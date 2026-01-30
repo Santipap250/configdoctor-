@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Loading...</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+  --bg:#0b0f14;
+  --card:#121821;
+  --primary:#7c8cff;
+  --text:#eaeaff;
+  --muted:#9aa4b2;
+}
+
+*{box-sizing:border-box;font-family:system-ui,Segoe UI,sans-serif;}
+
+body{
+  margin:0;
+  height:100vh;
+  background:radial-gradient(circle at top,var(--card),var(--bg));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--text);
+}
+
+.card{
+  background:rgba(18,24,33,.9);
+  border-radius:20px;
+  padding:40px 30px;
+  width:90%;
+  max-width:380px;
+  text-align:center;
+  box-shadow:0 0 40px rgba(0,0,0,.6);
+}
+
+.logo{
+  font-size:22px;
+  font-weight:700;
+  letter-spacing:1px;
+  margin-bottom:25px;
+  color:var(--primary);
+}
+
+.spinner{
+  width:64px;
+  height:64px;
+  border:4px solid rgba(255,255,255,.15);
+  border-top-color:var(--primary);
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+  margin:0 auto 25px;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg);}
+}
+
+.status{
+  font-size:15px;
+  color:var(--muted);
+  min-height:22px;
+}
+
+.footer{
+  margin-top:20px;
+  font-size:12px;
+  opacity:.6;
+}
+</style>
+</head>
+
+<body>
+<div class="card">
+  <div class="logo">OBIXConfig Lab</div>
+  <div class="spinner"></div>
+  <div class="status" id="status">กำลังปลุกระบบ...</div>
+  <div class="footer">Powered by Render</div>
+</div>
+
+<script>
+const steps = [
+  "กำลังเชื่อมต่อเซิร์ฟเวอร์...",
+  "กำลังโหลดระบบวิเคราะห์...",
+  "กำลังเตรียมอินเทอร์เฟซ...",
+  "ใกล้เสร็จแล้ว..."
+];
+
+let stepIndex = 0;
+setInterval(() => {
+  document.getElementById("status").innerText =
+    steps[stepIndex % steps.length];
+  stepIndex++;
+}, 1200);
+
+// 🔥 สำคัญ: เช็ค backend แบบวนซ้ำ (แก้ cold start)
+function checkBackend(){
+  fetch("/ping", { cache: "no-store" })
+    .then(res => {
+      if (res.ok) {
+        window.location.replace("/app");
+      }
+    })
+    .catch(() => {});
+}
+
+// เช็คทุก 1.5 วิ
+setInterval(checkBackend, 1500);
+</script>
+</body>
+</html>
