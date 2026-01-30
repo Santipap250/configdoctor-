@@ -381,7 +381,9 @@ Dynamic Notch: {{ analysis.filter.dyn_notch }}
 
 <h3>💡 Extra Tools</h3>
 <p>Thrust-to-Weight Ratio: {{ analysis.thrust_ratio }}</p>
-<p>Battery Runtime Estimate: {{ analysis.battery_est }} นาที</p>
+<p style="font-size:1.2em; font-weight:bold; color:#4CAF50;">
+⏱ เวลาบินโดยประมาณ: {{ analysis.battery_est }} นาที
+</p>
 
 <h3>📊 Visualization</h3>
 <canvas id="thrustChart" width="400" height="200"></canvas>
