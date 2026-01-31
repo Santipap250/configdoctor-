@@ -240,9 +240,42 @@ def index():
             "dyn_notch": filter_baseline.get("notch", filter_baseline.get("dyn_notch"))
         }
 
-        # keep warnings and prop_result
-        analysis["warnings"] = warnings
+        # ==== Normalize & preserve fields expected by template ====
+        # ensure 'style' is present (template uses analysis.style)
+        analysis.setdefault("style", style)
+
+        # provide a short summary field (template references analysis.summary)
+        analysis.setdefault("summary", analysis.get("overview", ""))
+
+        # normalize warnings to objects with level/msg because template expects w.level and w.msg
+        norm_warnings = []
+        for w in warnings:
+            if isinstance(w, dict):
+                lvl = w.get("level", "warning")
+                msg = w.get("msg", str(w))
+            else:
+                lvl = "warning"
+                msg = str(w)
+            norm_warnings.append({"level": lvl, "msg": msg})
+        analysis["warnings"] = norm_warnings
+
+        # ensure prop_result.effect contains keys used by template (motor_load, noise, grip)
+        effect = prop_result.get("effect", {})
+        if "motor_load" not in effect:
+            effect["motor_load"] = effect.get("motor_load", 0)
+        if "noise" not in effect:
+            effect["noise"] = effect.get("noise", 0)
+        if "grip" not in effect:
+            effect["grip"] = effect.get("grip", 0)
+        prop_result["effect"] = effect
         analysis["prop_result"] = prop_result
+
+        # (optional) debug print to server logs
+        try:
+            print("DEBUG: analysis keys ->", list(analysis.keys()))
+            print("DEBUG: battery_est ->", analysis.get("battery_est"))
+        except Exception:
+            pass
 
     return render_template("index.html", analysis=analysis)
 
