@@ -1,0 +1,141 @@
+/* static/css/site-theme.css
+   Quick Refresh theme: colors, fonts, spacing, buttons, cards, typography
+   คัดลอกไฟล์นี้ไปวางใน static/css/ แล้วลิงก์จาก base.html
+*/
+
+/* === Theme variables === */
+:root{
+  /* ถ้าจับคู่กับ navbar ที่มีตัวแปร ให้ใช้คีย์เดียวกัน */
+  --accent: #0ea5a4;        /* สีหลัก (teal) — ปรับได้ */
+  --accent-600: #059b94;
+  --accent-100: #e6f6f5;
+  --bg: #f7faf9;            /* พื้นหลังเพจ */
+  --card-bg: #ffffff;
+  --muted: #6b7280;
+  --text: #0f172a;
+  --radius: 12px;
+  --container-width: 1100px;
+  --shadow-soft: 0 6px 18px rgba(8,15,20,0.06);
+  --glass: rgba(255,255,255,0.65);
+}
+
+/* === Base reset / typography === */
+html,body{height:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family: "Sarabun", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.5;
+  font-size:16px;
+  -webkit-text-size-adjust:100%;
+}
+
+/* Container */
+.main-container{
+  max-width:var(--container-width);
+  margin:0 auto;
+  padding:20px;
+}
+
+/* Headings */
+h1{font-size:1.85rem; line-height:1.1; margin:0 0 0.5rem; font-weight:700}
+h2{font-size:1.25rem; margin:0 0 0.5rem; font-weight:600}
+h3{font-size:1.05rem; margin:0 0 0.4rem; font-weight:600}
+
+/* Paragraphs & small text */
+p{margin:0 0 1rem; color: #334155}
+small, .muted{color:var(--muted); font-size:0.92rem}
+
+/* === Cards / surfaces === */
+.card{
+  background:var(--card-bg);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-soft);
+  padding:14px;
+  transition:transform .16s ease, box-shadow .16s ease;
+}
+.card:hover{ transform:translateY(-4px); box-shadow:0 12px 30px rgba(8,15,20,0.08)}
+
+/* Hero */
+.hero{
+  display:flex;
+  gap:18px;
+  align-items:center;
+  background:linear-gradient(180deg, rgba(14,165,164,0.06), rgba(255,255,255,0));
+  border-radius:16px;
+  padding:20px;
+}
+
+/* Buttons */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;
+  padding:.6rem .95rem;
+  border-radius:10px;
+  border:0;
+  cursor:pointer;
+  font-weight:600;
+  text-decoration:none;
+  transition:transform .12s ease, box-shadow .12s ease;
+}
+.btn-primary{
+  background:var(--accent);
+  color:white;
+  box-shadow: 0 6px 18px rgba(14,165,164,0.14);
+}
+.btn-primary:hover{ transform:translateY(-3px); background:var(--accent-600) }
+
+.btn-ghost{
+  background:transparent;
+  color:var(--text);
+  border:1px solid rgba(15,23,42,0.06);
+}
+
+/* Tool cards grid */
+.tools-grid{
+  display:grid;
+  grid-template-columns: repeat(1, minmax(0,1fr));
+  gap:14px;
+}
+@media(min-width:720px){
+  .tools-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media(min-width:1100px){
+  .tools-grid{ grid-template-columns: repeat(3, minmax(0,1fr)); }
+}
+
+/* Menu / Navbar variables override (if using previous navbar) */
+.site-nav{ background: #ffffff; border-bottom:1px solid rgba(15,23,42,0.04); }
+.site-nav .brand{ color:var(--text); font-size:1.05rem; font-weight:700 }
+.site-nav .nav-menu a{ color:var(--text); }
+.site-nav .nav-menu .cta a{ background:var(--accent); }
+
+/* Link styles */
+a{ color:var(--accent); text-decoration:none }
+a:hover{ text-decoration:underline }
+
+/* Footer */
+.site-footer{
+  color:var(--muted);
+  font-size:.95rem;
+  margin-top:28px;
+  padding-top:18px;
+  border-top:1px solid rgba(15,23,42,0.04);
+}
+
+/* Utility spacing */
+.mt-2{margin-top:.5rem}
+.mt-4{margin-top:1rem}
+.mt-6{margin-top:1.5rem}
+.p-4{padding:1rem}
+.p-6{padding:1.5rem}
+
+/* Small responsive tweaks */
+@media(max-width:420px){
+  h1{font-size:1.5rem}
+  body{font-size:15px}
+}
