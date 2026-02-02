@@ -1,0 +1,40 @@
+<header class="header">
+  <div class="header-left">
+    <!-- Hamburger (ซ้ายบน) -->
+    <button id="hamburgerBtn" class="hamburger" aria-label="เปิดเมนู" aria-controls="mobileMenu" aria-expanded="false">
+      <span class="bar bar1"></span>
+      <span class="bar bar2"></span>
+      <span class="bar bar3"></span>
+    </button>
+  </div>
+
+  <div class="header-center">
+    <a class="brand" href="{{ url_for('index') }}">
+      <img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="OBIX" class="logo">
+      <span style="font-size:0.95rem;opacity:.95">OBIXConfig Doctor</span>
+    </a>
+  </div>
+
+  <div class="header-right">
+    <button class="theme-toggle" id="themeToggle" aria-label="สลับธีม">🌗</button>
+  </div>
+</header>
+
+<!-- Mobile drawer menu -->
+<nav id="mobileMenu" class="mobile-menu" hidden>
+  <div class="mobile-brand">
+    <img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="logo" style="height:34px">
+    <div style="font-weight:700;color:var(--accent)">OBIXConfig</div>
+    <button id="mobileClose" class="mobile-close" aria-label="ปิดเมนู">✕</button>
+  </div>
+
+  <ul class="mobile-links">
+    <li><a href="{{ url_for('index') }}" class="{% if active=='home' %}active{% endif %}">หน้าแรก</a></li>
+    <li><a href="{{ url_for('tools') }}" class="{% if active=='tools' %}active{% endif %}">เครื่องมือ</a></li>
+    <li><a href="{{ url_for('checklists') }}" class="{% if active=='checklists' %}active{% endif %}">Checklist</a></li>
+    <li><a href="{{ url_for('map') }}" class="{% if active=='map' %}active{% endif %}">แผนที่</a></li>
+    <li><a href="{{ url_for('logs') }}" class="{% if active=='logs' %}active{% endif %}">Log</a></li>
+    <li><a href="{{ url_for('about') }}" class="{% if active=='about' %}active{% endif %}">เกี่ยวกับ</a></li>
+    <li class="mobile-cta"><a href="{{ url_for('login') }}">เข้าสู่ระบบ</a></li>
+  </ul>
+</nav>
