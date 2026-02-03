@@ -116,10 +116,21 @@ function copyCLI() {
 </script>
 
 <body>
-<div class="top-bar center-logo">
-  <img src="{{ url_for('static', filename='img/obix-logo.png') }}" class="logo">
+<div class="top-bar center-logo" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+  <div style="display:flex; align-items:center; gap:10px;">
+    <!-- Hamburger -->
+    <button id="hamburgerBtn" class="hamburger" aria-label="เปิดเมนู" aria-controls="drawer" aria-expanded="false">
+      <span class="lines" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
 
-  <button class="toggle-theme" onclick="toggleTheme()">🌗</button>
+    <!-- logo -->
+    <img src="{{ url_for('static', filename='img/obix-logo.png') }}" class="logo" style="height:34px;">
+  </div>
+
+  <!-- ปุ่มสลับธีม (เดิม) -->
+  <div style="display:flex; align-items:center; gap:8px;">
+    <button class="toggle-theme" onclick="toggleTheme()">🌗</button>
+  </div>
 </div>
 
 <div class="container">
