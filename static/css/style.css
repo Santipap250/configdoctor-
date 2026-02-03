@@ -621,3 +621,42 @@ pre#pid, pre#filter {
   border-radius:8px;
   overflow:auto;
 }
+/* --- hamburger + drawer + popover styles --- */
+.hamburger{
+  width:44px;height:44px;border-radius:10px;border:0;background:rgba(255,255,255,0.02);
+  display:grid;place-items:center;color:var(--gold, #f1b65a); cursor:pointer;
+}
+.hamburger .lines{ width:22px; height:18px; position:relative; }
+.hamburger .lines span{
+  position:absolute; left:0; right:0; height:2px; background:currentColor; border-radius:2px;
+  transition:transform .22s, opacity .18s;
+}
+.hamburger .lines span:nth-child(1){ top:0; }
+.hamburger .lines span:nth-child(2){ top:8px; }
+.hamburger .lines span:nth-child(3){ top:16px; }
+.hamburger[aria-expanded="true"] .lines span:nth-child(1){ transform: translateY(8px) rotate(45deg); }
+.hamburger[aria-expanded="true"] .lines span:nth-child(2){ opacity:0; }
+.hamburger[aria-expanded="true"] .lines span:nth-child(3){ transform: translateY(-8px) rotate(-45deg); }
+
+/* overlay + drawer */
+.overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.5); opacity:0; pointer-events:none; transition:opacity .2s; z-index:999; }
+.overlay.open{ opacity:1; pointer-events:auto; }
+
+.drawer{
+  position:fixed; top:0; right:0; height:100vh; width:320px; max-width:92%;
+  background:var(--card-color-dark,#1e1e1e); transform:translateX(100%); transition:transform .26s; z-index:1000;
+  padding:14px; display:flex; flex-direction:column; gap:10px;
+}
+.drawer.open{ transform:translateX(0); }
+
+.popover{
+  position:fixed; z-index:1100; max-width:320px; background:var(--card-color-dark,#1e1e1e);
+  border-radius:10px; padding:10px; box-shadow:0 10px 30px rgba(0,0,0,0.6); display:none; color:var(--text-color-dark,#eee);
+}
+.popover.open{ display:block; }
+
+/* Accordion inside drawer */
+.accordion-item{ border-radius:8px; overflow:hidden; background:rgba(255,255,255,0.02); margin-bottom:8px; }
+.accordion-head{ display:flex; align-items:center; justify-content:space-between; padding:10px; cursor:pointer; }
+.accordion-body{ padding:10px 12px; font-size:13px; color:var(--text-color-dark,#ddd); display:none; }
+.accordion-item.open .accordion-body{ display:block; }
