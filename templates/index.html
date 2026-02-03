@@ -463,6 +463,109 @@ new Chart(noiseCtx, {
 </div>
 
 </div>
+<script>
+  // Drawer open/close
+  const btn = document.getElementById('hamburgerBtn');
+  const drawer = document.getElementById('drawer');
+  const overlay = document.getElementById('overlay');
+  const closeDrawerBtn = document.getElementById('closeDrawer');
+
+  function openDrawer(){
+    if(!btn) return;
+    btn.setAttribute('aria-expanded','true');
+    overlay.classList.add('open');
+    drawer.classList.add('open');
+    drawer.removeAttribute('hidden');
+    overlay.setAttribute('aria-hidden','false');
+    document.addEventListener('keydown', escClose);
+  }
+  function closeDrawer(){
+    if(!btn) return;
+    btn.setAttribute('aria-expanded','false');
+    overlay.classList.remove('open');
+    drawer.classList.remove('open');
+    overlay.setAttribute('aria-hidden','true');
+    document.removeEventListener('keydown', escClose);
+    setTimeout(()=> drawer.setAttribute('hidden',''), 240);
+    btn.focus();
+  }
+  function escClose(e){ if(e.key === 'Escape') closeDrawer(); }
+
+  if(btn) btn.addEventListener('click', ()=> {
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    if(expanded) closeDrawer(); else openDrawer();
+  });
+  if(overlay) overlay.addEventListener('click', closeDrawer);
+  if(closeDrawerBtn) closeDrawerBtn.addEventListener('click', closeDrawer);
+
+  // Accordion
+  document.querySelectorAll('.accordion-item').forEach(item=>{
+    const head = item.querySelector('.accordion-head');
+    head.addEventListener('click', ()=> {
+      const open = item.classList.toggle('open');
+      head.querySelector('span').textContent = open ? '−' : '+';
+    });
+  });
+
+  // Popover help (optional: hook to info icons next to inputs)
+  const pop = document.getElementById('popover');
+  const helpTexts = {
+    preset: 'Preset = ชุดการตั้งค่าล่วงหน้าที่รวม PID/Rates/Filters ใช้เพื่อเริ่มต้นได้เร็วขึ้น',
+    size: 'ขนาดโดรน (นิ้ว) อ้างอิงถึงขนาดเฟรม เช่น 5 นิ้ว',
+    weight: 'น้ำหนักรวมตอนบิน (กรัม) สำคัญในการเลือกมอเตอร์และประมาณเวลาบิน',
+    battery: 'แบตเตอรี่ เช่น 4S หรือ 6S — มีผลต่อแรงดันและ RPM ของมอเตอร์',
+    style: 'สไตล์การบิน: Freestyle / Racing / Long-range — มีผลกับ Rates และ PID',
+    prop: 'ขนาดใบพัด (นิ้ว) มีผลกับแรงยกและกระแสไฟ'
+  };
+
+  // ถ้าต้องการปุ่ม info ข้าง input ให้สร้างปุ่ม <button class="info-btn" data-pop="size">i</button> ข้าง input แล้วสคริปต์นี้จะทำงาน
+  function openPopover(key, targetBtn){
+    pop.textContent = helpTexts[key] || 'ไม่มีคำอธิบาย';
+    pop.classList.add('open');
+    pop.setAttribute('aria-hidden','false');
+    const rect = targetBtn.getBoundingClientRect();
+    let top = rect.top + window.scrollY + rect.height + 8;
+    let left = rect.left + window.scrollX;
+    const vw = window.innerWidth;
+    if(left + 320 > vw) left = vw - 336;
+    pop.style.top = top + 'px';
+    pop.style.left = left + 'px';
+    targetBtn.setAttribute('aria-expanded','true');
+    setTimeout(()=> document.addEventListener('click', outsideClick), 10);
+    document.addEventListener('keydown', popEsc);
+  }
+  function closePopover(){
+    pop.classList.remove('open');
+    pop.setAttribute('aria-hidden','true');
+    document.querySelectorAll('.info-btn').forEach(b=> b.setAttribute('aria-expanded','false'));
+    document.removeEventListener('click', outsideClick);
+    document.removeEventListener('keydown', popEsc);
+  }
+  function outsideClick(e){ if(!pop.contains(e.target) && !e.target.classList.contains('info-btn')) closePopover(); }
+  function popEsc(e){ if(e.key === 'Escape') closePopover(); }
+
+  document.querySelectorAll('.info-btn[data-pop]').forEach(b => {
+    const key = b.getAttribute('data-pop');
+    b.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const open = b.getAttribute('aria-expanded') === 'true';
+      if(open) { closePopover(); return; }
+      openPopover(key, b);
+    });
+  });
+
+  // Responsive: show drawer always on wide screens (optional)
+  window.addEventListener('resize', ()=> {
+    if(window.innerWidth > 900){
+      drawer.removeAttribute('hidden');
+      drawer.classList.remove('open');
+      overlay.classList.remove('open');
+    } else {
+      drawer.setAttribute('hidden','');
+    }
+  });
+  if(window.innerWidth <= 900) drawer.setAttribute('hidden','');
+</script>
 <!-- OBIX Preset autofill JS -->
 <script>
 const presetMap = {
