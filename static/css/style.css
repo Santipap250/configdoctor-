@@ -826,3 +826,7 @@ pre#pid, pre#filter {
   #miniNav .mini-link{ padding:8px 10px; font-size:0.88rem; }
   .short-section{ padding:12px; }
 }
+
+.drawer-link { transition: background .15s, transform .08s; }
+.drawer-link.active { background: rgba(255,255,255,0.03); box-shadow: 0 6px 18px rgba(0,0,0,0.35); transform: translateY(-1px); }
+.drawer-link:hover { transform: translateY(-1px); }
