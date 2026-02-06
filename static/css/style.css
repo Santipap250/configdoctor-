@@ -745,3 +745,84 @@ pre#pid, pre#filter {
 .accordion-head{ display:flex; align-items:center; justify-content:space-between; padding:10px; cursor:pointer; }
 .accordion-body{ padding:10px 12px; font-size:13px; color:var(--text-color-dark,#ddd); display:none; }
 .accordion-item.open .accordion-body{ display:block; }
+/* =========== OBIX Short Pages / MiniNav styles =========== */
+#miniNav {
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:14px 0;
+}
+#miniNav .mini-link{
+  background:rgba(255,255,255,0.03);
+  color:inherit;
+  padding:8px 12px;
+  border-radius:999px;
+  text-decoration:none;
+  font-size:0.95rem;
+  border:1px solid rgba(255,255,255,0.02);
+}
+#miniNav .mini-link:active,
+#miniNav .mini-link:focus,
+#miniNav .mini-link:hover{
+  box-shadow:0 6px 18px rgba(0,0,0,0.4);
+  transform:translateY(-1px);
+}
+
+/* Sections */
+.short-section{
+  margin-top:12px;
+  padding:14px;
+  border-radius:12px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+  box-shadow:0 6px 20px rgba(0,0,0,0.5);
+}
+.short-section h3{
+  margin-top:0;
+  color: #f1b65a;
+}
+.short-section p, .short-section li{ color:var(--text-color-dark, #ddd); line-height:1.5; }
+
+/* CLI snippet area */
+.cli-snippet{
+  background:#0b0c0d;
+  color:#dfe;
+  padding:10px;
+  border-radius:8px;
+  overflow:auto;
+  font-family:monospace;
+  font-size:0.9rem;
+}
+
+/* Copy buttons and small controls */
+.short-controls{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+.btn-small{
+  padding:8px 10px;
+  border-radius:8px;
+  border:0;
+  cursor:pointer;
+  background:#2ecc71;
+  color:#042;
+  font-weight:700;
+  text-decoration:none;
+}
+
+/* toast */
+#obixToast{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:22px;
+  padding:10px 14px;
+  border-radius:999px;
+  background:rgba(0,0,0,0.82);
+  color:#fff;
+  display:none;
+  z-index:2000;
+  box-shadow:0 6px 20px rgba(0,0,0,0.6);
+}
+
+/* responsive */
+@media(max-width:520px){
+  #miniNav .mini-link{ padding:8px 10px; font-size:0.88rem; }
+  .short-section{ padding:12px; }
+}
