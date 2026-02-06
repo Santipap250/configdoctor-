@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>เกี่ยวกับ — OBIXConfig Doctor</title>
+
+  <!-- ใช้ไฟล์ CSS เดิมของโปรเจค -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="top-bar center-logo" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <a href="/" aria-label="กลับหน้าแรก" style="display:inline-block; text-decoration:none; color:inherit;">
+        <!-- small back icon -->
+        <span style="display:inline-block; width:36px; height:36px; border-radius:8px; background:rgba(255,255,255,0.02); display:grid; place-items:center; font-weight:700;">←</span>
+      </a>
+      <img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="OBIXConfig" class="logo" style="height:34px;">
+    </div>
+
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button class="toggle-theme" onclick="toggleTheme()">🌗</button>
+    </div>
+  </header>
+
+  <main class="container" role="main" style="padding-top:18px;">
+    <article class="short-section" style="max-width:900px; margin: 12px auto;">
+      <h1 style="margin-top:0;">เกี่ยวกับ OBIXConfig Doctor</h1>
+
+      <p>OBIXConfig Doctor เป็นเครื่องมือที่ออกแบบมาเพื่อช่วยผู้เล่นโดรน FPV ให้เริ่มต้นตั้งค่า PID, Filter และ Preset ได้อย่างรวดเร็วและปลอดภัย โดยอาศัยแนวคิดและประสบการณ์จากนักบิน FPV ชุมชนไทย</p>
+
+      <h3>จุดประสงค์</h3>
+      <ul>
+        <li>ช่วยให้ผู้ใช้มีค่าเริ่มต้น (baseline) ที่ปลอดภัยในการทดสอบบิน</li>
+        <li>ลดเวลาการตั้งค่าเริ่มต้นและความสับสนสำหรับมือใหม่</li>
+        <li>ให้เครื่องมือคัดลอก CLI เพื่อนำไปใช้กับ Betaflight ได้ทันที</li>
+      </ul>
+
+      <h3>ฟีเจอร์สำคัญ</h3>
+      <ul>
+        <li>Preset สำหรับขนาดโดรนและสไตล์การบิน (Freestyle / Long-range / Beginner)</li>
+        <li>การคำนวณค่า PID/Filter แบบ baseline</li>
+        <li>CLI Presets ที่สามารถ Copy → Paste เข้า Betaflight</li>
+        <li>Pre-flight checklist และ FAQ เบื้องต้น</li>
+      </ul>
+
+      <h3>ติดต่อ / ชุมชน</h3>
+      <p>สอบถามหรือแนะนำฟีเจอร์ได้ที่เพจ: <a href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener">OBIXConfig Lab</a></p>
+
+      <h3>บันทึกสำหรับนักพัฒนา</h3>
+      <p>โค้ดหน้าเว็บนี้อยู่ใน repo ของโปรเจค — ถ้าจะแก้ template หรือต้องการเพิ่มภาษาอื่น แนะนำทำเป็น partial หรือใช้ base template เพื่อไม่ต้องซ้ำโค้ดส่วนหัว/ท้าย</p>
+
+      <p style="margin-top:20px; font-size:0.95rem; color:#999;">
+        OBIXConfig Doctor • v1.0b — พัฒนาโดยชุมชน FPV ไทย
+      </p>
+    </article>
+  </main>
+
+  <script>
+    // same small theme helper used in index.html — ใส่เพื่อให้ toggle ทำงานบนหน้านี้ด้วย
+    function toggleTheme(){
+      document.body.classList.toggle('dark');
+      document.body.classList.toggle('light');
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    }
+    (function(){
+      const saved = localStorage.getItem('theme') || 'light';
+      document.body.classList.add(saved);
+    })();
+  </script>
+</body>
+</html>
