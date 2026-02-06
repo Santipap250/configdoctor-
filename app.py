@@ -280,6 +280,21 @@ def index():
     return render_template("index.html", analysis=analysis)
 
 # ===============================
+# ROUTE: About page
+# ===============================
+@app.route("/about")
+def about():
+    # ถ้าส่ง data ไปยัง template ใส่ใน context dict ได้
+    return render_template("about.html")
+
+# ===============================
+# ROUTE: Changelog page
+# ===============================
+@app.route("/changelog")
+def changelog():
+    # ในอนาคตถ้าต้องการดึง changelog จากไฟล์หรือ DB ให้ใส่ logic ที่นี่
+    return render_template("changelog.html")
+# ===============================
 # RUN
 # ===============================
 import os
