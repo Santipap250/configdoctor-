@@ -168,39 +168,58 @@ if('IntersectionObserver' in window){
   sections.forEach(s => io.observe(s));
 }
 </script>
-  <!-- ========== ย้าย Mini-Nav มาไว้ที่นี่ ========== -->
-  <nav style="margin-top:10px;">
-    <a href="#quick" class="drawer-link" onclick="closeDrawer(); scrollToId('quick')" style="display:block;padding:12px;border-radius:8px;text-decoration:none;color:inherit;">
-      🏁 Quick Start
-      <div style="font-size:12px; opacity:0.75;">เริ่มใช้: เลือก preset → วิเคราะห์ → Copy</div>
-    </a>
+    <!-- Drawer: Betaflight Quick Guide (แทน nav เดิม) -->
+<nav style="margin-top:10px;">
+  <a href="#bf-overview" class="drawer-link" onclick="closeDrawer(); scrollToId('bf-overview')" style="display:block;padding:12px;border-radius:8px;text-decoration:none;color:inherit;">
+    🧭 Overview — Betaflight Basics
+    <div style="font-size:12px; opacity:0.75;">ภาพรวมและคำศัพท์สำคัญ</div>
+  </a>
 
-    <a href="#keys" class="drawer-link" onclick="closeDrawer(); scrollToId('keys')" style="display:block;padding:12px;border-radius:8px;text-decoration:none;color:inherit;">
-      🔑 Key Params
-      <div style="font-size:12px; opacity:0.75;">คำอธิบายค่าต่าง ๆ สั้น ๆ</div>
-    </a>
+  <a href="#bf-pid" class="drawer-link" onclick="closeDrawer(); scrollToId('bf-pid')" style="display:block;padding:12px;border-radius:8px;text-decoration:none;color:inherit;">
+    ⚙️ PID & Gains
+    <div style="font-size:12px; opacity:0.75;">P / I / D คืออะไร มีผลยังไง</div>
+  </a>
 
-    <a href="#cli" class="drawer-link" onclick="closeDrawer(); scrollToId('cli')" style="display:block;padding:12px;border-radius:8px;text-decoration:none;color:inherit;">
-      🧠 CLI Presets
-      <div style="font-size:12px; opacity:0.75;">คัดลอก CLI ไปใส่ใน Betaflight</div>
-    </a>
+  <a href="#bf-filters" class="drawer-link" onclick="closeDrawer(); scrollToId('bf-filters')" style="display:block;padding:12px;border-radius:8px;text-decoration:none;color:inherit;">
+    🌀 Filters
+    <div style="font-size:12px; opacity:0.75;">LPF / D-term / Notch — ลดเสียงรบกวนให้บินนิ่ง</div>
+  </a>
 
-    <a href="#pid" class="drawer-link" onclick="closeDrawer(); scrollToId('pid')" style="display:block;padding:12px;border-radius:8px;text-decoration:none;color:inherit;">
-      ⚙️ PID / Filter
-      <div style="font-size:12px; opacity:0.75;">ค่า baseline</div>
-    </a>
+  <a href="#bf-rates" class="drawer-link" onclick="closeDrawer(); scrollToId('bf-rates')" style="display:block;padding:12px;border-radius:8px;text-decoration:none;color:inherit;">
+    🎚 Rates & Expo
+    <div style="font-size:12px; opacity:0.75;">ควบคุมความไวและความเนี้ยบของการบังคับ</div>
+  </a>
 
-    <a href="#check" class="drawer-link" onclick="closeDrawer(); scrollToId('check')" style="display:block;padding:12px;border-radius:8px;text-decoration:none;color:inherit;">
-      📝 Checklist
-      <div style="font-size:12px; opacity:0.75;">สิ่งที่ต้องเช็คก่อนบิน</div>
-    </a>
+  <a href="#bf-esc" class="drawer-link" onclick="closeDrawer(); scrollToId('bf-esc')" style="display:block;padding:12px;border-radius:8px;text-decoration:none;color:inherit;">
+    🔌 ESC & Motor
+    <div style="font-size:12px; opacity:0.75;">BLHeli / RPM filter / timing</div>
+  </a>
 
-    <a href="#faq" class="drawer-link" onclick="closeDrawer(); scrollToId('faq')" style="display:block;padding:12px;border-radius:8px;text-decoration:none;color:inherit;">
-      ❓ FAQ
-      <div style="font-size:12px; opacity:0.75;">คำถามที่พบบ่อย</div>
-    </a>
-  </nav>
-  <!-- ========== End Mini-Nav in Drawer ========== -->
+  <a href="#bf-receiver" class="drawer-link" onclick="closeDrawer(); scrollToId('bf-receiver')" style="display:block;padding:12px;border-radius:8px;text-decoration:none;color:inherit;">
+    📡 Receiver & Radio
+    <div style="font-size:12px; opacity:0.75;">การแมพช่อง, deadband, endpoint</div>
+  </a>
+
+  <a href="#bf-osd" class="drawer-link" onclick="closeDrawer(); scrollToId('bf-osd')" style="display:block;padding:12px;border-radius:8px;text-decoration:none;color:inherit;">
+    🖥️ OSD & Telemetry
+    <div style="font-size:12px; opacity:0.75;">ค่าที่ควรแสดงบน OSD</div>
+  </a>
+
+  <a href="#bf-failsafe" class="drawer-link" onclick="closeDrawer(); scrollToId('bf-failsafe')" style="display:block;padding:12px;border-radius:8px;text-decoration:none;color:inherit;">
+    ⛑️ Failsafe & Safety
+    <div style="font-size:12px; opacity:0.75;">ตั้ง Failsafe, arming safety, kill switches</div>
+  </a>
+
+  <a href="#bf-cli" class="drawer-link" onclick="closeDrawer(); scrollToId('bf-cli')" style="display:block;padding:12px;border-radius:8px;text-decoration:none;color:inherit;">
+    💻 CLI Presets & Tips
+    <div style="font-size:12px; opacity:0.75;">CLI ที่ใช้บ่อย และวิธีคัดลอก</div>
+  </a>
+
+  <a href="#bf-checklist" class="drawer-link" onclick="closeDrawer(); scrollToId('bf-checklist')" style="display:block;padding:12px;border-radius:8px;text-decoration:none;color:inherit;">
+    📝 Tuning Checklist
+    <div style="font-size:12px; opacity:0.75;">ขั้นตอนทดสอบหลังปรับค่า</div>
+  </a>
+</nav>       
 
   <hr style="opacity:0.06; margin:12px 0;">
 
