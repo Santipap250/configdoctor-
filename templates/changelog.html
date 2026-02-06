@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Changelog — OBIXConfig Doctor</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="top-bar center-logo" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <a href="/" aria-label="กลับหน้าแรก" style="display:inline-block; text-decoration:none; color:inherit;">
+        <span style="display:inline-block; width:36px; height:36px; border-radius:8px; background:rgba(255,255,255,0.02); display:grid; place-items:center; font-weight:700;">←</span>
+      </a>
+      <img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="OBIXConfig" class="logo" style="height:34px;">
+    </div>
+
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button class="toggle-theme" onclick="toggleTheme()">🌗</button>
+    </div>
+  </header>
+
+  <main class="container" role="main">
+    <section class="short-section" style="max-width:900px; margin:12px auto;">
+      <h1 style="margin-top:0;">Changelog</h1>
+      <p>บันทึกการเปลี่ยนแปลงของ OBIXConfig Doctor — เวอร์ชันล่าสุดจะแสดงบนสุด</p>
+
+      <article style="margin-top:12px;">
+        <h3>v1.0b — Community Build</h3>
+        <ul>
+          <li>เพิ่ม: Drawer menu (เมนู 3 ขีด) และย้าย Quick Links เข้าเมนู</li>
+          <li>เพิ่ม: Preset autofill และ CLI copy button</li>
+          <li>ปรับปรุง: UI สำหรับมือถือ, dark theme</li>
+        </ul>
+        <small style="color:#999;">วันที่ปรับปรุง: (กรอกวันที่เมื่อ deploy)</small>
+      </article>
+
+      <article style="margin-top:16px;">
+        <h3>v1.0a — Initial release</h3>
+        <ul>
+          <li>เริ่มต้นหน้าแอปวิเคราะห์ค่า PID/Filter</li>
+          <li>เพิ่ม Quick Summary, Preset Box, CLI Presets</li>
+        </ul>
+        <small style="color:#999;">วันที่ปรับปรุง: (กรอกวันที่เมื่อ deploy)</small>
+      </article>
+
+      <p style="margin-top:18px;">ต้องการให้เพิ่ม item ไหนใน changelog แจ้งได้ที่เพจ: <a href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener">OBIXConfig Lab</a></p>
+
+      <p style="margin-top:20px; font-size:0.95rem; color:#999;">
+        OBIXConfig Doctor • v1.0b
+      </p>
+    </section>
+  </main>
+
+  <script>
+    function toggleTheme(){
+      document.body.classList.toggle('dark');
+      document.body.classList.toggle('light');
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    }
+    (function(){
+      const saved = localStorage.getItem('theme') || 'light';
+      document.body.classList.add(saved);
+    })();
+  </script>
+</body>
+</html>
