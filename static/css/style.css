@@ -822,8 +822,10 @@ pre#pid, pre#filter {
 }
 
 /* responsive */
-@media(max-width:520px){
-  #miniNav .mini-link{ padding:8px 10px; font-size:0.88rem; }
+@media(max-width:420px){
+  .drawer { width: 86%; }
+}
+#miniNav .mini-link{ padding:8px 10px; font-size:0.88rem; }
   .short-section{ padding:12px; }
 }
 
