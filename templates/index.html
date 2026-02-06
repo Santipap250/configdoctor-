@@ -171,12 +171,35 @@ if('IntersectionObserver' in window){
           
   <hr style="opacity:0.06; margin:12px 0;">
 
-  <div style="display:flex; flex-direction:column; gap:8px;">
-    <button class="btn-ghost" onclick="toggleTheme(); showToast('เปลี่ยนธีมแล้ว')">🌗 สลับธีม</button>
-    <a class="btn-ghost" href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener">📘 ไปที่เพจ OBIXConfig Lab</a>
-    <a class="btn-ghost" href="/about" target="_blank" rel="noopener">ℹ️ เกี่ยวกับ</a>
-    <a class="btn-ghost" href="/changelog" target="_blank" rel="noopener">📝 Changelog</a>
-  </div>
+  <!-- compact drawer nav — แก้ให้สวยขึ้น (3 รายการ) -->
+  <nav class="drawer-compact" aria-label="Quick links">
+    <a class="drawer-link" href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener" onclick="closeDrawer()">
+      <span class="dl-icon" aria-hidden="true">📘</span>
+      <span class="dl-body">
+        <span class="dl-title">ไปที่เพจ OBIXConfig Lab</span>
+        <span class="dl-meta">ถาม-แนะนำ ฟีเจอร์ & ตัวอย่างการตั้งค่า</span>
+      </span>
+      <span class="dl-pill">open</span>
+    </a>
+
+    <a class="drawer-link" href="{{ url_for('about') }}" onclick="closeDrawer();">
+      <span class="dl-icon" aria-hidden="true">ℹ️</span>
+      <span class="dl-body">
+        <span class="dl-title">เกี่ยวกับ</span>
+        <span class="dl-meta">ที่มาของโปรเจค & วิธีใช้งานสั้น ๆ</span>
+      </span>
+      <span class="dl-pill">info</span>
+    </a>
+
+    <a class="drawer-link" href="{{ url_for('changelog') }}" onclick="closeDrawer();">
+      <span class="dl-icon" aria-hidden="true">📝</span>
+      <span class="dl-body">
+        <span class="dl-title">Changelog</span>
+        <span class="dl-meta">บันทึกการอัปเดตของระบบ</span>
+      </span>
+      <span class="dl-pill">v1.0b</span>
+    </a>
+  </nav>
 
   <div style="margin-top:auto; font-size:12px; opacity:0.85; color:var(--muted,#9aa4b2);">
     OBIXConfig Doctor • v1.0b
