@@ -706,6 +706,7 @@ pre#pid, pre#filter {
   border-radius:8px;
   overflow:auto;
 }
+
 /* --- hamburger + drawer + popover styles --- */
 .hamburger{
   width:44px;height:44px;border-radius:10px;border:0;background:rgba(255,255,255,0.02);
@@ -832,3 +833,68 @@ pre#pid, pre#filter {
 .drawer-link { transition: background .15s, transform .08s; }
 .drawer-link.active { background: rgba(255,255,255,0.03); box-shadow: 0 6px 18px rgba(0,0,0,0.35); transform: translateY(-1px); }
 .drawer-link:hover { transform: translateY(-1px); }
+/* ===== Drawer compact links (card style) ===== */
+.drawer-compact { display:flex; flex-direction:column; gap:10px; margin-top:10px; }
+
+.drawer-compact .drawer-link{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px;
+  border-radius:12px;
+  text-decoration:none;
+  color:inherit;
+  background: rgba(255,255,255,0.01);
+  border: 1px solid rgba(255,255,255,0.03);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.22);
+  transition: transform .14s ease, box-shadow .14s ease, background .12s ease;
+  position:relative;
+}
+
+/* icon circle */
+.drawer-compact .dl-icon{
+  min-width:44px;
+  min-height:44px;
+  display:grid;
+  place-items:center;
+  border-radius:10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  font-size:18px;
+  color:var(--gold, #f1b65a);
+}
+
+/* title + meta */
+.drawer-compact .dl-body{ flex:1; display:flex; flex-direction:column; }
+.drawer-compact .dl-title{ font-weight:700; font-size:0.98rem; margin-bottom:2px; color:#fff; }
+.drawer-compact .dl-meta{ font-size:0.82rem; opacity:0.78; color:#bfc7cd; }
+
+/* small pill on right */
+.drawer-compact .dl-pill{
+  font-size:0.72rem;
+  padding:6px 8px;
+  border-radius:999px;
+  background: rgba(255,255,255,0.03);
+  color: #cbd5df;
+  border: 1px solid rgba(255,255,255,0.02);
+}
+
+/* hover/focus */
+.drawer-compact .drawer-link:hover,
+.drawer-compact .drawer-link:focus{
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  outline: none;
+}
+
+/* keyboard focus visible */
+.drawer-compact .drawer-link:focus{
+  box-shadow: 0 12px 30px rgba(0,0,0,0.55), 0 0 0 3px rgba(88,166,255,0.12);
+}
+
+/* responsive tweak */
+@media(max-width:420px){
+  .drawer-compact .dl-icon{ min-width:40px; min-height:40px; font-size:16px; }
+  .drawer-compact .dl-title{ font-size:0.95rem; }
+  .drawer-compact .dl-meta{ font-size:0.78rem; }
+}
