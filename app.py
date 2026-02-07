@@ -4,9 +4,17 @@ from analyzer.thrust_logic import calculate_thrust_weight, estimate_battery_runt
 from analyzer.battery_logic import analyze_battery
 from logic.presets import PRESETS, detect_class_from_size, get_baseline_for_class
 from analyzer.drone_class import detect_drone_class
+from datetime import datetime
 
 app = Flask(__name__)
 
+@app.template_filter('timestamp_to_datetime')
+def timestamp_to_datetime_filter(ts):
+    try:
+        return datetime.fromtimestamp(int(ts)).strftime('%Y-%m-%d %H:%M')
+    except Exception:
+        return ''
+#
 # ===============================
 # VALIDATE INPUT
 # ===============================
