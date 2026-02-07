@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <title>Downloads — OBIXConfig Doctor</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .dl-grid{ display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); margin-top:18px; }
+    .dl-card{ padding:14px; border-radius:12px; background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(255,255,255,0.005)); border:1px solid rgba(255,255,255,0.03); box-shadow:0 8px 26px rgba(0,0,0,0.45); }
+    .dl-meta{ font-size:0.85rem; color: #bfc7cd; margin-top:6px; }
+    .dl-actions{ margin-top:10px; display:flex; gap:8px; align-items:center; }
+    .btn-small{ padding:8px 10px; border-radius:8px; border:0; cursor:pointer; background:#2ecc71; color:#042; font-weight:700; text-decoration:none; }
+    .btn-download{ background:transparent; border:1px solid rgba(255,255,255,0.06); color:inherit; padding:8px 12px; border-radius:8px; text-decoration:none; }
+    pre.cli-snippet{ background:#0b0c0d; color:#dfe; padding:10px; border-radius:8px; overflow:auto; font-family: monospace; font-size:0.85rem; max-height:180px; }
+    #obixToast{ position:fixed; left:50%; transform:translateX(-50%); bottom:22px; padding:10px 14px; border-radius:999px; background:rgba(0,0,0,0.82); color:#fff; display:none; z-index:2000; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Downloads — diff_all (Factory)</h1>
+    <p>ไฟล์ CLI `diff all` สำหรับแต่ละ FC — ดาวน์โหลดหรือคลิก <strong>Copy CLI</strong> เพื่อคัดลอกข้อความทั้งหมดไปใช้งาน</p>
+
+    <div class="dl-grid">
+      {% for it in items %}
+      <div class="dl-card" id="card-{{ loop.index }}">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:44px;height:44px;display:grid;place-items:center;border-radius:8px;background:#0d1117;border:1px solid rgba(255,255,255,0.02);font-size:20px;">
+            📄
+          </div>
+          <div style="flex:1;">
+            <div style="font-weight:700;">{{ it.fc }} — {{ it.filename }}</div>
+            <div class="dl-meta">ขนาด: {{ (it.size/1024)|round(1) }} KB • sha256: {{ it.sha }} • อัปเดต: {{ it.mtime|timestamp_to_datetime }}</div>
+          </div>
+        </div>
+
+        <div style="margin-top:10px;">
+          <pre id="preview-{{ loop.index }}" class="cli-snippet">Loading preview…</pre>
+        </div>
+
+        <div class="dl-actions">
+          <a class="btn-download" href="{{ url_for('download_diff', fc=it.fc, filename=it.filename) }}">⬇️ ดาวน์โหลด</a>
+          <button class="btn-small copy-cli" data-fc="{{ it.fc }}" data-fn="{{ it.filename }}" data-target="#preview-{{ loop.index }}">📋 Copy CLI</button>
+          <span style="margin-left:auto; color:#9aa4b2; font-size:0.9rem;">{{ it.fc }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div id="obixToast">Copied</div>
+
+<script>
+document.querySelectorAll('.dl-card').forEach(card=>{
+  const btn = card.querySelector('.copy-cli');
+  const preview = card.querySelector('.cli-snippet');
+  const fc = btn.getAttribute('data-fc');
+  const fn = btn.getAttribute('data-fn');
+
+  // fetch a preview (first chunk)
+  fetch(`/static/downloads/diff_all/${fc}/${fn}`)
+    .then(r => r.text())
+    .then(t => {
+      preview.textContent = t.slice(0, 4000) + (t.length > 4000 ? "\n\n... (truncated)" : "");
+    }).catch(e=>{
+      preview.textContent = "Preview not available";
+    });
+
+  btn.addEventListener('click', async ()=>{
+    try {
+      const res = await fetch(`/static/downloads/diff_all/${fc}/${fn}`);
+      const txt = await res.text();
+      await navigator.clipboard.writeText(txt);
+      showToast("คัดลอก CLI เรียบร้อยแล้ว ✅");
+    } catch(err){
+      showToast("เกิดข้อผิดพลาดขณะคัดลอก");
+    }
+  });
+});
+
+function showToast(msg){
+  const t = document.getElementById('obixToast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(()=> t.style.display='none', 2600);
+}
+</script>
+</body>
+</html>
