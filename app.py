@@ -298,6 +298,46 @@ def changelog():
 # RUN
 # ===============================
 import os
+import os, hashlib
+from werkzeug.utils import secure_filename
+from flask import send_from_directory, abort, render_template
+
+# ดาวน์โหลดไฟล์จริง (attachment)
+@app.route('/downloads/<fc>/<filename>')
+def download_diff(fc, filename):
+    safe_fc = secure_filename(fc)
+    safe_fn = secure_filename(filename)
+    base_dir = os.path.join(app.root_path, 'static', 'downloads', 'diff_all', safe_fc)
+    file_path = os.path.join(base_dir, safe_fn)
+    if not os.path.isfile(file_path):
+        abort(404)
+    return send_from_directory(base_dir, safe_fn, as_attachment=True)
+
+# หน้าแสดงรายการดาวน์โหลด (scan โฟลเดอร์ static/downloads/diff_all)
+@app.route('/downloads')
+def downloads_index():
+    base = os.path.join(app.root_path, 'static', 'downloads', 'diff_all')
+    items = []
+    if os.path.isdir(base):
+        for fc in sorted(os.listdir(base)):
+            fcdir = os.path.join(base, fc)
+            if not os.path.isdir(fcdir):
+                continue
+            for fn in sorted(os.listdir(fcdir)):
+                path = os.path.join(fcdir, fn)
+                size = os.path.getsize(path)
+                mtime = int(os.path.getmtime(path))
+                # short sha256 แสดงคร่าว ๆ
+                with open(path, 'rb') as f:
+                    h = hashlib.sha256(f.read()).hexdigest()[:16]
+                items.append({
+                    'fc': fc,
+                    'filename': fn,
+                    'size': size,
+                    'mtime': mtime,
+                    'sha': h
+                })
+    return render_template('downloads.html', items=items)
 
 if __name__ == "__main__":
     app.run(
