@@ -259,11 +259,23 @@ if('IntersectionObserver' in window){
     <label>น้ำหนักโดรน (กรัม)</label>
     <input type="number" name="weight" placeholder="เช่น 950" value="{{ request.form.get('weight', '') }}" required>
 
-    <label>แบตเตอรี่</label>
-    <select name="battery">
-  <option value="4S" {% if request.form.get('battery','')=='4S' %}selected{% endif %}>4S</option>
-  <option value="6S" {% if request.form.get('battery','')=='6S' %}selected{% endif %}>6S</option>
+    <!-- === Battery detail (วางใน form) === -->
+<label>Battery cells</label>
+<select name="battery_cells">
+  <option value="1" {% if request.form.get('battery_cells')=='1' %}selected{% endif %}>1S</option>
+  <option value="2" {% if request.form.get('battery_cells')=='2' %}selected{% endif %}>2S</option>
+  <option value="3" {% if request.form.get('battery_cells')=='3' %}selected{% endif %}>3S</option>
+  <option value="4" {% if request.form.get('battery_cells')=='4' %}selected{% endif %}>4S</option>
+  <option value="5" {% if request.form.get('battery_cells')=='5' %}selected{% endif %}>5S</option>
+  <option value="6" {% if request.form.get('battery_cells')=='6' %}selected{% endif %}>6S</option>
 </select>
+
+<label>Battery capacity (mAh)</label>
+<input type="number" name="battery_mAh" placeholder="เช่น 1500" value="{{ request.form.get('battery_mAh','1500') }}">
+
+<label>Battery C-rate (ถ้ารู้)</label>
+<input type="number" name="battery_C" placeholder="เช่น 75" value="{{ request.form.get('battery_C','75') }}">
+<!-- === end battery details === -->
 
     <label>สไตล์การบิน</label>
     <select name="style">
