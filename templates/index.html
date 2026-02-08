@@ -393,37 +393,86 @@ Dynamic Notch: {{ analysis.filter_baseline.dyn_notch }}
 <div class="preset-box">
   <h3>🎛 Preset แนะนำจาก OBIXConfig Lab</h3>
 
-  <div class="preset-grid">
-    <div class="preset-item beginner" onclick="showPreset('beginner')">
-      <h4>🟢 Beginner / Smooth</h4>
-      <p>บินนิ่ง คุมง่าย ลดอาการสั่น เหมาะกับมือใหม่</p>
-      <ul>
-        <li>Throttle Limit: 85%</li>
-        <li>Rates: ต่ำ–กลาง</li>
-        <li>Filter: เน้นนุ่ม</li>
-      </ul>
+  <!-- ===== Preset Grid (วางแทน preset-grid เดิมทั้งหมด) ===== -->
+<div class="preset-grid">
+
+  <!-- Beginner / Smooth -->
+  <article class="preset-item preset-beginner" role="article" aria-label="Beginner Preset">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#e8fff0,#c6f2dd);display:grid;place-items:center;font-weight:800;color:#024;">
+        B
+      </div>
+      <div style="flex:1;">
+        <h4 style="margin:0 0 4px 0;">Beginner / Smooth</h4>
+        <div class="muted small">บินนิ่ง คุมง่าย เหมาะมือใหม่</div>
+      </div>
     </div>
 
-    <div class="preset-item freestyle" onclick="showPreset('freestyle')">
-      <h4>🔵 Freestyle</h4>
-      <p>ตอบสนองไว คุมแม่น เหมาะกับตีท่าบินสนุก</p>
-      <ul>
-        <li>Throttle Limit: 90–100%</li>
-        <li>Rates: กลาง–สูง</li>
-        <li>Filter: สมดุล</li>
-      </ul>
+    <ul style="margin:12px 0 0 18px;">
+      <li>Throttle limit: <strong>85%</strong></li>
+      <li>Rates: ต่ำ–กลาง</li>
+      <li>Filter: เน้นนุ่ม</li>
+    </ul>
+
+    <div style="display:flex; gap:8px; margin-top:12px; align-items:center;">
+      <button class="btn-primary" onclick="showPreset('beginner')">แสดง CLI</button>
+      <button class="btn-ghost" onclick="document.getElementById('cliOutput').scrollIntoView({behavior:'smooth'})">ไปที่ CLI</button>
+      <a class="btn-ghost" href="/downloads?filter=beginner" title="ตัวอย่างไฟล์" style="margin-left:auto;">ตัวอย่างไฟล์</a>
+    </div>
+  </article>
+
+  <!-- Freestyle -->
+  <article class="preset-item preset-freestyle" role="article" aria-label="Freestyle Preset">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#dceeff,#b7dbff);display:grid;place-items:center;font-weight:800;color:#023;">
+        F
+      </div>
+      <div style="flex:1;">
+        <h4 style="margin:0 0 4px 0;">Freestyle</h4>
+        <div class="muted small">ตอบสนองไว คุมแม่น สำหรับตีท่า</div>
+      </div>
     </div>
 
-    <div class="preset-item longrange" onclick="showPreset('longrange')">
-      <h4>🟣 Long-Range</h4>
-      <p>ประหยัดไฟ นิ่ง ลอยได้นาน</p>
-      <ul>
-        <li>Throttle Limit: 80–85%</li>
-        <li>Rates: ต่ำ</li>
-        <li>Filter: ประหยัดพลังงาน</li>
-      </ul>
+    <ul style="margin:12px 0 0 18px;">
+      <li>Throttle limit: <strong>90–100%</strong></li>
+      <li>Rates: กลาง–สูง</li>
+      <li>Filter: สมดุล ระหว่างนุ่มกับตอบสนอง</li>
+    </ul>
+
+    <div style="display:flex; gap:8px; margin-top:12px; align-items:center;">
+      <button class="btn-primary" onclick="showPreset('freestyle')">แสดง CLI</button>
+      <button class="btn-ghost" onclick="copyCLI()">คัดลอก CLI</button>
+      <a class="btn-ghost" href="/downloads?filter=freestyle" style="margin-left:auto;">ตัวอย่างไฟล์</a>
     </div>
-  </div>
+  </article>
+
+  <!-- Long-Range / Cinematic -->
+  <article class="preset-item preset-longrange" role="article" aria-label="Long Range Preset">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#f1d9ff,#e6c8ff);display:grid;place-items:center;font-weight:800;color:#2a0a4b;">
+        L
+      </div>
+      <div style="flex:1;">
+        <h4 style="margin:0 0 4px 0;">Long-Range / Cinematic</h4>
+        <div class="muted small">นิ่ง ประหยัดไฟ ลอยนาน</div>
+      </div>
+    </div>
+
+    <ul style="margin:12px 0 0 18px;">
+      <li>Throttle limit: <strong>80–85%</strong></li>
+      <li>Rates: ต่ำ</li>
+      <li>Filter: เน้นความนิ่งและประหยัด</li>
+    </ul>
+
+    <div style="display:flex; gap:8px; margin-top:12px; align-items:center;">
+      <button class="btn-primary" onclick="showPreset('longrange')">แสดง CLI</button>
+      <button class="btn-ghost" onclick="copyCLI()">คัดลอก CLI</button>
+      <a class="btn-ghost" href="/downloads?filter=longrange" style="margin-left:auto;">ตัวอย่างไฟล์</a>
+    </div>
+  </article>
+
+</div>
+<!-- ===== END Preset Grid ===== -->
 
   <p class="preset-note">
     * Preset เหล่านี้เป็นแนวทางเริ่มต้น สามารถนำไปปรับต่อให้เหมาะกับโดรนของคุณ
