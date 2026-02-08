@@ -18,8 +18,32 @@
 </head>
 <body>
   <div class="container">
-    <h1>Downloads — Diff_all And Dump (Factory)</h1>
-    <p>ไฟล์ CLI `diff all and dump` สำหรับแต่ละ FC — ดาวน์โหลดหรือคลิก <strong>Copy CLI</strong> เพื่อคัดลอกข้อความทั้งหมดไปใช้งาน</p>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+      <h1 style="margin:0;">Downloads — diff_all</h1>
+
+      <!-- search input -->
+      <div style="flex:1; min-width:220px;">
+        <input id="dlSearch" type="search" placeholder="ค้นหาไฟล์ (ชื่อ, FC, keyword)..." style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:#0d1117; color:inherit;">
+      </div>
+
+      <!-- filter by FC -->
+      <div>
+        <select id="dlFilterFC" style="padding:8px 10px; border-radius:8px; background:#0d1117; border:1px solid rgba(255,255,255,0.06); color:inherit;">
+          <option value="all">แสดงทุก FC</option>
+          {% set fcs = items|map(attribute='fc')|list|unique %}
+          {% for f in fcs %}
+            <option value="{{ f }}">{{ f }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- download all for selected FC -->
+      <div>
+        <a id="downloadAllBtn" class="btn-download" href="#" style="display:inline-block;padding:8px 12px;border-radius:8px;">📦 ดาวน์โหลดทั้งหมด</a>
+      </div>
+    </div>
+
+    <p style="margin-top:8px; color:#9aa4b2;">ค้นหา/กรอง แล้วกด "Copy CLI" หรือ "ดาวน์โหลด" ได้ทันที</p>
 
     <div class="dl-grid">
       {% for it in items %}
@@ -51,13 +75,21 @@
   <div id="obixToast">Copied</div>
 
 <script>
-document.querySelectorAll('.dl-card').forEach(card=>{
+const grid = document.getElementById('dlGrid');
+const cards = Array.from(document.querySelectorAll('.dl-card'));
+const searchInput = document.getElementById('dlSearch');
+const filterSelect = document.getElementById('dlFilterFC');
+const downloadAllBtn = document.getElementById('downloadAllBtn');
+
+function normalizeText(s){ return (s||'').toString().toLowerCase(); }
+
+// initial preview fetch + copy button (เหมือนเดิม)
+cards.forEach(card=>{
   const btn = card.querySelector('.copy-cli');
   const preview = card.querySelector('.cli-snippet');
   const fc = btn.getAttribute('data-fc');
   const fn = btn.getAttribute('data-fn');
 
-  // fetch a preview (first chunk)
   fetch(`/static/downloads/diff_all/${fc}/${fn}`)
     .then(r => r.text())
     .then(t => {
@@ -77,6 +109,41 @@ document.querySelectorAll('.dl-card').forEach(card=>{
     }
   });
 });
+
+// Filter + Search logic
+function applyFilter(){
+  const q = normalizeText(searchInput.value);
+  const fcFilter = filterSelect.value;
+
+  cards.forEach(card=>{
+    const title = normalizeText(card.querySelector('div > div > div').textContent || '');
+    const meta = normalizeText(card.querySelector('.dl-meta').textContent || '');
+    const fc = normalizeText(card.querySelector('.dl-actions span').textContent || '');
+    const matchQ = q === '' || title.includes(q) || meta.includes(q) || fc.includes(q);
+    const matchFC = (fcFilter === 'all') || (fc === fcFilter.toLowerCase());
+    card.style.display = (matchQ && matchFC) ? '' : 'none';
+  });
+
+  // update download all href
+  const sel = filterSelect.value;
+  if(sel === 'all'){
+    downloadAllBtn.href = '#';
+    downloadAllBtn.setAttribute('disabled','disabled');
+    downloadAllBtn.textContent = '📦 ดาวน์โหลดทั้งหมด';
+    downloadAllBtn.style.opacity = 0.6;
+  } else {
+    downloadAllBtn.href = `/static/downloads/diff_all/${sel}/${sel}-diff_all.zip`;
+    downloadAllBtn.removeAttribute('disabled');
+    downloadAllBtn.textContent = `📦 ดาวน์โหลดทั้งหมด: ${sel}`;
+    downloadAllBtn.style.opacity = 1;
+  }
+}
+
+searchInput.addEventListener('input', applyFilter);
+filterSelect.addEventListener('change', applyFilter);
+
+// init
+applyFilter();
 
 function showToast(msg){
   const t = document.getElementById('obixToast');
