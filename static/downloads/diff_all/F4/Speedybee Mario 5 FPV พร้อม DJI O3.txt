@@ -1,0 +1,169 @@
+defaults nosave
+
+
+# version
+# Betaflight / STM32F405 (S405) 4.5.1 Jul 27 2024 / 03:21:08 (77d01ba3b) MSP API: 1.46
+# config rev: fb15bf8
+
+# start the command batch
+batch start
+
+# reset configuration to default settings
+defaults nosave
+
+board_name SPEEDYBEEF405V4
+manufacturer_id SPBE
+mcu_id 002b003b3533471132303332
+signature
+
+# name: Mario 5 DC
+
+# feature
+feature GPS
+feature TELEMETRY
+feature LED_STRIP
+feature OSD
+
+# serial
+serial 0 131073 115200 57600 0 115200
+serial 4 0 115200 57600 0 115200
+serial 5 2 115200 57600 0 115200
+
+# beacon
+beacon RX_LOST
+beacon RX_SET
+
+# led
+led 0 5,4::CO:12
+led 1 6,4::CO:12
+led 2 7,4::CO:12
+led 3 8,4::CO:12
+
+# aux
+aux 0 0 0 1700 2100 0 0
+aux 1 1 1 1300 1700 0 0
+aux 2 2 1 1700 2100 0 0
+aux 3 13 2 1300 1700 0 0
+aux 4 35 2 1700 2100 0 0
+
+# master
+set dyn_notch_count = 1
+set dyn_notch_q = 450
+set dyn_notch_min_hz = 150
+set acc_calibration = -4,31,-25,1
+set blackbox_sample_rate = 1/2
+set dshot_bidir = ON
+set motor_pwm_protocol = DSHOT300
+set motor_output_reordering = 1,0,3,2,4,5,6,7
+set ibata_scale = 240
+set beeper_dshot_beacon_tone = 5
+set small_angle = 180
+set gps_sbas_mode = AUTO
+set gps_rescue_min_sats = 6
+set gps_rescue_allow_arming_without_fix = ON
+set pid_process_denom = 2
+set ledstrip_rainbow_delta = 1
+set ledstrip_rainbow_freq = 360
+set osd_vbat_pos = 2628
+set osd_rssi_pos = 2103
+set osd_rssi_dbm_pos = 3104
+set osd_tim_2_pos = 2644
+set osd_throttle_pos = 2500
+set osd_mah_drawn_pos = 3116
+set osd_craft_name_pos = 2564
+set osd_gps_speed_pos = 2091
+set osd_gps_lon_pos = 2148
+set osd_gps_lat_pos = 2180
+set osd_gps_sats_pos = 2084
+set osd_pidrate_profile_pos = 2652
+set osd_warnings_pos = 14868
+set osd_avg_cell_voltage_pos = 2636
+set osd_flip_arrow_pos = 2436
+set osd_log_status_pos = 2506
+set osd_rate_profile_name_pos = 1539
+set osd_pid_profile_name_pos = 2372
+set osd_profile_name_pos = 1379
+set rpm_filter_weights = 100,0,80
+set craft_name = Mario 5 DC
+
+profile 0
+
+# profile 0
+set profile_name = J40.
+set dterm_lpf1_dyn_min_hz = 82
+set dterm_lpf1_dyn_max_hz = 165
+set dterm_lpf1_static_hz = 82
+set dterm_lpf2_static_hz = 165
+set p_pitch = 73
+set i_pitch = 118
+set d_pitch = 57
+set f_pitch = 166
+set p_roll = 56
+set i_roll = 90
+set d_roll = 50
+set f_roll = 127
+set p_yaw = 56
+set i_yaw = 90
+set f_yaw = 127
+set d_min_roll = 41
+set d_min_pitch = 46
+set feedforward_jitter_factor = 10
+set dyn_idle_min_rpm = 34
+set simplified_master_multiplier = 125
+set simplified_i_gain = 90
+set simplified_d_gain = 110
+set simplified_dmax_gain = 65
+set simplified_feedforward_gain = 85
+set simplified_pitch_pi_gain = 125
+set simplified_dterm_filter_multiplier = 110
+
+profile 1
+
+# profile 1
+set profile_name = 51466 V2
+set dterm_lpf1_dyn_min_hz = 82
+set dterm_lpf1_dyn_max_hz = 165
+set dterm_lpf1_static_hz = 82
+set dterm_lpf2_static_hz = 165
+set p_pitch = 62
+set i_pitch = 99
+set d_pitch = 64
+set f_pitch = 140
+set p_roll = 51
+set i_roll = 82
+set d_roll = 56
+set f_roll = 117
+set p_yaw = 51
+set i_yaw = 82
+set f_yaw = 117
+set d_min_roll = 44
+set d_min_pitch = 50
+set feedforward_jitter_factor = 10
+set dyn_idle_min_rpm = 33
+set simplified_master_multiplier = 115
+set simplified_i_gain = 90
+set simplified_d_gain = 130
+set simplified_dmax_gain = 75
+set simplified_feedforward_gain = 85
+set simplified_pitch_pi_gain = 115
+set simplified_dterm_filter_multiplier = 110
+
+profile 2
+
+profile 3
+
+# restore original profile selection
+profile 0
+
+rateprofile 0
+
+rateprofile 1
+
+rateprofile 2
+
+rateprofile 3
+
+# restore original rateprofile selection
+rateprofile 0
+
+# save configuration
