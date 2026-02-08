@@ -252,7 +252,24 @@ def index():
         # ==== Normalize & preserve fields expected by template ====
         # ensure 'style' is present (template uses analysis.style)
         analysis.setdefault("style", style)
-
+# --- Advanced analysis (merge into analysis) ---
+try:
+    adv = make_advanced_report(
+        size=float(size),
+        weight_g=float(weight),
+        battery_s=battery,
+        prop_result=prop_result,
+        style=style
+    )
+    # merge advanced dict into analysis
+    analysis.update(adv)
+    # convenience top-level fields for template
+    analysis["thrust_ratio"] = adv["advanced"]["thrust_ratio"]
+    analysis["est_flight_time_min"] = adv["advanced"]["power"]["est_flight_time_min"]
+    analysis["est_flight_time_min_aggr"] = adv["advanced"]["power"]["est_flight_time_min_aggressive"]
+except Exception as e:
+    # do not break page on analysis errors
+    print("Advanced analysis error:", e)
         # provide a short summary field (template references analysis.summary)
         analysis.setdefault("summary", analysis.get("overview", ""))
 
@@ -286,25 +303,6 @@ def index():
         except Exception:
             pass
 
-
-# --- Advanced analysis (merge into analysis) ---
-try:
-    adv = make_advanced_report(
-        size=float(size),
-        weight_g=float(weight),
-        battery_s=battery,
-        prop_result=prop_result,
-        style=style
-    )
-    # merge advanced dict into analysis
-    analysis.update(adv)
-    # convenience top-level fields for template
-    analysis["thrust_ratio"] = adv["advanced"]["thrust_ratio"]
-    analysis["est_flight_time_min"] = adv["advanced"]["power"]["est_flight_time_min"]
-    analysis["est_flight_time_min_aggr"] = adv["advanced"]["power"]["est_flight_time_min_aggressive"]
-except Exception as e:
-    # do not break page on analysis errors
-    print("Advanced analysis error:", e)
     return render_template("index.html", analysis=analysis)
 
 # ===============================
