@@ -1,0 +1,123 @@
+defaults nosave
+
+# diff all
+
+# version
+# Betaflight / STM32F405 (S405) 4.4.3 Jun 27 2024 / 06:26:27 (738127e7e) MSP API: 1.45
+
+# config: YES
+
+# start the command batch
+batch start
+
+# reset configuration to default settings
+defaults nosave
+
+board_name SPEDIXF405
+manufacturer_id SPDX
+mcu_id 003800173441501420333456
+signature
+
+# feature
+feature GPS
+
+# serial
+serial 0 131073 115200 57600 0 115200
+serial 3 2 115200 115200 0 115200
+
+# beacon
+beacon RX_SET
+
+# aux
+aux 0 0 0 900 1300 0 0
+aux 1 1 1 1300 1700 0 0
+
+# master
+set gyro_lpf1_static_hz = 0
+set gyro_lpf2_static_hz = 600
+set gyro_lpf1_dyn_min_hz = 0
+set gyro_lpf1_dyn_max_hz = 600
+set acc_calibration = -22,18,-23,1
+set motor_pwm_protocol = DSHOT300
+set failsafe_switch_mode = STAGE2
+set failsafe_procedure = GPS-RESCUE
+set align_board_roll = 180
+set vbat_max_cell_voltage = 440
+set yaw_motors_reversed = ON
+set small_angle = 180
+set gps_ublox_use_galileo = ON
+set gps_set_home_point_once = ON
+set gps_rescue_allow_arming_without_fix = ON
+set simplified_gyro_filter_multiplier = 120
+set osd_vbat_pos = 2625
+set osd_link_quality_pos = 2369
+set osd_tim_2_pos = 2561
+set osd_throttle_pos = 2529
+set osd_gps_speed_pos = 2637
+set osd_gps_lon_pos = 2081
+set osd_gps_lat_pos = 2113
+set osd_gps_sats_pos = 2632
+set osd_home_dir_pos = 2586
+set osd_home_dist_pos = 2642
+set osd_altitude_pos = 3404
+set osd_warnings_pos = 14901
+set osd_avg_cell_voltage_pos = 2593
+set osd_pit_ang_pos = 2519
+set osd_displayport_device = MSP
+set debug_mode = GYRO_SCALED
+set vcd_video_system = HD
+
+profile 0
+
+# profile 0
+set dterm_lpf1_dyn_min_hz = 52
+set dterm_lpf1_dyn_max_hz = 105
+set dterm_lpf1_static_hz = 52
+set dterm_lpf2_static_hz = 105
+set iterm_rotation = ON
+set p_pitch = 50
+set i_pitch = 86
+set d_pitch = 71
+set f_pitch = 120
+set p_roll = 53
+set i_roll = 82
+set d_roll = 61
+set p_yaw = 50
+set i_yaw = 120
+set d_min_roll = 43
+set d_min_pitch = 48
+set feedforward_averaging = 3_POINT
+set feedforward_jitter_factor = 12
+set simplified_pids_mode = OFF
+set simplified_dterm_filter_multiplier = 70
+set tpa_mode = PD
+
+profile 1
+
+profile 2
+
+profile 3
+
+# restore original profile selection
+profile 0
+
+rateprofile 0
+
+# rateprofile 0
+set roll_expo = 30
+set pitch_expo = 30
+set yaw_expo = 30
+set roll_srate = 54
+set pitch_srate = 54
+set yaw_srate = 43
+
+rateprofile 1
+
+rateprofile 2
+
+rateprofile 3
+
+# restore original rateprofile selection
+rateprofile 0
+
+# save configuration
