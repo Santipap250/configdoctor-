@@ -152,8 +152,9 @@ def make_advanced_report(size, weight_g, battery_s, prop_result, style):
     warnings = []
     if power_info["est_hover_power_w"] * 1.4 > 350:  # arbitrary threshold high power
         warnings.append("เครื่องอาจใช้กำลังสูง — ตรวจสอบ ESC rating และสายไฟ")
-    if power_info["battery_mAh_used"] < 500 and size := float(size or 5) and size > 4.5:
-        warnings.append("แบตเตอรี่ความจุน้อยสำหรับขนาดนี้ — แนะนำความจุสูงขึ้นเพื่อเวลาบินที่ปลอดภัย")
+    size_val = float(size or 5)
+if power_info["battery_mAh_used"] < 500 and size_val > 4.5:
+    warnings.append("แบตเตอรี่ความจุน้อยสำหรับขนาดนี้ — แนะนำความจุสูงขึ้นเพื่อเวลาบินที่ปลอดภัย")
 
     return {
         "advanced": {
