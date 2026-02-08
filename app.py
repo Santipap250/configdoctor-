@@ -285,6 +285,7 @@ def index():
             print("DEBUG: battery_est ->", analysis.get("battery_est"))
         except Exception:
             pass
+
 # --- Advanced analysis (merge into analysis) ---
 try:
     adv = make_advanced_report(
