@@ -252,6 +252,7 @@ def index():
         # ==== Normalize & preserve fields expected by template ====
         # ensure 'style' is present (template uses analysis.style)
         analysis.setdefault("style", style)
+
 # --- Advanced analysis (merge into analysis) ---
 try:
     adv = make_advanced_report(
