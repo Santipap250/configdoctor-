@@ -1,3 +1,43 @@
+:root{
+  /* palette (dark-first) */
+  --bg-900: #0b0f11;
+  --bg-800: #0f1416;
+  --card:   #0f1518;
+  --muted:  #9aa4b2;
+  --text:   #d6dee8;
+  --accent: #24d07a; /* primary action */
+  --accent-2:#58a6ff; /* secondary */
+  --gold:   #f1b65a;
+
+  /* glass / subtle */
+  --glass: rgba(255,255,255,0.03);
+  --glass-2: rgba(255,255,255,0.02);
+
+  /* sizes */
+  --radius-lg: 16px;
+  --radius-md: 10px;
+  --radius-sm: 8px;
+  --gap: 14px;
+  --max-width: 980px;
+}
+
+/* Base */
+html,body{height:100%;}
+body{
+  font-family: "Sarabun", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: linear-gradient(180deg,var(--bg-900), #060708);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.5;
+}
+
+/* container center */
+.container{ max-width:var(--max-width); margin:20px auto; padding:18px; }
+
+/* subtle global transitions */
+*{ transition: background-color .18s ease, color .12s ease, box-shadow .18s ease, transform .18s ease; }
+
 /* ==================== BODY ===================== */
 body {
     font-family: "Sarabun", sans-serif;
@@ -746,6 +786,7 @@ pre#pid, pre#filter {
 .accordion-head{ display:flex; align-items:center; justify-content:space-between; padding:10px; cursor:pointer; }
 .accordion-body{ padding:10px 12px; font-size:13px; color:var(--text-color-dark,#ddd); display:none; }
 .accordion-item.open .accordion-body{ display:block; }
+
 /* =========== OBIX Short Pages / MiniNav styles =========== */
 #miniNav {
   display:flex;
@@ -898,3 +939,34 @@ pre#pid, pre#filter {
   .drawer-compact .dl-title{ font-size:0.95rem; }
   .drawer-compact .dl-meta{ font-size:0.78rem; }
 }
+
+.top-bar {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:18px;
+  border-radius:var(--radius-lg);
+  background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  box-shadow: 0 12px 40px rgba(2,8,12,0.6);
+  backdrop-filter: blur(6px) saturate(120%);
+  border:1px solid rgba(255,255,255,0.02);
+}
+
+/* logo container */
+.top-left {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+/* hamburger improved */
+.hamburger{
+  width:48px;height:48px;border-radius:12px;border:0;background:linear-gradient(180deg,var(--glass), rgba(255,255,255,0.01));
+  display:grid;place-items:center;color:var(--gold); cursor:pointer;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.25);
+}
+.hamburger:focus{ outline:2px solid rgba(88,166,255,0.18); }
+
+/* small logo tweak */
+.logo{ height:36px; filter: drop-shadow(0 0 12px rgba(0,255,180,0.08)); }
