@@ -286,6 +286,7 @@ def index():
         except Exception:
             pass
 
+
 # --- Advanced analysis (merge into analysis) ---
 try:
     adv = make_advanced_report(
