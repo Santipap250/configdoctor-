@@ -371,6 +371,75 @@ Dynamic Notch: {{ analysis.filter_baseline.dyn_notch }}
   </p>
 </div>
 {% endif %}
+{# Advanced analysis card - วางถัดจาก Quick Summary หรือก่อนผลรายละเอียด #}
+{% if analysis and analysis.advanced %}
+<div class="result-card" style="border-left:4px solid var(--accent); margin-top:12px;">
+  <h3>🔬 Advanced Analysis</h3>
+
+  <div style="display:flex; gap:12px; flex-wrap:wrap;">
+    <div style="flex:1; min-width:220px;">
+      <div class="card-metric">
+        <div class="metric-row">
+          <div>
+            <div class="metric-label">Estimated hover power</div>
+            <div class="metric-value">{{ analysis.advanced.power.est_hover_power_w }} W</div>
+            <div class="muted small">Aggressive: {{ analysis.advanced.power.est_aggressive_power_w }} W</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:1; min-width:220px;">
+      <div class="card-metric">
+        <div class="metric-label">Battery (used for estimate)</div>
+        <div class="metric-value">{{ analysis.advanced.power.battery_mAh_used }} mAh • {{ analysis.advanced.power.cells }}S</div>
+        <div class="muted small">Energy: {{ analysis.advanced.power.battery_wh }} Wh</div>
+      </div>
+    </div>
+
+    <div style="flex:1; min-width:220px;">
+      <div class="card-metric">
+        <div class="metric-label">Estimated flight time</div>
+        <div class="metric-value">{{ analysis.advanced.power.est_flight_time_min }} min</div>
+        <div class="muted small">Aggressive: {{ analysis.advanced.power.est_flight_time_min_aggressive }} min</div>
+      </div>
+    </div>
+  </div>
+
+  <hr style="opacity:.06;margin:12px 0;">
+
+  <div style="display:flex;gap:16px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:260px;">
+      <h4 style="margin:0 0 6px 0;">TWR / Thrust</h4>
+      <p class="muted small">Thrust-to-Weight: <strong>{{ analysis.thrust_ratio }}</strong></p>
+      <p>{{ analysis.advanced.twr_note }}</p>
+    </div>
+
+    <div style="flex:1;min-width:260px;">
+      <h4 style="margin:0 0 6px 0;">Motor KV suggestion</h4>
+      <p>{{ analysis.advanced.kv_suggestion }}</p>
+    </div>
+
+    <div style="flex:1;min-width:260px;">
+      <h4 style="margin:0 0 6px 0;">Prop notes</h4>
+      <ul>
+        {% for n in analysis.advanced.prop_notes %}
+          <li>{{ n }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  {% if analysis.advanced.warnings_advanced %}
+  <div class="warning-box" style="margin-top:12px;">
+    {% for w in analysis.advanced.warnings_advanced %}
+      <div class="alert warning">{{ w }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+</div>
+{% endif %}
 <!-- ===== END OBIX Detected Class ===== -->
 <div class="result-card">
 <h2>🔍 ผลการวิเคราะห์</h2>
