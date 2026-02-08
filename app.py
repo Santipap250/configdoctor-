@@ -278,6 +278,24 @@ def index():
             effect["grip"] = effect.get("grip", 0)
         prop_result["effect"] = effect
         analysis["prop_result"] = prop_result
+# --- Advanced analysis (merge into analysis) ---
+try:
+    adv = make_advanced_report(
+        size=float(size),
+        weight_g=float(weight),
+        battery_s=battery,
+        prop_result=prop_result,
+        style=style
+    )
+    # merge advanced dict into analysis
+    analysis.update(adv)
+    # convenience top-level fields for template
+    analysis["thrust_ratio"] = adv["advanced"]["thrust_ratio"]
+    analysis["est_flight_time_min"] = adv["advanced"]["power"]["est_flight_time_min"]
+    analysis["est_flight_time_min_aggr"] = adv["advanced"]["power"]["est_flight_time_min_aggressive"]
+except Exception as e:
+    # do not break page on analysis errors
+    print("Advanced analysis error:", e)
 
         # (optional) debug print to server logs
         try:
