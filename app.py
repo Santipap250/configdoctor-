@@ -1,3 +1,4 @@
+from analyzer.advanced_analysis import make_advanced_report
 from flask import Flask, render_template, request
 from analyzer.prop_logic import analyze_propeller
 from analyzer.thrust_logic import calculate_thrust_weight, estimate_battery_runtime
