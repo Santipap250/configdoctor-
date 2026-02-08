@@ -334,7 +334,6 @@ if('IntersectionObserver' in window){
     ⚠️ ค่านี้เป็นค่าเริ่มต้น แนะนำทดสอบบินจริงก่อนปรับเพิ่ม–ลด
   </div>
 </section>
-{% endif %}
 {# Advanced analysis card - วางถัดจาก Quick Summary หรือก่อนผลรายละเอียด #}
 {% if analysis and analysis.advanced %}
 <div class="result-card" style="border-left:4px solid var(--accent); margin-top:12px;">
@@ -401,6 +400,9 @@ if('IntersectionObserver' in window){
     {% endfor %}
   </div>
   {% endif %}
+
+</div>
+{% endif %}
 
 <!-- ===== OBIX Detected Class & Baseline (Optional but Recommended) ===== -->
 {% if analysis.detected_class %}
