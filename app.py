@@ -278,6 +278,13 @@ def index():
             effect["grip"] = effect.get("grip", 0)
         prop_result["effect"] = effect
         analysis["prop_result"] = prop_result
+
+        # (optional) debug print to server logs
+        try:
+            print("DEBUG: analysis keys ->", list(analysis.keys()))
+            print("DEBUG: battery_est ->", analysis.get("battery_est"))
+        except Exception:
+            pass
 # --- Advanced analysis (merge into analysis) ---
 try:
     adv = make_advanced_report(
@@ -296,14 +303,6 @@ try:
 except Exception as e:
     # do not break page on analysis errors
     print("Advanced analysis error:", e)
-
-        # (optional) debug print to server logs
-        try:
-            print("DEBUG: analysis keys ->", list(analysis.keys()))
-            print("DEBUG: battery_est ->", analysis.get("battery_est"))
-        except Exception:
-            pass
-
     return render_template("index.html", analysis=analysis)
 
 # ===============================
