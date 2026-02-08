@@ -1,0 +1,211 @@
+# 
+
+# diff all
+
+# version
+# Betaflight / AT32F435G (A435) 4.5.2 Sep  8 2025 / 11:11:20 (norevision) MSP API: 1.46
+# config rev: e0af134
+
+# start the command batch
+batch start
+
+# reset configuration to default settings
+defaults nosave
+
+board_name SPEEDYBEEF435AIOELRS
+manufacturer_id SPBE
+mcu_id 2099e2830da500000d501702
+signature 
+
+# name: Mario mini 25
+
+# feature
+feature GPS
+feature TELEMETRY
+feature LED_STRIP
+feature OSD
+
+# serial
+serial 2 131073 115200 57600 0 115200
+serial 6 2 115200 115200 0 115200
+
+# beacon
+beacon RX_LOST
+beacon RX_SET
+
+# led
+led 0 0,0::CB:2
+led 1 1,0::CB:2
+led 2 2,0::CB:2
+led 3 3,0::CB:2
+led 4 4,0::CB:2
+led 5 5,0::CB:2
+led 6 6,0::CB:2
+led 7 7,0::CB:2
+led 8 8,0::CB:2
+led 9 9,0::CB:2
+led 10 10,0::CB:2
+led 11 11,0::CB:2
+
+# aux
+aux 0 0 0 1700 2100 0 0
+aux 1 1 1 1300 1700 0 0
+aux 2 2 1 1700 2100 0 0
+aux 3 13 2 1300 1700 0 0
+aux 4 15 2 1700 2100 0 0
+aux 5 35 3 1700 2100 0 0
+
+# master
+set gyro_lpf1_static_hz = 0
+set gyro_lpf2_static_hz = 475
+set gyro_lpf1_dyn_min_hz = 237
+set gyro_lpf1_dyn_max_hz = 475
+set acc_calibration = 82,3,-37,1
+set mag_hardware = NONE
+set motor_poles = 12
+set beeper_dshot_beacon_tone = 5
+set yaw_motors_reversed = ON
+set small_angle = 180
+set gps_ublox_use_galileo = ON
+set gps_set_home_point_once = ON
+set pid_process_denom = 2
+set simplified_gyro_filter_multiplier = 95
+set osd_rssi_dbm_alarm = -85
+set osd_vbat_pos = 2628
+set osd_rssi_pos = 3111
+set osd_link_quality_pos = 573
+set osd_rssi_dbm_pos = 1056
+set osd_tim_2_pos = 2644
+set osd_throttle_pos = 2500
+set osd_mah_drawn_pos = 3116
+set osd_wh_drawn_pos = 1184
+set osd_craft_name_pos = 2564
+set osd_gps_speed_pos = 2091
+set osd_gps_lon_pos = 2148
+set osd_gps_lat_pos = 2180
+set osd_gps_sats_pos = 2084
+set osd_altitude_pos = 497
+set osd_pidrate_profile_pos = 2652
+set osd_warnings_pos = 2580
+set osd_avg_cell_voltage_pos = 2636
+set osd_flip_arrow_pos = 2436
+set osd_log_status_pos = 458
+set osd_rate_profile_name_pos = 1539
+set osd_pid_profile_name_pos = 2372
+set osd_profile_name_pos = 1379
+set osd_stat_bitmask = 8402476
+set craft_name = Mario mini 25
+
+profile 0
+
+# profile 0
+set profile_name = HQ2521-1
+set dterm_lpf1_dyn_min_hz = 120
+set dterm_lpf1_dyn_max_hz = 240
+set dterm_lpf1_static_hz = 120
+set dterm_lpf2_static_hz = 240
+set p_pitch = 38
+set i_pitch = 81
+set d_pitch = 39
+set f_pitch = 101
+set p_roll = 30
+set i_roll = 64
+set d_roll = 31
+set f_roll = 80
+set p_yaw = 30
+set i_yaw = 64
+set f_yaw = 80
+set d_min_roll = 27
+set d_min_pitch = 33
+set feedforward_jitter_factor = 8
+set dyn_idle_min_rpm = 65
+set simplified_pids_mode = OFF
+set simplified_dterm_filter_multiplier = 160
+
+profile 1
+
+# profile 1
+set profile_name = HQ2521-2
+set dterm_lpf1_dyn_min_hz = 120
+set dterm_lpf1_dyn_max_hz = 240
+set dterm_lpf1_static_hz = 120
+set dterm_lpf2_static_hz = 240
+set p_pitch = 36
+set i_pitch = 63
+set d_pitch = 37
+set f_pitch = 68
+set p_roll = 33
+set i_roll = 58
+set d_roll = 28
+set f_roll = 61
+set p_yaw = 33
+set i_yaw = 58
+set f_yaw = 62
+set d_min_roll = 19
+set d_min_pitch = 28
+set feedforward_jitter_factor = 10
+set dyn_idle_min_rpm = 60
+set simplified_pids_mode = OFF
+set simplified_dterm_filter_multiplier = 160
+
+profile 2
+
+# profile 2
+set profile_name = HQ2519
+set dterm_lpf1_dyn_min_hz = 120
+set dterm_lpf1_dyn_max_hz = 240
+set dterm_lpf1_static_hz = 120
+set dterm_lpf2_static_hz = 240
+set p_pitch = 31
+set i_pitch = 64
+set d_pitch = 33
+set f_pitch = 62
+set p_roll = 29
+set i_roll = 60
+set d_roll = 31
+set f_roll = 53
+set p_yaw = 29
+set i_yaw = 60
+set f_yaw = 54
+set d_min_roll = 21
+set d_min_pitch = 25
+set feedforward_jitter_factor = 10
+set dyn_idle_min_rpm = 60
+set simplified_pids_mode = OFF
+set simplified_dterm_filter_multiplier = 160
+
+profile 3
+
+# restore original profile selection
+profile 0
+
+rateprofile 0
+
+# rateprofile 0
+set throttle_limit_type = SCALE
+set throttle_limit_percent = 88
+
+rateprofile 1
+
+# rateprofile 1
+set throttle_limit_type = SCALE
+set throttle_limit_percent = 88
+
+rateprofile 2
+
+# rateprofile 2
+set throttle_limit_type = SCALE
+set throttle_limit_percent = 88
+
+rateprofile 3
+
+# rateprofile 3
+set throttle_limit_type = SCALE
+set throttle_limit_percent = 88
+
+# restore original rateprofile selection
+rateprofile 0
+
+# save configuration
+save
+# 
