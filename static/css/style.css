@@ -1029,3 +1029,40 @@ form input::placeholder{ color: rgba(255,255,255,0.18); font-style:italic; }
 /* small helpers */
 .muted{ color:var(--muted); font-size:0.94rem; }
 .small{ font-size:0.92rem; }
+/* ---------- Preset grid layout improvements ---------- */
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+/* card visuals override (if not already) */
+.preset-item {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding:16px;
+  border-radius:12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+  border:1px solid rgba(255,255,255,0.03);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+}
+
+/* small text helpers */
+.muted { color: var(--muted, #9aa4b2); font-size:0.95rem; }
+.small { font-size:0.92rem; }
+
+/* Buttons in cards */
+.preset-item .btn-primary { min-width:110px; }
+.preset-item .btn-ghost  { background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--text); padding:8px 10px; border-radius:10px; }
+
+/* responsive: mobile tweaks */
+@media (max-width: 720px) {
+  .preset-grid { grid-template-columns: 1fr; gap:12px; }
+  .preset-item { padding:14px; }
+  .preset-item h4 { font-size:1rem; }
+  .preset-item ul { margin-left: 14px; }
+  .preset-item .btn-primary { width:48%; }
+  .preset-item .btn-ghost { width:48%; }
+}
