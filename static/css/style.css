@@ -898,3 +898,188 @@ pre#pid, pre#filter {
   .drawer-compact .dl-title{ font-size:0.95rem; }
   .drawer-compact .dl-meta{ font-size:0.78rem; }
 }
+/* ================== Premium UI Overwrite / Additions ================== */
+/* Paste this at the end of your style.css */
+
+/* Root accents */
+:root{
+  --accent-1: #2ee6b6;    /* mint */
+  --accent-2: #58a6ff;    /* sky */
+  --glass-bg: rgba(255,255,255,0.03);
+  --glass-border: rgba(255,255,255,0.06);
+  --card-shadow: 0 10px 30px rgba(2,6,23,0.55);
+  --soft-radius: 14px;
+  --glass-blur: 8px;
+}
+
+/* Page background subtle gradient */
+body {
+  background: radial-gradient(1200px 600px at 10% 10%, rgba(40,48,60,0.12), transparent),
+              radial-gradient(900px 450px at 90% 80%, rgba(0,80,110,0.06), transparent),
+              linear-gradient(180deg, #07080a, #0d1117 60%);
+  color: #dbe7ef;
+  -webkit-font-smoothing:antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Top bar - modern centered with subtle glass */
+.top-bar {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur));
+  padding: 18px 18px;
+  border-radius: 18px;
+  box-shadow: var(--card-shadow);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+/* Premium logo area */
+.center-logo .logo {
+  width: 220px;
+  filter: drop-shadow(0 6px 26px rgba(46,230,182,0.06));
+}
+
+/* Hamburger button - larger + animated */
+.hamburger {
+  width:48px; height:48px; border-radius:12px; display:grid;place-items:center;
+  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border:1px solid rgba(255,255,255,0.03);
+  transition:transform .18s ease, box-shadow .18s;
+}
+.hamburger:hover{ transform:translateY(-2px); box-shadow:0 12px 30px rgba(2,6,23,0.35); }
+
+/* Header small subtitle */
+.top-bar .subtitle {
+  font-size:0.9rem;
+  color: #9fb6c8;
+  opacity:0.95;
+}
+
+/* Concept box => make compact, pill header */
+.concept-box {
+  border-radius: 16px;
+  padding: 0;
+  overflow:visible;
+}
+.concept-header {
+  padding: 12px 18px;
+  display:flex; align-items:center; gap:10px;
+  background: linear-gradient(90deg, rgba(46,230,182,0.06), rgba(88,166,255,0.02));
+  border-radius: 12px;
+  margin-bottom: 10px;
+  border:1px solid rgba(255,255,255,0.02);
+}
+.concept-title { color: var(--accent-1); font-weight:700; }
+.concept-content { padding: 14px 18px 18px; color:#cfe6ef; }
+
+/* Form card upgrade */
+.form-card {
+  border-radius: 16px;
+  padding: 20px;
+  border:1px solid rgba(255,255,255,0.03);
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+  box-shadow: 0 14px 40px rgba(2,6,23,0.45);
+}
+
+/* input focus glow */
+form input, form select {
+  transition: box-shadow .18s ease, transform .12s ease;
+}
+form input:focus, form select:focus {
+  box-shadow: 0 8px 28px rgba(88,166,255,0.08), 0 0 18px rgba(46,230,182,0.06) inset;
+  transform: translateY(-1px);
+  border-color: rgba(88,166,255,0.15);
+}
+
+/* Premium button */
+form button {
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+  color:#021014;
+  border-radius: 12px;
+  padding:14px 18px;
+  font-weight:800;
+  letter-spacing:0.2px;
+  box-shadow: 0 12px 30px rgba(46,230,182,0.08);
+  border: 1px solid rgba(255,255,255,0.02);
+}
+form button:hover{ transform:translateY(-3px) scale(1.01); box-shadow:0 20px 50px rgba(46,230,182,0.12); }
+
+/* Card grids (presets / downloads) */
+.preset-grid, .dl-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap:16px;
+}
+
+/* premium card */
+.preset-item, .dl-card, .result-card {
+  border-radius: 14px;
+  padding: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.03);
+  box-shadow: 0 14px 40px rgba(3,7,18,0.45);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.preset-item:hover, .dl-card:hover { transform: translateY(-6px); box-shadow: 0 30px 80px rgba(2,6,23,0.5); }
+
+/* badge / pill */
+.metric-pill, .dl-pill {
+  padding:6px 10px; border-radius:999px; font-weight:700; font-size:0.85rem;
+  background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border:1px solid rgba(255,255,255,0.02);
+}
+
+/* copy button premium */
+.btn-small {
+  background: linear-gradient(90deg, #40e6b2, #4fc6ff);
+  color: #021014;
+  border-radius: 12px;
+  box-shadow: 0 8px 22px rgba(46,230,182,0.06);
+}
+.btn-small:hover { transform:translateY(-4px); }
+
+/* CLI snippet styling */
+pre.cli-snippet {
+  border-radius:10px; padding:12px; font-size:0.85rem; line-height:1.45;
+  border:1px solid rgba(255,255,255,0.03);
+}
+
+/* Footer minimal */
+.version-note {
+  text-align:center;
+  margin-top:20px;
+  color:#8aa7b8;
+  font-weight:600;
+}
+
+/* Drawer (slide-in) improvements */
+.drawer{
+  width:360px;
+  padding:18px;
+  border-radius:12px 0 0 12px;
+}
+.drawer .menu-card{
+  padding:12px; border-radius:12px; display:flex; gap:12px; align-items:center; margin-bottom:12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.006), rgba(255,255,255,0.004));
+  border:1px solid rgba(255,255,255,0.02);
+}
+.drawer .menu-title{ font-weight:800; color: #ffd78a; }
+.drawer .menu-sub { color:#9fb6c8; font-size:0.9rem; }
+
+/* micro animations for icons */
+.icon-pulse { animation: pulse 2.6s infinite; }
+@keyframes pulse {
+  0%{ transform:scale(1); opacity:1; }
+  50%{ transform:scale(1.03); opacity:0.9; }
+  100%{ transform:scale(1); opacity:1; }
+}
+
+/* responsive refinements */
+@media(max-width:720px){
+  .top-bar{ padding:12px; border-radius:12px; }
+  .center-logo .logo{ width:160px; }
+  .drawer{ width:86%; }
+}
