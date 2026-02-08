@@ -334,42 +334,6 @@ if('IntersectionObserver' in window){
     ⚠️ ค่านี้เป็นค่าเริ่มต้น แนะนำทดสอบบินจริงก่อนปรับเพิ่ม–ลด
   </div>
 </section>
-<!-- ===== OBIX Detected Class & Baseline (Optional but Recommended) ===== -->
-{% if analysis.detected_class %}
-<div class="result-card" style="border-left:4px solid #4CAF50;">
-  <h3>🔎 OBIX วิเคราะห์ลำนี้เป็น</h3>
-
-  <p>
-    <strong>Drone Class:</strong>
-    {{ analysis.detected_class }}
-    {% if analysis.class_meta.description %}
-      — {{ analysis.class_meta.description }}
-    {% endif %}
-  </p>
-
-  <hr>
-
-  <h4>🎯 ค่าเริ่มต้น (Baseline) ที่ระบบแนะนำ</h4>
-
-  <p><strong>PID Baseline</strong></p>
-  <pre>
-ROLL  P {{ analysis.pid_baseline.roll.p }}  I {{ analysis.pid_baseline.roll.i }}  D {{ analysis.pid_baseline.roll.d }}
-PITCH P {{ analysis.pid_baseline.pitch.p }} I {{ analysis.pid_baseline.pitch.i }} D {{ analysis.pid_baseline.pitch.d }}
-YAW   P {{ analysis.pid_baseline.yaw.p }}   I {{ analysis.pid_baseline.yaw.i }}
-  </pre>
-
-  <p><strong>Filter Baseline</strong></p>
-  <pre>
-Gyro LPF2: {{ analysis.filter_baseline.gyro_lpf2 }} Hz
-D-Term LPF1: {{ analysis.filter_baseline.dterm_lpf1 }} Hz
-Dynamic Notch: {{ analysis.filter_baseline.dyn_notch }}
-  </pre>
-
-  <p style="font-size:0.9em; opacity:0.85;">
-    ⚠️ ค่านี้คือ <strong>จุดเริ่มต้นที่ปลอดภัย</strong><br>
-    แนะนำให้ทดสอบบินจริงก่อนนำไปใช้ระยะยาว
-  </p>
-</div>
 {% endif %}
 {# Advanced analysis card - วางถัดจาก Quick Summary หรือก่อนผลรายละเอียด #}
 {% if analysis and analysis.advanced %}
@@ -437,6 +401,43 @@ Dynamic Notch: {{ analysis.filter_baseline.dyn_notch }}
     {% endfor %}
   </div>
   {% endif %}
+
+<!-- ===== OBIX Detected Class & Baseline (Optional but Recommended) ===== -->
+{% if analysis.detected_class %}
+<div class="result-card" style="border-left:4px solid #4CAF50;">
+  <h3>🔎 OBIX วิเคราะห์ลำนี้เป็น</h3>
+
+  <p>
+    <strong>Drone Class:</strong>
+    {{ analysis.detected_class }}
+    {% if analysis.class_meta.description %}
+      — {{ analysis.class_meta.description }}
+    {% endif %}
+  </p>
+
+  <hr>
+
+  <h4>🎯 ค่าเริ่มต้น (Baseline) ที่ระบบแนะนำ</h4>
+
+  <p><strong>PID Baseline</strong></p>
+  <pre>
+ROLL  P {{ analysis.pid_baseline.roll.p }}  I {{ analysis.pid_baseline.roll.i }}  D {{ analysis.pid_baseline.roll.d }}
+PITCH P {{ analysis.pid_baseline.pitch.p }} I {{ analysis.pid_baseline.pitch.i }} D {{ analysis.pid_baseline.pitch.d }}
+YAW   P {{ analysis.pid_baseline.yaw.p }}   I {{ analysis.pid_baseline.yaw.i }}
+  </pre>
+
+  <p><strong>Filter Baseline</strong></p>
+  <pre>
+Gyro LPF2: {{ analysis.filter_baseline.gyro_lpf2 }} Hz
+D-Term LPF1: {{ analysis.filter_baseline.dterm_lpf1 }} Hz
+Dynamic Notch: {{ analysis.filter_baseline.dyn_notch }}
+  </pre>
+
+  <p style="font-size:0.9em; opacity:0.85;">
+    ⚠️ ค่านี้คือ <strong>จุดเริ่มต้นที่ปลอดภัย</strong><br>
+    แนะนำให้ทดสอบบินจริงก่อนนำไปใช้ระยะยาว
+  </p>
+</div>
 
 </div>
 {% endif %}
