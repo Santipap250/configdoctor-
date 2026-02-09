@@ -259,29 +259,30 @@ def index():
         }
 
         # ==== Normalize & preserve fields expected by template ====
-        # ensure 'style' is present (template uses analysis.style)
         analysis.setdefault("style", style)
-
-# --- Advanced analysis (merge into analysis) ---
-try:
-    adv = make_advanced_report(
-        size=float(size),
-        weight_g=float(weight),
-        battery_s=battery,
-        prop_result=prop_result,
-        style=style
-    )
-    # merge advanced dict into analysis
-    analysis.update(adv)
-    # convenience top-level fields for template
-    analysis["thrust_ratio"] = adv["advanced"]["thrust_ratio"]
-    analysis["est_flight_time_min"] = adv["advanced"]["power"]["est_flight_time_min"]
-    analysis["est_flight_time_min_aggr"] = adv["advanced"]["power"]["est_flight_time_min_aggressive"]
-except Exception as e:
-    # do not break page on analysis errors
-    print("Advanced analysis error:", e)
-        # provide a short summary field (template references analysis.summary)
         analysis.setdefault("summary", analysis.get("overview", ""))
+
+        # ===============================
+        # Advanced analysis (merge into analysis) - safe call
+        # ===============================
+        if 'ADV_ANALYSIS_AVAILABLE' in globals() and ADV_ANALYSIS_AVAILABLE:
+            try:
+                adv = make_advanced_report(
+                    size=float(size),
+                    weight_g=float(weight),
+                    battery_s=battery,
+                    prop_result=prop_result,
+                    style=style
+                )
+                if isinstance(adv, dict):
+                    analysis.update(adv)
+                    # safe extractions without KeyError
+                    adv_power = adv.get("advanced", {}).get("power", {})
+                    analysis["thrust_ratio"] = adv.get("advanced", {}).get("thrust_ratio", analysis.get("thrust_ratio", 0))
+                    analysis["est_flight_time_min"] = adv_power.get("est_flight_time_min", analysis.get("battery_est"))
+                    analysis["est_flight_time_min_aggr"] = adv_power.get("est_flight_time_min_aggressive", None)
+            except Exception as e:
+                print("Advanced analysis error:", e)
 
         # normalize warnings to objects with level/msg because template expects w.level and w.msg
         norm_warnings = []
@@ -297,12 +298,9 @@ except Exception as e:
 
         # ensure prop_result.effect contains keys used by template (motor_load, noise, grip)
         effect = prop_result.get("effect", {})
-        if "motor_load" not in effect:
-            effect["motor_load"] = effect.get("motor_load", 0)
-        if "noise" not in effect:
-            effect["noise"] = effect.get("noise", 0)
-        if "grip" not in effect:
-            effect["grip"] = effect.get("grip", 0)
+        effect.setdefault("motor_load", 0)
+        effect.setdefault("noise", 0)
+        effect.setdefault("grip", "")
         prop_result["effect"] = effect
         analysis["prop_result"] = prop_result
 
