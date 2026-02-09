@@ -8,16 +8,6 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Advanced analysis - lazy import (ถ้าโมดูลมีปัญหา เว็บจะไม่ล่ม)
-try:
-    from analyzer.advanced_analysis import make_advanced_report
-    ADV_ANALYSIS_AVAILABLE = True
-except Exception as _e:
-    print("advanced_analysis import failed:", _e)
-    def make_advanced_report(*args, **kwargs):
-        return {"advanced": {}}
-    ADV_ANALYSIS_AVAILABLE = False
-
 @app.template_filter('timestamp_to_datetime')
 def timestamp_to_datetime_filter(ts):
     try:
@@ -259,30 +249,11 @@ def index():
         }
 
         # ==== Normalize & preserve fields expected by template ====
+        # ensure 'style' is present (template uses analysis.style)
         analysis.setdefault("style", style)
-        analysis.setdefault("summary", analysis.get("overview", ""))
 
-        # ===============================
-        # Advanced analysis (merge into analysis) - safe call
-        # ===============================
-        if 'ADV_ANALYSIS_AVAILABLE' in globals() and ADV_ANALYSIS_AVAILABLE:
-            try:
-                adv = make_advanced_report(
-                    size=float(size),
-                    weight_g=float(weight),
-                    battery_s=battery,
-                    prop_result=prop_result,
-                    style=style
-                )
-                if isinstance(adv, dict):
-                    analysis.update(adv)
-                    # safe extractions without KeyError
-                    adv_power = adv.get("advanced", {}).get("power", {})
-                    analysis["thrust_ratio"] = adv.get("advanced", {}).get("thrust_ratio", analysis.get("thrust_ratio", 0))
-                    analysis["est_flight_time_min"] = adv_power.get("est_flight_time_min", analysis.get("battery_est"))
-                    analysis["est_flight_time_min_aggr"] = adv_power.get("est_flight_time_min_aggressive", None)
-            except Exception as e:
-                print("Advanced analysis error:", e)
+        # provide a short summary field (template references analysis.summary)
+        analysis.setdefault("summary", analysis.get("overview", ""))
 
         # normalize warnings to objects with level/msg because template expects w.level and w.msg
         norm_warnings = []
@@ -298,9 +269,12 @@ def index():
 
         # ensure prop_result.effect contains keys used by template (motor_load, noise, grip)
         effect = prop_result.get("effect", {})
-        effect.setdefault("motor_load", 0)
-        effect.setdefault("noise", 0)
-        effect.setdefault("grip", "")
+        if "motor_load" not in effect:
+            effect["motor_load"] = effect.get("motor_load", 0)
+        if "noise" not in effect:
+            effect["noise"] = effect.get("noise", 0)
+        if "grip" not in effect:
+            effect["grip"] = effect.get("grip", 0)
         prop_result["effect"] = effect
         analysis["prop_result"] = prop_result
 
