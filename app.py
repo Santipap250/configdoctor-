@@ -255,6 +255,27 @@ def index():
         # provide a short summary field (template references analysis.summary)
         analysis.setdefault("summary", analysis.get("overview", ""))
 
+# ===============================
+        # Advanced analysis (merge into analysis) - safe call
+        # ===============================
+        if 'ADV_ANALYSIS_AVAILABLE' in globals() and ADV_ANALYSIS_AVAILABLE:
+            try:
+                adv = make_advanced_report(
+                    size=float(size),
+                    weight_g=float(weight),
+                    battery_s=battery,
+                    prop_result=prop_result,
+                    style=style
+                )
+                if isinstance(adv, dict):
+                    analysis.update(adv)
+                    adv_power = adv.get("advanced", {}).get("power", {})
+                    analysis["thrust_ratio"] = adv.get("advanced", {}).get("thrust_ratio", analysis.get("thrust_ratio", 0))
+                    analysis["est_flight_time_min"] = adv_power.get("est_flight_time_min", analysis.get("battery_est"))
+                    analysis["est_flight_time_min_aggr"] = adv_power.get("est_flight_time_min_aggressive", None)
+            except Exception as e:
+                print("Advanced analysis error:", e)
+
         # normalize warnings to objects with level/msg because template expects w.level and w.msg
         norm_warnings = []
         for w in warnings:
