@@ -6,7 +6,6 @@ from logic.presets import PRESETS, detect_class_from_size, get_baseline_for_clas
 from analyzer.drone_class import detect_drone_class
 from datetime import datetime
 
-
 app = Flask(__name__)
 
 # Advanced analysis - lazy import (ถ้าโมดูลมีปัญหา เว็บจะไม่ล่ม)
