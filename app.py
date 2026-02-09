@@ -179,6 +179,10 @@ def index():
         blade_count = safe_int(request.form.get("blades"), 3)
         prop_pitch = safe_float(request.form.get("pitch"), 4.0)
 
+battery_mAh = safe_int(request.form.get("battery_mAh"), None)
+# เมื่อเรียก make_advanced_report เพิ่ม argument หรือให้ advanced module ใช้อนุมาน
+# (ปัจจุบัน module เดิมคาดเดา mAh — ถ้าต้องการใช้ค่าให้แก้ module เพื่อรับค่า mAh เพิ่ม)
+
         # override with preset if selected
         if preset_key:
             p = PRESETS.get(preset_key)
