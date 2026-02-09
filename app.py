@@ -5,7 +5,16 @@ from analyzer.battery_logic import analyze_battery
 from logic.presets import PRESETS, detect_class_from_size, get_baseline_for_class
 from analyzer.drone_class import detect_drone_class
 from datetime import datetime
-from analyzer.advanced_analysis import make_advanced_report
+
+# Advanced analysis - lazy import (ถ้าโมดูลมีปัญหา เว็บจะไม่ล่ม)
+try:
+    from analyzer.advanced_analysis import make_advanced_report
+    ADV_ANALYSIS_AVAILABLE = True
+except Exception as _e:
+    print("advanced_analysis import failed:", _e)
+    def make_advanced_report(*args, **kwargs):
+        return {"advanced": {}}
+    ADV_ANALYSIS_AVAILABLE = False
 
 app = Flask(__name__)
 
