@@ -6,6 +6,9 @@ from logic.presets import PRESETS, detect_class_from_size, get_baseline_for_clas
 from analyzer.drone_class import detect_drone_class
 from datetime import datetime
 
+
+app = Flask(__name__)
+
 # Advanced analysis - lazy import (ถ้าโมดูลมีปัญหา เว็บจะไม่ล่ม)
 try:
     from analyzer.advanced_analysis import make_advanced_report
@@ -15,8 +18,6 @@ except Exception as _e:
     def make_advanced_report(*args, **kwargs):
         return {"advanced": {}}
     ADV_ANALYSIS_AVAILABLE = False
-
-app = Flask(__name__)
 
 @app.template_filter('timestamp_to_datetime')
 def timestamp_to_datetime_filter(ts):
