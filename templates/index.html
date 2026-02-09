@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Obixconfig Doctor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root {
+    --bg-color-light: #f5f5f5;
+    --text-color-light: #111;
+    --card-color-light: #fff;
+
+    --bg-color-dark: #121212;
+    --text-color-dark: #eee;
+    --card-color-dark: #1e1e1e;
+}
+
+body.light {
+    background-color: var(--bg-color-light);
+    color: var(--text-color-light);
+}
+
+body.light .container, body.light .form-card, body.light .result-card {
+    background-color: var(--card-color-light);
+}
+
+body.dark {
+    background-color: var(--bg-color-dark);
+    color: var(--text-color-dark);
+}
+
+body.dark .container, body.dark .form-card, body.dark .result-card {
+    background-color: var(--card-color-dark);
+}
+
+button.toggle-theme {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+</style>
+
+<script>
+function copyText(id) {
+    const text = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(text);
+    alert("คัดลอกไปใช้ใน Betaflight ได้แล้ว");
+}
+
+// Dark/Light toggle
+function toggleTheme() {
+    document.body.classList.toggle('dark');
+    document.body.classList.toggle('light');
+    localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+}
+
+window.onload = () => {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.classList.add(savedTheme);
+}
+
+function toggleConcept() {
+  const box = document.querySelector('.concept-box');
+  box.classList.toggle('open');
+}
+</script>
+</head>
+
+<script>
+const presets = {
+  beginner: `
+# OBIXConfig Lab - Beginner Preset
+set throttle_limit_percent = 85
+set dshot_bidir = OFF
+set iterm_relax = RP
+set feedforward_transition = 0
+set anti_gravity_gain = 3
+save
+`,
+
+  freestyle: `
+# OBIXConfig Lab - Freestyle Preset
+set throttle_limit_percent = 100
+set iterm_relax = RPY
+set feedforward_transition = 0.5
+set anti_gravity_gain = 5
+save
+`,
+
+  longrange: `
+# OBIXConfig Lab - Long Range Preset
+set throttle_limit_percent = 80
+set iterm_relax = OFF
+set feedforward_transition = 0
+set anti_gravity_gain = 2
+save
+`
+};
+
+function showPreset(type) {
+  document.getElementById("cliOutput").textContent = presets[type];
+}
+
+function copyCLI() {
+  const text = document.getElementById("cliOutput").textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    alert("คัดลอก CLI เรียบร้อยแล้ว 🚀");
+  });
+}
+</script>
+
+<body>
+<div class="top-bar">
+  <div class="top-left">
+    <button id="hamburgerBtn" class="hamburger" aria-label="เปิดเมนู" aria-expanded="false">
+      <span class="lines" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <img src="{{ url_for('static', filename='img/obix-logo.png') }}" class="logo" alt="OBIXConfig">
+  </div>
+
+  <div style="display:flex;align-items:center;gap:8px;">
+    <button class="toggle-theme" onclick="toggleTheme()" title="Toggle theme">🌗</button>
+  </div>
+</div>
+
+  <!-- ปุ่มสลับธีม (เดิม) -->
+  <div style="display:flex; align-items:center; gap:8px;">
+    <button class="toggle-theme" onclick="toggleTheme()">🌗</button>
+  </div>
+</div>
+
+<div class="container">
+<!-- overlay + drawer + popover (วางตรงหลังปิด .container) -->
+<div id="overlay" class="overlay" tabindex="-1" aria-hidden="true"></div>
+
+<aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" hidden>
+  <div style="display:flex; align-items:center; justify-content:space-between;">
+    <h3 id="drawerTitle" style="margin:0; color:var(--gold,#f1b65a);">เมนู</h3>
+    <button id="closeDrawer" aria-label="ปิดเมนู" style="background:none;border:0;color:inherit;font-size:20px;padding:8px;cursor:pointer;">✕</button>
+  </div>
+<script>
+// highlight drawer link เมื่อเลื่อนมาถึง section
+const sectionIds = ['quick','keys','cli','pid','check','faq'];
+const sections = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
+const links = Array.from(document.querySelectorAll('.drawer-link'));
+
+function setActiveForId(id){
+  links.forEach(a => {
+    const href = a.getAttribute('href') || '';
+    if(href.includes('#'+id)) a.classList.add('active');
+    else a.classList.remove('active');
+  });
+}
+
+if('IntersectionObserver' in window){
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        setActiveForId(e.target.id);
+      }
+    });
+  }, { threshold: 0.45 });
+
+  sections.forEach(s => io.observe(s));
+}
+</script>
+          
+  <hr style="opacity:0.06; margin:12px 0;">
+
+  <!-- compact drawer nav — แก้ให้สวยขึ้น (3 รายการ) -->
+  <nav class="drawer-compact" aria-label="Quick links">
+    <a class="drawer-link" href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener" onclick="closeDrawer()">
+      <span class="dl-icon" aria-hidden="true">📘</span>
+      <span class="dl-body">
+        <span class="dl-title">ไปที่เพจ OBIXConfig Lab</span>
+        <span class="dl-meta">ถาม-แนะนำ ฟีเจอร์ & ตัวอย่างการตั้งค่า</span>
+      </span>
+      <span class="dl-pill">open</span>
+    </a>
+
+    <a class="drawer-link" href="{{ url_for('about') }}" onclick="closeDrawer();">
+      <span class="dl-icon" aria-hidden="true">ℹ️</span>
+      <span class="dl-body">
+        <span class="dl-title">เกี่ยวกับ</span>
+        <span class="dl-meta">ที่มาของโปรเจค & วิธีใช้งานสั้น ๆ</span>
+      </span>
+      <span class="dl-pill">info</span>
+    </a>
+
+    <a class="drawer-link" href="{{ url_for('changelog') }}" onclick="closeDrawer();">
+      <span class="dl-icon" aria-hidden="true">📝</span>
+      <span class="dl-body">
+        <span class="dl-title">Changelog</span>
+        <span class="dl-meta">บันทึกการอัปเดตของระบบ</span>
+      </span>
+      <span class="dl-pill">v1.0b</span>
+    </a>
+<!-- เพิ่มในส่วนเมนู / drawer -->
+<a class="drawer-link" href="{{ url_for('downloads_index') }}">
+  <div class="menu-card">
+    <div class="menu-title">📁 ไฟล์ DIFF และ DUMP</div>
+    <div class="menu-sub">รวม diff all และ dump — ดาวน์โหลด / คัดลอก CLI</div>
+   </div>
+</a>
+  </nav>
+
+  <div style="margin-top:auto; font-size:12px; opacity:0.85; color:var(--muted,#9aa4b2);">
+    OBIXConfig Doctor • v1.0b
+  </div>
+</aside>
+
+<div id="popover" class="popover" aria-hidden="true"></div>
+<div class="concept-box">
+
+  <div class="concept-header" onclick="toggleConcept()">
+    <span class="concept-title">🧠 แนวคิดการคำนวณค่า</span>
+<span class="concept-icon">❗👆🏻</span>
+  </div>
+
+  <div class="concept-content" id="conceptContent">
+    <p>
+      ค่าแนะนำจาก <strong>OBIXConfig Doctor</strong><br>
+      ไม่ใช่สูตรตายตัว แต่เป็น <strong>จุดเริ่มต้นที่ปลอดภัย</strong>
+      สำหรับการจูนโดรนแต่ละลำ
+    </p>
+
+    <ul>
+      <li>🔧 คำนวณจาก <strong>ขนาด / น้ำหนัก / แบตเตอรี่ / สไตล์การบิน</strong></li>
+      <li>📊 อ้างอิงแนวคิดเดียวกับนักบิน FPV ตัวจริง</li>
+      <li>⚠️ อุปกรณ์ สภาพโดรน และการประกอบ มีผลกับค่าเสมอ</li>
+    </ul>
+
+    <p class="concept-note">
+      แนะนำให้ทดสอบบินจริง และปรับเพิ่ม–ลดเล็กน้อย<br>
+      เพื่อให้เข้ากับโดรนและสไตล์ของคุณที่สุด
+    </p>
+  </div>
+
+</div>
+
+<form method="POST" class="form-card">
+<!-- ===== Preset selector (OBIXPresets) ===== -->
+    <label>Preset (เลือกชุดเริ่มต้น)</label>
+<select id="preset-select" name="preset" class="form-control">
+  <option value="">-- ไม่ใช้ preset --</option>
+
+  <option value="2.5_micro" {% if request.form.get('preset','')=='2.5_micro' or (analysis and analysis.preset_used=='2.5_micro') %}selected{% endif %}>2.5" — Micro</option>
+  <option value="3_whoop"   {% if request.form.get('preset','')=='3_whoop'   or (analysis and analysis.preset_used=='3_whoop')   %}selected{% endif %}>3.0" — Whoop / Toothpick</option>
+  <option value="3.5_cine"  {% if request.form.get('preset','')=='3.5_cine'  or (analysis and analysis.preset_used=='3.5_cine')  %}selected{% endif %}>3.5" — Cine</option>
+  <option value="4_mini"    {% if request.form.get('preset','')=='4_mini'    or (analysis and analysis.preset_used=='4_mini')    %}selected{% endif %}>4.0" — Mini</option>
+  <option value="5_freestyle"{% if request.form.get('preset','')=='5_freestyle' or (analysis and analysis.preset_used=='5_freestyle')%}selected{% endif %}>5.0" — Freestyle</option>
+  <option value="6_heavy5"  {% if request.form.get('preset','')=='6_heavy5'  or (analysis and analysis.preset_used=='6_heavy5')  %}selected{% endif %}>6.0" — Heavy</option>
+  <option value="7_midlr"   {% if request.form.get('preset','')=='7_midlr'   or (analysis and analysis.preset_used=='7_midlr')   %}selected{% endif %}>7.0" — Mid / LR</option>
+  <option value="7.5_midlr" {% if request.form.get('preset','')=='7.5_midlr' or (analysis and analysis.preset_used=='7.5_midlr') %}selected{% endif %}>7.5" — Mid / LR</option>
+  <option value="8_lr"      {% if request.form.get('preset','')=='8_lr'      or (analysis and analysis.preset_used=='8_lr')      %}selected{% endif %}>8.0" — Long Range</option>
+  <option value="10_lr"     {% if request.form.get('preset','')=='10_lr'     or (analysis and analysis.preset_used=='10_lr')     %}selected{% endif %}>10" — Long Range (Big)</option>
+</select>
+<!-- ===== end preset selector ===== -->
+    <label>ขนาดโดรน (นิ้ว)</label>
+    <input type="number" name="size" placeholder="เช่น 5" value="{{ request.form.get('size', '') }}" required>
+
+    <label>น้ำหนักโดรน (กรัม)</label>
+    <input type="number" name="weight" placeholder="เช่น 950" value="{{ request.form.get('weight', '') }}" required>
+
+    <label>แบตเตอรี่</label>
+    <select name="battery">
+  <option value="4S" {% if request.form.get('battery','')=='4S' %}selected{% endif %}>4S</option>
+  <option value="6S" {% if request.form.get('battery','')=='6S' %}selected{% endif %}>6S</option>
+</select>
+
+    <label>สไตล์การบิน</label>
+    <select name="style">
+  <option value="freestyle" {% if request.form.get('style','')=='freestyle' %}selected{% endif %}>Freestyle</option>
+  <option value="longrange" {% if request.form.get('style','')=='longrange' %}selected{% endif %}>Long Range / Cinematic</option>
+  <option value="racing" {% if request.form.get('style','')=='racing' %}selected{% endif %}>Racing</option>
+</select>
+
+    <label>ขนาดใบพัด (นิ้ว)</label>
+    <input type="number" name="prop_size" value="{{ request.form.get('prop_size', '5') }}" required>
+
+    <label>จำนวนใบพัด</label>
+    <select name="blades">
+  <option value="2" {% if request.form.get('blades','')=='2' %}selected{% endif %}>2 ใบ</option>
+  <option value="3" {% if request.form.get('blades','')=='3' %}selected{% endif %}>3 ใบ</option>
+  <option value="4" {% if request.form.get('blades','')=='4' %}selected{% endif %}>4 ใบ</option>
+</select>
+
+    <label>Pitch ใบพัด</label>
+    <input type="number" step="0.1" name="pitch" value="{{ request.form.get('pitch', '4.0') }}" required>
+
+    <button type="submit">วิเคราะห์</button>
+</form>
+
+{% if analysis %}
+<section class="quick-summary">
+  <div class="qs-header">
+    🧾 สรุปภาพรวม (Quick Summary)
+  </div>
+
+  <div class="qs-grid">
+    <div class="qs-item">
+      <span class="qs-label">สไตล์การบิน</span>
+      <span class="qs-value">{{ analysis.style }}</span>
+    </div>
+
+    <div class="qs-item">
+      <span class="qs-label">ระดับน้ำหนัก</span>
+      <span class="qs-value">{{ analysis.weight_class }}</span>
+    </div>
+
+    <div class="qs-item">
+      <span class="qs-label">แรงขับโดยรวม</span>
+      <span class="qs-value">{{ analysis.thrust_ratio }}</span>
+    </div>
+
+    <div class="qs-item">
+      <span class="qs-label">เวลาบินโดยประมาณ</span>
+     <span class="qs-value">{{ analysis.battery_est }} นาที</span>
+    </div>
+  </div>
+
+  <div class="qs-advice">
+    💡 <strong>คำแนะนำสั้น ๆ:</strong><br>
+    {{ analysis.summary }}
+  </div>
+
+  <div class="qs-warning">
+    ⚠️ ค่านี้เป็นค่าเริ่มต้น แนะนำทดสอบบินจริงก่อนปรับเพิ่ม–ลด
+  </div>
+</section>
+<!-- ===== OBIX Detected Class & Baseline (Optional but Recommended) ===== -->
+{% if analysis.detected_class %}
+<div class="result-card" style="border-left:4px solid #4CAF50;">
+  <h3>🔎 OBIX วิเคราะห์ลำนี้เป็น</h3>
+
+  <p>
+    <strong>Drone Class:</strong>
+    {{ analysis.detected_class }}
+    {% if analysis.class_meta.description %}
+      — {{ analysis.class_meta.description }}
+    {% endif %}
+  </p>
+
+  <hr>
+
+  <h4>🎯 ค่าเริ่มต้น (Baseline) ที่ระบบแนะนำ</h4>
+
+  <p><strong>PID Baseline</strong></p>
+  <pre>
+ROLL  P {{ analysis.pid_baseline.roll.p }}  I {{ analysis.pid_baseline.roll.i }}  D {{ analysis.pid_baseline.roll.d }}
+PITCH P {{ analysis.pid_baseline.pitch.p }} I {{ analysis.pid_baseline.pitch.i }} D {{ analysis.pid_baseline.pitch.d }}
+YAW   P {{ analysis.pid_baseline.yaw.p }}   I {{ analysis.pid_baseline.yaw.i }}
+  </pre>
+
+  <p><strong>Filter Baseline</strong></p>
+  <pre>
+Gyro LPF2: {{ analysis.filter_baseline.gyro_lpf2 }} Hz
+D-Term LPF1: {{ analysis.filter_baseline.dterm_lpf1 }} Hz
+Dynamic Notch: {{ analysis.filter_baseline.dyn_notch }}
+  </pre>
+
+  <p style="font-size:0.9em; opacity:0.85;">
+    ⚠️ ค่านี้คือ <strong>จุดเริ่มต้นที่ปลอดภัย</strong><br>
+    แนะนำให้ทดสอบบินจริงก่อนนำไปใช้ระยะยาว
+  </p>
+</div>
+{% endif %}
+<!-- ===== END OBIX Detected Class ===== -->
+<div class="result-card">
+<h2>🔍 ผลการวิเคราะห์</h2>
+
+{% if analysis and analysis.warnings %}
+<div class="warning-box">
+  {% for w in analysis.warnings %}
+    <div class="alert {{ w.level }}">
+      {% if w.level == "danger" %}❌{% endif %}
+      {% if w.level == "warning" %}⚠️{% endif %}
+      {% if w.level == "info" %}ℹ️{% endif %}
+      {{ w.msg }}
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<p><strong>{{ analysis.overview }}</strong></p>
+
+<div class="preset-box">
+  <h3>🎛 Preset แนะนำจาก OBIXConfig Lab</h3>
+
+  <!-- ===== Preset Grid (วางแทน preset-grid เดิมทั้งหมด) ===== -->
+<div class="preset-grid">
+
+  <!-- Beginner / Smooth -->
+  <article class="preset-item preset-beginner" role="article" aria-label="Beginner Preset">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#e8fff0,#c6f2dd);display:grid;place-items:center;font-weight:800;color:#024;">
+        B
+      </div>
+      <div style="flex:1;">
+        <h4 style="margin:0 0 4px 0;">Beginner / Smooth</h4>
+        <div class="muted small">บินนิ่ง คุมง่าย เหมาะมือใหม่</div>
+      </div>
+    </div>
+
+    <ul style="margin:12px 0 0 18px;">
+      <li>Throttle limit: <strong>85%</strong></li>
+      <li>Rates: ต่ำ–กลาง</li>
+      <li>Filter: เน้นนุ่ม</li>
+    </ul>
+
+    <div style="display:flex; gap:8px; margin-top:12px; align-items:center;">
+      <button class="btn-primary" onclick="showPreset('beginner')">แสดง CLI</button>
+      <button class="btn-ghost" onclick="document.getElementById('cliOutput').scrollIntoView({behavior:'smooth'})">ไปที่ CLI</button>
+      <a class="btn-ghost" href="/downloads?filter=beginner" title="ตัวอย่างไฟล์" style="margin-left:auto;">ตัวอย่างไฟล์</a>
+    </div>
+  </article>
+
+  <!-- Freestyle -->
+  <article class="preset-item preset-freestyle" role="article" aria-label="Freestyle Preset">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#dceeff,#b7dbff);display:grid;place-items:center;font-weight:800;color:#023;">
+        F
+      </div>
+      <div style="flex:1;">
+        <h4 style="margin:0 0 4px 0;">Freestyle</h4>
+        <div class="muted small">ตอบสนองไว คุมแม่น สำหรับตีท่า</div>
+      </div>
+    </div>
+
+    <ul style="margin:12px 0 0 18px;">
+      <li>Throttle limit: <strong>90–100%</strong></li>
+      <li>Rates: กลาง–สูง</li>
+      <li>Filter: สมดุล ระหว่างนุ่มกับตอบสนอง</li>
+    </ul>
+
+    <div style="display:flex; gap:8px; margin-top:12px; align-items:center;">
+      <button class="btn-primary" onclick="showPreset('freestyle')">แสดง CLI</button>
+      <button class="btn-ghost" onclick="copyCLI()">คัดลอก CLI</button>
+      <a class="btn-ghost" href="/downloads?filter=freestyle" style="margin-left:auto;">ตัวอย่างไฟล์</a>
+    </div>
+  </article>
+
+  <!-- Long-Range / Cinematic -->
+  <article class="preset-item preset-longrange" role="article" aria-label="Long Range Preset">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#f1d9ff,#e6c8ff);display:grid;place-items:center;font-weight:800;color:#2a0a4b;">
+        L
+      </div>
+      <div style="flex:1;">
+        <h4 style="margin:0 0 4px 0;">Long-Range / Cinematic</h4>
+        <div class="muted small">นิ่ง ประหยัดไฟ ลอยนาน</div>
+      </div>
+    </div>
+
+    <ul style="margin:12px 0 0 18px;">
+      <li>Throttle limit: <strong>80–85%</strong></li>
+      <li>Rates: ต่ำ</li>
+      <li>Filter: เน้นความนิ่งและประหยัด</li>
+    </ul>
+
+    <div style="display:flex; gap:8px; margin-top:12px; align-items:center;">
+      <button class="btn-primary" onclick="showPreset('longrange')">แสดง CLI</button>
+      <button class="btn-ghost" onclick="copyCLI()">คัดลอก CLI</button>
+      <a class="btn-ghost" href="/downloads?filter=longrange" style="margin-left:auto;">ตัวอย่างไฟล์</a>
+    </div>
+  </article>
+
+</div>
+<!-- ===== END Preset Grid ===== -->
+
+  <p class="preset-note">
+    * Preset เหล่านี้เป็นแนวทางเริ่มต้น สามารถนำไปปรับต่อให้เหมาะกับโดรนของคุณ
+ <div class="cli-box">
+  <h3>🧠 CLI Preset (Betaflight)</h3>
+
+  <pre id="cliOutput">
+# เลือก Preset เพื่อแสดง CLI
+  </pre>
+
+  <button onclick="copyCLI()" class="copy-btn">
+    📋 Copy CLI
+  </button>
+</div>
+ </p>
+</div>
+<h3>แนวคิดการตั้งค่า</h3>
+<ul>
+{% for tip in analysis.basic_tips %}
+<li>{{ tip }}</li>
+{% endfor %}
+</ul>
+
+<h3>⚙️ PID (ค่าแนะนำ)</h3>
+<pre id="pid">
+ROLL  P {{ analysis.pid.roll.p }}  I {{ analysis.pid.roll.i }}  D {{ analysis.pid.roll.d }}
+PITCH P {{ analysis.pid.pitch.p }} I {{ analysis.pid.pitch.i }} D {{ analysis.pid.pitch.d }}
+YAW   P {{ analysis.pid.yaw.p }}   I {{ analysis.pid.yaw.i }}
+</pre>
+<button onclick="copyText('pid')">Copy PID</button>
+
+<h3>🧠 Filter</h3>
+<pre id="filter">
+Gyro LPF2: {{ analysis.filter.gyro_lpf2 }} Hz
+D-Term LPF1: {{ analysis.filter.dterm_lpf1 }} Hz
+Dynamic Notch: {{ analysis.filter.dyn_notch }}
+</pre>
+<button onclick="copyText('filter')">Copy Filter</button>
+
+<h3>🛩️ ใบพัด</h3>
+<p>{{ analysis.prop_result.summary }}</p>
+<ul>
+<li>Noise: {{ analysis.prop_result.effect.noise }}</li>
+<li>Motor Load: {{ analysis.prop_result.effect.motor_load }}</li>
+<li>Grip: {{ analysis.prop_result.effect.grip }}</li>
+<li>Recommendation: {{ analysis.prop_result.recommendation }}</li>
+</ul>
+
+<h3>💡 Extra Tools</h3>
+<p>Thrust-to-Weight Ratio: {{ analysis.thrust_ratio }}</p>
+<p style="font-size:1.2em; font-weight:bold; color:#4CAF50;">
+⏱ เวลาบินโดยประมาณ: {{ analysis.battery_est }} นาที
+</p>
+
+<h3>📊 Visualization</h3>
+<canvas id="thrustChart" width="400" height="200"></canvas>
+<canvas id="noiseChart" width="400" height="200"></canvas>
+
+<script>
+const thrustCtx = document.getElementById('thrustChart').getContext('2d');
+new Chart(thrustCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Thrust-to-Weight'],
+        datasets: [{
+            label: 'Ratio',
+            data: [{{ analysis.thrust_ratio }}],
+            backgroundColor: ['rgba(54, 162, 235, 0.6)']
+        }]
+    },
+    options: { scales: { y: { beginAtZero: true } } }
+});
+
+const noiseCtx = document.getElementById('noiseChart').getContext('2d');
+new Chart(noiseCtx, {
+    type: 'line',
+    data: {
+        labels: ['Motor Load', 'Noise Level'],
+        datasets: [{
+            label: 'Effect',
+            data: [{{ analysis.prop_result.effect.motor_load }}, {{ analysis.prop_result.effect.noise }}],
+            fill: false,
+            borderColor: 'rgb(255, 99, 132)',
+            tension: 0.3
+        }]
+    },
+    options: { scales: { y: { beginAtZero: true } } }
+});
+</script>
+
+</div>
+{% endif %}
+
+<div class="community-box">
+  <p class="community-text">
+    ตอนนี้ <strong>OBIXCONFIG DOCTOR</strong> ยังพัฒนาอยู่เรื่อย ๆ 🚧<br><br>
+
+    ถ้าคุณอยากให้เว็บไซต์<br>
+ รองรับโดรนขนาดไหนเพิ่มฟีเจอร์อะไร<br>
+
+    <span class="highlight">
+      สอบถามและแนะนำได้ที่เพจ<br>
+      <strong>OBIXConfig Lab</strong>
+    </span><br><br>
+
+    เพื่อชาว FPV 🇹🇭 หัวใจรักการบิน 
+  </p>
+
+  <a href="https://www.facebook.com/banmysanti/"
+     target="_blank"
+     class="community-btn">
+     ไปที่เพจ OBIXConfig Lab
+  </a>
+</div>
+
+<div class="version-note">
+  OBIXConfig Doctor • v1.0b (Community Build)<br>
+  Developed by real FPV pilots 🇹🇭
+</div>
+
+</div>
+<script>
+  // Drawer open/close
+  const btn = document.getElementById('hamburgerBtn');
+  const drawer = document.getElementById('drawer');
+  const overlay = document.getElementById('overlay');
+  const closeDrawerBtn = document.getElementById('closeDrawer');
+
+  function openDrawer(){
+    if(!btn) return;
+    btn.setAttribute('aria-expanded','true');
+    overlay.classList.add('open');
+    drawer.classList.add('open');
+    drawer.removeAttribute('hidden');
+    overlay.setAttribute('aria-hidden','false');
+    document.addEventListener('keydown', escClose);
+  }
+  function closeDrawer(){
+    if(!btn) return;
+    btn.setAttribute('aria-expanded','false');
+    overlay.classList.remove('open');
+    drawer.classList.remove('open');
+    overlay.setAttribute('aria-hidden','true');
+    document.removeEventListener('keydown', escClose);
+    setTimeout(()=> drawer.setAttribute('hidden',''), 240);
+    btn.focus();
+  }
+  function escClose(e){ if(e.key === 'Escape') closeDrawer(); }
+
+  if(btn) btn.addEventListener('click', ()=> {
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    if(expanded) closeDrawer(); else openDrawer();
+  });
+  if(overlay) overlay.addEventListener('click', closeDrawer);
+  if(closeDrawerBtn) closeDrawerBtn.addEventListener('click', closeDrawer);
+
+  // Accordion
+  document.querySelectorAll('.accordion-item').forEach(item=>{
+    const head = item.querySelector('.accordion-head');
+    head.addEventListener('click', ()=> {
+      const open = item.classList.toggle('open');
+      head.querySelector('span').textContent = open ? '−' : '+';
+    });
+  });
+
+  // Popover help (optional: hook to info icons next to inputs)
+  const pop = document.getElementById('popover');
+  const helpTexts = {
+    preset: 'Preset = ชุดการตั้งค่าล่วงหน้าที่รวม PID/Rates/Filters ใช้เพื่อเริ่มต้นได้เร็วขึ้น',
+    size: 'ขนาดโดรน (นิ้ว) อ้างอิงถึงขนาดเฟรม เช่น 5 นิ้ว',
+    weight: 'น้ำหนักรวมตอนบิน (กรัม) สำคัญในการเลือกมอเตอร์และประมาณเวลาบิน',
+    battery: 'แบตเตอรี่ เช่น 4S หรือ 6S — มีผลต่อแรงดันและ RPM ของมอเตอร์',
+    style: 'สไตล์การบิน: Freestyle / Racing / Long-range — มีผลกับ Rates และ PID',
+    prop: 'ขนาดใบพัด (นิ้ว) มีผลกับแรงยกและกระแสไฟ'
+  };
+
+  // ถ้าต้องการปุ่ม info ข้าง input ให้สร้างปุ่ม <button class="info-btn" data-pop="size">i</button> ข้าง input แล้วสคริปต์นี้จะทำงาน
+  function openPopover(key, targetBtn){
+    pop.textContent = helpTexts[key] || 'ไม่มีคำอธิบาย';
+    pop.classList.add('open');
+    pop.setAttribute('aria-hidden','false');
+    const rect = targetBtn.getBoundingClientRect();
+    let top = rect.top + window.scrollY + rect.height + 8;
+    let left = rect.left + window.scrollX;
+    const vw = window.innerWidth;
+    if(left + 320 > vw) left = vw - 336;
+    pop.style.top = top + 'px';
+    pop.style.left = left + 'px';
+    targetBtn.setAttribute('aria-expanded','true');
+    setTimeout(()=> document.addEventListener('click', outsideClick), 10);
+    document.addEventListener('keydown', popEsc);
+  }
+  function closePopover(){
+    pop.classList.remove('open');
+    pop.setAttribute('aria-hidden','true');
+    document.querySelectorAll('.info-btn').forEach(b=> b.setAttribute('aria-expanded','false'));
+    document.removeEventListener('click', outsideClick);
+    document.removeEventListener('keydown', popEsc);
+  }
+  function outsideClick(e){ if(!pop.contains(e.target) && !e.target.classList.contains('info-btn')) closePopover(); }
+  function popEsc(e){ if(e.key === 'Escape') closePopover(); }
+
+  document.querySelectorAll('.info-btn[data-pop]').forEach(b => {
+    const key = b.getAttribute('data-pop');
+    b.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const open = b.getAttribute('aria-expanded') === 'true';
+      if(open) { closePopover(); return; }
+      openPopover(key, b);
+    });
+  });
+
+  // Responsive: show drawer always on wide screens (optional)
+  window.addEventListener('resize', ()=> {
+    if(window.innerWidth > 900){
+      drawer.removeAttribute('hidden');
+      drawer.classList.remove('open');
+      overlay.classList.remove('open');
+    } else {
+      drawer.setAttribute('hidden','');
+    }
+  });
+  if(window.innerWidth <= 900) drawer.setAttribute('hidden','');
+</script>
+<!-- OBIX Preset autofill JS -->
+<script>
+const presetMap = {
+  "2.5_micro": {size:2.5, weight:80, battery:"2S", prop_size:2.5, pitch:2.0, blades:"2", style:"micro"},
+  "3_whoop":   {size:3.0, weight:120, battery:"2S", prop_size:3.0, pitch:2.0, blades:"2", style:"whoop"},
+  "3.5_cine":  {size:3.5, weight:350, battery:"4S", prop_size:3.5, pitch:2.5, blades:"2", style:"cine"},
+  "4_mini":    {size:4.0, weight:420, battery:"4S", prop_size:4.0, pitch:3.0, blades:"2", style:"mini"},
+  "5_freestyle":{size:5.0, weight:750, battery:"4S", prop_size:5.0, pitch:4.0, blades:"3", style:"freestyle"},
+  "6_heavy5":  {size:6.0, weight:1000, battery:"4S", prop_size:6.0, pitch:4.0, blades:"3", style:"heavy"},
+  "7_midlr":   {size:7.0, weight:1100, battery:"4S", prop_size:7.0, pitch:3.5, blades:"2", style:"longrange"},
+  "7.5_midlr": {size:7.5, weight:1200, battery:"4S", prop_size:7.5, pitch:3.0, blades:"2", style:"longrange"},
+  "8_lr":      {size:8.0, weight:1500, battery:"6S", prop_size:8.0, pitch:3.5, blades:"2", style:"longrange"},
+  "10_lr":     {size:10.0, weight:2200, battery:"6S", prop_size:10.0, pitch:4.5, blades:"2", style:"longrange"}
+};
+
+// helper: set value if element exists
+function setIfExists(selector, value) {
+  const el = document.querySelector(selector);
+  if (!el) return false;
+  if (el.tagName === 'SELECT' || el.type === 'select-one') {
+    el.value = value;
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  } else {
+    el.value = value;
+  }
+  return true;
+}
+
+const presetSelect = document.getElementById('preset-select');
+if (presetSelect) {
+  presetSelect.addEventListener('change', function () {
+    const key = this.value;
+    if (!key) return;
+    const p = presetMap[key];
+    if (!p) return;
+
+    // fill fields (matches names in your form)
+    setIfExists('input[name="size"]', p.size);
+    setIfExists('input[name="weight"]', p.weight);
+    setIfExists('select[name="battery"]', p.battery);
+    setIfExists('input[name="prop_size"]', p.prop_size);
+    setIfExists('input[name="pitch"]', p.pitch);
+    setIfExists('select[name="blades"]', p.blades);
+    // style may be select or input; try both
+    setIfExists('select[name="style"]', p.style);
+    setIfExists('input[name="style"]', p.style);
+  });
+}
+</script>
+<script>
+// drawer simple toggle (if not present)
+const ham = document.getElementById('hamburgerBtn');
+const drawer = document.querySelector('.drawer');
+const overlay = document.querySelector('.overlay');
+
+if(ham){
+  ham.addEventListener('click', ()=>{
+    const expanded = ham.getAttribute('aria-expanded') === 'true';
+    ham.setAttribute('aria-expanded', !expanded);
+    if(drawer) drawer.classList.toggle('open');
+    if(overlay) overlay.classList.toggle('open');
+  });
+}
+
+// smooth scroll for anchors
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click', e=>{
+    e.preventDefault();
+    const id = a.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+});
+</script>
+<!-- end OBIX Preset autofill JS -->
+</body>
+</html>
