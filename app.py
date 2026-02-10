@@ -55,16 +55,23 @@ def timestamp_to_datetime_filter(ts):
 # ===============================
 # Validation helper
 # ===============================
-def validate_input(size, weight, prop_size, pitch, blades, battery_raw):
+def validate_input(size, weight, prop_size, pitch, blades, battery):
     warnings = []
 
-    # numeric ranges
-    try:
-        size = float(size)
-        if not (1 <= size <= 12):
-            warnings.append("ขนาดโดรนควรอยู่ระหว่าง 1–12 นิ้ว")
-    except Exception:
-        warnings.append("ขนาด (size) ต้องเป็นตัวเลข")
+    if not (1 <= size <= 10):
+        warnings.append("ขนาดโดรนควรอยู่ระหว่าง 1–10 นิ้ว")
+
+    if weight <= 0 or weight > 3000:
+        warnings.append("น้ำหนักโดรนควรอยู่ระหว่าง 1–3000 กรัม")
+
+    if prop_size > size:
+        warnings.append("ขนาดใบพัดใหญ่กว่าขนาดโดรน")
+
+    if not (2.0 <= pitch <= 6.5):
+        warnings.append("Pitch ใบพัดอยู่นอกช่วง")
+
+    if blades not in [2,3,4]:
+        warnings.append("จำนวนใบพัดผิดปกติ")
 
     try:
         weight = float(weight)
