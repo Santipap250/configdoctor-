@@ -189,20 +189,24 @@ def index():
         blade_count = safe_int(request.form.get("blades"), 3)
         prop_pitch = safe_float(request.form.get("pitch"), 4.0)
 
-# <<< วางตรงนี้ (อ่าน battery_mAh จากฟอร์ม ถ้ามี) >>> 
+        # --- NEW optional inputs (user-supplied to improve accuracy) ---
         battery_mAh = safe_int(request.form.get("battery_mAh"), None)
-
-        # override with preset if selected
-        if preset_key:
-            p = PRESETS.get(preset_key)
-            if p:
-                size = safe_float(p.get("size", size))
-                battery = p.get("battery", battery)
-                style = p.get("style", style)
-                weight = safe_float(p.get("weight", weight))
-                prop_size = safe_float(p.get("prop_size", prop_size))
-                prop_pitch = safe_float(p.get("pitch", prop_pitch))
-                blade_count = safe_int(p.get("blades", blade_count))
+        motor_count = safe_int(request.form.get("motor_count"), 4)
+        # measured thrust per motor (grams) - optional numeric input
+        prop_thrust_g = None
+        try:
+            pth = request.form.get("prop_thrust_g", None)
+            prop_thrust_g = float(pth) if pth not in (None, "", "None") else None
+        except Exception:
+            prop_thrust_g = None
+        # optional motor KV and ESC current limit
+        motor_kv = safe_int(request.form.get("motor_kv"), None)
+        esc_current_limit_a = None
+        try:
+            ecil = request.form.get("esc_current_limit_a", None)
+            esc_current_limit_a = float(ecil) if ecil not in (None, "", "None") else None
+        except Exception:
+            esc_current_limit_a = None
 
         # validation
         warnings = validate_input(size, weight, prop_size, prop_pitch, blade_count)
