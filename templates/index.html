@@ -544,17 +544,21 @@ function copyAdvancedSummary(){
 
   <p><strong>PID Baseline</strong></p>
   <pre>
+<pre id="pid">
 ROLL  P {{ analysis.pid_baseline.roll.p }}  I {{ analysis.pid_baseline.roll.i }}  D {{ analysis.pid_baseline.roll.d }}
 PITCH P {{ analysis.pid_baseline.pitch.p }} I {{ analysis.pid_baseline.pitch.i }} D {{ analysis.pid_baseline.pitch.d }}
 YAW   P {{ analysis.pid_baseline.yaw.p }}   I {{ analysis.pid_baseline.yaw.i }}
   </pre>
+<button onclick="copyText('pid')">Copy PID</button>
 
   <p><strong>Filter Baseline</strong></p>
   <pre>
+<pre id="filter">
 Gyro LPF2: {{ analysis.filter_baseline.gyro_lpf2 }} Hz
 D-Term LPF1: {{ analysis.filter_baseline.dterm_lpf1 }} Hz
 Dynamic Notch: {{ analysis.filter_baseline.dyn_notch }}
   </pre>
+<button onclick="copyText('filter')">Copy Filter</button>
 
   <p style="font-size:0.9em; opacity:0.85;">
     ⚠️ ค่านี้คือ <strong>จุดเริ่มต้นที่ปลอดภัย</strong><br>
