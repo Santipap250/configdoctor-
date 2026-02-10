@@ -193,7 +193,7 @@ if('IntersectionObserver' in window){
         <span class="dl-title">Changelog</span>
         <span class="dl-meta">บันทึกการอัปเดตของระบบ</span>
       </span>
-      <span class="dl-pill">v1.0b</span>
+      <span class="dl-pill">v1.0lite</span>
     </a>
 <!-- เพิ่มในส่วนเมนู / drawer -->
 <a class="drawer-link" href="{{ url_for('downloads_index') }}">
@@ -202,10 +202,20 @@ if('IntersectionObserver' in window){
     <div class="menu-sub">รวม diff all และ dump — ดาวน์โหลด / คัดลอก CLI</div>
    </div>
 </a>
-  </nav>
+ 
+<a href="/" class="{{ 'active' if request.path == '/' else '' }}">Home</a>
+  <a href="/vtx" class="{{ 'active' if request.path.startswith('/vtx') else '' }}">VTX Bands</a>
+  <a href="/vtx_control" class="{{ 'active' if request.path == '/vtx_control' else '' }}">VTX Control</a>
+  <a href="/hud" class="{{ 'active' if request.path.startswith('/hud') else '' }}">HUD</a>
+</nav>
+
+<style>
+  nav a{margin-right:12px;text-decoration:none;color:#0b76d1;padding:6px 8px;border-radius:6px}
+  nav a.active{background:#0b76d1;color:#fff;font-weight:700}
+</style>
 
   <div style="margin-top:auto; font-size:12px; opacity:0.85; color:var(--muted,#9aa4b2);">
-    OBIXConfig Doctor • v1.0b
+    OBIXConfig Doctor • v1.0lite
   </div>
 </aside>
 
