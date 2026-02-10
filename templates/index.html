@@ -543,7 +543,6 @@ function copyAdvancedSummary(){
   <h4>🎯 ค่าเริ่มต้น (Baseline) ที่ระบบแนะนำ</h4>
 
   <p><strong>PID Baseline</strong></p>
-  <pre>
 <pre id="pid">
 ROLL  P {{ analysis.pid_baseline.roll.p }}  I {{ analysis.pid_baseline.roll.i }}  D {{ analysis.pid_baseline.roll.d }}
 PITCH P {{ analysis.pid_baseline.pitch.p }} I {{ analysis.pid_baseline.pitch.i }} D {{ analysis.pid_baseline.pitch.d }}
@@ -552,7 +551,6 @@ YAW   P {{ analysis.pid_baseline.yaw.p }}   I {{ analysis.pid_baseline.yaw.i }}
 <button onclick="copyText('pid')">Copy PID</button>
 
   <p><strong>Filter Baseline</strong></p>
-  <pre>
 <pre id="filter">
 Gyro LPF2: {{ analysis.filter_baseline.gyro_lpf2 }} Hz
 D-Term LPF1: {{ analysis.filter_baseline.dterm_lpf1 }} Hz
