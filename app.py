@@ -273,12 +273,6 @@ def index():
         # provide a short summary field (template references analysis.summary)
         analysis.setdefault("summary", analysis.get("overview", ""))
 
-# evaluate rule-based checks and attach to analysis
-try:
-    analysis["rules"] = evaluate_rules(analysis)
-except Exception as e:
-    print("Rule engine error:", e)
-    analysis["rules"] = []
 # ===============================
         # Advanced analysis (merge into analysis) - safe call
         # ===============================
