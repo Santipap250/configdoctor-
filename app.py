@@ -279,33 +279,31 @@ def index():
         # ensure 'style' is present (template uses analysis.style)
         analysis.setdefault("style", style)
 
-        # provide a short summary field (template references analysis.summary)
-        analysis.setdefault("summary", analysis.get("overview", ""))
+        # --- Rule-based checks (evaluate rules) ---
+        try:
+            analysis["rules"] = evaluate_rules(analysis)
+        except Exception as e:
+            print("Rule engine error:", e)
+            analysis["rules"] = []
 
-# ===============================
-        # Advanced analysis (merge into analysis) - safe call
-        # ===============================
-# evaluate rule-based checks and attach to analysis
-try:
-    analysis["rules"] = evaluate_rules(analysis)
-except Exception as e:
-    print("Rule engine error:", e)
-    analysis["rules"] = []
-
+        # --- Advanced analysis (merge into analysis) - safe call (only if module available) ---
         if 'ADV_ANALYSIS_AVAILABLE' in globals() and ADV_ANALYSIS_AVAILABLE:
             try:
                 adv = make_advanced_report(
-    size=size,
-    weight_g=weight,
-    battery_s=battery,
-    prop_result=prop_result,
-    style=style,
-    battery_mAh=battery_mAh,
-    motor_count=motor_count,
-    prop_thrust_g=prop_thrust_g,
-    payload_g=payload_g
-)
+                    size=float(size),
+                    weight_g=float(weight),
+                    battery_s=battery,
+                    prop_result=prop_result,
+                    style=style,
+                    battery_mAh=battery_mAh,
+                    motor_count=motor_count,
+                    prop_thrust_g=prop_thrust_g,
+                    payload_g=payload_g,
+                    motor_kv=motor_kv,
+                    esc_current_limit_a=esc_current_limit_a
+                )
                 if isinstance(adv, dict):
+                    # merge safely
                     analysis.update(adv)
                     adv_power = adv.get("advanced", {}).get("power", {})
                     analysis["thrust_ratio"] = adv.get("advanced", {}).get("thrust_ratio", analysis.get("thrust_ratio", 0))
