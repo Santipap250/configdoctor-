@@ -26,14 +26,14 @@ if not logger.handlers:
 NOMINAL_CELL_V = 3.7  # 単セル平均電圧 (approx)
 # default mAh guesses by typical frame size (fallback)
 _DEFAULT_BATT_MAH_BY_SIZE = {
-    2.5: 450,
-    3.0: 550,
-    3.5: 650,
-    4.0: 850,
-    5.0: 1500,
-    6.0: 1800,
-    7.0: 2200,
-    8.0: 3000
+    2.5: {3: 450, 4: 450},
+    3.0: {3: 550, 4: 650},
+    3.5: {3: 650, 4: 850},
+    4.0: {3: 850, 4: 1000},
+    5.0: {4: 1500, 5: 1300, 6: 1100},
+    6.0: {4: 1800, 5: 1500, 6: 1300},
+    7.0: {5: 2200, 6: 1800, 7: 1500},
+    8.0: {6: 3000, 7: 2200, 8: 1800}
 }
 
 # heuristic power W per kg by flight style (hover estimate)
@@ -68,7 +68,12 @@ def _clamp(x, a, b):
 # helper: convert battery string "4S" -> int
 def _cells_from_str(s: str) -> int:
     try:
-        return int(str(s).upper().replace("S", "").strip())
+        cells = int(str(s).upper().replace("S", "").strip())
+        if cells < 3:
+            return 3
+        if cells > 8:
+            return 8
+        return cells
     except Exception:
         return 4
 
@@ -155,7 +160,7 @@ def make_advanced_report(
         if battery_mAh and isinstance(battery_mAh, int) and battery_mAh > 0:
             batt_mAh = int(battery_mAh)
         else:
-            batt_mAh = _guess_batt_mAh(size)
+            batt_mAh = _guess_batt_mAh(size, cells)
 
         # battery Wh
         pack_voltage = cells * NOMINAL_CELL_V
