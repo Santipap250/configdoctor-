@@ -1,22 +1,12 @@
-# advanced_analysis.py
+# analyzer/advanced_analysis.py
 """
-Rule-based FPV battery/motor/ESC analyzer
-Supports 3S - 8S (cells)
+Rule-based FPV battery/motor/ESC analyzer (3S-8S)
 Copy-paste ready.
 
-Inputs (CLI) examples:
+CLI example:
   python advanced_analysis.py --size 5.0 --cells 7 --motor-kv 1600 --weight 1200 --motors 4 --hover-throttle 0.28
 
-Output: JSON + human readable summary with warnings and diagnostics.
-
-Design goals:
-- _cells_from_str to normalize "4S" or numeric cells
-- _DEFAULT_BATT_MAH_BY_SIZE nested dict per user's spec
-- _guess_batt_mAh chooses nearest size then nearest cell fallback
-- Rule-based warnings for high-voltage (7S/8S) and KV vs cell
-- Throttle-efficiency classification rules
-- Flight profile suggestions
-- Diagnostics include battery_cells and battery_voltage_nominal
+Returns human-readable summary + JSON diagnostics.
 """
 from __future__ import annotations
 
@@ -99,10 +89,9 @@ def analyze(
 ) -> Dict[str, Any]:
     """Return analysis dict with computed metrics, warnings, and diagnostics.
 
-    Heuristics used (rule-based):
+    Heuristics (rule-based):
     - If thrust_per_motor_g not provided, assume hover thrust = weight * 2 margin, split across motors
     - Power estimate: empirical ratio W_per_gram = 0.12 W/g (multicopter hover heuristic)
-      (This is a rule-of-thumb estimator, not precise physics)
     - Current = power / pack_voltage
     - C-rating = (current * 1000) / batt_mAh
     """
@@ -231,7 +220,7 @@ def analyze(
             "pack_voltage_max": pack_voltage_max,
             "power_w": round(total_power_w, 1),
             "current_a": round(current_a, 2),
-            "implied_c_rating": round(c_rating, 1),
+            "implied_c_rating": round(c_rating, 1) if math.isfinite(c_rating) else None,
         },
         "motor_esc_stress": motor_esc_stress,
         "stress_reasons": stress_reasons,
@@ -253,7 +242,9 @@ def _human_summary(res: Dict[str, Any]) -> str:
     lines.append("=== FPV Advanced Analysis (Rule-based) ===")
     lines.append(f"Cells: {res['input']['cells']}S | Nominal V: {c['pack_voltage_nominal']} V | Max V: {diag['battery_voltage_max']} V")
     lines.append(f"Battery mAh (used): {diag['battery_mAh_used']} mAh")
-    lines.append(f"Estimated total power: {_format_watt(c['power_w'])} | Estimated current: {_format_amp(c['current_a'])} | Implied C-rating: {c['implied_c_rating']:.1f} C")
+    implied_c = c.get("implied_c_rating")
+    implied_c_str = f"{implied_c:.1f} C" if implied_c is not None else "n/a"
+    lines.append(f"Estimated total power: {_format_watt(c['power_w'])} | Estimated current: {_format_amp(c['current_a'])} | Implied C-rating: {implied_c_str}")
     lines.append(f"Motor/ESC stress: {res['motor_esc_stress']}" )
     if res['stress_reasons']:
         lines.append("Stress reasons:")
