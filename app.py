@@ -349,6 +349,7 @@ def index():
         except Exception:
             pass
 
+
     return render_template("index.html", analysis=analysis)
 
 # ===============================
