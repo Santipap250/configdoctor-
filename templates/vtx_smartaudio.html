@@ -1,0 +1,168 @@
+<!-- templates/vtx_smartaudio.html -->
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>VTX Control Helper — SmartAudio / Tramp</title>
+  <style>
+    :root { --accent:#0b76d1; --bg:#fff; --muted:#666; --card:#f8f9fb; }
+    body{font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin:18px; color:#111; background:var(--bg);}
+    .wrap{max-width:900px;margin:0 auto;}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    h1{font-size:1.2rem;margin:0}
+    .card{background:var(--card);padding:14px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.04);margin-bottom:12px;}
+    label{display:block;margin-top:8px;font-weight:600}
+    select,input{width:100%;padding:8px;margin-top:6px;border-radius:6px;border:1px solid #ddd;background:#fff}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    button{background:var(--accent);color:white;padding:10px 12px;border:none;border-radius:8px;cursor:pointer;margin-top:12px}
+    pre{background:#111;color:#e6e6e6;padding:10px;border-radius:6px;overflow:auto}
+    .small{font-size:0.9rem;color:var(--muted)}
+    .note{background:#fffbe6;border-left:4px solid #f0c14b;padding:8px;border-radius:6px;margin-top:8px}
+    .copybtn{background:#2d2d2d;color:#fff;padding:6px 10px;border-radius:6px;border:none;cursor:pointer}
+    .row{display:flex;gap:8px;align-items:center}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>VTX Control Helper — SmartAudio / Tramp</h1>
+      <nav>
+        <a href="/" style="color:var(--accent);text-decoration:none">Home</a> &nbsp; • &nbsp;
+        <a href="/vtx" style="color:var(--accent);text-decoration:none">VTX Bands</a>
+      </nav>
+    </header>
+
+    <section class="card">
+      <div class="small">เลือก Band, Channel และ Power ที่ต้องการ แล้วกด <strong>Generate</strong> — ระบบจะสร้างคำสั่งแนะนำสำหรับ SmartAudio (OSD) และ Tramp (OSD/serial) ให้คุณคัด-วาง หรือ copy เป็น JSON เพื่อส่งต่อ</div>
+
+      <div class="grid" style="margin-top:12px">
+        <div>
+          <label>Band</label>
+          <select id="band">
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="E">E</option>
+            <option value="F">F</option>
+            <option value="R">R (Race)</option>
+          </select>
+        </div>
+        <div>
+          <label>Channel (1–8)</label>
+          <select id="channel">
+            <option>1</option><option>2</option><option>3</option><option>4</option>
+            <option>5</option><option>6</option><option>7</option><option>8</option>
+          </select>
+        </div>
+      </div>
+
+      <label>VTX Power</label>
+      <select id="power">
+        <option value="25">25 mW</option>
+        <option value="100">100 mW</option>
+        <option value="200">200 mW</option>
+        <option value="500">500 mW</option>
+        <option value="800">800 mW</option>
+      </select>
+
+      <div style="margin-top:10px" class="row">
+        <button id="gen">Generate</button>
+        <button id="copyAll" class="copybtn" style="display:none">Copy All</button>
+      </div>
+
+      <div id="results" style="margin-top:12px;display:none">
+        <h3 style="margin-bottom:6px">ผลลัพธ์</h3>
+
+        <div class="small">คำสั่งเชิงคนอ่าน (ใช้กับ Betaflight OSD หรือ App ที่รองรับ SmartAudio/Tramp)</div>
+        <pre id="humanCmd"></pre>
+
+        <div class="small" style="margin-top:8px">Generic command strings (copy ไปใช้กับเครื่องมือที่รองรับ หรือส่งเป็น JSON ให้ backend)</div>
+        <pre id="genericCmd"></pre>
+
+        <div style="margin-top:8px" class="note">
+          <strong>หมายเหตุ:</strong> คำสั่งด้านล่างเป็นรูปแบบ <em>generic</em> ที่อธิบายให้มนุษย์และระบบ front-end เข้าใจ — โปรดตรวจสอบเอกสาร VTX/FC ของคุณเพื่อใช้ syntax ของโปรแกรม/OSD ที่ถูกต้อง (SmartAudio/Tramp มีเวอร์ชันย่อยที่รับค่า parameter ต่างกัน). ห้ามส่งกำลัง (power) เกินกฎหมายท้องถิ่น.
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>วิธีใช้จริง (สั้นๆ)</h3>
+      <ol class="small">
+        <li>เชื่อมสาย SmartAudio/Tramp จาก VTX → Flight Controller (UART TX/RX ตามคู่มือ VTX/FC)</li>
+        <li>ใน Betaflight Configurator: เปิด Ports → ตั้ง UART ที่ต่อกับ VTX เป็น \"IRC / SmartAudio\" หรือ Tramp ตามรุ่น</li>
+        <li>ใน OSD (Betaflight OSD) หรือ OSD menu บน OpenTX/edgeTX: ไปที่ VTX control → เลือก SmartAudio/Tramp → ใช้ค่าที่ระบบสร้างให้ (Band/Channel/Power)</li>
+        <li>ถ้าต้องการส่งผ่าน CLI/Serial: ใช้เครื่องมือ/คำสั่งเฉพาะยี่ห้อ (ตรวจคู่มือ VTX) — UI นี้ช่วย generate ค่า human-readable และ JSON ให้คุณคัดวาง</li>
+      </ol>
+
+      <div class="note">
+        ตัวอย่างการเชื่อมต่อ: VTX TX → FC RX (บน UART), VTX RX → FC TX (ถ้าจำเป็นสำหรับ SmartAudio bidirectional). ตรวจสอบว่า FC baudrate ถูกตั้งให้ตรงกับ VTX (ดูคู่มือ).
+      </div>
+    </section>
+
+    <section class="card small">
+      <h3>ตัวอย่าง JSON (ใช้ส่งไป backend)</h3>
+      <pre id="jsonOut">{}</pre>
+    </section>
+  </div>
+
+  <script>
+    // mapping: band -> label (the UI uses human terms)
+    const bandLabels = { A: 'A', B: 'B', E: 'E', F: 'F', R: 'R' };
+
+    function generateHumanText(band, ch, power) {
+      return [
+        `SmartAudio / Tramp — วิธีเปลี่ยน (human):`,
+        `1) เชื่อมสาย SmartAudio/Tramp ระหว่าง VTX และ FC (UART).`,
+        `2) ใน Betaflight Configurator เปิด OSD → VTX Control (หรือใช้รุ่น App ของ VTX).`,
+        `3) เลือก Band: ${band}, Channel: ${ch}, Power: ${power} mW.`,
+        `4) ยืนยันการเปลี่ยนและทดสอบสัญญาณจาก VRX / Goggles.`,
+        ``,
+        `หมายเหตุ: อย่าตั้ง power เกินกฎหมายท้องถิ่น. หากไม่แน่ใจ ให้ใช้ 25 mW สำหรับ indoor.`
+      ].join('\\n');
+    }
+
+    function generateGenericStrings(band, ch, power) {
+      // Generic formats (human-readable command strings)
+      const smartAudioCmd = `SMARTAUDIO: SET BAND=${band} CHANNEL=${ch} POWER=${power}mW`;
+      const trampCmd = `TRAMP: SET BAND=${band} CHANNEL=${ch} POWER=${power}mW`;
+      // JSON payload for backend
+      const jsonPayload = {
+        protocol: 'smartaudio', // or 'tramp'
+        band: band,
+        channel: parseInt(ch),
+        power_mw: parseInt(power)
+      };
+      return {
+        smartAudioCmd, trampCmd, jsonPayload
+      };
+    }
+
+    function onGen() {
+      const band = document.getElementById('band').value;
+      const ch = document.getElementById('channel').value;
+      const power = document.getElementById('power').value;
+      const human = generateHumanText(band, ch, power);
+      const gen = generateGenericStrings(band, ch, power);
+
+      document.getElementById('humanCmd').textContent = human;
+      document.getElementById('genericCmd').textContent =
+        gen.smartAudioCmd + '\\n' + gen.trampCmd + '\\n\\nJSON:\\n' + JSON.stringify(gen.jsonPayload, null, 2);
+      document.getElementById('jsonOut').textContent = JSON.stringify(gen.jsonPayload, null, 2);
+
+      document.getElementById('results').style.display = 'block';
+      document.getElementById('copyAll').style.display = 'inline-block';
+    }
+
+    document.getElementById('gen').addEventListener('click', onGen);
+
+    document.getElementById('copyAll').addEventListener('click', function(){
+      const t = document.getElementById('genericCmd').textContent;
+      navigator.clipboard.writeText(t).then(()=> {
+        alert('Copied generic commands to clipboard');
+      }, ()=> {
+        alert('Copy failed — please select text and copy manually');
+      });
+    });
+  </script>
+</body>
+</html>
