@@ -300,6 +300,103 @@ if('IntersectionObserver' in window){
     🧾 สรุปภาพรวม (Quick Summary)
   </div>
 
+{# ---------------- Advanced Analysis Card ---------------- #}
+{% if analysis and analysis.advanced %}
+<div class="result-card" style="border-left:4px solid var(--accent); margin-top:12px;">
+  <h3>🔬 Advanced Analysis</h3>
+
+  <div class="result-grid">
+    <div class="card-metric">
+      <div class="metric-label">Pack</div>
+      <div class="metric-value">{{ analysis.advanced.cells }}S • {{ analysis.advanced.pack_voltage_nominal }} V</div>
+      <div class="muted small">{{ analysis.advanced.battery_mAh_used }} mAh • {{ analysis.advanced.battery_wh }} Wh</div>
+    </div>
+
+    <div class="card-metric">
+      <div class="metric-label">Estimated flight time</div>
+      <div class="metric-value">{{ analysis.advanced.est_flight_time_min }} min</div>
+      <div class="muted small">Aggressive: {{ analysis.advanced.est_flight_time_min_aggr }} min</div>
+    </div>
+
+    <div class="card-metric">
+      <div class="metric-label">Power / Current</div>
+      <div class="metric-value">{{ analysis.advanced.avg_power_w }} W • {{ analysis.advanced.current_draw_a }} A</div>
+      <div class="muted small">Peak: {{ analysis.advanced.peak_current_a }} A • Req C: {{ analysis.advanced.c_required }}C</div>
+    </div>
+
+    <div class="card-metric">
+      <div class="metric-label">TWR / Hover</div>
+      <div class="metric-value">{{ analysis.advanced.thrust_ratio }}</div>
+      <div class="muted small">Hover: {{ analysis.advanced.hover_throttle_percent }}% — {{ analysis.advanced.efficiency_class }}</div>
+    </div>
+  </div>
+
+  <hr style="opacity:.06;margin:12px 0;">
+
+  <div style="display:flex;gap:12px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:220px;">
+      <h4 style="margin:0 0 6px 0;">Motor / Battery Health</h4>
+      <p class="muted small">Motor: <strong>{{ analysis.advanced.motor_health }}</strong></p>
+      <p class="muted small">Battery: <strong>{{ analysis.advanced.battery_health }}</strong></p>
+    </div>
+
+    <div style="flex:1;min-width:260px;">
+      <h4 style="margin:0 0 6px 0;">KV suggestion</h4>
+      <p>{{ analysis.advanced.kv_suggestion }}</p>
+    </div>
+
+    <div style="flex:1;min-width:260px;">
+      <h4 style="margin:0 0 6px 0;">Recommendations</h4>
+      <ul>
+        {% for r in analysis.advanced.recommendations %}
+          <li>{{ r }}</li>
+        {% else %}
+          <li class="muted small">ไม่มีคำแนะนำเพิ่มเติม</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  {% if analysis.advanced.warnings_advanced %}
+  <div class="warning-box" style="margin-top:12px;">
+    {% for w in analysis.advanced.warnings_advanced %}
+      <div class="alert {{ 'danger' if w.level=='danger' else 'warning' if w.level=='warning' else 'info' }}">
+        {{ w.msg }}
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+    <button class="btn-small" onclick="copyAdvancedSummary()">📋 Copy summary</button>
+    <a class="btn-small" href="#" onclick="downloadAdvancedJSON()">📂 Download JSON</a>
+  </div>
+
+  <pre id="advancedSummary" style="display:none;">
+{{ analysis.advanced | tojson(indent=2) }}
+  </pre>
+
+</div>
+
+<script>
+function copyAdvancedSummary(){
+  const t = document.getElementById('advancedSummary').innerText;
+  navigator.clipboard.writeText(t).then(()=> alert('Copied advanced summary'));
+}
+
+function downloadAdvancedJSON(){
+  const data = document.getElementById('advancedSummary').innerText;
+  const blob = new Blob([data], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'advanced_report.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+{% endif %}
+
   <div class="qs-grid">
     <div class="qs-item">
       <span class="qs-label">สไตล์การบิน</span>
