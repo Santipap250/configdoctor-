@@ -263,9 +263,13 @@ if('IntersectionObserver' in window){
     <input type="number" name="weight" placeholder="เช่น 950" value="{{ request.form.get('weight', '') }}" required>
 
     <label>แบตเตอรี่</label>
-    <select name="battery">
+<select name="battery" id="battery-select">
+  <option value="3S" {% if request.form.get('battery','')=='3S' %}selected{% endif %}>3S</option>
   <option value="4S" {% if request.form.get('battery','')=='4S' %}selected{% endif %}>4S</option>
+  <option value="5S" {% if request.form.get('battery','')=='5S' %}selected{% endif %}>5S</option>
   <option value="6S" {% if request.form.get('battery','')=='6S' %}selected{% endif %}>6S</option>
+  <option value="7S" {% if request.form.get('battery','')=='7S' %}selected{% endif %}>7S</option>
+  <option value="8S" {% if request.form.get('battery','')=='8S' %}selected{% endif %}>8S</option>
 </select>
 
 <label>Battery capacity (mAh) — (ถ้ามี)</label>
