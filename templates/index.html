@@ -300,6 +300,23 @@ if('IntersectionObserver' in window){
     🧾 สรุปภาพรวม (Quick Summary)
   </div>
 
+{% if analysis and analysis.rules %}
+<div class="result-card" style="margin-top:10px;">
+  <h3>🛠️ Smart Checks</h3>
+  <div>
+    {% for r in analysis.rules %}
+      {% if r.level == 'danger' %}
+        <div class="alert danger">❌ {{ r.msg }}<br><small>{{ r.suggestion }}</small></div>
+      {% elif r.level == 'warning' %}
+        <div class="alert warning">⚠️ {{ r.msg }}<br><small>{{ r.suggestion }}</small></div>
+      {% else %}
+        <div class="alert info">ℹ️ {{ r.msg }}{% if r.suggestion %}<br><small>{{ r.suggestion }}</small>{% endif %}</div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
 {# ---------------- Advanced Analysis Card ---------------- #}
 {% if analysis and analysis.advanced %}
 <div class="result-card" style="border-left:4px solid var(--accent); margin-top:12px;">
