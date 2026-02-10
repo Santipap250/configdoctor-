@@ -47,6 +47,13 @@ def validate_input(size, weight, prop_size, pitch, blades):
     if blades not in [2, 3, 4]:
         warnings.append("จำนวนใบพัดผิดปกติ")
 
+# Validate battery S range
+try:
+    cells = int(battery.upper().replace("S",""))
+    if cells < 3 or cells > 8:
+        warnings.append("แบตควรอยู่ในช่วง 3S ถึง 8S")
+except Exception:
+    warnings.append("แบตรูปแบบผิด — ใช้ตัวอย่างเช่น 3S, 4S, 6S, 8S")
     return warnings
 
 # ===============================
