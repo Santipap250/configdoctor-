@@ -5,6 +5,7 @@ from analyzer.battery_logic import analyze_battery
 from logic.presets import PRESETS, detect_class_from_size, get_baseline_for_class
 from analyzer.drone_class import detect_drone_class
 from datetime import datetime
+from analyzer.rule_engine import evaluate_rules
 
 # Advanced analysis - lazy import (ถ้าโมดูลมีปัญหา เว็บจะไม่ล่ม)
 try:
