@@ -434,11 +434,6 @@ function downloadAdvancedJSON(){
       <span class="qs-value">{{ analysis.thrust_ratio }}</span>
     </div>
 
-<div class="qs-item">
-  <span class="qs-label">แบตเตอรี่</span>
-  <span class="qs-value">{{ request.form.get('battery', analysis.prop_result and analysis.advanced.power.cells ~ 'S' ) }}</span>
-</div>
-
     <div class="qs-item">
       <span class="qs-label">เวลาบินโดยประมาณ</span>
      <span class="qs-value">{{ analysis.battery_est }} นาที</span>
