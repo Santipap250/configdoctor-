@@ -1,0 +1,105 @@
+<!-- templates/vtx.html -->
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>VTX Bands & Channels — OBIXConfig Doctor</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin: 18px; color:#111; }
+    header { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+    nav a { margin-right:12px; color:#0b76d1; text-decoration:none; }
+    table { border-collapse: collapse; width:100%; max-width:1000px; margin-bottom:18px; }
+    table, th, td { border:1px solid #ddd; }
+    th, td { padding:8px; text-align:center; }
+    th { background:#f7f7f7; }
+    .note { background:#fff8e1; padding:10px; border-left:4px solid #f0c14b; margin-bottom:12px; }
+    .section { margin-bottom: 18px; }
+    .small { font-size:0.9em; color:#555; }
+    .code { font-family: monospace; background:#f4f4f4; padding:4px 6px; border-radius:4px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>VTX Bands & Channel Guide</h1>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/vtx">VTX Bands</a>
+      <a href="/hud">HUD</a>
+      <!-- เพิ่มลิงก์เมนูอื่นตามต้องการ -->
+    </nav>
+  </header>
+
+  <div class="note">
+    <strong>สรุปสั้น ๆ:</strong> หน้าแสดงตารางความถี่ช่อง VTX (5.8 GHz) แบบมาตรฐาน — ใช้เป็น reference เมื่อตั้ง VTX/VRX ในการบินเดี่ยวหรือกลุ่ม. ตรวจสอบกฎหมายท้องถิ่นว่าความถี่/พลังงาน (mW) ที่ใช้ถูกต้องหรือไม่. 1
+  </div>
+
+  <section class="section">
+    <h2>ตารางความถี่ (Band → Channel → ความถี่ MHz)</h2>
+    <p class="small">ตารางนี้รวม band ที่ใช้บ่อย: <strong>A, B, E, F (FatShark), R (Raceband)</strong>. ช่องแต่ละ band มี 8 ช่อง (1–8).</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Band / Ch</th>
+          <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><th>A</th><td>5865</td><td>5845</td><td>5825</td><td>5805</td><td>5785</td><td>5765</td><td>5745</td><td>5725</td></tr>
+        <tr><th>B</th><td>5733</td><td>5752</td><td>5771</td><td>5790</td><td>5809</td><td>5828</td><td>5847</td><td>5866</td></tr>
+        <tr><th>E</th><td>5705</td><td>5685</td><td>5665</td><td>5645</td><td>5885</td><td>5905</td><td>5925</td><td>5945</td></tr>
+        <tr><th>F</th><td>5740</td><td>5760</td><td>5780</td><td>5800</td><td>5820</td><td>5840</td><td>5860</td><td>5880</td></tr>
+        <tr><th>R (Race)</th><td>5658</td><td>5695</td><td>5732</td><td>5769</td><td>5806</td><td>5843</td><td>5880</td><td>5917</td></tr>
+      </tbody>
+    </table>
+
+    <p class="small">หมายเหตุ: หน่วยเป็น MHz — ตารางอ้างอิงจากแหล่งข้อมูล FPV Channel charts (ดูอ้างอิงด้านล่าง). หาก VTX ของคุณมีไฟล์หรือคู่มือของผู้ผลิตให้ใช้ค่าของผู้ผลิตเป็นหลัก. 2</p>
+  </section>
+
+  <section class="section">
+    <h2>วิธีเลือก Band / Channel — ขั้นตอนแบบปฏิบัติ</h2>
+    <ol>
+      <li><strong>ตรวจกฎหมายก่อน</strong>: บางประเทศจำกัดความถี่และกำลังส่ง (mW). อย่าปรับเกินกฎหมายท้องถิ่น.</li>
+      <li><strong>ถ้าบินเดี่ยว</strong>: เลือก channel ที่สัญญาณ และ antenna ของคุณทำงานได้ดี (เช่น F4 หรือ R5 ถ้า antenna ตรง 5800MHz).</li>
+      <li><strong>ถ้าบินเป็นกลุ่ม</strong>: ใช้ช่องที่กระจายห่างกัน (Raceband ให้ spacing กว้างกว่า) และหลีกเลี่ยง IMD (intermodulation) — ตัวอย่างชุดช่องที่แนะนำสำหรับหลายคนอยู่ในแหล่งอ้างอิง. 3</li>
+      <li><strong>ตรวจ Wi-Fi รอบข้าง</strong>: Wi-Fi ใช้ย่าน 5170–5835 MHz — หากมี Wi-Fi เยอะ ให้เลือกช่องสูงกว่า (เช่น R8 5917 MHz) เพื่อลดการรบกวน. 4</li>
+      <li><strong>ตั้งพลังส่ง (Power)</strong>: ถ้าในสนามรวม ให้ลดพลัง (เช่น 25–200 mW ตามกติกาท้องถิ่น). ในบ้าน/สนามในอาคารให้ใช้ 25 mW หรือต่ำกว่า.</li>
+    </ol>
+  </section>
+
+  <section class="section">
+    <h2>วิธีตั้งค่า VTX — แบบปุ่ม/ด้วยมือถือ/ผ่าน Betaflight (SmartAudio / Tramp)</h2>
+
+    <h3>1) เปลี่ยนด้วยปุ่มบน VTX</h3>
+    <p class="small">หลาย VTX มีปุ่มเปลี่ยน Band/Channel/Power — วิธีทั่วไปคือกดสั้นเพื่อเปลี่ยน channel, กดยาวเพื่อเปลี่ยน band หรือ power (แต่ขึ้นกับรุ่น). ดูคู่มือ VTX ของคุณก่อนทำ.</p>
+
+    <h3>2) SmartAudio / Tramp (ตั้งจาก Flight Controller / OSD)</h3>
+    <p class="small">ถ้า VTX รองรับ SmartAudio หรือ TBS Tramp คุณสามารถเปลี่ยน band/channel/power ผ่าน OSD (Betaflight OSD) หรือผ่านมิกเซอร์จากรีโมทได้ — สะดวกและไม่ต้องถอดเครื่อง:</p>
+    <ul>
+      <li>เชื่อมต่อสาย SmartAudio/Tramp ระหว่าง FC กับ VTX (UART)</li>
+      <li>ใน Betaflight Configurator เปิดตาราง PID → Ports → ตั้ง UART เป็น MSP/SmartAudio ตามคู่มือ</li>
+      <li>ใช้ OSD หรือ UI ใน Betaflight เปลี่ยน Band/Channel/Power</li>
+    </ul>
+
+    <h3>3) ตั้งผ่านโทรศัพท์ (บาง VTX มี Bluetooth)</h3>
+    <p class="small">VTX บางรุ่นมีโมดูล Bluetooth ให้เชื่อมมือถือเพื่อตั้งค่า (เช่น VTX เมนู, power, smart audio) — ใช้ง่าย แต่ควรล็อก power ไม่ให้เกินกฎหมาย</p>
+
+  </section>
+
+  <section class="section">
+    <h2>Best Practices / ข้อควรระวัง</h2>
+    <ul>
+      <li>ก่อนเปิดเครื่อง ให้ถามคนอื่นในสนามว่าช่องไหนถูกใช้ เพื่อหลีกเลี่ยงชนช่อง</li>
+      <li>อย่าใช้พลังส่งสูงเกินกฎหมาย — โดยเฉพาะในพื้นที่สาธารณะและในประเทศที่จำกัด (บางประเทศอนุญาตเฉพาะ 25 mW หรือโดยใบอนุญาต)</li>
+      <li>ถ้าจะบินกับ DJI/Avatar หรือระบบดิจิทัลอื่น ให้รักษาระยะห่างกับนักบิน analog ตามคำแนะนำ (3–5 เมตร) เพื่อหลีกเลี่ยงการรบกวน</li>
+      <li>ถ้าเจอปัญหาให้ทดสอบด้วยแผงวัดกำลัง (RF power meter) หรือ LiteVNA ตรวจ SWR ของเสา</li>
+    </ul>
+    <p class="small">แหล่งข้อมูล & tips ดูข้อมูลโดยละเอียดได้จากบทความ channels & best practice. 5</p>
+  </section>
+
+  <footer class="small">
+    <p>ข้อมูลตารางความถี่: สรุปจากแหล่งข้อมูล FPV channel charts (Oscar Liang, GetFPV). ตรวจสอบคู่มือ VTX และกฎหมายท้องถิ่นก่อนส่งสัญญาณ.</p>
+  </footer>
+</body>
+</html>
