@@ -27,6 +27,18 @@ except Exception as e:
         return {"advanced": {}}
     ADV_ANALYSIS_AVAILABLE = False
 
+# helper: แปลง "4S" -> int cells (3..8)
+def _cells_from_str(s):
+    try:
+        c = int(str(s).upper().replace("S","").strip())
+        if c < 3:
+            return 3
+        if c > 8:
+            return 8
+        return c
+    except Exception:
+        return None
+
 # app setup
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
