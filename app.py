@@ -274,12 +274,16 @@ def index():
         if 'ADV_ANALYSIS_AVAILABLE' in globals() and ADV_ANALYSIS_AVAILABLE:
             try:
                 adv = make_advanced_report(
-                    size=float(size),
-                    weight_g=float(weight),
-                    battery_s=battery,
-                    prop_result=prop_result,
-                    style=style
-                )
+    size=size,
+    weight_g=weight,
+    battery_s=battery,
+    prop_result=prop_result,
+    style=style,
+    battery_mAh=battery_mAh,
+    motor_count=motor_count,
+    prop_thrust_g=prop_thrust_g,
+    payload_g=payload_g
+)
                 if isinstance(adv, dict):
                     analysis.update(adv)
                     adv_power = adv.get("advanced", {}).get("power", {})
