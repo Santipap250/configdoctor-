@@ -273,13 +273,6 @@ def index():
         # provide a short summary field (template references analysis.summary)
         analysis.setdefault("summary", analysis.get("overview", ""))
 
-# evaluate rule-based checks and attach to analysis
-try:
-    analysis["rules"] = evaluate_rules(analysis)
-except Exception as e:
-    print("Rule engine error:", e)
-    analysis["rules"] = []
-
 # ===============================
         # Advanced analysis (merge into analysis) - safe call
         # ===============================
@@ -304,6 +297,13 @@ except Exception as e:
                     analysis["est_flight_time_min_aggr"] = adv_power.get("est_flight_time_min_aggressive", None)
             except Exception as e:
                 print("Advanced analysis error:", e)
+
+# evaluate rule-based checks and attach to analysis
+try:
+    analysis["rules"] = evaluate_rules(analysis)
+except Exception as e:
+    print("Rule engine error:", e)
+    analysis["rules"] = []
 
         # normalize warnings to objects with level/msg because template expects w.level and w.msg
         norm_warnings = []
