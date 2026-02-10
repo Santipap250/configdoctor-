@@ -193,6 +193,15 @@ def index():
         # --- NEW optional inputs (user-supplied to improve accuracy) ---
         battery_mAh = safe_int(request.form.get("battery_mAh"), None)
         motor_count = safe_int(request.form.get("motor_count"), 4)
+
+# optional payload (เช่น น้ำหนักกล้อง / อุปกรณ์ที่ติดเพิ่ม) — ถ้าผู้ใช้ส่งมา
+        payload_g = None
+        try:
+            pg = request.form.get("payload_g", None)
+            payload_g = float(pg) if pg not in (None, "", "None") else None
+        except Exception:
+            payload_g = None
+
         # measured thrust per motor (grams) - optional numeric input
         prop_thrust_g = None
         try:
