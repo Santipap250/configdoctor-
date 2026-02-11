@@ -2,9 +2,7 @@
 from flask import Flask, render_template, request, send_from_directory, abort
 from analyzer.prop_logic import analyze_propeller
 from analyzer.thrust_logic import calculate_thrust_weight, estimate_battery_runtime
-from analyzer.battery_logic import analyze_battery
 from logic.presets import PRESETS, detect_class_from_size, get_baseline_for_class
-from analyzer.drone_class import detect_drone_class
 from datetime import datetime
 import os
 import hashlib
