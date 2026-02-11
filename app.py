@@ -57,22 +57,18 @@ def timestamp_to_datetime_filter(ts):
 # ===============================
 def validate_input(size, weight, prop_size, pitch, blades, battery):
     warnings = []
+    # normalize numeric inputs as far as possible
+    try:
+        size = float(size)
+    except Exception:
+        warnings.append("ขนาด (size) ต้องเป็นตัวเลข")
+        size = 0.0
 
+    # size range
     if not (1 <= size <= 10):
         warnings.append("ขนาดโดรนควรอยู่ระหว่าง 1–10 นิ้ว")
 
-    if weight <= 0 or weight > 3000:
-        warnings.append("น้ำหนักโดรนควรอยู่ระหว่าง 1–3000 กรัม")
-
-    if prop_size > size:
-        warnings.append("ขนาดใบพัดใหญ่กว่าขนาดโดรน")
-
-    if not (2.0 <= pitch <= 6.5):
-        warnings.append("Pitch ใบพัดอยู่นอกช่วง")
-
-    if blades not in [2,3,4]:
-        warnings.append("จำนวนใบพัดผิดปกติ")
-
+    # weight (single canonical check)
     try:
         weight = float(weight)
         if weight <= 0 or weight > 30000:
@@ -80,6 +76,7 @@ def validate_input(size, weight, prop_size, pitch, blades, battery):
     except Exception:
         warnings.append("น้ำหนัก (weight) ต้องเป็นตัวเลข")
 
+    # prop size sanity
     try:
         prop_size = float(prop_size)
         if prop_size > (size + 4):
@@ -87,6 +84,7 @@ def validate_input(size, weight, prop_size, pitch, blades, battery):
     except Exception:
         pass
 
+    # pitch sanity
     try:
         pitch = float(pitch)
         if not (1.5 <= pitch <= 8.0):
@@ -94,17 +92,18 @@ def validate_input(size, weight, prop_size, pitch, blades, battery):
     except Exception:
         pass
 
+    # blades
     try:
         blades = int(blades)
         if blades not in (2,3,4):
             warnings.append("จำนวนใบพัดควรเป็น 2, 3 หรือ 4")
     except Exception:
         warnings.append("จำนวนใบพัด (blades) ต้องเป็นจำนวนเต็ม")
-    
-# ✅ battery check (3S–8S)
+
+    # battery cells (use helper)
     try:
-        cells = int(battery.upper().replace("S", ""))
-        if cells < 3 or cells > 8:
+        cells = _cells_from_str(battery)
+        if cells is None or cells < 3 or cells > 8:
             warnings.append("แบตควรอยู่ในช่วง 3S ถึง 8S")
     except Exception:
         warnings.append("แบตรูปแบบผิด (เช่น 3S, 4S, 6S, 8S)")
