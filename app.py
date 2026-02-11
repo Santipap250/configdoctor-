@@ -423,6 +423,11 @@ def vtx_control():
     # Render SmartAudio/Tramp helper UI
     return render_template("vtx_smartaudio.html")
 
+@app.route("/hud")
+def hud_page():
+    # Optionally pass server-side data: render_template("hud.html", data=server_data)
+    return render_template("hud.html")
+
 # Run (dev)
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)), debug=False)
