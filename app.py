@@ -389,11 +389,18 @@ def changelog():
 def download_diff(fc, filename):
     safe_fc = secure_filename(fc)
     safe_fn = secure_filename(filename)
-    base_dir = os.path.join(app.root_path, 'static', 'downloads', 'diff_all', safe_fc)
-    file_path = os.path.join(base_dir, safe_fn)
-    if not os.path.isfile(file_path):
-        abort(404)
-    return send_from_directory(base_dir, safe_fn, as_attachment=True)
+    base_root = os.path.realpath(os.path.join(app.root_path, 'static', 'downloads', 'diff_all'))
+base_dir = os.path.realpath(os.path.join(base_root, safe_fc))
+file_path = os.path.realpath(os.path.join(base_dir, safe_fn))
+
+# ensure requested file is under downloads root
+if not file_path.startswith(base_root + os.sep):
+    abort(404)
+if not os.path.isfile(file_path):
+    abort(404)
+
+# safe to serve
+return send_from_directory(base_dir, safe_fn, as_attachment=True)
 
 @app.route('/downloads')
 def downloads_index():
