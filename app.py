@@ -413,6 +413,11 @@ def downloads_index():
                 items.append({'fc': fc, 'filename': fn, 'size': size, 'mtime': mtime, 'sha': h})
     return render_template('downloads.html', items=items)
 
+@app.route("/vtx")
+def vtx_page():
+    # render vtx.html created above
+    return render_template("vtx.html")
+
 # Run (dev)
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)), debug=False)
