@@ -413,20 +413,13 @@ def downloads_index():
                 items.append({'fc': fc, 'filename': fn, 'size': size, 'mtime': mtime, 'sha': h})
     return render_template('downloads.html', items=items)
 
+# ===============================
+# ROUTE: VTX (Band / Channel / Power guide)
+# ===============================
 @app.route("/vtx")
-def vtx_page():
-    # render vtx.html created above
+def vtx():
+    # หากต้องการส่งข้อมูลไดนามิก ให้เติม context dict
     return render_template("vtx.html")
-
-@app.route("/vtx_control")
-def vtx_control():
-    # Render SmartAudio/Tramp helper UI
-    return render_template("vtx_smartaudio.html")
-
-@app.route("/hud")
-def hud_page():
-    # Optionally pass server-side data: render_template("hud.html", data=server_data)
-    return render_template("hud.html")
 
 # Run (dev)
 if __name__ == "__main__":
