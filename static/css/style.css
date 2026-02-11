@@ -1066,23 +1066,3 @@ form input::placeholder{ color: rgba(255,255,255,0.18); font-style:italic; }
   .preset-item .btn-primary { width:48%; }
   .preset-item .btn-ghost { width:48%; }
 }
-
-/* VTX shortcut (small round emoji button) */
-.vtx-shortcut{
-  display:inline-grid;
-  place-items:center;
-  width:40px;
-  height:40px;
-  border-radius:10px;
-  text-decoration:none;
-  font-size:1.15rem;
-  background:rgba(255,255,255,0.02);
-  border:1px solid rgba(255,255,255,0.03);
-  color:inherit;
-  transition:transform .14s, box-shadow .14s, background .14s;
-}
-.vtx-shortcut:hover{
-  transform:translateY(-2px) scale(1.06);
-  box-shadow:0 8px 20px rgba(0,0,0,0.45);
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-}
