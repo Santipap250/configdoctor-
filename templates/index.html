@@ -203,16 +203,34 @@ if('IntersectionObserver' in window){
    </div>
 </a>
  
-<a href="/" class="{{ 'active' if request.path == '/' else '' }}">Home</a>
-  <a href="/vtx" class="{{ 'active' if request.path.startswith('/vtx') else '' }}">VTX Bands</a>
-  <a href="/vtx_control" class="{{ 'active' if request.path == '/vtx_control' else '' }}">VTX Control</a>
-  <a href="/hud" class="{{ 'active' if request.path.startswith('/hud') else '' }}">HUD</a>
-</nav>
+ <nav class="drawer-links" aria-label="Main quick links">
+<a class="drawer-item {{ 'active' if request.path == '/' else '' }}" href="{{ url_for('index_or_snapshot') if (url_for('index_or_snapshot', _external=False) is not none) else '/' }}" onclick="closeDrawer()">
+      <span class="ico" aria-hidden="true">🏠</span>
+      <span class="body"><span class="title">Home</span><span class="meta">กลับสู่หน้าหลัก</span></span>
+      <span class="pill">go</span>
+    </a>
 
-<style>
-  nav a{margin-right:12px;text-decoration:none;color:#0b76d1;padding:6px 8px;border-radius:6px}
-  nav a.active{background:#0b76d1;color:#fff;font-weight:700}
-</style>
+    <!-- VTX Bands -->
+    <a class="drawer-item {{ 'active' if request.path.startswith('/vtx') else '' }}" href="{{ url_for('vtx_page') if (url_for('vtx_page', _external=False) is not none) else '/vtx' }}" onclick="closeDrawer()">
+      <span class="ico" aria-hidden="true">📡</span>
+      <span class="body"><span class="title">VTX Bands</span><span class="meta">ตารางความถี่ & คำแนะนำ</span></span>
+      <span class="pill">open</span>
+    </a>
+
+    <!-- VTX Control -->
+    <a class="drawer-item {{ 'active' if request.path == '/vtx_control' else '' }}" href="{{ url_for('vtx_control') if (url_for('vtx_control', _external=False) is not none) else '/vtx_control' }}" onclick="closeDrawer()">
+      <span class="ico" aria-hidden="true">🔧</span>
+      <span class="body"><span class="title">VTX Control</span><span class="meta">SmartAudio / Tramp helper</span></span>
+      <span class="pill">tools</span>
+    </a>
+
+    <!-- HUD -->
+    <a class="drawer-item {{ 'active' if request.path.startswith('/hud') else '' }}" href="{{ url_for('hud_mock') if (url_for('hud_mock', _external=False) is not none) else '/hud' }}" onclick="closeDrawer()">
+      <span class="ico" aria-hidden="true">🖥️</span>
+      <span class="body"><span class="title">HUD</span><span class="meta">โหมดแสดงผล HUD สไตล์</span></span>
+      <span class="pill">view</span>
+    </a>
+  </nav>
 
   <div style="margin-top:auto; font-size:12px; opacity:0.85; color:var(--muted,#9aa4b2);">
     OBIXConfig Doctor • v1.0lite
