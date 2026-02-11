@@ -418,6 +418,11 @@ def vtx_page():
     # render vtx.html created above
     return render_template("vtx.html")
 
+@app.route("/vtx_control")
+def vtx_control():
+    # Render SmartAudio/Tramp helper UI
+    return render_template("vtx_smartaudio.html")
+
 # Run (dev)
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)), debug=False)
