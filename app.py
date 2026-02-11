@@ -388,37 +388,40 @@ def changelog():
 def download_diff(fc, filename):
     safe_fc = secure_filename(fc)
     safe_fn = secure_filename(filename)
+
     base_root = os.path.realpath(os.path.join(app.root_path, 'static', 'downloads', 'diff_all'))
-base_dir = os.path.realpath(os.path.join(base_root, safe_fc))
-file_path = os.path.realpath(os.path.join(base_dir, safe_fn))
+    base_dir = os.path.realpath(os.path.join(base_root, safe_fc))
+    file_path = os.path.realpath(os.path.join(base_dir, safe_fn))
 
-# ensure requested file is under downloads root
-if not file_path.startswith(base_root + os.sep):
-    abort(404)
-if not os.path.isfile(file_path):
-    abort(404)
+    # ensure requested file is under downloads root
+    if not file_path.startswith(base_root + os.sep):
+        abort(404)
+    if not os.path.isfile(file_path):
+        abort(404)
 
-# safe to serve
-return send_from_directory(base_dir, safe_fn, as_attachment=True)
+    return send_from_directory(base_dir, safe_fn, as_attachment=True)
 
 @app.route('/downloads')
 def downloads_index():
-    base = os.path.join(app.root_path, 'static', 'downloads', 'diff_all')
+    base = os.path.realpath(os.path.join(app.root_path, 'static', 'downloads', 'diff_all'))
     items = []
     if os.path.isdir(base):
         for fc in sorted(os.listdir(base)):
-            fcdir = os.path.join(base, fc)
+            fcdir = os.path.realpath(os.path.join(base, fc))
             if not os.path.isdir(fcdir):
                 continue
             for fn in sorted(os.listdir(fcdir)):
                 path = os.path.join(fcdir, fn)
+                if not os.path.isfile(path):
+                    continue
                 size = os.path.getsize(path)
                 mtime = int(os.path.getmtime(path))
+                # chunked sha256
                 hobj = hashlib.sha256()
-with open(path, 'rb') as f:
-    for chunk in iter(lambda: f.read(8192), b''):
-        hobj.update(chunk)
-h = hobj.hexdigest()[:16]
+                with open(path, 'rb') as f:
+                    for chunk in iter(lambda: f.read(8192), b''):
+                        hobj.update(chunk)
+                h = hobj.hexdigest()[:16]
                 items.append({'fc': fc, 'filename': fn, 'size': size, 'mtime': mtime, 'sha': h})
     return render_template('downloads.html', items=items)
 
@@ -442,6 +445,10 @@ def page_not_found(e):
 @app.errorhandler(500)
 def internal_server_error(e):
     return render_template("500.html"), 500
+
+@app.route("/healthz")
+def healthz():
+    return {"status":"ok", "advanced_analysis": bool(ADV_ANALYSIS_AVAILABLE)}
 
 # Run (dev)
 if __name__ == "__main__":
