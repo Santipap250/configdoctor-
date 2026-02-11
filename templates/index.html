@@ -202,42 +202,16 @@ if('IntersectionObserver' in window){
     <div class="menu-sub">รวม diff all และ dump — ดาวน์โหลด / คัดลอก CLI</div>
    </div>
 </a>
-  <a class="drawer-link {{ 'active' if request.path == '/' else '' }}" href="{{ url_for('index_or_snapshot') if (url_for('index_or_snapshot', _external=False) is not none) else '/' }}" onclick="closeDrawer()">
-    <span class="dl-icon" aria-hidden="true">🏠</span>
-    <span class="dl-body">
-      <span class="dl-title">Home</span>
-      <span class="dl-meta">กลับสู่หน้าหลัก</span>
-    </span>
-    <span class="dl-pill">go</span>
-  </a>
-
-  <a class="drawer-link {{ 'active' if request.path.startswith('/vtx') else '' }}" href="{{ url_for('vtx_page') if (url_for('vtx_page', _external=False) is not none) else '/vtx' }}" onclick="closeDrawer()">
-    <span class="dl-icon" aria-hidden="true">📡</span>
-    <span class="dl-body">
-      <span class="dl-title">VTX Bands</span>
-      <span class="dl-meta">ตารางความถี่ & คำแนะนำ</span>
-    </span>
-    <span class="dl-pill">open</span>
-  </a>
-
-  <a class="drawer-link {{ 'active' if request.path == '/vtx_control' else '' }}" href="{{ url_for('vtx_control') if (url_for('vtx_control', _external=False) is not none) else '/vtx_control' }}" onclick="closeDrawer()">
-    <span class="dl-icon" aria-hidden="true">🔧</span>
-    <span class="dl-body">
-      <span class="dl-title">VTX Control</span>
-      <span class="dl-meta">SmartAudio / Tramp helper</span>
-    </span>
-    <span class="dl-pill">tools</span>
-  </a>
-
-  <a class="drawer-link {{ 'active' if request.path.startswith('/hud') else '' }}" href="{{ url_for('hud_mock') if (url_for('hud_mock', _external=False) is not none) else '/hud' }}" onclick="closeDrawer()">
-    <span class="dl-icon" aria-hidden="true">🖥️</span>
-    <span class="dl-body">
-      <span class="dl-title">HUD</span>
-      <span class="dl-meta">โหมดแสดงผล HUD สไตล์</span>
-    </span>
-    <span class="dl-pill">view</span>
-  </a>
-</nav>
+  <!-- === เพิ่มเมนู VTX ตั้งค่า (วางต่อจากลิงก์ /downloads) === -->
+<a class="drawer-link" href="/vtx" onclick="closeDrawer();">
+  <span class="dl-icon" aria-hidden="true">📡</span>
+  <span class="dl-body">
+    <span class="dl-title">ตั้งค่า VTX / Band & Channel</span>
+    <span class="dl-meta">ตารางความถี่, กำลังส่ง, PIT mode และคำแนะนำ</span>
+  </span>
+  <span class="dl-pill">vtx</span>
+</a>
+<!-- === จบ เพิ่มเมนู VTX === -->
 </aside>
 
 <div id="popover" class="popover" aria-hidden="true"></div>
