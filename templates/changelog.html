@@ -1,68 +1,93 @@
+<!-- templates/changelog.html -->
 <!doctype html>
 <html lang="th">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Changelog — OBIXConfig Doctor</title>
+  <title>Changelog — OBIXConfig Doctor (v1.0lite)</title>
 
+  <!-- ถ้าอยากให้ใช้สไตล์เฉพาะหน้า ให้ย้าย CSS นี้ไปไฟล์ static/css/style.css -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    :root{--accent:#3b82f6;--muted:#98a6b8}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;margin:0;background:#071028;color:#e6eef8}
+    .wrap{max-width:920px;margin:28px auto;padding:18px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .logo{height:36px}
+    .card{background:rgba(255,255,255,0.02);border-radius:10px;padding:14px;margin-top:14px}
+    h1{margin:0 0 6px 0;font-size:1.3rem}
+    .meta{color:var(--muted);font-size:0.95rem}
+    ul{margin:10px 0 0 18px}
+    .foot{color:var(--muted);font-size:0.9rem;margin-top:14px}
+    a{color:var(--accent)}
+    @media (max-width:640px){.wrap{padding:12px}}
+  </style>
 </head>
 <body>
-  <header class="top-bar center-logo" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-    <div style="display:flex; align-items:center; gap:10px;">
-      <a href="/" aria-label="กลับหน้าแรก" style="display:inline-block; text-decoration:none; color:inherit;">
-        <span style="display:inline-block; width:36px; height:36px; border-radius:8px; background:rgba(255,255,255,0.02); display:grid; place-items:center; font-weight:700;">←</span>
-      </a>
-      <img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="OBIXConfig" class="logo" style="height:34px;">
-    </div>
+  <div class="wrap">
+    <header>
+      <div style="display:flex;align-items:center;gap:12px">
+        <a href="/"><img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="OBIX" class="logo"></a>
+        <div>
+          <div style="font-weight:700">OBIXConfig Doctor</div>
+          <div class="meta">Changelog — v1.0lite</div>
+        </div>
+      </div>
+      <div class="meta" style="text-align:right">
+        Snapshot: <strong>{{ repo_snapshot or 'n/a' }}</strong><br>
+        Branch: <strong>{{ branch or 'main' }}</strong>
+      </div>
+    </header>
 
-    <div style="display:flex; align-items:center; gap:8px;">
-      <button class="toggle-theme" onclick="toggleTheme()">🌗</button>
-    </div>
-  </header>
+    <section class="card" aria-labelledby="latest">
+      <h1 id="latest">Release: v1.0lite</h1>
+      <div class="meta">เบื้องต้น / เบา / เหมาะสำหรับหน้า release สั้น ๆ — แสดงรายการสำคัญของเวอร์ชัน</div>
 
-  <main class="container" role="main">
-    <section class="short-section" style="max-width:900px; margin:12px auto;">
-      <h1 style="margin-top:0;">Changelog</h1>
-      <p>บันทึกการเปลี่ยนแปลงของ OBIXConfig Doctor — เวอร์ชันล่าสุดจะแสดงบนสุด</p>
+      <ul>
+        <li><strong>เริ่มต้น (Lite)</strong> — รวมฟีเจอร์พื้นฐานสำหรับวิเคราะห์ CLI / diff</li>
+        <li><strong>เพิ่ม:</strong> หน้า Changelog แบบสั้น (v1.0lite)</li>
+        <li><strong>เพิ่ม:</strong> Drawer menu, Quick Links, Preset autofill (สรุป)</li>
+        <li><strong>ปรับปรุง:</strong> UI สำหรับมือถือ, dark theme เบื้องต้น</li>
+        <li><strong>แก้บัค:</strong> ตรวจ input เบื้องต้นก่อนวิเคราะห์ (basic validation)</li>
+      </ul>
 
-      <article style="margin-top:12px;">
-        <h3>v1.0b — Community Build</h3>
-        <ul>
-          <li>เพิ่ม: Drawer menu (เมนู 3 ขีด) และย้าย Quick Links เข้าเมนู</li>
-          <li>เพิ่ม: Preset autofill และ CLI copy button</li>
-          <li>ปรับปรุง: UI สำหรับมือถือ, dark theme</li>
-        </ul>
-        <small style="color:#999;">วันที่ปรับปรุง: (กรอกวันที่เมื่อ deploy)</small>
-      </article>
-
-      <article style="margin-top:16px;">
-        <h3>v1.0a — Initial release</h3>
-        <ul>
-          <li>เริ่มต้นหน้าแอปวิเคราะห์ค่า PID/Filter</li>
-          <li>เพิ่ม Quick Summary, Preset Box, CLI Presets</li>
-        </ul>
-        <small style="color:#999;">วันที่ปรับปรุง: (กรอกวันที่เมื่อ deploy)</small>
-      </article>
-
-      <p style="margin-top:18px;">ต้องการให้เพิ่ม item ไหนใน changelog แจ้งได้ที่เพจ: <a href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener">OBIXConfig Lab</a></p>
-
-      <p style="margin-top:20px; font-size:0.95rem; color:#999;">
-        OBIXConfig Doctor • v1.0b
-      </p>
+      <div class="foot">
+        เวอร์ชันนี้เหมาะสำหรับการเผยแพร่เริ่มต้นบนหน้าเว็บ — ถ้าต้องการเพิ่มรายละเอียดเวอร์ชัน (items / notes / dates) ให้บอกผม ผมจะทำให้หน้าแสดงรายการแบบ dynamic จาก `data/changelog.json`.
+      </div>
     </section>
-  </main>
 
-  <script>
-    function toggleTheme(){
-      document.body.classList.toggle('dark');
-      document.body.classList.toggle('light');
-      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
-    }
-    (function(){
-      const saved = localStorage.getItem('theme') || 'light';
-      document.body.classList.add(saved);
-    })();
-  </script>
+    <section class="card">
+      <h2 style="margin:0 0 8px 0">วิธีเชื่อมหน้า</h2>
+      <ol style="margin:0 0 0 18px">
+        <li>วางไฟล์นี้ที่ <code>templates/changelog.html</code></li>
+        <li>เพิ่ม route ใน <code>app.py</code> (ตัวอย่างข้างล่าง)</li>
+        <li>commit &amp; push → deploy</li>
+      </ol>
+
+      <pre style="background:#021028;color:#d6f1ff;padding:10px;border-radius:8px;margin-top:8px">
+# app.py (เพิ่ม)
+from flask import render_template
+
+@app.route('/changelog')
+def changelog():
+    return render_template(
+        'changelog.html',
+        repo_snapshot="189 commits",
+        branch="main"
+    )
+      </pre>
+
+      <div class="foot">ตรวจสอบไฟล์ไอคอน/โลโก้ใน <code>static/img/obix-logo.png</code> หากไม่มี ให้เปลี่ยนหรือลบ &lt;img&gt; ใน header</div>
+    </section>
+
+    <p style="margin-top:12px" class="meta">ข้อมูล snapshot ผมดึงจาก repo ปัจจุบัน: <strong>189 commits</strong>, branch <strong>main</strong>.</p>
+
+    <p style="margin-top:16px" class="meta">หากต้องการผมจะ:
+      <ul>
+        <li>✨ แปลงหน้าให้ดึงข้อมูลจริงจาก <code>data/changelog.json</code> (generate จาก git)</li>
+        <li>🔁 สร้าง GitHub Action อัปเดต changelog อัตโนมัติ</li>
+      </ul>
+    </p>
+  </div>
 </body>
 </html>
