@@ -179,7 +179,16 @@ if('IntersectionObserver' in window){
       <span class="dl-pill">open</span>
     </a>
 
-    <a class="drawer-link" href="{{ url_for('about') }}" onclick="closeDrawer();">
+    <a class="drawer-link" href="/vtx" onclick="closeDrawer();">
+  <span class="dl-icon">📡</span>
+  <span class="dl-body">
+    <span class="dl-title">VTX Bands & Channels</span>
+    <span class="dl-meta">สูตร band / channel + คำสั่งตัวอย่าง</span>
+  </span>
+  <span class="dl-pill">tool</span>
+</a>
+
+      <a class="drawer-link" href="{{ url_for('about') }}" onclick="closeDrawer();">
       <span class="dl-icon" aria-hidden="true">ℹ️</span>
       <span class="dl-body">
         <span class="dl-title">เกี่ยวกับ</span>
@@ -203,16 +212,6 @@ if('IntersectionObserver' in window){
     <div class="menu-sub">รวม diff all และ dump — ดาวน์โหลด / คัดลอก CLI</div>
    </div>
 </a>
-  <!-- === เพิ่มเมนู VTX ตั้งค่า (วางต่อจากลิงก์ /downloads) === -->
-<a class="drawer-link" href="/vtx" onclick="closeDrawer();">
-  <span class="dl-icon" aria-hidden="true">📡</span>
-  <span class="dl-body">
-    <span class="dl-title">ตั้งค่า VTX / Band & Channel</span>
-    <span class="dl-meta">ตารางความถี่, กำลังส่ง, PIT mode และคำแนะนำ</span>
-  </span>
-  <span class="dl-pill">vtx</span>
-</a>
-<!-- === จบ เพิ่มเมนู VTX === -->
 </aside>
 
 <div id="popover" class="popover" aria-hidden="true"></div>
