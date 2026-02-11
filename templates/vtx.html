@@ -1,105 +1,270 @@
-<!-- templates/vtx.html -->
-<!doctype html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>VTX Bands & Channels — OBIXConfig Doctor</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin: 18px; color:#111; }
-    header { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
-    nav a { margin-right:12px; color:#0b76d1; text-decoration:none; }
-    table { border-collapse: collapse; width:100%; max-width:1000px; margin-bottom:18px; }
-    table, th, td { border:1px solid #ddd; }
-    th, td { padding:8px; text-align:center; }
-    th { background:#f7f7f7; }
-    .note { background:#fff8e1; padding:10px; border-left:4px solid #f0c14b; margin-bottom:12px; }
-    .section { margin-bottom: 18px; }
-    .small { font-size:0.9em; color:#555; }
-    .code { font-family: monospace; background:#f4f4f4; padding:4px 6px; border-radius:4px; }
-  </style>
+<meta charset="utf-8" />
+<title>OBIXConfig — VTX Bands & Channels</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+/* small overrides for vtx page */
+.vtx-page { max-width: 980px; margin: 18px auto; padding: 14px; }
+.vtx-hero { display:flex; gap:14px; align-items:center; margin-bottom:12px; }
+.vtx-card { padding:14px; border-radius:12px; background:linear-gradient(135deg,#0f1511,#0b0f0c); box-shadow:0 10px 28px rgba(0,0,0,0.45); }
+.vtx-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px; margin-top:12px; }
+.small { font-size:0.92rem; opacity:0.9; }
+.kv { font-weight:700; }
+.freq-out { font-family:monospace; font-size:1.05rem; padding:8px; border-radius:8px; background:rgba(255,255,255,0.02); }
+.copy-btn { padding:8px 10px; border-radius:8px; background:#238636; color:#fff; border:0; cursor:pointer; }
+.warn { background:#fff4e5; color:#804b00; padding:8px; border-radius:8px; margin-top:10px; }
+.table { width:100%; border-collapse:collapse; margin-top:8px; }
+.table th, .table td { padding:6px 8px; text-align:left; border-bottom:1px solid rgba(255,255,255,0.03); font-size:0.95rem; }
+.note { opacity:0.85; font-size:0.9rem; margin-top:8px; }
+</style>
 </head>
-<body>
-  <header>
-    <h1>VTX Bands & Channel Guide</h1>
-    <nav>
-      <a href="/">Home</a>
-      <a href="/vtx">VTX Bands</a>
-      <a href="/hud">HUD</a>
-      <!-- เพิ่มลิงก์เมนูอื่นตามต้องการ -->
-    </nav>
-  </header>
+<body class="dark">
+  <div class="top-bar center-logo" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <button id="hamburgerBtn" class="hamburger" aria-label="เปิดเมนู" aria-controls="drawer" aria-expanded="false">
+        <span class="lines" aria-hidden="true"><span></span><span></span><span></span></span>
+      </button>
+      <img src="{{ url_for('static', filename='img/obix-logo.png') }}" class="logo" style="height:34px;">
+    </div>
 
-  <div class="note">
-    <strong>สรุปสั้น ๆ:</strong> หน้าแสดงตารางความถี่ช่อง VTX (5.8 GHz) แบบมาตรฐาน — ใช้เป็น reference เมื่อตั้ง VTX/VRX ในการบินเดี่ยวหรือกลุ่ม. ตรวจสอบกฎหมายท้องถิ่นว่าความถี่/พลังงาน (mW) ที่ใช้ถูกต้องหรือไม่. 1
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button class="toggle-theme" onclick="toggleTheme()">🌗</button>
+    </div>
   </div>
 
-  <section class="section">
-    <h2>ตารางความถี่ (Band → Channel → ความถี่ MHz)</h2>
-    <p class="small">ตารางนี้รวม band ที่ใช้บ่อย: <strong>A, B, E, F (FatShark), R (Raceband)</strong>. ช่องแต่ละ band มี 8 ช่อง (1–8).</p>
+  <div class="container vtx-page">
+    <div class="vtx-hero">
+      <div style="flex:1">
+        <h1 style="margin:0;">📡 VTX — Band & Channel Helper</h1>
+        <div class="small">ช่วยเลือก band / channel และดูความถี่ที่เกี่ยวข้อง — คัดลอกคำสั่งแบบง่ายไปใช้กับ VTX (ตัวอย่าง)</div>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <a class="btn-ghost" href="/downloads" title="ไฟล์ DIFF และ DUMP">📁 ไฟล์ DIFF</a>
+        <a class="btn-primary" href="/" title="กลับหน้าแรก">🏠 กลับ</a>
+      </div>
+    </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Band / Ch</th>
-          <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><th>A</th><td>5865</td><td>5845</td><td>5825</td><td>5805</td><td>5785</td><td>5765</td><td>5745</td><td>5725</td></tr>
-        <tr><th>B</th><td>5733</td><td>5752</td><td>5771</td><td>5790</td><td>5809</td><td>5828</td><td>5847</td><td>5866</td></tr>
-        <tr><th>E</th><td>5705</td><td>5685</td><td>5665</td><td>5645</td><td>5885</td><td>5905</td><td>5925</td><td>5945</td></tr>
-        <tr><th>F</th><td>5740</td><td>5760</td><td>5780</td><td>5800</td><td>5820</td><td>5840</td><td>5860</td><td>5880</td></tr>
-        <tr><th>R (Race)</th><td>5658</td><td>5695</td><td>5732</td><td>5769</td><td>5806</td><td>5843</td><td>5880</td><td>5917</td></tr>
-      </tbody>
-    </table>
+    <div class="vtx-card">
+      <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+        <div style="flex:1; min-width:260px;">
+          <label class="small">เลือก Band</label>
+          <select id="bandSelect" class="form-control">
+            <option value="">-- เลือก band --</option>
+            <option value="race">Raceband (R)</option>
+            <option value="fatshark_a">FatShark A</option>
+            <option value="fatshark_b">FatShark B</option>
+            <option value="fatshark_e">FatShark E</option>
+            <option value="fatshark_f">FatShark F</option>
+            <option value="manual">Manual / Custom (กรอกความถี่เอง)</option>
+          </select>
+        </div>
 
-    <p class="small">หมายเหตุ: หน่วยเป็น MHz — ตารางอ้างอิงจากแหล่งข้อมูล FPV Channel charts (ดูอ้างอิงด้านล่าง). หาก VTX ของคุณมีไฟล์หรือคู่มือของผู้ผลิตให้ใช้ค่าของผู้ผลิตเป็นหลัก. 2</p>
-  </section>
+        <div style="min-width:200px;">
+          <label class="small">Channel / Number</label>
+          <select id="chSelect" class="form-control">
+            <option value="">-- เลือก channel --</option>
+          </select>
+        </div>
 
-  <section class="section">
-    <h2>วิธีเลือก Band / Channel — ขั้นตอนแบบปฏิบัติ</h2>
-    <ol>
-      <li><strong>ตรวจกฎหมายก่อน</strong>: บางประเทศจำกัดความถี่และกำลังส่ง (mW). อย่าปรับเกินกฎหมายท้องถิ่น.</li>
-      <li><strong>ถ้าบินเดี่ยว</strong>: เลือก channel ที่สัญญาณ และ antenna ของคุณทำงานได้ดี (เช่น F4 หรือ R5 ถ้า antenna ตรง 5800MHz).</li>
-      <li><strong>ถ้าบินเป็นกลุ่ม</strong>: ใช้ช่องที่กระจายห่างกัน (Raceband ให้ spacing กว้างกว่า) และหลีกเลี่ยง IMD (intermodulation) — ตัวอย่างชุดช่องที่แนะนำสำหรับหลายคนอยู่ในแหล่งอ้างอิง. 3</li>
-      <li><strong>ตรวจ Wi-Fi รอบข้าง</strong>: Wi-Fi ใช้ย่าน 5170–5835 MHz — หากมี Wi-Fi เยอะ ให้เลือกช่องสูงกว่า (เช่น R8 5917 MHz) เพื่อลดการรบกวน. 4</li>
-      <li><strong>ตั้งพลังส่ง (Power)</strong>: ถ้าในสนามรวม ให้ลดพลัง (เช่น 25–200 mW ตามกติกาท้องถิ่น). ในบ้าน/สนามในอาคารให้ใช้ 25 mW หรือต่ำกว่า.</li>
-    </ol>
-  </section>
+        <div style="min-width:170px;">
+          <label class="small">Power / PWR</label>
+          <select id="pwrSelect" class="form-control">
+            <option value="25">25 mW</option>
+            <option value="200">200 mW</option>
+            <option value="600">600 mW</option>
+            <option value="1000">1 W</option>
+          </select>
+        </div>
 
-  <section class="section">
-    <h2>วิธีตั้งค่า VTX — แบบปุ่ม/ด้วยมือถือ/ผ่าน Betaflight (SmartAudio / Tramp)</h2>
+        <div style="min-width:220px;">
+          <label class="small">Frequency</label>
+          <div id="freqDisplay" class="freq-out">— MHz</div>
+        </div>
+      </div>
 
-    <h3>1) เปลี่ยนด้วยปุ่มบน VTX</h3>
-    <p class="small">หลาย VTX มีปุ่มเปลี่ยน Band/Channel/Power — วิธีทั่วไปคือกดสั้นเพื่อเปลี่ยน channel, กดยาวเพื่อเปลี่ยน band หรือ power (แต่ขึ้นกับรุ่น). ดูคู่มือ VTX ของคุณก่อนทำ.</p>
+      <div class="note">
+        <strong>หมายเหตุ:</strong> ตารางด้านล่างเป็นค่าความถี่มาตรฐานที่ใช้กันทั่วไป — ก่อนบินหรือเปลี่ยนกำลัง ควรตรวจสอบกฎหมาย/ข้อบังคับท้องถิ่น และสเปค VTX/แอนเทนน่า ของคุณเสมอ.
+      </div>
 
-    <h3>2) SmartAudio / Tramp (ตั้งจาก Flight Controller / OSD)</h3>
-    <p class="small">ถ้า VTX รองรับ SmartAudio หรือ TBS Tramp คุณสามารถเปลี่ยน band/channel/power ผ่าน OSD (Betaflight OSD) หรือผ่านมิกเซอร์จากรีโมทได้ — สะดวกและไม่ต้องถอดเครื่อง:</p>
-    <ul>
-      <li>เชื่อมต่อสาย SmartAudio/Tramp ระหว่าง FC กับ VTX (UART)</li>
-      <li>ใน Betaflight Configurator เปิดตาราง PID → Ports → ตั้ง UART เป็น MSP/SmartAudio ตามคู่มือ</li>
-      <li>ใช้ OSD หรือ UI ใน Betaflight เปลี่ยน Band/Channel/Power</li>
-    </ul>
+      <div class="vtx-grid">
+        <div>
+          <h4 style="margin:8px 0;">ผลลัพธ์ (คัดลอก)</h4>
+          <pre id="smartAudioCmd" class="cli-snippet">โปรดเลือก band และ channel เพื่อดูคำสั่งตัวอย่าง</pre>
+          <div style="display:flex; gap:8px; margin-top:8px;">
+            <button class="copy-btn" onclick="copyResult()">คัดลอกคำสั่ง</button>
+            <button class="btn-ghost" onclick="fillManual()">ใส่ความถี่ด้วยมือ</button>
+          </div>
 
-    <h3>3) ตั้งผ่านโทรศัพท์ (บาง VTX มี Bluetooth)</h3>
-    <p class="small">VTX บางรุ่นมีโมดูล Bluetooth ให้เชื่อมมือถือเพื่อตั้งค่า (เช่น VTX เมนู, power, smart audio) — ใช้ง่าย แต่ควรล็อก power ไม่ให้เกินกฎหมาย</p>
+          <div class="warn" aria-live="polite" style="display:none;" id="vtxWarn"></div>
+        </div>
 
-  </section>
+        <div>
+          <h4 style="margin:8px 0;">ตารางความถี่ (ทั่วไป)</h4>
+          <table class="table" id="freqTable">
+            <thead><tr><th>Band</th><th>Ch</th><th>Freq (MHz)</th></tr></thead>
+            <tbody id="freqTableBody">
+              <!-- JS will fill -->
+            </tbody>
+          </table>
+        </div>
 
-  <section class="section">
-    <h2>Best Practices / ข้อควรระวัง</h2>
-    <ul>
-      <li>ก่อนเปิดเครื่อง ให้ถามคนอื่นในสนามว่าช่องไหนถูกใช้ เพื่อหลีกเลี่ยงชนช่อง</li>
-      <li>อย่าใช้พลังส่งสูงเกินกฎหมาย — โดยเฉพาะในพื้นที่สาธารณะและในประเทศที่จำกัด (บางประเทศอนุญาตเฉพาะ 25 mW หรือโดยใบอนุญาต)</li>
-      <li>ถ้าจะบินกับ DJI/Avatar หรือระบบดิจิทัลอื่น ให้รักษาระยะห่างกับนักบิน analog ตามคำแนะนำ (3–5 เมตร) เพื่อหลีกเลี่ยงการรบกวน</li>
-      <li>ถ้าเจอปัญหาให้ทดสอบด้วยแผงวัดกำลัง (RF power meter) หรือ LiteVNA ตรวจ SWR ของเสา</li>
-    </ul>
-    <p class="small">แหล่งข้อมูล & tips ดูข้อมูลโดยละเอียดได้จากบทความ channels & best practice. 5</p>
-  </section>
+        <div>
+          <h4 style="margin:8px 0;">คำอธิบายสั้น ๆ</h4>
+          <p class="small">
+            - Raceband มักใช้แข่ง (8 ช่อง) และเป็นมาตรฐานในสนามแข่งหลายแห่ง.<br>
+            - FatShark A/B/E/F เป็นการจัดกลุ่มช่องความถี่ของแว่น/ระบบแบบเก่า/ทั่วไป.<br>
+            - หาก VTX ของคุณรองรับ SmartAudio/Tramp คุณสามารถเปลี่ยนความถี่และกำลังผ่าน OSD หรือรีโมทได้ — แต่คำสั่งจริงขึ้นกับโปรโตคอลของ VTX.
+          </p>
 
-  <footer class="small">
-    <p>ข้อมูลตารางความถี่: สรุปจากแหล่งข้อมูล FPV channel charts (Oscar Liang, GetFPV). ตรวจสอบคู่มือ VTX และกฎหมายท้องถิ่นก่อนส่งสัญญาณ.</p>
-  </footer>
+          <p class="small">ถ้าต้องการ ผมสามารถเพิ่ม: <em>SmartAudio/Tramp command generator</em> ที่ตรงกับไลบรารีของ VTX ยี่ห้อ/รุ่นที่ตุ้ยมี (ส่งยี่ห้อรุ่นมาได้)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// Minimal band -> channel -> frequency mapping (common sets).
+// NOTE: These are common reference values — verify with your VTX manual.
+const BAND_TABLES = {
+  // Raceband (R1..R8) — commonly used 8-channel raceband set
+  "race": [
+    {ch:"R1", f:5658},
+    {ch:"R2", f:5695},
+    {ch:"R3", f:5732},
+    {ch:"R4", f:5769},
+    {ch:"R5", f:5806},
+    {ch:"R6", f:5843},
+    {ch:"R7", f:5880},
+    {ch:"R8", f:5917}
+  ],
+  // FatShark A: common "A" band channels (A1..A8)
+  "fatshark_a": [
+    {ch:"A1", f:5865},{ch:"A2", f:5845},{ch:"A3", f:5825},{ch:"A4", f:5805},
+    {ch:"A5", f:5785},{ch:"A6", f:5765},{ch:"A7", f:5745},{ch:"A8", f:5725}
+  ],
+  // FatShark B
+  "fatshark_b": [
+    {ch:"B1", f:5733},{ch:"B2", f:5752},{ch:"B3", f:5771},{ch:"B4", f:5790},
+    {ch:"B5", f:5809},{ch:"B6", f:5828},{ch:"B7", f:5847},{ch:"B8", f:5866}
+  ],
+  // FatShark E
+  "fatshark_e": [
+    {ch:"E1", f:5705},{ch:"E2", f:5685},{ch:"E3", f:5665},{ch:"E4", f:5645},
+    {ch:"E5", f:5885},{ch:"E6", f:5905},{ch:"E7", f:5925},{ch:"E8", f:5945}
+  ],
+  // FatShark F (alternate legacy set)
+  "fatshark_f": [
+    {ch:"F1", f:5740},{ch:"F2", f:5760},{ch:"F3", f:5780},{ch:"F4", f:5800},
+    {ch:"F5", f:5820},{ch:"F6", f:5840},{ch:"F7", f:5860},{ch:"F8", f:5880}
+  ]
+};
+
+const bandSelect = document.getElementById('bandSelect');
+const chSelect = document.getElementById('chSelect');
+const freqDisplay = document.getElementById('freqDisplay');
+const smartAudioCmd = document.getElementById('smartAudioCmd');
+const freqTableBody = document.getElementById('freqTableBody');
+const vtxWarn = document.getElementById('vtxWarn');
+
+function populateTable() {
+  freqTableBody.innerHTML = '';
+  for (const key of Object.keys(BAND_TABLES)) {
+    const rows = BAND_TABLES[key];
+    for (const r of rows) {
+      const tr = document.createElement('tr');
+      const bandLabel = key.replace('fatshark_', 'FatShark ').toUpperCase();
+      tr.innerHTML = `<td>${bandLabel}</td><td>${r.ch}</td><td>${r.f} MHz</td>`;
+      freqTableBody.appendChild(tr);
+    }
+  }
+}
+populateTable();
+
+function fillChannelsFor(bandKey) {
+  chSelect.innerHTML = '<option value="">-- เลือก channel --</option>';
+  if (!bandKey || bandKey === 'manual') return;
+  const rows = BAND_TABLES[bandKey] || [];
+  rows.forEach((r, idx) => {
+    const opt = document.createElement('option');
+    opt.value = r.f;
+    opt.textContent = `${r.ch} — ${r.f} MHz`;
+    chSelect.appendChild(opt);
+  });
+}
+
+bandSelect.addEventListener('change', (e) => {
+  const val = e.target.value;
+  fillChannelsFor(val);
+  // show band rows highlight
+  if (val && val !== 'manual') {
+    const first = BAND_TABLES[val] && BAND_TABLES[val][0];
+    if (first) {
+      freqDisplay.textContent = 'เลือก channel เพื่อแสดงความถี่';
+      smartAudioCmd.textContent = 'โปรดเลือก channel';
+    }
+  } else if (val === 'manual') {
+    freqDisplay.textContent = 'ใส่ความถี่ (MHz) ในช่องด้านล่าง';
+    smartAudioCmd.textContent = 'Manual mode — ใส่ความถี่แล้วกด "คัดลอกคำสั่ง"';
+  } else {
+    freqDisplay.textContent = '— MHz';
+    smartAudioCmd.textContent = 'โปรดเลือก band / channel';
+  }
+  vtxWarn.style.display = 'none';
+});
+
+chSelect.addEventListener('change', () => {
+  const f = chSelect.value;
+  const pwr = document.getElementById('pwrSelect').value;
+  if (!f) { freqDisplay.textContent = '— MHz'; smartAudioCmd.textContent = 'โปรดเลือก channel'; return; }
+  freqDisplay.textContent = `${f} MHz`;
+  // example SmartAudio style "set_freq <MHz> <power_mW>" (this is illustrative)
+  smartAudioCmd.textContent = `SmartAudio (ตัวอย่าง): set_vtx_freq ${f} ; set_vtx_power ${pwr}mW`;
+  // small warning for high power on certain bands
+  const cellsHint = '';
+  if (parseInt(pwr) >= 600) {
+    vtxWarn.textContent = 'ระวัง: กำลังสูง (≥600mW) อาจทำให้รบกวนผู้อื่นและร้อน — ตรวจสอบกฎหมาย/สนามบินก่อนใช้งาน';
+    vtxWarn.style.display = 'block';
+  } else {
+    vtxWarn.style.display = 'none';
+  }
+});
+
+document.getElementById('pwrSelect').addEventListener('change', () => {
+  // refresh smartAudioCmd with current freq
+  const f = chSelect.value || '';
+  const pwr = document.getElementById('pwrSelect').value;
+  if (f) smartAudioCmd.textContent = `SmartAudio (ตัวอย่าง): set_vtx_freq ${f} ; set_vtx_power ${pwr}mW`;
+});
+
+// manual fill
+function fillManual(){
+  const manual = prompt('กรุณาใส่ความถี่ (MHz) ตัวอย่าง: 5865');
+  if (!manual) return;
+  const v = parseFloat(manual);
+  if (isNaN(v) || v < 400 || v > 6000) { alert('ความถี่ไม่ถูกต้อง'); return; }
+  freqDisplay.textContent = `${v} MHz`;
+  smartAudioCmd.textContent = `SmartAudio (ตัวอย่าง): set_vtx_freq ${v} ; set_vtx_power ${document.getElementById('pwrSelect').value}mW`;
+  chSelect.value = '';
+  bandSelect.value = 'manual';
+  vtxWarn.style.display = 'none';
+}
+
+function copyResult(){
+  const t = smartAudioCmd.innerText || smartAudioCmd.textContent;
+  navigator.clipboard.writeText(t).then(()=> {
+    alert('คัดลอกเรียบร้อย');
+  }).catch(()=> alert('คัดลอกไม่สำเร็จ'));
+}
+
+/* small helpers used by site */
+function toggleTheme(){
+  document.body.classList.toggle('dark');
+  document.body.classList.toggle('light');
+  try{ localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light'); }catch(e){}
+}
+</script>
 </body>
 </html>
