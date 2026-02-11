@@ -1089,3 +1089,8 @@ form input::placeholder{ color: rgba(255,255,255,0.18); font-style:italic; }
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
   outline: none;
 }
+
+/* ถ้าต้องการซ่อนบนมือถือ เพิ่ม @media (ถ้ไม่ต้องการ ให้ข้าม) */
+@media (max-width:420px){
+  .vtx-shortcut{ display:inline-grid; } /* หรือ display:none; เพื่อซ่อน */
+}
