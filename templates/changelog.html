@@ -51,43 +51,40 @@
         <li><strong>แก้บัค:</strong> ตรวจ input เบื้องต้นก่อนวิเคราะห์ (basic validation)</li>
       </ul>
 
-      <div class="foot">
+<small style="color:#999;">วันที่ปรับปรุง: (11/2026 deploy)</small>
+      </article>
+
+      <article style="margin-top:16px;">
+        <h3>v1.0a — Initial release</h3>
+        <ul>
+          <li>เริ่มต้นหน้าแอปวิเคราะห์ค่า PID/Filter</li>
+          <li>เพิ่ม Quick Summary, Preset Box, CLI Presets</li>
+        </ul>
+        <small style="color:#999;">วันที่ปรับปรุง: (กรอกวันที่เมื่อ deploy)</small>
+      </article>
+
+      <p style="margin-top:18px;">ต้องการให้เพิ่ม item ไหนใน changelog แจ้งได้ที่เพจ: <a href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener">OBIXConfig Lab</a></p>
+
+      <p style="margin-top:20px; font-size:0.95rem; color:#999;">
+        OBIXConfig Doctor • v1.0b
+      </p>
+    </section>
+  </main>
+
+  <script>
+    function toggleTheme(){
+      document.body.classList.toggle('dark');
+      document.body.classList.toggle('light');
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    }
+    (function(){
+      const saved = localStorage.getItem('theme') || 'light';
+      document.body.classList.add(saved);
+    })();
+  </script>
+
+<div class="foot">
         เวอร์ชันนี้เหมาะสำหรับการเผยแพร่เริ่มต้นบนหน้าเว็บ — ถ้าต้องการเพิ่มรายละเอียดเวอร์ชัน (items / notes / dates) ให้บอกผม ผมจะทำให้หน้าแสดงรายการแบบ dynamic จาก `data/changelog.json`.
       </div>
-    </section>
-
-    <section class="card">
-      <h2 style="margin:0 0 8px 0">วิธีเชื่อมหน้า</h2>
-      <ol style="margin:0 0 0 18px">
-        <li>วางไฟล์นี้ที่ <code>templates/changelog.html</code></li>
-        <li>เพิ่ม route ใน <code>app.py</code> (ตัวอย่างข้างล่าง)</li>
-        <li>commit &amp; push → deploy</li>
-      </ol>
-
-      <pre style="background:#021028;color:#d6f1ff;padding:10px;border-radius:8px;margin-top:8px">
-# app.py (เพิ่ม)
-from flask import render_template
-
-@app.route('/changelog')
-def changelog():
-    return render_template(
-        'changelog.html',
-        repo_snapshot="189 commits",
-        branch="main"
-    )
-      </pre>
-
-      <div class="foot">ตรวจสอบไฟล์ไอคอน/โลโก้ใน <code>static/img/obix-logo.png</code> หากไม่มี ให้เปลี่ยนหรือลบ &lt;img&gt; ใน header</div>
-    </section>
-
-    <p style="margin-top:12px" class="meta">ข้อมูล snapshot ผมดึงจาก repo ปัจจุบัน: <strong>189 commits</strong>, branch <strong>main</strong>.</p>
-
-    <p style="margin-top:16px" class="meta">หากต้องการผมจะ:
-      <ul>
-        <li>✨ แปลงหน้าให้ดึงข้อมูลจริงจาก <code>data/changelog.json</code> (generate จาก git)</li>
-        <li>🔁 สร้าง GitHub Action อัปเดต changelog อัตโนมัติ</li>
-      </ul>
-    </p>
-  </div>
 </body>
 </html>
