@@ -118,9 +118,22 @@ function copyCLI() {
 <body>
 <div class="top-bar">
   <div class="top-left">
+<!-- LEFT: hamburger + vtx shortcut + logo -->
+<div style="display:flex; align-items:center; gap:10px;">
+<!-- Hamburger (เก็บ id เดิมไว้) -->
     <button id="hamburgerBtn" class="hamburger" aria-label="เปิดเมนู" aria-expanded="false">
       <span class="lines" aria-hidden="true"><span></span><span></span><span></span></span>
     </button>
+
+<!-- VTX shortcut (emoji) — จะไปหน้า /vtx -->
+  <a href="/vtx"
+     class="vtx-shortcut"
+     title="VTX bands & channels"
+     aria-label="VTX bands & channels"
+     style="text-decoration:none;">
+    📡
+  </a>
+
     <img src="{{ url_for('static', filename='img/obix-logo.png') }}" class="logo" alt="OBIXConfig">
   </div>
 
@@ -128,15 +141,6 @@ function copyCLI() {
 <!-- ปุ่มสลับธีม (เดิม) -->
     <button class="toggle-theme" onclick="toggleTheme()" title="Toggle theme">🌗</button>
   </div>
-<!-- Shortcut to VTX — วางใน top-bar ใกล้ปุ่มสลับธีม / โลโก้ -->
-<div style="display:flex; align-items:center; gap:8px;">
-  <!-- ปุ่มอิโมจิเล็กๆ ที่ไปหน้า /vtx -->
-  <a href="/vtx"
-     class="vtx-shortcut"
-     title="VTX bands & channels"
-     aria-label="VTX bands & channels">
-    📡
-  </a>
 </div>
 
 <div class="container">
