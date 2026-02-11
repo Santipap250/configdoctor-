@@ -415,8 +415,11 @@ def downloads_index():
                 path = os.path.join(fcdir, fn)
                 size = os.path.getsize(path)
                 mtime = int(os.path.getmtime(path))
-                with open(path, 'rb') as f:
-                    h = hashlib.sha256(f.read()).hexdigest()[:16]
+                hobj = hashlib.sha256()
+with open(path, 'rb') as f:
+    for chunk in iter(lambda: f.read(8192), b''):
+        hobj.update(chunk)
+h = hobj.hexdigest()[:16]
                 items.append({'fc': fc, 'filename': fn, 'size': size, 'mtime': mtime, 'sha': h})
     return render_template('downloads.html', items=items)
 
