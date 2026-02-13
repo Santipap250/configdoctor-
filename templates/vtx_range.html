@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>VTX Range Calculator — OBIXConfig</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<!-- small inline tweaks -->
+<style>
+  .vtx-wrap { max-width:980px; margin:18px auto; padding:16px; }
+  .vtx-grid { display:grid; grid-template-columns: 1fr 380px; gap:18px; align-items:start;}
+  @media(max-width:920px){ .vtx-grid{ grid-template-columns:1fr; } }
+  .card { padding:14px; border-radius:12px; background: linear-gradient(135deg, #0f1511, #0b0f0c); border:1px solid rgba(255,255,255,0.02); box-shadow:0 10px 30px rgba(0,0,0,0.5); }
+  label{ display:block; font-weight:600; margin-top:10px; color:var(--muted,#9aa4b2); }
+  input[type=number], select { width:100%; padding:8px 10px; border-radius:8px; border:1px solid #30363d; background:transparent; color:var(--text-color-dark,#eee); }
+  .btn { display:inline-block; padding:10px 12px; border-radius:10px; cursor:pointer; border:0; background:linear-gradient(135deg,#238636,#2ea043); color:#fff; font-weight:700; }
+  .muted { color:var(--muted,#9aa4b2); font-size:0.93rem; }
+  pre.jsonbox { background:#010409; color:#cfe; padding:10px; border-radius:8px; overflow:auto; font-family:monospace; font-size:0.9rem; }
+  .controls { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .small { font-size:0.9rem; opacity:0.9; }
+</style>
+</head>
+<body class="dark">
+  <div class="vtx-wrap">
+    <h1>📡 VTX Range Calculator — OBIXConfig</h1>
+    <p class="muted">ประมาณระยะสัญญาณโดยใช้ Link-Budget + Free-Space Path Loss (มีโหมดปรับค่า loss สำหรับโลกจริง)</p>
+
+    <div class="vtx-grid">
+      <!-- LEFT: inputs -->
+      <div class="card">
+        <form id="vtxForm">
+          <label>Transmit power (mW)</label>
+          <input type="number" name="power_mw" step="1" value="200" min="0">
+
+          <label>Frequency (MHz)</label>
+          <input type="number" name="freq_mhz" step="1" value="5800">
+
+          <label>Tx antenna gain (dBi)</label>
+          <input type="number" name="gt" step="0.1" value="2">
+
+          <label>Rx antenna gain (dBi)</label>
+          <input type="number" name="gr" step="0.1" value="2">
+
+          <label>Receiver sensitivity (dBm)</label>
+          <input type="number" name="rx_sens_dbm" step="0.5" value="-90">
+
+          <label>Fade margin / safety (dB)</label>
+          <input type="number" name="margin_db" step="0.5" value="10">
+
+          <label>Real world loss model</label>
+          <select name="loss_model">
+            <option value="free_space">Free-space (ideal)</option>
+            <option value="suburban">Suburban (~ +8 dB)</option>
+            <option value="forest">Forest / Trees (~ +15 dB)</option>
+            <option value="urban">Urban / Buildings (~ +20 dB)</option>
+          </select>
+
+          <div class="controls">
+            <button type="submit" class="btn">คำนวณ</button>
+            <button type="button" id="copyBtn" class="btn" style="background:#4b6cff">คัดลอกสรุป</button>
+            <button type="button" id="csvBtn" class="btn" style="background:#f39c12">ดาวน์โหลด CSV</button>
+            <button type="button" id="pngBtn" class="btn" style="background:#8e44ad">ดาวน์โหลด PNG</button>
+          </div>
+        </form>
+
+        <hr style="opacity:.06;margin:12px 0;">
+
+        <div>
+          <div class="small muted">สรุป</div>
+          <pre id="summary" class="jsonbox">ยังไม่ได้คำนวณ</pre>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: chart + explanation -->
+      <div>
+        <div class="card" style="margin-bottom:12px;">
+          <div class="small muted">Link margin vs distance</div>
+          <canvas id="rangeChart" width="600" height="320"></canvas>
+        </div>
+
+        <div class="card">
+          <h3 style="margin:0 0 6px 0;">คำอธิบาย</h3>
+          <p class="muted small" style="margin:8px 0 0 0;">
+            สูตรหลัก: <strong>FSPL(dB) = 20·log10(d_km) + 20·log10(freq_MHz) + 32.44</strong><br>
+            คำนวณหา maximal distance เมื่อ <em>FSPL == effective link budget</em> (หลังหัก fade/real-world loss)<br>
+            <strong>หมายเหตุ:</strong> ค่าจริงในภาคสนามมักสั้นกว่า estimation มากขึ้นเมื่อมีสิ่งกีดขวาง
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+(async function(){
+  const form = document.getElementById('vtxForm');
+  const summary = document.getElementById('summary');
+  const csvBtn = document.getElementById('csvBtn');
+  const pngBtn = document.getElementById('pngBtn');
+  const copyBtn = document.getElementById('copyBtn');
+  const ctx = document.getElementById('rangeChart').getContext('2d');
+  let chart = null;
+  let lastResult = null;
+  const makeCSV = (x, y) => {
+    let lines = ['distance_m,link_margin_db'];
+    for(let i=0;i<x.length;i++) lines.push(`${x[i]},${y[i]}`);
+    return lines.join('\n');
+  };
+
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const fd = new FormData(form);
+
+    // call server-side API
+    const res = await fetch('/vtx-calc', { method:'POST', body: fd });
+    const j = await res.json();
+    lastResult = j;
+
+    // show readable summary
+    summary.textContent = JSON.stringify(j, null, 2);
+
+    // prepare data for chart: distances 50..3000m
+    const freq_mhz = parseFloat(fd.get('freq_mhz') || 5800);
+    const x = [];
+    const y = [];
+    for(let d=25; d<=3000; d+=25){
+      const d_km = d/1000.0;
+      const fspl = 20*Math.log10(d_km) + 20*Math.log10(freq_mhz) + 32.44;
+      // link margin = effective_budget_db - FSPL
+      const eff_budget = j.computed.effective_budget_db;
+      const margin = eff_budget - fspl;
+      x.push(d);
+      y.push(Math.round(margin*10)/10);
+    }
+
+    // draw chart
+    if(chart) chart.destroy();
+    chart = new Chart(ctx, {
+      type:'line',
+      data:{
+        labels: x,
+        datasets:[{
+          label: 'Link margin (dB)',
+          data: y,
+          borderColor: '#58a6ff',
+          backgroundColor: 'rgba(88,166,255,0.08)',
+          pointRadius: 0,
+          tension: 0.15,
+          fill: false
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        scales:{
+          y:{ beginAtZero:true, title:{display:true, text:'Link margin (dB)'} },
+          x:{ title:{display:true, text:'Distance (m)'} }
+        },
+        plugins:{
+          tooltip:{ callbacks: {
+            label: (ctx)=> ` ${ctx.parsed.y} dB at ${ctx.label} m`
+          }}
+        }
+      }
+    });
+  });
+
+  // copy summary
+  copyBtn.addEventListener('click', ()=>{
+    if(!lastResult) return alert('ยังไม่ได้คำนวณ');
+    navigator.clipboard.writeText(JSON.stringify(lastResult, null, 2)).then(()=> alert('คัดลอกเรียบร้อย'));
+  });
+
+  // download CSV
+  csvBtn.addEventListener('click', ()=>{
+    if(!chart) return alert('ยังไม่ได้คำนวณ');
+    const x = chart.data.labels;
+    const y = chart.data.datasets[0].data;
+    const csv = makeCSV(x,y);
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'vtx_range.csv'; a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // download PNG
+  pngBtn.addEventListener('click', ()=>{
+    if(!chart) return alert('ยังไม่ได้คำนวณ');
+    const url = document.getElementById('rangeChart').toDataURL('image/png', 1.0);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'vtx_range.png'; a.click();
+  });
+
+})();
+</script>
+</body>
+</html>
