@@ -1,199 +1,183 @@
+<!-- templates/vtx_range.html -->
 <!doctype html>
 <html lang="th">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>VTX Range Calculator — OBIXConfig</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VTX Range Calculator — OBIXConfig Doctor</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-<!-- small inline tweaks -->
 <style>
-  .vtx-wrap { max-width:980px; margin:18px auto; padding:16px; }
-  .vtx-grid { display:grid; grid-template-columns: 1fr 380px; gap:18px; align-items:start;}
-  @media(max-width:920px){ .vtx-grid{ grid-template-columns:1fr; } }
-  .card { padding:14px; border-radius:12px; background: linear-gradient(135deg, #0f1511, #0b0f0c); border:1px solid rgba(255,255,255,0.02); box-shadow:0 10px 30px rgba(0,0,0,0.5); }
-  label{ display:block; font-weight:600; margin-top:10px; color:var(--muted,#9aa4b2); }
-  input[type=number], select { width:100%; padding:8px 10px; border-radius:8px; border:1px solid #30363d; background:transparent; color:var(--text-color-dark,#eee); }
-  .btn { display:inline-block; padding:10px 12px; border-radius:10px; cursor:pointer; border:0; background:linear-gradient(135deg,#238636,#2ea043); color:#fff; font-weight:700; }
-  .muted { color:var(--muted,#9aa4b2); font-size:0.93rem; }
-  pre.jsonbox { background:#010409; color:#cfe; padding:10px; border-radius:8px; overflow:auto; font-family:monospace; font-size:0.9rem; }
-  .controls { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
-  .small { font-size:0.9rem; opacity:0.9; }
+  .vtx-panel{ max-width:900px;margin:18px auto;padding:18px;border-radius:12px;background:linear-gradient(135deg,#0f1511,#0b0f0c);box-shadow:0 8px 30px rgba(0,0,0,0.5); }
+  .two-col{ display:grid; grid-template-columns:1fr 320px; gap:12px; }
+  .field{ margin-bottom:10px; }
+  .muted{ opacity:0.8; font-size:0.9rem; color:var(--text-color-dark,#ddd); }
+  .result-badge{ padding:10px 12px; border-radius:10px; background:#071826; display:inline-block; color:#bff; font-weight:700; }
+  pre.explain{ background:#050608; padding:8px; border-radius:8px; color:#ddd; font-size:0.9rem; overflow:auto; }
+  @media(max-width:880px){ .two-col{ grid-template-columns:1fr; } }
 </style>
 </head>
 <body class="dark">
-  <div class="vtx-wrap">
-    <h1>📡 VTX Range Calculator — OBIXConfig</h1>
-    <p class="muted">ประมาณระยะสัญญาณโดยใช้ Link-Budget + Free-Space Path Loss (มีโหมดปรับค่า loss สำหรับโลกจริง)</p>
+<div class="container vtx-panel">
+  <h2>📡 VTX Range Calculator (multi-model)</h2>
+  <p class="muted">เลือกโมเดลการแพร่ของสัญญาณ แล้วระบบจะประมาณระยะสูงสุดที่คาดว่าจะรับภาพได้ (โดยคำนวณจาก link-budget)</p>
 
-    <div class="vtx-grid">
-      <!-- LEFT: inputs -->
-      <div class="card">
-        <form id="vtxForm">
-          <label>Transmit power (mW)</label>
-          <input type="number" name="power_mw" step="1" value="200" min="0">
-
-          <label>Frequency (MHz)</label>
-          <input type="number" name="freq_mhz" step="1" value="5800">
-
-          <label>Tx antenna gain (dBi)</label>
-          <input type="number" name="gt" step="0.1" value="2">
-
-          <label>Rx antenna gain (dBi)</label>
-          <input type="number" name="gr" step="0.1" value="2">
-
-          <label>Receiver sensitivity (dBm)</label>
-          <input type="number" name="rx_sens_dbm" step="0.5" value="-90">
-
-          <label>Fade margin / safety (dB)</label>
-          <input type="number" name="margin_db" step="0.5" value="10">
-
-          <label>Real world loss model</label>
-          <select name="loss_model">
-            <option value="free_space">Free-space (ideal)</option>
-            <option value="suburban">Suburban (~ +8 dB)</option>
-            <option value="forest">Forest / Trees (~ +15 dB)</option>
-            <option value="urban">Urban / Buildings (~ +20 dB)</option>
-          </select>
-
-          <div class="controls">
-            <button type="submit" class="btn">คำนวณ</button>
-            <button type="button" id="copyBtn" class="btn" style="background:#4b6cff">คัดลอกสรุป</button>
-            <button type="button" id="csvBtn" class="btn" style="background:#f39c12">ดาวน์โหลด CSV</button>
-            <button type="button" id="pngBtn" class="btn" style="background:#8e44ad">ดาวน์โหลด PNG</button>
-          </div>
-        </form>
-
-        <hr style="opacity:.06;margin:12px 0;">
-
-        <div>
-          <div class="small muted">สรุป</div>
-          <pre id="summary" class="jsonbox">ยังไม่ได้คำนวณ</pre>
-        </div>
-
+  <div class="two-col">
+    <div>
+      <div class="field">
+        <label>กำลังส่ง (mW)</label>
+        <input type="number" id="power_mw" value="200">
       </div>
 
-      <!-- RIGHT: chart + explanation -->
-      <div>
-        <div class="card" style="margin-bottom:12px;">
-          <div class="small muted">Link margin vs distance</div>
-          <canvas id="rangeChart" width="600" height="320"></canvas>
-        </div>
+      <div class="field">
+        <label>ความถี่ (MHz)</label>
+        <input type="number" id="freq_mhz" value="5800">
+      </div>
 
-        <div class="card">
-          <h3 style="margin:0 0 6px 0;">คำอธิบาย</h3>
-          <p class="muted small" style="margin:8px 0 0 0;">
-            สูตรหลัก: <strong>FSPL(dB) = 20·log10(d_km) + 20·log10(freq_MHz) + 32.44</strong><br>
-            คำนวณหา maximal distance เมื่อ <em>FSPL == effective link budget</em> (หลังหัก fade/real-world loss)<br>
-            <strong>หมายเหตุ:</strong> ค่าจริงในภาคสนามมักสั้นกว่า estimation มากขึ้นเมื่อมีสิ่งกีดขวาง
-          </p>
+      <div class="field">
+        <label>TX antenna gain (dBi)</label>
+        <input type="number" id="tx_gain_db" value="2">
+      </div>
+
+      <div class="field">
+        <label>RX antenna gain (dBi)</label>
+        <input type="number" id="rx_gain_db" value="2">
+      </div>
+
+      <div class="field">
+        <label>Receiver sensitivity (dBm)</label>
+        <input type="number" id="rx_sens_dbm" value="-90">
+      </div>
+
+      <div class="field">
+        <label>Link margin (dB)</label>
+        <input type="number" id="margin_db" value="10">
+      </div>
+
+      <div class="field">
+        <label>Propagation model</label>
+        <select id="model">
+          <option value="fspl">Free-space (ITU-R / FSPL)</option>
+          <option value="two_ray">Two-ray ground (reflection)</option>
+          <option value="hata">Okumura-Hata (empirical)</option>
+          <option value="itu_simple">ITU-style (FSPL + environment)</option>
+        </select>
+      </div>
+
+      <div id="model-params">
+        <!-- dynamic extra params -->
+        <div class="field">
+          <label>TX antenna height (m)</label>
+          <input type="number" id="ht_m" value="0.03" step="0.01">
         </div>
+        <div class="field">
+          <label>RX antenna height (m)</label>
+          <input type="number" id="hr_m" value="1.5" step="0.1">
+        </div>
+        <div class="field" id="hata-city-row" style="display:none;">
+          <label>City type (Hata)</label>
+          <select id="city_type"><option value="urban">urban</option><option value="suburban">suburban</option><option value="rural">rural</option></select>
+        </div>
+        <div class="field" id="terrain-row" style="display:none;">
+          <label>Terrain (ITU simple)</label>
+          <select id="terrain"><option value="land">land</option><option value="suburban">suburban</option><option value="urban">urban</option><option value="forest">forest</option></select>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <button id="calcBtn" class="btn-primary">คำนวณระยะ</button>
+        <button id="copyInputs" class="btn-ghost" style="margin-left:8px;">คัดลอกเป็น JSON</button>
       </div>
     </div>
+
+    <aside>
+      <div style="margin-bottom:12px;">
+        <div class="muted">Model explanation</div>
+        <div id="modelHelp" class="muted" style="margin-top:6px;">
+          Free-space: baseline LOS. Two-ray: includes ground reflection (important with low TX heights). Hata: empirical (150–1500 MHz), city type matters. ITU-simple: FSPL + environment extra loss.
+        </div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <div class="muted">Result</div>
+        <div style="margin-top:8px;">
+          <div>Estimated max distance: <span id="dist" class="result-badge">— m</span></div>
+          <div style="margin-top:6px;">Path loss @dist: <span id="pl" class="result-badge">— dB</span></div>
+          <div style="margin-top:6px;">Received power @dist: <span id="rx" class="result-badge">— dBm</span></div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <div class="muted">Model details</div>
+        <pre class="explain" id="modelDetail">Choose a model and press "คำนวณระยะ".</pre>
+      </div>
+    </aside>
   </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <hr style="opacity:.06;margin:14px 0;">
+
+  <div>
+    <h4>Notes</h4>
+    <ul class="muted">
+      <li>Hata model is only recommended for 150–1500 MHz. For 5.8 GHz results, prefer FSPL or two-ray and treat Hata results as not applicable.</li>
+      <li>Two-ray can drastically reduce distance if TX height is small (ground reflection causing destructive interference).</li>
+      <li>These are estimates for planning and comparison — test in real field conditions.</li>
+    </ul>
+  </div>
+</div>
+
 <script>
-(async function(){
-  const form = document.getElementById('vtxForm');
-  const summary = document.getElementById('summary');
-  const csvBtn = document.getElementById('csvBtn');
-  const pngBtn = document.getElementById('pngBtn');
-  const copyBtn = document.getElementById('copyBtn');
-  const ctx = document.getElementById('rangeChart').getContext('2d');
-  let chart = null;
-  let lastResult = null;
-  const makeCSV = (x, y) => {
-    let lines = ['distance_m,link_margin_db'];
-    for(let i=0;i<x.length;i++) lines.push(`${x[i]},${y[i]}`);
-    return lines.join('\n');
+document.getElementById('model').addEventListener('change', (e)=>{
+  const v = e.target.value;
+  document.getElementById('hata-city-row').style.display = (v === 'hata') ? 'block' : 'none';
+  document.getElementById('terrain-row').style.display = (v === 'itu_simple') ? 'block' : 'none';
+  // update help text
+  const helpMap = {
+    fspl: 'Free-space (ITU-R): good baseline for unobstructed LOS. Formula PL(d)=20log10(4πd/λ).',
+    two_ray: 'Two-ray ground: direct + ground reflection; dominant at large distances when TX is low; PL grows ~d^4.',
+    hata: 'Okumura-Hata: empirical model for 150–1500 MHz; uses antenna heights and city type (urban/suburban/rural). Use with caution above 1.5 GHz.',
+    itu_simple: 'ITU-style simple: FSPL + environment extra loss (urban/forest/suburban). Quick empirical correction — not full ITU-R.'
   };
+  document.getElementById('modelHelp').textContent = helpMap[v] || helpMap.fspl;
+});
 
-  form.addEventListener('submit', async (ev) => {
-    ev.preventDefault();
-    const fd = new FormData(form);
-
-    // call server-side API
-    const res = await fetch('/vtx-calc', { method:'POST', body: fd });
-    const j = await res.json();
-    lastResult = j;
-
-    // show readable summary
-    summary.textContent = JSON.stringify(j, null, 2);
-
-    // prepare data for chart: distances 50..3000m
-    const freq_mhz = parseFloat(fd.get('freq_mhz') || 5800);
-    const x = [];
-    const y = [];
-    for(let d=25; d<=3000; d+=25){
-      const d_km = d/1000.0;
-      const fspl = 20*Math.log10(d_km) + 20*Math.log10(freq_mhz) + 32.44;
-      // link margin = effective_budget_db - FSPL
-      const eff_budget = j.computed.effective_budget_db;
-      const margin = eff_budget - fspl;
-      x.push(d);
-      y.push(Math.round(margin*10)/10);
-    }
-
-    // draw chart
-    if(chart) chart.destroy();
-    chart = new Chart(ctx, {
-      type:'line',
-      data:{
-        labels: x,
-        datasets:[{
-          label: 'Link margin (dB)',
-          data: y,
-          borderColor: '#58a6ff',
-          backgroundColor: 'rgba(88,166,255,0.08)',
-          pointRadius: 0,
-          tension: 0.15,
-          fill: false
-        }]
-      },
-      options:{
-        responsive:true,
-        maintainAspectRatio:false,
-        scales:{
-          y:{ beginAtZero:true, title:{display:true, text:'Link margin (dB)'} },
-          x:{ title:{display:true, text:'Distance (m)'} }
-        },
-        plugins:{
-          tooltip:{ callbacks: {
-            label: (ctx)=> ` ${ctx.parsed.y} dB at ${ctx.label} m`
-          }}
-        }
-      }
-    });
+async function calc(){
+  const data = new URLSearchParams();
+  ['power_mw','freq_mhz','tx_gain_db','rx_gain_db','rx_sens_dbm','margin_db','model','ht_m','hr_m','city_type','terrain'].forEach(k=>{
+    const el = document.getElementById(k) || document.querySelector(`[name="${k}"]`);
+    if(el) data.append(k, el.value);
   });
+  const res = await fetch('/vtx-calc', { method:'POST', body:data });
+  const j = await res.json();
+  if(!j.ok){ alert('Error: '+ (j.error||'unknown')); return; }
+  const r = j.results;
+  document.getElementById('dist').textContent = r.estimated_distance_m + ' m';
+  document.getElementById('pl').textContent = r.path_loss_db_at_distance + ' dB';
+  document.getElementById('rx').textContent = r.rx_dbm_at_distance + ' dBm';
+  // details
+  const explain = [
+    `Model: ${j.inputs.model}`,
+    `Tx dBm: ${j.inputs.tx_dbm} dBm (power ${j.inputs.power_mw} mW)`,
+    `Allowed path loss: ${j.results.allowed_path_loss_db} dB`,
+    `At distance: PL=${r.path_loss_db_at_distance} dB, Rx=${r.rx_dbm_at_distance} dBm`
+  ];
+  document.getElementById('modelDetail').textContent = explain.join('\\n');
+}
 
-  // copy summary
-  copyBtn.addEventListener('click', ()=>{
-    if(!lastResult) return alert('ยังไม่ได้คำนวณ');
-    navigator.clipboard.writeText(JSON.stringify(lastResult, null, 2)).then(()=> alert('คัดลอกเรียบร้อย'));
-  });
-
-  // download CSV
-  csvBtn.addEventListener('click', ()=>{
-    if(!chart) return alert('ยังไม่ได้คำนวณ');
-    const x = chart.data.labels;
-    const y = chart.data.datasets[0].data;
-    const csv = makeCSV(x,y);
-    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'vtx_range.csv'; a.click();
-    URL.revokeObjectURL(url);
-  });
-
-  // download PNG
-  pngBtn.addEventListener('click', ()=>{
-    if(!chart) return alert('ยังไม่ได้คำนวณ');
-    const url = document.getElementById('rangeChart').toDataURL('image/png', 1.0);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'vtx_range.png'; a.click();
-  });
-
-})();
+document.getElementById('calcBtn').addEventListener('click', calc);
+document.getElementById('copyInputs').addEventListener('click', ()=>{
+  const o = {
+    power_mw: document.getElementById('power_mw').value,
+    freq_mhz: document.getElementById('freq_mhz').value,
+    tx_gain_db: document.getElementById('tx_gain_db').value,
+    rx_gain_db: document.getElementById('rx_gain_db').value,
+    rx_sens_dbm: document.getElementById('rx_sens_dbm').value,
+    margin_db: document.getElementById('margin_db').value,
+    model: document.getElementById('model').value,
+    ht_m: document.getElementById('ht_m').value,
+    hr_m: document.getElementById('hr_m').value
+  };
+  navigator.clipboard.writeText(JSON.stringify(o, null, 2)).then(()=> alert('คัดลอกค่าเป็น JSON แล้ว'));
+});
 </script>
 </body>
 </html>
