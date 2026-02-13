@@ -431,6 +431,85 @@ def vtx():
     # หากต้องการส่งข้อมูลไดนามิก ให้เติม context dict
     return render_template("vtx.html")
 
+# ===== VTX range tool =====
+from flask import jsonify
+
+@app.route("/vtx-range")
+def vtx_range():
+    # render the interactive front-end page
+    return render_template("vtx_range.html")
+
+@app.route("/vtx-calc", methods=["POST"])
+def vtx_calc():
+    """
+    Accept form fields (power_mw, freq_mhz, gt, gr, rx_sens_dbm, margin_db, loss_model)
+    Return JSON with link budget, fspl@distance, estimated_max_distance_m, breakdown
+    """
+    try:
+        form = request.form
+        power_mw = float(form.get("power_mw", 200))
+        freq_mhz = float(form.get("freq_mhz", 5800))
+        gt = float(form.get("gt", 2.0))
+        gr = float(form.get("gr", 2.0))
+        rx_sens_dbm = float(form.get("rx_sens_dbm", -90.0))
+        margin_db = float(form.get("margin_db", 10.0))
+        loss_model = form.get("loss_model", "free_space")  # 'free_space','suburban','forest','urban'
+
+        # convert mW -> dBm
+        import math
+        tx_dbm = 10.0 * math.log10(max(0.0001, power_mw))
+
+        # basic link budget (dB)
+        link_budget_db = tx_dbm + gt + gr - rx_sens_dbm - margin_db
+
+        # adjust for loss model (add extra loss in dB)
+        loss_models = {
+            "free_space": 0.0,
+            "suburban": 8.0,
+            "forest": 15.0,
+            "urban": 20.0
+        }
+        extra_loss_db = loss_models.get(loss_model, 0.0)
+        effective_budget_db = link_budget_db - extra_loss_db
+
+        # FSPL formula (dB): FSPL = 20*log10(d_km) + 20*log10(freq_mhz) + 32.44
+        # Solve for distance where FSPL == effective_budget_db -> d_km = 10^((effective_budget_db - 20*log10(freq_mhz) - 32.44)/20)
+        denom = 20.0 * math.log10(freq_mhz) + 32.44
+        exp = (effective_budget_db - denom) / 20.0
+        d_km = 10 ** exp if exp > -99 else 0.0
+        est_distance_m = max(0.0, d_km * 1000.0)
+
+        # build response
+        resp = {
+            "input": {
+                "power_mw": power_mw,
+                "freq_mhz": freq_mhz,
+                "gt_dbi": gt,
+                "gr_dbi": gr,
+                "rx_sens_dbm": rx_sens_dbm,
+                "margin_db": margin_db,
+                "loss_model": loss_model
+            },
+            "computed": {
+                "tx_dbm": round(tx_dbm, 2),
+                "link_budget_db": round(link_budget_db, 2),
+                "extra_loss_db": round(extra_loss_db, 2),
+                "effective_budget_db": round(effective_budget_db, 2),
+                "estimated_max_distance_m": round(est_distance_m, 1),
+                "fspl_formula_breakdown": {
+                    "denom": round(denom, 2),
+                    "exp": round(exp, 4)
+                }
+            },
+            "notes": {
+                "model": "Free-space + selected real-world extra loss",
+                "warning": "ค่าประมาณเชิงทฤษฎี — ปัจจัยภาคพื้น/สิ่งกีดขวาง/สภาพอากาศมีผลมาก"
+            }
+        }
+        return jsonify(resp)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
 # ===============================
 # ERROR HANDLERS
 # ===============================
@@ -438,7 +517,6 @@ def vtx():
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template("404.html"), 404
-
 
 @app.errorhandler(500)
 def internal_server_error(e):
