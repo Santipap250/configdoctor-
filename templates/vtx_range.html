@@ -1,183 +1,208 @@
-<!-- templates/vtx_range.html -->
 <!doctype html>
 <html lang="th">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>VTX Range Calculator — OBIXConfig Doctor</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<title>VTX Range Calculator</title>
+
 <style>
-  .vtx-panel{ max-width:900px;margin:18px auto;padding:18px;border-radius:12px;background:linear-gradient(135deg,#0f1511,#0b0f0c);box-shadow:0 8px 30px rgba(0,0,0,0.5); }
-  .two-col{ display:grid; grid-template-columns:1fr 320px; gap:12px; }
-  .field{ margin-bottom:10px; }
-  .muted{ opacity:0.8; font-size:0.9rem; color:var(--text-color-dark,#ddd); }
-  .result-badge{ padding:10px 12px; border-radius:10px; background:#071826; display:inline-block; color:#bff; font-weight:700; }
-  pre.explain{ background:#050608; padding:8px; border-radius:8px; color:#ddd; font-size:0.9rem; overflow:auto; }
-  @media(max-width:880px){ .two-col{ grid-template-columns:1fr; } }
+:root{
+  --bg:#0d1117;
+  --card:#161b22;
+  --accent:#00e5ff;
+  --text:#e6edf3;
+  --muted:#9aa4ad;
+  --radius:16px;
+}
+body{
+  margin:0;
+  font-family: system-ui, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+header{
+  padding:14px;
+  text-align:center;
+  background:#020409;
+  font-size:1.2rem;
+  font-weight:bold;
+}
+.container{
+  padding:12px;
+  max-width:480px;
+  margin:auto;
+}
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:14px;
+  margin-bottom:12px;
+  box-shadow:0 4px 20px rgba(0,0,0,.4);
+}
+label{
+  font-size:.9rem;
+  color:var(--muted);
+}
+input,select{
+  width:100%;
+  padding:12px;
+  margin-top:4px;
+  border-radius:12px;
+  border:none;
+  background:#0d1117;
+  color:white;
+  font-size:1rem;
+}
+button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  background:var(--accent);
+  color:#000;
+  font-size:1.1rem;
+  font-weight:bold;
+  margin-top:10px;
+}
+.result{
+  font-size:1.2rem;
+  font-weight:bold;
+  color:var(--accent);
+}
+.small{
+  font-size:.85rem;
+  color:var(--muted);
+}
+.model-help{
+  font-size:.85rem;
+  margin-top:6px;
+  line-height:1.4;
+}
 </style>
 </head>
-<body class="dark">
-<div class="container vtx-panel">
-  <h2>📡 VTX Range Calculator (multi-model)</h2>
-  <p class="muted">เลือกโมเดลการแพร่ของสัญญาณ แล้วระบบจะประมาณระยะสูงสุดที่คาดว่าจะรับภาพได้ (โดยคำนวณจาก link-budget)</p>
 
-  <div class="two-col">
-    <div>
-      <div class="field">
-        <label>กำลังส่ง (mW)</label>
-        <input type="number" id="power_mw" value="200">
-      </div>
+<body>
+<header>📡 VTX Range Calculator</header>
 
-      <div class="field">
-        <label>ความถี่ (MHz)</label>
-        <input type="number" id="freq_mhz" value="5800">
-      </div>
+<div class="container">
 
-      <div class="field">
-        <label>TX antenna gain (dBi)</label>
-        <input type="number" id="tx_gain_db" value="2">
-      </div>
+<div class="card">
+<label>Power (mW)</label>
+<input type="number" id="power_mw" value="200">
 
-      <div class="field">
-        <label>RX antenna gain (dBi)</label>
-        <input type="number" id="rx_gain_db" value="2">
-      </div>
+<label>Frequency (MHz)</label>
+<input type="number" id="freq_mhz" value="5800">
 
-      <div class="field">
-        <label>Receiver sensitivity (dBm)</label>
-        <input type="number" id="rx_sens_dbm" value="-90">
-      </div>
+<label>TX Gain (dBi)</label>
+<input type="number" id="tx_gain_db" value="2">
 
-      <div class="field">
-        <label>Link margin (dB)</label>
-        <input type="number" id="margin_db" value="10">
-      </div>
+<label>RX Gain (dBi)</label>
+<input type="number" id="rx_gain_db" value="2">
 
-      <div class="field">
-        <label>Propagation model</label>
-        <select id="model">
-          <option value="fspl">Free-space (ITU-R / FSPL)</option>
-          <option value="two_ray">Two-ray ground (reflection)</option>
-          <option value="hata">Okumura-Hata (empirical)</option>
-          <option value="itu_simple">ITU-style (FSPL + environment)</option>
-        </select>
-      </div>
+<label>Receiver Sensitivity (dBm)</label>
+<input type="number" id="rx_sens_dbm" value="-90">
 
-      <div id="model-params">
-        <!-- dynamic extra params -->
-        <div class="field">
-          <label>TX antenna height (m)</label>
-          <input type="number" id="ht_m" value="0.03" step="0.01">
-        </div>
-        <div class="field">
-          <label>RX antenna height (m)</label>
-          <input type="number" id="hr_m" value="1.5" step="0.1">
-        </div>
-        <div class="field" id="hata-city-row" style="display:none;">
-          <label>City type (Hata)</label>
-          <select id="city_type"><option value="urban">urban</option><option value="suburban">suburban</option><option value="rural">rural</option></select>
-        </div>
-        <div class="field" id="terrain-row" style="display:none;">
-          <label>Terrain (ITU simple)</label>
-          <select id="terrain"><option value="land">land</option><option value="suburban">suburban</option><option value="urban">urban</option><option value="forest">forest</option></select>
-        </div>
-      </div>
+<label>Fade Margin (dB)</label>
+<input type="number" id="margin_db" value="10">
+</div>
 
-      <div style="margin-top:12px;">
-        <button id="calcBtn" class="btn-primary">คำนวณระยะ</button>
-        <button id="copyInputs" class="btn-ghost" style="margin-left:8px;">คัดลอกเป็น JSON</button>
-      </div>
-    </div>
+<div class="card">
+<label>Propagation Model</label>
+<select id="model">
+  <option value="fspl">Free Space (ITU-R)</option>
+  <option value="two_ray">Two-Ray Ground</option>
+  <option value="hata">Okumura-Hata</option>
+  <option value="itu_simple">ITU Simple</option>
+</select>
 
-    <aside>
-      <div style="margin-bottom:12px;">
-        <div class="muted">Model explanation</div>
-        <div id="modelHelp" class="muted" style="margin-top:6px;">
-          Free-space: baseline LOS. Two-ray: includes ground reflection (important with low TX heights). Hata: empirical (150–1500 MHz), city type matters. ITU-simple: FSPL + environment extra loss.
-        </div>
-      </div>
+<div class="model-help" id="modelHelp">
+Free-space: ใช้ LOS โล่ง ไม่มีสิ่งกีดขวาง
+</div>
 
-      <div style="margin-top:10px;">
-        <div class="muted">Result</div>
-        <div style="margin-top:8px;">
-          <div>Estimated max distance: <span id="dist" class="result-badge">— m</span></div>
-          <div style="margin-top:6px;">Path loss @dist: <span id="pl" class="result-badge">— dB</span></div>
-          <div style="margin-top:6px;">Received power @dist: <span id="rx" class="result-badge">— dBm</span></div>
-        </div>
-      </div>
+<label>TX Height (m)</label>
+<input type="number" id="ht_m" value="0.03" step="0.01">
 
-      <div style="margin-top:12px;">
-        <div class="muted">Model details</div>
-        <pre class="explain" id="modelDetail">Choose a model and press "คำนวณระยะ".</pre>
-      </div>
-    </aside>
-  </div>
+<label>RX Height (m)</label>
+<input type="number" id="hr_m" value="1.5" step="0.1">
 
-  <hr style="opacity:.06;margin:14px 0;">
+<div id="hataRow" style="display:none">
+<label>City Type</label>
+<select id="city_type">
+  <option value="urban">Urban</option>
+  <option value="suburban">Suburban</option>
+  <option value="rural">Rural</option>
+</select>
+</div>
 
-  <div>
-    <h4>Notes</h4>
-    <ul class="muted">
-      <li>Hata model is only recommended for 150–1500 MHz. For 5.8 GHz results, prefer FSPL or two-ray and treat Hata results as not applicable.</li>
-      <li>Two-ray can drastically reduce distance if TX height is small (ground reflection causing destructive interference).</li>
-      <li>These are estimates for planning and comparison — test in real field conditions.</li>
-    </ul>
-  </div>
+<div id="terrainRow" style="display:none">
+<label>Terrain</label>
+<select id="terrain">
+  <option value="land">Land</option>
+  <option value="urban">Urban</option>
+  <option value="forest">Forest</option>
+</select>
+</div>
+
+<button onclick="calc()">คำนวณระยะ</button>
+</div>
+
+<div class="card">
+<div class="small">Estimated Distance</div>
+<div class="result" id="dist">—</div>
+
+<div class="small">Path Loss</div>
+<div class="result" id="pl">—</div>
+
+<div class="small">RX Power</div>
+<div class="result" id="rx">—</div>
+</div>
+
+<div class="card small">
+<b>Model Explanation</b>
+<pre id="detail">เลือกโมเดลแล้วกดคำนวณ</pre>
+</div>
+
 </div>
 
 <script>
-document.getElementById('model').addEventListener('change', (e)=>{
-  const v = e.target.value;
-  document.getElementById('hata-city-row').style.display = (v === 'hata') ? 'block' : 'none';
-  document.getElementById('terrain-row').style.display = (v === 'itu_simple') ? 'block' : 'none';
-  // update help text
-  const helpMap = {
-    fspl: 'Free-space (ITU-R): good baseline for unobstructed LOS. Formula PL(d)=20log10(4πd/λ).',
-    two_ray: 'Two-ray ground: direct + ground reflection; dominant at large distances when TX is low; PL grows ~d^4.',
-    hata: 'Okumura-Hata: empirical model for 150–1500 MHz; uses antenna heights and city type (urban/suburban/rural). Use with caution above 1.5 GHz.',
-    itu_simple: 'ITU-style simple: FSPL + environment extra loss (urban/forest/suburban). Quick empirical correction — not full ITU-R.'
-  };
-  document.getElementById('modelHelp').textContent = helpMap[v] || helpMap.fspl;
+const help={
+ fspl:"Free-space (ITU-R): LOS โล่ง สูตรพื้นฐาน",
+ two_ray:"Two-ray: รวมสัญญาณสะท้อนจากพื้น เหมาะกับเสาต่ำ",
+ hata:"Okumura-Hata: โมเดลเชิงประจักษ์ 150–1500 MHz",
+ itu_simple:"ITU simple: FSPL + ค่าสภาพแวดล้อม"
+};
+
+document.getElementById("model").addEventListener("change",e=>{
+ const v=e.target.value;
+ document.getElementById("modelHelp").textContent=help[v];
+ document.getElementById("hataRow").style.display=(v==="hata")?"block":"none";
+ document.getElementById("terrainRow").style.display=(v==="itu_simple")?"block":"none";
 });
 
 async function calc(){
-  const data = new URLSearchParams();
-  ['power_mw','freq_mhz','tx_gain_db','rx_gain_db','rx_sens_dbm','margin_db','model','ht_m','hr_m','city_type','terrain'].forEach(k=>{
-    const el = document.getElementById(k) || document.querySelector(`[name="${k}"]`);
-    if(el) data.append(k, el.value);
-  });
-  const res = await fetch('/vtx-calc', { method:'POST', body:data });
-  const j = await res.json();
-  if(!j.ok){ alert('Error: '+ (j.error||'unknown')); return; }
-  const r = j.results;
-  document.getElementById('dist').textContent = r.estimated_distance_m + ' m';
-  document.getElementById('pl').textContent = r.path_loss_db_at_distance + ' dB';
-  document.getElementById('rx').textContent = r.rx_dbm_at_distance + ' dBm';
-  // details
-  const explain = [
-    `Model: ${j.inputs.model}`,
-    `Tx dBm: ${j.inputs.tx_dbm} dBm (power ${j.inputs.power_mw} mW)`,
-    `Allowed path loss: ${j.results.allowed_path_loss_db} dB`,
-    `At distance: PL=${r.path_loss_db_at_distance} dB, Rx=${r.rx_dbm_at_distance} dBm`
-  ];
-  document.getElementById('modelDetail').textContent = explain.join('\\n');
-}
+ const data=new URLSearchParams();
+ ["power_mw","freq_mhz","tx_gain_db","rx_gain_db","rx_sens_dbm","margin_db",
+  "model","ht_m","hr_m","city_type","terrain"].forEach(id=>{
+   const el=document.getElementById(id);
+   if(el) data.append(id,el.value);
+ });
 
-document.getElementById('calcBtn').addEventListener('click', calc);
-document.getElementById('copyInputs').addEventListener('click', ()=>{
-  const o = {
-    power_mw: document.getElementById('power_mw').value,
-    freq_mhz: document.getElementById('freq_mhz').value,
-    tx_gain_db: document.getElementById('tx_gain_db').value,
-    rx_gain_db: document.getElementById('rx_gain_db').value,
-    rx_sens_dbm: document.getElementById('rx_sens_dbm').value,
-    margin_db: document.getElementById('margin_db').value,
-    model: document.getElementById('model').value,
-    ht_m: document.getElementById('ht_m').value,
-    hr_m: document.getElementById('hr_m').value
-  };
-  navigator.clipboard.writeText(JSON.stringify(o, null, 2)).then(()=> alert('คัดลอกค่าเป็น JSON แล้ว'));
-});
+ const r=await fetch("/vtx-calc",{method:"POST",body:data});
+ const j=await r.json();
+
+ if(!j.ok){ alert("Error"); return; }
+
+ document.getElementById("dist").textContent=j.results.estimated_distance_m+" m";
+ document.getElementById("pl").textContent=j.results.path_loss_db_at_distance+" dB";
+ document.getElementById("rx").textContent=j.results.rx_dbm_at_distance+" dBm";
+
+ document.getElementById("detail").textContent=
+ `Model: ${j.inputs.model}
+Allowed Path Loss: ${j.results.allowed_path_loss_db} dB
+TX dBm: ${j.inputs.tx_dbm}
+RX dBm: ${j.results.rx_dbm_at_distance}`;
+}
 </script>
+
 </body>
 </html>
