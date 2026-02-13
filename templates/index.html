@@ -191,6 +191,15 @@ if('IntersectionObserver' in window){
   <span class="dl-pill">tool</span>
 </a>
 
+<a class="drawer-link" href="/vtx-range" onclick="closeDrawer();">
+  <span class="dl-icon" aria-hidden="true">📡🏞️</span>
+  <span class="dl-body">
+    <span class="dl-title">VTX Range Calculator</span>
+    <span class="dl-meta">ประมาณระยะสัญญาณ + กราฟ</span>
+  </span>
+  <span class="dl-pill">tool</span>
+</a>
+
       <a class="drawer-link" href="{{ url_for('about') }}" onclick="closeDrawer();">
       <span class="dl-icon" aria-hidden="true">ℹ️</span>
       <span class="dl-body">
@@ -208,15 +217,6 @@ if('IntersectionObserver' in window){
       </span>
       <span class="dl-pill">v1.0lite</span>
     </a>
-
-<a class="drawer-link" href="/vtx-range" onclick="closeDrawer();">
-  <span class="dl-icon" aria-hidden="true">📡</span>
-  <span class="dl-body">
-    <span class="dl-title">VTX Range Calculator</span>
-    <span class="dl-meta">ประมาณระยะสัญญาณ + กราฟ</span>
-  </span>
-  <span class="dl-pill">tool</span>
-</a>
 
 <!-- เพิ่มในส่วนเมนู / drawer -->
 <a class="drawer-link" href="{{ url_for('downloads_index') }}">
