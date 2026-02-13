@@ -431,84 +431,186 @@ def vtx():
     # หากต้องการส่งข้อมูลไดนามิก ให้เติม context dict
     return render_template("vtx.html")
 
-# ===== VTX range tool =====
+# ===============================
+# ROUTE: VTX Range Calculator (multi-model)
+# ===============================
 from flask import jsonify
+import math
 
-@app.route("/vtx-range")
-def vtx_range():
-    # render the interactive front-end page
-    return render_template("vtx_range.html")
+# helper: wavelength (m) from MHz
+def _lambda_m(freq_mhz):
+    return 300.0 / float(freq_mhz)
+
+# Path loss (dB) models
+def path_loss_fspl(d_m, freq_mhz):
+    """Free-space path loss (d in meters, f in MHz)"""
+    lam = _lambda_m(freq_mhz)
+    # FSPL = 20*log10(4*pi*d / lambda)
+    if d_m <= 0:
+        return 0.0
+    return 20.0 * math.log10(4.0 * math.pi * d_m / lam)
+
+def path_loss_two_ray(d_m, freq_mhz, ht_m=0.3, hr_m=0.3):
+    """Two-ray ground approximation (valid for moderate/large d)
+       Uses far-field large-distance approx:
+       PL_two_ray(dB) = 40*log10(d) - 20*log10(ht) - 20*log10(hr) - 20*log10(lambda/(4*pi))
+       (d in meters, ht/hr in meters)
+    """
+    lam = _lambda_m(freq_mhz)
+    if d_m <= 0:
+        return 0.0
+    const = 20.0 * math.log10(lam / (4.0 * math.pi))
+    return 40.0 * math.log10(d_m) - 20.0 * math.log10(ht_m) - 20.0 * math.log10(hr_m) - const
+
+def path_loss_hata(d_m, freq_mhz, ht_m=1.0, hr_m=1.0, city_type="urban"):
+    """Okumura-Hata model (classic). Valid approx 150 - 1500 MHz and d in km.
+       Reference formula (urban); includes small-city correction a(hr).
+       We include 'urban', 'suburban', 'rural' variants.
+    """
+    d_km = max(0.001, d_m / 1000.0)
+    f = float(freq_mhz)
+    # a(hr) correction (for small/medium cities)
+    # a(hr) = (1.1*log10(f) - 0.7)*hr - (1.56*log10(f) - 0.8)
+    a_hr = (1.1 * math.log10(f) - 0.7) * hr_m - (1.56 * math.log10(f) - 0.8)
+    # Hata urban basic:
+    L = 69.55 + 26.16 * math.log10(f) - 13.82 * math.log10(ht_m) - a_hr + (44.9 - 6.55 * math.log10(ht_m)) * math.log10(d_km)
+    if city_type == "suburban":
+        # correction for suburban
+        L = L - 2 * (math.log10(f / 28.0))**2 - 5.4
+    elif city_type == "rural":
+        # rural modification (ITU simplified)
+        L = L - 4.78 * (math.log10(f))**2 + 18.33 * math.log10(f) - 40.94
+    return L
+
+def path_loss_itu_simple(d_m, freq_mhz, terrain="land"):
+    """Very simple ITU fallback: FSPL plus an environment loss term.
+       This is NOT full ITU-R P.1546 but gives usable correction bands.
+    """
+    base = path_loss_fspl(d_m, freq_mhz)
+    env_extra = {
+        "land": 0.0,
+        "suburban": 8.0,
+        "urban": 15.0,
+        "forest": 20.0
+    }.get(terrain, 0.0)
+    return base + env_extra
+
+# numeric solver: find d such that path_loss(d) ~= allowed_loss (binary search)
+def solve_distance_for_loss(allowed_loss_db, freq_mhz, model, model_args=None, d_min=0.5, d_max=1e6):
+    model_args = model_args or {}
+    low = d_min
+    high = d_max
+    # if even at max distance loss < allowed, return max
+    def pl_at(d):
+        if model == "fspl":
+            return path_loss_fspl(d, freq_mhz)
+        elif model == "two_ray":
+            return path_loss_two_ray(d, freq_mhz, **model_args)
+        elif model == "hata":
+            return path_loss_hata(d, freq_mhz, **model_args)
+        elif model == "itu_simple":
+            return path_loss_itu_simple(d, freq_mhz, **model_args)
+        else:
+            return path_loss_fspl(d, freq_mhz)
+
+    # check monotonicity: generally path loss increases with d for these models
+    # If allowed_loss is lower than PL at d_min => distance < d_min
+    if pl_at(low) > allowed_loss_db:
+        return low
+    # if even at high PL < allowed => return high
+    if pl_at(high) <= allowed_loss_db:
+        return high
+
+    for _ in range(60):
+        mid = (low + high) / 2.0
+        pl = pl_at(mid)
+        if pl > allowed_loss_db:
+            high = mid
+        else:
+            low = mid
+    return (low + high) / 2.0
 
 @app.route("/vtx-calc", methods=["POST"])
 def vtx_calc():
-    """
-    Accept form fields (power_mw, freq_mhz, gt, gr, rx_sens_dbm, margin_db, loss_model)
-    Return JSON with link budget, fspl@distance, estimated_max_distance_m, breakdown
-    """
     try:
-        form = request.form
-        power_mw = float(form.get("power_mw", 200))
-        freq_mhz = float(form.get("freq_mhz", 5800))
-        gt = float(form.get("gt", 2.0))
-        gr = float(form.get("gr", 2.0))
-        rx_sens_dbm = float(form.get("rx_sens_dbm", -90.0))
-        margin_db = float(form.get("margin_db", 10.0))
-        loss_model = form.get("loss_model", "free_space")  # 'free_space','suburban','forest','urban'
+        # read form values (defaults tuned for FPV)
+        power_mw = float(request.form.get("power_mw", 200.0))   # mW
+        freq_mhz = float(request.form.get("freq_mhz", 5800.0))
+        tx_gain_db = float(request.form.get("tx_gain_db", 2.0))
+        rx_gain_db = float(request.form.get("rx_gain_db", 2.0))
+        rx_sens_dbm = float(request.form.get("rx_sens_dbm", -90.0))
+        margin_db = float(request.form.get("margin_db", 10.0))
+        model = request.form.get("model", "fspl")
 
-        # convert mW -> dBm
-        import math
-        tx_dbm = 10.0 * math.log10(max(0.0001, power_mw))
+        # optional model params
+        ht_m = float(request.form.get("ht_m", 0.03))   # tx antenna height (m) small VTX on quad ~0.03-0.1
+        hr_m = float(request.form.get("hr_m", 1.5))    # rx antenna height (m) - pilot goggles ~1-1.8
+        city_type = request.form.get("city_type", "urban")
+        terrain = request.form.get("terrain", "land")
 
-        # basic link budget (dB)
-        link_budget_db = tx_dbm + gt + gr - rx_sens_dbm - margin_db
+        # compute tx dBm
+        tx_dbm = 10.0 * math.log10(max(power_mw, 0.001))  # convert mW->dBm
+        # allowed path loss = Pt + Gt + Gr - (Rx_sens + margin)
+        allowed_loss_db = tx_dbm + tx_gain_db + rx_gain_db - (rx_sens_dbm + margin_db)
 
-        # adjust for loss model (add extra loss in dB)
-        loss_models = {
-            "free_space": 0.0,
-            "suburban": 8.0,
-            "forest": 15.0,
-            "urban": 20.0
-        }
-        extra_loss_db = loss_models.get(loss_model, 0.0)
-        effective_budget_db = link_budget_db - extra_loss_db
+        # pick model args
+        model_args = {}
+        if model == "two_ray":
+            model_args = {"ht_m": max(0.01, ht_m), "hr_m": max(0.01, hr_m)}
+        elif model == "hata":
+            model_args = {"ht_m": max(1.0, ht_m), "hr_m": max(1.0, hr_m), "city_type": city_type}
+        elif model == "itu_simple":
+            model_args = {"terrain": terrain}
 
-        # FSPL formula (dB): FSPL = 20*log10(d_km) + 20*log10(freq_mhz) + 32.44
-        # Solve for distance where FSPL == effective_budget_db -> d_km = 10^((effective_budget_db - 20*log10(freq_mhz) - 32.44)/20)
-        denom = 20.0 * math.log10(freq_mhz) + 32.44
-        exp = (effective_budget_db - denom) / 20.0
-        d_km = 10 ** exp if exp > -99 else 0.0
-        est_distance_m = max(0.0, d_km * 1000.0)
+        # solve for distance (meters)
+        est_d_m = solve_distance_for_loss(allowed_loss_db, freq_mhz, model, model_args=model_args, d_min=0.5, d_max=2e6)
 
-        # build response
-        resp = {
-            "input": {
+        # also compute PL at that distance and received power
+        if model == "fspl":
+            pl_db = path_loss_fspl(est_d_m, freq_mhz)
+        elif model == "two_ray":
+            pl_db = path_loss_two_ray(est_d_m, freq_mhz, **model_args)
+        elif model == "hata":
+            pl_db = path_loss_hata(est_d_m, freq_mhz, **model_args)
+        else:
+            pl_db = path_loss_itu_simple(est_d_m, freq_mhz, **model_args)
+
+        rx_dbm = tx_dbm + tx_gain_db + rx_gain_db - pl_db
+
+        # return structured JSON (used by JS)
+        return jsonify({
+            "ok": True,
+            "inputs": {
                 "power_mw": power_mw,
                 "freq_mhz": freq_mhz,
-                "gt_dbi": gt,
-                "gr_dbi": gr,
+                "tx_dbm": round(tx_dbm,2),
+                "tx_gain_db": tx_gain_db,
+                "rx_gain_db": rx_gain_db,
                 "rx_sens_dbm": rx_sens_dbm,
                 "margin_db": margin_db,
-                "loss_model": loss_model
+                "model": model,
+                "ht_m": ht_m,
+                "hr_m": hr_m,
+                "city_type": city_type,
+                "terrain": terrain
             },
-            "computed": {
-                "tx_dbm": round(tx_dbm, 2),
-                "link_budget_db": round(link_budget_db, 2),
-                "extra_loss_db": round(extra_loss_db, 2),
-                "effective_budget_db": round(effective_budget_db, 2),
-                "estimated_max_distance_m": round(est_distance_m, 1),
-                "fspl_formula_breakdown": {
-                    "denom": round(denom, 2),
-                    "exp": round(exp, 4)
+            "results": {
+                "allowed_path_loss_db": round(allowed_loss_db,2),
+                "estimated_distance_m": round(est_d_m,1),
+                "path_loss_db_at_distance": round(pl_db,2),
+                "rx_dbm_at_distance": round(rx_dbm,2)
+            },
+            "explain": {
+                "model_help": {
+                    "fspl": "Free-space (ITU-R reference): good baseline in unobstructed LOS. PL(dB)=20log10(4πd/λ).",
+                    "two_ray": "Two-ray ground: includes direct + ground-reflection interference; tends to dominate at larger distances where PL∝d^4.",
+                    "hata": "Okumura–Hata (empirical): built for 150–1500 MHz, uses antenna heights and city type; caution above its frequency validity.",
+                    "itu_simple": "Simple ITU-style correction: FSPL + environment extra loss (urban/forest/suburban). Not a full ITU-R P.1546 implementation."
                 }
-            },
-            "notes": {
-                "model": "Free-space + selected real-world extra loss",
-                "warning": "ค่าประมาณเชิงทฤษฎี — ปัจจัยภาคพื้น/สิ่งกีดขวาง/สภาพอากาศมีผลมาก"
             }
-        }
-        return jsonify(resp)
+        })
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"ok": False, "error": str(e)}), 400
 
 # ===============================
 # ERROR HANDLERS
