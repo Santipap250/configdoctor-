@@ -1,0 +1,32 @@
+/* static/css/motor_prop.css - responsive for mobile + desktop */
+:root{
+  --bg:#0f1113; --card:#161718; --muted:#9aa4b2; --accent:#17c964; --text:#e6eef3;
+  --gap:14px;
+}
+body.light{ --bg:#f5f6f8; --card:#fff; --muted:#6b7785; --text:#111;}
+body{ font-family:Inter, "Noto Sans Thai UI", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg); color:var(--text); margin:0; padding:0;}
+.tool-shell{max-width:1100px;margin:0 auto;padding:16px;}
+.tool-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.tool-header h1{margin:0;font-size:1.2rem}
+.tool-header .subtitle{margin:4px 0 0;font-size:.95rem;color:var(--muted)}
+.left .back{display:inline-block;color:var(--muted);text-decoration:none;margin-right:12px}
+.icon-btn{background:transparent;border:0;font-size:1.35rem;cursor:pointer;padding:8px;border-radius:8px}
+.tool-main{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start}
+@media (max-width:920px){
+  .tool-main{grid-template-columns:1fr; padding-bottom:40px}
+  .mp-result{order:2}
+}
+.group{background:var(--card);padding:12px;border-radius:12px;margin-bottom:12px}
+label{display:block;font-size:.95rem;margin-bottom:10px}
+input, select{display:block;width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.04);background:transparent;color:inherit;font-size:1rem}
+.form-actions{display:flex;gap:8px;align-items:center;justify-content:flex-start;margin-top:8px}
+.btn-primary{background:linear-gradient(90deg,var(--accent),#0ea88a);border:0;color:white;padding:10px 12px;border-radius:10px;font-weight:700;cursor:pointer}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.04);color:var(--text);padding:8px 10px;border-radius:8px;cursor:pointer}
+.mp-result .card{background:var(--card);padding:12px;border-radius:12px}
+.metrics{display:grid;grid-template-columns:repeat(1,1fr);gap:6px;margin-bottom:8px}
+@media(min-width:640px){ .metrics{grid-template-columns:repeat(2,1fr)} }
+.metric{display:flex;justify-content:space-between;padding:8px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent)}
+.k{color:var(--muted);font-size:.9rem}
+.v{font-weight:700}
+.cli{background:#07111a;color:#bde3ff;padding:10px;border-radius:8px;overflow:auto}
+.muted{color:var(--muted)}
