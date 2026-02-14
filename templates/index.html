@@ -209,6 +209,10 @@ if('IntersectionObserver' in window){
   <span class="dl-pill">tool</span>
 </a>
 
+<button onclick="sendOsdExport('txt', false)">Export .txt</button>
+<button onclick="sendOsdExport('cli', false)">Export pseudo-CLI</button>
+<button onclick="sendOsdExport('txt', true)">Save to server</button>
+
       <a class="drawer-link" href="{{ url_for('about') }}" onclick="closeDrawer();">
       <span class="dl-icon" aria-hidden="true">ℹ️</span>
       <span class="dl-body">
