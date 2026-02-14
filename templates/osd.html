@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>OBIXConfig — OSD Designer</title>
+<style>
+  :root{
+    --bg:#0f1113; --card:#16171a; --muted:#9aa4b2; --accent:#4CAF50;
+    --glass: rgba(255,255,255,0.03);
+  }
+  html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+  body{background:var(--bg); color:#e6eef3; -webkit-font-smoothing:antialiased; padding:12px;}
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .logo{height:36px}
+  .title{font-weight:700;font-size:18px}
+  .container{display:flex;gap:12px;align-items:flex-start}
+  /* left palette */
+  .palette{width:88px;background:var(--card);border-radius:12px;padding:10px;box-shadow:0 6px 18px rgba(0,0,0,0.6)}
+  .palette h4{font-size:12px;margin:0 0 8px 0;color:var(--muted)}
+  .icon-btn{display:flex;align-items:center;justify-content:center; width:56px;height:56px;margin:6px auto;border-radius:10px;background:var(--glass);cursor:pointer; user-select:none}
+  .icon-btn:active{transform:translateY(1px)}
+  .icon-emoji{font-size:22px}
+  .palette .small{font-size:11px;color:var(--muted);text-align:center;margin-top:6px}
+  /* center canvas */
+  .canvas-wrap{flex:1;display:flex;flex-direction:column;gap:10px}
+  .canvas-toolbar{display:flex;gap:8px;align-items:center}
+  .btn{background:linear-gradient(180deg,#2a2e31,#18181a);border:1px solid rgba(255,255,255,0.03);padding:8px 12px;border-radius:10px;color:#e6eef3;cursor:pointer}
+  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+  .preview{background:linear-gradient(180deg,#060708,#0e0f10);border-radius:12px;padding:12px;display:flex;justify-content:center;align-items:center;min-height:420px;box-shadow:inset 0 3px 20px rgba(0,0,0,0.7)}
+  .screen{position:relative;background:#040404;border-radius:6px;width:360px;height:240px;box-shadow:0 8px 30px rgba(0,0,0,0.6);overflow:hidden;border:1px solid rgba(255,255,255,0.02)}
+  .screen.grid{background-image:linear-gradient(rgba(255,255,255,0.01) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px); background-size:24px 24px, 24px 24px;}
+  .item{position:absolute;touch-action:none;cursor:grab;display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.02);font-size:13px}
+  .item .label{font-weight:600}
+  .properties{display:flex;flex-direction:column;gap:8px;background:var(--card);border-radius:12px;padding:10px;width:300px;box-shadow:0 6px 16px rgba(0,0,0,0.6)}
+  .prop-row{display:flex;flex-direction:column;gap:6px}
+  .prop-row label{font-size:12px;color:var(--muted)}
+  input[type="text"], input[type="number"], select{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:8px;color:inherit}
+  .muted{color:var(--muted);font-size:13px}
+  .small{font-size:12px;color:var(--muted)}
+  footer{margin-top:12px;color:var(--muted);font-size:12px}
+  /* responsive */
+  @media (max-width:900px){
+    .container{flex-direction:column}
+    .palette{order:2;display:flex;flex-direction:row;gap:8px;width:100%;padding:8px;overflow:auto}
+    .properties{width:100%}
+    .preview{min-height:300px}
+    .screen{width:90%;height:220px}
+  }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="btn ghost" onclick="history.back()" title="กลับ">◀</button>
+      <div class="title">OSD Designer — OBIXConfig</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+      <button class="btn" id="saveLocal">Save (Local)</button>
+      <button class="btn" id="loadLocal">Load (Local)</button>
+      <button class="btn" id="exportBtn">Export (BF CLI)</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- palette -->
+    <aside class="palette" aria-label="OSD palette">
+      <h4>Elements</h4>
+      <div title="Battery" class="icon-btn" data-type="battery" tabindex="0"><div class="icon-emoji">🔋</div></div>
+      <div title="RSSI" class="icon-btn" data-type="rssi" tabindex="0"><div class="icon-emoji">📶</div></div>
+      <div title="Timer" class="icon-btn" data-type="timer" tabindex="0"><div class="icon-emoji">⏱️</div></div>
+      <div title="VTX" class="icon-btn" data-type="vtx" tabindex="0"><div class="icon-emoji">📡</div></div>
+      <div title="Throttle" class="icon-btn" data-type="throttle" tabindex="0"><div class="icon-emoji">🎚️</div></div>
+      <div title="Text" class="icon-btn" data-type="text" tabindex="0"><div class="icon-emoji">🔤</div></div>
+      <div class="small">แตะเพื่อเพิ่ม → ลากเพื่อย้าย</div>
+    </aside>
+
+    <!-- canvas & toolbar -->
+    <main class="canvas-wrap">
+      <div class="canvas-toolbar">
+        <div class="muted small">Preview scale</div>
+        <select id="scaleSelect" class="btn ghost" style="width:92px">
+          <option value="1">1x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2">2x</option>
+          <option value="fit">Fit</option>
+        </select>
+        <div style="margin-left:auto" class="small muted">Tip: บนมือถือ แตะไอคอนค้างเพื่อเลือก</div>
+      </div>
+
+      <div class="preview" role="region" aria-label="OSD preview area">
+        <div id="screen" class="screen grid" tabindex="0" aria-label="OSD screen">
+          <!-- items go here -->
+        </div>
+      </div>
+
+      <footer>
+        ผลลัพธ์จะส่งเป็นไฟล์ข้อความที่สามารถนำไปวางใน Betaflight CLI ได้ (หรือดาวน์โหลดแบบ JSON เก็บไว้)
+      </footer>
+    </main>
+
+    <!-- properties -->
+    <aside class="properties" aria-label="Properties panel">
+      <h4 style="margin:0 0 4px 0">Properties</h4>
+      <div id="noSelection" class="muted small">เลือกไอคอนบนหน้าจอเพื่อแก้ค่า</div>
+
+      <div id="props" style="display:none">
+        <div class="prop-row">
+          <label>Type</label>
+          <input type="text" id="p_type" readonly>
+        </div>
+
+        <div class="prop-row">
+          <label>Text / Label</label>
+          <input type="text" id="p_text" placeholder="ตัวอย่าง: BATT">
+        </div>
+
+        <div class="prop-row">
+          <label>Position X (px)</label>
+          <input type="number" id="p_x" step="1">
+        </div>
+
+        <div class="prop-row">
+          <label>Position Y (px)</label>
+          <input type="number" id="p_y" step="1">
+        </div>
+
+        <div class="prop-row">
+          <label>Font size (px)</label>
+          <input type="number" id="p_size" value="14">
+        </div>
+
+        <div class="prop-row">
+          <label>Color</label>
+          <input type="text" id="p_color" placeholder="#ffffff">
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="deleteBtn" class="btn ghost">Delete</button>
+          <button id="cloneBtn" class="btn">Clone</button>
+        </div>
+      </div>
+
+      <hr style="opacity:.06;margin:12px 0;">
+      <div class="small muted">Presets</div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn ghost" onclick="loadPreset('freestyle')">Freestyle</button>
+        <button class="btn ghost" onclick="loadPreset('longrange')">LongRange</button>
+        <button class="btn ghost" onclick="loadPreset('cine')">Cinematic</button>
+      </div>
+
+      <div style="height:10px"></div>
+      <div class="small muted">Export / Save</div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn" id="copyCLI">Copy CLI</button>
+        <button class="btn ghost" id="downloadJson">Download JSON</button>
+      </div>
+    </aside>
+  </div>
+
+<script>
+/* Simple OSD Designer logic (no dependencies) */
+const screen = document.getElementById('screen');
+const scaleSelect = document.getElementById('scaleSelect');
+const propsPanel = document.getElementById('props');
+const noSelection = document.getElementById('noSelection');
+
+let model = {
+  width: 360, height: 240, items: []
+};
+let selectedId = null;
+let idCounter = 1;
+
+function render(){
+  // clear
+  screen.innerHTML = '';
+  model.items.forEach(it => {
+    const el = document.createElement('div');
+    el.className = 'item';
+    el.dataset.id = it.id;
+    el.style.left = (it.x) + 'px';
+    el.style.top = (it.y) + 'px';
+    el.style.fontSize = (it.size || 14) + 'px';
+    el.style.color = it.color || '#fff';
+    el.innerHTML = `<span class="label">${it.label || it.type.toUpperCase()}</span>`;
+    // selection style
+    if(it.id === selectedId) el.style.boxShadow = '0 6px 18px rgba(0,0,0,0.6), 0 0 0 2px rgba(76,175,80,0.12)';
+    // pointer events for drag
+    el.addEventListener('pointerdown', startDrag);
+    el.addEventListener('click', (ev)=>{ ev.stopPropagation(); selectItem(it.id); });
+    // long-press support for mobile selection
+    let pressTimer = null;
+    el.addEventListener('touchstart', (e)=> { pressTimer = setTimeout(()=> selectItem(it.id), 500); }, {passive:true});
+    el.addEventListener('touchend', ()=> { clearTimeout(pressTimer); });
+    screen.appendChild(el);
+  });
+  updatePropsPanel();
+}
+
+function addItem(type){
+  const item = {
+    id: 'i'+(idCounter++),
+    type: type,
+    label: (type==='text') ? 'TEXT' : type.toUpperCase(),
+    x: Math.round((model.width - 80)/2),
+    y: Math.round((model.height - 20)/2),
+    size: 14,
+    color: '#ffffff',
+    options: {}
+  };
+  model.items.push(item);
+  selectedId = item.id;
+  render();
+}
+
+document.querySelectorAll('.icon-btn').forEach(b => {
+  b.addEventListener('click', ()=> addItem(b.dataset.type));
+});
+
+screen.addEventListener('click', ()=> { selectedId = null; render(); });
+
+function selectItem(id){
+  selectedId = id;
+  updatePropsPanel();
+  render();
+}
+
+function updatePropsPanel(){
+  if(!selectedId){
+    propsPanel.style.display = 'none';
+    noSelection.style.display = 'block';
+    return;
+  }
+  noSelection.style.display = 'none';
+  propsPanel.style.display = 'block';
+  const it = model.items.find(x=>x.id===selectedId);
+  if(!it) return;
+  document.getElementById('p_type').value = it.type;
+  document.getElementById('p_text').value = it.label;
+  document.getElementById('p_x').value = it.x;
+  document.getElementById('p_y').value = it.y;
+  document.getElementById('p_size').value = it.size;
+  document.getElementById('p_color').value = it.color;
+}
+
+/* property bindings */
+['p_text','p_x','p_y','p_size','p_color'].forEach(id => {
+  document.getElementById(id).addEventListener('input', (e)=>{
+    if(!selectedId) return;
+    const it = model.items.find(x=>x.id===selectedId);
+    if(!it) return;
+    const v = e.target.value;
+    if(id==='p_x' || id==='p_y' || id==='p_size') it[id.replace('p_','')] = Number(v);
+    else if(id==='p_text') it.label = v;
+    else it.color = v;
+    render();
+  });
+});
+
+document.getElementById('deleteBtn').addEventListener('click', ()=>{
+  if(!selectedId) return;
+  model.items = model.items.filter(x=>x.id!==selectedId);
+  selectedId = null;
+  render();
+});
+document.getElementById('cloneBtn').addEventListener('click', ()=>{
+  const it = model.items.find(x=>x.id===selectedId);
+  if(!it) return;
+  const clone = {...it, id:'i'+(idCounter++), x: it.x+12, y: it.y+12};
+  model.items.push(clone);
+  selectedId = clone.id;
+  render();
+});
+
+/* Drag & drop (pointer events) */
+let dragState = null;
+function startDrag(ev){
+  ev.preventDefault();
+  ev.stopPropagation();
+  const id = ev.currentTarget.dataset.id;
+  const it = model.items.find(x=>x.id===id);
+  if(!it) return;
+  dragState = {id:id, startX:ev.clientX, startY:ev.clientY, origX:it.x, origY:it.y};
+  document.addEventListener('pointermove', onDrag);
+  document.addEventListener('pointerup', endDrag);
+}
+function onDrag(ev){
+  if(!dragState) return;
+  const dx = ev.clientX - dragState.startX;
+  const dy = ev.clientY - dragState.startY;
+  const it = model.items.find(x=>x.id===dragState.id);
+  if(!it) return;
+  // apply
+  it.x = Math.round(Math.max(0, Math.min(model.width - 20, dragState.origX + dx)));
+  it.y = Math.round(Math.max(0, Math.min(model.height - 12, dragState.origY + dy)));
+  selectedId = it.id;
+  render();
+}
+function endDrag(){
+  document.removeEventListener('pointermove', onDrag);
+  document.removeEventListener('pointerup', endDrag);
+  dragState = null;
+}
+
+/* scale handling */
+scaleSelect.addEventListener('change', ()=>{
+  const val = scaleSelect.value;
+  if(val === 'fit'){
+    const parentW = screen.parentElement.clientWidth;
+    const scale = Math.max(0.5, Math.min(2.0, (parentW - 40) / model.width));
+    screen.style.transform = `scale(${scale})`;
+    screen.style.transformOrigin = 'top left';
+  } else {
+    screen.style.transform = `scale(${Number(val)})`;
+    screen.style.transformOrigin = 'top left';
+  }
+});
+
+/* presets */
+function loadPreset(k){
+  model.items = [];
+  if(k==='freestyle'){
+    model.items.push({id:'i1',type:'battery',label:'BATT',x:10,y:10,size:14,color:'#fff',options:{}});
+    model.items.push({id:'i2',type:'timer',label:'TIME',x:260,y:10,size:14,color:'#fff',options:{}});
+  } else if(k==='longrange'){
+    model.items.push({id:'i'+(idCounter++),type:'battery',label:'BATT',x:10,y:10,size:14,color:'#fff',options:{}});
+    model.items.push({id:'i'+(idCounter++),type:'rssi',label:'RSSI',x:10,y:40,size:14,color:'#fff',options:{}});
+  } else if(k==='cine'){
+    model.items.push({id:'i'+(idCounter++),type:'timer',label:'TIME',x:10,y:10,size:14,color:'#fff',options:{}});
+    model.items.push({id:'i'+(idCounter++),type:'text',label:'REC',x:260,y:10,size:14,color:'#ff6b6b',options:{}});
+  }
+  render();
+}
+
+/* save / load local */
+document.getElementById('saveLocal').addEventListener('click', ()=>{
+  localStorage.setItem('obix_osd', JSON.stringify(model));
+  alert('Saved to localStorage');
+});
+document.getElementById('loadLocal').addEventListener('click', ()=>{
+  const s = localStorage.getItem('obix_osd');
+  if(!s){ alert('No saved layout'); return; }
+  try{ model = JSON.parse(s); render(); alert('Loaded'); }catch(e){ alert('Load error'); }
+});
+
+/* export to server as BF CLI-like text */
+async function exportLayout(){
+  const payload = { width: model.width, height: model.height, items: model.items };
+  // POST JSON to /osd/export and download response as file
+  try{
+    const resp = await fetch('/osd/export', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if(!resp.ok) throw new Error('export failed');
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'obix_osd_layout.txt';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }catch(err){
+    alert('Export failed: ' + err.message);
+  }
+}
+document.getElementById('exportBtn').addEventListener('click', exportLayout);
+
+/* copy CLI (generate client-side too) */
+document.getElementById('copyCLI').addEventListener('click', ()=>{
+  const cli = renderCLIText();
+  navigator.clipboard.writeText(cli).then(()=> alert('Copied CLI to clipboard'));
+});
+
+/* download JSON */
+document.getElementById('downloadJson').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(model, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'obix_osd.json'; document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+});
+
+/* render simple CLI string
+   This returns human-readable commands; server export will create final format.
+*/
+function renderCLIText(){
+  let lines = [];
+  lines.push('# OBIXConfig OSD export (client preview)');
+  lines.push(`# screen ${model.width}x${model.height}`);
+  model.items.forEach(it=>{
+    lines.push(`# ${it.type} "${it.label}" @ ${it.x},${it.y} size=${it.size} color=${it.color}`);
+    // placeholder: user will paste specific BF CLI add commands
+  });
+  return lines.join('\\n');
+}
+
+/* export button server endpoint also accessible as fetch above */
+document.addEventListener('DOMContentLoaded', ()=>{
+  // initial demo item
+  if(model.items.length===0){
+    loadPreset('freestyle');
+  }
+  render();
+});
+</script>
+</body>
+</html>
