@@ -1,0 +1,137 @@
+{# templates/motor_prop.html #}
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <title>Motor × Prop Recommender — OBIXConfig</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    /* เพิ่มสไตล์เฉพาะหน้านี้เล็กน้อย */
+    .tool-card { max-width:980px; margin:18px auto; padding:18px; border-radius:12px; background:var(--card-color-dark); }
+    .tool-grid { display:grid; grid-template-columns: 1fr 360px; gap:18px; align-items:start; }
+    .form-row { margin-bottom:10px; }
+    label { display:block; font-weight:600; margin-bottom:6px; color:var(--text-color-dark); }
+    input[type=number], select { width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,.06); background:transparent; color:inherit; }
+    button.primary { background:linear-gradient(90deg,#17c964,#14a37d); color:white; padding:10px 14px; border-radius:10px; border:0; cursor:pointer; font-weight:700;}
+    .result { padding:12px; border-radius:10px; background: rgba(255,255,255,0.02); }
+    .result h3 { margin-top:0; }
+    .metric { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed rgba(255,255,255,.03); }
+    .muted { opacity:.7; font-size:.95rem; }
+    .pill { padding:6px 8px; border-radius:999px; background:rgba(255,255,255,0.04); font-size:.85rem; }
+    pre.cli { background:#0f1720; color:#dbeafe; padding:10px; border-radius:8px; overflow:auto; }
+  </style>
+</head>
+<body class="dark">
+  <div class="container">
+    <a href="/app" class="muted">← กลับหน้าหลัก</a>
+    <div class="tool-card">
+      <h2>Motor × Prop Recommender</h2>
+      <p class="muted">กรอกข้อมูลลำของคุณแล้วระบบจะแนะนำช่วง KV, ขนาดสเตเตอร์ที่เหมาะสม, ประเมิน TWR, กระแส และเวลาบินโดยประมาณ</p>
+
+      <div class="tool-grid">
+        <!-- Form -->
+        <form method="POST" class="left" style="min-width:0;">
+          <div class="form-row">
+            <label>ขนาดโดรน (นิ้ว)</label>
+            <input type="number" name="size" step="0.1" value="{{ request.form.get('size', '5') }}" required>
+          </div>
+
+          <div class="form-row">
+            <label>น้ำหนักตอนบิน (กรัม)</label>
+            <input type="number" name="weight" step="1" value="{{ request.form.get('weight', '900') }}" required>
+          </div>
+
+          <div class="form-row">
+            <label>แบตเตอรี่</label>
+            <select name="battery">
+              {% for c in [3,4,5,6,7,8] %}
+                <option value="{{c}}S" {% if request.form.get('battery','4S') == (c ~ 'S') %}selected{% endif %}>{{c}}S</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label>ปริมาตรแบต (mAh) — (ถ้ามี)</label>
+            <input type="number" name="battery_mAh" value="{{ request.form.get('battery_mAh','1500') }}" placeholder="เช่น 1500">
+          </div>
+
+          <div class="form-row">
+            <label>ขนาดใบพัด (นิ้ว)</label>
+            <input type="number" name="prop_size" step="0.1" value="{{ request.form.get('prop_size','5') }}" required>
+          </div>
+
+          <div class="form-row">
+            <label>จำนวนใบพัด</label>
+            <select name="blades">
+              <option value="2" {% if request.form.get('blades','3')=='2' %}selected{% endif %}>2</option>
+              <option value="3" {% if request.form.get('blades','3')=='3' %}selected{% endif %}>3</option>
+              <option value="4" {% if request.form.get('blades','3')=='4' %}selected{% endif %}>4</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label>Pitch (เช่น 4.0)</label>
+            <input type="number" step="0.1" name="pitch" value="{{ request.form.get('pitch','4.0') }}">
+          </div>
+
+          <div class="form-row">
+            <label>จำนวนมอเตอร์</label>
+            <input type="number" name="motor_count" value="{{ request.form.get('motor_count','4') }}">
+          </div>
+
+          <div class="form-row">
+            <label>โจทย์การบิน (style)</label>
+            <select name="style">
+              <option value="freestyle" {% if request.form.get('style','freestyle')=='freestyle' %}selected{% endif %}>Freestyle</option>
+              <option value="racing" {% if request.form.get('style','freestyle')=='racing' %}selected{% endif %}>Racing</option>
+              <option value="longrange" {% if request.form.get('style','freestyle')=='longrange' %}selected{% endif %}>Long-range / Cinematic</option>
+            </select>
+          </div>
+
+          <div style="margin-top:10px;">
+            <button class="primary" type="submit">แนะนำมอเตอร์ & ใบพัด</button>
+          </div>
+        </form>
+
+        <!-- Result column -->
+        <div class="right result">
+          {% if result is defined %}
+            <h3>ผลลัพธ์</h3>
+
+            <div class="metric"><div>Estimated TWR</div><div><strong>{{ result.twr_display }}</strong></div></div>
+            <div class="metric"><div>แรงผลักรวม (g)</div><div><strong>{{ result.total_thrust_g }} g</strong></div></div>
+            <div class="metric"><div>แนะนำ KV (ช่วง)</div><div><strong>{{ result.kv_range }}</strong></div></div>
+            <div class="metric"><div>แนะนำสเตเตอร์</div><div><strong>{{ result.stator }}</strong></div></div>
+            <div class="metric"><div>ประเมินกระแสเฉลี่ย</div><div><strong>{{ result.est_current_a }} A</strong></div></div>
+            <div class="metric"><div>ประเมินเวลาบิน</div><div><strong>{{ result.est_flight_time_min }} นาที</strong></div></div>
+
+            <hr style="opacity:.06;margin:10px 0;">
+            <div>
+              <h4>คำแนะนำสั้น ๆ</h4>
+              <ul>
+                {% for tip in result.tips %}
+                  <li>{{ tip }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+
+            <hr style="opacity:.06;margin:10px 0;">
+            <div>
+              <h4>ตัวอย่าง CLI / หมายเหตุ</h4>
+              <pre class="cli">{{ result.sample_cli }}</pre>
+              <button onclick="navigator.clipboard.writeText(document.querySelector('.cli').innerText).then(()=>alert('คัดลอกแล้ว'))">คัดลอก CLI</button>
+            </div>
+          {% else %}
+            <div class="muted">ส่งแบบฟอร์มเพื่อรับคำแนะนำ</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ไม่บังคับ แต่ถ้าต้องการสามารถเพิ่ม JS ย่อยได้
+  </script>
+</body>
+</html>
