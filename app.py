@@ -531,6 +531,73 @@ def motor_prop():
         return render_template('motor_prop.html', result=result)
     return render_template('motor_prop.html')
 
+# ---------- OSD Designer routes ----------
+import io, time, json
+from werkzeug.utils import secure_filename
+from flask import send_file, jsonify, url_for
+
+@app.route('/osd')
+def osd_page():
+    """
+    UI page for OSD Designer
+    """
+    return render_template('osd.html')
+
+# helper filename
+def _timestamped_filename(prefix="obix_osd", ext="txt"):
+    t = time.strftime("%Y%m%d-%H%M%S")
+    return f"{prefix}-{t}.{ext}"
+
+def _generate_osd_text_from_model(model: dict) -> str:
+    # pretty JSON (human readable) — can be changed to specific OSD format
+    return json.dumps(model, ensure_ascii=False, indent=2)
+
+def _generate_cli_from_model(model: dict) -> str:
+    lines = []
+    lines.append("# OBIXConfig pseudo CLI export")
+    for i, it in enumerate(model.get('items', []), start=1):
+        lines.append(f"// {i}. {it.get('type')} '{it.get('label')}' @{it.get('x')},{it.get('y')} size={it.get('size')}")
+        lines.append(f"// command: osd_add {it.get('type')} {it.get('x')} {it.get('y')} \"{it.get('label')}\" size={it.get('size')}")
+    return "\n".join(lines)
+
+@app.route('/osd/export', methods=['POST'])
+def osd_export():
+    fmt = (request.args.get('format') or 'txt').lower()
+    save_flag = str(request.args.get('save', '0')).lower() in ('1','true','yes')
+
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return ("Invalid JSON payload", 400)
+
+    if fmt == 'cli':
+        content = _generate_cli_from_model(data)
+        ext = 'cli.txt'
+    elif fmt == 'json':
+        content = json.dumps(data, ensure_ascii=False, indent=2)
+        ext = 'json'
+    else:
+        content = _generate_osd_text_from_model(data)
+        ext = 'txt'
+
+    if save_flag:
+        out_dir = os.path.join(app.root_path, 'static', 'downloads', 'osd')
+        os.makedirs(out_dir, exist_ok=True)
+        fname = secure_filename(_timestamped_filename(prefix="obix_osd", ext=ext))
+        path = os.path.join(out_dir, fname)
+        try:
+            with open(path, 'w', encoding='utf-8') as f:
+                f.write(content)
+        except Exception as e:
+            return (f"Failed to save file: {e}", 500)
+        download_url = url_for('static', filename=f'downloads/osd/{fname}', _external=False)
+        return jsonify({"ok": True, "download_url": download_url, "filename": fname})
+
+    # return attachment for immediate download
+    buf = io.BytesIO()
+    buf.write(content.encode('utf-8'))
+    buf.seek(0)
+    return send_file(buf, mimetype='text/plain', as_attachment=True, download_name=f"obix_osd.{ext}")
+
 # ===============================
 # ERROR HANDLERS
 # ===============================
