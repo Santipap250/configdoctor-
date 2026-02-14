@@ -8,6 +8,12 @@ import os
 import hashlib
 import logging
 from werkzeug.utils import secure_filename
+import os
+import io
+import json
+import time
+from werkzeug.utils import secure_filename
+from flask import send_file, jsonify, url_for
 
 # optional modules (lazy / tolerant)
 try:
@@ -661,6 +667,79 @@ def osd_export():
     buf.write(content.encode("utf-8"))
     buf.seek(0)
     return send_file(buf, mimetype="text/plain", as_attachment=True, download_name=f"obix_osd.{ext}")
+
+# -------------------------
+# OSD export: POST JSON -> save or download
+# Endpoint: POST /osd/export?format=txt|cli&save=1
+# -------------------------
+def _timestamped_filename(prefix="obix_osd", ext="txt"):
+    t = time.strftime("%Y%m%d-%H%M%S")
+    return f"{prefix}-{t}.{ext}"
+
+def _generate_osd_text_from_model(model: dict) -> str:
+    # very simple human-readable serializer (ปรับได้ตามต้องการ)
+    lines = []
+    lines.append("# OBIXConfig OSD export (human readable)")
+    lines.append(f"# generated: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+    lines.append("")
+    lines.append(json.dumps(model, ensure_ascii=False, indent=2))
+    return "\n".join(lines)
+
+def _generate_betaflight_cli_from_model(model: dict) -> str:
+    # pseudo-CLI; ปรับ mapping ให้เป็นคำสั่ง Betaflight จริงตามเวอร์ชันถ้าต้องการ
+    lines = []
+    lines.append("# OBIXConfig — pseudo Betaflight CLI (verify before use)")
+    lines.append("")
+    items = model.get("items", [])
+    for i, it in enumerate(items, start=1):
+        t = it.get("type","unknown")
+        label = it.get("label","")
+        x = it.get("x",0)
+        y = it.get("y",0)
+        size = it.get("size",14)
+        lines.append(f"# {i}. {t} '{label}' @({x},{y}) size={size}")
+        lines.append(f"//betaflight: osd_add {t} {x} {y} \"{label}\" size={size}")
+        lines.append("")
+    return "\n".join(lines)
+
+@app.route('/osd/export', methods=['POST'])
+def osd_export():
+    fmt = (request.args.get('format') or 'txt').lower()
+    save_flag = str(request.args.get('save', '0')).lower() in ('1', 'true', 'yes')
+
+    # อ่าน JSON payload
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return ("Invalid JSON payload", 400)
+
+    # สร้างเนื้อหาไฟล์
+    if fmt == 'cli':
+        content = _generate_betaflight_cli_from_model(data)
+        ext = 'cli.txt'
+    else:
+        content = _generate_osd_text_from_model(data)
+        ext = 'txt'
+
+    # ถ้าให้เซฟบนเซิร์ฟเวอร์
+    if save_flag:
+        out_dir = os.path.join(app.root_path, 'static', 'downloads', 'osd')
+        os.makedirs(out_dir, exist_ok=True)
+        fname = secure_filename(_timestamped_filename(prefix="obix_osd", ext=ext))
+        path = os.path.join(out_dir, fname)
+        try:
+            with open(path, 'w', encoding='utf-8') as f:
+                f.write(content)
+        except Exception as e:
+            return (f"Failed to save file: {e}", 500)
+        # คืนลิงก์ relative (สามารถปรับให้เป็น external URL ได้)
+        download_url = url_for('static', filename=f'downloads/osd/{fname}', _external=False)
+        return jsonify({"ok": True, "download_url": download_url, "filename": fname})
+
+    # ส่งเป็น attachment ให้ดาวน์โหลดทันที
+    buf = io.BytesIO()
+    buf.write(content.encode('utf-8'))
+    buf.seek(0)
+    return send_file(buf, mimetype='text/plain', as_attachment=True, download_name=f"obix_osd.{ext}")
 
 # ===============================
 # ERROR HANDLERS
