@@ -431,11 +431,8 @@ def vtx():
     # หากต้องการส่งข้อมูลไดนามิก ให้เติม context dict
     return render_template("vtx.html")
 
-# --- Motor × Prop Recommender helpers & route ---
+# --- Motor × Prop recommender helper + route ---
 def _recommend_motor_prop(form):
-    """
-    รับค่า form (จาก request.form) แล้วคืน dict result
-    """
     try:
         size = float(form.get('size') or 5.0)
         weight_g = float(form.get('weight') or 900)
@@ -447,66 +444,57 @@ def _recommend_motor_prop(form):
         motor_count = int(form.get('motor_count') or 4)
         style = form.get('style') or 'freestyle'
     except Exception:
-        # คืนค่า default ถ้า parse ผิด
         size = 5.0; weight_g = 900; battery="4S"; battery_mAh=1500
         prop_size = 5.0; blades=3; pitch=4.0; motor_count=4; style='freestyle'
 
-    # helper: cells
     try:
         cells = int(str(battery).upper().replace('S',''))
     except Exception:
         cells = 4
 
-    # 1) เป้าหมาย TWR ตาม style
+    # target TWR by style
     if style == 'racing':
         target_twr = 2.2
     elif style == 'freestyle':
         target_twr = 2.0
-    else:  # longrange / cinematic
+    else:
         target_twr = 1.6
 
-    # 2) estimated thrust per motor required
     total_thrust_g = max(1.0, weight_g * target_twr)
     thrust_per_motor = total_thrust_g / max(1, motor_count)
 
-    # 3) heuristic stator recommendation by prop size / weight class
-    # (coarse mapping)
+    # stator / KV mapping (coarse)
     if prop_size <= 3.5:
-        stator = "1104–1407 / whoop / tiny whoop style"
-        kv_hint = {3: 4000, 4: 3500, 5: 3000, 6: 2600, 7:2200, 8:2000}
+        stator = "1104–1407 (micro/whoop)"
+        kv_hint = {3:4000,4:3500,5:3000,6:2600,7:2200,8:2000}
     elif prop_size <= 4.5:
         stator = "1407–1806 (light 3-4\")"
-        kv_hint = {3: 3500,4:3000,5:2600,6:2200,7:2000,8:1800}
+        kv_hint = {3:3500,4:3000,5:2600,6:2200,7:2000,8:1800}
     elif prop_size <= 5.5:
-        stator = "1806–2207 / 2206 / 2207 (5\")"
+        stator = "1806–2207 (5\")"
         kv_hint = {3:3000,4:2500,5:2000,6:1700,7:1500,8:1200}
     elif prop_size <= 7.0:
-        stator = "2207–2408 / 2306 / 2405 (6\")"
+        stator = "2207–2408 (6\")"
         kv_hint = {3:2600,4:2200,5:1800,6:1500,7:1200,8:1000}
     else:
-        stator = "2706–3006 / big stator (7–10\")"
+        stator = "big stator (7–10\")"
         kv_hint = {3:2200,4:1800,5:1500,6:1200,7:1000,8:900}
 
-    # 4) KV range: +/- 25% around kv_hint[cells]
     base_kv = kv_hint.get(cells, kv_hint.get(4))
     low_kv = int(base_kv * 0.75)
     high_kv = int(base_kv * 1.25)
-    kv_range = f"{low_kv}–{high_kv} KV (แนะนำ)"
+    kv_range = f"{low_kv}–{high_kv} KV"
 
-    # 5) estimate power & current (simple heuristic)
-    # use POWER_W_PER_KG rough rule (like earlier) — different by style
-    style_power_per_kg = {'freestyle':550.0, 'racing':700.0, 'longrange':300.0}
-    p_per_kg = style_power_per_kg.get(style, 500.0)
+    style_power = {'freestyle':550.0, 'racing':700.0, 'longrange':300.0}
+    p_per_kg = style_power.get(style, 500.0)
     est_hover_power_w = (p_per_kg * (weight_g/1000.0))
     pack_v = cells * 3.7
     est_current_a = round(est_hover_power_w / max(0.1, pack_v), 2)
 
-    # 6) estimate flight time (simple)
     batt_wh = (battery_mAh / 1000.0) * pack_v
     avg_power = est_hover_power_w * 1.1
     est_flight_time_min = int(max(0, round((batt_wh / max(0.1, avg_power)) * 60.0)))
 
-    # 7) tips / warnings
     tips = []
     if thrust_per_motor < 200:
         tips.append("มอเตอร์โหลดต่ำ — อาจโอเวอร์พาวเวอร์สำหรับเฟรมขนาดเล็ก")
@@ -514,13 +502,12 @@ def _recommend_motor_prop(form):
         tips.append("มอเตอร์ถูกโหลดสูง — เลือกสเตเตอร์ใหญ่ขึ้นหรือใบพัดขนาดใหญ่ขึ้น")
     if cells >= 7 and base_kv > 1600:
         tips.append("ระวัง KV สูงบนแรงดันสูง (7S+) — อาจทำให้มอเตอร์ร้อน")
-    tips.append("เริ่มต้นจากค่าแนะนำแล้วปรับจูนในการบินจริง")
+    tips.append("เริ่มจากค่าแนะนำแล้วปรับจูนจริงขณะบิน")
 
-    # sample CLI hint
-    sample_cli = f"""# Example PID/limits (start)
-set motor_min_runup_tps = 1000
+    sample_cli = f"""# OBIX: motor×prop sample (for {cells}S)
 set throttle_limit_percent = {'90' if style=='freestyle' else '80'}
-# Choose motors ~ stator: {stator}, KV range: {kv_range}
+# Recommended stator: {stator}
+# KV range: {kv_range}
 save
 """
 
@@ -537,14 +524,12 @@ save
     }
     return result
 
-
 @app.route('/motor-prop', methods=['GET','POST'])
 def motor_prop():
     if request.method == 'POST':
         result = _recommend_motor_prop(request.form)
         return render_template('motor_prop.html', result=result)
-    else:
-        return render_template('motor_prop.html')
+    return render_template('motor_prop.html')
 
 # ===============================
 # ERROR HANDLERS
