@@ -8,12 +8,6 @@ import os
 import hashlib
 import logging
 from werkzeug.utils import secure_filename
-import os
-import io
-import json
-import time
-from werkzeug.utils import secure_filename
-from flask import send_file, jsonify, url_for
 
 # optional modules (lazy / tolerant)
 try:
