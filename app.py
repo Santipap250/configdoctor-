@@ -558,8 +558,6 @@ def osd_export():
                      download_name="obix_osd_layout.txt",
                      mimetype="text/plain")
 
-
-
 # ===== app.py : OSD export + save + cli generator =====
 import io, json, time
 from flask import send_file, jsonify
