@@ -531,6 +531,33 @@ def motor_prop():
         return render_template('motor_prop.html', result=result)
     return render_template('motor_prop.html')
 
+from flask import send_file, jsonify
+import io, json
+
+@app.route('/osd', methods=['GET', 'POST'])
+def osd_designer():
+    # GET: หน้าออกแบบ, POST: optional save preview request
+    return render_template('osd.html')
+
+@app.route('/osd/export', methods=['POST'])
+def osd_export():
+    # รับ JSON layout จาก client แล้วส่งไฟล์ .txt (หรือ JSON) ให้ดาวน์โหลด
+    layout = request.get_json() or {}
+    # สร้าง Betaflight OSD layout string (ตัวอย่างง่าย)
+    # ให้ผู้ใช้แก้ template นี้ต่อได้
+    bf_lines = []
+    bf_lines.append('# OBIX OSD export')
+    bf_lines.append(f'# width:{layout.get("width",640)} height:{layout.get("height",480)}')
+    for item in layout.get('items', []):
+        bf_lines.append(f'osd add {item["type"]} {item["x"]} {item["y"]} {item.get("options","")}')
+    bf_content = "\n".join(bf_lines)
+    buf = io.BytesIO(bf_content.encode('utf-8'))
+    buf.seek(0)
+    return send_file(buf,
+                     as_attachment=True,
+                     download_name="obix_osd_layout.txt",
+                     mimetype="text/plain")
+
 # ===============================
 # ERROR HANDLERS
 # ===============================
