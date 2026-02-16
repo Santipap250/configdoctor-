@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPV Knowledge Hub - Config Doctor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #0f172a;       /* สีพื้นหลัง Dark Slate */
+            --card-bg: #1e293b;        /* สีการ์ด */
+            --primary: #38bdf8;        /* สีฟ้า Tech */
+            --accent: #f43f5e;         /* สีแดงจุดเด่น */
+            --text-main: #f8fafc;      /* สีตัวหนังสือขาว */
+            --text-sub: #94a3b8;       /* สีตัวหนังสือเทา */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* --- Navbar --- */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: rgba(15, 23, 42, 0.95);
+            border-bottom: 1px solid #334155;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+        .logo span { color: var(--primary); }
+
+        .btn-tool {
+            background: var(--primary);
+            color: #0f172a;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+        .btn-tool:hover { background: #7dd3fc; }
+
+        /* --- Hero Section --- */
+        .hero {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 70%);
+        }
+
+        .hero h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--text-sub);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* --- Grid Layout --- */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        /* --- Card Design --- */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: transform 0.2s, border-color 0.2s;
+            text-decoration: none;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .card h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .card p {
+            color: var(--text-sub);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+        }
+
+        .card-link {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-sub);
+            font-size: 0.8rem;
+            border-top: 1px solid #334155;
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="logo">Config<span>Doctor</span></a>
+        <a href="/app" class="btn-tool"><i class="fas fa-calculator"></i> Use Calculator</a>
+    </nav>
+
+    <header class="hero">
+        <h1>FPV Knowledge Hub</h1>
+        <p>แหล่งรวมความรู้การประกอบโดรน จูนนิ่ง และเทคนิคเชิงลึก <br>เรียนรู้ให้เข้าใจ แล้วไปประกอบให้บินได้จริง</p>
+    </header>
+
+    <div class="container">
+        
+        <h2 style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--text-sub);">หมวดหมู่ความรู้</h2>
+        
+        <div class="category-grid">
+            
+            <a href="#" class="card">
+                <div class="card-icon"><i class="fas fa-graduation-cap"></i></div>
+                <h3>มือใหม่ FPV (Beginner)</h3>
+                <p>เริ่มต้นจากศูนย์ FPV คืออะไร? ต้องใช้อุปกรณ์อะไรบ้าง? คู่มือสำหรับคนอยากเริ่มบิน</p>
+                <div class="card-link">อ่านต่อ <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a href="#" class="card"> <div class="card-icon"><i class="fas fa-microchip"></i></div>
+                <h3>Hardware & ประกอบ</h3>
+                <p>เจาะลึกสเปก Motor KV, แบตเตอรี่ 4S vs 6S, การเลือกเฟรม และใบพัดให้แมตช์กัน</p>
+                <div class="card-link">อ่านต่อ <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a href="#" class="card">
+                <div class="card-icon"><i class="fas fa-sliders-h"></i></div>
+                <h3>Tuning & Software</h3>
+                <p>Betaflight คืออะไร? พื้นฐาน PID Tuning และการแก้ปัญหาอาการสั่นของโดรน</p>
+                <div class="card-link">อ่านต่อ <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a href="#" class="card">
+                <div class="card-icon"><i class="fas fa-tools"></i></div>
+                <h3>ซ่อมบำรุง (Troubleshoot)</h3>
+                <p>มอเตอร์ร้อน? บินแล้วร่วง? รวมวิธีแก้ปัญหาที่พบบ่อยในสนาม</p>
+                <div class="card-link">อ่านต่อ <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+        </div>
+    </div>
+
+    <div style="text-align: center; margin: 3rem 1.5rem;">
+        <p style="color: var(--text-sub); margin-bottom: 1rem;">พร้อมจะคำนวณสเปกโดรนรึยัง?</p>
+        <a href="/app" style="display: inline-block; background: #334155; color: white; padding: 0.8rem 2rem; border-radius: 30px; text-decoration: none; border: 1px solid #475569;">
+            🚀 ไปที่เครื่องคำนวณ Config Doctor
+        </a>
+    </div>
+
+    <footer>
+        <p>© 2024 Config Doctor. FPV Knowledge Base.</p>
+    </footer>
+
+</body>
+</html>
