@@ -178,6 +178,11 @@ def analyze_drone(size, battery, style, prop_result, weight):
 
     return analysis
 
+# เพิ่ม code นี้ลงใน app.py
+@app.route('/fpv')
+def fpv_hub():
+    return render_template('fpv/index.html')
+
 # ===============================
 # ROUTES
 # ===============================
