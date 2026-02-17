@@ -9,24 +9,30 @@ import hashlib
 import logging
 from werkzeug.utils import secure_filename
 
-# Advanced analysis - lazy import (ถ้าโมดูลมีปัญหา เว็บจะไม่ล่ม)
-ADV_ANALYSIS_AVAILABLE = False
+# optional modules (lazy / tolerant)
 try:
-    # primary: modern name used in templates/logic
+    from analyzer.rule_engine import evaluate_rules
+except Exception as e:
+    evaluate_rules = None
+    print("rule_engine import failed:", e)
+
+try:
+    from analyzer.cli_export import build_cli_diff, build_snapshot_meta
+    CLI_EXPORT_AVAILABLE = True
+except Exception as e:
+    CLI_EXPORT_AVAILABLE = False
+    print("cli_export import failed:", e)
+    def build_cli_diff(a): return "# cli_export not available"
+    def build_snapshot_meta(a): return {}
+
+try:
     from analyzer.advanced_analysis import make_advanced_report
     ADV_ANALYSIS_AVAILABLE = True
-except Exception as _e1:
-    # fallback: many older versions used `analyze()` as the exported function
-    try:
-        from analyzer.advanced_analysis import analyze as make_advanced_report
-        ADV_ANALYSIS_AVAILABLE = True
-        print("advanced_analysis: using fallback 'analyze' as make_advanced_report")
-    except Exception as _e2:
-        # final fallback: provide a no-op function so site doesn't crash
-        print("advanced_analysis import failed:", _e1, " / ", _e2)
-        def make_advanced_report(*args, **kwargs):
-            return {"advanced": {}}
-        ADV_ANALYSIS_AVAILABLE = False
+except Exception as e:
+    print("advanced_analysis import failed:", e)
+    def make_advanced_report(*args, **kwargs):
+        return {"advanced": {}}
+    ADV_ANALYSIS_AVAILABLE = False
 
 # helper: แปลง "4S" -> int cells (3..8)
 def _cells_from_str(s):
