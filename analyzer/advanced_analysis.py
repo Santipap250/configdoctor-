@@ -301,3 +301,127 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         sys.exit(0)
+
+# --- Wrapper so app.py can call make_advanced_report(...) ---
+def make_advanced_report(
+    size: float,
+    weight_g: float,
+    battery_s: str,
+    prop_result: Dict[str, Any],
+    style: str,
+    battery_mAh: Optional[int] = None,
+    motor_count: int = DEFAULT_MOTORS,
+    measured_thrust_per_motor_g: Optional[float] = None,
+    motor_kv: Optional[int] = None,
+    esc_current_limit_a: Optional[float] = None,
+    blades: Optional[int] = None,
+    payload_g: Optional[float] = None
+) -> Dict[str, Any]:
+    """
+    Compatibility wrapper:
+    - Calls analyze(...) (existing) and maps its output into the {'advanced': {...}} shape
+      expected by app.py templates.
+    - Provides reasonable defaults when some inputs are missing.
+    """
+    try:
+        # normalize inputs
+        cells = _cells_from_str(str(battery_s))
+        total_weight_g = float((weight_g or 0) + (payload_g or 0))
+
+        # Call existing analyze() but adapt parameter names:
+        analysis = analyze(
+            size_inch=float(size or 5.0),
+            cell_input=cells,
+            batt_mAh=battery_mAh,
+            motor_kv=motor_kv,
+            weight_g=total_weight_g,
+            motors=int(motor_count or DEFAULT_MOTORS),
+            hover_throttle=None,  # analyze uses hover_throttle only for classification warnings; we don't have measured value
+            thrust_per_motor_g=measured_thrust_per_motor_g
+        )
+
+        # Pull commonly needed values (fall back sensibly)
+        comp = analysis.get("computed", {})
+        diag = analysis.get("diagnostics", {})
+        input_block = analysis.get("input", {})
+
+        total_power_w = float(comp.get("power_w", 0.0))
+        pack_voltage = float(comp.get("pack_voltage_nominal", cells * NOMINAL_CELL_V))
+        batt_mAh_used = int(input_block.get("batt_mAh") or battery_mAh or _guess_batt_mAh(float(size or 5.0), cells))
+        # battery energy (Wh)
+        battery_wh = round((batt_mAh_used / 1000.0) * pack_voltage, 2)
+
+        # estimate flight time (minutes): use total_power_w (W). Avoid divide-by-zero.
+        if total_power_w > 0:
+            est_flight_time_min = int(max(0, round((battery_wh / total_power_w) * 60.0)))
+            # aggressive uses a simple multiplier (higher power)
+            est_flight_time_min_aggressive = int(max(0, round((battery_wh / (total_power_w * 1.8)) * 60.0)))
+        else:
+            est_flight_time_min = 0
+            est_flight_time_min_aggressive = 0
+
+        # thrust ratio: try to take from analysis if present else compute from thrust estimate
+        thrust_ratio = None
+        if "thrust_ratio" in analysis:
+            try:
+                thrust_ratio = analysis["thrust_ratio"]
+            except Exception:
+                thrust_ratio = None
+        else:
+            # compute if we have estimated thrust per motor in diagnostics
+            est_thrust_per_motor = diag.get("estimated_hover_thrust_per_motor_g") or input_block.get("thrust_per_motor_g")
+            if est_thrust_per_motor:
+                try:
+                    total_thrust_g = float(est_thrust_per_motor) * int(input_block.get("motors", motor_count))
+                    thrust_ratio = round(total_thrust_g / (total_weight_g or 1.0), 2)
+                except Exception:
+                    thrust_ratio = None
+
+        # convert warnings to simple list for template (strings)
+        warnings_list = []
+        for w in analysis.get("warnings", []):
+            if isinstance(w, dict):
+                warnings_list.append(w.get("msg", str(w)))
+            else:
+                warnings_list.append(str(w))
+
+        # Build the advanced dict shape used by templates
+        advanced = {
+            "power": {
+                "cells": int(cells),
+                "battery_mAh_used": int(batt_mAh_used),
+                "battery_wh": battery_wh,
+                # match naming used in templates: est_hover_power_w
+                "est_hover_power_w": round(total_power_w, 1),
+                "est_aggressive_power_w": round(total_power_w * 1.8, 1),
+                "est_flight_time_min": int(est_flight_time_min),
+                "est_flight_time_min_aggressive": int(est_flight_time_min_aggressive)
+            },
+            "thrust_ratio": thrust_ratio if thrust_ratio is not None else analysis.get("motor_esc_stress", None),
+            "twr_note": analysis.get("twr_note", ""),
+            "kv_suggestion": input_block.get("motor_kv", motor_kv) or (f"{1200}-{2800}" if size >=5 else "1500-3500"),
+            "prop_notes": prop_result.get("effect", {}).get("notes", []) if isinstance(prop_result, dict) else [],
+            "warnings_advanced": warnings_list,
+            "_diagnostics": {
+                "raw_analysis": analysis
+            }
+        }
+
+        return {"advanced": advanced}
+
+    except Exception as e:
+        # never raise here — return safe structure
+        return {
+            "advanced": {
+                "power": {},
+                "thrust_ratio": 0,
+                "twr_note": "",
+                "kv_suggestion": "",
+                "prop_notes": [],
+                "warnings_advanced": [f"advanced wrapper error: {e}"],
+                "_diagnostics": {}
+            }
+        }
+
+# expose both names (compatibility)
+__all__ = ["analyze", "make_advanced_report"]
