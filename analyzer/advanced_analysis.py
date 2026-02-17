@@ -1,308 +1,79 @@
 # analyzer/advanced_analysis.py
 """
-Rule-based FPV battery/motor/ESC analyzer (3S-8S)
-Copy-paste ready.
-
-CLI example:
-  python advanced_analysis.py --size 5.0 --cells 7 --motor-kv 1600 --weight 1200 --motors 4 --hover-throttle 0.28
-
-Returns human-readable summary + JSON diagnostics.
+Advanced analysis v1.0+ for OBIXConfig Doctor (engineering-ready).
+วางไฟล์นี้ที่ analyzer/advanced_analysis.py (แทนไฟล์เดิมได้)
+ฟังก์ชันหลัก: make_advanced_report(...)
 """
-from __future__ import annotations
 
-import argparse
-import json
+from typing import Dict, Any, Optional, List
 import math
-import sys
-from typing import Dict, Any
+import logging
 
-# --- Constants ---
-NOMINAL_CELL_V = 3.7
-MAX_CELL_V = 4.2
-KV_THRESHOLD_HIGH = 1500  # KV above which high-voltage builds are risky
-HIGH_VOLTAGE_CELLS = 7
-DEFAULT_MOTORS = 4
+logger = logging.getLogger("advanced_analysis")
+if not logger.handlers:
+    logger.addHandler(logging.NullHandler())
 
-# Default mAh table (nested by prop size -> cells -> typical mAh)
+# ---------- Constants & heuristics ----------
+NOMINAL_CELL_V = 3.7  # average per-cell nominal voltage
 _DEFAULT_BATT_MAH_BY_SIZE = {
-    2.5: {3: 450, 4: 450},
-    3.0: {3: 550, 4: 650},
-    3.5: {3: 650, 4: 850},
-    4.0: {3: 850, 4: 1000},
-    5.0: {4: 1500, 5: 1300, 6: 1100},
-    6.0: {4: 1800, 5: 1500, 6: 1300},
-    7.0: {5: 2200, 6: 1800, 7: 1500},
-    8.0: {6: 3000, 7: 2200, 8: 1800}
+    2.5: 450, 3.0: 550, 3.5: 650, 4.0: 850, 5.0: 1500, 6.0: 1800, 7.0: 2200, 8.0: 3000
 }
+POWER_W_PER_KG = {
+    "freestyle": 550.0,
+    "racing": 700.0,
+    "longrange": 300.0,
+    "cine": 350.0,
+    "micro": 420.0,
+}
+HOVER_THRESHOLDS = {"excellent": 0.30, "good": 0.45, "poor": 0.60}
+C_SAFE = 20.0
+C_HIGH = 35.0
+C_DANGER = 50.0
+MOTOR_SAFE_G = 250.0
+MOTOR_HIGH_G = 450.0
 
-# --- Helpers ---
+def _clamp(x, a, b):
+    return max(a, min(b, x))
 
 def _cells_from_str(s: str) -> int:
-    """Parse cell count from string like '4S' or integer string.
-    Clamp to range 3..8. Return default 4 on error.
-    """
     try:
-        cells = int(str(s).upper().replace("S", "").strip())
-        if cells < 3:
-            return 3
-        if cells > 8:
-            return 8
-        return cells
+        return int(str(s).upper().replace("S", "").strip())
     except Exception:
         return 4
 
-
-def _guess_batt_mAh(size_inch: float, cells: int) -> int:
-    """Pick a default batt mAh given prop/airframe size and cells.
-    Strategy: find the closest size key, check table for exact cell; if missing, pick nearest available cell value.
-    """
-    keys = sorted(_DEFAULT_BATT_MAH_BY_SIZE.keys())
-    closest = min(keys, key=lambda k: abs(k - size_inch))
-    table = _DEFAULT_BATT_MAH_BY_SIZE[closest]
-    if cells in table:
-        return table[cells]
-    # nearest available cell in that table
-    available_cells = sorted(table.keys())
-    nearest_cell = min(available_cells, key=lambda c: abs(c - cells))
-    return table[nearest_cell]
-
-
-def _format_amp(a: float) -> str:
-    return f"{a:.2f} A"
-
-
-def _format_watt(w: float) -> str:
-    return f"{w:.1f} W"
-
-
-# --- Core analysis ---
-
-def analyze(
-    size_inch: float = 5.0,
-    cell_input: str | int = 4,
-    batt_mAh: int | None = None,
-    motor_kv: int | None = None,
-    weight_g: float = 1000.0,
-    motors: int = DEFAULT_MOTORS,
-    hover_throttle: float = 0.5,
-    thrust_per_motor_g: float | None = None,
-) -> Dict[str, Any]:
-    """Return analysis dict with computed metrics, warnings, and diagnostics.
-
-    Heuristics (rule-based):
-    - If thrust_per_motor_g not provided, assume hover thrust = weight * 2 margin, split across motors
-    - Power estimate: empirical ratio W_per_gram = 0.12 W/g (multicopter hover heuristic)
-    - Current = power / pack_voltage
-    - C-rating = (current * 1000) / batt_mAh
-    """
-    # Normalize cells
-    cells = _cells_from_str(str(cell_input))
-
-    # Battery defaults
-    if batt_mAh is None:
-        batt_mAh = _guess_batt_mAh(size_inch, cells)
-
-    # Voltages
-    pack_voltage_nominal = round(cells * NOMINAL_CELL_V, 2)
-    pack_voltage_max = round(cells * MAX_CELL_V, 2)
-
-    # thrust estimate
-    if thrust_per_motor_g is None:
-        # assume hover thrust needed = weight * 2 (50% throttle margin), distributed across motors
-        hover_thrust_total_g = weight_g * 2.0
-        thrust_per_motor_g = hover_thrust_total_g / float(motors)
-
-    # Empirical power estimate per motor (rule-based)
-    # Use heuristic W_per_gram = 0.12 W/g (common multicopter hover heuristic)
-    W_PER_GRAM = 0.12
-    power_per_motor_w = thrust_per_motor_g * W_PER_GRAM
-    total_power_w = power_per_motor_w * motors
-
-    # Current and C-rating
-    current_a = total_power_w / pack_voltage_nominal if pack_voltage_nominal > 0 else 0.0
-    c_rating = (current_a * 1000.0) / batt_mAh if batt_mAh > 0 else float('inf')
-
-    # Rule-based warnings and classes
-    warnings = []
-
-    # High voltage warning
-    if cells >= HIGH_VOLTAGE_CELLS:
-        warnings.append({
-            "level": "warning",
-            "msg": "แรงดันสูง (7S–8S) — ตรวจสอบ ESC, capacitor และ motor KV ให้รองรับ"
-        })
-
-    # KV vs cell rules
-    if motor_kv is not None:
-        if cells >= 7 and motor_kv > KV_THRESHOLD_HIGH:
-            warnings.append({
-                "level": "danger",
-                "msg": f"Motor KV {motor_kv} สูงเกินไปสำหรับ {cells}S — เสี่ยง ESC/motor พัง"
-            })
-        elif cells <= 3 and motor_kv < KV_THRESHOLD_HIGH:
-            warnings.append({
-                "level": "warning",
-                "msg": f"Motor KV {motor_kv} ต่ำเกินไปสำหรับ {cells}S — อาจแรงไม่พอ"
-            })
-
-    # Throttle efficiency class
-    efficiency_class = "nominal"
-    if hover_throttle is not None:
-        if cells <= 3 and hover_throttle > 0.6:
-            efficiency_class = "danger_low_voltage"
-            warnings.append({
-                "level": "danger",
-                "msg": "Low-voltage build with high hover throttle — battery and motors under stress"
-            })
-        elif cells >= 7 and hover_throttle < 0.25:
-            efficiency_class = "overpowered"
-            warnings.append({
-                "level": "info",
-                "msg": "High-voltage build with very low hover throttle — overpowered for typical hover"
-            })
-
-    # Motor/ESC stress estimation (rule-based scoring)
-    stress_score = 0.0
-    stress_reasons = []
-    # High current relative to typical ESC continuous rating
-    typical_esc_continuous_a = 30.0  # rule-of-thumb
-    if current_a > typical_esc_continuous_a:
-        stress_score += 1.0
-        stress_reasons.append(f"Estimated current {current_a:.1f}A exceeds typical ESC continuous {typical_esc_continuous_a}A")
-
-    # High KV on high cells
-    if motor_kv is not None and cells >= 7 and motor_kv > KV_THRESHOLD_HIGH:
-        stress_score += 1.0
-        stress_reasons.append("High KV on high-voltage pack increases motor/ESC stress")
-
-    # C-rating concern
-    if c_rating > 60:
-        stress_score += 0.8
-        stress_reasons.append(f"High implied C-rating {c_rating:.1f}C -> battery stressed")
-
-    # Motor/ESC stress classification
-    if stress_score >= 2.0:
-        motor_esc_stress = "high"
-    elif stress_score >= 1.0:
-        motor_esc_stress = "moderate"
-    else:
-        motor_esc_stress = "low"
-
-    # Flight profile suggestion
-    if cells >= 7:
-        flight_profile = "High voltage performance build"
-    elif cells == 3:
-        flight_profile = "Low voltage efficiency build"
-    else:
-        flight_profile = "Balanced build"
-
-    diagnostics = {
-        "battery_cells": cells,
-        "battery_voltage_nominal": pack_voltage_nominal,
-        "battery_voltage_max": pack_voltage_max,
-        "battery_mAh_used": batt_mAh,
-        "estimated_hover_thrust_per_motor_g": round(thrust_per_motor_g, 1),
-        "motors": motors,
-    }
-
-    result = {
-        "input": {
-            "size_inch": size_inch,
-            "cells": cells,
-            "batt_mAh": batt_mAh,
-            "motor_kv": motor_kv,
-            "weight_g": weight_g,
-            "motors": motors,
-            "hover_throttle": hover_throttle,
-        },
-        "computed": {
-            "pack_voltage_nominal": pack_voltage_nominal,
-            "pack_voltage_max": pack_voltage_max,
-            "power_w": round(total_power_w, 1),
-            "current_a": round(current_a, 2),
-            "implied_c_rating": round(c_rating, 1) if math.isfinite(c_rating) else None,
-        },
-        "motor_esc_stress": motor_esc_stress,
-        "stress_reasons": stress_reasons,
-        "efficiency_class": efficiency_class,
-        "flight_profile": flight_profile,
-        "warnings": warnings,
-        "diagnostics": diagnostics,
-    }
-
-    return result
-
-
-# --- CLI / Pretty print ---
-
-def _human_summary(res: Dict[str, Any]) -> str:
-    c = res["computed"]
-    diag = res["diagnostics"]
-    lines = []
-    lines.append("=== FPV Advanced Analysis (Rule-based) ===")
-    lines.append(f"Cells: {res['input']['cells']}S | Nominal V: {c['pack_voltage_nominal']} V | Max V: {diag['battery_voltage_max']} V")
-    lines.append(f"Battery mAh (used): {diag['battery_mAh_used']} mAh")
-    implied_c = c.get("implied_c_rating")
-    implied_c_str = f"{implied_c:.1f} C" if implied_c is not None else "n/a"
-    lines.append(f"Estimated total power: {_format_watt(c['power_w'])} | Estimated current: {_format_amp(c['current_a'])} | Implied C-rating: {implied_c_str}")
-    lines.append(f"Motor/ESC stress: {res['motor_esc_stress']}" )
-    if res['stress_reasons']:
-        lines.append("Stress reasons:")
-        for r in res['stress_reasons']:
-            lines.append(f" - {r}")
-    if res['warnings']:
-        lines.append("Warnings:")
-        for w in res['warnings']:
-            lines.append(f" [{w['level'].upper()}] {w['msg']}")
-    lines.append(f"Efficiency class: {res['efficiency_class']}")
-    lines.append(f"Flight profile suggestion: {res['flight_profile']}")
-    lines.append("Diagnostics:")
-    for k, v in res['diagnostics'].items():
-        lines.append(f"  {k}: {v}")
-
-    return "\n".join(lines)
-
-
-def _parse_args(argv=None):
-    p = argparse.ArgumentParser(description="advanced_analysis.py - rule-based FPV analyzer (3S-8S)")
-    p.add_argument("--size", type=float, default=5.0, help="frame/prop nominal size in inches (e.g. 5.0)")
-    p.add_argument("--cells", type=str, default="4", help="battery cells (e.g. 4 or 4S)")
-    p.add_argument("--batt-mAh", type=int, default=None, help="battery capacity in mAh (optional) -- if omitted guess from size+cells")
-    p.add_argument("--motor-kv", type=int, default=None, help="motor KV (optional)")
-    p.add_argument("--weight", type=float, default=1000.0, help="aircraft takeoff weight in grams")
-    p.add_argument("--motors", type=int, default=DEFAULT_MOTORS, help="number of motors")
-    p.add_argument("--hover-throttle", type=float, default=0.5, help="hover throttle (0..1)")
-    p.add_argument("--thrust-per-motor-g", type=float, default=None, help="override thrust per motor in grams (optional)")
-    return p.parse_args(argv)
-
-
-def main(argv=None):
-    args = _parse_args(argv)
-    cells = _cells_from_str(str(args.cells))
-    res = analyze(
-        size_inch=args.size,
-        cell_input=cells,
-        batt_mAh=args.batt_mAh,
-        motor_kv=args.motor_kv,
-        weight_g=args.weight,
-        motors=args.motors,
-        hover_throttle=args.hover_throttle,
-        thrust_per_motor_g=args.thrust_per_motor_g,
-    )
-
-    # Print human summary and JSON
-    print(_human_summary(res))
-    print('\n--- JSON output (machine friendly) ---')
-    print(json.dumps(res, indent=2))
-
-
-if __name__ == "__main__":
+def _guess_batt_mAh(size_inch: float) -> int:
     try:
-        main()
-    except KeyboardInterrupt:
-        sys.exit(0)
+        keys = sorted(_DEFAULT_BATT_MAH_BY_SIZE.keys())
+        closest = min(keys, key=lambda k: abs(k - size_inch))
+        return int(_DEFAULT_BATT_MAH_BY_SIZE.get(closest, 1500))
+    except Exception:
+        return 1500
 
-# --- Wrapper so app.py can call make_advanced_report(...) ---
+def _estimate_thrust_per_motor(prop_result: Dict[str, Any], size_inch: float, blades: int) -> float:
+    try:
+        eff = prop_result.get("effect", {}) if isinstance(prop_result, dict) else {}
+        m_load = eff.get("motor_load")
+        if m_load:
+            return float(m_load)
+    except Exception:
+        pass
+    if size_inch <= 3.5:
+        base = 220.0
+    elif size_inch <= 5.0:
+        base = 400.0
+    elif size_inch <= 6.0:
+        base = 520.0
+    else:
+        base = 700.0
+    blade_factor = 1.0 + (0.08 * (max(2, blades or 2) - 2))
+    return round(base * blade_factor, 1)
+
+def _format_minutes(m: float) -> int:
+    try:
+        return int(max(0, round(m)))
+    except Exception:
+        return 0
+
 def make_advanced_report(
     size: float,
     weight_g: float,
@@ -310,118 +81,243 @@ def make_advanced_report(
     prop_result: Dict[str, Any],
     style: str,
     battery_mAh: Optional[int] = None,
-    motor_count: int = DEFAULT_MOTORS,
+    motor_count: int = 4,
     measured_thrust_per_motor_g: Optional[float] = None,
     motor_kv: Optional[int] = None,
     esc_current_limit_a: Optional[float] = None,
     blades: Optional[int] = None,
     payload_g: Optional[float] = None
 ) -> Dict[str, Any]:
-    """
-    Compatibility wrapper:
-    - Calls analyze(...) (existing) and maps its output into the {'advanced': {...}} shape
-      expected by app.py templates.
-    - Provides reasonable defaults when some inputs are missing.
-    """
+    """Return an 'advanced' analysis dict."""
+    advanced: Dict[str, Any] = {}
     try:
-        # normalize inputs
-        cells = _cells_from_str(str(battery_s))
-        total_weight_g = float((weight_g or 0) + (payload_g or 0))
+        cells = _cells_from_str(battery_s)
+        size = float(size or 0)
+        payload_g = float(payload_g or 0)
+        total_weight_g = float((weight_g or 0) + payload_g)
+        motor_count = int(motor_count or 4)
+        blades = int(blades) if blades else None
 
-        # Call existing analyze() but adapt parameter names:
-        analysis = analyze(
-            size_inch=float(size or 5.0),
-            cell_input=cells,
-            batt_mAh=battery_mAh,
-            motor_kv=motor_kv,
-            weight_g=total_weight_g,
-            motors=int(motor_count or DEFAULT_MOTORS),
-            hover_throttle=None,  # analyze uses hover_throttle only for classification warnings; we don't have measured value
-            thrust_per_motor_g=measured_thrust_per_motor_g
-        )
-
-        # Pull commonly needed values (fall back sensibly)
-        comp = analysis.get("computed", {})
-        diag = analysis.get("diagnostics", {})
-        input_block = analysis.get("input", {})
-
-        total_power_w = float(comp.get("power_w", 0.0))
-        pack_voltage = float(comp.get("pack_voltage_nominal", cells * NOMINAL_CELL_V))
-        batt_mAh_used = int(input_block.get("batt_mAh") or battery_mAh or _guess_batt_mAh(float(size or 5.0), cells))
-        # battery energy (Wh)
-        battery_wh = round((batt_mAh_used / 1000.0) * pack_voltage, 2)
-
-        # estimate flight time (minutes): use total_power_w (W). Avoid divide-by-zero.
-        if total_power_w > 0:
-            est_flight_time_min = int(max(0, round((battery_wh / total_power_w) * 60.0)))
-            # aggressive uses a simple multiplier (higher power)
-            est_flight_time_min_aggressive = int(max(0, round((battery_wh / (total_power_w * 1.8)) * 60.0)))
+        # battery mAh guess / override
+        if battery_mAh and isinstance(battery_mAh, int) and battery_mAh > 0:
+            batt_mAh = int(battery_mAh)
         else:
-            est_flight_time_min = 0
-            est_flight_time_min_aggressive = 0
+            batt_mAh = _guess_batt_mAh(size)
 
-        # thrust ratio: try to take from analysis if present else compute from thrust estimate
-        thrust_ratio = None
-        if "thrust_ratio" in analysis:
-            try:
-                thrust_ratio = analysis["thrust_ratio"]
-            except Exception:
-                thrust_ratio = None
+        pack_voltage = cells * NOMINAL_CELL_V
+        batt_wh = (batt_mAh / 1000.0) * pack_voltage
+
+        # thrust per motor
+        if measured_thrust_per_motor_g and measured_thrust_per_motor_g > 0:
+            thrust_per_motor_g = float(measured_thrust_per_motor_g)
         else:
-            # compute if we have estimated thrust per motor in diagnostics
-            est_thrust_per_motor = diag.get("estimated_hover_thrust_per_motor_g") or input_block.get("thrust_per_motor_g")
-            if est_thrust_per_motor:
-                try:
-                    total_thrust_g = float(est_thrust_per_motor) * int(input_block.get("motors", motor_count))
-                    thrust_ratio = round(total_thrust_g / (total_weight_g or 1.0), 2)
-                except Exception:
-                    thrust_ratio = None
+            thrust_per_motor_g = _estimate_thrust_per_motor(prop_result or {}, size, blades or 2)
 
-        # convert warnings to simple list for template (strings)
-        warnings_list = []
-        for w in analysis.get("warnings", []):
-            if isinstance(w, dict):
-                warnings_list.append(w.get("msg", str(w)))
+        total_thrust_g = thrust_per_motor_g * max(1, motor_count)
+        twr = (total_thrust_g / total_weight_g) if total_weight_g > 0 else float('inf')
+
+        hover_throttle = (total_weight_g / total_thrust_g) if total_thrust_g > 0 else 1.0
+        hover_throttle_pct = round(hover_throttle * 100.0, 1)
+
+        # efficiency class
+        if hover_throttle < HOVER_THRESHOLDS["excellent"]:
+            efficiency_class = "excellent"
+        elif hover_throttle < HOVER_THRESHOLDS["good"]:
+            efficiency_class = "good"
+        elif hover_throttle < HOVER_THRESHOLDS["poor"]:
+            efficiency_class = "poor"
+        else:
+            efficiency_class = "danger"
+
+        # estimate power
+        p_per_kg = POWER_W_PER_KG.get(style, POWER_W_PER_KG.get("freestyle", 450.0))
+        weight_kg = max(0.001, total_weight_g / 1000.0)
+        est_hover_power_w = p_per_kg * weight_kg
+
+        # tweak by cell efficiency factor (higher cells -> slightly more efficient)
+        cell_efficiency_factor = {3:0.85,4:1.0,5:1.05,6:1.10,7:1.12,8:1.15}
+        cef = cell_efficiency_factor.get(cells, 1.0)
+        est_hover_power_w = est_hover_power_w / cef
+
+        # margins
+        est_aggressive_power_w = est_hover_power_w * 1.8
+        avg_power_for_flight_w = est_hover_power_w * 1.12
+
+        est_flight_time_min = _format_minutes((batt_wh / avg_power_for_flight_w) * 60.0) if avg_power_for_flight_w > 0 else 0
+        est_flight_time_min_aggr = _format_minutes((batt_wh / est_aggressive_power_w) * 60.0) if est_aggressive_power_w > 0 else 0
+
+        # current and C
+        est_hover_current_a = (est_hover_power_w / pack_voltage) if pack_voltage > 0 else 0.0
+        batt_a_available = batt_mAh / 1000.0 if batt_mAh > 0 else 0.0
+        c_required_hover = (est_hover_current_a / batt_a_available) if batt_a_available > 0 else None
+
+        per_motor_hover_a = (est_hover_current_a / motor_count) if motor_count > 0 else 0.0
+
+        # motor/battery health
+        motor_load_g = thrust_per_motor_g
+        if motor_load_g < MOTOR_SAFE_G:
+            motor_health = "safe"
+        elif motor_load_g < MOTOR_HIGH_G:
+            motor_health = "high_load"
+        else:
+            motor_health = "danger"
+
+        if c_required_hover is None:
+            battery_health = "unknown"
+        else:
+            if c_required_hover < C_SAFE:
+                battery_health = "safe"
+            elif c_required_hover < C_HIGH:
+                battery_health = "high_load"
             else:
-                warnings_list.append(str(w))
+                battery_health = "danger"
 
-        # Build the advanced dict shape used by templates
+        # ESC flag
+        esc_flag = None
+        if esc_current_limit_a:
+            if per_motor_hover_a > esc_current_limit_a:
+                esc_flag = "danger"
+            elif per_motor_hover_a > esc_current_limit_a * 0.9:
+                esc_flag = "warning"
+            else:
+                esc_flag = "ok"
+
+        # KV suggestion coarse
+        if size <= 3.5:
+            kv_suggestion = "2300-4200"
+        elif size <= 5.0:
+            kv_suggestion = "1500-2800"
+        elif size <= 6.0:
+            kv_suggestion = "1200-2000"
+        else:
+            kv_suggestion = "800-1400"
+
+        # TWR note
+        if twr == float('inf'):
+            twr_note = "น้ำหนักเป็น 0 — ตรวจสอบค่าน้ำหนัก"
+        elif twr >= 2.5:
+            twr_note = "แรงเหลือสำหรับ freestyle/racing และ recovery ดี"
+        elif twr >= 2.0:
+            twr_note = "เพียงพอสำหรับ cinematic/long-range และการบินนิ่ง"
+        elif twr >= 1.2:
+            twr_note = "พอสู้ได้ แต่ไม่มี margin สำหรับท่าแอ็กทีฟ"
+        else:
+            twr_note = "แรงไม่พอ — แนะนำลดน้ำหนักหรือเพิ่ม thrust"
+
+        # prop notes
+        prop_notes: List[str] = []
+        try:
+            eff = prop_result.get("effect", {}) if isinstance(prop_result, dict) else {}
+            noise = eff.get("noise", None)
+            grip = eff.get("grip", None)
+            motor_load_indicator = eff.get("motor_load", None)
+            if motor_load_indicator:
+                if motor_load_indicator > 100:
+                    prop_notes.append(f"Estimated thrust/motor {motor_load_indicator} g")
+                else:
+                    prop_notes.append(f"Motor load indicator: {motor_load_indicator}")
+            if noise:
+                prop_notes.append(f"Noise level: {noise}")
+            if grip:
+                prop_notes.append(f"Grip: {grip}")
+        except Exception:
+            pass
+
+        warnings: List[Dict[str, Any]] = []
+        if twr < 1.2:
+            warnings.append({"level": "danger", "msg": "TWR ต่ำมาก — บังคับยากและเสี่ยงต่อการสูญหาย"})
+        elif twr < 1.5:
+            warnings.append({"level": "warning", "msg": "TWR ค่อนข้างต่ำ — พิจารณาปรับสเปคหรือโหลดน้อยลง"})
+
+        if c_required_hover is not None:
+            if c_required_hover > C_DANGER:
+                warnings.append({"level": "danger", "msg": f"ต้องการ C สูง (~{c_required_hover:.0f}C) — เสี่ยง voltage sag/overheat"})
+            elif c_required_hover > C_HIGH:
+                warnings.append({"level": "warning", "msg": f"ต้องการ C สูง (~{c_required_hover:.0f}C) — แนะนำแบต C สูงขึ้น"})
+
+        if motor_health == "danger":
+            warnings.append({"level": "warning", "msg": "มอเตอร์ถูกโหลดสูง — ระวังความร้อนและตรวจสอบ ESC"})
+
+        if esc_flag == "danger":
+            warnings.append({"level": "danger", "msg": "ESC limit ต่ำกว่าการโหลดคาดการณ์ — risk of ESC overcurrent"})
+        elif esc_flag == "warning":
+            warnings.append({"level": "warning", "msg": "ESC ใกล้ขีดจำกัดในการบินแบบ aggressive"})
+
+        if est_flight_time_min < 2:
+            warnings.append({"level": "danger", "msg": "เวลาบินคาดการณ์น้อยกว่า 2 นาที — ไม่แนะนำขึ้นบิน"})
+        elif est_flight_time_min < 5:
+            warnings.append({"level": "warning", "msg": "เวลาบินสั้น — พิจารณาแบตเตอรี่ใหญ่ขึ้นหรือลดน้ำหนัก"})
+
         advanced = {
             "power": {
                 "cells": int(cells),
-                "battery_mAh_used": int(batt_mAh_used),
-                "battery_wh": battery_wh,
-                # match naming used in templates: est_hover_power_w
-                "est_hover_power_w": round(total_power_w, 1),
-                "est_aggressive_power_w": round(total_power_w * 1.8, 1),
+                "battery_mAh_used": int(batt_mAh),
+                "battery_wh": round(batt_wh, 2),
+                "est_hover_power_w": round(est_hover_power_w, 1),
+                "est_aggressive_power_w": round(est_aggressive_power_w, 1),
                 "est_flight_time_min": int(est_flight_time_min),
-                "est_flight_time_min_aggressive": int(est_flight_time_min_aggressive)
+                "est_flight_time_min_aggressive": int(est_flight_time_min_aggr)
             },
-            "thrust_ratio": thrust_ratio if thrust_ratio is not None else analysis.get("motor_esc_stress", None),
-            "twr_note": analysis.get("twr_note", ""),
-            "kv_suggestion": input_block.get("motor_kv", motor_kv) or (f"{1200}-{2800}" if size >=5 else "1500-3500"),
-            "prop_notes": prop_result.get("effect", {}).get("notes", []) if isinstance(prop_result, dict) else [],
-            "warnings_advanced": warnings_list,
+            "thrust_ratio": round(twr, 2) if twr != float('inf') else "inf",
+            "hover_throttle_percent": hover_throttle_pct,
+            "efficiency_class": efficiency_class,
+            "motor_health": motor_health,
+            "battery_health": battery_health,
+            "flight_profile": ("Freestyle/Racing" if twr > 2.5 else ("Cinematic/Long-range" if twr >= 2.0 else ("General/Light" if twr >= 1.2 else "Not recommended"))),
+            "twr_note": twr_note,
+            "kv_suggestion": kv_suggestion,
+            "prop_notes": prop_notes,
+            "warnings_advanced": warnings,
             "_diagnostics": {
-                "raw_analysis": analysis
+                "pack_voltage_v": round(pack_voltage, 2),
+                "thrust_per_motor_g": round(thrust_per_motor_g, 1),
+                "total_thrust_g": round(total_thrust_g, 1),
+                "weight_g": round(total_weight_g, 1),
+                "hover_throttle_frac": round(hover_throttle, 3),
+                "est_hover_power_w": round(est_hover_power_w, 1),
+                "est_hover_current_a": round(est_hover_current_a, 2),
+                "c_required_hover": round(c_required_hover, 2) if c_required_hover is not None else None,
+                "per_motor_hover_a": round(per_motor_hover_a, 2),
+                "esc_flag": esc_flag,
+                "motor_kv": motor_kv
             }
         }
 
         return {"advanced": advanced}
 
     except Exception as e:
-        # never raise here — return safe structure
+        logger.exception("make_advanced_report failed")
         return {
             "advanced": {
                 "power": {},
                 "thrust_ratio": 0,
+                "hover_throttle_percent": 100,
+                "efficiency_class": "unknown",
+                "motor_health": "unknown",
+                "battery_health": "unknown",
+                "flight_profile": "unknown",
                 "twr_note": "",
                 "kv_suggestion": "",
                 "prop_notes": [],
-                "warnings_advanced": [f"advanced wrapper error: {e}"],
+                "warnings_advanced": [{"level": "danger", "msg": f"advanced analysis error: {e}"}],
                 "_diagnostics": {}
             }
         }
 
-# expose both names (compatibility)
-__all__ = ["analyze", "make_advanced_report"]
+# quick smoke test when run directly
+if __name__ == "__main__":
+    sample = make_advanced_report(
+        size=5.0,
+        weight_g=900,
+        battery_s="4S",
+        prop_result={"effect": {"motor_load": 420, "noise": 3, "grip": "medium"}},
+        style="freestyle",
+        battery_mAh=1500,
+        motor_count=4,
+        measured_thrust_per_motor_g=None,
+        motor_kv=2450,
+        esc_current_limit_a=40,
+        blades=3
+    )
+    import json
+    print(json.dumps(sample, indent=2, ensure_ascii=False))
