@@ -51,6 +51,16 @@ def _cells_from_str(s):
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
 
+# Session hardening (production)
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+    SESSION_COOKIE_SECURE=True
+)
+
+# Debug from env
+app.config['DEBUG'] = os.environ.get('FLASK_DEBUG', '0') == '1'
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("configdoctor")
 
