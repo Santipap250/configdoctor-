@@ -14,7 +14,7 @@ import argparse
 import json
 import math
 import sys
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 # --- Constants ---
 NOMINAL_CELL_V = 3.7
