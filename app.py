@@ -52,14 +52,15 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
 
 # Session hardening (production)
+FORCE_SECURE = os.environ.get("FORCE_SECURE", "1") in ("1", "true", "True", "yes")
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',
-    SESSION_COOKIE_SECURE=True
+    SESSION_COOKIE_SECURE=FORCE_SECURE
 )
 
 # Debug from env
-app.config['DEBUG'] = os.environ.get('FLASK_DEBUG', '0') == '1'
+app.config['DEBUG'] = os.environ.get('FLASK_DEBUG', '0') in ('1','true','True')
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("configdoctor")
@@ -642,4 +643,8 @@ def healthz():
 
 # Run (dev)
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)), debug=False)
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 10000)),
+        debug=app.config.get('DEBUG', False)
+    )
