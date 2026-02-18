@@ -416,16 +416,28 @@ def download_diff(fc, filename):
     safe_fn = secure_filename(filename)
 
     base_root = os.path.realpath(os.path.join(app.root_path, 'static', 'downloads', 'diff_all'))
-    base_dir = os.path.realpath(os.path.join(base_root, safe_fc))
-    file_path = os.path.realpath(os.path.join(base_dir, safe_fn))
 
-    # ensure requested file is under downloads root
-    if not file_path.startswith(base_root + os.sep):
+    # ตรวจว่า safe_fc ถูกต้องและมีอยู่จริงใน base_root
+    if not safe_fc:
+        logger.warning("Empty fc requested")
+        abort(404)
+
+    candidate_fc_dir = os.path.realpath(os.path.join(base_root, safe_fc))
+    # ensure fc dir is a subdir of base_root and exists
+    if not (candidate_fc_dir.startswith(base_root + os.sep) and os.path.isdir(candidate_fc_dir)):
+        logger.warning("Invalid fc dir: %s", candidate_fc_dir)
+        abort(404)
+
+    file_path = os.path.realpath(os.path.join(candidate_fc_dir, safe_fn))
+
+    # ensure requested file is under candidate_fc_dir
+    if not file_path.startswith(candidate_fc_dir + os.sep):
+        logger.warning("Attempted traversal: %s/%s", fc, filename)
         abort(404)
     if not os.path.isfile(file_path):
         abort(404)
 
-    return send_from_directory(base_dir, safe_fn, as_attachment=True)
+    return send_from_directory(candidate_fc_dir, safe_fn, as_attachment=True)
 
 @app.route('/downloads')
 def downloads_index():
