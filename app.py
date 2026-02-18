@@ -47,7 +47,10 @@ def _cells_from_str(s):
         return None
 
 # app setup
+
 app = Flask(__name__)
+app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("configdoctor")
 
