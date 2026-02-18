@@ -86,14 +86,14 @@ def validate_input(size, weight, prop_size, pitch, blades, battery):
         size = 0.0
 
     # size range
-    if not (1 <= size <= 10):
-        warnings.append("ขนาดโดรนควรอยู่ระหว่าง 1–10 นิ้ว")
+    if not (1 <= size <= 15):
+        warnings.append("ขนาดโดรนควรอยู่ระหว่าง 1–15 นิ้ว")
 
     # weight (single canonical check)
     try:
         weight = float(weight)
-        if weight <= 0 or weight > 30000:
-            warnings.append("น้ำหนักโดรนควรอยู่ระหว่าง 1–30000 กรัม")
+        if weight <= 0 or weight > 8000:
+            warnings.append("น้ำหนักโดรนควรอยู่ระหว่าง 1–8000 กรัม")
     except Exception:
         warnings.append("น้ำหนัก (weight) ต้องเป็นตัวเลข")
 
