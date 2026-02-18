@@ -142,8 +142,7 @@ def classify_weight(size, weight):
         return "ไม่ระบุ"
 
     if size >= 5:
-    ...
-if weight < 650:
+    if weight < 650:
             return "เบา"
         elif weight <= 900:
             return "กลาง"
