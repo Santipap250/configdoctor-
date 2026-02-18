@@ -86,14 +86,14 @@ def validate_input(size, weight, prop_size, pitch, blades, battery):
         size = 0.0
 
     # size range
-    if not (1 <= size <= 15):
+    if not (1 <= size <= 10):
         warnings.append("ขนาดโดรนควรอยู่ระหว่าง 1–10 นิ้ว")
 
     # weight (single canonical check)
     try:
         weight = float(weight)
-        if weight <= 0 or weight > 8000:
-            warnings.append("น้ำหนักโดรนควรอยู่ระหว่าง 1–8000 กรัม")
+        if weight <= 0 or weight > 30000:
+            warnings.append("น้ำหนักโดรนควรอยู่ระหว่าง 1–30000 กรัม")
     except Exception:
         warnings.append("น้ำหนัก (weight) ต้องเป็นตัวเลข")
 
@@ -143,13 +143,13 @@ def classify_weight(size, weight):
 
     if size >= 5:
     ...
-elif size >= 3:
-    if weight < 250:
-        return "เบา"
-    elif weight <= 450:
-        return "กลาง"
-    else:
-        return "หนัก"
+if weight < 650:
+            return "เบา"
+        elif weight <= 900:
+            return "กลาง"
+        else:
+            return "หนัก"
+    return "ไม่ระบุ"
 
 # ===============================
 # main analyze_drone (simple baseline)
