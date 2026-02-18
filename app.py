@@ -52,7 +52,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
 
 # Session hardening (production)
-FORCE_SECURE = os.environ.get("FORCE_SECURE", "1") in ("1", "true", "True", "yes")
+FORCE_SECURE = os.environ.get("FORCE_SECURE", "1").lower() in ("1","true","yes")
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',
