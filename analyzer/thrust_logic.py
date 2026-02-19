@@ -1,47 +1,27 @@
-# analyzer/thrust_logic.py
-"""Thrust & battery estimation helpers."""
-
-from typing import Optional, Dict
-
-
-def calculate_thrust_weight(thrust_g: float, weight_g: float, motor_count: Optional[int] = None) -> Dict:
+# analyzer/thrust_logic.py (REPLACE)
+def calculate_thrust_weight(thrust_g, weight_g, motor_count=None):
     """
-    Compute thrust metrics.
-
-    Args:
-      thrust_g: total thrust (grams)
-      weight_g: total vehicle weight (grams)
-      motor_count: optional number of motors
-
-    Returns:
-      dict with:
-        - thrust_ratio (rounded float)
-        - thrust_total_g, weight_g
-        - motor_count (if provided)
-        - thrust_per_motor_g, required_thrust_per_motor_g,
-          per_motor_margin_g, per_motor_margin_pct (if motor_count provided)
-        - error (optional string)
+    Return dictionary with thrust metrics.
+      - thrust_ratio: thrust_total_g / weight_g (unitless)
+      - thrust_total_g, weight_g
+      - if motor_count provided: thrust_per_motor_g, required_per_motor_g, per_motor_margin_g, per_motor_margin_pct
     """
-    out = {
-        "thrust_ratio": 0.0,
-        "thrust_total_g": float(thrust_g) if thrust_g is not None else 0.0,
-        "weight_g": float(weight_g) if weight_g is not None else 0.0,
-    }
-
-    # validate numerics
     try:
-        thrust = float(out["thrust_total_g"])
-        weight = float(out["weight_g"])
+        thrust = float(thrust_g)
+        weight = float(weight_g)
     except Exception:
-        out["error"] = "invalid numeric"
-        return out
+        return {"thrust_ratio": 0.0, "error": "invalid numeric"}
 
     if weight <= 0:
-        out["error"] = "weight must be > 0"
-        return out
+        return {"thrust_ratio": 0.0, "error": "weight must be > 0"}
 
     thrust_ratio = thrust / weight
-    out["thrust_ratio"] = round(thrust_ratio, 2)
+
+    out = {
+        "thrust_ratio": round(thrust_ratio, 2),
+        "thrust_total_g": float(thrust),
+        "weight_g": float(weight),
+    }
 
     if motor_count:
         try:
@@ -50,10 +30,7 @@ def calculate_thrust_weight(thrust_g: float, weight_g: float, motor_count: Optio
                 thrust_per_motor = thrust / m
                 required_per_motor = weight / m
                 per_motor_margin_g = thrust_per_motor - required_per_motor
-                per_motor_margin_pct = None
-                if required_per_motor != 0:
-                    per_motor_margin_pct = (per_motor_margin_g / required_per_motor) * 100.0
-
+                per_motor_margin_pct = (per_motor_margin_g / required_per_motor) * 100.0 if required_per_motor != 0 else None
                 out.update({
                     "motor_count": m,
                     "thrust_per_motor_g": round(thrust_per_motor, 2),
@@ -62,22 +39,17 @@ def calculate_thrust_weight(thrust_g: float, weight_g: float, motor_count: Optio
                     "per_motor_margin_pct": round(per_motor_margin_pct, 1) if per_motor_margin_pct is not None else None,
                 })
         except Exception:
-            # keep result without motor details
             pass
 
     return out
 
 
-def estimate_battery_runtime_wh(consumption_w: float, battery_wh: float) -> float:
-    """
-    Simple runtime estimate in minutes: battery_wh / consumption_w * 60
-    (caller should compute consumption_w or use heuristic)
-    """
-    try:
-        c = float(consumption_w)
-        b = float(battery_wh)
-    except Exception:
-        return 0.0
-    if c <= 0:
-        return 0.0
-    return round((b / c) * 60.0, 1)
+def estimate_battery_runtime(weight, battery):
+    # keep existing coarse heuristic or improve later
+    base = 3.5
+    if battery == "4S":
+        return round(base * (1500/1000) / (weight if weight>0 else 1) * 4, 1)
+    elif battery == "6S":
+        return round(base * (1500/1000) / (weight if weight>0 else 1) * 6, 1)
+    else:
+        return 0
