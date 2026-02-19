@@ -251,7 +251,6 @@ else:
         analysis["battery_est"] = estimate_battery_runtime(weight, battery)
     except Exception:
         analysis["battery_est"] = 0
-
     return analysis
 
 # เพิ่ม code นี้ลงใน app.py
