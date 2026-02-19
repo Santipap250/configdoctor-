@@ -186,16 +186,65 @@ def analyze_drone(size, battery, style, prop_result, weight):
     analysis["filter"] = filter_desc
     analysis["extra_tips"] = extra_tips
 
-    # thrust_ratio (best-effort)
-    try:
-        thrust = prop_result.get("thrust_g", 0)
+    # --- START: thrust calculation (replace existing problematic block) ---
+# Ensure motor_count variable available (already parsed earlier), default 4
+try:
+    motor_count = int(motor_count)
+except Exception:
+    motor_count = 4
 
-analysis["thrust_ratio"] = calculate_thrust_weight(
-    thrust,
-    float(weight)
-)
+# Try read thrust per prop (heuristic) returned by analyze_propeller
+thrust_per_prop_g = prop_result.get("thrust_per_prop_g", None) or prop_result.get("thrust_g", None)
+# If prop_result provided a total thrust directly (thrust_g), use that as total
+if thrust_per_prop_g is None:
+    # no per-prop thrust provided; try thrust_total directly
+    thrust_total_g = prop_result.get("thrust_total_g", 0) or prop_result.get("thrust_g", 0)
+else:
+    try:
+        thrust_total_g = float(thrust_per_prop_g) * int(motor_count)
     except Exception:
-        analysis["thrust_ratio"] = 0
+        thrust_total_g = 0.0
+
+# Parse weight — assume weight in grams unless your app uses kg (adjust if needed)
+try:
+    weight_g = float(weight)
+except Exception:
+    weight_g = 0.0
+
+# Warnings & fallback
+analysis.setdefault("warnings", [])
+if thrust_total_g <= 0:
+    analysis["warnings"].append(
+        "ไม่พบค่า thrust ที่ถูกต้องจาก analyze_propeller() — แนะนำให้ให้ prop_logic คืนค่า 'thrust_per_prop_g' หรือ 'thrust_g'"
+    )
+
+# Call the (updated) calculate_thrust_weight which expects (thrust_g, weight_g, motor_count)
+thrust_info = {}
+try:
+    thrust_info = calculate_thrust_weight(thrust_total_g, weight_g, motor_count=int(motor_count))
+except Exception as e:
+    # ensure we still return something reasonable
+    thrust_info = {"thrust_ratio": 0.0, "error": str(e), "thrust_total_g": thrust_total_g, "weight_g": weight_g}
+
+# Save detailed dict and also a simple scalar for backwards compatibility
+analysis["thrust"] = thrust_info
+analysis["thrust_ratio"] = float(thrust_info.get("thrust_ratio", 0.0))
+
+# Human-readable summary
+tr = analysis["thrust_ratio"]
+if tr <= 0:
+    analysis["thrust_summary"] = "ไม่สามารถคำนวณ thrust ratio — ตรวจสอบค่า thrust / weight"
+elif tr <= 1.0:
+    analysis["thrust_summary"] = "แรงผลักต่ำกว่าน้ำหนัก — บินไม่ได้/ไม่ปลอดภัย"
+elif tr < 1.5:
+    analysis["thrust_summary"] = "พอ hover ช้า (cinematic)"
+elif tr < 2.0:
+    analysis["thrust_summary"] = "เพียงพอสำหรับบินทั่วไป"
+elif tr < 3.5:
+    analysis["thrust_summary"] = "แรงดี เหมาะกับ racing/acro"
+else:
+    analysis["thrust_summary"] = "แรงสูง — ระวังแบตและความร้อน"
+# --- END: thrust calculation ---
 
     # battery estimate fallback
     try:
