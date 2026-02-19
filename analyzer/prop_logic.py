@@ -53,4 +53,17 @@ def analyze_propeller(prop_size, prop_pitch, blade_count, style):
         "grip": grip
     }
     result["recommendation"] = recommend
+
+# quick heuristic estimate (per-prop thrust in grams)
+try:
+    # tuning constant; ปรับค่า C ให้ตรงกับข้อมูลจริงของคุณ
+    C = 8.0
+    blade_factor = 1.0 if blade_count == 2 else (0.95 if blade_count == 3 else 0.9)
+    thrust_per_prop_g = (C * (prop_size ** 2) * prop_pitch) * blade_factor
+    result["thrust_per_prop_g"] = float(round(thrust_per_prop_g, 2))
+    result["thrust_total_g"] = float(round(thrust_per_prop_g * result.get("motor_count", 4), 2))
+except Exception:
+    result["thrust_per_prop_g"] = 0.0
+    result["thrust_total_g"] = 0.0
+
     return result
