@@ -141,7 +141,7 @@ def classify_weight(size, weight):
     except Exception:
         return "ไม่ระบุ"
 
-     if size >= 5:
+    if size >= 5:
         if weight < 650:
             return "เบา"
         elif weight <= 900:
