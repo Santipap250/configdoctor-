@@ -194,8 +194,8 @@ analysis["thrust_ratio"] = calculate_thrust_weight(
     thrust,
     float(weight)
 )
-    except Exception:
-        analysis["thrust_ratio"] = 0
+    if thrust == 0:
+    analysis["thrust_ratio"] = 0
 
     # battery estimate fallback
     try:
