@@ -192,7 +192,6 @@ try:
     motor_count = int(motor_count)
 except Exception:
     motor_count = 4
-
 # Try read thrust per prop (heuristic) returned by analyze_propeller
 thrust_per_prop_g = prop_result.get("thrust_per_prop_g", None) or prop_result.get("thrust_g", None)
 # If prop_result provided a total thrust directly (thrust_g), use that as total
