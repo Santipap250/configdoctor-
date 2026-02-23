@@ -188,12 +188,8 @@ def analyze_drone(size, battery, style, prop_result, weight):
 
     # thrust_ratio (best-effort)
     try:
-        thrust = prop_result.get("thrust_g", 0)
-
-analysis["thrust_ratio"] = calculate_thrust_weight(
-    thrust,
-    float(weight)
-)
+        motor_load = prop_result.get("effect", {}).get("motor_load", 0)
+        analysis["thrust_ratio"] = calculate_thrust_weight(motor_load, float(weight))
     except Exception:
         analysis["thrust_ratio"] = 0
 
