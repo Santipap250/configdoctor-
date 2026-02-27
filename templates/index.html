@@ -2,989 +2,853 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>Obixconfig Doctor</title>
-
-<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-
+<title>OBIXConfig Doctor</title>
+<meta name="description" content="วิเคราะห์และแนะนำค่า PID / Filter / Motor สำหรับโดรน FPV">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<style>
-:root {
-    --bg-color-light: #f5f5f5;
-    --text-color-light: #111;
-    --card-color-light: #fff;
-
-    --bg-color-dark: #121212;
-    --text-color-dark: #eee;
-    --card-color-dark: #1e1e1e;
-}
-
-body.light {
-    background-color: var(--bg-color-light);
-    color: var(--text-color-light);
-}
-
-body.light .container, body.light .form-card, body.light .result-card {
-    background-color: var(--card-color-light);
-}
-
-body.dark {
-    background-color: var(--bg-color-dark);
-    color: var(--text-color-dark);
-}
-
-body.dark .container, body.dark .form-card, body.dark .result-card {
-    background-color: var(--card-color-dark);
-}
-
-button.toggle-theme {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    padding: 6px 12px;
-    cursor: pointer;
-}
-</style>
-
 <script>
-function copyText(id) {
-    const text = document.getElementById(id).innerText;
-    navigator.clipboard.writeText(text);
-    alert("คัดลอกไปใช้ใน Betaflight ได้แล้ว");
+// ── Theme init (ทำก่อน paint เพื่อป้องกัน flash) ──
+(function(){
+  var t = localStorage.getItem('theme') || 'dark';
+  document.documentElement.className = t;
+  document.addEventListener('DOMContentLoaded', function(){
+    document.body.classList.add(t);
+  });
+})();
+
+function toggleTheme(){
+  var isDark = document.body.classList.contains('dark');
+  document.body.classList.toggle('dark', !isDark);
+  document.body.classList.toggle('light', isDark);
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
 }
 
-// Dark/Light toggle
-function toggleTheme() {
-    document.body.classList.toggle('dark');
-    document.body.classList.toggle('light');
-    localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+function copyText(id){
+  var el = document.getElementById(id);
+  if(!el) return;
+  navigator.clipboard.writeText(el.innerText).then(function(){
+    showToast('คัดลอกเรียบร้อย ✓');
+  });
 }
 
-window.onload = () => {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.body.classList.add(savedTheme);
+function showToast(msg){
+  var t = document.getElementById('toast');
+  if(!t){ t = document.createElement('div'); t.id='toast';
+    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#10c47a;color:#021a0e;padding:8px 18px;border-radius:20px;font-weight:700;font-size:.87rem;z-index:999;transition:opacity .3s;';
+    document.body.appendChild(t); }
+  t.textContent = msg; t.style.opacity = '1';
+  clearTimeout(t._t);
+  t._t = setTimeout(function(){ t.style.opacity='0'; }, 2000);
 }
 
-function toggleConcept() {
-  const box = document.querySelector('.concept-box');
-  box.classList.toggle('open');
+function toggleConcept(){
+  document.querySelector('.concept-box').classList.toggle('open');
 }
 </script>
 </head>
 
-<script>
-const presets = {
-  beginner: `
-# OBIXConfig Lab - Beginner Preset
-set throttle_limit_percent = 85
-set dshot_bidir = OFF
-set iterm_relax = RP
-set feedforward_transition = 0
-set anti_gravity_gain = 3
-save
-`,
-
-  freestyle: `
-# OBIXConfig Lab - Freestyle Preset
-set throttle_limit_percent = 100
-set iterm_relax = RPY
-set feedforward_transition = 0.5
-set anti_gravity_gain = 5
-save
-`,
-
-  longrange: `
-# OBIXConfig Lab - Long Range Preset
-set throttle_limit_percent = 80
-set iterm_relax = OFF
-set feedforward_transition = 0
-set anti_gravity_gain = 2
-save
-`
-};
-
-function showPreset(type) {
-  document.getElementById("cliOutput").textContent = presets[type];
-}
-
-function copyCLI() {
-  const text = document.getElementById("cliOutput").textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    alert("คัดลอก CLI เรียบร้อยแล้ว 🚀");
-  });
-}
-</script>
-
 <body>
+<!-- ── TOP BAR ── -->
 <div class="top-bar">
   <div class="top-left">
     <button id="hamburgerBtn" class="hamburger" aria-label="เปิดเมนู" aria-expanded="false">
-      <span class="lines" aria-hidden="true"><span></span><span></span><span></span></span>
+      <span class="lines" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </span>
     </button>
-    <img src="{{ url_for('static', filename='img/obix-logo.png') }}" class="logo" alt="OBIXConfig">
+    <a href="/landing">
+      <img src="{{ url_for('static', filename='img/obix-logo.png') }}" class="logo" alt="OBIXConfig Doctor">
+    </a>
   </div>
-
-  <div style="display:flex;align-items:center;gap:8px;">
-<!-- ปุ่มสลับธีม (เดิม) -->
-    <button class="toggle-theme" onclick="toggleTheme()" title="Toggle theme">🌗</button>
-  </div>
+  <button class="toggle-theme" onclick="toggleTheme()" title="สลับธีม">🌗</button>
 </div>
 
-<div class="container">
-<!-- overlay + drawer + popover (วางตรงหลังปิด .container) -->
+<!-- ── OVERLAY + DRAWER ── -->
 <div id="overlay" class="overlay" tabindex="-1" aria-hidden="true"></div>
 
 <aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" hidden>
-  <div style="display:flex; align-items:center; justify-content:space-between;">
-    <h3 id="drawerTitle" style="margin:0; color:var(--gold,#f1b65a);">เมนู</h3>
-    <button id="closeDrawer" aria-label="ปิดเมนู" style="background:none;border:0;color:inherit;font-size:20px;padding:8px;cursor:pointer;">✕</button>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <span id="drawerTitle" style="font-weight:700;font-size:1rem;color:var(--green);">เมนู</span>
+    <button id="closeDrawer" aria-label="ปิดเมนู" style="background:none;border:0;color:var(--muted);font-size:20px;cursor:pointer;">✕</button>
   </div>
-<script>
-// highlight drawer link เมื่อเลื่อนมาถึง section
-const sectionIds = ['quick','keys','cli','pid','check','faq'];
-const sections = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
-const links = Array.from(document.querySelectorAll('.drawer-link'));
 
-function setActiveForId(id){
-  links.forEach(a => {
-    const href = a.getAttribute('href') || '';
-    if(href.includes('#'+id)) a.classList.add('active');
-    else a.classList.remove('active');
-  });
-}
+  <hr style="margin-bottom:12px;">
 
-if('IntersectionObserver' in window){
-  const io = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if(e.isIntersecting){
-        setActiveForId(e.target.id);
-      }
-    });
-  }, { threshold: 0.45 });
-
-  sections.forEach(s => io.observe(s));
-}
-</script>
-          
-  <hr style="opacity:0.06; margin:12px 0;">
-
-  <!-- compact drawer nav — แก้ให้สวยขึ้น (3 รายการ) -->
-  <nav class="drawer-compact" aria-label="Quick links">
-    <a class="drawer-link" href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener" onclick="closeDrawer()">
-      <span class="dl-icon" aria-hidden="true">📘</span>
+  <nav aria-label="เมนูหลัก">
+    <a class="drawer-link" href="/app">
+      <span class="dl-icon">🏠</span>
       <span class="dl-body">
-        <span class="dl-title">ไปที่เพจ OBIXConfig Lab</span>
+        <span class="dl-title">หน้าหลัก / วิเคราะห์</span>
+        <span class="dl-meta">กรอกข้อมูลโดรนเพื่อดูผล</span>
+      </span>
+      <span class="dl-pill">main</span>
+    </a>
+
+    <a class="drawer-link" href="/motor-prop">
+      <span class="dl-icon">🧭</span>
+      <span class="dl-body">
+        <span class="dl-title">Motor × Prop Recommender</span>
+        <span class="dl-meta">แนะนำมอเตอร์/ใบพัดตามน้ำหนัก & แบต</span>
+      </span>
+      <span class="dl-pill">tool</span>
+    </a>
+
+    <a class="drawer-link" href="/vtx">
+      <span class="dl-icon">📡</span>
+      <span class="dl-body">
+        <span class="dl-title">VTX Bands & Channels</span>
+        <span class="dl-meta">สูตร band/channel + คำสั่งตัวอย่าง</span>
+      </span>
+      <span class="dl-pill">tool</span>
+    </a>
+
+    <a class="drawer-link" href="/vtx-range">
+      <span class="dl-icon">📡🏞️</span>
+      <span class="dl-body">
+        <span class="dl-title">VTX Range Calculator</span>
+        <span class="dl-meta">ประมาณระยะสัญญาณ + กราฟ</span>
+      </span>
+      <span class="dl-pill">tool</span>
+    </a>
+
+    <a class="drawer-link" href="/downloads">
+      <span class="dl-icon">📁</span>
+      <span class="dl-body">
+        <span class="dl-title">ไฟล์ DIFF และ DUMP</span>
+        <span class="dl-meta">รวม diff all / dump CLI สำเร็จรูป</span>
+      </span>
+      <span class="dl-pill">files</span>
+    </a>
+
+    <a class="drawer-link" href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener">
+      <span class="dl-icon">📘</span>
+      <span class="dl-body">
+        <span class="dl-title">เพจ OBIXConfig Lab</span>
         <span class="dl-meta">ถาม-แนะนำ ฟีเจอร์ & ตัวอย่างการตั้งค่า</span>
       </span>
       <span class="dl-pill">open</span>
     </a>
 
-    <a class="drawer-link" href="/vtx" onclick="closeDrawer();">
-  <span class="dl-icon">📡</span>
-  <span class="dl-body">
-    <span class="dl-title">VTX Bands & Channels</span>
-    <span class="dl-meta">สูตร band / channel + คำสั่งตัวอย่าง</span>
-  </span>
-  <span class="dl-pill">tool</span>
-</a>
-
-<a class="drawer-link" href="/vtx-range" onclick="closeDrawer();">
-  <span class="dl-icon" aria-hidden="true">📡🏞️</span>
-  <span class="dl-body">
-    <span class="dl-title">VTX Range Calculator</span>
-    <span class="dl-meta">ประมาณระยะสัญญาณ + กราฟ</span>
-  </span>
-  <span class="dl-pill">tool</span>
-</a>
-
-<a class="drawer-link" href="/motor-prop" onclick="closeDrawer();">
-  <span class="dl-icon">🧭</span>
-  <span class="dl-body">
-    <span class="dl-title">Motor × Prop Recommender</span>
-    <span class="dl-meta">แนะนำมอเตอร์/ใบพัดตามน้ำหนัก & แบต</span>
-  </span>
-  <span class="dl-pill">tool</span>
-</a>
-
-<button onclick="sendOsdExport('txt', false)">Export .txt</button>
-<button onclick="sendOsdExport('cli', false)">Export pseudo-CLI</button>
-<button onclick="sendOsdExport('txt', true)">Save to server</button>
-
-      <a class="drawer-link" href="{{ url_for('about') }}" onclick="closeDrawer();">
-      <span class="dl-icon" aria-hidden="true">ℹ️</span>
+    <a class="drawer-link" href="{{ url_for('about') }}">
+      <span class="dl-icon">ℹ️</span>
       <span class="dl-body">
         <span class="dl-title">เกี่ยวกับ</span>
-        <span class="dl-meta">ที่มาของโปรเจค & วิธีใช้งานสั้น ๆ</span>
+        <span class="dl-meta">ที่มา & วิธีใช้งาน</span>
       </span>
       <span class="dl-pill">info</span>
     </a>
 
-    <a class="drawer-link" href="{{ url_for('changelog') }}" onclick="closeDrawer();">
-      <span class="dl-icon" aria-hidden="true">📝</span>
+    <a class="drawer-link" href="{{ url_for('changelog') }}">
+      <span class="dl-icon">📝</span>
       <span class="dl-body">
         <span class="dl-title">Changelog</span>
-        <span class="dl-meta">บันทึกการอัปเดตของระบบ</span>
+        <span class="dl-meta">บันทึกการอัปเดต</span>
       </span>
-      <span class="dl-pill">v1.0lite</span>
+      <span class="dl-pill">v1.1</span>
     </a>
-
-<!-- เพิ่มในส่วนเมนู / drawer -->
-<a class="drawer-link" href="{{ url_for('downloads_index') }}">
-  <div class="menu-card">
-    <div class="menu-title">📁 ไฟล์ DIFF และ DUMP</div>
-    <div class="menu-sub">รวม diff all และ dump — ดาวน์โหลด / คัดลอก CLI</div>
-   </div>
-</a>
+  </nav>
 </aside>
 
-<div id="popover" class="popover" aria-hidden="true"></div>
-<div class="concept-box">
+<!-- ── MAIN CONTENT ── -->
+<div class="container">
 
+<!-- ── CONCEPT BOX ── -->
+<div class="concept-box" style="margin-top:20px;">
   <div class="concept-header" onclick="toggleConcept()">
     <span class="concept-title">🧠 แนวคิดการคำนวณค่า</span>
-<span class="concept-icon">❗👆🏻</span>
+    <span class="concept-icon">▾</span>
   </div>
-
-  <div class="concept-content" id="conceptContent">
+  <div class="concept-content">
     <p>
-      ค่าแนะนำจาก <strong>OBIXConfig Doctor</strong><br>
+      ค่าแนะนำจาก <strong>OBIXConfig Doctor</strong>
       ไม่ใช่สูตรตายตัว แต่เป็น <strong>จุดเริ่มต้นที่ปลอดภัย</strong>
-      สำหรับการจูนโดรนแต่ละลำ
     </p>
-
     <ul>
       <li>🔧 คำนวณจาก <strong>ขนาด / น้ำหนัก / แบตเตอรี่ / สไตล์การบิน</strong></li>
       <li>📊 อ้างอิงแนวคิดเดียวกับนักบิน FPV ตัวจริง</li>
       <li>⚠️ อุปกรณ์ สภาพโดรน และการประกอบ มีผลกับค่าเสมอ</li>
     </ul>
-
     <p class="concept-note">
-      แนะนำให้ทดสอบบินจริง และปรับเพิ่ม–ลดเล็กน้อย<br>
-      เพื่อให้เข้ากับโดรนและสไตล์ของคุณที่สุด
+      แนะนำทดสอบบินจริงก่อน และปรับเพิ่ม–ลดเล็กน้อยตามพฤติกรรมของโดรน
     </p>
   </div>
-
 </div>
 
-<form method="POST" class="form-card">
-<!-- ===== Preset selector (OBIXPresets) ===== -->
-    <label>Preset (เลือกชุดเริ่มต้น)</label>
-<select id="preset-select" name="preset" class="form-control">
-  <option value="">-- ไม่ใช้ preset --</option>
+<!-- ── FORM ── -->
+<div class="form-card">
+  <h2 style="font-size:1rem;color:var(--green);margin-bottom:18px;">
+    ⚙️ กรอกข้อมูลโดรน
+  </h2>
 
-  <option value="2.5_micro" {% if request.form.get('preset','')=='2.5_micro' or (analysis and analysis.preset_used=='2.5_micro') %}selected{% endif %}>2.5" — Micro</option>
-  <option value="3_whoop"   {% if request.form.get('preset','')=='3_whoop'   or (analysis and analysis.preset_used=='3_whoop')   %}selected{% endif %}>3.0" — Whoop / Toothpick</option>
-  <option value="3.5_cine"  {% if request.form.get('preset','')=='3.5_cine'  or (analysis and analysis.preset_used=='3.5_cine')  %}selected{% endif %}>3.5" — Cine</option>
-  <option value="4_mini"    {% if request.form.get('preset','')=='4_mini'    or (analysis and analysis.preset_used=='4_mini')    %}selected{% endif %}>4.0" — Mini</option>
-  <option value="5_freestyle"{% if request.form.get('preset','')=='5_freestyle' or (analysis and analysis.preset_used=='5_freestyle')%}selected{% endif %}>5.0" — Freestyle</option>
-  <option value="6_heavy5"  {% if request.form.get('preset','')=='6_heavy5'  or (analysis and analysis.preset_used=='6_heavy5')  %}selected{% endif %}>6.0" — Heavy</option>
-  <option value="7_midlr"   {% if request.form.get('preset','')=='7_midlr'   or (analysis and analysis.preset_used=='7_midlr')   %}selected{% endif %}>7.0" — Mid / LR</option>
-  <option value="7.5_midlr" {% if request.form.get('preset','')=='7.5_midlr' or (analysis and analysis.preset_used=='7.5_midlr') %}selected{% endif %}>7.5" — Mid / LR</option>
-  <option value="8_lr"      {% if request.form.get('preset','')=='8_lr'      or (analysis and analysis.preset_used=='8_lr')      %}selected{% endif %}>8.0" — Long Range</option>
-  <option value="10_lr"     {% if request.form.get('preset','')=='10_lr'     or (analysis and analysis.preset_used=='10_lr')     %}selected{% endif %}>10" — Long Range (Big)</option>
-</select>
-<!-- ===== end preset selector ===== -->
-    <label>ขนาดโดรน (นิ้ว)</label>
-    <input type="number" name="size" placeholder="เช่น 5" value="{{ request.form.get('size', '') }}" required>
+  <form method="POST">
+    <!-- Preset -->
+    <label>Preset (ชุดเริ่มต้น)</label>
+    <select id="preset-select" name="preset">
+      <option value="">-- ไม่ใช้ preset --</option>
+      {% for key, label in [
+        ('2.5_micro','2.5\" — Micro'),
+        ('3_whoop','3.0\" — Whoop / Toothpick'),
+        ('3.5_cine','3.5\" — Cine'),
+        ('4_mini','4.0\" — Mini'),
+        ('5_freestyle','5.0\" — Freestyle'),
+        ('6_heavy5','6.0\" — Heavy'),
+        ('7_midlr','7.0\" — Mid / LR'),
+        ('7.5_midlr','7.5\" — Mid / LR'),
+        ('8_lr','8.0\" — Long Range'),
+        ('10_lr','10\" — Long Range (Big)')
+      ] %}
+      <option value="{{ key }}"
+        {% if request.form.get('preset','')==key or (analysis and analysis.preset_used==key) %}selected{% endif %}>
+        {{ label }}
+      </option>
+      {% endfor %}
+    </select>
 
-    <label>น้ำหนักโดรน (กรัม)</label>
-    <input type="number" name="weight" placeholder="เช่น 950" value="{{ request.form.get('weight', '') }}" required>
-
-    <label>แบตเตอรี่</label>
-<select name="battery" id="battery-select">
-  <option value="3S" {% if request.form.get('battery','')=='3S' %}selected{% endif %}>3S</option>
-  <option value="4S" {% if request.form.get('battery','')=='4S' %}selected{% endif %}>4S</option>
-  <option value="5S" {% if request.form.get('battery','')=='5S' %}selected{% endif %}>5S</option>
-  <option value="6S" {% if request.form.get('battery','')=='6S' %}selected{% endif %}>6S</option>
-  <option value="7S" {% if request.form.get('battery','')=='7S' %}selected{% endif %}>7S</option>
-  <option value="8S" {% if request.form.get('battery','')=='8S' %}selected{% endif %}>8S</option>
-</select>
-
-<label>Battery capacity (mAh) — (ถ้ามี)</label>
-<input type="number" name="battery_mAh" placeholder="เช่น 1500" value="{{ request.form.get('battery_mAh','') }}">
-
-    <label>สไตล์การบิน</label>
-    <select name="style">
-  <option value="freestyle" {% if request.form.get('style','')=='freestyle' %}selected{% endif %}>Freestyle</option>
-  <option value="longrange" {% if request.form.get('style','')=='longrange' %}selected{% endif %}>Long Range / Cinematic</option>
-  <option value="racing" {% if request.form.get('style','')=='racing' %}selected{% endif %}>Racing</option>
-</select>
-
-    <label>ขนาดใบพัด (นิ้ว)</label>
-    <input type="number" name="prop_size" value="{{ request.form.get('prop_size', '5') }}" required>
-
-    <label>จำนวนใบพัด</label>
-    <select name="blades">
-  <option value="2" {% if request.form.get('blades','')=='2' %}selected{% endif %}>2 ใบ</option>
-  <option value="3" {% if request.form.get('blades','')=='3' %}selected{% endif %}>3 ใบ</option>
-  <option value="4" {% if request.form.get('blades','')=='4' %}selected{% endif %}>4 ใบ</option>
-</select>
-
-    <label>Pitch ใบพัด</label>
-    <input type="number" step="0.1" name="pitch" value="{{ request.form.get('pitch', '4.0') }}" required>
-
-    <button type="submit">วิเคราะห์</button>
-</form>
-
-{% if analysis %}
-<section class="quick-summary">
-  <div class="qs-header">
-    🧾 สรุปภาพรวม (Quick Summary)
-  </div>
-
-{% if analysis and analysis.rules %}
-<div class="result-card" style="margin-top:10px;">
-  <h3>🛠️ Smart Checks</h3>
-  <div>
-    {% for r in analysis.rules %}
-      {% if r.level == 'danger' %}
-        <div class="alert danger">❌ {{ r.msg }}<br><small>{{ r.suggestion }}</small></div>
-      {% elif r.level == 'warning' %}
-        <div class="alert warning">⚠️ {{ r.msg }}<br><small>{{ r.suggestion }}</small></div>
-      {% else %}
-        <div class="alert info">ℹ️ {{ r.msg }}{% if r.suggestion %}<br><small>{{ r.suggestion }}</small>{% endif %}</div>
-      {% endif %}
-    {% endfor %}
-  </div>
-</div>
-{% endif %}
-
-{# ---------------- Advanced Analysis Card ---------------- #}
-{% if analysis and analysis.advanced %}
-<div class="result-card" style="border-left:4px solid var(--accent); margin-top:12px;">
-  <h3>🔬 Advanced Analysis</h3>
-
-  <div class="result-grid">
-    <div class="card-metric">
-      <div class="metric-label">Pack</div>
-      <div class="metric-value">{{ analysis.advanced.cells }}S • {{ analysis.advanced.pack_voltage_nominal }} V</div>
-      <div class="muted small">{{ analysis.advanced.battery_mAh_used }} mAh • {{ analysis.advanced.battery_wh }} Wh</div>
-    </div>
-
-    <div class="card-metric">
-      <div class="metric-label">Estimated flight time</div>
-      <div class="metric-value">{{ analysis.advanced.est_flight_time_min }} min</div>
-      <div class="muted small">Aggressive: {{ analysis.advanced.est_flight_time_min_aggr }} min</div>
-    </div>
-
-    <div class="card-metric">
-      <div class="metric-label">Power / Current</div>
-      <div class="metric-value">{{ analysis.advanced.avg_power_w }} W • {{ analysis.advanced.current_draw_a }} A</div>
-      <div class="muted small">Peak: {{ analysis.advanced.peak_current_a }} A • Req C: {{ analysis.advanced.c_required }}C</div>
-    </div>
-
-    <div class="card-metric">
-      <div class="metric-label">TWR / Hover</div>
-      <div class="metric-value">{{ analysis.advanced.thrust_ratio }}</div>
-      <div class="muted small">Hover: {{ analysis.advanced.hover_throttle_percent }}% — {{ analysis.advanced.efficiency_class }}</div>
-    </div>
-  </div>
-
-  <hr style="opacity:.06;margin:12px 0;">
-
-  <div style="display:flex;gap:12px;flex-wrap:wrap;">
-    <div style="flex:1;min-width:220px;">
-      <h4 style="margin:0 0 6px 0;">Motor / Battery Health</h4>
-      <p class="muted small">Motor: <strong>{{ analysis.advanced.motor_health }}</strong></p>
-      <p class="muted small">Battery: <strong>{{ analysis.advanced.battery_health }}</strong></p>
-    </div>
-
-    <div style="flex:1;min-width:260px;">
-      <h4 style="margin:0 0 6px 0;">KV suggestion</h4>
-      <p>{{ analysis.advanced.kv_suggestion }}</p>
-    </div>
-
-    <div style="flex:1;min-width:260px;">
-      <h4 style="margin:0 0 6px 0;">Recommendations</h4>
-      <ul>
-        {% for r in analysis.advanced.recommendations %}
-          <li>{{ r }}</li>
-        {% else %}
-          <li class="muted small">ไม่มีคำแนะนำเพิ่มเติม</li>
-        {% endfor %}
-      </ul>
-    </div>
-  </div>
-
-  {% if analysis.advanced.warnings_advanced %}
-  <div class="warning-box" style="margin-top:12px;">
-    {% for w in analysis.advanced.warnings_advanced %}
-      <div class="alert {{ 'danger' if w.level=='danger' else 'warning' if w.level=='warning' else 'info' }}">
-        {{ w.msg }}
+    <div class="form-grid">
+      <div>
+        <label>ขนาดโดรน (นิ้ว)</label>
+        <input type="number" step="0.1" name="size" placeholder="เช่น 5" value="{{ request.form.get('size','') }}" required>
       </div>
-    {% endfor %}
-  </div>
-  {% endif %}
+      <div>
+        <label>น้ำหนักโดรน (กรัม)</label>
+        <input type="number" name="weight" placeholder="เช่น 750" value="{{ request.form.get('weight','') }}" required>
+      </div>
+    </div>
 
-  <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
-    <button class="btn-small" onclick="copyAdvancedSummary()">📋 Copy summary</button>
-    <a class="btn-small" href="#" onclick="downloadAdvancedJSON()">📂 Download JSON</a>
-  </div>
+    <div class="form-grid">
+      <div>
+        <label>แบตเตอรี่</label>
+        <select name="battery" id="battery-select">
+          {% for c in ['3S','4S','5S','6S','7S','8S'] %}
+          <option value="{{ c }}" {% if request.form.get('battery','')==c %}selected{% endif %}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>Battery capacity (mAh)</label>
+        <input type="number" name="battery_mAh" placeholder="เช่น 1500" value="{{ request.form.get('battery_mAh','') }}">
+      </div>
+    </div>
 
-  <pre id="advancedSummary" style="display:none;">
-{{ analysis.advanced | tojson(indent=2) }}
-  </pre>
+    <div class="form-grid">
+      <div>
+        <label>สไตล์การบิน</label>
+        <select name="style">
+          <option value="freestyle" {% if request.form.get('style','')=='freestyle' %}selected{% endif %}>Freestyle</option>
+          <option value="longrange" {% if request.form.get('style','')=='longrange' %}selected{% endif %}>Long Range / Cinematic</option>
+          <option value="racing"    {% if request.form.get('style','')=='racing'    %}selected{% endif %}>Racing</option>
+        </select>
+      </div>
+      <div>
+        <label>Motor Count</label>
+        <input type="number" name="motor_count" value="{{ request.form.get('motor_count','4') }}" min="1" max="8">
+      </div>
+    </div>
 
+    <div class="form-grid">
+      <div>
+        <label>ขนาดใบพัด (นิ้ว)</label>
+        <input type="number" step="0.1" name="prop_size" value="{{ request.form.get('prop_size','5') }}" required>
+      </div>
+      <div>
+        <label>จำนวนใบพัด</label>
+        <select name="blades">
+          {% for n in [2,3,4] %}
+          <option value="{{ n }}" {% if request.form.get('blades','')==(n|string) %}selected{% endif %}>{{ n }} ใบ</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div>
+        <label>Pitch ใบพัด</label>
+        <input type="number" step="0.1" name="pitch" value="{{ request.form.get('pitch','4.0') }}" required>
+      </div>
+      <div>
+        <label>Motor KV (ถ้ามี)</label>
+        <input type="number" name="motor_kv" placeholder="เช่น 2306" value="{{ request.form.get('motor_kv','') }}">
+      </div>
+    </div>
+
+    <button type="submit">🚁 วิเคราะห์โดรน</button>
+  </form>
 </div>
 
-<script>
-function copyAdvancedSummary(){
-  const t = document.getElementById('advancedSummary').innerText;
-  navigator.clipboard.writeText(t).then(()=> alert('Copied advanced summary'));
-}
+<!-- ── RESULTS ── -->
+{% if analysis %}
 
-function downloadAdvancedJSON(){
-  const data = document.getElementById('advancedSummary').innerText;
-  const blob = new Blob([data], {type: 'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'advanced_report.json';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-</script>
-{% endif %}
-
+<!-- Quick Summary -->
+<section class="quick-summary">
+  <div class="qs-header">🧾 สรุปภาพรวม</div>
   <div class="qs-grid">
     <div class="qs-item">
-      <span class="qs-label">สไตล์การบิน</span>
-      <span class="qs-value">{{ analysis.style }}</span>
+      <span class="qs-label">สไตล์</span>
+      <span class="qs-value">{{ analysis.style | capitalize }}</span>
     </div>
-
     <div class="qs-item">
-      <span class="qs-label">ระดับน้ำหนัก</span>
+      <span class="qs-label">น้ำหนัก</span>
       <span class="qs-value">{{ analysis.weight_class }}</span>
     </div>
-
     <div class="qs-item">
-      <span class="qs-label">แรงขับโดยรวม</span>
-      <span class="qs-value">{{ analysis.thrust_ratio }}</span>
+      <span class="qs-label">TWR</span>
+      <span class="qs-value" style="color:
+        {% if analysis.thrust_ratio and analysis.thrust_ratio < 1.2 %}var(--red)
+        {% elif analysis.thrust_ratio and analysis.thrust_ratio > 3 %}var(--gold)
+        {% else %}var(--green){% endif %}">
+        {% if analysis.thrust_ratio %}{{ analysis.thrust_ratio }}{% else %}—{% endif %}
+      </span>
     </div>
-
     <div class="qs-item">
-      <span class="qs-label">เวลาบินโดยประมาณ</span>
-     <span class="qs-value">{{ analysis.battery_est }} นาที</span>
+      <span class="qs-label">เวลาบิน</span>
+      <span class="qs-value">
+        {% if analysis.est_flight_time_min %}{{ analysis.est_flight_time_min }} min
+        {% elif analysis.battery_est %}{{ analysis.battery_est }} min
+        {% else %}—{% endif %}
+      </span>
     </div>
   </div>
-
-  <div class="qs-advice">
-    💡 <strong>คำแนะนำสั้น ๆ:</strong><br>
-    {{ analysis.summary }}
-  </div>
-
-  <div class="qs-warning">
-    ⚠️ ค่านี้เป็นค่าเริ่มต้น แนะนำทดสอบบินจริงก่อนปรับเพิ่ม–ลด
+  <div class="qs-advice">💡 {{ analysis.summary }}</div>
+  <div class="qs-warning" style="margin-top:8px;">
+    ⚠️ ค่านี้เป็นจุดเริ่มต้น ควรทดสอบบินจริงก่อนปรับ
   </div>
 </section>
-<!-- ===== OBIX Detected Class & Baseline (Optional but Recommended) ===== -->
-{% if analysis and analysis.advanced %}
-<div class="result-card" style="border-left:4px solid var(--accent); margin-top:12px;">
-  <h3>🔬 Advanced Analysis</h3>
 
-  <div class="result-grid">
-    <div class="card-metric">
-      <div class="metric-label">Estimated hover power</div>
-      <div class="metric-value">{{ analysis.advanced.power.est_hover_power_w | default('—') }} W</div>
-      <div class="muted small">Aggressive: {{ analysis.advanced.power.est_aggressive_power_w | default('—') }} W</div>
-    </div>
-
-    <div class="card-metric">
-      <div class="metric-label">Battery used for estimate</div>
-      <div class="metric-value">{{ analysis.advanced.power.battery_mAh_used | default('—') }} mAh • {{ analysis.advanced.power.cells | default('—') }}S</div>
-      <div class="muted small">Energy: {{ analysis.advanced.power.battery_wh | default('—') }} Wh</div>
-    </div>
-
-    <div class="card-metric">
-      <div class="metric-label">Estimated flight time</div>
-      <div class="metric-value">{{ analysis.advanced.power.est_flight_time_min | default('—') }} min</div>
-      <div class="muted small">Aggressive: {{ analysis.advanced.power.est_flight_time_min_aggressive | default('—') }} min</div>
-    </div>
-  </div>
-
-  <hr style="opacity:.06;margin:12px 0;">
-
-  <div style="display:flex; gap:12px; flex-wrap:wrap;">
-    <div style="flex:1; min-width:220px;">
-      <h4 style="margin:0 0 6px 0;">TWR / Thrust</h4>
-      <p class="muted small">Thrust-to-Weight: <strong>{{ analysis.advanced.thrust_ratio | default('—') }}</strong></p>
-      <p>{{ analysis.advanced.twr_note | default('') }}</p>
-    </div>
-
-    <div style="flex:1; min-width:220px;">
-      <h4 style="margin:0 0 6px 0;">Motor KV suggestion</h4>
-      <p>{{ analysis.advanced.kv_suggestion | default('—') }}</p>
-    </div>
-
-    <div style="flex:1; min-width:220px;">
-      <h4 style="margin:0 0 6px 0;">Prop notes</h4>
-      <ul>
-        {% for n in analysis.advanced.prop_notes %}
-          <li>{{ n }}</li>
-        {% else %}
-          <li class="muted small">ไม่มีหมายเหตุเพิ่มเติม</li>
-        {% endfor %}
-      </ul>
-    </div>
-  </div>
-
-  {% if analysis.advanced.warnings_advanced %}
-  <div class="warning-box" style="margin-top:12px;">
-    {% for w in analysis.advanced.warnings_advanced %}
-      <div class="alert warning">{{ w }}</div>
-    {% endfor %}
-  </div>
-  {% endif %}
-
-  <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
-    <button class="btn-small" onclick="copyAdvancedSummary()">📋 คัดลอกสรุป</button>
-    <a class="btn-small" href="{{ url_for('downloads_index') }}">📂 ดาวน์โหลด diff / files</a>
-  </div>
-
-  <pre id="advancedSummary" style="display:none;">
-Advanced report
-TWR: {{ analysis.advanced.thrust_ratio }}
-Hover power: {{ analysis.advanced.power.est_hover_power_w }} W
-Est flight time: {{ analysis.advanced.power.est_flight_time_min }} min
-KV suggestion: {{ analysis.advanced.kv_suggestion }}
-  </pre>
-
-</div>
-
-<script>
-function copyAdvancedSummary(){
-  const t = document.getElementById('advancedSummary').innerText;
-  navigator.clipboard.writeText(t).then(()=> alert('คัดลอกข้อมูลสรุป Advanced เรียบร้อย'));
-}
-</script>
-{% endif %}
-{% if analysis.detected_class %}
-<div class="result-card" style="border-left:4px solid #4CAF50;">
-  <h3>🔎 OBIX วิเคราะห์ลำนี้เป็น</h3>
-
-  <p>
-    <strong>Drone Class:</strong>
-    {{ analysis.detected_class }}
-    {% if analysis.class_meta.description %}
-      — {{ analysis.class_meta.description }}
-    {% endif %}
-  </p>
-
-  <hr>
-
-  <h4>🎯 ค่าเริ่มต้น (Baseline) ที่ระบบแนะนำ</h4>
-
-  <p><strong>PID Baseline</strong></p>
-<pre id="pid">
-ROLL  P {{ analysis.pid_baseline.roll.p }}  I {{ analysis.pid_baseline.roll.i }}  D {{ analysis.pid_baseline.roll.d }}
-PITCH P {{ analysis.pid_baseline.pitch.p }} I {{ analysis.pid_baseline.pitch.i }} D {{ analysis.pid_baseline.pitch.d }}
-YAW   P {{ analysis.pid_baseline.yaw.p }}   I {{ analysis.pid_baseline.yaw.i }}
-  </pre>
-<button onclick="copyText('pid')">Copy PID</button>
-
-  <p><strong>Filter Baseline</strong></p>
-<pre id="filter">
-Gyro LPF2: {{ analysis.filter_baseline.gyro_lpf2 }} Hz
-D-Term LPF1: {{ analysis.filter_baseline.dterm_lpf1 }} Hz
-Dynamic Notch: {{ analysis.filter_baseline.dyn_notch }}
-  </pre>
-<button onclick="copyText('filter')">Copy Filter</button>
-
-  <p style="font-size:0.9em; opacity:0.85;">
-    ⚠️ ค่านี้คือ <strong>จุดเริ่มต้นที่ปลอดภัย</strong><br>
-    แนะนำให้ทดสอบบินจริงก่อนนำไปใช้ระยะยาว
-  </p>
-</div>
-{% endif %}
-<!-- ===== END OBIX Detected Class ===== -->
-<div class="result-card">
-<h2>🔍 ผลการวิเคราะห์</h2>
-
-{% if analysis and analysis.warnings %}
-<div class="warning-box">
-  {% for w in analysis.warnings %}
+<!-- Warnings -->
+{% if analysis.warnings %}
+<div class="result-card" style="padding-bottom:14px;">
+  <h3 style="margin-top:0;">🚨 คำเตือนจากระบบ</h3>
+  <div class="warning-box">
+    {% for w in analysis.warnings %}
     <div class="alert {{ w.level }}">
-      {% if w.level == "danger" %}❌{% endif %}
-      {% if w.level == "warning" %}⚠️{% endif %}
-      {% if w.level == "info" %}ℹ️{% endif %}
+      {% if w.level == 'danger' %}❌{% elif w.level == 'warning' %}⚠️{% else %}ℹ️{% endif %}
       {{ w.msg }}
     </div>
-  {% endfor %}
+    {% endfor %}
+  </div>
 </div>
 {% endif %}
 
-<p><strong>{{ analysis.overview }}</strong></p>
-
-<div class="preset-box">
-  <h3>🎛 Preset แนะนำจาก OBIXConfig Lab</h3>
-
-  <!-- ===== Preset Grid (วางแทน preset-grid เดิมทั้งหมด) ===== -->
-<div class="preset-grid">
-
-  <!-- Beginner / Smooth -->
-  <article class="preset-item preset-beginner" role="article" aria-label="Beginner Preset">
-    <div style="display:flex; align-items:center; gap:12px;">
-      <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#e8fff0,#c6f2dd);display:grid;place-items:center;font-weight:800;color:#024;">
-        B
-      </div>
-      <div style="flex:1;">
-        <h4 style="margin:0 0 4px 0;">Beginner / Smooth</h4>
-        <div class="muted small">บินนิ่ง คุมง่าย เหมาะมือใหม่</div>
-      </div>
+<!-- Smart Checks -->
+{% if analysis.rules %}
+<div class="result-card">
+  <h3 style="margin-top:0;color:var(--gold);">🛠️ Smart Checks</h3>
+  <div class="warning-box">
+    {% for r in analysis.rules %}
+    <div class="alert {{ r.level }}">
+      {% if r.level=='danger' %}❌{% elif r.level=='warning' %}⚠️{% else %}ℹ️{% endif %}
+      <strong>{{ r.msg }}</strong>
+      {% if r.suggestion %}<small>{{ r.suggestion }}</small>{% endif %}
     </div>
-
-    <ul style="margin:12px 0 0 18px;">
-      <li>Throttle limit: <strong>85%</strong></li>
-      <li>Rates: ต่ำ–กลาง</li>
-      <li>Filter: เน้นนุ่ม</li>
-    </ul>
-
-    <div style="display:flex; gap:8px; margin-top:12px; align-items:center;">
-      <button class="btn-primary" onclick="showPreset('beginner')">แสดง CLI</button>
-      <button class="btn-ghost" onclick="document.getElementById('cliOutput').scrollIntoView({behavior:'smooth'})">ไปที่ CLI</button>
-      <a class="btn-ghost" href="/downloads?filter=beginner" title="ตัวอย่างไฟล์" style="margin-left:auto;">ตัวอย่างไฟล์</a>
-    </div>
-  </article>
-
-  <!-- Freestyle -->
-  <article class="preset-item preset-freestyle" role="article" aria-label="Freestyle Preset">
-    <div style="display:flex; align-items:center; gap:12px;">
-      <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#dceeff,#b7dbff);display:grid;place-items:center;font-weight:800;color:#023;">
-        F
-      </div>
-      <div style="flex:1;">
-        <h4 style="margin:0 0 4px 0;">Freestyle</h4>
-        <div class="muted small">ตอบสนองไว คุมแม่น สำหรับตีท่า</div>
-      </div>
-    </div>
-
-    <ul style="margin:12px 0 0 18px;">
-      <li>Throttle limit: <strong>90–100%</strong></li>
-      <li>Rates: กลาง–สูง</li>
-      <li>Filter: สมดุล ระหว่างนุ่มกับตอบสนอง</li>
-    </ul>
-
-    <div style="display:flex; gap:8px; margin-top:12px; align-items:center;">
-      <button class="btn-primary" onclick="showPreset('freestyle')">แสดง CLI</button>
-      <button class="btn-ghost" onclick="copyCLI()">คัดลอก CLI</button>
-      <a class="btn-ghost" href="/downloads?filter=freestyle" style="margin-left:auto;">ตัวอย่างไฟล์</a>
-    </div>
-  </article>
-
-  <!-- Long-Range / Cinematic -->
-  <article class="preset-item preset-longrange" role="article" aria-label="Long Range Preset">
-    <div style="display:flex; align-items:center; gap:12px;">
-      <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#f1d9ff,#e6c8ff);display:grid;place-items:center;font-weight:800;color:#2a0a4b;">
-        L
-      </div>
-      <div style="flex:1;">
-        <h4 style="margin:0 0 4px 0;">Long-Range / Cinematic</h4>
-        <div class="muted small">นิ่ง ประหยัดไฟ ลอยนาน</div>
-      </div>
-    </div>
-
-    <ul style="margin:12px 0 0 18px;">
-      <li>Throttle limit: <strong>80–85%</strong></li>
-      <li>Rates: ต่ำ</li>
-      <li>Filter: เน้นความนิ่งและประหยัด</li>
-    </ul>
-
-    <div style="display:flex; gap:8px; margin-top:12px; align-items:center;">
-      <button class="btn-primary" onclick="showPreset('longrange')">แสดง CLI</button>
-      <button class="btn-ghost" onclick="copyCLI()">คัดลอก CLI</button>
-      <a class="btn-ghost" href="/downloads?filter=longrange" style="margin-left:auto;">ตัวอย่างไฟล์</a>
-    </div>
-  </article>
-
-</div>
-<!-- ===== END Preset Grid ===== -->
-
-  <p class="preset-note">
-    * Preset เหล่านี้เป็นแนวทางเริ่มต้น สามารถนำไปปรับต่อให้เหมาะกับโดรนของคุณ
- 
-<h3>แนวคิดการตั้งค่า</h3>
-<ul>
-{% for tip in analysis.basic_tips %}
-<li>{{ tip }}</li>
-{% endfor %}
-</ul>
-
-<h3>⚙️ PID (ค่าแนะนำ)</h3>
-<pre id="pid">
-ROLL  P {{ analysis.pid.roll.p }}  I {{ analysis.pid.roll.i }}  D {{ analysis.pid.roll.d }}
-PITCH P {{ analysis.pid.pitch.p }} I {{ analysis.pid.pitch.i }} D {{ analysis.pid.pitch.d }}
-YAW   P {{ analysis.pid.yaw.p }}   I {{ analysis.pid.yaw.i }}
-</pre>
-<button onclick="copyText('pid')">Copy PID</button>
-
-<h3>🧠 Filter</h3>
-<pre id="filter">
-Gyro LPF2: {{ analysis.filter.gyro_lpf2 }} Hz
-D-Term LPF1: {{ analysis.filter.dterm_lpf1 }} Hz
-Dynamic Notch: {{ analysis.filter.dyn_notch }}
-</pre>
-<button onclick="copyText('filter')">Copy Filter</button>
-
-<h3>🛩️ ใบพัด</h3>
-<p>{{ analysis.prop_result.summary }}</p>
-<ul>
-<li>Noise: {{ analysis.prop_result.effect.noise }}</li>
-<li>Motor Load: {{ analysis.prop_result.effect.motor_load }}</li>
-<li>Grip: {{ analysis.prop_result.effect.grip }}</li>
-<li>Recommendation: {{ analysis.prop_result.recommendation }}</li>
-</ul>
-
-<h3>💡 Extra Tools</h3>
-<p>Thrust-to-Weight Ratio: {{ analysis.thrust_ratio }}</p>
-<p style="font-size:1.2em; font-weight:bold; color:#4CAF50;">
-⏱ เวลาบินโดยประมาณ: {{ analysis.battery_est }} นาที
-</p>
-
-<h3>📊 Visualization</h3>
-<canvas id="thrustChart" width="400" height="200"></canvas>
-<canvas id="noiseChart" width="400" height="200"></canvas>
-
-<script>
-const thrustCtx = document.getElementById('thrustChart').getContext('2d');
-new Chart(thrustCtx, {
-    type: 'bar',
-    data: {
-        labels: ['Thrust-to-Weight'],
-        datasets: [{
-            label: 'Ratio',
-            data: [{{ analysis.thrust_ratio }}],
-            backgroundColor: ['rgba(54, 162, 235, 0.6)']
-        }]
-    },
-    options: { scales: { y: { beginAtZero: true } } }
-});
-
-const noiseCtx = document.getElementById('noiseChart').getContext('2d');
-new Chart(noiseCtx, {
-    type: 'line',
-    data: {
-        labels: ['Motor Load', 'Noise Level'],
-        datasets: [{
-            label: 'Effect',
-            data: [{{ analysis.prop_result.effect.motor_load }}, {{ analysis.prop_result.effect.noise }}],
-            fill: false,
-            borderColor: 'rgb(255, 99, 132)',
-            tension: 0.3
-        }]
-    },
-    options: { scales: { y: { beginAtZero: true } } }
-});
-</script>
-
+    {% endfor %}
+  </div>
 </div>
 {% endif %}
 
-<div class="community-box">
-  <p class="community-text">
-    ตอนนี้ <strong>OBIXCONFIG DOCTOR</strong> ยังพัฒนาอยู่เรื่อย ๆ 🚧<br><br>
+<!-- Advanced Analysis (ONE card, ไม่ซ้ำ) -->
+{% if analysis.advanced %}
+<div class="result-card" style="border-left:3px solid var(--green);">
+  <h3 style="margin-top:0;color:var(--green);">🔬 Advanced Analysis</h3>
 
-    ถ้าคุณอยากให้เว็บไซต์<br>
- รองรับโดรนขนาดไหนเพิ่มฟีเจอร์อะไร<br>
+  <!-- Tab Navigation -->
+  <div class="result-tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'tab-power')">⚡ Power</button>
+    <button class="tab-btn" onclick="switchTab(this,'tab-health')">🩺 Health</button>
+    <button class="tab-btn" onclick="switchTab(this,'tab-kv')">🔧 Motor / KV</button>
+  </div>
 
-    <span class="highlight">
-      สอบถามและแนะนำได้ที่เพจ<br>
-      <strong>OBIXConfig Lab</strong>
-    </span><br><br>
+  <!-- Tab: Power -->
+  <div id="tab-power" class="tab-pane active">
+    <div class="result-grid">
+      <div class="card-metric">
+        <div class="metric-label">Pack</div>
+        <div class="metric-value">{{ analysis.advanced.cells }}S — {{ analysis.advanced.pack_voltage_nominal }} V</div>
+        <div class="muted small">{{ analysis.advanced.battery_mAh_used }} mAh • {{ analysis.advanced.battery_wh }} Wh</div>
+      </div>
+      <div class="card-metric">
+        <div class="metric-label">Estimated Flight Time</div>
+        <div class="metric-value" style="color:var(--green);">
+          {{ analysis.advanced.est_flight_time_min }} min
+        </div>
+        <div class="muted small">Aggressive: {{ analysis.advanced.est_flight_time_min_aggr }} min</div>
+      </div>
+      <div class="card-metric">
+        <div class="metric-label">Power / Current</div>
+        <div class="metric-value">{{ analysis.advanced.avg_power_w }} W</div>
+        <div class="muted small">{{ analysis.advanced.current_draw_a }} A hover • Peak {{ analysis.advanced.peak_current_a }} A</div>
+      </div>
+      <div class="card-metric">
+        <div class="metric-label">Required C-Rating</div>
+        <div class="metric-value" style="color:
+          {% if analysis.advanced.c_required and analysis.advanced.c_required > 60 %}var(--red)
+          {% elif analysis.advanced.c_required and analysis.advanced.c_required > 40 %}var(--gold)
+          {% else %}var(--green){% endif %}">
+          {% if analysis.advanced.c_required %}{{ analysis.advanced.c_required }}C{% else %}—{% endif %}
+        </div>
+        <div class="muted small">เลือกแบตที่ rating ≥ ค่านี้</div>
+      </div>
+    </div>
+  </div>
 
-    เพื่อชาว FPV TH หัวใจรักการบิน 
+  <!-- Tab: Health -->
+  <div id="tab-health" class="tab-pane">
+    <div class="result-grid">
+      <div class="card-metric">
+        <div class="metric-label">TWR</div>
+        <div class="metric-value" style="color:
+          {% if analysis.advanced.thrust_ratio and analysis.advanced.thrust_ratio < 1.2 %}var(--red)
+          {% elif analysis.advanced.thrust_ratio and analysis.advanced.thrust_ratio > 3 %}var(--gold)
+          {% else %}var(--green){% endif %}">
+          {% if analysis.advanced.thrust_ratio %}{{ analysis.advanced.thrust_ratio }}{% else %}—{% endif %}
+        </div>
+        <div class="muted small">{{ analysis.advanced.efficiency_class | default('') }}</div>
+      </div>
+      <div class="card-metric">
+        <div class="metric-label">Motor Health</div>
+        <div class="metric-value">{{ analysis.advanced.motor_health | default('—') }}</div>
+      </div>
+      <div class="card-metric">
+        <div class="metric-label">Battery Health</div>
+        <div class="metric-value">{{ analysis.advanced.battery_health | default('—') }}</div>
+      </div>
+    </div>
+
+    {% if analysis.advanced.warnings_advanced %}
+    <div class="warning-box" style="margin-top:12px;">
+      {% for w in analysis.advanced.warnings_advanced %}
+      <div class="alert {{ w.level | default('warning') }}">
+        {% if w.level=='danger' %}❌{% elif w.level=='warning' %}⚠️{% else %}ℹ️{% endif %}
+        {{ w.msg }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if analysis.advanced.recommendations %}
+    <h4 style="margin-top:14px;">💡 คำแนะนำ</h4>
+    <ul style="padding-left:18px;font-size:.87rem;">
+      {% for r in analysis.advanced.recommendations %}
+      <li style="margin-bottom:5px;">{{ r }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+
+  <!-- Tab: Motor/KV -->
+  <div id="tab-kv" class="tab-pane">
+    <div style="padding:10px 0;">
+      <h4>KV Suggestion</h4>
+      <p style="font-size:1.05rem;font-weight:700;color:var(--blue);">{{ analysis.advanced.kv_suggestion | default('—') }}</p>
+    </div>
+    {% if analysis.advanced.prop_notes %}
+    <h4>Prop Notes</h4>
+    <ul style="padding-left:18px;font-size:.87rem;">
+      {% for n in analysis.advanced.prop_notes %}
+      <li>{{ n }}</li>
+      {% else %}
+      <li class="muted small">ไม่มีหมายเหตุเพิ่มเติม</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+
+  <hr>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+    <button class="btn-small" onclick="copyAdvancedJSON()">📋 Copy JSON</button>
+    <a class="btn-small" href="{{ url_for('downloads_index') }}">📂 ดาวน์โหลด DIFF</a>
+  </div>
+
+  <pre id="advancedJSON" style="display:none;">{{ analysis.advanced | tojson(indent=2) }}</pre>
+</div>
+{% endif %}
+
+<!-- Drone Class + Baseline -->
+{% if analysis.detected_class %}
+<div class="result-card" style="border-left:3px solid var(--blue);">
+  <h3 style="margin-top:0;display:flex;align-items:center;gap:8px;">
+    🔎 OBIX วิเคราะห์ลำนี้เป็น
+    <span class="class-badge">{{ analysis.detected_class }}</span>
+  </h3>
+
+  {% if analysis.class_meta.description %}
+  <p style="color:var(--muted);font-size:.87rem;margin-bottom:14px;">
+    {{ analysis.class_meta.description }}
+  </p>
+  {% endif %}
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <div>
+      <h4>🎯 PID Baseline</h4>
+      <pre id="pid-baseline">ROLL   P {{ analysis.pid_baseline.roll.p }}  I {{ analysis.pid_baseline.roll.i }}  D {{ analysis.pid_baseline.roll.d }}
+PITCH  P {{ analysis.pid_baseline.pitch.p }} I {{ analysis.pid_baseline.pitch.i }} D {{ analysis.pid_baseline.pitch.d }}
+YAW    P {{ analysis.pid_baseline.yaw.p }}  I {{ analysis.pid_baseline.yaw.i }}</pre>
+      <button class="btn-small" style="margin-top:6px;" onclick="copyText('pid-baseline')">Copy PID Baseline</button>
+    </div>
+    <div>
+      <h4>🔊 Filter Baseline</h4>
+      <pre id="filter-baseline">Gyro LPF2 : {{ analysis.filter_baseline.gyro_lpf2 }} Hz
+D-Term LPF: {{ analysis.filter_baseline.dterm_lpf1 }} Hz
+Dyn Notch : {{ analysis.filter_baseline.dyn_notch }}</pre>
+      <button class="btn-small" style="margin-top:6px;" onclick="copyText('filter-baseline')">Copy Filter</button>
+    </div>
+  </div>
+
+  <p style="margin-top:12px;font-size:.82rem;color:var(--muted);">
+    ⚠️ ค่านี้คือ <strong style="color:var(--text);">จุดเริ่มต้นที่ปลอดภัย</strong> — แนะนำทดสอบบินจริงก่อน
+  </p>
+</div>
+{% endif %}
+
+<!-- Main Analysis: PID + Filter (Analyzed) -->
+<div class="result-card">
+  <h2>🔍 ผลการวิเคราะห์ (Style-based)</h2>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+    <div>
+      <h3>⚙️ PID แนะนำ</h3>
+      <pre id="pid-main">ROLL   P {{ analysis.pid.roll.p }}  I {{ analysis.pid.roll.i }}  D {{ analysis.pid.roll.d }}
+PITCH  P {{ analysis.pid.pitch.p }} I {{ analysis.pid.pitch.i }} D {{ analysis.pid.pitch.d }}
+YAW    P {{ analysis.pid.yaw.p }}  I {{ analysis.pid.yaw.i }}</pre>
+      <button class="btn-small" style="margin-top:6px;" onclick="copyText('pid-main')">Copy PID</button>
+    </div>
+    <div>
+      <h3>🧠 Filter แนะนำ</h3>
+      <pre id="filter-main">Gyro LPF2 : {{ analysis.filter.gyro_lpf2 }} Hz
+D-Term LPF: {{ analysis.filter.dterm_lpf1 }} Hz
+Dyn Notch : {{ analysis.filter.dyn_notch }}</pre>
+      <button class="btn-small" style="margin-top:6px;" onclick="copyText('filter-main')">Copy Filter</button>
+    </div>
+  </div>
+
+  <!-- Prop Analysis -->
+  <h3>🛩️ ใบพัด</h3>
+  <p style="color:var(--muted);font-size:.88rem;margin-bottom:8px;">{{ analysis.prop_result.summary }}</p>
+  <div class="result-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;">
+    <div class="card-metric">
+      <div class="metric-label">Noise</div>
+      <div class="metric-value" style="color:
+        {% if analysis.prop_result.effect.noise >= 7 %}var(--red)
+        {% elif analysis.prop_result.effect.noise >= 5 %}var(--gold)
+        {% else %}var(--green){% endif %}">
+        {{ analysis.prop_result.effect.noise }}/8
+      </div>
+    </div>
+    <div class="card-metric">
+      <div class="metric-label">Motor Load</div>
+      <div class="metric-value" style="color:
+        {% if analysis.prop_result.effect.motor_load >= 5 %}var(--gold)
+        {% else %}var(--green){% endif %}">
+        {{ analysis.prop_result.effect.motor_load }}/6
+      </div>
+    </div>
+    <div class="card-metric">
+      <div class="metric-label">Grip</div>
+      <div class="metric-value" style="font-size:.9rem;">{{ analysis.prop_result.effect.grip }}</div>
+    </div>
+  </div>
+  <p style="font-size:.85rem;color:var(--blue);margin-top:8px;">
+    💡 {{ analysis.prop_result.recommendation }}
   </p>
 
-  <a href="https://www.facebook.com/banmysanti/"
-     target="_blank"
-     class="community-btn">
-     ไปที่เพจ OBIXConfig Lab
+  <!-- Tips -->
+  {% if analysis.basic_tips %}
+  <h3>📋 Tips</h3>
+  <ul style="padding-left:18px;">
+    {% for tip in analysis.basic_tips %}
+    <li style="font-size:.87rem;margin-bottom:5px;color:var(--muted);">{{ tip }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</div>
+
+<!-- Preset CLI Box -->
+<div class="result-card preset-box" style="border:1px solid rgba(88,166,255,0.12);">
+  <h3 style="margin-top:0;color:var(--blue);">🎛 Preset แนะนำ</h3>
+  <div class="preset-grid">
+    <article class="preset-item preset-beginner">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="width:40px;height:40px;border-radius:10px;background:var(--green-dim);display:grid;place-items:center;font-weight:800;color:var(--green);font-size:1.2rem;">B</div>
+        <div>
+          <h4 style="margin:0;">Beginner / Smooth</h4>
+          <div class="muted small">มือใหม่ บินนิ่ง คุมง่าย</div>
+        </div>
+      </div>
+      <ul>
+        <li>Throttle limit: <strong>85%</strong></li>
+        <li>Rates: ต่ำ–กลาง | Filter: นุ่ม</li>
+      </ul>
+      <button class="btn-primary" style="margin-top:10px;width:100%;font-size:.83rem;" onclick="showPreset('beginner')">แสดง CLI</button>
+    </article>
+
+    <article class="preset-item preset-freestyle">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="width:40px;height:40px;border-radius:10px;background:var(--blue-dim);display:grid;place-items:center;font-weight:800;color:var(--blue);font-size:1.2rem;">F</div>
+        <div>
+          <h4 style="margin:0;">Freestyle</h4>
+          <div class="muted small">ตอบสนองไว คุมแม่น</div>
+        </div>
+      </div>
+      <ul>
+        <li>Throttle: <strong>90–100%</strong></li>
+        <li>Rates: กลาง–สูง | Filter: สมดุล</li>
+      </ul>
+      <button class="btn-primary" style="margin-top:10px;width:100%;font-size:.83rem;background:var(--blue);color:#001133;" onclick="showPreset('freestyle')">แสดง CLI</button>
+    </article>
+
+    <article class="preset-item preset-longrange">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="width:40px;height:40px;border-radius:10px;background:rgba(201,166,255,0.1);display:grid;place-items:center;font-weight:800;color:#c9a6ff;font-size:1.2rem;">L</div>
+        <div>
+          <h4 style="margin:0;">Long-Range / Cinematic</h4>
+          <div class="muted small">นิ่ง ประหยัดไฟ ลอยนาน</div>
+        </div>
+      </div>
+      <ul>
+        <li>Throttle: <strong>80–85%</strong></li>
+        <li>Rates: ต่ำ | Filter: นิ่ง</li>
+      </ul>
+      <button class="btn-primary" style="margin-top:10px;width:100%;font-size:.83rem;background:#7a52b0;color:#fff;" onclick="showPreset('longrange')">แสดง CLI</button>
+    </article>
+  </div>
+
+  <div class="cli-box" style="margin-top:16px;">
+    <div class="cli-btns">
+      <button class="btn-ghost" onclick="copyText('cliOutput')">📋 คัดลอก CLI</button>
+    </div>
+    <pre id="cliOutput" style="min-height:60px;"># เลือก preset ด้านบนเพื่อแสดง CLI</pre>
+  </div>
+  <p class="preset-note">* Preset เหล่านี้เป็นแนวทางเริ่มต้น — ปรับต่อให้เหมาะกับโดรนของคุณ</p>
+</div>
+
+<!-- Charts -->
+<div class="result-card">
+  <h3 style="margin-top:0;">📊 Visualization</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <div class="chart-wrap">
+      <canvas id="thrustChart"></canvas>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="noiseChart"></canvas>
+    </div>
+  </div>
+</div>
+
+{% endif %}{# end if analysis #}
+
+<!-- Community -->
+<div class="community-box">
+  <p class="community-text">
+    <strong>OBIXConfig Doctor</strong> พัฒนาอยู่เรื่อย ๆ 🚧<br><br>
+    อยากให้เพิ่มฟีเจอร์อะไร? รองรับโดรนขนาดไหน?<br>
+    <span class="highlight">แนะนำได้ที่เพจ <strong>OBIXConfig Lab</strong></span><br><br>
+    เว็บนี้ทำเพื่อชุมชน FPV จริง ๆ ❤️
+  </p>
+  <a href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener" class="community-btn">
+    ไปที่เพจ OBIXConfig Lab
   </a>
 </div>
 
-<div class="version-note">
-  OBIXConfig Doctor • v1.0lite (Community Build)<br>
-  Developed by real FPV pilots 🇹🇭
-</div>
+<div class="version-note">OBIXConfig Doctor • v1.1 — Developed by FPV community 🇹🇭</div>
 
-</div>
+</div>{# end .container #}
+
+<!-- ── SCRIPTS ── -->
 <script>
-  // Drawer open/close
-  const btn = document.getElementById('hamburgerBtn');
-  const drawer = document.getElementById('drawer');
-  const overlay = document.getElementById('overlay');
-  const closeDrawerBtn = document.getElementById('closeDrawer');
-
-  function openDrawer(){
-    if(!btn) return;
-    btn.setAttribute('aria-expanded','true');
-    overlay.classList.add('open');
-    drawer.classList.add('open');
-    drawer.removeAttribute('hidden');
-    overlay.setAttribute('aria-hidden','false');
-    document.addEventListener('keydown', escClose);
-  }
-  function closeDrawer(){
-    if(!btn) return;
-    btn.setAttribute('aria-expanded','false');
-    overlay.classList.remove('open');
-    drawer.classList.remove('open');
-    overlay.setAttribute('aria-hidden','true');
-    document.removeEventListener('keydown', escClose);
-    setTimeout(()=> drawer.setAttribute('hidden',''), 240);
-    btn.focus();
-  }
-  function escClose(e){ if(e.key === 'Escape') closeDrawer(); }
-
-  if(btn) btn.addEventListener('click', ()=> {
-    const expanded = btn.getAttribute('aria-expanded') === 'true';
-    if(expanded) closeDrawer(); else openDrawer();
-  });
-  if(overlay) overlay.addEventListener('click', closeDrawer);
-  if(closeDrawerBtn) closeDrawerBtn.addEventListener('click', closeDrawer);
-
-  // Accordion
-  document.querySelectorAll('.accordion-item').forEach(item=>{
-    const head = item.querySelector('.accordion-head');
-    head.addEventListener('click', ()=> {
-      const open = item.classList.toggle('open');
-      head.querySelector('span').textContent = open ? '−' : '+';
-    });
-  });
-
-  // Popover help (optional: hook to info icons next to inputs)
-  const pop = document.getElementById('popover');
-  const helpTexts = {
-    preset: 'Preset = ชุดการตั้งค่าล่วงหน้าที่รวม PID/Rates/Filters ใช้เพื่อเริ่มต้นได้เร็วขึ้น',
-    size: 'ขนาดโดรน (นิ้ว) อ้างอิงถึงขนาดเฟรม เช่น 5 นิ้ว',
-    weight: 'น้ำหนักรวมตอนบิน (กรัม) สำคัญในการเลือกมอเตอร์และประมาณเวลาบิน',
-    battery: 'แบตเตอรี่ เช่น 4S หรือ 6S — มีผลต่อแรงดันและ RPM ของมอเตอร์',
-    style: 'สไตล์การบิน: Freestyle / Racing / Long-range — มีผลกับ Rates และ PID',
-    prop: 'ขนาดใบพัด (นิ้ว) มีผลกับแรงยกและกระแสไฟ'
-  };
-
-  // ถ้าต้องการปุ่ม info ข้าง input ให้สร้างปุ่ม <button class="info-btn" data-pop="size">i</button> ข้าง input แล้วสคริปต์นี้จะทำงาน
-  function openPopover(key, targetBtn){
-    pop.textContent = helpTexts[key] || 'ไม่มีคำอธิบาย';
-    pop.classList.add('open');
-    pop.setAttribute('aria-hidden','false');
-    const rect = targetBtn.getBoundingClientRect();
-    let top = rect.top + window.scrollY + rect.height + 8;
-    let left = rect.left + window.scrollX;
-    const vw = window.innerWidth;
-    if(left + 320 > vw) left = vw - 336;
-    pop.style.top = top + 'px';
-    pop.style.left = left + 'px';
-    targetBtn.setAttribute('aria-expanded','true');
-    setTimeout(()=> document.addEventListener('click', outsideClick), 10);
-    document.addEventListener('keydown', popEsc);
-  }
-  function closePopover(){
-    pop.classList.remove('open');
-    pop.setAttribute('aria-hidden','true');
-    document.querySelectorAll('.info-btn').forEach(b=> b.setAttribute('aria-expanded','false'));
-    document.removeEventListener('click', outsideClick);
-    document.removeEventListener('keydown', popEsc);
-  }
-  function outsideClick(e){ if(!pop.contains(e.target) && !e.target.classList.contains('info-btn')) closePopover(); }
-  function popEsc(e){ if(e.key === 'Escape') closePopover(); }
-
-  document.querySelectorAll('.info-btn[data-pop]').forEach(b => {
-    const key = b.getAttribute('data-pop');
-    b.addEventListener('click', (ev) => {
-      ev.stopPropagation();
-      const open = b.getAttribute('aria-expanded') === 'true';
-      if(open) { closePopover(); return; }
-      openPopover(key, b);
-    });
-  });
-
-  // Responsive: show drawer always on wide screens (optional)
-  window.addEventListener('resize', ()=> {
-    if(window.innerWidth > 900){
-      drawer.removeAttribute('hidden');
-      drawer.classList.remove('open');
-      overlay.classList.remove('open');
-    } else {
-      drawer.setAttribute('hidden','');
-    }
-  });
-  if(window.innerWidth <= 900) drawer.setAttribute('hidden','');
-</script>
-<!-- OBIX Preset autofill JS -->
-<script>
-const presetMap = {
-  "2.5_micro": {size:2.5, weight:80, battery:"3S", prop_size:2.5, pitch:2.0, blades:"2", style:"micro"},
-  "3_whoop":   {size:3.0, weight:120, battery:"3S", prop_size:3.0, pitch:2.0, blades:"2", style:"whoop"},
-  "3.5_cine":  {size:3.5, weight:350, battery:"4S", prop_size:3.5, pitch:2.5, blades:"2", style:"cine"},
-  "4_mini":    {size:4.0, weight:420, battery:"4S", prop_size:4.0, pitch:3.0, blades:"2", style:"mini"},
-  "5_freestyle":{size:5.0, weight:750, battery:"4S", prop_size:5.0, pitch:4.0, blades:"3", style:"freestyle"},
-  "6_heavy5":  {size:6.0, weight:1000, battery:"6S", prop_size:6.0, pitch:4.0, blades:"3", style:"heavy"},
-  "7_midlr":   {size:7.0, weight:1100, battery:"7S", prop_size:7.0, pitch:3.5, blades:"2", style:"longrange"},
-  "8_lr":      {size:8.0, weight:1500, battery:"8S", prop_size:8.0, pitch:3.5, blades:"2", style:"longrange"}
+// ── Preset CLI data ──
+const presets = {
+  beginner:`# OBIXConfig Lab - Beginner Preset
+set throttle_limit_percent = 85
+set dshot_bidir = OFF
+set iterm_relax = RP
+set feedforward_transition = 0
+set anti_gravity_gain = 3
+save`,
+  freestyle:`# OBIXConfig Lab - Freestyle Preset
+set throttle_limit_percent = 100
+set iterm_relax = RPY
+set feedforward_transition = 0.5
+set anti_gravity_gain = 5
+save`,
+  longrange:`# OBIXConfig Lab - Long Range Preset
+set throttle_limit_percent = 80
+set iterm_relax = OFF
+set feedforward_transition = 0
+set anti_gravity_gain = 2
+save`
 };
 
-// helper: set value if element exists
-function setIfExists(selector, value) {
-  const el = document.querySelector(selector);
-  if (!el) return false;
-  if (el.tagName === 'SELECT' || el.type === 'select-one') {
-    el.value = value;
-    el.dispatchEvent(new Event('change', { bubbles: true }));
-  } else {
-    el.value = value;
+function showPreset(type){
+  var el = document.getElementById('cliOutput');
+  if(el) el.textContent = presets[type] || '';
+}
+
+// ── Preset autofill ──
+const presetMap = {
+  "2.5_micro":   {size:2.5,  weight:80,   battery:"3S", prop_size:2.5, pitch:2.0, blades:"2", style:"freestyle"},
+  "3_whoop":     {size:3.0,  weight:120,  battery:"3S", prop_size:3.0, pitch:2.0, blades:"2", style:"freestyle"},
+  "3.5_cine":    {size:3.5,  weight:350,  battery:"4S", prop_size:3.5, pitch:2.5, blades:"2", style:"longrange"},
+  "4_mini":      {size:4.0,  weight:420,  battery:"4S", prop_size:4.0, pitch:3.0, blades:"2", style:"freestyle"},
+  "5_freestyle": {size:5.0,  weight:750,  battery:"4S", prop_size:5.0, pitch:4.0, blades:"3", style:"freestyle"},
+  "6_heavy5":    {size:6.0,  weight:1000, battery:"6S", prop_size:6.0, pitch:4.0, blades:"3", style:"freestyle"},
+  "7_midlr":     {size:7.0,  weight:1100, battery:"6S", prop_size:7.0, pitch:3.5, blades:"2", style:"longrange"},
+  "7.5_midlr":   {size:7.5,  weight:1200, battery:"6S", prop_size:7.5, pitch:3.0, blades:"2", style:"longrange"},
+  "8_lr":        {size:8.0,  weight:1500, battery:"6S", prop_size:8.0, pitch:3.5, blades:"2", style:"longrange"},
+  "10_lr":       {size:10.0, weight:2200, battery:"6S", prop_size:10.0,pitch:4.5, blades:"2", style:"longrange"}
+};
+
+function setField(sel, val){
+  var el = document.querySelector(sel);
+  if(!el) return;
+  el.value = val;
+}
+
+var psEl = document.getElementById('preset-select');
+if(psEl){
+  psEl.addEventListener('change', function(){
+    var p = presetMap[this.value];
+    if(!p) return;
+    setField('input[name="size"]', p.size);
+    setField('input[name="weight"]', p.weight);
+    setField('select[name="battery"]', p.battery);
+    setField('input[name="prop_size"]', p.prop_size);
+    setField('input[name="pitch"]', p.pitch);
+    setField('select[name="blades"]', p.blades);
+    setField('select[name="style"]', p.style);
+  });
+}
+
+// ── Drawer (ONE implementation only) ──
+(function(){
+  var btn = document.getElementById('hamburgerBtn');
+  var drawer = document.getElementById('drawer');
+  var overlay = document.getElementById('overlay');
+  var closeBtn = document.getElementById('closeDrawer');
+
+  function open(){
+    btn && btn.setAttribute('aria-expanded','true');
+    drawer && drawer.classList.add('open');
+    drawer && drawer.removeAttribute('hidden');
+    overlay && overlay.classList.add('open');
+    overlay && overlay.setAttribute('aria-hidden','false');
+    document.addEventListener('keydown', onEsc);
   }
-  return true;
-}
+  function close(){
+    btn && btn.setAttribute('aria-expanded','false');
+    drawer && drawer.classList.remove('open');
+    overlay && overlay.classList.remove('open');
+    overlay && overlay.setAttribute('aria-hidden','true');
+    document.removeEventListener('keydown', onEsc);
+    setTimeout(function(){ drawer && drawer.setAttribute('hidden',''); }, 260);
+    btn && btn.focus();
+  }
+  function onEsc(e){ if(e.key==='Escape') close(); }
 
-const presetSelect = document.getElementById('preset-select');
-if (presetSelect) {
-  presetSelect.addEventListener('change', function () {
-    const key = this.value;
-    if (!key) return;
-    const p = presetMap[key];
-    if (!p) return;
-
-    // fill fields (matches names in your form)
-    setIfExists('input[name="size"]', p.size);
-    setIfExists('input[name="weight"]', p.weight);
-    setIfExists('select[name="battery"]', p.battery);
-    setIfExists('input[name="prop_size"]', p.prop_size);
-    setIfExists('input[name="pitch"]', p.pitch);
-    setIfExists('select[name="blades"]', p.blades);
-    // style may be select or input; try both
-    setIfExists('select[name="style"]', p.style);
-    setIfExists('input[name="style"]', p.style);
+  btn && btn.addEventListener('click', function(){
+    btn.getAttribute('aria-expanded')==='true' ? close() : open();
   });
+  overlay && overlay.addEventListener('click', close);
+  closeBtn && closeBtn.addEventListener('click', close);
+
+  // responsive
+  window.addEventListener('resize', function(){
+    if(window.innerWidth > 900){
+      drawer && drawer.removeAttribute('hidden');
+    } else if(!drawer.classList.contains('open')){
+      drawer && drawer.setAttribute('hidden','');
+    }
+  });
+  if(window.innerWidth <= 900 && drawer) drawer.setAttribute('hidden','');
+})();
+
+// ── Tab switching ──
+function switchTab(btn, paneId){
+  var tabs = btn.closest('.result-card').querySelectorAll('.tab-btn');
+  var panes = btn.closest('.result-card').querySelectorAll('.tab-pane');
+  tabs.forEach(function(t){ t.classList.remove('active'); });
+  panes.forEach(function(p){ p.classList.remove('active'); });
+  btn.classList.add('active');
+  var pane = document.getElementById(paneId);
+  if(pane) pane.classList.add('active');
 }
+
+// ── Advanced JSON copy ──
+function copyAdvancedJSON(){
+  var el = document.getElementById('advancedJSON');
+  if(el) navigator.clipboard.writeText(el.innerText).then(function(){ showToast('คัดลอก JSON เรียบร้อย ✓'); });
+}
+
+// ── Charts ──
+{% if analysis %}
+(function(){
+  var thrustEl = document.getElementById('thrustChart');
+  if(thrustEl){
+    new Chart(thrustEl, {
+      type: 'bar',
+      data: {
+        labels: ['Thrust-to-Weight Ratio'],
+        datasets: [{
+          label: 'TWR',
+          data: [{{ analysis.thrust_ratio or 0 }}],
+          backgroundColor: ['rgba(16,196,122,0.5)'],
+          borderColor: ['#10c47a'],
+          borderWidth: 1,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, max: 5,
+               grid: { color: 'rgba(255,255,255,0.04)' },
+               ticks: { color: '#8a99a8' } },
+          x: { grid: { display: false }, ticks: { color: '#8a99a8' } }
+        }
+      }
+    });
+  }
+
+  var noiseEl = document.getElementById('noiseChart');
+  if(noiseEl){
+    new Chart(noiseEl, {
+      type: 'radar',
+      data: {
+        labels: ['Motor Load', 'Noise', 'Grip'],
+        datasets: [{
+          label: 'Prop Profile',
+          data: [
+            {{ analysis.prop_result.effect.motor_load }},
+            {{ analysis.prop_result.effect.noise }},
+            {% if analysis.prop_result.effect.grip == 'หนึบมาก' %}6
+            {% elif analysis.prop_result.effect.grip == 'หนึบดี' %}4
+            {% else %}2{% endif %}
+          ],
+          backgroundColor: 'rgba(88,166,255,0.15)',
+          borderColor: '#58a6ff',
+          pointBackgroundColor: '#58a6ff',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          r: {
+            beginAtZero: true, max: 8,
+            grid: { color: 'rgba(255,255,255,0.06)' },
+            ticks: { display: false },
+            pointLabels: { color: '#8a99a8', font: { size: 11 } }
+          }
+        }
+      }
+    });
+  }
+})();
+{% endif %}
 </script>
-<script>
-// drawer simple toggle (if not present)
-const ham = document.getElementById('hamburgerBtn');
-const drawer = document.querySelector('.drawer');
-const overlay = document.querySelector('.overlay');
 
-if(ham){
-  ham.addEventListener('click', ()=>{
-    const expanded = ham.getAttribute('aria-expanded') === 'true';
-    ham.setAttribute('aria-expanded', !expanded);
-    if(drawer) drawer.classList.toggle('open');
-    if(overlay) overlay.classList.toggle('open');
-  });
-}
-
-// smooth scroll for anchors
-document.querySelectorAll('a[href^="#"]').forEach(a=>{
-  a.addEventListener('click', e=>{
-    e.preventDefault();
-    const id = a.getAttribute('href').slice(1);
-    const el = document.getElementById(id);
-    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
-  });
-});
-</script>
-<!-- end OBIX Preset autofill JS -->
 </body>
 </html>
