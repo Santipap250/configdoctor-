@@ -8,6 +8,7 @@ import os
 import hashlib
 import logging
 from werkzeug.utils import secure_filename
+from analyzer.cli_surgeon import analyze_dump as cli_analyze_dump
 
 # optional modules (lazy / tolerant)
 try:
