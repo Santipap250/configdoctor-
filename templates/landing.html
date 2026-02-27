@@ -1,83 +1,360 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta name="description" content="OBIXConfig Doctor เครื่องมือช่วยวิเคราะห์และแนะนำการจูนโดรน FPV สำหรับมือใหม่และนักบินสายจริง ใช้งานง่าย เข้าใจเร็ว">
 <meta charset="UTF-8">
-<title>OBIXConfig Doctor</title>
+<title>OBIXConfig Doctor — FPV Drone Tuning Tool</title>
+<meta name="description" content="เครื่องมือวิเคราะห์และแนะนำค่า PID / Filter / Motor สำหรับโดรน FPV ทุกขนาด">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+/* Landing-specific styles */
+.hero {
+  min-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated grid background */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(16,196,122,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16,196,122,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%);
+  animation: gridPulse 8s ease-in-out infinite;
+}
+
+@keyframes gridPulse {
+  0%,100% { opacity:.6; }
+  50%      { opacity:1; }
+}
+
+/* Glow blobs */
+.hero::after {
+  content: '';
+  position: absolute;
+  top: 20%; left: 50%; transform: translateX(-50%);
+  width: 500px; height: 300px;
+  background: radial-gradient(ellipse, rgba(16,196,122,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-content { position: relative; z-index: 1; max-width: 680px; }
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  background: rgba(16,196,122,0.1);
+  border: 1px solid rgba(16,196,122,0.25);
+  border-radius: 20px;
+  font-size: .8rem;
+  font-weight: 700;
+  color: #10c47a;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  animation: fadeUp .6s ease both;
+}
+
+.hero-logo {
+  width: 180px;
+  height: auto;
+  filter: drop-shadow(0 0 24px rgba(16,196,122,0.4));
+  animation: fadeUp .7s .1s ease both, logoFloat 4s 1s ease-in-out infinite;
+  margin-bottom: 20px;
+}
+@keyframes logoFloat {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(18px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+.hero-title {
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: #fff;
+  margin-bottom: 14px;
+  animation: fadeUp .7s .2s ease both;
+}
+.hero-title .accent { color: #10c47a; }
+
+.hero-sub {
+  font-size: 1rem;
+  color: var(--muted);
+  line-height: 1.65;
+  margin-bottom: 36px;
+  animation: fadeUp .7s .3s ease both;
+}
+
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 15px 32px;
+  background: var(--green);
+  color: #021a0e;
+  font-weight: 800;
+  font-size: 1.05rem;
+  border-radius: 12px;
+  text-decoration: none;
+  box-shadow: 0 12px 40px rgba(16,196,122,0.28);
+  transition: transform .2s, box-shadow .2s, filter .2s;
+  animation: fadeUp .7s .4s ease both;
+  letter-spacing: .03em;
+}
+.hero-cta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 50px rgba(16,196,122,0.38);
+  filter: brightness(1.06);
+}
+
+.hero-secondary {
+  margin-top: 14px;
+  font-size: .85rem;
+  color: var(--muted);
+  animation: fadeUp .7s .5s ease both;
+}
+.hero-secondary a { color: var(--blue); text-decoration: none; }
+.hero-secondary a:hover { text-decoration: underline; }
+
+/* ── Features ── */
+.features {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 0 20px 80px;
+}
+
+.features-title {
+  text-align: center;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 32px;
+}
+.features-title span { color: var(--green); }
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.feature-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px;
+  transition: transform .2s, border-color .2s, box-shadow .2s;
+}
+.feature-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-hi);
+  box-shadow: var(--shadow-sm);
+}
+
+.feature-icon {
+  font-size: 1.8rem;
+  margin-bottom: 12px;
+  display: block;
+}
+.feature-title { font-weight: 700; color: var(--text); margin-bottom: 6px; font-size: .95rem; }
+.feature-desc  { font-size: .84rem; color: var(--muted); line-height: 1.55; }
+
+/* ── Supported builds ── */
+.builds {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 32px auto;
+  max-width: 700px;
+  padding: 0 20px;
+}
+.build-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: .82rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+.build-pill:hover { border-color: var(--border-hi); color: var(--text); }
+.builds-label {
+  text-align: center;
+  font-size: .82rem;
+  color: var(--muted);
+  margin-bottom: 12px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+/* ── Tools row ── */
+.tools-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 40px auto 0;
+  max-width: 700px;
+  padding: 0 20px;
+}
+.tool-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: .87rem;
+  font-weight: 600;
+  transition: background .2s, border-color .2s;
+}
+.tool-link:hover { background: rgba(255,255,255,0.07); border-color: var(--border-hi); }
+</style>
 </head>
+<body class="dark">
 
-<body>
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">🇹🇭 สำหรับชุมชน FPV ไทย</div>
 
-<!-- ===== HERO / LOGO ===== -->
-<div class="top-bar center-logo">
-  <img src="{{ url_for('static', filename='img/obix-logo.png') }}" class="logo">
-</div>
+    <img src="{{ url_for('static', filename='img/obix-logo.png') }}"
+         class="hero-logo" alt="OBIXConfig Doctor Logo">
 
-<div class="container">
+    <h1 class="hero-title">
+      จูนโดรน <span class="accent">FPV</span><br>ได้ง่ายขึ้น
+    </h1>
 
-<!-- ===== INTRO ===== -->
-<div class="concept-box open">
-  <div class="concept-header">
-    <span class="concept-title">🧠 OBIXConfig Doctor คืออะไร</span>
-  </div>
-
-  <div class="concept-content" style="display:block">
-    <p>
-      <strong>OBIXConfig Doctor</strong> คือเครื่องมือช่วยวิเคราะห์และแนะนำค่า
-      สำหรับการจูนโดรน FPV แบบเข้าใจง่าย
+    <p class="hero-sub">
+      OBIXConfig Doctor วิเคราะห์ PID / Filter / Motor / Battery<br>
+      จากข้อมูลโดรนของคุณ — แล้วให้ค่าเริ่มต้นที่ปลอดภัยพร้อมใช้
     </p>
 
-    <ul>
-      <li>🔧 ใช้เป็น <strong>จุดเริ่มต้น</strong> ในการจูน (ไม่ใช่สูตรตายตัว)</li>
-      <li>🛩️ เหมาะกับทั้งมือใหม่ และนักบินที่อยากได้ baseline เร็ว ๆ</li>
-      <li>📊 อ้างอิงแนวคิดจากการบิน FPV จริง</li>
-    </ul>
+    <a href="/app" class="hero-cta">
+      🚀 เริ่มวิเคราะห์โดรน
+    </a>
 
-    <p class="concept-note">
-      ค่าแนะนำอาจต้องปรับตามอุปกรณ์ น้ำหนัก และสไตล์การบินของแต่ละคน
+    <p class="hero-secondary">
+      หรือดู
+      <a href="{{ url_for('downloads_index') }}">ไฟล์ DIFF ตัวอย่าง</a>
+      &nbsp;•&nbsp;
+      <a href="/motor-prop">Motor Recommender</a>
     </p>
   </div>
+</section>
+
+<!-- Supported builds -->
+<div class="features" style="padding-top:0;">
+  <p class="builds-label">รองรับขนาด</p>
+  <div class="builds">
+    {% for b in [
+      ('2.5" Micro','🤏'), ('3" Toothpick','🦷'), ('3.5" Cine','🎬'),
+      ('4" Mini','🔹'), ('5" Freestyle','🚀'), ('6" Heavy','⚡'),
+      ('7" Mid-LR','🛸'), ('8–10" Long Range','🌏')
+    ] %}
+    <span class="build-pill">{{ b[1] }} {{ b[0] }}</span>
+    {% endfor %}
+  </div>
+
+  <!-- Features -->
+  <h2 class="features-title" style="margin-top:40px;">มีอะไรใน <span>OBIXConfig Doctor</span></h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <span class="feature-icon">⚙️</span>
+      <div class="feature-title">PID & Filter Baseline</div>
+      <div class="feature-desc">
+        แนะนำค่า PID และ Filter ที่ปลอดภัยสำหรับ class โดรนของคุณ
+        พร้อม copy CLI ได้เลย
+      </div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🔬</span>
+      <div class="feature-title">Advanced Analysis</div>
+      <div class="feature-desc">
+        ประมาณ TWR, กระแสไฟ, C-rating, เวลาบิน และ motor/battery health
+      </div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🧭</span>
+      <div class="feature-title">Motor × Prop Recommender</div>
+      <div class="feature-desc">
+        แนะนำ KV, stator size และประมาณกระแสตามน้ำหนัก + battery
+      </div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🛠️</span>
+      <div class="feature-title">Smart Rule Checks</div>
+      <div class="feature-desc">
+        ตรวจหา warning อัตโนมัติ เช่น TWR ต่ำ, C-rating สูง,
+        KV ไม่เหมาะกับ cell count
+      </div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">📡</span>
+      <div class="feature-title">VTX Tools</div>
+      <div class="feature-desc">
+        ตาราง Band/Channel + Range Calculator
+        ประมาณระยะสัญญาณจาก FSPL
+      </div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">📁</span>
+      <div class="feature-title">DIFF / DUMP Library</div>
+      <div class="feature-desc">
+        รวมไฟล์ diff all และ dump CLI จากโดรนหลายรุ่น
+        ดาวน์โหลดได้ทันที
+      </div>
+    </div>
+  </div>
+
+  <!-- Tool links -->
+  <h2 class="features-title" style="margin-top:48px;">เครื่องมืออื่น ๆ</h2>
+  <div class="tools-row">
+    <a class="tool-link" href="/motor-prop">🧭 Motor × Prop</a>
+    <a class="tool-link" href="/vtx">📡 VTX Bands</a>
+    <a class="tool-link" href="/vtx-range">📡🏞️ VTX Range</a>
+    <a class="tool-link" href="{{ url_for('downloads_index') }}">📁 DIFF Library</a>
+    <a class="tool-link" href="{{ url_for('about') }}">ℹ️ About</a>
+  </div>
+
+  <!-- Community -->
+  <div class="community-box" style="margin-top:48px;">
+    <p class="community-text">
+      ยังพัฒนาต่อเนื่อง 🚧 อยากให้เพิ่มอะไร?<br>
+      <span class="highlight">แนะนำได้ที่เพจ <strong>OBIXConfig Lab</strong></span><br>
+      เว็บนี้ทำเพื่อชุมชน FPV จริง ๆ ❤️
+    </p>
+    <a href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener" class="community-btn">
+      ไปที่เพจ OBIXConfig Lab
+    </a>
+  </div>
+
+  <div class="version-note">OBIXConfig Doctor • v1.1 — FPV community 🇹🇭</div>
 </div>
 
-<!-- ===== CTA ===== -->
-<div style="text-align:center; margin:40px 0;">
-  <a href="/app" class="community-btn" style="font-size:1rem; padding:16px 32px;">
-    🚀 เริ่มวิเคราะห์โดรนของคุณ
-  </a>
-</div>
-
-<!-- ===== COMMUNITY ===== -->
-<div class="community-box">
-  <p class="community-text">
-    ตอนนี้ <strong>OBIXConfig Doctor</strong> ยังพัฒนาอยู่เรื่อย ๆ 🚧<br><br>
-
-    ถ้าคุณอยากให้เว็บ<br>
-    👉 รองรับโดรนขนาดไหน<br>
-    👉 เพิ่มฟีเจอร์อะไร<br><br>
-
-    <span class="highlight">
-      แนะนำได้ที่เพจ<br>
-      <strong>OBIXConfig Lab</strong>
-    </span><br><br>
-
-    เว็บนี้ทำเพื่อชุมชน FPV จริง ๆ ❤️
-  </p>
-
-  <a href="https://www.facebook.com/banmysanti/"
-     target="_blank"
-     class="community-btn">
-     ไปที่เพจ OBIXConfig Lab
-  </a>
-</div>
-
-<div class="version-note">
-  OBIXConfig Doctor • v0.9 beta<br>
-  Developed by FPV community 🇹🇭
-</div>
-
-</div>
 </body>
 </html>
