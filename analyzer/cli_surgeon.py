@@ -226,20 +226,28 @@ def basic_checks(params: Dict[str, Any]) -> List[Dict]:
             except Exception:
                 pass
 
-    # --- PID extremes ---
-    # detect keys like p_roll, p_pitch, p_yaw, pid_p, pid_p_roll etc.
+    # ── PID extremes ──
+    # BF4.4/4.5: I-term ปกติ = 80-100, P ปกติ max ~80, D ปกติ max ~60
+    # แยก threshold ตาม P/I/D เพื่อไม่ให้ I=90 ถูก flag ผิด
+    _PID_THRESHOLDS = {
+        'i': 130,    # I สูงกว่า 130 ถึงจะ critical (BF4.4 I ปกติ = 80-100)
+        'd': 80,     # D สูงกว่า 80 = critical
+        'p': 100,    # P สูงกว่า 100 = critical
+    }
     pid_keys = [k for k in params.keys() if re.match(r'^(p|i|d)(_|-)?(roll|pitch|yaw|[xyz])?$', k) or re.match(r'^pid[_\-]?[pid]?', k)]
-    # evaluate numeric pid values and flag unusually large ones
     for k in pid_keys:
         v = params.get(k)
         try:
             num = float(v)
-            if num > 80:
+            # กำหนด threshold ตามชนิด (P/I/D)
+            axis_char = k[0].lower()
+            threshold = _PID_THRESHOLDS.get(axis_char, 100)
+            if num > threshold:
                 _add_rule(
                     rules,
                     f'pid_high_{k}',
                     'critical',
-                    f'{k} สูงมาก ({num}) — อาจเกิด oscillation / motor stress',
+                    f'{k} สูงมาก ({num}) — อาจเกิด oscillation / motor stress (threshold {threshold})',
                     'ลดค่า P/I/D ลง หรือย้อนกลับค่าเดิมหากเป็นการ import ผิดพลาด; ทดสอบการบินหลังปรับ'
                 )
             if num == 0:
@@ -465,3 +473,133 @@ set serialrx_provider = CRSF
             sys.exit(1)
     out = analyze_dump(txt)
     print(json.dumps(out, ensure_ascii=False, indent=2))
+# ----------------------
+# Version Detection (new)
+# ----------------------
+
+def detect_firmware_version(text: str) -> dict:
+    """
+    Detect firmware type and version from CLI dump header.
+    Returns {'type': 'betaflight'|'inav'|'emuflight'|'unknown', 'version': '4.4.3'|None}
+    """
+    sample = text[:1000].upper()
+    fw_type = 'unknown'
+    fw_version = None
+
+    if 'BETAFLIGHT' in sample:
+        fw_type = 'betaflight'
+    elif 'INAV' in sample:
+        fw_type = 'inav'
+    elif 'EMUFLIGHT' in sample:
+        fw_type = 'emuflight'
+
+    import re as _re
+    m = _re.search(r'(\d+\.\d+\.\d+)', text[:500])
+    if m:
+        fw_version = m.group(1)
+
+    # Determine if "modern" BF (4.4+) vs legacy for PID context
+    is_modern_bf = False
+    if fw_type == 'betaflight' and fw_version:
+        try:
+            parts = [int(x) for x in fw_version.split('.')]
+            if parts[0] > 4 or (parts[0] == 4 and parts[1] >= 4):
+                is_modern_bf = True
+        except Exception:
+            pass
+
+    return {
+        'type':         fw_type,
+        'version':      fw_version,
+        'is_modern_bf': is_modern_bf,
+    }
+
+
+# ----------------------
+# Diff Comparator (new)
+# ----------------------
+
+def compare_dumps(dump_a: str, dump_b: str) -> dict:
+    """
+    Compare two CLI dumps and return diff.
+    Returns:
+      {
+        'only_in_a':   [(key, val), ...],  # keys in A but not B
+        'only_in_b':   [(key, val), ...],  # keys in B but not A
+        'changed':     [(key, val_a, val_b, explanation), ...],  # keys that changed
+        'same':        [(key, val), ...],  # keys identical in both
+        'summary':     str
+      }
+    """
+    params_a = parse_dump(dump_a)
+    params_b = parse_dump(dump_b)
+
+    # Filter out internal keys
+    def _clean(p):
+        return {k: v for k, v in p.items() if not k.startswith('_')}
+
+    a = _clean(params_a)
+    b = _clean(params_b)
+
+    keys_a = set(a.keys())
+    keys_b = set(b.keys())
+    all_keys = keys_a | keys_b
+
+    only_in_a = []
+    only_in_b = []
+    changed   = []
+    same      = []
+
+    # Context explanations for common changed params
+    _PARAM_EXPLAIN = {
+        'p_roll':           'P term Roll — ตอบสนอง roll axis',
+        'p_pitch':          'P term Pitch — ตอบสนอง pitch axis',
+        'i_roll':           'I term Roll — lock-in roll',
+        'i_pitch':          'I term Pitch — lock-in pitch',
+        'd_roll':           'D term Roll — damp oscillation roll',
+        'd_pitch':          'D term Pitch — damp oscillation pitch',
+        'gyro_lpf1_hz':     'Gyro LPF1 cutoff frequency',
+        'dterm_lpf1_hz':    'D-term LPF1 cutoff',
+        'dyn_notch_count':  'Dynamic notch filter count',
+        'anti_gravity_gain':'Anti-gravity gain ระหว่าง throttle punch',
+        'feedforward_roll': 'Feedforward roll — stick response derivative',
+        'min_throttle':     'Min throttle — มอเตอร์ idle speed',
+        'failsafe_action':  'Failsafe action เมื่อ signal lost',
+    }
+
+    for k in sorted(all_keys):
+        in_a = k in a
+        in_b = k in b
+        if in_a and not in_b:
+            only_in_a.append((k, a[k]))
+        elif in_b and not in_a:
+            only_in_b.append((k, b[k]))
+        else:
+            va, vb = a[k], b[k]
+            if str(va) != str(vb):
+                explain = _PARAM_EXPLAIN.get(k, 'ค่าเปลี่ยนแปลง')
+                # Determine direction
+                try:
+                    diff_val = float(vb) - float(va)
+                    direction = '↑ เพิ่มขึ้น' if diff_val > 0 else '↓ ลดลง'
+                    explain += f' ({direction} {abs(diff_val):.1f})'
+                except Exception:
+                    pass
+                changed.append((k, va, vb, explain))
+            else:
+                same.append((k, va))
+
+    summary = (
+        f"เปรียบเทียบ: {len(changed)} ค่าเปลี่ยน, "
+        f"{len(only_in_a)} เฉพาะใน Config A, "
+        f"{len(only_in_b)} เฉพาะใน Config B, "
+        f"{len(same)} ค่าเหมือนกัน"
+    )
+
+    return {
+        'only_in_a': only_in_a,
+        'only_in_b': only_in_b,
+        'changed':   changed,
+        'same':      same,
+        'summary':   summary,
+    }
