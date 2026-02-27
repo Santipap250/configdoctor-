@@ -465,4 +465,18 @@ dz.addEventListener('drop', e=>{
   if (f){
     const r = new FileReader();
     r.onload = ()=> dumpEl.value = r.result;
-    r.readAs
+    r.readAsText(f);
+  } else {
+    // maybe text dropped
+    const txt = e.dataTransfer.getData('text');
+    if (txt) dumpEl.value = txt;
+  }
+});
+
+// initial server check and set placeholder if needed
+(async ()=>{ const ok = await checkServer(); if (!ok) serverStatusEl.textContent='Offline (local fallback)'; })();
+
+</script>
+</body>
+</html>
+สรุปฟีเจอร์สำคัญที่เพิ่มให้:
