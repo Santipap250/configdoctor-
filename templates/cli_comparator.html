@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLI Diff Comparator — OBIXConfig Doctor</title>
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+.cmp-wrap{max-width:1100px;margin:0 auto;padding:16px;}
+.cmp-card{background:var(--card-bg,#0d2015);border:1px solid var(--border,#1a3a24);border-radius:12px;padding:20px;margin:12px 0;}
+.cmp-card h3{color:var(--green,#10c47a);font-size:1rem;margin-bottom:12px;}
+.col2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:700px){.col2{grid-template-columns:1fr;}}
+label{font-size:.82rem;color:var(--muted,#7a9a88);display:block;margin-bottom:5px;}
+textarea{width:100%;height:200px;background:#050d08;border:1px solid var(--border,#1a3a24);border-radius:8px;color:#e0f0e8;font-family:monospace;font-size:.78rem;padding:10px;resize:vertical;}
+textarea:focus{outline:2px solid var(--green,#10c47a);border-color:transparent;}
+.go-btn{background:var(--green,#10c47a);color:#021a0e;border:none;border-radius:8px;padding:10px 28px;font-weight:700;cursor:pointer;font-size:.95rem;margin-top:12px;}
+.go-btn:hover{opacity:.88;}
+.section-title{font-size:.82rem;font-weight:700;padding:8px 12px;border-radius:6px;margin:12px 0 6px;display:flex;align-items:center;gap:6px;}
+.sec-changed{background:#1a2a0a;border-left:3px solid #f59e0b;color:#fde68a;}
+.sec-a{background:#1a0a0a;border-left:3px solid #ef4444;color:#fca5a5;}
+.sec-b{background:#0a1a0a;border-left:3px solid #10c47a;color:#86efac;}
+.sec-same{background:#0a0a0a;border-left:3px solid #334155;color:var(--muted,#7a9a88);}
+table{width:100%;border-collapse:collapse;font-size:.82rem;}
+th{background:#050d08;color:var(--muted,#7a9a88);padding:6px 10px;text-align:left;border-bottom:1px solid #1a3a24;}
+td{padding:5px 10px;border-bottom:1px solid #0d1a10;vertical-align:top;}
+tr:hover td{background:#061309;}
+.key{font-family:monospace;color:#79c0ff;}
+.val-a{color:#fca5a5;}
+.val-b{color:#86efac;}
+.val-same{color:var(--muted,#7a9a88);}
+.explain{color:var(--muted,#7a9a88);font-size:.78rem;font-style:italic;}
+.badge-change{display:inline-block;background:#78350f;color:#fde68a;padding:.1rem .5rem;border-radius:4px;font-size:.72rem;font-weight:700;}
+.badge-a{background:#450a0a;color:#fca5a5;}
+.badge-b{background:#052e16;color:#86efac;}
+.badge-same{background:#0f172a;color:#64748b;}
+.summary-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0;}
+.sum-box{background:#050d08;border:1px solid var(--border,#1a3a24);border-radius:8px;padding:12px;text-align:center;}
+.sum-val{font-size:1.6rem;font-weight:700;}
+.sum-lbl{font-size:.72rem;color:var(--muted,#7a9a88);margin-top:3px;}
+.filter-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0;}
+.filter-btn{background:transparent;border:1px solid var(--border,#1a3a24);color:var(--muted,#7a9a88);padding:.3rem .75rem;border-radius:6px;cursor:pointer;font-size:.8rem;transition:.15s;}
+.filter-btn.active{background:var(--green,#10c47a);color:#021a0e;border-color:var(--green,#10c47a);font-weight:700;}
+.hidden{display:none;}
+#loading{text-align:center;padding:30px;color:var(--muted,#7a9a88);display:none;}
+.spinner{display:inline-block;width:24px;height:24px;border:3px solid #1a3a24;border-top-color:var(--green,#10c47a);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty-hint{text-align:center;padding:30px;color:var(--muted,#7a9a88);font-size:.85rem;}
+a.back{color:var(--green,#10c47a);font-size:.85rem;text-decoration:none;}
+.tip-box{background:#0a1a0a;border:1px solid #1a3a24;border-radius:8px;padding:12px 16px;font-size:.82rem;color:var(--muted,#7a9a88);}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <div class="top-left">
+    <a href="/landing"><img src="{{ url_for('static', filename='img/obix-logo.png') }}" class="logo" alt="OBIXConfig Doctor"></a>
+  </div>
+  <button class="toggle-theme" onclick="toggleTheme()" title="สลับธีม">🌗</button>
+</div>
+
+<div class="cmp-wrap">
+  <div style="margin-bottom:16px;">
+    <a class="back" href="/app">← กลับหน้าหลัก</a>
+    <h2 style="color:var(--green);font-size:1.1rem;margin:6px 0 2px;">⚖️ CLI Diff Comparator</h2>
+    <p style="color:var(--muted);font-size:.84rem;">วาง diff all / dump 2 ชุด → เห็นทุกค่าที่เปลี่ยน พร้อมคำอธิบาย</p>
+  </div>
+
+  <div class="tip-box" style="margin-bottom:12px;">
+    💡 ใช้ได้กับ: Betaflight <code>diff all</code>, <code>dump</code> หรือ config text ใดๆ ก็ได้ — รองรับ INAV/Emuflight ด้วย
+  </div>
+
+  <div class="cmp-card">
+    <h3>📥 วาง Config ทั้ง 2 ชุด</h3>
+    <div class="col2">
+      <div>
+        <label>⬤ Config A (เก่า / ของคุณ)</label>
+        <textarea id="dumpA" placeholder="# วาง diff all หรือ dump ของ Config A ที่นี่...
+set min_throttle = 1000
+set p_roll = 48
+set i_roll = 90
+set d_roll = 38
+..."></textarea>
+      </div>
+      <div>
+        <label>⬤ Config B (ใหม่ / ของคนอื่น)</label>
+        <textarea id="dumpB" placeholder="# วาง diff all หรือ dump ของ Config B ที่นี่...
+set min_throttle = 1010
+set p_roll = 52
+set i_roll = 90
+set d_roll = 42
+..."></textarea>
+      </div>
+    </div>
+    <button class="go-btn" onclick="doCompare()">🔍 เปรียบเทียบ →</button>
+    <button class="go-btn" style="background:transparent;color:var(--muted);border:1px solid var(--border);" onclick="loadExample()">ลอง Example</button>
+  </div>
+
+  <div id="loading"><span class="spinner"></span>กำลังวิเคราะห์...</div>
+
+  <div id="results" class="hidden">
+
+    <!-- Summary bar -->
+    <div class="summary-bar">
+      <div class="sum-box"><div class="sum-val" style="color:#f59e0b;" id="cnt-changed">0</div><div class="sum-lbl">ค่าเปลี่ยน</div></div>
+      <div class="sum-box"><div class="sum-val" style="color:#ef4444;" id="cnt-a">0</div><div class="sum-lbl">เฉพาะใน A</div></div>
+      <div class="sum-box"><div class="sum-val" style="color:#10c47a;" id="cnt-b">0</div><div class="sum-lbl">เฉพาะใน B</div></div>
+      <div class="sum-box"><div class="sum-val" style="color:#64748b;" id="cnt-same">0</div><div class="sum-lbl">เหมือนกัน</div></div>
+    </div>
+
+    <!-- Filter buttons -->
+    <div class="filter-row">
+      <span style="font-size:.8rem;color:var(--muted);">แสดง:</span>
+      <button class="filter-btn active" id="btn-changed" onclick="setFilter('changed')">🔸 เปลี่ยน</button>
+      <button class="filter-btn" id="btn-a" onclick="setFilter('a')">🔴 เฉพาะ A</button>
+      <button class="filter-btn" id="btn-b" onclick="setFilter('b')">🟢 เฉพาะ B</button>
+      <button class="filter-btn" id="btn-same" onclick="setFilter('same')">⚫ เหมือนกัน</button>
+      <button class="filter-btn" id="btn-all" onclick="setFilter('all')">ทั้งหมด</button>
+    </div>
+
+    <!-- Changed table -->
+    <div id="sec-changed">
+      <div class="section-title sec-changed">🔸 ค่าที่เปลี่ยนแปลง</div>
+      <div class="cmp-card" style="padding:0;overflow:hidden;">
+        <table>
+          <tr><th style="width:30%">Parameter</th><th style="width:25%">Config A (เดิม)</th><th style="width:25%">Config B (ใหม่)</th><th>คำอธิบาย</th></tr>
+          <tbody id="tbody-changed"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Only in A -->
+    <div id="sec-a">
+      <div class="section-title sec-a">🔴 เฉพาะใน Config A (ไม่มีใน B)</div>
+      <div class="cmp-card" style="padding:0;overflow:hidden;">
+        <table>
+          <tr><th style="width:40%">Parameter</th><th>ค่าใน A</th></tr>
+          <tbody id="tbody-a"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Only in B -->
+    <div id="sec-b">
+      <div class="section-title sec-b">🟢 เฉพาะใน Config B (ไม่มีใน A)</div>
+      <div class="cmp-card" style="padding:0;overflow:hidden;">
+        <table>
+          <tr><th style="width:40%">Parameter</th><th>ค่าใน B</th></tr>
+          <tbody id="tbody-b"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Same -->
+    <div id="sec-same">
+      <div class="section-title sec-same">⚫ ค่าที่เหมือนกัน</div>
+      <div class="cmp-card" style="padding:0;overflow:hidden;">
+        <table>
+          <tr><th style="width:40%">Parameter</th><th>ค่า</th></tr>
+          <tbody id="tbody-same"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /results -->
+</div>
+
+<script>
+(function(){ var t=localStorage.getItem('theme')||'dark'; document.documentElement.className=t; document.addEventListener('DOMContentLoaded',function(){ document.body.classList.add(t); }); })();
+function toggleTheme(){ var isDark=document.body.classList.contains('dark'); document.body.classList.toggle('dark',!isDark); document.body.classList.toggle('light',isDark); localStorage.setItem('theme',isDark?'light':'dark'); }
+
+var currentFilter = 'changed';
+
+function setFilter(f) {
+  currentFilter = f;
+  ['changed','a','b','same','all'].forEach(function(k) {
+    document.getElementById('btn-'+k).classList.toggle('active', k===f);
+  });
+  var show = {
+    'changed': ['sec-changed'],
+    'a': ['sec-a'],
+    'b': ['sec-b'],
+    'same': ['sec-same'],
+    'all': ['sec-changed','sec-a','sec-b','sec-same']
+  }[f] || [];
+  ['sec-changed','sec-a','sec-b','sec-same'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle('hidden', show.indexOf(id)<0);
+  });
+}
+
+function loadExample() {
+  document.getElementById('dumpA').value = `# Config A — before tuning
+set min_throttle = 1000
+set p_roll = 48
+set i_roll = 90
+set d_roll = 38
+set p_pitch = 52
+set i_pitch = 90
+set d_pitch = 40
+set p_yaw = 40
+set i_yaw = 90
+set gyro_lpf1_hz = 200
+set dterm_lpf1_hz = 110
+set dyn_notch_count = 2
+set anti_gravity_gain = 5
+set failsafe_delay = 4
+set serialrx_provider = CRSF`;
+  document.getElementById('dumpB').value = `# Config B — after tuning session
+set min_throttle = 1010
+set p_roll = 52
+set i_roll = 90
+set d_roll = 42
+set p_pitch = 56
+set i_pitch = 90
+set d_pitch = 44
+set p_yaw = 38
+set i_yaw = 85
+set gyro_lpf1_hz = 180
+set dterm_lpf1_hz = 100
+set dyn_notch_count = 3
+set anti_gravity_gain = 8
+set feedforward_roll = 25
+set feedforward_pitch = 25
+set failsafe_delay = 4
+set serialrx_provider = CRSF`;
+}
+
+async function doCompare() {
+  var a = document.getElementById('dumpA').value.trim();
+  var b = document.getElementById('dumpB').value.trim();
+  if (!a || !b) { alert('กรุณาวาง Config ทั้ง 2 ชุดก่อน'); return; }
+
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('results').classList.add('hidden');
+
+  try {
+    var res = await fetch('/compare_cli', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({dump_a: a, dump_b: b})
+    });
+    var data = await res.json();
+    if (data.error) { alert('Error: ' + data.error); return; }
+    renderResults(data);
+  } catch(e) {
+    alert('เกิดข้อผิดพลาด: ' + e.message);
+  } finally {
+    document.getElementById('loading').style.display = 'none';
+  }
+}
+
+function renderResults(data) {
+  // Summary
+  document.getElementById('cnt-changed').textContent = data.changed.length;
+  document.getElementById('cnt-a').textContent = data.only_in_a.length;
+  document.getElementById('cnt-b').textContent = data.only_in_b.length;
+  document.getElementById('cnt-same').textContent = data.same.length;
+
+  // Changed table
+  var tc = document.getElementById('tbody-changed');
+  tc.innerHTML = '';
+  if (data.changed.length === 0) {
+    tc.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;">ไม่มีค่าที่เปลี่ยน</td></tr>';
+  } else {
+    data.changed.forEach(function(row) {
+      var key = row[0], va = row[1], vb = row[2], exp = row[3];
+      var isUp = '';
+      try { isUp = parseFloat(vb) > parseFloat(va) ? '↑' : '↓'; } catch(e){}
+      tc.innerHTML += '<tr>' +
+        '<td class="key">' + esc(key) + '</td>' +
+        '<td class="val-a">' + esc(String(va)) + '</td>' +
+        '<td class="val-b">' + (isUp?'<span style="margin-right:4px">'+isUp+'</span>':'') + esc(String(vb)) + '</td>' +
+        '<td class="explain">' + esc(exp) + '</td></tr>';
+    });
+  }
+
+  // Only in A
+  var ta = document.getElementById('tbody-a');
+  ta.innerHTML = '';
+  if (data.only_in_a.length === 0) {
+    ta.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--muted);padding:16px;">ไม่มี</td></tr>';
+  } else {
+    data.only_in_a.forEach(function(row) {
+      ta.innerHTML += '<tr><td class="key val-a">' + esc(row[0]) + '</td><td class="val-a">' + esc(String(row[1])) + '</td></tr>';
+    });
+  }
+
+  // Only in B
+  var tb = document.getElementById('tbody-b');
+  tb.innerHTML = '';
+  if (data.only_in_b.length === 0) {
+    tb.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--muted);padding:16px;">ไม่มี</td></tr>';
+  } else {
+    data.only_in_b.forEach(function(row) {
+      tb.innerHTML += '<tr><td class="key val-b">' + esc(row[0]) + '</td><td class="val-b">' + esc(String(row[1])) + '</td></tr>';
+    });
+  }
+
+  // Same
+  var ts = document.getElementById('tbody-same');
+  ts.innerHTML = '';
+  data.same.forEach(function(row) {
+    ts.innerHTML += '<tr><td class="key val-same">' + esc(row[0]) + '</td><td class="val-same">' + esc(String(row[1])) + '</td></tr>';
+  });
+
+  // Show with default filter
+  document.getElementById('results').classList.remove('hidden');
+  setFilter('changed');
+  document.getElementById('results').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>
