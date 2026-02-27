@@ -76,31 +76,31 @@ PRESETS: Dict[str, Dict[str, Any]] = {
     # clamp ค่าต่ำสุดที่ 3S (min 3) ทำให้ 2S preset triggers warning เสมอ
     # Tiny whoops จริงๆ ใช้ 1S–2S แต่ระบบยังไม่รองรับ — ปรับเป็น 3S ไปก่อน
     "2.5_micro": {
-        "class": "micro", "size": 2.5, "weight": 80, "battery": "3S", "prop_size": 2.5, "pitch": 2.0, "blades": 2, "style": "micro"
+        "class": "micro", "size": 2.5, "weight": 80, "battery": "3S", "prop_size": 2.5, "pitch": 2.0, "blades": 2, "style": "freestyle"
     },
     "3_whoop": {
-        "class": "whoop", "size": 3.0, "weight": 120, "battery": "3S", "prop_size": 3.0, "pitch": 2.0, "blades": 2, "style": "whoop"
+        "class": "whoop", "size": 3.0, "weight": 120, "battery": "3S", "prop_size": 3.0, "pitch": 2.0, "blades": 2, "style": "freestyle"
     },
     "3.5_cine": {
-        "class": "cine", "size": 3.5, "weight": 350, "battery": "4S", "prop_size": 3.5, "pitch": 2.5, "blades": 2, "style": "cine"
+        "class": "cine", "size": 3.5, "weight": 350, "battery": "4S", "prop_size": 3.5, "pitch": 2.5, "blades": 2, "style": "longrange"
     },
     "4_mini": {
-        "class": "mini", "size": 4.0, "weight": 420, "battery": "4S", "prop_size": 4.0, "pitch": 3.0, "blades": 2, "style": "mini"
+        "class": "mini", "size": 4.0, "weight": 420, "battery": "4S", "prop_size": 4.0, "pitch": 3.0, "blades": 2, "style": "freestyle"
     },
     "5_freestyle": {
         "class": "freestyle", "size": 5.0, "weight": 750, "battery": "4S", "prop_size": 5.0, "pitch": 4.0, "blades": 3, "style": "freestyle"
     },
     "6_heavy5": {
-        "class": "heavy_5", "size": 6.0, "weight": 1000, "battery": "4S", "prop_size": 6.0, "pitch": 4.0, "blades": 3, "style": "heavy"
+        "class": "heavy_5", "size": 6.0, "weight": 1000, "battery": "6S", "prop_size": 6.0, "pitch": 4.0, "blades": 3, "style": "freestyle"
     },
     "7_midlr": {
-        "class": "mid_lr", "size": 7.0, "weight": 1100, "battery": "4S", "prop_size": 7.0, "pitch": 3.5, "blades": 2, "style": "longrange"
+        "class": "mid_lr", "size": 7.0, "weight": 1100, "battery": "6S", "prop_size": 7.0, "pitch": 3.5, "blades": 2, "style": "longrange"
     },
     "7.5_midlr": {
-        "class": "mid_lr", "size": 7.5, "weight": 1200, "battery": "4S", "prop_size": 7.5, "pitch": 3.0, "blades": 2, "style": "longrange"
+        "class": "mid_lr", "size": 7.5, "weight": 1200, "battery": "6S", "prop_size": 7.5, "pitch": 3.0, "blades": 2, "style": "longrange"
     },
     "8_lr": {
-        "class": "long_range", "size": 8.0, "weight": 1500, "battery": "4S", "prop_size": 8.0, "pitch": 3.5, "blades": 2, "style": "longrange"
+        "class": "long_range", "size": 8.0, "weight": 1500, "battery": "6S", "prop_size": 8.0, "pitch": 3.5, "blades": 2, "style": "longrange"
     },
     "10_lr": {
         "class": "long_range", "size": 10.0, "weight": 2200, "battery": "6S", "prop_size": 10.0, "pitch": 4.5, "blades": 2, "style": "longrange"
