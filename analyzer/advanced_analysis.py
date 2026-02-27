@@ -84,7 +84,7 @@ def analyze(
     motor_kv: int | None = None,
     weight_g: float = 1000.0,
     motors: int = DEFAULT_MOTORS,
-    hover_throttle: float = 0.5,
+    hover_throttle: float | None = None,
     thrust_per_motor_g: float | None = None,
 ) -> Dict[str, Any]:
     """Return analysis dict with computed metrics, warnings, and diagnostics.
