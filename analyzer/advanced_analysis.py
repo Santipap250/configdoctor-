@@ -377,31 +377,76 @@ def make_advanced_report(
                 except Exception:
                     thrust_ratio = None
 
-        # convert warnings to simple list for template (strings)
-        warnings_list = []
+        # BUG FIX: warnings เดิมถูก flatten เป็น list of strings
+        # แต่ template ใช้ w.level / w.msg → ต้องเก็บเป็น list of dicts
+        warnings_as_dicts = []
         for w in analysis.get("warnings", []):
             if isinstance(w, dict):
-                warnings_list.append(w.get("msg", str(w)))
+                warnings_as_dicts.append(w)
             else:
-                warnings_list.append(str(w))
+                warnings_as_dicts.append({"level": "warning", "msg": str(w)})
 
-        # Build the advanced dict shape used by templates
+        # ---- คำนวณ fields เพิ่มเติมที่ template ต้องการแต่ยังไม่มีใน advanced dict ----
+        pack_voltage_nominal = float(comp.get("pack_voltage_nominal", cells * NOMINAL_CELL_V))
+        current_draw_a = round(total_power_w / pack_voltage_nominal, 2) if pack_voltage_nominal > 0 else 0
+        peak_current_a = round(current_draw_a * 1.8, 2)
+        c_required = round((current_draw_a * 1000) / batt_mAh_used, 1) if batt_mAh_used > 0 else None
+
+        stress = analysis.get("motor_esc_stress", "low")
+        motor_health = {"high": "⚠️ สูง", "moderate": "⚡ ปานกลาง", "low": "✅ ปกติ"}.get(stress, stress)
+        battery_health = "⚠️ ระวัง" if (c_required or 0) > 60 else ("✅ ดี" if (c_required or 0) < 30 else "⚡ ปกติ")
+
+        efficiency_class = analysis.get("efficiency_class", "nominal")
+
+        # KV suggestion
+        if motor_kv:
+            kv_display = f"{motor_kv} KV (input)"
+        elif (size or 5) >= 7:
+            kv_display = "900–1500 KV"
+        elif (size or 5) >= 5:
+            kv_display = "1200–2800 KV"
+        else:
+            kv_display = "1500–3500 KV"
+
+        # recommendations from warnings
+        recs = [w.get("msg", str(w)) for w in warnings_as_dicts] or ["ค่าพื้นฐานดูปกติ — ทดสอบบินจริงเพื่อปรับจูน"]
+
+        # BUG FIX: thrust_ratio เดิม fallback คืน motor_esc_stress string แทนที่จะเป็น number/None
+        thrust_ratio_safe = thrust_ratio if isinstance(thrust_ratio, (int, float)) else None
+
+        # Build the advanced dict — รวม flat fields (section 1) + nested power (section 2)
         advanced = {
+            # ---- flat fields สำหรับ template section 1 ----
+            "cells": int(cells),
+            "pack_voltage_nominal": pack_voltage_nominal,
+            "battery_mAh_used": int(batt_mAh_used),
+            "battery_wh": battery_wh,
+            "est_flight_time_min": int(est_flight_time_min),
+            "est_flight_time_min_aggr": int(est_flight_time_min_aggressive),
+            "avg_power_w": round(total_power_w, 1),
+            "current_draw_a": current_draw_a,
+            "peak_current_a": peak_current_a,
+            "c_required": c_required,
+            "thrust_ratio": thrust_ratio_safe,
+            "hover_throttle_percent": None,
+            "efficiency_class": efficiency_class,
+            "motor_health": motor_health,
+            "battery_health": battery_health,
+            "kv_suggestion": kv_display,
+            "recommendations": recs,
+            "twr_note": analysis.get("twr_note", ""),
+            "prop_notes": prop_result.get("effect", {}).get("notes", []) if isinstance(prop_result, dict) else [],
+            "warnings_advanced": warnings_as_dicts,
+            # ---- nested power สำหรับ template section 2 ----
             "power": {
                 "cells": int(cells),
                 "battery_mAh_used": int(batt_mAh_used),
                 "battery_wh": battery_wh,
-                # match naming used in templates: est_hover_power_w
                 "est_hover_power_w": round(total_power_w, 1),
                 "est_aggressive_power_w": round(total_power_w * 1.8, 1),
                 "est_flight_time_min": int(est_flight_time_min),
-                "est_flight_time_min_aggressive": int(est_flight_time_min_aggressive)
+                "est_flight_time_min_aggressive": int(est_flight_time_min_aggressive),
             },
-            "thrust_ratio": thrust_ratio if thrust_ratio is not None else analysis.get("motor_esc_stress", None),
-            "twr_note": analysis.get("twr_note", ""),
-            "kv_suggestion": input_block.get("motor_kv", motor_kv) or (f"{1200}-{2800}" if size >=5 else "1500-3500"),
-            "prop_notes": prop_result.get("effect", {}).get("notes", []) if isinstance(prop_result, dict) else [],
-            "warnings_advanced": warnings_list,
             "_diagnostics": {
                 "raw_analysis": analysis
             }
