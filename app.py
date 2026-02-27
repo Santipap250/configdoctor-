@@ -194,6 +194,7 @@ def analyze_drone(size, battery, style, prop_result, weight):
         analysis["thrust_ratio"] = 0
 
     # battery estimate fallback
+    # BUG FIX: estimate_battery_runtime รับ battery_mAh ด้วย (optional) เพื่อให้สูตรแม่นขึ้น
     try:
         analysis["battery_est"] = estimate_battery_runtime(weight, battery)
     except Exception:
@@ -470,6 +471,12 @@ def downloads_index():
 def vtx():
     # หากต้องการส่งข้อมูลไดนามิก ให้เติม context dict
     return render_template("vtx.html")
+
+# BUG FIX: /vtx-range route หายไป — template vtx_range.html มีอยู่แล้วแต่ไม่มี route
+# ทำให้ link ใน drawer ของ index.html ไปยัง 404
+@app.route("/vtx-range")
+def vtx_range():
+    return render_template("vtx_range.html")
 
 # --- Motor × Prop recommender helper + route ---
 def _recommend_motor_prop(form):
