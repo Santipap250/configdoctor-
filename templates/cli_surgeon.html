@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <title>The CLI Surgeon - ConfigDoctor</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>🩺 The CLI Surgeon</h1>
+    <p>วางผลคำสั่ง <code>diff all</code> หรือ <code>dump</code> จาก Betaflight แล้วกด <b>Analyze</b></p>
+
+    <textarea id="cliDump" rows="14" style="width:100%;" placeholder="วาง diff all / dump ที่นี่..."></textarea>
+
+    <div style="margin-top:10px;">
+      <button id="analyzeBtn">Analyze</button>
+      <button id="clearBtn">Clear</button>
+    </div>
+
+    <div id="result" style="margin-top:12px; white-space:pre-wrap; background:#0f0f10; padding:12px; border-radius:8px;"></div>
+  </div>
+
+<script>
+document.getElementById('clearBtn').addEventListener('click', () => {
+  document.getElementById('cliDump').value = '';
+  document.getElementById('result').textContent = '';
+});
+document.getElementById('analyzeBtn').addEventListener('click', async () => {
+  const dump = document.getElementById('cliDump').value.trim();
+  if (!dump) { alert('กรุณาวาง diff all / dump ก่อน'); return; }
+  document.getElementById('result').textContent = 'กำลังวิเคราะห์...';
+  try {
+    const r = await fetch('/analyze_cli', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({dump})
+    });
+    const j = await r.json();
+    if (j.error) document.getElementById('result').textContent = 'Error: ' + j.error;
+    else {
+      // สร้างผลแบบอ่านง่าย
+      let out = '';
+      if (j.summary) out += j.summary + '\n\n';
+      if (j.rules && j.rules.length) {
+        out += 'ผลการวิเคราะห์:\n';
+        j.rules.forEach((rs, i) => {
+          out += `${i+1}. [${rs.level.toUpperCase()}] ${rs.msg}\n   => ${rs.suggestion}\n\n`;
+        });
+      }
+      if (j.fix_commands && j.fix_commands.length) {
+        out += 'คำสั่ง CLI ที่แนะนำ (copy แล้ววางใน Betaflight CLI):\n';
+        out += j.fix_commands.join('\n') + '\n';
+      }
+      document.getElementById('result').textContent = out || 'ไม่พบปัญหาใหญ่';
+    }
+  } catch (e) {
+    document.getElementById('result').textContent = 'เกิดข้อผิดพลาด: ' + e.message;
+  }
+});
+</script>
+</body>
+</html>
