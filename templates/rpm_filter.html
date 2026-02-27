@@ -1,52 +1,62 @@
-{% extends "partials/header.html" %}{% block content %}
 <!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RPM Filter Calculator — ConfigDoctor</title>
+<title>RPM Filter Calculator — OBIXConfig Doctor</title>
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <style>
-:root{--accent:#FF6B2B;--dark:#0F1117;--panel:#1A1D27;--border:#2E3348;--text:#E2E8F0;--muted:#8A94A6;--danger:#EF4444;--warning:#F59E0B;--ok:#22C55E;}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark);color:var(--text);padding:2rem 1rem;}
-.wrap{max-width:900px;margin:0 auto;}
-h1{font-size:1.8rem;font-weight:700;color:var(--accent);margin-bottom:.3rem;}
-h2{font-size:1.1rem;font-weight:600;color:#fff;margin:1.8rem 0 .8rem;}
-.subtitle{color:var(--muted);margin-bottom:1.8rem;font-size:.95rem;}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:1.25rem 1.5rem;margin:.8rem 0;}
-.form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
-@media(max-width:640px){.form-grid{grid-template-columns:1fr;}}
-label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:.4rem;}
-input,select{width:100%;padding:.6rem .9rem;background:#0d1117;border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.95rem;}
-input:focus,select:focus{outline:2px solid var(--accent);border-color:transparent;}
-.btn{background:var(--accent);color:#fff;border:none;padding:.7rem 1.8rem;border-radius:8px;font-weight:600;cursor:pointer;font-size:1rem;margin-top:1rem;}
-.btn:hover{opacity:.9;}
-table{width:100%;border-collapse:collapse;margin:.5rem 0;}
-th{background:#252938;color:#fff;padding:.5rem .8rem;font-size:.83rem;text-align:center;}
-td{padding:.45rem .8rem;border-bottom:1px solid var(--border);font-size:.85rem;text-align:center;}
-.hz-1{color:var(--ok);}
-.hz-2{color:#60a5fa;}
-.hz-3{color:#c084fc;}
-.hz-4{color:var(--warning);}
-.cli-box{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:1rem 1.2rem;font-family:'Courier New',monospace;font-size:.85rem;color:#79c0ff;white-space:pre-wrap;margin:.5rem 0;}
-.tag-ok{background:#14532d;color:#86efac;padding:.15rem .5rem;border-radius:4px;font-size:.78rem;font-weight:600;}
-.tag-warn{background:#78350f;color:#fde68a;padding:.15rem .5rem;border-radius:4px;font-size:.78rem;font-weight:600;}
-.rec-box{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem;margin:.8rem 0;}
-.rec-item{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:.8rem;text-align:center;}
-.rec-val{font-size:1.4rem;font-weight:700;color:var(--accent);}
-.rec-label{font-size:.78rem;color:var(--muted);margin-top:.2rem;}
-.warn-item{background:#78350f22;border:1px solid #78350f;border-radius:6px;padding:.6rem 1rem;margin:.4rem 0;font-size:.88rem;color:#fde68a;}
-.note-item{color:var(--muted);font-size:.85rem;padding:.25rem 0;}
-.copy-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:.3rem .7rem;border-radius:5px;cursor:pointer;font-size:.8rem;float:right;}
-.copy-btn:hover{color:#fff;border-color:var(--accent);}
+.rpm-wrap{max-width:900px;margin:0 auto;padding:16px;}
+.rpm-card{background:var(--card-bg,#0d2015);border:1px solid var(--border,#1a3a24);border-radius:12px;padding:22px;margin:14px 0;}
+.rpm-card h3{color:var(--green,#10c47a);font-size:1rem;margin-bottom:14px;}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr;}}
+label{font-size:.82rem;color:var(--muted,#7a9a88);display:block;margin-bottom:5px;}
+input,select{width:100%;padding:.55rem .85rem;background:#050d08;border:1px solid var(--border,#1a3a24);border-radius:7px;color:var(--fg,#e0f0e8);font-size:.9rem;}
+input:focus,select:focus{outline:2px solid var(--green,#10c47a);border-color:transparent;}
+.submit-btn{margin-top:14px;background:var(--green,#10c47a);color:#021a0e;border:none;border-radius:8px;padding:10px 26px;font-weight:700;cursor:pointer;font-size:.95rem;}
+.submit-btn:hover{opacity:.88;}
+table{width:100%;border-collapse:collapse;}
+th{background:#061309;color:var(--muted,#7a9a88);padding:.5rem .8rem;font-size:.8rem;text-align:center;border-bottom:1px solid var(--border,#1a3a24);}
+td{padding:.5rem .8rem;border-bottom:1px solid #0d1a10;font-size:.85rem;text-align:center;}
+tr:hover td{background:#061309;}
+.hz1{color:#10c47a;font-weight:600;}
+.hz2{color:#60a5fa;}
+.hz3{color:#c084fc;}
+.hz4{color:#f59e0b;}
+.rec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:10px 0;}
+.rec-item{background:#050d08;border:1px solid var(--border,#1a3a24);border-radius:10px;padding:14px;text-align:center;}
+.rec-val{font-size:1.5rem;font-weight:700;color:var(--green,#10c47a);}
+.rec-lbl{font-size:.75rem;color:var(--muted,#7a9a88);margin-top:4px;}
+.cli-box{background:#050d08;border:1px solid #1a3a24;border-radius:8px;padding:14px;font-family:monospace;font-size:.82rem;color:#10c47a;white-space:pre;overflow-x:auto;}
+.copy-btn{background:transparent;border:1px solid var(--border,#1a3a24);color:var(--muted,#7a9a88);padding:.3rem .75rem;border-radius:6px;cursor:pointer;font-size:.8rem;float:right;}
+.copy-btn:hover{color:var(--fg,#e0f0e8);border-color:var(--green,#10c47a);}
+.warn-box{background:#1a0a0033;border:1px solid #7c2d12;border-radius:8px;padding:10px 14px;margin:6px 0;color:#fde68a;font-size:.85rem;}
+.note-item{color:var(--muted,#7a9a88);font-size:.84rem;padding:.2rem 0;}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.82rem;margin-bottom:10px;}
+.leg{display:inline-flex;align-items:center;gap:6px;color:var(--muted,#7a9a88);}
+.dot{width:12px;height:12px;border-radius:3px;display:inline-block;}
+a.back{color:var(--green,#10c47a);font-size:.85rem;text-decoration:none;}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>🔔 RPM Filter Frequency Calculator</h1>
-  <p class="subtitle">คำนวณความถี่ harmonic notch ที่แน่นอนสำหรับ RPM filter ของคุณ ช่วยตั้งค่า dyn_notch_min/max ได้ถูกต้อง</p>
+<div class="top-bar">
+  <div class="top-left">
+    <a href="/landing"><img src="{{ url_for('static', filename='img/obix-logo.png') }}" class="logo" alt="OBIXConfig Doctor"></a>
+  </div>
+  <button class="toggle-theme" onclick="toggleTheme()" title="สลับธีม">🌗</button>
+</div>
 
-  <div class="card">
+<div class="rpm-wrap">
+  <div style="margin-bottom:16px;">
+    <a class="back" href="/app">← กลับหน้าหลัก</a>
+    <h2 style="color:var(--green);font-size:1.1rem;margin:6px 0 2px;">🔔 RPM Filter Frequency Calculator</h2>
+    <p style="color:var(--muted);font-size:.84rem;">ใส่ KV + แบต → ได้ตาราง harmonic + ค่า dyn_notch พร้อม CLI command</p>
+  </div>
+
+  <div class="rpm-card">
+    <h3>⚙️ ข้อมูลมอเตอร์</h3>
     <form method="POST" action="/rpm-filter">
       <div class="form-grid">
         <div>
@@ -54,7 +64,7 @@ td{padding:.45rem .8rem;border-bottom:1px solid var(--border);font-size:.85rem;t
           <input type="number" name="kv" min="200" max="8000" value="{{ form.kv or 2400 }}" placeholder="เช่น 2400" required>
         </div>
         <div>
-          <label>Battery (S)</label>
+          <label>Battery</label>
           <select name="battery">
             {% for s in ['3S','4S','5S','6S','7S','8S'] %}
             <option value="{{ s }}" {% if form.battery == s %}selected{% endif %}>{{ s }}</option>
@@ -65,88 +75,87 @@ td{padding:.45rem .8rem;border-bottom:1px solid var(--border);font-size:.85rem;t
           <label>Prop Size (นิ้ว)</label>
           <select name="prop_size">
             {% for p in [2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 7.0, 8.0] %}
-            <option value="{{ p }}" {% if form.prop_size|float == p %}selected{% endif %}>{{ p }}"</option>
+            <option value="{{ p }}" {% if form.prop_size and form.prop_size|float == p %}selected{% endif %}>{{ p }}"</option>
             {% endfor %}
           </select>
         </div>
       </div>
-      <button class="btn" type="submit">คำนวณ RPM Filter →</button>
+      <button class="submit-btn" type="submit">📊 คำนวณ RPM Filter →</button>
     </form>
   </div>
 
   {% if result %}
-  <h2>📊 ผลการคำนวณ — KV {{ result.kv }} × {{ result.cells }}S</h2>
+    {% if result.error is defined %}
+    <div class="warn-box">❌ {{ result.error }}</div>
+    {% else %}
 
-  {% if result.warnings %}
-  {% for w in result.warnings %}
-  <div class="warn-item">{{ w }}</div>
-  {% endfor %}
-  {% endif %}
+    {% for w in result.warnings %}
+    <div class="warn-box">{{ w }}</div>
+    {% endfor %}
 
-  <div class="card">
-    <h2 style="margin-top:0">ตารางความถี่ Harmonic ตาม Throttle</h2>
-    <p style="color:var(--muted);font-size:.85rem;margin-bottom:.8rem">RPM loaded max: <strong style="color:var(--accent)">{{ "{:,}".format(result.rpm_loaded_max) }} RPM</strong> &nbsp;|&nbsp; ความถี่ 1× ที่ full throttle: <strong style="color:var(--ok)">{{ result.throttle_table[-1].harmonics[0].hz }} Hz</strong></p>
-    <table>
-      <tr>
-        <th>Throttle</th>
-        <th>RPM (est.)</th>
-        <th class="hz-1">1× Hz</th>
-        <th class="hz-2">2× Hz</th>
-        <th class="hz-3">3× Hz</th>
-        <th class="hz-4">4× Hz</th>
-      </tr>
-      {% for row in result.throttle_table %}
-      <tr>
-        <td><strong>{{ row.throttle }}</strong></td>
-        <td>{{ "{:,}".format(row.rpm) }}</td>
-        {% for h in row.harmonics %}
-        <td class="hz-{{ h.n }}">{{ h.hz }} Hz</td>
+    <div class="rpm-card">
+      <h3>📊 ตาราง Harmonic Frequency</h3>
+      <p style="color:var(--muted);font-size:.83rem;margin-bottom:10px;">
+        Max RPM (loaded): <strong style="color:var(--green);">{{ "{:,}".format(result.rpm_loaded_max) }} RPM</strong> &nbsp;·&nbsp;
+        Freq ที่ full throttle (1×): <strong style="color:var(--green);">{{ result.throttle_table[-1].harmonics[0].hz }} Hz</strong>
+      </p>
+      <div class="legend">
+        <span class="leg"><span class="dot" style="background:#10c47a"></span> 1× fundamental</span>
+        <span class="leg"><span class="dot" style="background:#60a5fa"></span> 2× harmonic</span>
+        <span class="leg"><span class="dot" style="background:#c084fc"></span> 3× harmonic</span>
+        <span class="leg"><span class="dot" style="background:#f59e0b"></span> 4× harmonic</span>
+      </div>
+      <table>
+        <tr>
+          <th>Throttle</th><th>RPM (est.)</th>
+          <th class="hz1">1× Hz</th><th class="hz2">2× Hz</th><th class="hz3">3× Hz</th><th class="hz4">4× Hz</th>
+        </tr>
+        {% for row in result.throttle_table %}
+        <tr>
+          <td><strong>{{ row.throttle }}</strong></td>
+          <td>{{ "{:,}".format(row.rpm) }}</td>
+          {% for h in row.harmonics %}
+          <td class="hz{{ h.n }}">{{ h.hz }}</td>
+          {% endfor %}
+        </tr>
         {% endfor %}
-      </tr>
-      {% endfor %}
-    </table>
-  </div>
+      </table>
+    </div>
 
-  <div class="card">
-    <h2 style="margin-top:0">🎯 ค่าแนะนำสำหรับ Betaflight</h2>
-    <div class="rec-box">
-      <div class="rec-item">
-        <div class="rec-val">{{ result.recommended.dyn_notch_min }}</div>
-        <div class="rec-label">dyn_notch_min_hz</div>
-      </div>
-      <div class="rec-item">
-        <div class="rec-val">{{ result.recommended.dyn_notch_max }}</div>
-        <div class="rec-label">dyn_notch_max_hz</div>
-      </div>
-      <div class="rec-item">
-        <div class="rec-val">{{ result.recommended.dyn_notch_count }}</div>
-        <div class="rec-label">dyn_notch_count</div>
+    <div class="rpm-card">
+      <h3>🎯 ค่าแนะนำสำหรับ Betaflight</h3>
+      <div class="rec-grid">
+        <div class="rec-item"><div class="rec-val">{{ result.recommended.dyn_notch_min }}</div><div class="rec-lbl">dyn_notch_min_hz</div></div>
+        <div class="rec-item"><div class="rec-val">{{ result.recommended.dyn_notch_max }}</div><div class="rec-lbl">dyn_notch_max_hz</div></div>
+        <div class="rec-item"><div class="rec-val">{{ result.recommended.dyn_notch_count }}</div><div class="rec-lbl">dyn_notch_count</div></div>
       </div>
     </div>
-    <p style="color:var(--muted);font-size:.85rem;">ค่าแนะนำครอบคลุม harmonic 1× ตั้งแต่ throttle 20%–100% + margin 20% เพื่อความปลอดภัย</p>
-  </div>
 
-  <div class="card">
-    <h2 style="margin-top:0">📋 CLI Commands (copy ไปวางใน Betaflight)</h2>
-    <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('cli-output').textContent)">📋 Copy</button>
-    <div class="cli-box" id="cli-output">{% for line in result.cli_commands %}{{ line }}
+    <div class="rpm-card">
+      <h3>📋 CLI Commands <button class="copy-btn" onclick="copyCLI()">📋 Copy</button></h3>
+      <div class="cli-box" id="cli-out">{% for line in result.cli_commands %}{{ line }}
 {% endfor %}</div>
-  </div>
+    </div>
 
-  <div class="card">
-    <h2 style="margin-top:0">ℹ️ หมายเหตุ</h2>
-    {% for note in result.notes %}
-    <p class="note-item">• {{ note }}</p>
-    {% endfor %}
-  </div>
+    <div class="rpm-card">
+      <h3>ℹ️ หมายเหตุ</h3>
+      {% for note in result.notes %}
+      <p class="note-item">• {{ note }}</p>
+      {% endfor %}
+    </div>
+    {% endif %}
   {% endif %}
 
-  <div class="card" style="border-color:var(--border)">
-    <p style="color:var(--muted);font-size:.85rem;">💡 <strong style="color:var(--text)">วิธีใช้:</strong> ตั้งค่า dyn_notch_min/max ตามที่คำนวณ แล้วเปิด RPM Filter ใน Betaflight Configurator → Filters tab ยืนยันด้วย Blackbox + Spectrum Analyzer ทุกครั้ง</p>
-  </div>
-
-  <p style="margin-top:1.5rem;"><a href="/app" style="color:var(--accent)">← กลับหน้าวิเคราะห์หลัก</a></p>
+  <p style="margin-top:16px;font-size:.82rem;color:var(--muted);">
+    💡 ยืนยันผลด้วย Blackbox + Betaflight Spectrum Analyzer เสมอ — ค่านี้เป็นจุดเริ่มต้น
+  </p>
 </div>
+
+<script>
+(function(){ var t=localStorage.getItem('theme')||'dark'; document.documentElement.className=t; document.addEventListener('DOMContentLoaded',function(){ document.body.classList.add(t); }); })();
+function toggleTheme(){ var isDark=document.body.classList.contains('dark'); document.body.classList.toggle('dark',!isDark); document.body.classList.toggle('light',isDark); localStorage.setItem('theme',isDark?'light':'dark'); }
+function copyCLI(){ var el=document.getElementById('cli-out'); if(!el) return; navigator.clipboard.writeText(el.textContent).then(function(){ showToast('คัดลอก CLI command แล้ว ✓'); }); }
+function showToast(msg){ var t=document.getElementById('toast'); if(!t){ t=document.createElement('div'); t.id='toast'; t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#10c47a;color:#021a0e;padding:8px 18px;border-radius:20px;font-weight:700;font-size:.87rem;z-index:999;'; document.body.appendChild(t); } t.textContent=msg; t.style.opacity='1'; clearTimeout(t._t); t._t=setTimeout(function(){ t.style.opacity='0'; },2200); }
+</script>
 </body>
 </html>
-{% endblock %}
