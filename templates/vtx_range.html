@@ -1,1 +1,102 @@
-1
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>VTX Range Calculator — OBIXConfig Doctor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+  body { font-family: sans-serif; background: #121212; color: #eee; padding: 20px; }
+  .container { max-width: 800px; margin: 0 auto; }
+  h1 { color: #f1b65a; }
+  .card { background: #1e1e1e; border-radius: 12px; padding: 20px; margin-top: 16px; }
+  label { display: block; margin: 10px 0 4px; color: #aaa; font-size: 0.9em; }
+  input, select {
+    width: 100%; padding: 8px 10px;
+    background: #2a2a2a; border: 1px solid #444;
+    border-radius: 6px; color: #eee;
+  }
+  button {
+    margin-top: 16px; padding: 10px 24px;
+    background: #f1b65a; color: #111;
+    border: none; border-radius: 8px;
+    cursor: pointer; font-weight: bold;
+  }
+  .result {
+    margin-top: 20px; background: #2a2a2a;
+    border-radius: 8px; padding: 16px;
+  }
+  .result span { font-size: 1.4em; color: #f1b65a; font-weight: bold; }
+  .back-link {
+    display: inline-block; margin-top: 20px;
+    color: #aaa; text-decoration: none; font-size: 0.9em;
+  }
+  .back-link:hover { color: #f1b65a; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📡 VTX Range Calculator</h1>
+  <p style="color:#aaa;">
+    ประมาณระยะส่งสัญญาณ VTX จากกำลังส่ง + antenna
+    (Free-Space Path Loss model)
+  </p>
+
+  <div class="card">
+    <label>กำลังส่ง VTX (mW)</label>
+    <input type="number" id="txPower" value="400" min="25" max="2000" step="25">
+
+    <label>ความถี่</label>
+    <select id="freq">
+      <option value="5800">5.8 GHz (5800 MHz) — ทั่วไป</option>
+      <option value="2400">2.4 GHz (2400 MHz) — ระยะไกลขึ้น</option>
+      <option value="900">900 MHz — Long-range</option>
+    </select>
+
+    <label>ความไวรับสัญญาณ RX (dBm) เช่น -90</label>
+    <input type="number" id="rxSens" value="-90" min="-110" max="-60">
+
+    <label>Antenna gain TX (dBi)</label>
+    <input type="number" id="txGain" value="2" min="0" max="20" step="0.5">
+
+    <label>Antenna gain RX (dBi)</label>
+    <input type="number" id="rxGain" value="2" min="0" max="20" step="0.5">
+
+    <button onclick="calcRange()">คำนวณระยะ</button>
+  </div>
+
+  <div class="result" id="result" style="display:none;">
+    <p>📏 ระยะประมาณ: <span id="rangeOut">—</span></p>
+    <p style="color:#aaa; font-size:0.85em;">
+      * ค่านี้เป็น line-of-sight (ไม่มีสิ่งกีดขวาง)<br>
+      ในสภาพจริง ระยะอาจน้อยกว่า 30–60%
+      เนื่องจากอาคาร ต้นไม้ และสัญญาณแทรก
+    </p>
+  </div>
+
+  <a class="back-link" href="/app">← กลับหน้าหลัก</a>
+</div>
+
+<script>
+function calcRange() {
+  const txPower_mW = parseFloat(document.getElementById('txPower').value) || 400;
+  const freq_MHz   = parseFloat(document.getElementById('freq').value)    || 5800;
+  const rxSens_dBm = parseFloat(document.getElementById('rxSens').value)  || -90;
+  const txGain_dBi = parseFloat(document.getElementById('txGain').value)  || 2;
+  const rxGain_dBi = parseFloat(document.getElementById('rxGain').value)  || 2;
+
+  const txPower_dBm = 10 * Math.log10(txPower_mW);
+  const linkBudget  = txPower_dBm + txGain_dBi + rxGain_dBi - rxSens_dBm;
+  const exponent    = (linkBudget - 20 * Math.log10(freq_MHz) - 32.44) / 20;
+  const range_km    = Math.pow(10, exponent);
+
+  const display = range_km >= 1
+    ? range_km.toFixed(2) + ' km'
+    : (range_km * 1000).toFixed(0) + ' m';
+
+  document.getElementById('rangeOut').innerText = display;
+  document.getElementById('result').style.display = 'block';
+}
+</script>
+</body>
+</html>
