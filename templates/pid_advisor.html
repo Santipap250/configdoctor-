@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PID Symptom Advisor — ConfigDoctor</title>
+<style>
+:root{--accent:#FF6B2B;--dark:#0F1117;--panel:#1A1D27;--border:#2E3348;--text:#E2E8F0;--muted:#8A94A6;--danger:#EF4444;--warning:#F59E0B;--ok:#22C55E;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark);color:var(--text);padding:2rem 1rem;}
+.wrap{max-width:900px;margin:0 auto;}
+h1{font-size:1.8rem;font-weight:700;color:var(--accent);margin-bottom:.3rem;}
+.subtitle{color:var(--muted);margin-bottom:1.8rem;font-size:.95rem;}
+h2{font-size:1.05rem;font-weight:600;color:#fff;margin:1.5rem 0 .7rem;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:1.25rem 1.5rem;margin:.8rem 0;}
+.symptom-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+@media(max-width:600px){.symptom-grid{grid-template-columns:1fr;}}
+.symptom-btn{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;cursor:pointer;text-align:left;color:var(--text);transition:.15s;font-size:.9rem;line-height:1.4;}
+.symptom-btn:hover{border-color:var(--accent);background:#12151f;}
+.symptom-btn.active{border-color:var(--accent);background:#1a1200;color:#fff;}
+.symptom-btn .cat{font-size:.72rem;color:var(--muted);display:block;margin-top:.2rem;}
+.result-section{margin-top:1.5rem;}
+.diag-box{background:#0d1117;border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:.8rem 0;}
+.cause-badge{display:inline-block;background:#451a0366;border:1px solid #7c2d12;color:#fdba74;padding:.2rem .7rem;border-radius:5px;font-size:.82rem;font-weight:600;margin:.4rem 0;}
+table{width:100%;border-collapse:collapse;margin:.6rem 0;}
+th{background:#1e2335;padding:.5rem .9rem;font-size:.82rem;text-align:left;color:var(--muted);}
+td{padding:.5rem .9rem;border-bottom:1px solid var(--border);font-size:.85rem;vertical-align:top;}
+td:first-child{font-family:'Courier New',monospace;color:#79c0ff;white-space:nowrap;}
+.dir-up{color:var(--ok);}
+.dir-down{color:var(--danger);}
+.dir-check{color:var(--warning);}
+.cli-box{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:1rem 1.2rem;font-family:'Courier New',monospace;font-size:.83rem;color:#79c0ff;white-space:pre-wrap;}
+.copy-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:.3rem .7rem;border-radius:5px;cursor:pointer;font-size:.8rem;}
+.copy-btn:hover{color:#fff;border-color:var(--accent);}
+.tip-item{padding:.3rem 0;color:var(--muted);font-size:.87rem;}
+.tip-item::before{content:"💡 ";color:var(--warning);}
+.hidden{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🩺 PID Symptom Advisor</h1>
+  <p class="subtitle">เลือกอาการที่พบขณะบิน — ระบบจะวิเคราะห์สาเหตุและแนะนำ CLI commands ที่ควรปรับ</p>
+
+  <div class="card">
+    <h2 style="margin-top:0">อาการที่พบคืออะไร?</h2>
+    <div class="symptom-grid" id="symptom-grid">
+      {% for s in symptoms %}
+      <button class="symptom-btn" onclick="showAdvice('{{ s.id }}')" id="btn-{{ s.id }}">
+        {{ s.label }}
+        <span class="cat">{{ s.category }}</span>
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Result placeholder (shown once user selects) -->
+  <div id="result-area" class="hidden">
+    <div class="card">
+      <h2 style="margin-top:0">🔍 การวินิจฉัย</h2>
+      <div class="diag-box" id="diag-text"></div>
+      <p style="margin:.4rem 0 .2rem;">สาเหตุหลัก: <span class="cause-badge" id="cause-text"></span></p>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0">🎛️ ค่าที่ควรปรับ</h2>
+      <table>
+        <tr><th>Parameter</th><th>ทิศทาง</th><th>ปริมาณ</th><th>เหตุผล</th></tr>
+        <tbody id="adj-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;">
+        <h2 style="margin:0">📋 CLI Template</h2>
+        <button class="copy-btn" onclick="copyCLI()">📋 Copy</button>
+      </div>
+      <p style="color:var(--muted);font-size:.82rem;margin-bottom:.6rem;">แทน {ค่าในวงเล็บ} ด้วยค่าปัจจุบันของคุณ (ดูจาก Betaflight → PID tab)</p>
+      <div class="cli-box" id="cli-area"></div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0">💡 Tips เพิ่มเติม</h2>
+      <div id="tips-area"></div>
+    </div>
+  </div>
+
+  <p style="margin-top:1.5rem;"><a href="/app" style="color:var(--accent)">← กลับหน้าวิเคราะห์หลัก</a></p>
+</div>
+
+<script>
+const data = {{ advice_json|safe }};
+
+function showAdvice(id) {
+  const s = data[id];
+  if (!s) return;
+
+  // Update buttons
+  document.querySelectorAll('.symptom-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + id).classList.add('active');
+
+  document.getElementById('diag-text').textContent = s.diagnosis;
+  document.getElementById('cause-text').textContent = s.primary_cause;
+
+  // Adjustments table
+  const tbody = document.getElementById('adj-tbody');
+  tbody.innerHTML = '';
+  s.adjustments.forEach(a => {
+    const dir = a.direction.includes('เพิ่ม') ? '<span class="dir-up">↑ เพิ่ม</span>'
+              : a.direction.includes('ลด') ? '<span class="dir-down">↓ ลด</span>'
+              : '<span class="dir-check">⚡ ' + a.direction + '</span>';
+    tbody.innerHTML += `<tr>
+      <td>${a.param}</td>
+      <td>${dir}</td>
+      <td>${a.amount}</td>
+      <td style="color:var(--muted)">${a.reason}</td>
+    </tr>`;
+  });
+
+  // CLI
+  document.getElementById('cli-area').textContent = s.cli_template.join('\n');
+
+  // Tips
+  const tipsEl = document.getElementById('tips-area');
+  tipsEl.innerHTML = s.tips.map(t => `<p class="tip-item">${t}</p>`).join('');
+
+  document.getElementById('result-area').classList.remove('hidden');
+  document.getElementById('result-area').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function copyCLI() {
+  navigator.clipboard.writeText(document.getElementById('cli-area').textContent);
+}
+</script>
+</body>
+</html>
