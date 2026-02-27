@@ -100,14 +100,14 @@ def evaluate_rules(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
         ml = float(motor_load)
     except Exception:
         ml = 0
-    if ml > 100:
+    if ml >= 6:  # motor_load max score from prop_logic is 6
         add("motor_overload", "danger",
-            f"โหลดมอเตอร์สูง ({ml}) — เสี่ยงมอเตอร์ร้อนหรือ ESC ลิมิต",
+            f"โหลดมอเตอร์สูงสุด ({ml}/6) — ใบพัดหนัก pitch สูง+4ใบ เสี่ยงมอเตอร์ร้อน",
             "ลดขนาด/pitch ของใบพัด หรือเลือกมอเตอร์ที่รองรับโหลดสูงขึ้น",
             ["prop_result.effect.motor_load"])
-    elif ml > 60:
+    elif ml >= 4:  # score 4-5 out of 6 = moderately loaded
         add("motor_heavy", "warning",
-            f"โหลดมอเตอร์ค่อนข้างสูง ({ml})",
+            f"โหลดมอเตอร์ค่อนข้างสูง ({ml}/6)",
             "ตรวจสอบอุณหภูมิหลังบิน และพิจารณาใบพัด/มอเตอร์ที่เหมาะสม",
             ["prop_result.effect.motor_load"])
 
