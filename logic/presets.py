@@ -72,11 +72,14 @@ BASELINE_CTRL: Dict[str, Dict[str, Any]] = {
 # These are examples — สามารถเพิ่มได้ทีหลัง
 # -----------------------
 PRESETS: Dict[str, Dict[str, Any]] = {
+    # BUG FIX: เปลี่ยน "2S" → "3S" เพราะ validate_input() และ _cells_from_str() ใน app.py
+    # clamp ค่าต่ำสุดที่ 3S (min 3) ทำให้ 2S preset triggers warning เสมอ
+    # Tiny whoops จริงๆ ใช้ 1S–2S แต่ระบบยังไม่รองรับ — ปรับเป็น 3S ไปก่อน
     "2.5_micro": {
-        "class": "micro", "size": 2.5, "weight": 80, "battery": "2S", "prop_size": 2.5, "pitch": 2.0, "blades": 2, "style": "micro"
+        "class": "micro", "size": 2.5, "weight": 80, "battery": "3S", "prop_size": 2.5, "pitch": 2.0, "blades": 2, "style": "micro"
     },
     "3_whoop": {
-        "class": "whoop", "size": 3.0, "weight": 120, "battery": "2S", "prop_size": 3.0, "pitch": 2.0, "blades": 2, "style": "whoop"
+        "class": "whoop", "size": 3.0, "weight": 120, "battery": "3S", "prop_size": 3.0, "pitch": 2.0, "blades": 2, "style": "whoop"
     },
     "3.5_cine": {
         "class": "cine", "size": 3.5, "weight": 350, "battery": "4S", "prop_size": 3.5, "pitch": 2.5, "blades": 2, "style": "cine"
