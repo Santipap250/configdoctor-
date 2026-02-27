@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rates Visualizer — ConfigDoctor</title>
+<style>
+:root{--accent:#FF6B2B;--dark:#0F1117;--panel:#1A1D27;--border:#2E3348;--text:#E2E8F0;--muted:#8A94A6;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark);color:var(--text);padding:2rem 1rem;}
+.wrap{max-width:960px;margin:0 auto;}
+h1{font-size:1.8rem;font-weight:700;color:var(--accent);margin-bottom:.3rem;}
+.subtitle{color:var(--muted);margin-bottom:1.5rem;font-size:.95rem;}
+h2{font-size:1rem;font-weight:600;color:#fff;margin:1.5rem 0 .6rem;}
+.layout{display:grid;grid-template-columns:300px 1fr;gap:1.5rem;align-items:start;}
+@media(max-width:760px){.layout{grid-template-columns:1fr;}}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:1.25rem;}
+.tabs{display:flex;gap:.5rem;margin-bottom:1rem;}
+.tab{background:#0d1117;border:1px solid var(--border);border-radius:6px;padding:.4rem .9rem;cursor:pointer;font-size:.85rem;color:var(--muted);transition:.15s;}
+.tab.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.ctrl-group{margin:.8rem 0;}
+label{display:block;font-size:.83rem;color:var(--muted);margin-bottom:.25rem;}
+input[type=range]{width:100%;accent-color:var(--accent);}
+.val{font-size:.9rem;color:var(--accent);font-weight:700;float:right;}
+canvas{width:100%;border-radius:8px;display:block;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-top:.8rem;}
+.stat{background:#0d1117;border:1px solid var(--border);border-radius:6px;padding:.5rem;text-align:center;}
+.stat-val{font-size:1.1rem;font-weight:700;color:var(--accent);}
+.stat-lbl{font-size:.72rem;color:var(--muted);}
+.cli-box{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:.8rem 1rem;font-family:'Courier New',monospace;font-size:.8rem;color:#79c0ff;white-space:pre;margin:.5rem 0;}
+.copy-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:.3rem .7rem;border-radius:5px;cursor:pointer;font-size:.8rem;}
+.copy-btn:hover{color:#fff;border-color:var(--accent);}
+.legend{display:flex;gap:1rem;flex-wrap:wrap;margin:.5rem 0;}
+.leg-item{display:flex;align-items:center;gap:.35rem;font-size:.82rem;color:var(--muted);}
+.leg-dot{width:14px;height:3px;border-radius:2px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📈 Rates Visualizer</h1>
+  <p class="subtitle">Visualize stick response curve สำหรับ Betaflight ACTUAL, RCRATE/SuperRate, หรือ KISS rates — ปรับ slider แล้วเห็นผลทันที</p>
+
+  <div class="layout">
+    <!-- Controls -->
+    <div>
+      <div class="card">
+        <div class="tabs">
+          <div class="tab active" onclick="setMode('actual')">ACTUAL</div>
+          <div class="tab" onclick="setMode('bf')">RC+Super</div>
+          <div class="tab" onclick="setMode('kiss')">KISS</div>
+        </div>
+
+        <!-- ACTUAL mode -->
+        <div id="ctrl-actual">
+          <div class="ctrl-group">
+            <label>RC Rate <span class="val" id="v-rc-rate">1.00</span></label>
+            <input type="range" id="rc-rate" min="0.01" max="2.55" step="0.01" value="1.00" oninput="update()">
+          </div>
+          <div class="ctrl-group">
+            <label>Super Rate <span class="val" id="v-super-rate">0.70</span></label>
+            <input type="range" id="super-rate" min="0.00" max="0.95" step="0.01" value="0.70" oninput="update()">
+          </div>
+          <div class="ctrl-group">
+            <label>Expo <span class="val" id="v-expo">0.00</span></label>
+            <input type="range" id="expo" min="0.00" max="1.00" step="0.01" value="0.00" oninput="update()">
+          </div>
+        </div>
+
+        <!-- BF Legacy mode -->
+        <div id="ctrl-bf" style="display:none">
+          <div class="ctrl-group">
+            <label>RC Rate (legacy) <span class="val" id="v-bf-rc">1.00</span></label>
+            <input type="range" id="bf-rc" min="0.01" max="2.55" step="0.01" value="1.00" oninput="update()">
+          </div>
+          <div class="ctrl-group">
+            <label>Super Rate <span class="val" id="v-bf-super">0.70</span></label>
+            <input type="range" id="bf-super" min="0.00" max="0.95" step="0.01" value="0.70" oninput="update()">
+          </div>
+          <div class="ctrl-group">
+            <label>RC Expo <span class="val" id="v-bf-expo">0.00</span></label>
+            <input type="range" id="bf-expo" min="0.00" max="1.00" step="0.01" value="0.00" oninput="update()">
+          </div>
+        </div>
+
+        <!-- KISS mode -->
+        <div id="ctrl-kiss" style="display:none">
+          <div class="ctrl-group">
+            <label>Rate <span class="val" id="v-kiss-rate">60</span> deg/s</label>
+            <input type="range" id="kiss-rate" min="10" max="200" step="1" value="60" oninput="update()">
+          </div>
+          <div class="ctrl-group">
+            <label>Acro+ <span class="val" id="v-kiss-acro">0.02</span></label>
+            <input type="range" id="kiss-acro" min="0.00" max="0.50" step="0.01" value="0.02" oninput="update()">
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat"><div class="stat-val" id="stat-center">—</div><div class="stat-lbl">Center (deg/s)</div></div>
+          <div class="stat"><div class="stat-val" id="stat-max">—</div><div class="stat-lbl">Max (deg/s)</div></div>
+          <div class="stat"><div class="stat-val" id="stat-half">—</div><div class="stat-lbl">50% stick</div></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:1rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;">
+          <span style="font-size:.9rem;font-weight:600;">CLI Commands</span>
+          <button class="copy-btn" onclick="copyCLI()">📋 Copy</button>
+        </div>
+        <div class="cli-box" id="cli-output">—</div>
+      </div>
+    </div>
+
+    <!-- Canvas -->
+    <div class="card">
+      <div class="legend">
+        <div class="leg-item"><div class="leg-dot" style="background:#FF6B2B;"></div>Current</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#3B82F6;"></div>Linear reference</div>
+      </div>
+      <canvas id="rateCanvas" width="600" height="480"></canvas>
+      <p style="color:var(--muted);font-size:.78rem;margin-top:.6rem;text-align:center;">แกน X = Stick position (0–100%) | แกน Y = Angular rate (deg/s)</p>
+    </div>
+  </div>
+
+  <p style="margin-top:1.5rem;"><a href="/app" style="color:var(--accent)">← กลับหน้าวิเคราะห์หลัก</a></p>
+</div>
+
+<script>
+let mode = 'actual';
+
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['actual','bf','kiss'][i] === m));
+  document.getElementById('ctrl-actual').style.display = m === 'actual' ? '' : 'none';
+  document.getElementById('ctrl-bf').style.display     = m === 'bf'     ? '' : 'none';
+  document.getElementById('ctrl-kiss').style.display   = m === 'kiss'   ? '' : 'none';
+  update();
+}
+
+// ── Rate calculation functions ──────────────────────────────────────────
+function actualRate(stick, rcRate, superRate, expo) {
+  // Betaflight ACTUAL rates
+  // stick: 0..1
+  const s = stick;
+  const expo_s = (expo > 0) ? (s * (1 - expo) + expo * Math.pow(s, 3)) : s;
+  const MAX_DEG = 1998.0;
+  const center = rcRate * 200;  // Center sensitivity (deg/s per full stick without superrate)
+  const sr = superRate;
+  // Betaflight ACTUAL formula
+  const angularRate = center * expo_s / (1 - sr * expo_s);
+  return Math.min(angularRate, MAX_DEG);
+}
+
+function bfRate(stick, rcRate, superRate, expo) {
+  // Legacy BF rate
+  const s = stick;
+  const expo_s = (expo > 0) ? (s * (1 - expo) + expo * Math.pow(s, 3)) : s;
+  const baseRate = (rcRate > 1.0) ? (rcRate - 1) + rcRate * rcRate : rcRate;
+  return Math.min(baseRate * expo_s * 500 / (1.0 - superRate * expo_s), 1998);
+}
+
+function kissRate(stick, rate, acroPlusFactor) {
+  const s = stick;
+  return rate * s + acroPlusFactor * Math.pow(s, 3) * 1998;
+}
+
+function getRate(stick) {
+  if (mode === 'actual') {
+    return actualRate(stick,
+      parseFloat(document.getElementById('rc-rate').value),
+      parseFloat(document.getElementById('super-rate').value),
+      parseFloat(document.getElementById('expo').value));
+  } else if (mode === 'bf') {
+    return bfRate(stick,
+      parseFloat(document.getElementById('bf-rc').value),
+      parseFloat(document.getElementById('bf-super').value),
+      parseFloat(document.getElementById('bf-expo').value));
+  } else {
+    return kissRate(stick,
+      parseFloat(document.getElementById('kiss-rate').value),
+      parseFloat(document.getElementById('kiss-acro').value));
+  }
+}
+
+function update() {
+  // Update value labels
+  const vals = {
+    'rc-rate':'v-rc-rate','super-rate':'v-super-rate','expo':'v-expo',
+    'bf-rc':'v-bf-rc','bf-super':'v-bf-super','bf-expo':'v-bf-expo',
+    'kiss-rate':'v-kiss-rate','kiss-acro':'v-kiss-acro'
+  };
+  for (const [inp, lbl] of Object.entries(vals)) {
+    const el = document.getElementById(inp);
+    if (el) document.getElementById(lbl).textContent = parseFloat(el.value).toFixed(2);
+  }
+  if (document.getElementById('kiss-rate')) {
+    document.getElementById('v-kiss-rate').textContent = document.getElementById('kiss-rate').value;
+  }
+
+  drawCurve();
+  updateStats();
+  updateCLI();
+}
+
+function drawCurve() {
+  const canvas = document.getElementById('rateCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const PAD = 50;
+  const maxRate = Math.ceil(getRate(1.0) / 100) * 100 || 800;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background
+  ctx.fillStyle = '#0d1117';
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid
+  ctx.strokeStyle = '#1E2538';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 10; i++) {
+    const x = PAD + (W - PAD * 2) * i / 10;
+    ctx.beginPath(); ctx.moveTo(x, PAD); ctx.lineTo(x, H - PAD); ctx.stroke();
+  }
+  for (let i = 0; i <= 8; i++) {
+    const y = PAD + (H - PAD * 2) * i / 8;
+    ctx.beginPath(); ctx.moveTo(PAD, y); ctx.lineTo(W - PAD, y); ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle = '#3B4260';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(PAD, PAD); ctx.lineTo(PAD, H - PAD);
+  ctx.moveTo(PAD, H - PAD); ctx.lineTo(W - PAD, H - PAD);
+  ctx.stroke();
+
+  // Labels
+  ctx.fillStyle = '#8A94A6';
+  ctx.font = '11px monospace';
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= 4; i++) {
+    const rate = maxRate * i / 4;
+    const y = H - PAD - (H - PAD * 2) * i / 4;
+    ctx.fillText(Math.round(rate), PAD - 6, y + 4);
+  }
+  ctx.textAlign = 'center';
+  for (let i = 0; i <= 5; i++) {
+    const pct = i * 20;
+    const x = PAD + (W - PAD * 2) * i / 5;
+    ctx.fillText(pct + '%', x, H - PAD + 15);
+  }
+
+  // Axis titles
+  ctx.save();
+  ctx.translate(14, H / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText('deg/s', 0, 0);
+  ctx.restore();
+  ctx.fillText('Stick %', W / 2, H - 8);
+
+  const toX = s => PAD + (W - PAD * 2) * s;
+  const toY = r => H - PAD - (H - PAD * 2) * Math.min(r, maxRate) / maxRate;
+
+  // Linear reference
+  ctx.strokeStyle = '#3B82F6';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.moveTo(toX(0), toY(0));
+  ctx.lineTo(toX(1), toY(getRate(1.0)));
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Rate curve
+  ctx.strokeStyle = '#FF6B2B';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  const steps = 200;
+  for (let i = 0; i <= steps; i++) {
+    const s = i / steps;
+    const r = getRate(s);
+    const x = toX(s), y = toY(r);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // 50% stick marker
+  const half_s = 0.5;
+  const half_r = getRate(half_s);
+  ctx.strokeStyle = '#666';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath();
+  ctx.moveTo(toX(half_s), H - PAD);
+  ctx.lineTo(toX(half_s), toY(half_r));
+  ctx.lineTo(PAD, toY(half_r));
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.fillStyle = '#FF6B2B';
+  ctx.beginPath();
+  ctx.arc(toX(half_s), toY(half_r), 5, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function updateStats() {
+  const center = getRate(0.02);
+  const max    = getRate(1.0);
+  const half   = getRate(0.5);
+  document.getElementById('stat-center').textContent = Math.round(center);
+  document.getElementById('stat-max').textContent    = Math.round(max);
+  document.getElementById('stat-half').textContent   = Math.round(half) + ' d/s';
+}
+
+function updateCLI() {
+  let lines = [];
+  if (mode === 'actual') {
+    const rc = parseFloat(document.getElementById('rc-rate').value).toFixed(2);
+    const sr = parseFloat(document.getElementById('super-rate').value).toFixed(2);
+    const ex = parseFloat(document.getElementById('expo').value).toFixed(2);
+    lines = [
+      '# Betaflight ACTUAL rates',
+      `set rates_type = ACTUAL`,
+      `set roll_rc_rate = ${Math.round(rc * 100)}`,
+      `set roll_super_rate = ${Math.round(sr * 100)}`,
+      `set roll_expo = ${Math.round(ex * 100)}`,
+      `set pitch_rc_rate = ${Math.round(rc * 100)}`,
+      `set pitch_super_rate = ${Math.round(sr * 100)}`,
+      `set pitch_expo = ${Math.round(ex * 100)}`,
+      'save',
+    ];
+  } else if (mode === 'bf') {
+    const rc = parseFloat(document.getElementById('bf-rc').value).toFixed(2);
+    const sr = parseFloat(document.getElementById('bf-super').value).toFixed(2);
+    const ex = parseFloat(document.getElementById('bf-expo').value).toFixed(2);
+    lines = [
+      '# Betaflight legacy rates',
+      `set rates_type = BETAFLIGHT`,
+      `set roll_rc_rate = ${Math.round(rc * 100)}`,
+      `set roll_super_rate = ${Math.round(sr * 100)}`,
+      `set roll_expo = ${Math.round(ex * 100)}`,
+      `set pitch_rc_rate = ${Math.round(rc * 100)}`,
+      `set pitch_super_rate = ${Math.round(sr * 100)}`,
+      `set pitch_expo = ${Math.round(ex * 100)}`,
+      'save',
+    ];
+  } else {
+    const r = document.getElementById('kiss-rate').value;
+    const a = parseFloat(document.getElementById('kiss-acro').value).toFixed(2);
+    lines = [
+      '# KISS rates',
+      `set rates_type = KISS`,
+      `set roll_rc_rate = ${r}`,
+      `set roll_super_rate = ${Math.round(a * 100)}`,
+      `set pitch_rc_rate = ${r}`,
+      `set pitch_super_rate = ${Math.round(a * 100)}`,
+      'save',
+    ];
+  }
+  document.getElementById('cli-output').textContent = lines.join('\n');
+}
+
+function copyCLI() {
+  navigator.clipboard.writeText(document.getElementById('cli-output').textContent);
+}
+
+update();
+</script>
+</body>
+</html>
