@@ -185,11 +185,13 @@ def analyze_drone(size, battery, style, prop_result, weight, detected_class=None
 
     # ── Filter: comprehensive output ───────────────────────────────────
     analysis["filter"] = {
-        # Legacy keys (template uses these)
-        "gyro_lpf2":   flt_raw.get("gyro_lpf1"),         # template calls this "Gyro LPF2"
-        "dterm_lpf1":  flt_raw.get("dterm_lpf1"),        # template "D-Term LPF"
-        "dyn_notch":   flt_raw.get("dyn_notch_count", 2),# template "Dyn Notch"
-        # Extended keys (for future template / API use)
+        # ชื่อ key ตรงกับค่าจริง (แก้ bug เดิมที่ใส่ LPF1 ไว้ใน key ชื่อ LPF2)
+        "gyro_lpf1":         flt_raw.get("gyro_lpf1"),
+        "gyro_lpf2":         flt_raw.get("gyro_lpf2"),
+        "dterm_lpf1":        flt_raw.get("dterm_lpf1"),
+        "dterm_lpf2":        flt_raw.get("dterm_lpf2"),
+        "dyn_notch":         flt_raw.get("dyn_notch_count", 2),
+        # Extended keys (backward compat + new)
         "gyro_lpf1_hz":      flt_raw.get("gyro_lpf1"),
         "gyro_lpf2_hz":      flt_raw.get("gyro_lpf2"),
         "dterm_lpf1_hz":     flt_raw.get("dterm_lpf1"),
@@ -583,6 +585,54 @@ def motor_prop():
 @app.route('/cli_surgeon')
 def cli_surgeon_page(): return render_template('cli_surgeon.html')
 
+# ── PID Symptom Advisor ───────────────────────────────────────────────────
+try:
+    from analyzer.symptom_advisor import get_all_symptoms, get_advice as _get_symptom_advice
+    SYMPTOM_ADVISOR_AVAILABLE = True
+except Exception as e:
+    SYMPTOM_ADVISOR_AVAILABLE = False
+    def get_all_symptoms(): return []
+    def _get_symptom_advice(sid): return {"error": "symptom_advisor not available"}
+    print("symptom_advisor import failed:", e)
+
+@app.route('/pid-advisor')
+def pid_advisor():
+    symptoms = get_all_symptoms()
+    return render_template('pid_advisor.html', symptoms=symptoms)
+
+@app.route('/api/symptom/<symptom_id>')
+def api_symptom(symptom_id):
+    advice = _get_symptom_advice(symptom_id)
+    return jsonify(advice)
+
+# ── RPM Filter Calculator ────────────────────────────────────────────────
+try:
+    from analyzer.rpm_filter_calc import calculate_rpm_filter
+    RPM_FILTER_AVAILABLE = True
+except Exception as e:
+    RPM_FILTER_AVAILABLE = False
+    def calculate_rpm_filter(kv, battery, prop_size=5.0): return {"error": "rpm_filter_calc not available"}
+    print("rpm_filter_calc import failed:", e)
+
+@app.route('/rpm-filter', methods=['GET', 'POST'])
+def rpm_filter():
+    result = None
+    if request.method == 'POST':
+        try:
+            kv        = int(request.form.get('motor_kv', 2400))
+            battery   = request.form.get('battery', '4S')
+            prop_size = float(request.form.get('prop_size', 5.0))
+            result    = calculate_rpm_filter(kv, battery, prop_size)
+        except Exception as e:
+            logger.exception("rpm_filter error")
+            result = {"error": str(e)}
+    return render_template('rpm_filter.html', result=result)
+
+# ── Rates Visualizer ──────────────────────────────────────────────────────
+@app.route('/rates-visualizer')
+def rates_visualizer():
+    return render_template('rates_visualizer.html')
+
 @app.route('/analyze_cli', methods=['POST'])
 def analyze_cli():
     try:
@@ -590,10 +640,35 @@ def analyze_cli():
         dump = data.get('dump', '')
         if not dump:
             return jsonify({"error": "no dump provided"}), 400
+        # Size limit
+        if len(dump.encode('utf-8')) > 512_000:
+            return jsonify({"error": "ไฟล์ใหญ่เกิน 512KB"}), 413
         result = cli_analyze_dump(dump)
+        # Enrich with firmware version detection
+        try:
+            from analyzer.cli_surgeon import detect_firmware_version
+            result['firmware'] = detect_firmware_version(dump)
+        except Exception:
+            pass
         return jsonify(result)
     except Exception as e:
         logger.exception("analyze_cli error")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/compare_cli', methods=['POST'])
+def compare_cli():
+    """Compare two CLI dumps and return diff."""
+    try:
+        data  = request.get_json(force=True)
+        dump_a = data.get('dump_a', '')
+        dump_b = data.get('dump_b', '')
+        if not dump_a or not dump_b:
+            return jsonify({"error": "ต้องการ dump_a และ dump_b"}), 400
+        from analyzer.cli_surgeon import compare_dumps
+        result = compare_dumps(dump_a, dump_b)
+        return jsonify(result)
+    except Exception as e:
+        logger.exception("compare_cli error")
         return jsonify({"error": str(e)}), 500
 
 # ── OSD Designer ──────────────────────────────────────────────────────────
