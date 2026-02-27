@@ -4,478 +4,379 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>The CLI Surgeon — ConfigDoctor</title>
-
-  <!-- Minimal, self-contained dark UI styles (ปรับได้ให้เข้ากับ site CSS ของตุ้ย) -->
-  <style>
-    :root{
-      --bg:#0b0c0d; --card:#0f1113; --muted:#9aa0a6;
-      --accent:#2dd4bf; --danger:#ff6b6b; --warn:#ffb86b; --info:#60a5fa;
-      --glass: rgba(255,255,255,0.03);
-      --radius:12px; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    }
-    html,body{height:100%; margin:0; background: linear-gradient(180deg,#070708 0%, #0b0c0d 100%); color:#e6eef3;}
-    .wrap{max-width:1100px; margin:28px auto; padding:20px; border-radius:16px; background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent); box-shadow: 0 6px 30px rgba(0,0,0,0.6);}
-    header{display:flex; gap:16px; align-items:center; margin-bottom:16px;}
-    .brand{display:flex; align-items:center; gap:12px;}
-    .logo{width:52px; height:52px; border-radius:10px; background:linear-gradient(135deg,var(--accent),#7dd3fc); display:flex; align-items:center; justify-content:center; font-weight:700; color:#04111a;}
-    h1{font-size:20px; margin:0;}
-    p.lead{margin:0; color:var(--muted); font-size:13px;}
-
-    .grid{display:grid; grid-template-columns: 1fr 420px; gap:18px; margin-top:18px;}
-    .panel{background:var(--card); padding:14px; border-radius:var(--radius); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);}
-    .dropzone{min-height:220px; border:1px dashed rgba(255,255,255,0.04); padding:10px; border-radius:10px; display:flex; flex-direction:column;}
-    textarea#dump{resize:vertical; width:100%; min-height:160px; background:transparent; border:0; color:inherit; outline:none; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; font-size:13px;}
-    .tools{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
-    button.btn{background:var(--glass); border:1px solid rgba(255,255,255,0.03); color:var(--accent); padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:600;}
-    button.ghost{background:transparent; color:var(--muted); border:1px solid rgba(255,255,255,0.02);}
-    .btn.danger{color:var(--danger); border-color: rgba(255,107,107,0.12);}
-    .small{padding:6px 10px; font-size:13px;}
-    .result{padding:12px; border-radius:10px; background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent); font-family: ui-monospace, monospace; font-size:13px; white-space:pre-wrap; color:#dbeafe;}
-    .summary{display:flex; gap:12px; align-items:center; flex-wrap:wrap;}
-    .badge{padding:6px 8px; border-radius:999px; font-weight:700; font-size:12px; color:#04111a;}
-    .badge.good{background:#86efac;}
-    .badge.info{background:var(--info); color:white;}
-    .badge.warn{background:var(--warn); color:#04111a;}
-    .badge.danger{background:var(--danger); color:white;}
-    .rules{margin-top:8px; display:flex; flex-direction:column; gap:8px;}
-    .rule{padding:10px; border-radius:8px; background: linear-gradient(90deg, rgba(255,255,255,0.01), transparent); display:flex; gap:10px; align-items:flex-start;}
-    .rule .left{width:8px; border-radius:6px; margin-top:4px;}
-    .rule .body{flex:1;}
-    .rule h4{margin:0; font-size:14px;}
-    .rule p{margin:4px 0 0 0; color:var(--muted); font-size:13px;}
-    .cmds{margin-top:10px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
-    .cli-box{background:#061018; border-radius:10px; padding:12px; border:1px solid rgba(255,255,255,0.02); font-family: ui-monospace, monospace;}
-    .cli-line{display:flex; gap:8px; align-items:center; justify-content:space-between;}
-    .copy{background:linear-gradient(90deg,#1f2937,#111827); padding:6px 8px; border-radius:8px; color:var(--muted); border:1px solid rgba(255,255,255,0.02); cursor:pointer; font-size:13px;}
-    .muted{color:var(--muted); font-size:13px;}
-    .footer{margin-top:16px; color:var(--muted); font-size:13px; display:flex; justify-content:space-between; gap:12px; align-items:center;}
-    @media (max-width:980px){
-      .grid{grid-template-columns:1fr; }
-      .panel{padding:12px;}
-    }
-  </style>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
-<body>
-  <div class="wrap">
-    <header>
-      <div class="brand">
-        <div class="logo">CS</div>
-        <div>
-          <h1>🩺 The CLI Surgeon</h1>
-          <p class="lead">วาง <code>diff all</code> หรือ <code>dump</code> จาก Betaflight → วิเคราะห์หา config ผิดปกติและสร้างคำสั่ง CLI แนะนำ</p>
+<body class="cs-body">
+
+  <main class="cs-wrap">
+    <header class="cs-header">
+      <div class="cs-brand">
+        <div class="cs-logo">CS</div>
+        <div class="cs-title-block">
+          <h1 class="cs-title">🩺 The CLI Surgeon</h1>
+          <p class="cs-lead">วาง <code>diff all</code> หรือ <code>dump</code> จาก Betaflight → วิเคราะห์หา config ผิดปกติและสร้างคำสั่ง CLI แนะนำ</p>
         </div>
       </div>
-      <div style="margin-left:auto; text-align:right;">
-        <div class="muted">ConfigDoctor · Diagnostic Tool</div>
-        <div class="muted" style="margin-top:6px;">มีโหมด offline หากเซิร์ฟเวอร์ไม่ตอบสนอง</div>
+
+      <div class="cs-meta">
+        <div class="cs-sub muted">ConfigDoctor · Diagnostic Tool</div>
+        <div class="cs-sub muted">มีโหมด offline หากเซิร์ฟเวอร์ไม่ตอบสนอง</div>
       </div>
     </header>
 
-    <div class="grid">
-      <!-- Left: input + controls -->
-      <section class="panel">
-        <div style="display:flex; gap:12px; align-items:center; justify-content:space-between;">
-          <div class="summary">
-            <div class="badge info">ANALYZE</div>
-            <div class="muted">Paste / Drop / Upload your CLI dump</div>
+    <section class="cs-grid">
+      <!-- Left column: input -->
+      <section class="cs-panel cs-input-panel">
+        <div class="cs-panel-top">
+          <div class="cs-summary">
+            <span class="cs-badge cs-badge-info">ANALYZE</span>
+            <span class="muted">Paste / Drop / Upload your CLI dump</span>
           </div>
-          <div>
-            <button class="btn small" id="sampleBtn">ตัวอย่าง</button>
-            <button class="btn small ghost" id="clearBtn">ล้าง</button>
+
+          <div class="cs-panel-actions">
+            <button id="sampleBtn" class="cs-btn cs-btn-primary cs-btn-sm">ตัวอย่าง</button>
+            <button id="clearBtn" class="cs-btn cs-btn-ghost cs-btn-sm">ล้าง</button>
           </div>
         </div>
 
-        <div class="dropzone" id="dropzone" style="margin-top:12px;">
-          <textarea id="dump" placeholder="วาง diff all / dump ที่นี่ หรือลากไฟล์มาวาง..." aria-label="CLI dump"></textarea>
-          <div class="tools">
-            <button class="btn" id="analyzeBtn">🔎 Analyze</button>
-            <button class="btn ghost small" id="analyzeLocalBtn">🖥️ Analyze (local fallback)</button>
-            <label class="btn ghost small" style="display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
+        <div id="dropzone" class="cs-dropzone" aria-label="CLI dump dropzone">
+          <textarea id="dump" class="cs-textarea" placeholder="วาง diff all / dump ที่นี่..."></textarea>
+
+          <div class="cs-tools">
+            <button id="analyzeBtn" class="cs-btn cs-btn-primary">🔎 Analyze</button>
+            <button id="analyzeLocalBtn" class="cs-btn cs-btn-ghost">🖥️ Analyze (local)</button>
+
+            <label class="cs-upload cs-btn cs-btn-ghost">
               📁 Upload
-              <input type="file" id="fileInput" accept=".txt,.log" style="display:none;">
+              <input id="fileInput" type="file" accept=".txt,.log" class="cs-file-input">
             </label>
-            <button class="btn small" id="downloadBtn">⬇️ Download report</button>
+
+            <button id="downloadBtn" class="cs-btn cs-btn-ghost">⬇️ Download report</button>
           </div>
-          <div style="margin-top:8px; color:var(--muted); font-size:13px;">
-            เคล็ดลับ: ใส่ค่าจาก Betaflight CLI (diff all) หรือไฟล์ dump ทั้งหมดเพื่อการวิเคราะห์ที่ดีที่สุด
-          </div>
+
+          <div class="cs-hint muted">เคล็ดลับ: ใส่ค่าจาก Betaflight CLI (diff all) หรือไฟล์ dump ทั้งหมดเพื่อการวิเคราะห์ที่ดีที่สุด</div>
         </div>
 
-        <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
-          <div class="muted">Server:</div>
-          <div id="serverStatus" class="badge" style="background:rgba(255,255,255,0.03); color:var(--muted); font-weight:600; padding:6px 8px; border-radius:8px;">ตรวจสอบ...</div>
+        <div class="cs-server-status">
+          <span class="muted">Server:</span>
+          <span id="serverStatus" class="cs-badge cs-badge-muted">ตรวจสอบ...</span>
         </div>
       </section>
 
-      <!-- Right: results -->
-      <aside class="panel">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
+      <!-- Right column: result -->
+      <aside class="cs-panel cs-result-panel">
+        <div class="cs-result-header">
           <div>
             <div class="muted">ผลการวิเคราะห์</div>
-            <div id="summaryText" style="font-weight:700; margin-top:6px;">ยังไม่ได้วิเคราะห์</div>
+            <div id="summaryText" class="cs-summary-text">ยังไม่ได้วิเคราะห์</div>
           </div>
-          <div style="text-align:right;">
-            <div id="severitySummary" style="display:flex; gap:6px; align-items:center;">
-              <div class="badge good" id="okBadge" style="display:none;">OK</div>
-              <div class="badge warn" id="warnBadge" style="display:none;">WARN</div>
-              <div class="badge danger" id="critBadge" style="display:none;">CRIT</div>
-            </div>
+
+          <div class="cs-severity">
+            <span id="okBadge" class="cs-badge cs-badge-good" hidden>OK</span>
+            <span id="warnBadge" class="cs-badge cs-badge-warn" hidden>WARN</span>
+            <span id="critBadge" class="cs-badge cs-badge-danger" hidden>CRIT</span>
           </div>
         </div>
 
-        <div id="rulesArea" class="rules" style="margin-top:12px;">
-          <!-- rules injected here -->
+        <div id="rulesArea" class="cs-rules">
+          <div class="muted">ยังไม่มีการวิเคราะห์ — กด Analyze เพื่อเริ่ม</div>
         </div>
 
-        <div style="margin-top:12px;">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="cs-cli-section">
+          <div class="cs-cli-header">
             <div class="muted">คำสั่ง CLI ที่แนะนำ</div>
-            <div>
-              <button class="copy" id="copyAllBtn">Copy all</button>
-            </div>
+            <button id="copyAllBtn" class="cs-copy-btn">Copy all</button>
           </div>
 
-          <div class="cli-box" id="cliBox" style="margin-top:8px; min-height:80px;">
-            <div id="cliLines" style="display:flex; flex-direction:column; gap:6px;">
+          <div id="cliBox" class="cs-cli-box">
+            <div id="cliLines" class="cs-cli-lines">
               <div class="muted">ยังไม่มีคำสั่งแนะนำ — ทำการวิเคราะห์ก่อน</div>
             </div>
           </div>
         </div>
 
-        <div style="margin-top:12px;">
+        <div class="cs-raw">
           <div class="muted">ค่าที่อ่านได้ (raw)</div>
-          <pre id="rawParams" class="result" style="height:120px; overflow:auto; margin-top:8px;">ยังไม่มีข้อมูล</pre>
+          <pre id="rawParams" class="cs-raw-pre muted">ยังไม่มีข้อมูล</pre>
         </div>
 
-        <div class="footer">
+        <footer class="cs-footer muted">
           <div>เวอร์ชัน: 1.0 · The CLI Surgeon</div>
-          <div class="muted">หากต้องการฟีเจอร์เพิ่ม บอกผมได้เลย</div>
-        </div>
+          <div>หากต้องการฟีเจอร์เพิ่ม บอกผมได้เลย</div>
+        </footer>
       </aside>
-    </div>
-  </div>
+    </section>
+  </main>
 
-<script>
-/*
-  client-side logic:
-  - fetch server /analyze_cli if available
-  - fallback to local basic analyzer if server not reachable
-  - pretty render rules, severity badges, CLI suggestions
-  - drag & drop / file upload support, copy/download
-*/
+  <script>
+  /* ========== Client logic (no inline styling dependence) ========== */
+  const serverStatusEl = document.getElementById('serverStatus');
+  const dumpEl = document.getElementById('dump');
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const analyzeLocalBtn = document.getElementById('analyzeLocalBtn');
+  const rulesArea = document.getElementById('rulesArea');
+  const cliLines = document.getElementById('cliLines');
+  const rawParams = document.getElementById('rawParams');
+  const summaryText = document.getElementById('summaryText');
+  const copyAllBtn = document.getElementById('copyAllBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const sampleBtn = document.getElementById('sampleBtn');
+  const fileInput = document.getElementById('fileInput');
+  const clearBtn = document.getElementById('clearBtn');
 
-const serverStatusEl = document.getElementById('serverStatus');
-const dumpEl = document.getElementById('dump');
-const analyzeBtn = document.getElementById('analyzeBtn');
-const analyzeLocalBtn = document.getElementById('analyzeLocalBtn');
-const rulesArea = document.getElementById('rulesArea');
-const cliLines = document.getElementById('cliLines');
-const rawParams = document.getElementById('rawParams');
-const summaryText = document.getElementById('summaryText');
-const copyAllBtn = document.getElementById('copyAllBtn');
-const downloadBtn = document.getElementById('downloadBtn');
-const sampleBtn = document.getElementById('sampleBtn');
-const fileInput = document.getElementById('fileInput');
-const clearBtn = document.getElementById('clearBtn');
+  let lastResult = null;
 
-let lastResult = null;
-
-// Check server availability
-async function checkServer(){
-  try{
-    const r = await fetch('/analyze_cli', {method:'OPTIONS'});
-    if (r.ok || r.status===200 || r.status===204){
+  async function checkServer(){
+    try {
+      const r = await fetch('/analyze_cli', { method: 'OPTIONS' });
       serverStatusEl.textContent = 'Online';
-      serverStatusEl.style.background = 'var(--accent)';
-      serverStatusEl.style.color = '#04111a';
+      serverStatusEl.dataset.status = 'online';
       return true;
+    } catch(e){
+      serverStatusEl.textContent = 'Offline (local)';
+      serverStatusEl.dataset.status = 'offline';
+      return false;
     }
-    // some servers may not support OPTIONS — try a lightweight POST
-    serverStatusEl.textContent = 'Online';
-    serverStatusEl.style.background = 'var(--accent)';
-    serverStatusEl.style.color = '#04111a';
-    return true;
-  }catch(e){
-    serverStatusEl.textContent = 'Offline (local fallback)';
-    serverStatusEl.style.background = 'transparent';
-    serverStatusEl.style.color = 'var(--muted)';
-    return false;
   }
-}
-checkServer();
+  checkServer();
 
-// basic local analyzer (JS) — conservative checks, similar to server rules
-function parseDumpToParams(text){
-  const params = {};
-  const lines = text.split(/\r?\n/);
-  for (let raw of lines){
-    let l = raw.trim();
-    if (!l) continue;
-    // match "set name = value" or "name = value"
-    const m = l.match(/^(?:set\s+)?([a-z0-9_\-]+)\s*=\s*(.+)$/i);
-    if (m){
-      const key = m[1].toLowerCase();
-      let val = m[2].replace(/\s+#.*$/,'').trim();
-      params[key]=val;
-      continue;
+  function parseDumpToParams(text){
+    const params = {};
+    const lines = text.split(/\r?\n/);
+    for (let raw of lines){
+      let l = raw.trim();
+      if (!l) continue;
+      const m = l.match(/^(?:set\s+)?([a-z0-9_\-]+)\s*=\s*(.+)$/i);
+      if (m){
+        const key = m[1].toLowerCase();
+        const val = m[2].replace(/\s+#.*$/,'').trim();
+        params[key] = val;
+      }
     }
-    // some CLI outputs are "pid_p = 50" etc captured above
+    return params;
   }
-  return params;
-}
 
-function localAnalyze(params){
-  const rules = [];
-  // min_throttle / mincommand
-  const minKeys = ['min_throttle','mincommand','min_throttle_percent'];
-  for (let k of minKeys){
-    if (params[k]){
-      const v = parseFloat(params[k]);
-      if (!isNaN(v)){
-        if (v < 1000){
-          rules.push({id:'min_throttle_low', level:'warning', msg:`min_throttle ต่ำ (${v}) — อาจเกิด motor stutter/idle`, suggestion:'ลองเพิ่ม min_throttle เป็น 1000-1020 และทดสอบ hover'});
-        } else if (v > 1100){
-          rules.push({id:'min_throttle_high', level:'info', msg:`min_throttle สูง (${v})`, suggestion:'ถ้า throttle deadband หรือ response แย่ให้ลดค่าลง'});
+  function localAnalyze(params){
+    const rules = [];
+    const minKeys = ['min_throttle','mincommand','min_throttle_percent'];
+    for (let k of minKeys){
+      if (params[k]){
+        const v = parseFloat(params[k]);
+        if (!isNaN(v)){
+          if (v < 1000){
+            rules.push({id:'min_throttle_low', level:'warning', msg:`min_throttle ต่ำ (${v}) — อาจเกิด motor stutter/idle`, suggestion:'ลองตั้งค่า min_throttle เป็น 1000-1020 แล้วทดสอบ hover'});
+          } else if (v > 1100){
+            rules.push({id:'min_throttle_high', level:'info', msg:`min_throttle สูง (${v})`, suggestion:'พิจารณาลดค่าเพื่อ response ที่ดีขึ้น'});
+          }
         }
       }
     }
-  }
 
-  // failsafe detection
-  const lowerKeys = Object.keys(params).join(' ');
-  if (!/failsafe|failsafe_delay|failsafe_off/i.test(lowerKeys)){
-    rules.push({id:'no_failsafe', level:'warning', msg:'ไม่พบการตั้งค่า failsafe', suggestion:'ตั้ง failsafe action (land/drop) และ delay ตามคู่มือ'});
-  }
-
-  // looptime
-  if (params['looptime']){
-    const lt = parseInt(params['looptime']);
-    if (!isNaN(lt)){
-      if (lt < 1000) rules.push({id:'looptime_low', level:'warning', msg:`looptime ต่ำ (${lt} µs)`, suggestion:'ตรวจสอบ ESC/CPU compatibility'});
-      if (lt > 4000) rules.push({id:'looptime_high', level:'warning', msg:`looptime สูง (${lt} µs)`, suggestion:'ลด looptime เพื่อ latency ต่ำลง ถ้าฮาร์ดแวร์รองรับ'});
+    const joined = Object.keys(params).join(' ');
+    if (!/failsafe|failsafe_delay|failsafe_off/i.test(joined)){
+      rules.push({id:'no_failsafe', level:'warning', msg:'ไม่พบการตั้งค่า failsafe', suggestion:'ตั้ง failsafe action เช่น land หรือ drop'});
     }
-  }
 
-  // PID extremes (check some common keys)
-  ['p_roll','p_pitch','p_yaw','pid_p'].forEach(k=>{
-    if (params[k]){
-      const v = parseFloat(params[k]);
-      if (!isNaN(v) && v > 80){
-        rules.push({id:'pid_high_'+k, level:'critical', msg:`${k} สูงมาก (${v})`, suggestion:'ลด P ลงหรือตรวจสอบว่าค่าถูก import ถูกต้อง'});
+    if (params['looptime']){
+      const lt = parseInt(params['looptime']);
+      if (!isNaN(lt)){
+        if (lt < 1000) rules.push({id:'looptime_low', level:'warning', msg:`looptime ต่ำ (${lt} µs)`, suggestion:'ตรวจสอบ ESC/CPU compatibility'});
+        if (lt > 4000) rules.push({id:'looptime_high', level:'warning', msg:`looptime สูง (${lt} µs)`, suggestion:'ลด looptime หากฮาร์ดแวร์รองรับ'});
       }
     }
-  });
 
-  return rules;
-}
+    ['p_roll','p_pitch','p_yaw','pid_p'].forEach(k=>{
+      if (params[k]){
+        const v = parseFloat(params[k]);
+        if (!isNaN(v) && v > 80){
+          rules.push({id:'pid_high_'+k, level:'critical', msg:`${k} สูงมาก (${v})`, suggestion:'ลด P ลงหรือตรวจสอบการ import ค่า'});
+        }
+      }
+    });
 
-function suggestCliFixes(rules, params){
-  const fixes = [];
-  for (let r of rules){
-    if (r.id==='min_throttle_low'){
-      fixes.push('set min_throttle = 1000');
-    }
-    if (r.id.startsWith('pid_high_')){
-      // try reduce by 20%
-      const key = r.id.replace('pid_high_','');
-      const cur = parseFloat(params[key]||params['p_'+key]||0) || NaN;
-      if (!isNaN(cur) && cur>0){
-        const newv = Math.round(cur * 0.8 * 1000)/1000;
-        fixes.push(`set ${key} = ${newv}`);
+    return rules;
+  }
+
+  function suggestCliFixes(rules, params){
+    const fixes = [];
+    for (let r of rules){
+      if (r.id === 'min_throttle_low'){
+        fixes.push('set min_throttle = 1000');
+      }
+      if (r.id.startsWith('pid_high_')){
+        const key = r.id.replace('pid_high_','');
+        const cur = parseFloat(params[key] || params['p_'+key] || 0);
+        if (!isNaN(cur) && cur > 0){
+          const newv = Math.round(cur * 0.8 * 1000) / 1000;
+          fixes.push(`set ${key} = ${newv}`);
+        }
+      }
+      if (r.id === 'no_failsafe'){
+        fixes.push('# Example failsafe settings:');
+        fixes.push('set failsafe_delay = 10');
+        fixes.push('set failsafe_off_delay = 60');
+        fixes.push('set failsafe_throttle = 1000');
       }
     }
-    if (r.id==='no_failsafe'){
-      fixes.push('# Review failsafe settings (example):');
-      fixes.push('set failsafe_delay = 10');
-      fixes.push('set failsafe_off_delay = 60');
-      fixes.push('set failsafe_throttle = 1000');
+    if (fixes.length) fixes.push('save');
+    return fixes;
+  }
+
+  function renderRules(rules){
+    rulesArea.innerHTML = '';
+    if (!rules.length){
+      const el = document.createElement('div');
+      el.className = 'muted';
+      el.textContent = '✅ ไม่พบปัญหาใหญ่จากการสแกนเบื้องต้น';
+      rulesArea.appendChild(el);
+      return;
     }
+    rules.forEach(r=>{
+      const w = document.createElement('div');
+      w.className = 'cs-rule';
+      const left = document.createElement('div');
+      left.className = 'cs-rule-left';
+      left.dataset.level = r.level;
+      const body = document.createElement('div');
+      body.className = 'cs-rule-body';
+      const h = document.createElement('h4');
+      h.className = 'cs-rule-title';
+      h.textContent = `[${r.level.toUpperCase()}] ${r.msg}`;
+      const p = document.createElement('p');
+      p.className = 'muted';
+      p.textContent = r.suggestion;
+      body.appendChild(h); body.appendChild(p);
+      w.appendChild(left); w.appendChild(body);
+      rulesArea.appendChild(w);
+    });
   }
-  // always add save
-  if (fixes.length) fixes.push('save');
-  return fixes;
-}
 
-// render helpers
-function renderRules(rules){
-  rulesArea.innerHTML = '';
-  if (!rules.length){
-    const el = document.createElement('div');
-    el.className='muted';
-    el.textContent = '✅ ไม่พบปัญหาใหญ่จากการสแกนเบื้องต้น';
-    rulesArea.appendChild(el);
-    return;
+  function renderCli(fixes){
+    cliLines.innerHTML = '';
+    if (!fixes || fixes.length === 0){
+      cliLines.innerHTML = '<div class="muted">ยังไม่มีคำสั่งแนะนำ</div>';
+      return;
+    }
+    fixes.forEach((c)=>{
+      const row = document.createElement('div');
+      row.className = 'cs-cli-line';
+      const txt = document.createElement('div');
+      txt.className = 'cs-cli-text';
+      txt.textContent = c;
+      const cp = document.createElement('button');
+      cp.className = 'cs-copy-btn';
+      cp.textContent = 'Copy';
+      cp.onclick = ()=>{ navigator.clipboard.writeText(c); cp.textContent='Copied'; setTimeout(()=>cp.textContent='Copy',1100); };
+      row.appendChild(txt);
+      row.appendChild(cp);
+      cliLines.appendChild(row);
+    });
   }
-  rules.forEach(r=>{
-    const wrapper = document.createElement('div');
-    wrapper.className='rule';
-    const left = document.createElement('div');
-    left.className='left';
-    left.style.background = (r.level==='critical'?'var(--danger)':(r.level==='warning'?'var(--warn)':'var(--info)'));
-    const body = document.createElement('div');
-    body.className='body';
-    const h = document.createElement('h4');
-    h.textContent = `[${r.level.toUpperCase()}] ${r.msg}`;
-    const p = document.createElement('p');
-    p.textContent = r.suggestion;
-    body.appendChild(h); body.appendChild(p);
-    wrapper.appendChild(left); wrapper.appendChild(body);
-    rulesArea.appendChild(wrapper);
-  });
-}
 
-// render cli suggestions
-function renderCli(fixes){
-  cliLines.innerHTML = '';
-  if (!fixes || fixes.length===0){
-    cliLines.innerHTML = '<div class="muted">ยังไม่มีคำสั่งแนะนำ</div>';
-    return;
+  function renderRawParams(params){
+    rawParams.textContent = JSON.stringify(params, null, 2);
   }
-  fixes.forEach((c, idx)=>{
-    const row = document.createElement('div');
-    row.className='cli-line';
-    const left = document.createElement('div');
-    left.style.flex='1';
-    left.textContent = c;
-    const copyBtn = document.createElement('button');
-    copyBtn.className='copy';
-    copyBtn.textContent = 'Copy';
-    copyBtn.onclick = ()=>{ navigator.clipboard.writeText(c); copyBtn.textContent='Copied'; setTimeout(()=>copyBtn.textContent='Copy',1200); };
-    row.appendChild(left);
-    row.appendChild(copyBtn);
-    cliLines.appendChild(row);
-  });
-}
 
-// fill raw params
-function renderRawParams(params){
-  const pretty = JSON.stringify(params, null, 2);
-  rawParams.textContent = pretty || 'ไม่มีพารามิเตอร์ที่อ่านได้';
-}
+  async function analyzeFlow(useLocal=false){
+    const txt = dumpEl.value.trim();
+    if (!txt){ alert('กรุณาวาง diff all / dump ก่อน'); return; }
+    summaryText.textContent = 'กำลังวิเคราะห์...';
+    rulesArea.innerHTML = '';
+    cliLines.innerHTML = '<div class="muted">รอผล...</div>';
+    rawParams.textContent = 'อ่านพารามิเตอร์...';
 
-// main analyze flow: try server, fallback to local
-async function analyzeFlow(useLocal=false){
-  const txt = dumpEl.value.trim();
-  if (!txt){ alert('กรุณาวาง diff all / dump ก่อน'); return; }
-  summaryText.textContent = 'กำลังวิเคราะห์...';
-  rulesArea.innerHTML = '';
-  cliLines.innerHTML = '<div class="muted">รอผล...</div>';
-  rawParams.textContent = 'อ่านพารามิเตอร์...';
-
-  // try server if not forcing local
-  if (!useLocal){
-    try{
-      const res = await fetch('/analyze_cli', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({dump: txt})
-      });
-      if (res.ok){
-        const j = await res.json();
-        applyResult(j);
-        return;
-      } else {
-        // fallthrough to local
-        console.warn('server analyze failed, status', res.status);
+    if (!useLocal){
+      try {
+        const res = await fetch('/analyze_cli', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({dump: txt})
+        });
+        if (res.ok){
+          const j = await res.json();
+          applyResult(j);
+          return;
+        }
+      } catch(e){
+        console.warn('server analyze failed', e);
       }
-    }catch(e){
-      console.warn('server analyze error', e);
     }
+
+    const params = parseDumpToParams(txt);
+    const rules = localAnalyze(params);
+    const fixes = suggestCliFixes(rules, params);
+    const out = { summary: `พารามิเตอร์ที่อ่านได้: ${Object.keys(params).length}`, rules, fix_commands: fixes, params };
+    applyResult(out);
   }
 
-  // local fallback
-  const params = parseDumpToParams(txt);
-  const rules = localAnalyze(params);
-  const fixes = suggestCliFixes(rules, params);
-  const out = {summary:`พารามิเตอร์ที่อ่านได้: ${Object.keys(params).length}`, rules, fix_commands: fixes, params};
-  applyResult(out);
-}
-
-function applyResult(j){
-  lastResult = j;
-  // summary
-  summaryText.textContent = j.summary || 'วิเคราะห์แล้ว';
-  // rules normalization (server may return different keys)
-  let rules = j.rules || j.rules || [];
-  // accept if server returns objects with msg & suggestion
-  if (rules && rules.length && typeof rules[0] === 'string'){
-    rules = rules.map((s,i)=>({id:'r'+i, level:'info', msg:s, suggestion:''}));
+  function applyResult(j){
+    lastResult = j;
+    summaryText.textContent = j.summary || 'วิเคราะห์แล้ว';
+    let rules = j.rules || [];
+    renderRules(rules);
+    const fixes = j.fix_commands || j.fixCommands || j.fix_commands || j.fix_commands || [];
+    renderCli(fixes);
+    renderRawParams(j.params || {});
+    updateSeverityBadge(rules);
   }
-  renderRules(rules);
-  // cli fixes
-  const fixes = j.fix_commands || j.fix_commands || j.fix_commands || j.fixCommands || j.fix_commands || [];
-  renderCli(fixes);
-  // raw params
-  renderRawParams(j.params || {});
-  updateSeverityBadge(rules);
-}
 
-function updateSeverityBadge(rules){
-  const ok = document.getElementById('okBadge');
-  const warn = document.getElementById('warnBadge');
-  const crit = document.getElementById('critBadge');
-  ok.style.display='none'; warn.style.display='none'; crit.style.display='none';
-  if (!rules || rules.length===0){ ok.style.display='inline-block'; return; }
-  const lv = rules.map(r=>r.level);
-  if (lv.includes('critical') || lv.includes('danger')) crit.style.display='inline-block';
-  if (lv.includes('warning')) warn.style.display='inline-block';
-  if (!lv.includes('warning') && !lv.includes('critical') && lv.includes('info')) ok.style.display='inline-block';
-}
+  function updateSeverityBadge(rules){
+    const ok = document.getElementById('okBadge');
+    const warn = document.getElementById('warnBadge');
+    const crit = document.getElementById('critBadge');
+    ok.hidden = warn.hidden = crit.hidden = true;
+    if (!rules || !rules.length) { ok.hidden = false; return; }
+    const lv = rules.map(r => r.level);
+    if (lv.includes('critical') || lv.includes('danger')) crit.hidden = false;
+    if (lv.includes('warning')) warn.hidden = false;
+    if (!lv.includes('warning') && !lv.includes('critical')) ok.hidden = false;
+  }
 
-// events
-analyzeBtn.onclick = ()=>{ analyzeFlow(false); };
-analyzeLocalBtn.onclick = ()=>{ analyzeFlow(true); };
-copyAllBtn.onclick = ()=>{
-  if (!lastResult || !lastResult.fix_commands || lastResult.fix_commands.length===0){ alert('ไม่มีคำสั่งให้คัดลอก'); return;}
-  const txt = lastResult.fix_commands.join('\n');
-  navigator.clipboard.writeText(txt).then(()=>{ copyAllBtn.textContent='Copied'; setTimeout(()=>copyAllBtn.textContent='Copy all',1200); });
-};
-downloadBtn.onclick = ()=>{
-  if (!lastResult){ alert('ยังไม่มีรายงาน'); return; }
-  const blob = new Blob([JSON.stringify(lastResult, null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'cli_surgeon_report.json';
-  a.click(); URL.revokeObjectURL(url);
-};
-sampleBtn.onclick = ()=>{
-  const sample = `# sample diff all
-set min_throttle = 980
-set looptime = 500
-set p_roll = 95
-# end`;
-  dumpEl.value = sample;
-};
-fileInput.onchange = (ev)=>{
-  const f = ev.target.files[0];
-  if (!f) return;
-  const reader = new FileReader();
-  reader.onload = ()=>{ dumpEl.value = reader.result; };
-  reader.readAsText(f);
-};
-clearBtn.onclick = ()=>{ dumpEl.value=''; rulesArea.innerHTML=''; cliLines.innerHTML='<div class="muted">ยังไม่มีคำสั่งแนะนำ</div>'; rawParams.textContent='ยังไม่มีข้อมูล'; summaryText.textContent='ยังไม่ได้วิเคราะห์'; lastResult=null; };
+  analyzeBtn.onclick = ()=> analyzeFlow(false);
+  analyzeLocalBtn.onclick = ()=> analyzeFlow(true);
 
-// drag & drop
-const dz = document.getElementById('dropzone');
-dz.addEventListener('dragover', e=>{ e.preventDefault(); dz.style.borderColor='rgba(255,255,255,0.06)'; });
-dz.addEventListener('dragleave', e=>{ dz.style.borderColor='rgba(255,255,255,0.04)'; });
-dz.addEventListener('drop', e=>{
-  e.preventDefault(); dz.style.borderColor='rgba(255,255,255,0.04)';
-  const f = e.dataTransfer.files && e.dataTransfer.files[0];
-  if (f){
+  copyAllBtn.onclick = ()=>{
+    if (!lastResult || !lastResult.fix_commands || lastResult.fix_commands.length === 0){ alert('ไม่มีคำสั่งให้คัดลอก'); return; }
+    const txt = lastResult.fix_commands.join('\n');
+    navigator.clipboard.writeText(txt).then(()=>{ copyAllBtn.textContent='Copied'; setTimeout(()=>copyAllBtn.textContent='Copy all',1200); });
+  };
+
+  downloadBtn.onclick = ()=>{
+    if (!lastResult){ alert('ยังไม่มีรายงาน'); return; }
+    const blob = new Blob([JSON.stringify(lastResult, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'cli_surgeon_report.json'; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  sampleBtn.onclick = ()=>{
+    const sample = `# sample diff all\nset min_throttle = 980\nset looptime = 500\nset p_roll = 95\n# end`;
+    dumpEl.value = sample;
+  };
+
+  fileInput.onchange = (ev)=>{
+    const f = ev.target.files[0];
+    if (!f) return;
     const r = new FileReader();
     r.onload = ()=> dumpEl.value = r.result;
     r.readAsText(f);
-  } else {
-    // maybe text dropped
-    const txt = e.dataTransfer.getData('text');
-    if (txt) dumpEl.value = txt;
-  }
-});
+  };
 
-// initial server check and set placeholder if needed
-(async ()=>{ const ok = await checkServer(); if (!ok) serverStatusEl.textContent='Offline (local fallback)'; })();
+  clearBtn.onclick = ()=>{
+    dumpEl.value=''; rulesArea.innerHTML=''; cliLines.innerHTML='<div class="muted">ยังไม่มีคำสั่งแนะนำ</div>'; rawParams.textContent='ยังไม่มีข้อมูล'; summaryText.textContent='ยังไม่ได้วิเคราะห์'; lastResult=null;
+  };
 
-</script>
+  // drag & drop handling
+  const dz = document.getElementById('dropzone');
+  dz.addEventListener('dragover', e=>{ e.preventDefault(); dz.classList.add('cs-dropzone-over'); });
+  dz.addEventListener('dragleave', e=>{ dz.classList.remove('cs-dropzone-over'); });
+  dz.addEventListener('drop', e=>{
+    e.preventDefault(); dz.classList.remove('cs-dropzone-over');
+    const f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f){ const r = new FileReader(); r.onload = ()=> dumpEl.value = r.result; r.readAsText(f); }
+    else { const txt = e.dataTransfer.getData('text'); if (txt) dumpEl.value = txt; }
+  });
+
+  </script>
 </body>
 </html>
