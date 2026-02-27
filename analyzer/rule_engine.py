@@ -187,7 +187,9 @@ def evaluate_rules(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
             ["pid.roll.d", "filter.dterm_lpf1"])
 
     # 8) Battery capacity sanity against size
-    batt_mAh = _get(analysis, "advanced.power.battery_mAh_used", _get(analysis, "battery_est", None))
+    # FIX: battery_est คือ "นาที" ไม่ใช่ mAh — ต้องอ่านจาก advanced.power.battery_mAh_used เท่านั้น
+    batt_mAh = _get(analysis, "advanced.power.battery_mAh_used",
+                    _get(analysis, "advanced.battery_mAh_used", None))
     try:
         batt_mAh_v = int(batt_mAh) if batt_mAh is not None else None
     except Exception:
