@@ -597,8 +597,14 @@ except Exception as e:
 
 @app.route('/pid-advisor')
 def pid_advisor():
-    symptoms = get_all_symptoms()
-    return render_template('pid_advisor.html', symptoms=symptoms)
+    import json as _json
+    symptoms_list = get_all_symptoms()
+    # Build advice dict keyed by id for JS
+    advice_dict = {}
+    for s in symptoms_list:
+        advice_dict[s['id']] = _get_symptom_advice(s['id'])
+    advice_json = _json.dumps(advice_dict, ensure_ascii=False)
+    return render_template('pid_advisor.html', symptoms=symptoms_list, advice_json=advice_json)
 
 @app.route('/api/symptom/<symptom_id>')
 def api_symptom(symptom_id):
@@ -617,21 +623,31 @@ except Exception as e:
 @app.route('/rpm-filter', methods=['GET', 'POST'])
 def rpm_filter():
     result = None
+    form   = {}
     if request.method == 'POST':
         try:
-            kv        = int(request.form.get('motor_kv', 2400))
+            kv        = int(request.form.get('kv', 2400))
             battery   = request.form.get('battery', '4S')
             prop_size = float(request.form.get('prop_size', 5.0))
-            result    = calculate_rpm_filter(kv, battery, prop_size)
+            form = {'kv': kv, 'battery': battery, 'prop_size': prop_size}
+            result = calculate_rpm_filter(kv, battery, prop_size)
         except Exception as e:
             logger.exception("rpm_filter error")
             result = {"error": str(e)}
-    return render_template('rpm_filter.html', result=result)
+    return render_template('rpm_filter.html', result=result, form=form)
 
 # ── Rates Visualizer ──────────────────────────────────────────────────────
 @app.route('/rates-visualizer')
 def rates_visualizer():
     return render_template('rates_visualizer.html')
+
+@app.route('/cli-comparator')
+def cli_comparator():
+    return render_template('cli_comparator.html')
+
+@app.route('/esc-checker')
+def esc_checker():
+    return render_template('esc_checker.html')
 
 @app.route('/analyze_cli', methods=['POST'])
 def analyze_cli():
