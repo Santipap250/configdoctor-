@@ -579,6 +579,23 @@ def motor_prop():
         return render_template('motor_prop.html', result=result)
     return render_template('motor_prop.html')
 
+@app.route('/cli_surgeon')
+def cli_surgeon_page():
+    return render_template('cli_surgeon.html')
+
+@app.route('/analyze_cli', methods=['POST'])
+def analyze_cli():
+    try:
+        data = request.get_json(force=True)
+        dump = data.get('dump','')
+        if not dump:
+            return jsonify({"error":"no dump provided"}), 400
+        result = cli_analyze_dump(dump)
+        # result เป็น dict ที่มี keys: summary, rules, fix_commands
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # ---------- OSD Designer routes ----------
 import io, time, json
 from werkzeug.utils import secure_filename
