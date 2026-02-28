@@ -320,8 +320,139 @@ def basic_checks(params: Dict[str, Any]) -> List[Dict]:
             'ตรวจสอบว่า switch, lvp, battery thresholds และ safety settings ถูกต้อง'
         )
 
-    # --- Save check: ensure config save command presence not necessary but we can recommend save after fixes ---
-    # nothing to add here, just a note at the end produced as suggestion in summary if fix_commands exist.
+    # ══════════════════════════════════════════════════════════════════
+    # NEW CHECKS v2.0 — ตรวจ parameters สำคัญที่ขาดไป
+    # ══════════════════════════════════════════════════════════════════
+
+    # --- DShot Protocol ---
+    pwm_proto = str(params.get('motor_pwm_protocol', '')).upper()
+    if pwm_proto:
+        if pwm_proto in ('DISABLED', 'STANDARD', 'ONESHOT125', 'ONESHOT42', 'MULTISHOT'):
+            _add_rule(
+                rules, 'protocol_old', 'warning',
+                f'motor_pwm_protocol = {pwm_proto} — เป็น analog protocol รุ่นเก่า',
+                'เปลี่ยนเป็น DSHOT300 หรือ DSHOT600: set motor_pwm_protocol = DSHOT600'
+            )
+        elif pwm_proto == 'DSHOT150':
+            _add_rule(
+                rules, 'protocol_dshot150', 'info',
+                'motor_pwm_protocol = DSHOT150 — ใช้ได้แต่ช้ากว่า',
+                'แนะนำ DSHOT300/600: set motor_pwm_protocol = DSHOT300'
+            )
+
+    # --- Bidirectional DShot ---
+    bidir = str(params.get('dshot_bidir', '')).upper()
+    rpm_filter_on = _find_any_text(raw_text, ['rpm_filter', 'gyro_rpm_notch'])
+    if rpm_filter_on and bidir == 'OFF':
+        _add_rule(
+            rules, 'bidir_off_with_rpm', 'warning',
+            'RPM filter เปิดอยู่ แต่ dshot_bidir = OFF — RPM filter ทำงานไม่ได้',
+            'set dshot_bidir = ON (ต้องใช้ DSHOT300+ และ ESC firmware รองรับ)'
+        )
+    if bidir == 'ON' and pwm_proto and 'DSHOT' not in pwm_proto:
+        _add_rule(
+            rules, 'bidir_no_dshot', 'danger',
+            f'dshot_bidir = ON แต่ protocol = {pwm_proto} — ไม่ compatible กัน',
+            'set motor_pwm_protocol = DSHOT600 ให้ตรงกับ bidir'
+        )
+
+    # --- iterm_relax ---
+    iterm_relax = str(params.get('iterm_relax', '')).upper()
+    if iterm_relax == 'OFF':
+        _add_rule(
+            rules, 'iterm_relax_off', 'warning',
+            'iterm_relax = OFF — I-term wind up ระหว่าง maneuver ทำให้ bounce-back',
+            'set iterm_relax = RPH | set iterm_relax_type = SETPOINT'
+        )
+
+    # --- TPA ---
+    tpa_rate = params.get('tpa_rate', None)
+    tpa_breakpoint = params.get('tpa_breakpoint', None)
+    if tpa_rate is not None:
+        try:
+            tpa_val = float(tpa_rate)
+            if tpa_val > 70:
+                _add_rule(rules, 'tpa_high', 'warning',
+                    f'tpa_rate = {int(tpa_val)}% สูงมาก — D-term ถูกลดมากที่ full throttle',
+                    'ปกติ 30-60%: set tpa_rate = 50 | set tpa_breakpoint = 1600')
+            elif tpa_val == 0:
+                _add_rule(rules, 'tpa_zero', 'info',
+                    'tpa_rate = 0 — D-term ไม่ถูก attenuate ที่ full throttle',
+                    'set tpa_rate = 40 | set tpa_breakpoint = 1600')
+        except (TypeError, ValueError):
+            pass
+    if tpa_breakpoint is not None:
+        try:
+            if int(tpa_breakpoint) < 1400:
+                _add_rule(rules, 'tpa_breakpoint_low', 'warning',
+                    f'tpa_breakpoint = {tpa_breakpoint} ต่ำมาก — TPA เริ่มเร็วเกินไป',
+                    'set tpa_breakpoint = 1600')
+        except (TypeError, ValueError):
+            pass
+
+    # --- vbat_pid_gain ---
+    vbat_pid = str(params.get('vbat_pid_gain', '')).upper()
+    if vbat_pid == 'OFF':
+        _add_rule(rules, 'vbat_pid_off', 'info',
+            'vbat_pid_gain = OFF — PID จะเปลี่ยนตามแรงดันแบต (ตอนแบตอ่อน response ต่างออกไป)',
+            'set vbat_pid_gain = ON เพื่อ compensate PID ให้คงที่')
+
+    # --- thrust_linear ---
+    thrust_lin = params.get('thrust_linear', None)
+    if thrust_lin is not None:
+        try:
+            tl = int(thrust_lin)
+            if tl == 0:
+                _add_rule(rules, 'thrust_linear_zero', 'info',
+                    'thrust_linear = 0 — mid-stick response sluggish กว่า full stick',
+                    'set thrust_linear = 25 เพื่อ stick feel สม่ำเสมอขึ้น')
+            elif tl > 75:
+                _add_rule(rules, 'thrust_linear_high', 'warning',
+                    f'thrust_linear = {tl} สูงมาก — low throttle response hyperactive',
+                    'set thrust_linear = 30')
+        except (TypeError, ValueError):
+            pass
+
+    # --- motor_poles ---
+    motor_poles = params.get('motor_poles', None)
+    if motor_poles is not None:
+        try:
+            poles = int(motor_poles)
+            if poles not in (12, 14, 24, 28, 32):
+                _add_rule(rules, 'motor_poles_unusual', 'info',
+                    f'motor_poles = {poles} ผิดปกติ (FPV motors ทั่วไป 14 poles)',
+                    'ตรวจ motor spec: set motor_poles = 14')
+        except (TypeError, ValueError):
+            pass
+
+    # --- feedforward ---
+    for ff_k in [k for k in params if 'feedforward' in k
+                 and k not in ('feedforward_transition','feedforward_averaging','feedforward_smooth_factor')]:
+        try:
+            ff_val = float(params[ff_k])
+            axis = ff_k.replace('feedforward_', '')
+            if ff_val > 80:
+                _add_rule(rules, f'ff_high_{axis}', 'warning',
+                    f'{ff_k} = {int(ff_val)} สูงมาก — อาจ overshoot ใน freestyle',
+                    f'set {ff_k} = 35')
+            elif ff_val == 0 and 'yaw' not in ff_k:
+                _add_rule(rules, f'ff_zero_{axis}', 'info',
+                    f'{ff_k} = 0 — stick response ช้า ไม่มี feedforward',
+                    f'set {ff_k} = 30')
+        except (TypeError, ValueError):
+            continue
+
+    # --- anti_gravity_gain ---
+    ag = params.get('anti_gravity_gain', None)
+    if ag is not None:
+        try:
+            ag_val = float(ag)
+            if ag_val > 25:
+                _add_rule(rules, 'anti_gravity_high', 'warning',
+                    f'anti_gravity_gain = {ag_val} สูงมาก — oscillation ตอน throttle punch',
+                    'set anti_gravity_gain = 8')
+        except (TypeError, ValueError):
+            pass
 
     return rules
 
