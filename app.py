@@ -7,11 +7,6 @@
 # - estimate_battery_runtime() ใช้ style-based power factor
 # - prop_logic ส่ง est_thrust, efficiency, pitch_speed กลับมา
 # ============================================================
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    pass
 
 from flask import (Flask, render_template, request, send_from_directory,
                    abort, send_file, jsonify, url_for)
@@ -740,6 +735,61 @@ def internal_server_error(e): return render_template("500.html"), 500
 @app.route("/healthz")
 def healthz():
     return {"status": "ok", "advanced_analysis": bool(ADV_ANALYSIS_AVAILABLE)}
+
+# ── SEO: robots.txt ────────────────────────────────────────────────────────
+@app.route("/robots.txt")
+def robots_txt():
+    content = (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Disallow: /static/downloads/osd/\n"
+        "Disallow: /analyze_cli\n"
+        "Disallow: /compare_cli\n"
+        "\n"
+        "Sitemap: https://configdoctor.onrender.com/sitemap.xml\n"
+    )
+    from flask import Response
+    return Response(content, mimetype="text/plain")
+
+# ── SEO: sitemap.xml ───────────────────────────────────────────────────────
+@app.route("/sitemap.xml")
+def sitemap_xml():
+    from flask import Response
+    pages = [
+        ("/landing",          "weekly",  "1.0"),
+        ("/app",              "weekly",  "0.9"),
+        ("/cli_surgeon",      "weekly",  "0.9"),
+        ("/pid-advisor",      "weekly",  "0.9"),
+        ("/rpm-filter",       "weekly",  "0.8"),
+        ("/motor-prop",       "weekly",  "0.8"),
+        ("/rates-visualizer", "weekly",  "0.8"),
+        ("/cli-comparator",   "weekly",  "0.8"),
+        ("/esc-checker",      "weekly",  "0.8"),
+        ("/osd",              "weekly",  "0.7"),
+        ("/vtx",              "monthly", "0.6"),
+        ("/vtx-range",        "monthly", "0.6"),
+        ("/vtx-smartaudio",   "monthly", "0.6"),
+        ("/downloads",        "weekly",  "0.7"),
+        ("/fpv",              "monthly", "0.6"),
+        ("/about",            "monthly", "0.5"),
+        ("/changelog",        "weekly",  "0.5"),
+    ]
+    base = "https://configdoctor.onrender.com"
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    urls = "\n".join(
+        f"""  <url>
+    <loc>{base}{loc}</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>{freq}</changefreq>
+    <priority>{pri}</priority>
+  </url>"""
+        for loc, freq, pri in pages
+    )
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{urls}
+</urlset>"""
+    return Response(xml, mimetype="application/xml")
 
 if __name__ == "__main__":
     app.run(
