@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ESC Compatibility Checker — OBIXConfig Doctor</title>
+{% set og_title       = "ESC Compatibility Checker — OBIXConfig Doctor" %}
+{% set og_description = "ตรวจสอบ ESC amps, protocol, KV+แบต compatibility สำหรับโดรน FPV" %}
+{% set og_url         = "https://configdoctor.onrender.com/esc-checker" %}
+{% include "partials/og_tags.html" %}
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <style>

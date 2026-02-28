@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RPM Filter Calculator — OBIXConfig Doctor</title>
+{% set og_title       = "RPM Filter Calculator — OBIXConfig Doctor" %}
+{% set og_description = "คำนวณ harmonic frequency และ dyn_notch ที่เหมาะสมจาก KV และแรงดันแบต" %}
+{% set og_url         = "https://configdoctor.onrender.com/rpm-filter" %}
+{% include "partials/og_tags.html" %}
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <style>

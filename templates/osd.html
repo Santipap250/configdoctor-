@@ -5,6 +5,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>OSD Designer — OBIXConfig Doctor</title>
+{% set og_title       = "OSD Designer — OBIXConfig Doctor" %}
+{% set og_description = "ออกแบบ OSD layout สำหรับโดรน FPV แบบ drag-and-drop แล้ว export CLI ได้เลย" %}
+{% set og_url         = "https://configdoctor.onrender.com/osd" %}
+{% include "partials/og_tags.html" %}
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/osd.css') }}">
   <!-- re-use global stylesheet if you want: <link rel="stylesheet" href="/static/css/style.css"> -->
