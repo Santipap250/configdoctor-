@@ -7,9 +7,12 @@
 # - estimate_battery_runtime() ใช้ style-based power factor
 # - prop_logic ส่ง est_thrust, efficiency, pitch_speed กลับมา
 # ============================================================
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
-from dotenv import load_dotenv
-load_dotenv()
 from flask import (Flask, render_template, request, send_from_directory,
                    abort, send_file, jsonify, url_for)
 from logic.presets import (PRESETS, detect_class_from_size,
