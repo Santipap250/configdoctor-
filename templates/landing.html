@@ -1146,6 +1146,595 @@ footer {
   </div>
 </section>
 
+
+<!-- ════════════════════════════════════════════════════════════════
+  💛 SUPPORT SECTION — OBIXConfig Doctor v2.0
+  
+  วิธีใช้:
+  1. วาง block นี้ใน templates/landing.html
+     ระหว่าง  </section>  (จบ community) กับ  <footer>
+  
+  2. บันทึก QR image ไว้ที่:
+     static/img/support-qr.png
+  
+  (ไม่ต้องแก้อะไรเพิ่ม — ทุก CSS/JS อยู่ใน block นี้ทั้งหมด)
+  ════════════════════════════════════════════════════════════════ -->
+
+<!-- ── SUPPORT SECTION ──────────────────────────────────────────── -->
+<section class="sup-section" id="support" aria-label="สนับสนุนโปรเจกต์">
+
+  <!-- Ambient FX -->
+  <div class="sup-grid" aria-hidden="true"></div>
+  <div class="sup-orb sup-orb-a" aria-hidden="true"></div>
+  <div class="sup-orb sup-orb-b" aria-hidden="true"></div>
+
+  <!-- Eyebrow pill -->
+  <div class="sup-eyebrow" data-sup-reveal>
+    <span class="sup-eyebrow-dot"></span>
+    สนับสนุนโปรเจกต์
+  </div>
+
+  <!-- Headline -->
+  <h2 class="sup-h2" data-sup-reveal>
+    <span class="sup-h2-white">เครื่องมือนี้ฟรีตลอด</span>
+    <span class="sup-h2-grad">
+      ทำเพื่อชุมชน FPV ไทย
+      <span class="sup-heart-pulse" aria-hidden="true">❤️</span>
+    </span>
+  </h2>
+
+  <p class="sup-desc" data-sup-reveal>
+    ถ้า OBIXConfig Doctor ช่วยให้โดรนบินดีขึ้น —
+    <strong>ค่ากาแฟสักแก้ว</strong> ก็เป็นกำลังใจมากๆ ครับ&nbsp;🙏
+  </p>
+
+  <!-- ── Main Card ── -->
+  <div class="sup-card" data-sup-reveal>
+
+    <!-- Shimmer border FX -->
+    <div class="sup-card-shimmer" aria-hidden="true"></div>
+
+    <!-- LEFT: info + amounts -->
+    <div class="sup-left">
+
+      <!-- Amount selector -->
+      <p class="sup-label">เลือกจำนวน</p>
+      <div class="sup-amounts" role="group" aria-label="เลือกจำนวนที่ต้องการโอน">
+        <button class="sup-amt" data-amt="30"  onclick="supSelect(this)" type="button">
+          <span class="sup-amt-emoji">☕</span>
+          <span class="sup-amt-val">30฿</span>
+          <span class="sup-amt-tag">กาแฟ</span>
+        </button>
+        <button class="sup-amt" data-amt="50"  onclick="supSelect(this)" type="button">
+          <span class="sup-amt-emoji">🍜</span>
+          <span class="sup-amt-val">50฿</span>
+          <span class="sup-amt-tag">ข้าวกลางวัน</span>
+        </button>
+        <button class="sup-amt sup-amt-active" data-amt="100" onclick="supSelect(this)" type="button">
+          <span class="sup-amt-emoji">🚀</span>
+          <span class="sup-amt-val">100฿</span>
+          <span class="sup-amt-tag">upgrade แบต</span>
+        </button>
+        <button class="sup-amt" data-amt="0"   onclick="supSelect(this)" type="button">
+          <span class="sup-amt-emoji">💎</span>
+          <span class="sup-amt-val">ตามใจ</span>
+          <span class="sup-amt-tag">ขอบคุณมาก</span>
+        </button>
+      </div>
+
+      <div class="sup-rule"></div>
+
+      <!-- Receiver info -->
+      <div class="sup-info-rows">
+        <div class="sup-info-row">
+          <span class="sup-info-key">ชื่อบัญชี</span>
+          <span class="sup-info-val">นาย สันติภาพ สงฆรักษ์</span>
+        </div>
+        <div class="sup-info-row">
+          <span class="sup-info-key">ธนาคาร</span>
+          <span class="sup-info-val">
+            <span class="sup-kbank-badge">K+</span>
+            กสิกรไทย · รับทุกธนาคาร
+          </span>
+        </div>
+        <div class="sup-info-row">
+          <span class="sup-info-key">พร้อมเพย์</span>
+          <button class="sup-reveal-btn" 
+                  id="supRevealBtn"
+                  onclick="supReveal()"
+                  type="button"
+                  aria-label="คลิกเพื่อดูเลข PromptPay">
+            <span class="sup-reveal-idle">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+              กดดูเลข
+            </span>
+            <span class="sup-reveal-shown" aria-live="polite"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sup-rule"></div>
+
+      <!-- Thank-you note -->
+      <div class="sup-thankyou">
+        <div class="sup-ty-star">✦</div>
+        <p class="sup-ty-body">
+          ทุกบาทช่วยค่า server, เวลาพัฒนา<br>
+          และทำให้เครื่องมือดีขึ้นเรื่อยๆ ครับ
+        </p>
+      </div>
+
+    </div><!-- /sup-left -->
+
+    <!-- RIGHT: QR code -->
+    <div class="sup-right" aria-label="QR Code สำหรับสแกน PromptPay">
+
+      <!-- QR frame with animated corners -->
+      <div class="sup-qr-frame">
+        <span class="sup-c sup-c-tl" aria-hidden="true"></span>
+        <span class="sup-c sup-c-tr" aria-hidden="true"></span>
+        <span class="sup-c sup-c-bl" aria-hidden="true"></span>
+        <span class="sup-c sup-c-br" aria-hidden="true"></span>
+        <div class="sup-qr-halo" aria-hidden="true"></div>
+        <img
+          src="{{ url_for('static', filename='img/support-qr.png') }}"
+          alt="QR Code พร้อมเพย์ — นาย สันติภาพ สงฆรักษ์"
+          class="sup-qr-img"
+          loading="lazy"
+          width="210"
+          height="210"
+        >
+      </div>
+
+      <!-- Badge -->
+      <div class="sup-qr-label">
+        <span class="sup-qr-dot" aria-hidden="true"></span>
+        PromptPay · Thai QR
+      </div>
+
+      <!-- Scan instruction -->
+      <p class="sup-scan-txt">
+        <svg class="sup-arrow-down" width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path d="M12 4v16M5 13l7 7 7-7"/>
+        </svg>
+        เปิดแอปธนาคาร → สแกน QR ได้เลย
+      </p>
+
+      <!-- Copy-to-confirm feedback pill -->
+      <div class="sup-copied-pill" id="supCopiedPill" aria-live="polite" aria-atomic="true"></div>
+
+    </div><!-- /sup-right -->
+
+  </div><!-- /sup-card -->
+
+  <p class="sup-footnote" data-sup-reveal>
+    ไม่มีค่าธรรมเนียม · สแกนได้จากทุกแอปธนาคาร · ขอบคุณที่สนับสนุน 🙏
+  </p>
+
+</section>
+
+
+<!-- ════════════ STYLES ════════════ -->
+<style>
+/* ── Variables (inherit from landing.html) ─────────────────── */
+.sup-section {
+  --sg: #10c47a;   /* green */
+  --so: #f1b65a;   /* gold */
+  --sd: #06090b;   /* deep bg */
+  --sb: rgba(255,255,255,.05);   /* card bg */
+  --sl: rgba(255,255,255,.06);   /* border */
+  --sm: rgba(221,231,239,.45);   /* muted text */
+}
+
+/* ── Section shell ─────────────────────────────────────────── */
+.sup-section {
+  position: relative;
+  padding: 110px 20px 90px;
+  text-align: center;
+  overflow: hidden;
+  background: var(--sd);
+  border-top: 1px solid var(--sl);
+}
+
+/* ── Grid pattern ──────────────────────────────────────────── */
+.sup-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(16,196,122,.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16,196,122,.045) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: radial-gradient(ellipse 85% 70% at 50% 50%, #000 30%, transparent 100%);
+}
+
+/* ── Ambient orbs ──────────────────────────────────────────── */
+.sup-orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(100px); pointer-events: none; will-change: transform;
+}
+.sup-orb-a {
+  width: 480px; height: 480px; top: -160px; left: -120px; opacity: .2;
+  background: radial-gradient(circle, var(--so) 0%, transparent 70%);
+  animation: supFloat 9s ease-in-out infinite;
+}
+.sup-orb-b {
+  width: 380px; height: 380px; bottom: -120px; right: -80px; opacity: .18;
+  background: radial-gradient(circle, var(--sg) 0%, transparent 70%);
+  animation: supFloat 9s ease-in-out infinite reverse;
+}
+@keyframes supFloat {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50%      { transform: translate(10px,-28px) scale(1.06); }
+}
+
+/* ── Eyebrow ───────────────────────────────────────────────── */
+.sup-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 5px 16px; border-radius: 100px; margin-bottom: 26px;
+  border: 1px solid rgba(241,182,90,.35);
+  background: rgba(241,182,90,.07);
+  font-family: var(--font-en,'Orbitron',monospace);
+  font-size: 10px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--so);
+}
+.sup-eyebrow-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--so);
+  animation: supPulse 2s ease-in-out infinite;
+}
+@keyframes supPulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .35; transform: scale(.65); }
+}
+
+/* ── Headline ──────────────────────────────────────────────── */
+.sup-h2 {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 6px; margin: 0 0 18px;
+  font-family: var(--font-th,'Sarabun',sans-serif);
+  font-size: clamp(24px, 4.5vw, 42px);
+  font-weight: 800; line-height: 1.2;
+}
+.sup-h2-white { color: #f0f6ff; }
+.sup-h2-grad {
+  background: linear-gradient(120deg, var(--sg) 10%, var(--so) 90%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.sup-heart-pulse {
+  display: inline-block; -webkit-text-fill-color: initial;
+  animation: supHeart 2.4s ease-in-out infinite;
+}
+@keyframes supHeart {
+  0%,100% { transform: scale(1); }
+  15%      { transform: scale(1.35); }
+  35%      { transform: scale(1); }
+  55%      { transform: scale(1.18); }
+}
+
+/* ── Desc ──────────────────────────────────────────────────── */
+.sup-desc {
+  font-family: var(--font-th,'Sarabun',sans-serif);
+  font-size: 15px; line-height: 1.75;
+  color: var(--sm); max-width: 460px;
+  margin: 0 auto 48px;
+}
+.sup-desc strong { color: #dde7ef; font-weight: 700; }
+
+/* ── Card ──────────────────────────────────────────────────── */
+.sup-card {
+  position: relative;
+  display: grid; grid-template-columns: 1fr 260px;
+  max-width: 820px; margin: 0 auto 40px;
+  border-radius: 20px;
+  border: 1px solid var(--sl);
+  background: var(--sb);
+  backdrop-filter: blur(14px);
+  overflow: hidden;
+  transition: border-color .4s;
+}
+.sup-card:hover { border-color: rgba(241,182,90,.2); }
+
+/* Shimmer top-border FX */
+.sup-card-shimmer {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%, rgba(241,182,90,.6) 40%,
+    rgba(16,196,122,.5) 60%, transparent 100%);
+  animation: supShimmer 4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes supShimmer {
+  0%,100% { opacity: .4; transform: scaleX(.5); transform-origin: left; }
+  50%      { opacity: 1;  transform: scaleX(1); }
+}
+
+/* ── Left column ───────────────────────────────────────────── */
+.sup-left {
+  padding: 40px 36px;
+  display: flex; flex-direction: column;
+  text-align: left;
+}
+.sup-label {
+  font-family: var(--font-en,'Orbitron',monospace);
+  font-size: 10px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--sm);
+  margin: 0 0 12px;
+}
+
+/* ── Amount buttons ────────────────────────────────────────── */
+.sup-amounts {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px;
+}
+.sup-amt {
+  flex: 1; min-width: 66px;
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: 11px 10px; border-radius: 11px;
+  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.025);
+  cursor: pointer; transition: all .22s;
+  font-family: inherit; position: relative; overflow: hidden;
+}
+.sup-amt:hover {
+  border-color: rgba(241,182,90,.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(241,182,90,.1);
+}
+.sup-amt-active, .sup-amt.sup-amt-active {
+  border-color: var(--so) !important;
+  background: rgba(241,182,90,.08) !important;
+  box-shadow: 0 0 0 1px rgba(241,182,90,.2), 0 0 24px rgba(241,182,90,.15) !important;
+}
+.sup-amt-emoji { font-size: 16px; line-height: 1; }
+.sup-amt-val {
+  font-family: var(--font-en,'Orbitron',monospace);
+  font-size: 12px; font-weight: 700; color: #f0f6ff;
+}
+.sup-amt-tag {
+  font-family: var(--font-th,'Sarabun',sans-serif);
+  font-size: 10px; color: var(--sm);
+}
+
+/* ── Divider ───────────────────────────────────────────────── */
+.sup-rule {
+  height: 1px; margin: 20px 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent);
+}
+
+/* ── Info rows ─────────────────────────────────────────────── */
+.sup-info-rows { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+.sup-info-row  { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.sup-info-key {
+  font-family: var(--font-en,'Orbitron',monospace);
+  font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--sm);
+  min-width: 76px; flex-shrink: 0;
+}
+.sup-info-val {
+  font-family: var(--font-th,'Sarabun',sans-serif);
+  font-size: 13px; font-weight: 600; color: #dde7ef;
+  display: flex; align-items: center; gap: 7px;
+}
+.sup-kbank-badge {
+  background: #12a053; color: #fff;
+  font-size: 9px; font-weight: 900; letter-spacing: .04em;
+  padding: 2px 6px; border-radius: 4px;
+}
+
+/* Reveal PromptPay button */
+.sup-reveal-btn {
+  background: none; border: none; padding: 0;
+  cursor: pointer; font-family: inherit;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.sup-reveal-idle {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; color: var(--sg);
+  text-decoration: underline dotted;
+  font-family: var(--font-th,'Sarabun',sans-serif);
+  transition: opacity .2s;
+}
+.sup-reveal-idle:hover { opacity: .75; }
+.sup-reveal-shown {
+  font-family: var(--font-en,'Orbitron',monospace);
+  font-size: 11px; color: var(--so); letter-spacing: .05em;
+  display: none;
+}
+.sup-reveal-btn.done .sup-reveal-idle { display: none; }
+.sup-reveal-btn.done .sup-reveal-shown { display: inline; }
+
+/* ── Thank-you note ────────────────────────────────────────── */
+.sup-thankyou {
+  display: flex; align-items: flex-start; gap: 10px; margin-top: 8px;
+}
+.sup-ty-star {
+  color: var(--so); font-size: 14px; flex-shrink: 0; margin-top: 2px;
+  animation: supSpin 10s linear infinite;
+}
+@keyframes supSpin { to { transform: rotate(360deg); } }
+.sup-ty-body {
+  font-family: var(--font-th,'Sarabun',sans-serif);
+  font-size: 12px; color: var(--sm); line-height: 1.7; margin: 0;
+}
+
+/* ── Right column ──────────────────────────────────────────── */
+.sup-right {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 14px; padding: 40px 36px 32px;
+  border-left: 1px solid var(--sl);
+  background: linear-gradient(175deg,
+    rgba(241,182,90,.04) 0%,
+    rgba(16,196,122,.03) 100%);
+}
+
+/* QR frame */
+.sup-qr-frame {
+  position: relative; width: 210px; height: 210px;
+}
+
+/* Animated bracket corners */
+.sup-c {
+  position: absolute; width: 20px; height: 20px;
+  border-color: var(--so); border-style: solid;
+}
+.sup-c-tl { top:-3px; left:-3px;  border-width: 2px 0 0 2px; border-radius: 4px 0 0 0;  animation: supCorner 3s ease-in-out infinite 0s; }
+.sup-c-tr { top:-3px; right:-3px; border-width: 2px 2px 0 0; border-radius: 0 4px 0 0;  animation: supCorner 3s ease-in-out infinite .75s; }
+.sup-c-bl { bottom:-3px; left:-3px;  border-width: 0 0 2px 2px; border-radius: 0 0 0 4px;animation: supCorner 3s ease-in-out infinite 1.5s; }
+.sup-c-br { bottom:-3px; right:-3px; border-width: 0 2px 2px 0; border-radius: 0 0 4px 0;animation: supCorner 3s ease-in-out infinite 2.25s; }
+@keyframes supCorner {
+  0%,100% { opacity: .45; }
+  50%      { opacity: 1; filter: drop-shadow(0 0 6px rgba(241,182,90,.7)); }
+}
+
+/* QR halo */
+.sup-qr-halo {
+  position: absolute; inset: -6px; border-radius: 14px;
+  box-shadow: 0 0 0 0 transparent;
+  animation: supHalo 4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes supHalo {
+  0%,100% { box-shadow: 0 0 20px rgba(241,182,90,.08); }
+  50%      { box-shadow: 0 0 44px rgba(241,182,90,.2), 0 0 80px rgba(16,196,122,.06); }
+}
+
+/* QR image */
+.sup-qr-img {
+  width: 100%; height: 100%;
+  border-radius: 10px;
+  display: block; object-fit: contain;
+  background: #fff;
+}
+
+/* Badge + scan label */
+.sup-qr-label {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-en,'Orbitron',monospace);
+  font-size: 10px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--sm);
+}
+.sup-qr-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--sg); animation: supPulse 2s ease-in-out infinite;
+}
+.sup-scan-txt {
+  font-family: var(--font-th,'Sarabun',sans-serif);
+  font-size: 11px; color: var(--sm);
+  display: flex; align-items: center; gap: 5px; margin: 0;
+}
+.sup-arrow-down {
+  color: var(--sg);
+  animation: supBounce 1.6s ease-in-out infinite;
+}
+@keyframes supBounce {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(4px); }
+}
+
+/* Copied feedback pill */
+.sup-copied-pill {
+  height: 26px; min-width: 1px;
+  font-family: var(--font-th,'Sarabun',sans-serif);
+  font-size: 11px; color: var(--sg);
+  display: flex; align-items: center;
+  transition: opacity .3s;
+}
+
+/* ── Footnote ──────────────────────────────────────────────── */
+.sup-footnote {
+  font-family: var(--font-th,'Sarabun',sans-serif);
+  font-size: 12px; color: var(--sm); opacity: .7; margin: 0;
+  letter-spacing: .02em;
+}
+
+/* ── Scroll reveal ─────────────────────────────────────────── */
+[data-sup-reveal] {
+  opacity: 0; transform: translateY(22px);
+  transition: opacity .65s ease, transform .65s ease;
+}
+[data-sup-reveal].sup-vis { opacity: 1; transform: translateY(0); }
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 680px) {
+  .sup-card {
+    grid-template-columns: 1fr;
+  }
+  .sup-right {
+    border-left: none;
+    border-top: 1px solid var(--sl);
+    padding: 28px 24px;
+  }
+  .sup-left { padding: 28px 24px; }
+  .sup-section { padding: 80px 16px 68px; }
+  .sup-qr-frame { width: 200px; height: 200px; }
+}
+</style>
+
+
+<!-- ════════════ SCRIPT ════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  /* ── PromptPay number (เปลี่ยนได้) ──────────────── */
+  var PP_NUMBER = '004-9999-117205996';
+
+  /* ── Amount button toggle ────────────────────────── */
+  window.supSelect = function (btn) {
+    document.querySelectorAll('.sup-amt').forEach(function (b) {
+      b.classList.remove('sup-amt-active');
+    });
+    btn.classList.add('sup-amt-active');
+  };
+
+  /* ── PromptPay reveal + clipboard copy ──────────── */
+  window.supReveal = function () {
+    var btn   = document.getElementById('supRevealBtn');
+    var shown = btn.querySelector('.sup-reveal-shown');
+    var pill  = document.getElementById('supCopiedPill');
+    if (!btn) return;
+
+    shown.textContent = PP_NUMBER;
+    btn.classList.add('done');
+
+    /* copy to clipboard */
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(PP_NUMBER).then(function () {
+        if (pill) {
+          pill.textContent = '✓ คัดลอกแล้ว!';
+          setTimeout(function () { pill.textContent = ''; }, 2800);
+        }
+      }).catch(function () {});
+    }
+  };
+
+  /* ── Scroll reveal (standalone, won't conflict) ──── */
+  var supItems = document.querySelectorAll('[data-sup-reveal]');
+  if ('IntersectionObserver' in window && supItems.length) {
+    var supObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e, i) {
+        if (e.isIntersecting) {
+          setTimeout(function () {
+            e.target.classList.add('sup-vis');
+          }, i * 130);
+          supObs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    supItems.forEach(function (el) { supObs.observe(el); });
+  } else {
+    /* fallback: show immediately */
+    supItems.forEach(function (el) { el.classList.add('sup-vis'); });
+  }
+
+})();
+</script>
+
+
 <!-- ── FOOTER ── -->
 <footer>
   <div class="footer-left">
