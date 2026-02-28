@@ -2,9 +2,12 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>OBIXConfig Doctor</title>
-<meta name="description" content="วิเคราะห์และแนะนำค่า PID / Filter / Motor สำหรับโดรน FPV">
+<title>OBIXConfig Doctor — วิเคราะห์โดรน FPV</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% set og_title       = "Drone Analyzer — OBIXConfig Doctor" %}
+{% set og_description = "วิเคราะห์และแนะนำค่า PID · Filter · Motor สำหรับโดรน FPV — กรอกข้อมูลโดรนแล้วรับผลทันที" %}
+{% set og_url         = "https://configdoctor.onrender.com/app" %}
+{% include "partials/og_tags.html" %}
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
