@@ -280,6 +280,193 @@ SYMPTOMS: Dict[str, Dict[str, Any]] = {
             "ตรวจ motor bearing: หมุน motor ด้วยมือ — ควร smooth ไม่สะดุด",
         ],
     },
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # NEW SYMPTOMS (v2.0)
+    # ─────────────────────────────────────────────────────────────────────────
+
+    "esc_desync": {
+        "label": "ESC Desync / มอเตอร์หยุดกลางอากาศ (Motor stutter/stop)",
+        "category": "esc",
+        "diagnosis": (
+            "ESC desync เกิดเมื่อ ESC 'หลง' timing ของมอเตอร์ แล้วหยุดหมุนทันที "
+            "อาการ: มอเตอร์ 1 ตัวหยุดกะทันหัน โดรนหมุนหรือตก "
+            "สาเหตุ: Demag compensation ไม่พอ, throttle ต่ำเกินจนมอเตอร์หยุด, "
+            "protocol ไม่เหมาะ (Oneshot/Multishot บน ESC เก่า) "
+            "หรือ motor KV สูงเกินไปบนแรงดันสูง"
+        ),
+        "primary_cause": "ESC demag / protocol / KV สูงเกิน / throttle ต่ำเกิน",
+        "adjustments": [
+            {"param": "motor_pwm_protocol", "direction": "เปลี่ยน", "amount": "DSHOT300 หรือ DSHOT600",
+             "reason": "Digital protocol ไม่มีปัญหา desync แบบ analog"},
+            {"param": "dshot_bidir",        "direction": "เปิด",   "amount": "ON",
+             "reason": "Bidirectional DShot + RPM filter ลด desync ได้ดีที่สุด"},
+            {"param": "motor_poles",        "direction": "ตรวจสอบ", "amount": "ค่าถูกต้องตาม motor",
+             "reason": "Pole count ผิดทำให้ RPM ผิด → desync ง่ายขึ้น"},
+            {"param": "min_throttle",       "direction": "เพิ่ม",  "amount": "ลอง 1020-1030",
+             "reason": "Throttle ต่ำมากทำให้มอเตอร์หยุดหมุน (เสี่ยง desync)"},
+        ],
+        "cli_template": [
+            "# แก้: ESC Desync",
+            "set motor_pwm_protocol = DSHOT600",
+            "set dshot_bidir = ON",
+            "set motor_poles = 14           # ตรวจสอบ spec motor ของคุณ",
+            "set min_throttle = 1020",
+            "# ESC Firmware: อัปเป็น BLHeli_32 หรือ AM32 ล่าสุด",
+            "# ใน BLHeli_32: เพิ่ม Demag Compensation เป็น High",
+            "save",
+        ],
+        "tips": [
+            "DSHOT600 + Bidir DShot แก้ desync ได้ดีที่สุด — ทำก่อนอย่างอื่น",
+            "ตรวจ Blackbox: มอเตอร์ที่ desync จะเห็น motor output กระโดดผิดปกติ",
+            "KV สูง (2800+) บน 4S อาจต้องลด RPM limit ใน ESC firmware",
+            "ถ้า desync เฉพาะ motor ตัวเดียว → เปลี่ยน ESC หรือมอเตอร์ตัวนั้น",
+            "Motor bearing เสียทำให้ load ไม่สม่ำเสมอ → desync ได้",
+        ],
+    },
+
+    "wind_rejection": {
+        "label": "กันลมไม่อยู่ / โดรนล่องลอยเมื่อมีลม",
+        "category": "pid_advanced",
+        "diagnosis": (
+            "โดรนไม่สามารถ hold position หรือ attitude ได้ดีเมื่อมีลม "
+            "อาการ: โดรนถูกลมพัดไป ต้องใช้ stick ต้านตลอด, drift ขณะ hover "
+            "สาเหตุหลัก: I-term ต่ำเกินไปทำให้ไม่ reject disturbance, "
+            "anti_gravity ต่ำ หรือ iterm_relax ตั้งค่าผิดทำให้ I ไม่ทำงาน"
+        ),
+        "primary_cause": "I-term ต่ำ / iterm_relax ผิด / anti_gravity ต่ำ",
+        "adjustments": [
+            {"param": "i_roll / i_pitch",  "direction": "เพิ่ม", "amount": "เพิ่ม 5–10",
+             "reason": "I-term สูงขึ้นช่วย reject wind disturbance"},
+            {"param": "i_yaw",             "direction": "เพิ่ม", "amount": "เพิ่ม 3–5",
+             "reason": "Yaw I ช่วย hold heading ในลม"},
+            {"param": "iterm_relax",       "direction": "ตรวจสอบ", "amount": "ควรเป็น RPH หรือ RP",
+             "reason": "iterm_relax = OFF ทำให้ I ไม่สะสมได้ดีตอนบิน"},
+            {"param": "anti_gravity_gain", "direction": "เพิ่ม", "amount": "ลอง 7–12",
+             "reason": "Anti-gravity เพิ่ม I ชั่วคราวตอน throttle change ต้านลม"},
+        ],
+        "cli_template": [
+            "# แก้: กันลมไม่อยู่",
+            "set i_roll = {i_roll + 8}",
+            "set i_pitch = {i_pitch + 8}",
+            "set i_yaw = {i_yaw + 5}",
+            "set iterm_relax = RPH",
+            "set iterm_relax_type = SETPOINT",
+            "set iterm_relax_cutoff = 15",
+            "set anti_gravity_gain = 10",
+            "save",
+        ],
+        "tips": [
+            "ทดสอบในลมจริง — เพิ่ม I ทีละ 5 จนโดรน hold ได้ดีขึ้น",
+            "iterm_relax = RPH ทำให้ I ยังทำงานแต่ไม่ wind up ระหว่าง maneuver",
+            "Longrange build ควร I สูงกว่า freestyle เพราะต้องต้านลมระยะไกล",
+            "ตรวจสอบ CoG — ถ้า CoG ไม่ตรงกลาง โดรนจะ drift แม้ PID ดี",
+        ],
+    },
+
+    "not_arming": {
+        "label": "โดรนไม่ ARM / ARM แล้วมอเตอร์ไม่หมุน",
+        "category": "setup",
+        "diagnosis": (
+            "โดรนปฏิเสธการ ARM มักเกิดจาก: "
+            "Throttle ไม่ตำลงสุด, Stick endpoint ไม่ถึง, "
+            "Accelerometer ไม่ calibrate, Pre-arm check fail "
+            "(volt/GPS/barometer), หรือ Mode ไม่ถูก "
+            "บน Betaflight 4.3+ มี ARMING_DISABLED flags ที่ต้องตรวจ"
+        ),
+        "primary_cause": "Pre-arm check fail / stick ไม่ calibrate / mode ผิด",
+        "adjustments": [
+            {"param": "arm (CLI check)",      "direction": "ตรวจสอบ", "amount": "type 'arm' ใน CLI",
+             "reason": "แสดง ARMING_DISABLED reasons ทั้งหมด"},
+            {"param": "min_check",            "direction": "ตรวจสอบ", "amount": "ควร 1050-1100",
+             "reason": "ถ้า min_check ต่ำกว่า stick endpoint จะ ARM ไม่ได้"},
+            {"param": "max_check",            "direction": "ตรวจสอบ", "amount": "ควร 1900",
+             "reason": "ตรวจ endpoint ของ TX"},
+            {"param": "small_angle",          "direction": "ตรวจสอบ", "amount": "set small_angle = 25",
+             "reason": "โดรนเอียงเกิน small_angle จะ ARM ไม่ได้"},
+        ],
+        "cli_template": [
+            "# ตรวจสอบ: ทำไมไม่ ARM",
+            "status                          # ดู ARMING_DISABLED flags",
+            "set small_angle = 25            # อนุญาต tilt มากขึ้น",
+            "set min_check = 1050",
+            "set max_check = 1900",
+            "# Receiver: ตรวจ Channel 3 (Throttle) ที่ stick ลงสุด = 1000",
+            "# Accelerometer calibration: กด 'calib_acc' ใน CLI แล้วตั้ง FC ให้นิ่งราบ",
+            "save",
+        ],
+        "tips": [
+            "ใน CLI พิมพ์ 'status' จะเห็น ARMING_DISABLED พร้อม reason",
+            "สาเหตุที่พบบ่อย: THROTTLE, ANGLE, NOPREARM, MSP, FAILSAFE",
+            "ตรวจ receiver binding ก่อน — ถ้าไม่รับสัญญาณ ARM ไม่ได้เลย",
+            "BF4.4+: เปิด prearm mode ใน modes ก่อน ARM จะสะดวกกว่า",
+            "ตรวจ motor plug: motor ที่ถอดออกทำให้ FC detect ผิดปกติ",
+        ],
+    },
+
+    "turtle_mode_fail": {
+        "label": "Turtle mode ไม่ทำงาน / พลิกกลับไม่ได้",
+        "category": "setup",
+        "diagnosis": (
+            "Turtle mode (flip after crash) ไม่ทำงานหรือทำงานไม่สมบูรณ์ "
+            "สาเหตุ: ไม่ได้ assign switch ใน modes, motor direction ไม่ถูก, "
+            "3D mode ไม่ได้เปิด หรือ ESC ไม่รองรับ turtle mode (ต้องการ DSHOT)"
+        ),
+        "primary_cause": "Mode ไม่ assign / protocol ไม่ใช่ DSHOT / motor direction",
+        "adjustments": [
+            {"param": "motor_pwm_protocol",   "direction": "เปลี่ยน", "amount": "DSHOT300 หรือสูงกว่า",
+             "reason": "Turtle mode ต้องการ DSHOT — Oneshot/Multishot ไม่รองรับ"},
+            {"param": "flip_over_after_crash","direction": "assign",  "amount": "กำหนด switch ใน Modes",
+             "reason": "ต้องมี mode switch ถึงจะใช้ได้"},
+        ],
+        "cli_template": [
+            "# ตั้งค่า Turtle Mode",
+            "set motor_pwm_protocol = DSHOT600   # ต้องเป็น DSHOT",
+            "# ใน Betaflight Configurator → Modes → เพิ่ม Flip Over After Crash",
+            "# กำหนด Channel ที่ต้องการ (เช่น AUX3)",
+            "# ใน ESC Configurator: ตั้ง Bidirectional mode = enabled",
+            "save",
+        ],
+        "tips": [
+            "Turtle mode ต้องใช้ DSHOT300/600 เสมอ — ตรวจก่อนอย่างอื่น",
+            "ถ้า motor บางตัวหมุนผิดทางตอน turtle → ตรวจ motor direction ใน BF",
+            "Motor ที่ไม่มีรู airflow อาจร้อนมากตอน turtle — ระวัง",
+            "ทดสอบ turtle บนพื้นก่อนใช้จริง",
+        ],
+    },
+
+    "video_breakup": {
+        "label": "ภาพ FPV แตก / สัญญาณ VTX หาย (Video breakup)",
+        "category": "vtx",
+        "diagnosis": (
+            "ภาพ FPV แตกหรือหายไประหว่างบิน มักเกิดจาก: "
+            "VTX ร้อนเกิน (over-temp throttle), แรงดันไฟตก (voltage sag) บน VTX, "
+            "antenna ไม่ดีหรือหัก, กำลังส่ง (power) ต่ำเกิน "
+            "หรือ channel ชน กับ VTX ตัวอื่นในพื้นที่"
+        ),
+        "primary_cause": "VTX ร้อน / แรงดันตก / antenna เสีย / channel ชน",
+        "adjustments": [
+            {"param": "vtx_power",   "direction": "เพิ่ม", "amount": "200mW+ สำหรับ outdoor",
+             "reason": "กำลังส่งต่ำทำให้ภาพแตกเมื่อระยะห่างขึ้น"},
+            {"param": "vtx_channel", "direction": "เปลี่ยน", "amount": "ใช้ channel ว่าง",
+             "reason": "Channel ชนทำให้ภาพแทรกกัน"},
+        ],
+        "cli_template": [
+            "# VTX Settings (ถ้าใช้ SmartAudio/IRC Tramp)",
+            "set vtx_power = 3               # level 3 = โดยทั่วไป 200mW (ขึ้นกับ VTX)",
+            "set vtx_channel = 6             # Raceband CH6 (ใช้กันน้อย)",
+            "set vtx_band = 5                # Raceband",
+            "# Hardware: ตรวจ solder ที่ connector VTX, ตรวจ capacitor 1000µF บน power",
+            "save",
+        ],
+        "tips": [
+            "ใส่ capacitor 470-1000µF บน power supply ของ VTX — ลด voltage sag",
+            "VTX ที่ไม่มี airflow จะ throttle down กำลังส่งเองเมื่อร้อน",
+            "Antenna ที่บิดงอหรือหัก ลดพิสัยมากกว่า 50%",
+            "ทดสอบ VTX บนพื้น: ถ้าภาพดี แต่บินแล้วแตก = voltage sag",
+            "SmartAudio: ใช้ OSD menu เปลี่ยน channel โดยไม่ต้อง land",
+        ],
+    },
 }
 
 
