@@ -8,6 +8,8 @@
 # - prop_logic ส่ง est_thrust, efficiency, pitch_speed กลับมา
 # ============================================================
 
+from dotenv import load_dotenv
+load_dotenv()
 from flask import (Flask, render_template, request, send_from_directory,
                    abort, send_file, jsonify, url_for)
 from logic.presets import (PRESETS, detect_class_from_size,
