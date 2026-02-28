@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <title>OBIXConfig Doctor — FPV Drone Tuning Tool</title>
-<meta name="description" content="เครื่องมือวิเคราะห์ PID / Filter / Motor / ESC / Rates สำหรับโดรน FPV ทุกขนาด — ชุมชน FPV ไทย">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% set og_title       = "OBIXConfig Doctor — FPV Drone Tuning Tool" %}
+{% set og_description = "เครื่องมือวิเคราะห์ PID · Filter · Motor · ESC · Rates สำหรับโดรน FPV ทุกขนาด — ชุมชน FPV ไทย" %}
+{% set og_url         = "https://configdoctor.onrender.com/landing" %}
+{% include "partials/og_tags.html" %}
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -813,7 +816,7 @@ footer {
     <div class="hero-label">OBIXCONFIG DOCTOR</div>
 
     <h1 class="hero-title">
-      จูนโดรน <span class="accent">FPV</span><br>ได้ง่าย | ได้ผล
+      จูนโดรน <span class="accent">FPV</span><br>ได้ง่าย — ได้ผล
       <span class="hero-title-en">TUNE SMARTER. FLY BETTER.</span>
     </h1>
 
