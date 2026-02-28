@@ -413,6 +413,91 @@ def basic_checks(params: Dict[str, Any]) -> List[Dict]:
         except (TypeError, ValueError):
             pass
 
+    # ─────────────────────────────────────────────────────────────────
+    # BUG FIX v2.1: Filter param naming (BF4.4+ uses *_static_hz)
+    # Real dumps: gyro_lpf1_STATIC_hz / dterm_lpf1_STATIC_hz
+    # cli_surgeon was reading 'gyro_lpf1_hz' (non-existent param)
+    # ─────────────────────────────────────────────────────────────────
+    _FILTER_ALIASES = {
+        'gyro_lpf1_hz':  ['gyro_lpf1_hz',  'gyro_lpf1_static_hz',  'gyro_lowpass_hz'],
+        'dterm_lpf1_hz': ['dterm_lpf1_hz', 'dterm_lpf1_static_hz', 'dterm_lowpass_hz'],
+    }
+    def _get_filter_param(p, aliases_map, key):
+        """Return first found value from aliases, or None."""
+        for alias in aliases_map.get(key, [key]):
+            if alias in p:
+                return p[alias]
+        return None
+
+    gyro_hz  = _get_filter_param(params, _FILTER_ALIASES, 'gyro_lpf1_hz')
+    dterm_hz = _get_filter_param(params, _FILTER_ALIASES, 'dterm_lpf1_hz')
+
+    # BF4.4+ Simplified Filter: when simplified_gyro_filter = ON,
+    # static_hz is 0 and actual freq = multiplier / 100 * 250 Hz
+    simplified_on = str(params.get('simplified_gyro_filter', '')).upper() == 'ON'
+    simplified_mult = params.get('simplified_gyro_filter_multiplier', None)
+    if simplified_on and simplified_mult is not None:
+        try:
+            gyro_hz = round(int(simplified_mult) / 100.0 * 250)
+        except (TypeError, ValueError):
+            pass
+    simplified_dterm_on = str(params.get('simplified_dterm_filter', '')).upper() == 'ON'
+    simplified_dterm_mult = params.get('simplified_dterm_filter_multiplier', None)
+    if simplified_dterm_on and simplified_dterm_mult is not None:
+        try:
+            dterm_hz = round(int(simplified_dterm_mult) / 100.0 * 120)
+        except (TypeError, ValueError):
+            pass
+
+    # Dynamic filter range (BF4.4+)
+    gyro_dyn_min = params.get('gyro_lpf1_dyn_min_hz', None)
+    gyro_dyn_max = params.get('gyro_lpf1_dyn_max_hz', None)
+    dterm_dyn_min = params.get('dterm_lpf1_dyn_min_hz', None)
+    dterm_dyn_max = params.get('dterm_lpf1_dyn_max_hz', None)
+    is_dynamic_gyro  = gyro_dyn_min is not None and int(gyro_dyn_min) > 0
+    is_dynamic_dterm = dterm_dyn_min is not None and int(dterm_dyn_min) > 0
+
+    # Use dyn min as effective Hz if dynamic mode active
+    if is_dynamic_gyro and gyro_hz == 0:
+        gyro_hz = gyro_dyn_min
+    if is_dynamic_dterm and dterm_hz == 0:
+        dterm_hz = dterm_dyn_min
+
+    # Filter checks
+    if gyro_hz is not None:
+        try:
+            ghz = float(gyro_hz)
+            mode_desc = "dynamic" if is_dynamic_gyro else ("simplified" if simplified_on else "static")
+            if ghz > 400:
+                _add_rule(rules, 'gyro_lpf_very_high', 'warning',
+                    f'Gyro LPF1 = {int(ghz)}Hz ({mode_desc}) — สูงมาก แทบไม่ filter',
+                    'แนะนำ 150-300Hz: set gyro_lpf1_static_hz = 200 หรือใช้ Simplified filter')
+            elif ghz > 0 and ghz < 80:
+                _add_rule(rules, 'gyro_lpf_very_low', 'warning',
+                    f'Gyro LPF1 = {int(ghz)}Hz ({mode_desc}) — ต่ำมาก อาจเพิ่ม latency',
+                    'ลองเพิ่ม: set gyro_lpf1_static_hz = 150')
+        except (TypeError, ValueError):
+            pass
+
+    if dterm_hz is not None:
+        try:
+            dhz = float(dterm_hz)
+            if dhz > 200:
+                _add_rule(rules, 'dterm_lpf_high', 'warning',
+                    f'D-term LPF1 = {int(dhz)}Hz — สูง อาจ amplify noise ใน D-term',
+                    'แนะนำ 80-150Hz: set dterm_lpf1_static_hz = 110')
+            elif dhz > 0 and dhz < 60:
+                _add_rule(rules, 'dterm_lpf_low', 'info',
+                    f'D-term LPF1 = {int(dhz)}Hz — ต่ำมาก อาจทำให้ D-term sluggish',
+                    'ลองเพิ่ม: set dterm_lpf1_static_hz = 100')
+        except (TypeError, ValueError):
+            pass
+
+    if simplified_on:
+        _add_rule(rules, 'simplified_filter_on', 'info',
+            f'Simplified Gyro Filter ON (multiplier={simplified_mult}) → effective ~{gyro_hz}Hz — BF4.4+ default',
+            'ตรวจสอบ filter multiplier ให้เหมาะกับ noise level ของ build คุณ')
+
     # --- motor_poles ---
     motor_poles = params.get('motor_poles', None)
     if motor_poles is not None:
