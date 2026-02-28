@@ -113,10 +113,32 @@ def analyze(
         thrust_per_motor_g = hover_thrust_total_g / float(motors)
 
     # Empirical power estimate per motor (rule-based)
-    # Use heuristic W_per_gram = 0.12 W/g (common multicopter hover heuristic)
-    W_PER_GRAM = 0.12
-    power_per_motor_w = thrust_per_motor_g * W_PER_GRAM
-    total_power_w = power_per_motor_w * motors
+    # FIX v4: size-dependent W/g (0.12 คงที่ทำให้โดรนเล็กคำนวณผิดมาก)
+    # Source: bench data + community telemetry
+    _W_PER_G_TABLE = {
+        2.5: 0.50, 3.0: 0.35, 3.5: 0.27, 4.0: 0.20,
+        4.5: 0.18, 5.0: 0.16, 5.5: 0.17, 6.0: 0.22,
+        7.0: 0.12, 8.0: 0.10, 10.0: 0.09,
+    }
+    _sizes = sorted(_W_PER_G_TABLE.keys())
+    _s = float(size_inch or 5.0)
+    if _s <= _sizes[0]:
+        W_PER_GRAM = _W_PER_G_TABLE[_sizes[0]]
+    elif _s >= _sizes[-1]:
+        W_PER_GRAM = _W_PER_G_TABLE[_sizes[-1]]
+    else:
+        for _i in range(len(_sizes) - 1):
+            _lo, _hi = _sizes[_i], _sizes[_i + 1]
+            if _lo <= _s <= _hi:
+                _t = (_s - _lo) / (_hi - _lo)
+                W_PER_GRAM = _W_PER_G_TABLE[_lo] + _t * (_W_PER_G_TABLE[_hi] - _W_PER_G_TABLE[_lo])
+                break
+        else:
+            W_PER_GRAM = 0.16
+    # hover power = weight × W/g (ไม่ใช่ thrust×W/g เพราะ thrust ที่ส่งมาคือ 2× weight)
+    # ใช้ weight โดยตรงเพื่อความถูกต้อง
+    total_power_w = W_PER_GRAM * weight_g
+    power_per_motor_w = total_power_w / float(motors)
 
     # Current and C-rating
     current_a = total_power_w / pack_voltage_nominal if pack_voltage_nominal > 0 else 0.0
@@ -351,11 +373,17 @@ def make_advanced_report(
         # battery energy (Wh)
         battery_wh = round((batt_mAh_used / 1000.0) * pack_voltage, 2)
 
-        # estimate flight time (minutes): use total_power_w (W). Avoid divide-by-zero.
+        # estimate flight time with style-based model (ไม่ใช่แค่ Wh/power)
+        # เพราะ total_power_w = hover power ไม่ใช่ average power
+        _STYLE_FACTORS = {
+            "freestyle": 1.55, "racing": 2.00,
+            "longrange": 1.05, "cine": 1.25,
+        }
+        _usable_wh = battery_wh  # already calculated above with 0.85 factor
+        _style_factor = _STYLE_FACTORS.get(str(style).lower(), 1.55)
         if total_power_w > 0:
-            est_flight_time_min = int(max(0, round((battery_wh / total_power_w) * 60.0)))
-            # aggressive uses a simple multiplier (higher power)
-            est_flight_time_min_aggressive = int(max(0, round((battery_wh / (total_power_w * 1.8)) * 60.0)))
+            est_flight_time_min = int(max(0, round((_usable_wh / (total_power_w * _style_factor)) * 60.0)))
+            est_flight_time_min_aggressive = int(max(0, round((_usable_wh / (total_power_w * _style_factor * 1.35)) * 60.0)))
         else:
             est_flight_time_min = 0
             est_flight_time_min_aggressive = 0
