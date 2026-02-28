@@ -34,7 +34,7 @@
         <a href="/"><img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="OBIX" class="logo"></a>
         <div>
           <div style="font-weight:700">OBIXConfig Doctor</div>
-          <div class="meta">Changelog — v1.0lite</div>
+          <div class="meta">Changelog — v2.1</div>
         </div>
       </div>
       <div class="meta" style="text-align:right">
@@ -44,33 +44,62 @@
     </header>
 
     <section class="card" aria-labelledby="latest">
-      <h1 id="latest">Release: v1.0.1BETA</h1>
-      <div class="meta">เบื้องต้น / เบา / เหมาะสำหรับหน้า release สั้น ๆ — แสดงรายการสำคัญของเวอร์ชัน</div>
-
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- v2.1 — Bug Fixes & Filter Intelligence                  -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <h1 id="latest" style="color:#10c47a;">🔧 v2.1 — Filter Intelligence Update</h1>
+      <div class="meta">01/03/2026 · Physics & Parser Accuracy Patch</div>
       <ul>
-        <li><strong>เริ่มต้น (Lite)</strong> — รวมฟีเจอร์พื้นฐานสำหรับวิเคราะห์ CLI / diff</li>
-        <li><strong>เพิ่ม:</strong> หน้า Changelog แบบสั้น (v1.0.1beta)</li>
-        <li><strong>เพิ่ม:</strong> Drawer menu, Quick Links, Preset autofill (สรุป)</li>
-        <li><strong>ปรับปรุง:</strong> UI สำหรับมือถือ, dark theme เบื้องต้น</li>
-        <li><strong>แก้บัค:</strong> ตรวจ input เบื้องต้นก่อนวิเคราะห์ (basic validation)</li>
+        <li><strong>แก้บัค Critical:</strong> CLI Surgeon ตรวจ <code>gyro_lpf1_static_hz</code> / <code>dterm_lpf1_static_hz</code> ได้ถูกต้องแล้ว (BF4.4+ ใช้ชื่อ parameter ต่างจากเดิม)</li>
+        <li><strong>เพิ่ม:</strong> รองรับ <code>simplified_gyro_filter</code> — คำนวณ effective Hz จาก multiplier อัตโนมัติ</li>
+        <li><strong>เพิ่ม:</strong> ตรวจ Dynamic Filter range (<code>dyn_min_hz</code> / <code>dyn_max_hz</code>)</li>
+        <li><strong>แก้บัค:</strong> แบตเตอรี่เริ่มต้น 7" 6S ปรับเป็น 2200mAh (ค่าจริงจาก community)</li>
+        <li><strong>ปรับปรุง:</strong> Filter warnings ทำงานกับ dump ไฟล์จริงทุกเวอร์ชัน BF4.3-4.5</li>
       </ul>
 
-<small style="color:#999;">12/02: (28/02/2026 deploy)</small>
-      </article>
+      <hr style="border:none;border-top:1px solid rgba(255,255,255,0.06);margin:18px 0;">
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- v2.0 — Major Release                                    -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <h2 style="color:#f1b65a;margin-top:0;">🚀 v2.0 — Size-Aware Physics Engine</h2>
+      <div class="meta">01/03/2026 · Major Accuracy Overhaul</div>
+      <ul>
+        <li><strong>แก้บัค Critical:</strong> Flight time คำนวณต่างกันตามขนาด prop — 3" whoop 4.8 min (เดิม 11.7 min ผิด), 5" freestyle 6.1 min ✅</li>
+        <li><strong>เพิ่ม Size-Dependent Power Model:</strong> W/g แตกต่างตาม prop size (2.5"=0.50 ถึง 10"=0.09 W/g)</li>
+        <li><strong>เพิ่ม Symptom Advisor:</strong> 13 อาการ → แก้ไข (เดิม 8) รวม ESC Desync, กันลม, ไม่ ARM, Turtle mode, VTX breakup</li>
+        <li><strong>เพิ่ม CLI Surgeon checks:</strong> DSHOT protocol, Bidirectional DShot, iterm_relax, TPA, vbat_pid_gain, thrust_linear, motor_poles, feedforward</li>
+        <li><strong>เพิ่ม Support Section:</strong> PromptPay QR พร้อมระบบ reveal ในหน้า Landing</li>
+        <li><strong>ปรับปรุง:</strong> advanced_analysis.py ใช้ size-dependent power model เดียวกัน</li>
+      </ul>
+
+      <hr style="border:none;border-top:1px solid rgba(255,255,255,0.06);margin:18px 0;">
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- v1.1 — Stable Release                                   -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <h2 style="color:#98a6b8;margin-top:0;">v1.1 — Stable Foundation</h2>
+      <div class="meta">28/02/2026</div>
+      <ul>
+        <li><strong>เพิ่ม:</strong> Drawer menu, Quick Links, Preset autofill</li>
+        <li><strong>เพิ่ม:</strong> หน้า Changelog</li>
+        <li><strong>ปรับปรุง:</strong> UI สำหรับมือถือ, dark theme</li>
+        <li><strong>แก้บัค:</strong> ตรวจ input ก่อนวิเคราะห์ (basic validation)</li>
+      </ul>
 
       <article style="margin-top:16px;">
-        <h3>v1.0.1beta — Initial release</h3>
+        <h3 style="color:#98a6b8;">v1.0.1beta — Initial release</h3>
         <ul>
           <li>เริ่มต้นหน้าแอปวิเคราะห์ค่า PID/Filter</li>
           <li>เพิ่ม Quick Summary, Preset Box, CLI Presets</li>
         </ul>
-        <small style="color:#999;">วันที่ปรับปรุง: (29/02/2026 deploy)</small>
+        <small style="color:#999;">วันที่ปรับปรุง: 12/02/2026</small>
       </article>
 
       <p style="margin-top:18px;">ต้องการให้เพิ่ม item ไหนใน changelog แจ้งได้ที่เพจ: <a href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener">OBIXConfig Lab</a></p>
 
       <p style="margin-top:20px; font-size:0.95rem; color:#999;">
-        OBIXConfig Doctor • v1.1beta
+        OBIXConfig Doctor • v2.1
       </p>
     </section>
   </main>
