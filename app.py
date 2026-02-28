@@ -227,7 +227,7 @@ def analyze_drone(size, battery, style, prop_result, weight, detected_class=None
 
     # ── Flight time (style-aware) ──────────────────────────────────────
     try:
-        analysis["battery_est"] = estimate_battery_runtime(weight, battery, style=style)
+        analysis["battery_est"] = estimate_battery_runtime(weight, battery, style=style, size_inch=float(size or 5.0))
     except Exception:
         analysis["battery_est"] = 0
 
@@ -418,7 +418,7 @@ def index():
 
         # ── Flight time detail (style-aware) ─────────────────────────
         try:
-            ft_detail = estimate_battery_runtime_detail(weight, battery, battery_mAh, style)
+            ft_detail = estimate_battery_runtime_detail(weight, battery, battery_mAh, style, float(size or 5.0))
             analysis["flight_time_detail"] = ft_detail
             # Override with style-accurate value if advanced didn't provide
             analysis.setdefault("est_flight_time_min", ft_detail.get("avg_flight_min"))
