@@ -1,6 +1,6 @@
 {#
-  partials/og_tags.html — OBIXConfig Doctor
-  ══════════════════════════════════════════
+  partials/og_tags.html — OBIXConfig Doctor v2.2
+  ══════════════════════════════════════════════
   วิธีใช้ใน template อื่น:
     {% set og_title       = "ชื่อหน้า — OBIXConfig Doctor" %}
     {% set og_description = "คำอธิบายหน้านี้" %}
@@ -8,23 +8,24 @@
     {% set og_image       = "https://configdoctor.onrender.com/static/img/og-default.jpg" %}
     {% include "partials/og_tags.html" %}
 
-  ถ้าไม่ set ตัวแปร จะใช้ค่า default ของ landing page
+  ตัวแปรเพิ่มเติม (optional):
+    {% set jsonld_extra = ',"inLanguage":"th"' %}
 #}
 
 {% set _title = og_title       | default("OBIXConfig Doctor — FPV Drone Tuning Tool") %}
-{% set _desc  = og_description | default("เครื่องมือวิเคราะห์ PID · Filter · Motor · ESC · Rates สำหรับโดรน FPV ทุกขนาด — ชุมชน FPV ไทย") %}
+{% set _desc  = og_description | default("เครื่องมือวิเคราะห์ PID · Filter · Motor · ESC · Blackbox สำหรับโดรน FPV ทุกขนาด — ชุมชน FPV ไทย") %}
 {% set _url   = og_url         | default("https://configdoctor.onrender.com") %}
 {% set _img   = og_image       | default("https://configdoctor.onrender.com/static/img/og-default.jpg") %}
 {% set _site  = "OBIXConfig Doctor" %}
 
-<!-- ══ Primary Meta ══════════════════════════════════════════ -->
+<!-- ══ Primary Meta ══════════════════════════════════════════════ -->
 <meta name="description"        content="{{ _desc }}">
 <meta name="author"             content="OBIXConfig Lab">
-<meta name="keywords"           content="FPV, Betaflight, PID tuning, drone, โดรน, CLI, filter, RPM, rates, ESC, motor, prop, ไทย">
+<meta name="keywords"           content="FPV, Betaflight, PID tuning, drone, โดรน, CLI, filter, RPM filter, rates, ESC, motor, prop, blackbox, blackbox analyzer, ไทย, FPV Thailand, propwash, oscillation, tuning">
 <meta name="robots"             content="index, follow">
 <meta name="theme-color"        content="#10c47a">
 
-<!-- ══ Open Graph (Facebook · LINE · Messenger · Discord) ═══ -->
+<!-- ══ Open Graph (Facebook · LINE · Messenger · Discord) ═══════ -->
 <meta property="og:type"        content="website">
 <meta property="og:site_name"   content="{{ _site }}">
 <meta property="og:title"       content="{{ _title }}">
@@ -37,12 +38,49 @@
 <meta property="og:locale"      content="th_TH">
 <meta property="og:locale:alternate" content="en_US">
 
-<!-- ══ Twitter Card ════════════════════════════════════════════ -->
+<!-- ══ Twitter Card ═════════════════════════════════════════════ -->
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="{{ _title }}">
 <meta name="twitter:description" content="{{ _desc }}">
 <meta name="twitter:image"       content="{{ _img }}">
 <meta name="twitter:image:alt"   content="{{ _title }}">
 
-<!-- ══ Canonical URL ══════════════════════════════════════════ -->
+<!-- ══ Canonical URL ════════════════════════════════════════════ -->
 <link rel="canonical" href="{{ _url }}">
+
+<!-- ══ JSON-LD Structured Data ══════════════════════════════════ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "{{ _title }}",
+  "description": "{{ _desc }}",
+  "url": "{{ _url }}",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "THB"
+  },
+  "inLanguage": "th",
+  "publisher": {
+    "@type": "Organization",
+    "name": "OBIXConfig Lab",
+    "url": "https://configdoctor.onrender.com"
+  },
+  "featureList": [
+    "PID Tuning Analyzer",
+    "Blackbox CSV Analyzer",
+    "CLI Surgeon",
+    "PID Symptom Advisor",
+    "RPM Filter Calculator",
+    "Motor Prop Recommender",
+    "ESC Compatibility Checker",
+    "Rates Visualizer",
+    "CLI Diff Comparator",
+    "OSD Designer",
+    "VTX Range Calculator"
+  ]{{ jsonld_extra | default("") }}
+}
+</script>
