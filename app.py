@@ -1,11 +1,8 @@
-# app.py — OBIXConfig Doctor (v3 — improved accuracy)
+# app.py — OBIXConfig Doctor v2.2
 # ============================================================
-# v3 IMPROVEMENTS:
-# - analyze_drone() รับ detected_class → PID ถูกต้อง class+style
-# - get_pid_for_class_style() ใช้ BF4.4/4.5 I-term 80-100
-# - Filter แสดง gyro LPF1, LPF2, dterm LPF1, LPF2, RPM filter, anti-gravity
-# - estimate_battery_runtime() ใช้ style-based power factor
-# - prop_logic ส่ง est_thrust, efficiency, pitch_speed กลับมา
+# v2.2 — Blackbox CSV Analyzer + Full Tool Suite
+# Tools: PID/Filter · Blackbox · CLI Surgeon · PID Advisor
+#        RPM Filter · ESC Checker · Rates · VTX · OSD · Motor
 # ============================================================
 
 # ── Load .env สำหรับ local dev (ถ้ามี python-dotenv) ──────────────────────
@@ -798,6 +795,7 @@ def sitemap_xml():
     from flask import Response
     pages = [
         ("/landing",          "weekly",  "1.0"),
+        ("/blackbox",          "weekly",  "1.0"),
         ("/app",              "weekly",  "0.9"),
         ("/cli_surgeon",      "weekly",  "0.9"),
         ("/pid-advisor",      "weekly",  "0.9"),
@@ -810,7 +808,6 @@ def sitemap_xml():
         ("/vtx",              "monthly", "0.6"),
         ("/vtx-range",        "monthly", "0.6"),
         ("/vtx-smartaudio",   "monthly", "0.6"),
-        ("/blackbox",          "weekly",  "0.9"),
         ("/downloads",        "weekly",  "0.7"),
         ("/fpv",              "monthly", "0.6"),
         ("/about",            "monthly", "0.5"),
