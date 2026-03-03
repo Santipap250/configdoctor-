@@ -30,3 +30,11 @@ input, select{display:block;width:100%;padding:10px;border-radius:8px;border:1px
 .v{font-weight:700}
 .cli{background:#07111a;color:#bde3ff;padding:10px;border-radius:8px;overflow:auto}
 .muted{color:var(--muted)}
+/* ── Responsive ── */
+html, body, .tool-shell { overflow-x: hidden; }
+input, select { font-size: 16px !important; min-height: 44px; }
+@media(max-width: 480px) {
+  .tool-shell  { padding: 10px; }
+  .tool-header { flex-direction: column; gap: 6px; }
+  .tool-header h1 { font-size: 1.05rem; }
+}
