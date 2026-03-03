@@ -1,272 +1,603 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="utf-8" />
+<meta charset="utf-8">
 <title>VTX Bands & Channels — OBIXConfig Doctor</title>
 {% set og_title       = "VTX Bands & Channels — OBIXConfig Doctor" %}
-{% set og_description = "ตาราง VTX Band และ Channel พร้อมคำสั่ง CLI ตัวอย่างสำหรับโดรน FPV" %}
+{% set og_description = "ตาราง VTX Band/Channel ครบทุก Band พร้อม SmartAudio · Tramp CLI command — FPV community tool 🇹🇭" %}
 {% set og_url         = "https://configdoctor.onrender.com/vtx" %}
 {% include "partials/og_tags.html" %}
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <style>
-/* small overrides for vtx page */
-.vtx-page { max-width: 980px; margin: 18px auto; padding: 14px; }
-.vtx-hero { display:flex; gap:14px; align-items:center; margin-bottom:12px; }
-.vtx-card { padding:14px; border-radius:12px; background:linear-gradient(135deg,#0f1511,#0b0f0c); box-shadow:0 10px 28px rgba(0,0,0,0.45); }
-.vtx-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px; margin-top:12px; }
-.small { font-size:0.92rem; opacity:0.9; }
-.kv { font-weight:700; }
-.freq-out { font-family:monospace; font-size:1.05rem; padding:8px; border-radius:8px; background:rgba(255,255,255,0.02); }
-.copy-btn { padding:8px 10px; border-radius:8px; background:#238636; color:#fff; border:0; cursor:pointer; }
-.warn { background:#fff4e5; color:#804b00; padding:8px; border-radius:8px; margin-top:10px; }
-.table { width:100%; border-collapse:collapse; margin-top:8px; }
-.table th, .table td { padding:6px 8px; text-align:left; border-bottom:1px solid rgba(255,255,255,0.03); font-size:0.95rem; }
-.note { opacity:0.85; font-size:0.9rem; margin-top:8px; }
+/* ── VTX Page Specific ── */
+.vtx-band-matrix { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; margin: 14px 0; }
+.vtx-band-matrix .band-header {
+  font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em;
+  color: var(--muted); text-align: center; padding: 5px 2px;
+}
+.ch-cell {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 3px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .15s;
+  position: relative;
+}
+.ch-cell:hover { border-color: rgba(255,255,255,0.16); transform: translateY(-1px); }
+.ch-cell.selected {
+  background: var(--green-dim);
+  border-color: rgba(16,196,122,0.45);
+  box-shadow: 0 0 10px rgba(16,196,122,0.18);
+}
+.ch-cell.selected .ch-freq { color: var(--green); }
+.ch-cell.selected .ch-label { color: var(--green); font-weight: 700; }
+.ch-num { font-size: 0.60rem; color: var(--muted); display: block; }
+.ch-freq { font-size: 0.72rem; font-family: var(--mono); color: var(--text); display: block; margin-top: 2px; font-weight: 600; }
+.ch-label { font-size: 0.62rem; color: var(--muted); display: block; margin-top: 1px; }
+
+/* Band row labels */
+.band-row-label {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 0 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+}
+.band-row-label .band-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.band-row-label span { font-size: 0.78rem; font-weight: 700; }
+
+/* Power bar */
+.pwr-bar-wrap { position: relative; height: 8px; background: var(--bg-elevated); border-radius: 4px; overflow: hidden; margin-top: 6px; }
+.pwr-bar-fill { height: 100%; border-radius: 4px; transition: width .3s ease, background .3s; }
+
+/* Protocol tabs */
+.proto-tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.proto-tab {
+  padding: 6px 14px; border-radius: 20px;
+  font-size: 0.78rem; font-weight: 700;
+  background: rgba(255,255,255,0.04); color: var(--muted);
+  border: 1px solid var(--border); cursor: pointer; transition: all .15s;
+}
+.proto-tab.active { background: var(--green-dim); color: var(--green); border-color: rgba(16,196,122,0.3); }
+.proto-tab:hover:not(.active) { background: rgba(255,255,255,0.07); color: var(--text); }
+
+/* Channel info display */
+.ch-info-card {
+  background: linear-gradient(135deg, #0c1810, #0a1014);
+  border: 1px solid rgba(16,196,122,0.15);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  position: relative; overflow: hidden;
+}
+.ch-info-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(16,196,122,0.3), transparent);
+}
+.ch-info-freq {
+  font-family: var(--font-display); font-size: 2.2rem; font-weight: 700;
+  color: var(--green); line-height: 1;
+  text-shadow: 0 0 30px rgba(16,196,122,0.35);
+}
+.ch-info-freq span { font-size: 1rem; color: var(--muted); font-weight: 400; margin-left: 4px; }
+.ch-info-band { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+
+/* CLI output enhanced */
+.cli-output-box {
+  background: #050810;
+  border: 1px solid rgba(16,196,122,0.12);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  font-family: var(--mono); font-size: 0.82rem;
+  color: #9dbfda; line-height: 1.65;
+  min-height: 68px; position: relative;
+  overflow-x: auto;
+}
+.cli-comment { color: #4a6a5a; }
+.cli-cmd { color: #10c47a; }
+.cli-val { color: #58a6ff; }
+
+/* Conflict indicator */
+.conflict-dot {
+  position: absolute; top: 4px; right: 4px;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--red);
+  animation: conflictBlink 1s ease-in-out infinite;
+}
+@keyframes conflictBlink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* Freq table enhanced */
+.vtx-freq-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+.vtx-freq-table th {
+  padding: 7px 10px; text-align: left; font-size: 0.68rem; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+.vtx-freq-table td { padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,0.025); }
+.vtx-freq-table tr:hover td { background: rgba(255,255,255,0.025); }
+.vtx-freq-table tr.highlighted td { background: var(--green-dim); }
+.vtx-freq-table tr.highlighted .td-freq { color: var(--green); font-weight: 700; }
+.band-badge {
+  display: inline-block; padding: 1px 7px; border-radius: 10px;
+  font-size: 0.65rem; font-weight: 700; letter-spacing: .04em;
+}
+
+/* Info cards row */
+.info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 12px; }
+.info-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 14px;
+}
+.info-card h4 { font-size: 0.78rem; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .05em; }
+.info-card p  { font-size: 0.82rem; color: var(--text); line-height: 1.55; }
+
+@media (max-width: 600px) {
+  .vtx-band-matrix { grid-template-columns: repeat(4, 1fr); }
+  .ch-info-freq { font-size: 1.7rem; }
+}
+@media (max-width: 420px) {
+  .vtx-band-matrix { grid-template-columns: repeat(4, 1fr); }
+}
 </style>
+<script>
+(function(){
+  var t = localStorage.getItem('theme') || 'dark';
+  document.documentElement.className = t;
+  document.addEventListener('DOMContentLoaded', function(){ document.body.classList.add(t); });
+})();
+function toggleTheme(){
+  var isDark = document.body.classList.contains('dark');
+  document.body.classList.toggle('dark', !isDark);
+  document.body.classList.toggle('light', isDark);
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+}
+</script>
 </head>
 <body class="dark">
-  <div class="top-bar center-logo" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-    <div style="display:flex; align-items:center; gap:10px;">
-      <button id="hamburgerBtn" class="hamburger" aria-label="เปิดเมนู" aria-controls="drawer" aria-expanded="false">
-        <span class="lines" aria-hidden="true"><span></span><span></span><span></span></span>
-      </button>
-      <img src="{{ url_for('static', filename='img/obix-logo.png') }}" class="logo" style="height:34px;">
-    </div>
 
-    <div style="display:flex; align-items:center; gap:8px;">
-      <button class="toggle-theme" onclick="toggleTheme()">🌗</button>
+<!-- ── TOP BAR ── -->
+<div class="top-bar">
+  <div class="top-left">
+    <button id="hamburgerBtn" class="hamburger" aria-label="เปิดเมนู" aria-expanded="false">
+      <span class="lines" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <a href="/landing">
+      <img src="{{ url_for('static', filename='img/obix-logo.png') }}" class="logo" alt="OBIXConfig Doctor">
+    </a>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <a href="/app" class="btn-ghost" style="padding:6px 12px;font-size:.82rem;">🏠 หน้าหลัก</a>
+    <button class="toggle-theme" onclick="toggleTheme()">🌗</button>
+  </div>
+</div>
+
+<!-- ── OVERLAY + DRAWER (reuse main) ── -->
+<div id="overlay" class="overlay" tabindex="-1" aria-hidden="true"></div>
+<aside id="drawer" class="drawer" role="dialog" aria-modal="true" hidden>
+  <div class="drawer-header">
+    <div class="drawer-brand">
+      <div class="drawer-brand-icon">🚁</div>
+      <div>
+        <div class="drawer-brand-name">OBIX Config Doctor</div>
+        <div class="drawer-brand-sub">FPV Tuning Toolkit · v2.2</div>
+      </div>
+    </div>
+    <button id="closeDrawer" class="drawer-close">✕</button>
+  </div>
+  <nav class="drawer-nav">
+    <div class="drawer-group-label">หน้าหลัก</div>
+    <a class="drawer-link" href="/app"><span class="dl-icon-wrap green">🏠</span><span class="dl-body"><span class="dl-title">Drone Analyzer</span><span class="dl-meta">วิเคราะห์ PID · Filter · Motor</span></span></a>
+    <div class="drawer-divider"></div>
+    <div class="drawer-group-label">🔧 เครื่องมือ</div>
+    <a class="drawer-link" href="/motor-prop"><span class="dl-icon-wrap blue">🧭</span><span class="dl-body"><span class="dl-title">Motor × Prop Recommender</span><span class="dl-meta">แนะนำมอเตอร์/ใบพัดตามสเปค</span></span></a>
+    <a class="drawer-link" href="/cli_surgeon"><span class="dl-icon-wrap gold">🩺</span><span class="dl-body"><span class="dl-title">CLI Surgeon</span><span class="dl-meta">วิเคราะห์ diff all / dump</span></span></a>
+    <a class="drawer-link" href="/pid-advisor"><span class="dl-icon-wrap purple">💊</span><span class="dl-body"><span class="dl-title">PID Symptom Advisor</span><span class="dl-meta">บอกอาการ → รับคำแนะนำ PID</span></span><span class="dl-pill new">new</span></a>
+    <a class="drawer-link" href="/rpm-filter"><span class="dl-icon-wrap green">⚙️</span><span class="dl-body"><span class="dl-title">RPM Filter Calculator</span><span class="dl-meta">คำนวณ harmonic + dyn_notch</span></span><span class="dl-pill new">new</span></a>
+    <a class="drawer-link" href="/rates-visualizer"><span class="dl-icon-wrap blue">📈</span><span class="dl-body"><span class="dl-title">Rates Visualizer</span><span class="dl-meta">curve real-time + CLI command</span></span><span class="dl-pill new">new</span></a>
+    <div class="drawer-divider"></div>
+    <div class="drawer-group-label">⚡ ขั้นสูง</div>
+    <a class="drawer-link" href="/cli-comparator"><span class="dl-icon-wrap gold">⚖️</span><span class="dl-body"><span class="dl-title">CLI Diff Comparator</span></span><span class="dl-pill new">new</span></a>
+    <a class="drawer-link" href="/esc-checker"><span class="dl-icon-wrap gold">⚡</span><span class="dl-body"><span class="dl-title">ESC Compatibility Checker</span></span><span class="dl-pill new">new</span></a>
+    <a class="drawer-link" href="/blackbox"><span class="dl-icon-wrap blue">📊</span><span class="dl-body"><span class="dl-title">Blackbox CSV Analyzer</span></span><span class="dl-pill hot">NEW</span></a>
+    <div class="drawer-divider"></div>
+    <div class="drawer-group-label">📡 VTX & Signal</div>
+    <a class="drawer-link active" href="/vtx"><span class="dl-icon-wrap green">📡</span><span class="dl-body"><span class="dl-title">VTX Bands & Channels</span><span class="dl-meta">ตาราง Band/Channel + CLI</span></span><span class="dl-pill">tool</span></a>
+    <a class="drawer-link" href="/vtx-range"><span class="dl-icon-wrap blue">🏞️</span><span class="dl-body"><span class="dl-title">VTX Range Calculator</span><span class="dl-meta">ประมาณระยะสัญญาณ + กราฟ</span></span><span class="dl-pill">tool</span></a>
+    <div class="drawer-divider"></div>
+    <div class="drawer-group-label">📚 แหล่งข้อมูล</div>
+    <a class="drawer-link" href="/downloads"><span class="dl-icon-wrap">📁</span><span class="dl-body"><span class="dl-title">ไฟล์ DIFF และ DUMP</span></span></a>
+    <a class="drawer-link" href="https://www.facebook.com/banmysanti/" target="_blank"><span class="dl-icon-wrap blue">📘</span><span class="dl-body"><span class="dl-title">เพจ OBIXConfig Lab</span></span><span class="dl-pill">open</span></a>
+    <a class="drawer-link" href="/about"><span class="dl-icon-wrap">ℹ️</span><span class="dl-body"><span class="dl-title">เกี่ยวกับ</span></span><span class="dl-pill">info</span></a>
+    <a class="drawer-link" href="/changelog"><span class="dl-icon-wrap green">📝</span><span class="dl-body"><span class="dl-title">Changelog</span></span><span class="dl-pill">v2.2</span></a>
+  </nav>
+  <div class="drawer-footer"><div class="drawer-footer-text">OBIXConfig Doctor &nbsp;·&nbsp; <span class="drawer-footer-ver">v2.2</span><br>Developed for FPV community 🇹🇭</div></div>
+</aside>
+
+<!-- ── CONTENT ── -->
+<div class="container">
+
+  <!-- PAGE HERO -->
+  <div class="page-hero">
+    <div class="page-hero-label">OBIXConfig Doctor · VTX Tools</div>
+    <div class="page-hero-title">📡 VTX Band & Channel Helper</div>
+    <div class="page-hero-sub">เลือก Band / Channel · สร้าง CLI command · ตรวจ channel conflict</div>
+    <div class="page-hero-badges">
+      <span class="hero-badge green">SmartAudio</span>
+      <span class="hero-badge blue">Tramp</span>
+      <span class="hero-badge gold">5.8 GHz FPV</span>
     </div>
   </div>
 
-  <div class="container vtx-page">
-    <div class="vtx-hero">
-      <div style="flex:1">
-        <h1 style="margin:0;">📡 VTX — Band & Channel Helper</h1>
-        <div class="small">ช่วยเลือก band / channel และดูความถี่ที่เกี่ยวข้อง — คัดลอกคำสั่งแบบง่ายไปใช้กับ VTX (ตัวอย่าง)</div>
-      </div>
-      <div style="display:flex; gap:8px; align-items:center;">
-        <a class="btn-ghost" href="/downloads" title="ไฟล์ DIFF และ DUMP">📁 ไฟล์ DIFF</a>
-        <a class="btn-primary" href="/" title="กลับหน้าแรก">🏠 กลับ</a>
-      </div>
-    </div>
+  <!-- MAIN VTX CARD -->
+  <div class="form-card">
 
-    <div class="vtx-card">
-      <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
-        <div style="flex:1; min-width:260px;">
-          <label class="small">เลือก Band</label>
-          <select id="bandSelect" class="form-control">
-            <option value="">-- เลือก band --</option>
-            <option value="race">Raceband (R)</option>
-            <option value="fatshark_a">FatShark A</option>
-            <option value="fatshark_b">FatShark B</option>
-            <option value="fatshark_e">FatShark E</option>
-            <option value="fatshark_f">FatShark F</option>
-            <option value="manual">Manual / Custom (กรอกความถี่เอง)</option>
-          </select>
-        </div>
-
-        <div style="min-width:200px;">
-          <label class="small">Channel / Number</label>
-          <select id="chSelect" class="form-control">
-            <option value="">-- เลือก channel --</option>
-          </select>
-        </div>
-
-        <div style="min-width:170px;">
-          <label class="small">Power / PWR</label>
-          <select id="pwrSelect" class="form-control">
-            <option value="25">25 mW</option>
-            <option value="200">200 mW</option>
-            <option value="600">600 mW</option>
-            <option value="1000">1 W</option>
-          </select>
-        </div>
-
-        <div style="min-width:220px;">
-          <label class="small">Frequency</label>
-          <div id="freqDisplay" class="freq-out">— MHz</div>
-        </div>
-      </div>
-
-      <div class="note">
-        <strong>หมายเหตุ:</strong> ตารางด้านล่างเป็นค่าความถี่มาตรฐานที่ใช้กันทั่วไป — ก่อนบินหรือเปลี่ยนกำลัง ควรตรวจสอบกฎหมาย/ข้อบังคับท้องถิ่น และสเปค VTX/แอนเทนน่า ของคุณเสมอ.
-      </div>
-
-      <div class="vtx-grid">
+    <!-- CHANNEL INFO DISPLAY -->
+    <div class="ch-info-card" id="chInfoCard">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
         <div>
-          <h4 style="margin:8px 0;">ผลลัพธ์ (คัดลอก)</h4>
-          <pre id="smartAudioCmd" class="cli-snippet">โปรดเลือก band และ channel เพื่อดูคำสั่งตัวอย่าง</pre>
-          <div style="display:flex; gap:8px; margin-top:8px;">
-            <button class="copy-btn" onclick="copyResult()">คัดลอกคำสั่ง</button>
-            <button class="btn-ghost" onclick="fillManual()">ใส่ความถี่ด้วยมือ</button>
+          <div class="ch-info-freq" id="chInfoFreq">— <span>MHz</span></div>
+          <div class="ch-info-band" id="chInfoBand">เลือก Band และ Channel จากตารางด้านล่าง</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:4px;">Power</div>
+          <div id="chInfoPower" style="font-size:1.1rem;font-weight:700;color:var(--gold);">—</div>
+          <div class="pwr-bar-wrap" style="width:90px;">
+            <div class="pwr-bar-fill" id="pwrBarFill" style="width:0%;background:var(--gold);"></div>
           </div>
-
-          <div class="warn" aria-live="polite" style="display:none;" id="vtxWarn"></div>
-        </div>
-
-        <div>
-          <h4 style="margin:8px 0;">ตารางความถี่ (ทั่วไป)</h4>
-          <table class="table" id="freqTable">
-            <thead><tr><th>Band</th><th>Ch</th><th>Freq (MHz)</th></tr></thead>
-            <tbody id="freqTableBody">
-              <!-- JS will fill -->
-            </tbody>
-          </table>
-        </div>
-
-        <div>
-          <h4 style="margin:8px 0;">คำอธิบายสั้น ๆ</h4>
-          <p class="small">
-            - Raceband มักใช้แข่ง (8 ช่อง) และเป็นมาตรฐานในสนามแข่งหลายแห่ง.<br>
-            - FatShark A/B/E/F เป็นการจัดกลุ่มช่องความถี่ของแว่น/ระบบแบบเก่า/ทั่วไป.<br>
-            - หาก VTX ของคุณรองรับ SmartAudio/Tramp คุณสามารถเปลี่ยนความถี่และกำลังผ่าน OSD หรือรีโมทได้ — แต่คำสั่งจริงขึ้นกับโปรโตคอลของ VTX.
-          </p>         
         </div>
       </div>
     </div>
+
+    <!-- CONTROLS ROW -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+      <div>
+        <label style="font-size:.72rem;color:var(--muted);font-weight:700;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em;">กำลังส่ง (Power)</label>
+        <select id="pwrSelect" onchange="updateOutput()" style="width:100%;padding:9px 12px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text);font-size:14px;">
+          <option value="25">25 mW — ต่ำมาก (Indoor)</option>
+          <option value="100">100 mW — ต่ำ (Practice)</option>
+          <option value="200" selected>200 mW — กลาง (ทั่วไป)</option>
+          <option value="400">400 mW — สูง</option>
+          <option value="600">600 mW — สูงมาก ⚠️</option>
+          <option value="1000">1000 mW — 1W ⚠️⚠️</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:.72rem;color:var(--muted);font-weight:700;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em;">Protocol</label>
+        <div class="proto-tabs" style="margin-bottom:0;">
+          <button class="proto-tab active" onclick="setProto('smartaudio',this)">SmartAudio</button>
+          <button class="proto-tab" onclick="setProto('tramp',this)">IRC Tramp</button>
+          <button class="proto-tab" onclick="setProto('msp',this)">MSP VTX</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BAND MATRIX -->
+    <div style="margin-bottom:16px;">
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px;">เลือก Channel จากตาราง</div>
+      <div id="bandMatrix"></div>
+    </div>
+
+    <!-- CLI OUTPUT -->
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">CLI Command</div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn-small" onclick="copyCmd()">📋 คัดลอก</button>
+          <button class="btn-small" onclick="clearSelection()">✕ ล้าง</button>
+        </div>
+      </div>
+      <div class="cli-output-box" id="cliOut">
+        <span class="cli-comment"># เลือก Band / Channel จากตารางด้านบนเพื่อสร้าง CLI command</span>
+      </div>
+      <div id="pwrWarning" style="display:none;background:rgba(241,182,90,0.1);border:1px solid rgba(241,182,90,0.25);border-radius:var(--radius-md);padding:9px 13px;margin-top:8px;font-size:.82rem;color:var(--gold);">
+        ⚠️ กำลังส่งสูง (≥600mW) อาจรบกวนผู้อื่นและทำให้ VTX ร้อนมาก — ตรวจสอบกฎหมายท้องถิ่น และระวังอุณหภูมิ
+      </div>
+    </div>
   </div>
+
+  <!-- FREQUENCY REFERENCE TABLE -->
+  <div class="result-card">
+    <h3 style="margin-top:0;color:var(--blue);">📋 ตารางความถี่อ้างอิง (5.8 GHz)</h3>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:12px;">คลิกที่แถวเพื่อเลือก Channel</p>
+    <div style="overflow-x:auto;">
+      <table class="vtx-freq-table" id="freqRefTable">
+        <thead>
+          <tr>
+            <th>Band</th>
+            <th>Channel</th>
+            <th>Frequency</th>
+            <th>หมายเหตุ</th>
+          </tr>
+        </thead>
+        <tbody id="freqRefBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- INFO CARDS -->
+  <div class="result-card">
+    <h3 style="margin-top:0;">📖 คู่มือย่อ VTX</h3>
+    <div class="info-grid">
+      <div class="info-card">
+        <h4>📡 SmartAudio</h4>
+        <p>ใช้กับ VTX ที่รองรับ TBS SmartAudio — ควบคุมผ่าน FC UART หรือ OSD โดยตรง รองรับ V1/V2/V2.1</p>
+      </div>
+      <div class="info-card">
+        <h4>🔌 IRC Tramp</h4>
+        <p>Protocol อีกตัวของ ImmersionRC — ใช้ command <code style="font-family:var(--mono);font-size:.78rem;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px;">vtx &lt;band&gt; &lt;ch&gt;</code> ผ่าน OSD หรือ CLI</p>
+      </div>
+      <div class="info-card">
+        <h4>🏁 Raceband (R)</h4>
+        <p>มาตรฐานการแข่งขัน FPV ทั่วโลก ช่อง R1–R8 เว้นระยะห่างกัน 37 MHz ลด interference ได้ดี</p>
+      </div>
+      <div class="info-card">
+        <h4>⚡ Power Guidelines</h4>
+        <p>ในไทย FPV มักใช้ ≤200mW บินซ้อม, ≥400mW สำหรับ long range — ตรวจสอบกฎ กสทช. ก่อนใช้งาน</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="version-note">OBIXConfig Doctor • v2.2 — VTX Band Helper</div>
+</div>
 
 <script>
-// Minimal band -> channel -> frequency mapping (common sets).
-// NOTE: These are common reference values — verify with your VTX manual.
-const BAND_TABLES = {
-  // Raceband (R1..R8) — commonly used 8-channel raceband set
-  "race": [
-    {ch:"R1", f:5658},
-    {ch:"R2", f:5695},
-    {ch:"R3", f:5732},
-    {ch:"R4", f:5769},
-    {ch:"R5", f:5806},
-    {ch:"R6", f:5843},
-    {ch:"R7", f:5880},
-    {ch:"R8", f:5917}
-  ],
-  // FatShark A: common "A" band channels (A1..A8)
-  "fatshark_a": [
-    {ch:"A1", f:5865},{ch:"A2", f:5845},{ch:"A3", f:5825},{ch:"A4", f:5805},
-    {ch:"A5", f:5785},{ch:"A6", f:5765},{ch:"A7", f:5745},{ch:"A8", f:5725}
-  ],
-  // FatShark B
-  "fatshark_b": [
-    {ch:"B1", f:5733},{ch:"B2", f:5752},{ch:"B3", f:5771},{ch:"B4", f:5790},
-    {ch:"B5", f:5809},{ch:"B6", f:5828},{ch:"B7", f:5847},{ch:"B8", f:5866}
-  ],
-  // FatShark E
-  "fatshark_e": [
-    {ch:"E1", f:5705},{ch:"E2", f:5685},{ch:"E3", f:5665},{ch:"E4", f:5645},
-    {ch:"E5", f:5885},{ch:"E6", f:5905},{ch:"E7", f:5925},{ch:"E8", f:5945}
-  ],
-  // FatShark F (alternate legacy set)
-  "fatshark_f": [
-    {ch:"F1", f:5740},{ch:"F2", f:5760},{ch:"F3", f:5780},{ch:"F4", f:5800},
-    {ch:"F5", f:5820},{ch:"F6", f:5840},{ch:"F7", f:5860},{ch:"F8", f:5880}
-  ]
+// ─── Band / Channel Data ───────────────────────────
+const BANDS = {
+  "Raceband": {
+    key: "R", color: "#10c47a",
+    channels: [
+      {ch:"R1",f:5658},{ch:"R2",f:5695},{ch:"R3",f:5732},{ch:"R4",f:5769},
+      {ch:"R5",f:5806},{ch:"R6",f:5843},{ch:"R7",f:5880},{ch:"R8",f:5917}
+    ]
+  },
+  "Band A": {
+    key: "A", color: "#58a6ff",
+    channels: [
+      {ch:"A1",f:5865},{ch:"A2",f:5845},{ch:"A3",f:5825},{ch:"A4",f:5805},
+      {ch:"A5",f:5785},{ch:"A6",f:5765},{ch:"A7",f:5745},{ch:"A8",f:5725}
+    ]
+  },
+  "Band B": {
+    key: "B", color: "#f1b65a",
+    channels: [
+      {ch:"B1",f:5733},{ch:"B2",f:5752},{ch:"B3",f:5771},{ch:"B4",f:5790},
+      {ch:"B5",f:5809},{ch:"B6",f:5828},{ch:"B7",f:5847},{ch:"B8",f:5866}
+    ]
+  },
+  "Band E": {
+    key: "E", color: "#c9a6ff",
+    channels: [
+      {ch:"E1",f:5705},{ch:"E2",f:5685},{ch:"E3",f:5665},{ch:"E4",f:5645},
+      {ch:"E5",f:5885},{ch:"E6",f:5905},{ch:"E7",f:5925},{ch:"E8",f:5945}
+    ]
+  },
+  "Band F": {
+    key: "F", color: "#f85149",
+    channels: [
+      {ch:"F1",f:5740},{ch:"F2",f:5760},{ch:"F3",f:5780},{ch:"F4",f:5800},
+      {ch:"F5",f:5820},{ch:"F6",f:5840},{ch:"F7",f:5860},{ch:"F8",f:5880}
+    ]
+  },
+  "Band D": {
+    key: "D", color: "#88d4ab",
+    channels: [
+      {ch:"D1",f:5362},{ch:"D2",f:5399},{ch:"D3",f:5436},{ch:"D4",f:5473},
+      {ch:"D5",f:5510},{ch:"D6",f:5547},{ch:"D7",f:5584},{ch:"D8",f:5621}
+    ]
+  }
 };
 
-const bandSelect = document.getElementById('bandSelect');
-const chSelect = document.getElementById('chSelect');
-const freqDisplay = document.getElementById('freqDisplay');
-const smartAudioCmd = document.getElementById('smartAudioCmd');
-const freqTableBody = document.getElementById('freqTableBody');
-const vtxWarn = document.getElementById('vtxWarn');
+const BAND_NAMES = Object.keys(BANDS);
+let selectedBand = null, selectedCh = null, selectedFreq = null;
+let currentProto = 'smartaudio';
 
-function populateTable() {
-  freqTableBody.innerHTML = '';
-  for (const key of Object.keys(BAND_TABLES)) {
-    const rows = BAND_TABLES[key];
-    for (const r of rows) {
-      const tr = document.createElement('tr');
-      const bandLabel = key.replace('fatshark_', 'FatShark ').toUpperCase();
-      tr.innerHTML = `<td>${bandLabel}</td><td>${r.ch}</td><td>${r.f} MHz</td>`;
-      freqTableBody.appendChild(tr);
-    }
-  }
-}
-populateTable();
+// ─── Build Band Matrix ─────────────────────────────
+function buildMatrix(){
+  const matrix = document.getElementById('bandMatrix');
+  matrix.innerHTML = '';
+  BAND_NAMES.forEach(function(bandName){
+    const band = BANDS[bandName];
+    const row = document.createElement('div');
+    row.style.cssText = 'margin-bottom:10px;';
 
-function fillChannelsFor(bandKey) {
-  chSelect.innerHTML = '<option value="">-- เลือก channel --</option>';
-  if (!bandKey || bandKey === 'manual') return;
-  const rows = BAND_TABLES[bandKey] || [];
-  rows.forEach((r, idx) => {
-    const opt = document.createElement('option');
-    opt.value = r.f;
-    opt.textContent = `${r.ch} — ${r.f} MHz`;
-    chSelect.appendChild(opt);
+    const label = document.createElement('div');
+    label.className = 'band-row-label';
+    label.innerHTML = `<span class="band-dot" style="background:${band.color}"></span><span style="color:${band.color}">${bandName}</span><span class="muted small" style="margin-left:4px;opacity:.7;">(${band.key}1–${band.key}8)</span>`;
+    row.appendChild(label);
+
+    const grid = document.createElement('div');
+    grid.className = 'vtx-band-matrix';
+    grid.style.gridTemplateColumns = 'repeat(8,1fr)';
+
+    band.channels.forEach(function(item, idx){
+      const cell = document.createElement('div');
+      cell.className = 'ch-cell';
+      cell.dataset.band = bandName;
+      cell.dataset.ch = item.ch;
+      cell.dataset.freq = item.f;
+      cell.innerHTML = `<span class="ch-num">Ch ${idx+1}</span><span class="ch-freq">${item.f}</span><span class="ch-label">${item.ch}</span>`;
+      cell.style.borderTopColor = band.color + '33';
+      cell.addEventListener('click', function(){ selectCell(this); });
+      grid.appendChild(cell);
+    });
+    row.appendChild(grid);
+    matrix.appendChild(row);
   });
 }
 
-bandSelect.addEventListener('change', (e) => {
-  const val = e.target.value;
-  fillChannelsFor(val);
-  // show band rows highlight
-  if (val && val !== 'manual') {
-    const first = BAND_TABLES[val] && BAND_TABLES[val][0];
-    if (first) {
-      freqDisplay.textContent = 'เลือก channel เพื่อแสดงความถี่';
-      smartAudioCmd.textContent = 'โปรดเลือก channel';
-    }
-  } else if (val === 'manual') {
-    freqDisplay.textContent = 'ใส่ความถี่ (MHz) ในช่องด้านล่าง';
-    smartAudioCmd.textContent = 'Manual mode — ใส่ความถี่แล้วกด "คัดลอกคำสั่ง"';
+function selectCell(el){
+  // Clear previous
+  document.querySelectorAll('.ch-cell.selected').forEach(function(c){ c.classList.remove('selected'); });
+  el.classList.add('selected');
+  selectedBand = el.dataset.band;
+  selectedCh   = el.dataset.ch;
+  selectedFreq = parseInt(el.dataset.freq);
+  updateOutput();
+  // Highlight ref table
+  document.querySelectorAll('#freqRefBody tr').forEach(function(tr){
+    tr.classList.toggle('highlighted', tr.dataset.ch === selectedCh);
+  });
+}
+
+function clearSelection(){
+  document.querySelectorAll('.ch-cell.selected').forEach(function(c){ c.classList.remove('selected'); });
+  document.querySelectorAll('#freqRefBody tr').forEach(function(tr){ tr.classList.remove('highlighted'); });
+  selectedBand = selectedCh = selectedFreq = null;
+  document.getElementById('chInfoFreq').innerHTML = '— <span>MHz</span>';
+  document.getElementById('chInfoBand').textContent = 'เลือก Band และ Channel จากตารางด้านล่าง';
+  document.getElementById('chInfoPower').textContent = '—';
+  document.getElementById('pwrBarFill').style.width = '0%';
+  document.getElementById('cliOut').innerHTML = '<span class="cli-comment"># เลือก Band / Channel จากตารางด้านบนเพื่อสร้าง CLI command</span>';
+  document.getElementById('pwrWarning').style.display = 'none';
+}
+
+function setProto(proto, btn){
+  currentProto = proto;
+  document.querySelectorAll('.proto-tab').forEach(function(t){ t.classList.remove('active'); });
+  btn.classList.add('active');
+  updateOutput();
+}
+
+function updateOutput(){
+  const pwr = parseInt(document.getElementById('pwrSelect').value);
+  const pwrPct = Math.min(100, Math.round(pwr / 10));
+  const pwrColor = pwr >= 600 ? '#f85149' : pwr >= 400 ? '#f1b65a' : '#10c47a';
+
+  // Update power display
+  document.getElementById('chInfoPower').textContent = pwr + ' mW';
+  document.getElementById('chInfoPower').style.color = pwrColor;
+  document.getElementById('pwrBarFill').style.width = pwrPct + '%';
+  document.getElementById('pwrBarFill').style.background = pwrColor;
+  document.getElementById('pwrWarning').style.display = pwr >= 600 ? 'block' : 'none';
+
+  if(!selectedFreq){ return; }
+
+  // Update freq display
+  document.getElementById('chInfoFreq').innerHTML = selectedFreq + ' <span>MHz</span>';
+  const bandColor = BANDS[selectedBand] ? BANDS[selectedBand].color : 'var(--green)';
+  document.getElementById('chInfoFreq').style.color = bandColor;
+  document.getElementById('chInfoBand').textContent = selectedBand + ' · ' + selectedCh + ' · ' + selectedFreq + ' MHz';
+
+  // Generate CLI
+  const cliOut = document.getElementById('cliOut');
+  const bandObj = BANDS[selectedBand];
+  const bandKey = bandObj ? bandObj.key : selectedCh.charAt(0);
+  const chNum   = parseInt(selectedCh.replace(/[A-Z]/,''));
+
+  let lines = '';
+  if(currentProto === 'smartaudio'){
+    lines = `<span class="cli-comment"># SmartAudio — ${selectedBand} ${selectedCh} @ ${selectedFreq} MHz, ${pwr} mW</span>\n` +
+            `<span class="cli-cmd">set</span> <span class="cli-val">vtx_band = ${chNum > 0 ? chNum : 1}</span>\n` +
+            `<span class="cli-cmd">set</span> <span class="cli-val">vtx_channel = ${chNum}</span>\n` +
+            `<span class="cli-cmd">set</span> <span class="cli-val">vtx_power = ${getPowerIndex(pwr)}</span>\n` +
+            `<span class="cli-comment"># (หรือตั้งผ่าน OSD → Video Transmitter)</span>\n` +
+            `<span class="cli-cmd">save</span>`;
+  } else if(currentProto === 'tramp'){
+    lines = `<span class="cli-comment"># IRC Tramp — ${selectedBand} ${selectedCh} @ ${selectedFreq} MHz, ${pwr} mW</span>\n` +
+            `<span class="cli-cmd">vtx</span> <span class="cli-val">${selectedFreq} ${pwr}</span>\n` +
+            `<span class="cli-comment"># หรือ: vtxtable band ${bandKey} channel ${chNum}</span>`;
   } else {
-    freqDisplay.textContent = '— MHz';
-    smartAudioCmd.textContent = 'โปรดเลือก band / channel';
+    lines = `<span class="cli-comment"># MSP VTX — ${selectedBand} ${selectedCh} @ ${selectedFreq} MHz, ${pwr} mW</span>\n` +
+            `<span class="cli-cmd">set</span> <span class="cli-val">vtx_freq = ${selectedFreq}</span>\n` +
+            `<span class="cli-cmd">set</span> <span class="cli-val">vtx_power = ${pwr}</span>\n` +
+            `<span class="cli-cmd">save</span>`;
   }
-  vtxWarn.style.display = 'none';
-});
+  cliOut.innerHTML = lines;
+}
 
-chSelect.addEventListener('change', () => {
-  const f = chSelect.value;
-  const pwr = document.getElementById('pwrSelect').value;
-  if (!f) { freqDisplay.textContent = '— MHz'; smartAudioCmd.textContent = 'โปรดเลือก channel'; return; }
-  freqDisplay.textContent = `${f} MHz`;
-  // example SmartAudio style "set_freq <MHz> <power_mW>" (this is illustrative)
-  smartAudioCmd.textContent = `SmartAudio (ตัวอย่าง): set_vtx_freq ${f} ; set_vtx_power ${pwr}mW`;
-  // small warning for high power on certain bands
-  const cellsHint = '';
-  if (parseInt(pwr) >= 600) {
-    vtxWarn.textContent = 'ระวัง: กำลังสูง (≥600mW) อาจทำให้รบกวนผู้อื่นและร้อน — ตรวจสอบกฎหมาย/สนามบินก่อนใช้งาน';
-    vtxWarn.style.display = 'block';
-  } else {
-    vtxWarn.style.display = 'none';
+function getPowerIndex(mw){
+  if(mw <= 25)  return '1 (25mW)';
+  if(mw <= 100) return '2 (100mW)';
+  if(mw <= 200) return '3 (200mW)';
+  if(mw <= 400) return '4 (400mW)';
+  if(mw <= 600) return '5 (600mW)';
+  return '6 (1W)';
+}
+
+function copyCmd(){
+  const el = document.getElementById('cliOut');
+  const text = el.innerText || el.textContent;
+  navigator.clipboard.writeText(text).then(function(){ showToast('คัดลอก CLI เรียบร้อย ✓'); });
+}
+
+function showToast(msg){
+  var t = document.getElementById('toast');
+  if(!t){ t = document.createElement('div'); t.id='toast';
+    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#10c47a;color:#021a0e;padding:8px 20px;border-radius:20px;font-weight:700;font-size:.87rem;z-index:9999;transition:opacity .3s;box-shadow:0 4px 20px rgba(16,196,122,.4);';
+    document.body.appendChild(t); }
+  t.textContent = msg; t.style.opacity = '1';
+  clearTimeout(t._t); t._t = setTimeout(function(){ t.style.opacity='0'; }, 2000);
+}
+
+// ─── Build Freq Reference Table ────────────────────
+function buildRefTable(){
+  const tbody = document.getElementById('freqRefBody');
+  tbody.innerHTML = '';
+  BAND_NAMES.forEach(function(bandName){
+    const band = BANDS[bandName];
+    band.channels.forEach(function(item){
+      const tr = document.createElement('tr');
+      tr.dataset.ch = item.ch;
+      tr.style.cursor = 'pointer';
+      tr.innerHTML = `<td><span class="band-badge" style="background:${band.color}22;color:${band.color};border:1px solid ${band.color}44;">${bandName}</span></td>
+        <td style="font-family:var(--mono);font-weight:600;">${item.ch}</td>
+        <td class="td-freq" style="font-family:var(--mono);color:var(--text);">${item.f} <span style="color:var(--muted);font-size:.78rem;">MHz</span></td>
+        <td style="font-size:.78rem;color:var(--muted);">${getFreqNote(bandName, item.ch)}</td>`;
+      tr.addEventListener('click', function(){
+        // find corresponding cell
+        const cell = document.querySelector(`.ch-cell[data-ch="${item.ch}"]`);
+        if(cell){ selectCell(cell); cell.scrollIntoView({behavior:'smooth',block:'center'}); }
+      });
+      tbody.appendChild(tr);
+    });
+  });
+}
+
+function getFreqNote(band, ch){
+  if(band === 'Raceband'){
+    if(ch==='R1') return 'มักใช้กับ pilot 1';
+    if(ch==='R7') return 'พื้นที่ใกล้ 5.8G WiFi — ระวัง';
+    return 'มาตรฐาน race';
   }
-});
-
-document.getElementById('pwrSelect').addEventListener('change', () => {
-  // refresh smartAudioCmd with current freq
-  const f = chSelect.value || '';
-  const pwr = document.getElementById('pwrSelect').value;
-  if (f) smartAudioCmd.textContent = `SmartAudio (ตัวอย่าง): set_vtx_freq ${f} ; set_vtx_power ${pwr}mW`;
-});
-
-// manual fill
-function fillManual(){
-  const manual = prompt('กรุณาใส่ความถี่ (MHz) ตัวอย่าง: 5865');
-  if (!manual) return;
-  const v = parseFloat(manual);
-  if (isNaN(v) || v < 400 || v > 6000) { alert('ความถี่ไม่ถูกต้อง'); return; }
-  freqDisplay.textContent = `${v} MHz`;
-  smartAudioCmd.textContent = `SmartAudio (ตัวอย่าง): set_vtx_freq ${v} ; set_vtx_power ${document.getElementById('pwrSelect').value}mW`;
-  chSelect.value = '';
-  bandSelect.value = 'manual';
-  vtxWarn.style.display = 'none';
+  if(band === 'Band E'){
+    if(['E5','E6','E7','E8'].includes(ch)) return '5.8G อาจ overlap WiFi';
+  }
+  if(band === 'Band D') return '5.3 GHz — ไม่รองรับใน VTX ทั่วไป';
+  return '—';
 }
 
-function copyResult(){
-  const t = smartAudioCmd.innerText || smartAudioCmd.textContent;
-  navigator.clipboard.writeText(t).then(()=> {
-    alert('คัดลอกเรียบร้อย');
-  }).catch(()=> alert('คัดลอกไม่สำเร็จ'));
-}
+// ─── Drawer ────────────────────────────────────────
+(function(){
+  var btn=document.getElementById('hamburgerBtn'), drawer=document.getElementById('drawer'),
+      overlay=document.getElementById('overlay'), closeBtn=document.getElementById('closeDrawer');
+  function open(){
+    btn&&btn.setAttribute('aria-expanded','true');
+    drawer&&drawer.classList.add('open'); drawer&&drawer.removeAttribute('hidden');
+    overlay&&overlay.classList.add('open');
+    document.addEventListener('keydown',onEsc);
+  }
+  function close(){
+    btn&&btn.setAttribute('aria-expanded','false');
+    drawer&&drawer.classList.remove('open'); overlay&&overlay.classList.remove('open');
+    document.removeEventListener('keydown',onEsc);
+    setTimeout(function(){ drawer&&drawer.setAttribute('hidden',''); }, 280);
+  }
+  function onEsc(e){ if(e.key==='Escape') close(); }
+  btn&&btn.addEventListener('click',function(){ btn.getAttribute('aria-expanded')==='true'?close():open(); });
+  overlay&&overlay.addEventListener('click',close);
+  closeBtn&&closeBtn.addEventListener('click',close);
+  if(window.innerWidth<=900&&drawer) drawer.setAttribute('hidden','');
+})();
 
-/* small helpers used by site */
-function toggleTheme(){
-  document.body.classList.toggle('dark');
-  document.body.classList.toggle('light');
-  try{ localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light'); }catch(e){}
-}
+// ─── Init ──────────────────────────────────────────
+buildMatrix();
+buildRefTable();
+document.getElementById('pwrSelect').addEventListener('change', updateOutput);
 </script>
 </body>
 </html>
