@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Flight Style Quiz — OBIXConfig Doctor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+{% set og_title       = "Flight Style Quiz — OBIXConfig Doctor" %}
+{% set og_description = "ตอบ 5 คำถาม รับ rates + preset ที่เหมาะกับสไตล์การบินของคุณโดยเฉพาะ — ฟรี ไม่ต้อง login" %}
+{% set og_url         = "https://configdoctor.onrender.com/flight-quiz" %}
+{% include "partials/og_tags.html" %}
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@400;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+{% set nav_page = "flight_quiz" %}
+{% include "partials/nav.html" %}
+
+<style>
+/* ══════════════════════════════════════════════
+   TOKENS — ตรงกับ OBIX HUD Design System
+══════════════════════════════════════════════ */
+:root {
+  --bg:      #020509;
+  --bg2:     #040b14;
+  --surface: #060e1c;
+  --border:  rgba(0,255,136,0.08);
+  --borderB: rgba(0,170,255,0.12);
+  --text:    #c8d8e8;
+  --muted:   #3d5470;
+  --muted2:  #7090a8;
+  --green:   #00ff88;
+  --green2:  #00cc6a;
+  --blue:    #00aaff;
+  --amber:   #ffb700;
+  --red:     #ff4455;
+  --g-dim:   rgba(0,255,136,0.07);
+  --b-dim:   rgba(0,170,255,0.07);
+  --a-dim:   rgba(255,183,0,0.07);
+  --r-dim:   rgba(255,68,85,0.07);
+  --glow-g:  0 0 22px rgba(0,255,136,0.32);
+  --glow-b:  0 0 22px rgba(0,170,255,0.32);
+  --glow-a:  0 0 22px rgba(255,183,0,0.32);
+  --font-d:  'Orbitron', sans-serif;
+  --font-m:  'JetBrains Mono', monospace;
+  --font-t:  'Sarabun', sans-serif;
+}
+
+/* ══════════════════════════════════════════════
+   RESET + BASE
+══════════════════════════════════════════════ */
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+html,body { overflow-x:hidden; min-height:100%; }
+
+body {
+  font-family: var(--font-t);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Dot-grid background ── */
+body::before {
+  content:'';
+  position:fixed; inset:0; z-index:0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(0,255,136,0.07) 1px, transparent 0);
+  background-size: 28px 28px;
+  pointer-events:none;
+  animation: gridDrift 45s linear infinite;
+}
+@keyframes gridDrift { to { background-position: 28px 28px; } }
+
+body::after {
+  content:'';
+  position:fixed; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 15%, rgba(0,255,136,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 35% at 80% 85%, rgba(0,170,255,0.04) 0%, transparent 60%);
+  pointer-events:none;
+}
+
+/* ── Scan line entrance ── */
+.scan-line {
+  position:fixed; top:-2px; left:0; right:0; height:2px;
+  background: linear-gradient(90deg, transparent, var(--green) 30%, var(--blue) 70%, transparent);
+  z-index:9999;
+  animation: scanDrop 1.2s cubic-bezier(.4,0,.2,1) forwards;
+  box-shadow: 0 0 10px var(--green);
+}
+@keyframes scanDrop { 0%{top:-2px;opacity:1} 80%{opacity:1} 100%{top:100vh;opacity:0} }
+
+/* ══════════════════════════════════════════════
+   PAGE LAYOUT
+══════════════════════════════════════════════ */
+.page-wrap {
+  position:relative; z-index:1;
+  max-width: 860px; margin:0 auto;
+  padding: 0 16px 100px;
+}
+
+/* ══════════════════════════════════════════════
+   HERO — pre-quiz state
+══════════════════════════════════════════════ */
+.hero {
+  padding: 40px 0 32px;
+  animation: fadeUp .55s ease both;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:none} }
+
+.hero-eyebrow {
+  display:flex; align-items:center; gap:8px;
+  font-family:var(--font-d); font-size:9px; font-weight:600;
+  letter-spacing:.22em; text-transform:uppercase; color:var(--green);
+  margin-bottom:10px;
+}
+.hero-led {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--green); box-shadow:var(--glow-g);
+  animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+.hero h1 {
+  font-family:var(--font-d);
+  font-size: clamp(22px,4.5vw,42px);
+  font-weight:900; letter-spacing:.03em; line-height:1.1;
+  color:#f0f8ff;
+}
+.hero h1 .g { color:var(--green); }
+.hero h1 .b { color:var(--blue); }
+
+.hero-sub {
+  margin-top:12px; font-size:.95rem; color:var(--muted2);
+  max-width:520px; line-height:1.75;
+}
+
+.hero-meta {
+  display:flex; gap:8px; flex-wrap:wrap; margin-top:16px;
+}
+.meta-chip {
+  font-family:var(--font-d); font-size:9px; font-weight:600;
+  letter-spacing:.08em; padding:3px 11px; border-radius:100px; border:1px solid;
+  text-transform:uppercase;
+}
+.meta-chip.g { color:var(--green); border-color:rgba(0,255,136,0.3); background:rgba(0,255,136,0.06); }
+.meta-chip.b { color:var(--blue);  border-color:rgba(0,170,255,0.3); background:rgba(0,170,255,0.06); }
+.meta-chip.a { color:var(--amber); border-color:rgba(255,183,0,0.3);  background:rgba(255,183,0,0.06); }
+
+.start-btn {
+  margin-top:28px; display:inline-flex; align-items:center; gap:10px;
+  padding:14px 32px; border-radius:10px;
+  background: linear-gradient(135deg, var(--green), var(--green2));
+  border:none; cursor:pointer;
+  font-family:var(--font-d); font-size:13px; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase; color:#001a0a;
+  transition:.22s; box-shadow:0 4px 22px rgba(0,255,136,0.3);
+  position:relative; overflow:hidden;
+}
+.start-btn::after {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg, transparent, rgba(255,255,255,0.14), transparent);
+  transform:translateX(-100%); transition:transform .4s;
+}
+.start-btn:hover::after { transform:translateX(100%); }
+.start-btn:hover { box-shadow:0 6px 30px rgba(0,255,136,0.45); transform:translateY(-2px); }
+.start-btn:active { transform:translateY(0); }
+
+/* ══════════════════════════════════════════════
+   QUIZ CONTAINER
+══════════════════════════════════════════════ */
+.quiz-wrap {
+  display:none;
+  animation: fadeUp .45s ease both;
+}
+.quiz-wrap.active { display:block; }
+
+/* ── Progress bar ── */
+.progress-wrap {
+  margin-bottom:28px; padding:0 4px;
+}
+.progress-steps {
+  display:flex; align-items:center; gap:0;
+  position:relative;
+}
+.progress-connector {
+  flex:1; height:2px;
+  background: rgba(255,255,255,0.06);
+  position:relative; overflow:hidden;
+}
+.progress-connector-fill {
+  position:absolute; inset:0;
+  background: linear-gradient(90deg, var(--green), var(--blue));
+  transform:scaleX(0); transform-origin:left;
+  transition:transform .45s cubic-bezier(.4,0,.2,1);
+}
+.progress-connector.done .progress-connector-fill { transform:scaleX(1); }
+
+.progress-step {
+  width:36px; height:36px; border-radius:50%; flex-shrink:0;
+  display:grid; place-items:center;
+  font-family:var(--font-d); font-size:11px; font-weight:700;
+  border:2px solid rgba(255,255,255,0.08);
+  background:var(--surface); color:var(--muted);
+  transition:all .35s cubic-bezier(.4,0,.2,1);
+  position:relative; z-index:1;
+}
+.progress-step.current {
+  border-color:var(--green); color:var(--green);
+  box-shadow:0 0 0 4px rgba(0,255,136,0.12), var(--glow-g);
+  background:rgba(0,255,136,0.08);
+  animation: stepPulse 2s ease-in-out infinite;
+}
+@keyframes stepPulse { 0%,100%{box-shadow:0 0 0 4px rgba(0,255,136,0.12),var(--glow-g)} 50%{box-shadow:0 0 0 8px rgba(0,255,136,0.06),var(--glow-g)} }
+.progress-step.done {
+  border-color:var(--green2); background:rgba(0,255,136,0.12); color:var(--green);
+}
+.step-icon { font-size:13px; }
+
+.progress-labels {
+  display:flex; justify-content:space-between; margin-top:8px;
+}
+.progress-label {
+  font-family:var(--font-d); font-size:7.5px; font-weight:600;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
+  text-align:center; width:36px; transition:.3s;
+}
+.progress-label.current { color:var(--green); }
+.progress-label.done    { color:var(--green2); }
+
+/* ── Question card ── */
+.q-card {
+  background:var(--surface);
+  border:1px solid var(--border); border-radius:16px;
+  overflow:hidden;
+  animation: qSlideIn .35s cubic-bezier(.4,0,.2,1) both;
+}
+@keyframes qSlideIn   { from{opacity:0;transform:translateX(28px)} to{opacity:1;transform:none} }
+@keyframes qSlideOut  { from{opacity:1;transform:none} to{opacity:0;transform:translateX(-28px)} }
+.q-card.leaving { animation:qSlideOut .28s cubic-bezier(.4,0,.2,1) both; }
+
+.q-head {
+  display:flex; align-items:center; gap:10px;
+  padding:14px 18px; border-bottom:1px solid var(--border);
+  background:rgba(0,255,136,0.03);
+}
+.q-num {
+  font-family:var(--font-d); font-size:9px; font-weight:700;
+  letter-spacing:.15em; color:var(--green);
+  background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.2);
+  padding:3px 10px; border-radius:100px;
+}
+.q-title {
+  font-size:1.05rem; font-weight:700; color:var(--text); flex:1;
+}
+.q-sub {
+  font-size:.82rem; color:var(--muted2); margin-top:3px;
+}
+
+/* ── Choices grid ── */
+.choices-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:10px; padding:16px;
+}
+@media(max-width:500px) { .choices-grid { grid-template-columns:1fr; } }
+
+/* ── Choice card ── */
+.choice-card {
+  background:var(--bg2);
+  border:1px solid rgba(255,255,255,0.06); border-radius:11px;
+  padding:14px 14px 13px;
+  cursor:pointer; transition:all .18s cubic-bezier(.4,0,.2,1);
+  display:flex; align-items:flex-start; gap:11px;
+  position:relative; overflow:hidden; user-select:none;
+}
+.choice-card::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg, rgba(0,255,136,0.04), transparent);
+  opacity:0; transition:opacity .18s;
+}
+.choice-card:hover { border-color:rgba(0,255,136,0.28); transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,0.3); }
+.choice-card:hover::before { opacity:1; }
+.choice-card:active { transform:translateY(0); }
+
+.choice-card.selected {
+  border-color:var(--green); background:rgba(0,255,136,0.07);
+  box-shadow:var(--glow-g), 0 0 0 1px rgba(0,255,136,0.2);
+}
+.choice-card.selected::before { opacity:1; }
+.choice-card.dimmed { opacity:.38; pointer-events:none; }
+
+.choice-icon-wrap {
+  width:42px; height:42px; border-radius:10px; flex-shrink:0;
+  background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06);
+  display:grid; place-items:center; font-size:19px;
+  transition:.18s;
+}
+.choice-card:hover .choice-icon-wrap { border-color:rgba(0,255,136,0.2); background:rgba(0,255,136,0.06); }
+.choice-card.selected .choice-icon-wrap { border-color:rgba(0,255,136,0.35); background:rgba(0,255,136,0.1); }
+
+.choice-body { flex:1; min-width:0; }
+.choice-label { font-size:.92rem; font-weight:700; color:var(--text); display:block; margin-bottom:2px; }
+.choice-desc  { font-size:.8rem; color:var(--muted2); line-height:1.45; }
+.choice-card.selected .choice-label { color:var(--green); }
+
+.choice-check {
+  width:18px; height:18px; border-radius:50%;
+  border:2px solid rgba(255,255,255,0.12);
+  flex-shrink:0; margin-top:2px;
+  display:grid; place-items:center;
+  transition:.18s;
+}
+.choice-card.selected .choice-check {
+  background:var(--green); border-color:var(--green);
+  box-shadow:0 0 8px rgba(0,255,136,0.5);
+}
+.choice-check-inner {
+  width:6px; height:6px; border-radius:50%;
+  background:#001a0a; opacity:0; transition:.18s;
+}
+.choice-card.selected .choice-check-inner { opacity:1; }
+
+/* ── Next button ── */
+.q-footer {
+  padding:12px 16px 16px;
+  display:flex; align-items:center; justify-content:space-between;
+  border-top:1px solid var(--border);
+}
+.q-back {
+  background:none; border:1px solid rgba(255,255,255,0.08);
+  border-radius:8px; padding:8px 14px; cursor:pointer;
+  font-family:var(--font-d); font-size:10px; font-weight:600;
+  letter-spacing:.06em; color:var(--muted2); transition:.18s;
+}
+.q-back:hover { border-color:rgba(255,255,255,0.2); color:var(--text); }
+.q-back:disabled { opacity:.3; pointer-events:none; }
+.q-next {
+  background:linear-gradient(135deg,var(--green),var(--green2));
+  border:none; border-radius:8px; padding:9px 22px; cursor:pointer;
+  font-family:var(--font-d); font-size:11px; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase; color:#001a0a;
+  transition:.2s; box-shadow:0 3px 14px rgba(0,255,136,0.25);
+  opacity:.4; pointer-events:none;
+}
+.q-next.ready { opacity:1; pointer-events:all; }
+.q-next.ready:hover { box-shadow:0 5px 22px rgba(0,255,136,0.45); transform:translateY(-1px); }
+
+/* ══════════════════════════════════════════════
+   COMPUTING ANIMATION
+══════════════════════════════════════════════ */
+.computing-wrap {
+  display:none; text-align:center; padding:60px 20px;
+  animation:fadeUp .4s ease both;
+}
+.computing-wrap.active { display:block; }
+
+.comp-icon {
+  font-size:52px; margin-bottom:20px;
+  animation:compSpin 1s linear infinite;
+  display:inline-block;
+}
+@keyframes compSpin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+
+.comp-title {
+  font-family:var(--font-d); font-size:14px; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase;
+  color:var(--green); margin-bottom:8px;
+}
+.comp-sub { font-size:.88rem; color:var(--muted2); margin-bottom:28px; }
+
+.comp-bar-wrap {
+  max-width:320px; margin:0 auto;
+  height:3px; background:rgba(255,255,255,0.06);
+  border-radius:2px; overflow:hidden;
+}
+.comp-bar-fill {
+  height:100%; width:0%;
+  background:linear-gradient(90deg, var(--green), var(--blue));
+  border-radius:2px;
+  transition:width .12s linear;
+}
+
+.comp-steps {
+  margin-top:20px; display:flex; flex-direction:column; gap:6px;
+  font-family:var(--font-m); font-size:11px; color:var(--muted);
+  min-height:84px; /* prevent layout shift */
+}
+.comp-step {
+  opacity:0; transition:opacity .25s;
+  display:flex; align-items:center; gap:8px; justify-content:center;
+}
+.comp-step.show { opacity:1; }
+.comp-step-dot {
+  width:5px; height:5px; border-radius:50%;
+  background:var(--green); box-shadow:var(--glow-g); flex-shrink:0;
+}
+
+/* ══════════════════════════════════════════════
+   RESULT CARD
+══════════════════════════════════════════════ */
+.result-wrap {
+  display:none;
+  animation:fadeUp .5s ease both;
+}
+.result-wrap.active { display:block; }
+
+.result-header {
+  border-radius:16px 16px 0 0;
+  padding:28px 24px 24px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-bottom:none;
+  position:relative; overflow:hidden;
+}
+.result-header::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background:linear-gradient(90deg, var(--green), var(--blue), var(--amber));
+}
+.result-header-top {
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+}
+.result-badge {
+  width:72px; height:72px; border-radius:16px;
+  display:grid; place-items:center; font-size:32px; flex-shrink:0;
+  background:rgba(255,255,255,0.05); border:2px solid var(--border);
+  transition:.35s;
+}
+.result-badge-text {
+  flex:1;
+}
+.result-profile-label {
+  font-family:var(--font-d); font-size:9px; font-weight:600;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--muted2);
+  margin-bottom:4px;
+}
+.result-profile-name {
+  font-family:var(--font-d);
+  font-size: clamp(18px,4vw,32px);
+  font-weight:900; letter-spacing:.05em; color:#f0f8ff;
+  line-height:1;
+}
+.result-profile-nameth {
+  font-size:1rem; color:var(--muted2); margin-top:4px;
+}
+.result-tag {
+  font-family:var(--font-d); font-size:9px; font-weight:700;
+  letter-spacing:.12em; padding:4px 12px; border-radius:100px;
+  border:1px solid; margin-top:8px; display:inline-block;
+}
+.result-desc {
+  font-size:.92rem; color:var(--muted2); margin-top:14px; line-height:1.7;
+  max-width:520px;
+}
+
+/* Personality bar */
+.pers-wrap {
+  margin-top:18px;
+  background:var(--bg2); border:1px solid var(--border); border-radius:10px;
+  padding:12px 14px;
+}
+.pers-label {
+  font-family:var(--font-d); font-size:8px; font-weight:600;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+  margin-bottom:8px; display:flex; align-items:center; justify-content:space-between;
+}
+.pers-bar {
+  height:10px; border-radius:6px; position:relative;
+  background:linear-gradient(90deg,
+    #00aaff 0%, #00ff88 30%, #00ff88 55%, #ffb700 75%, #ff4455 100%);
+  overflow:hidden;
+}
+.pers-needle {
+  position:absolute; top:-4px; width:3px; height:18px;
+  background:#fff; border-radius:2px;
+  box-shadow:0 0 8px rgba(255,255,255,0.8);
+  transition:left .8s cubic-bezier(.4,0,.2,1);
+}
+.pers-ticks {
+  display:flex; justify-content:space-between;
+  margin-top:6px;
+}
+.pers-tick {
+  font-family:var(--font-d); font-size:7px; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--muted);
+}
+
+/* ── Rates table ── */
+.result-body {
+  background:var(--surface); border:1px solid var(--border);
+  border-top:none; padding:20px 24px;
+}
+
+.section-label {
+  font-family:var(--font-d); font-size:8.5px; font-weight:600;
+  letter-spacing:.16em; text-transform:uppercase;
+  color:var(--blue); margin-bottom:12px;
+  display:flex; align-items:center; gap:7px;
+}
+.section-label::after {
+  content:''; flex:1; height:1px;
+  background:rgba(0,170,255,0.15);
+}
+
+.rates-table {
+  width:100%; border-collapse:collapse; margin-bottom:20px;
+  font-family:var(--font-m); font-size:13px;
+}
+.rates-table th {
+  font-family:var(--font-d); font-size:8px; font-weight:600;
+  letter-spacing:.12em; text-transform:uppercase;
+  color:var(--muted); padding:7px 10px; text-align:center;
+  border-bottom:1px solid var(--border);
+}
+.rates-table th:first-child { text-align:left; }
+.rates-table td {
+  padding:9px 10px; text-align:center;
+  border-bottom:1px solid rgba(255,255,255,0.03);
+  color:var(--text);
+}
+.rates-table td:first-child {
+  font-family:var(--font-d); font-size:9px; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--muted2);
+  text-align:left;
+}
+.rates-table tr:hover td { background:rgba(255,255,255,0.02); }
+.val-big { font-size:16px; font-weight:700; color:var(--green); }
+.val-mid { font-size:15px; font-weight:600; color:var(--blue); }
+.val-lo  { font-size:15px; font-weight:600; color:var(--amber); }
+
+.maxdeg-box {
+  display:flex; align-items:center; gap:12px;
+  background:var(--bg2); border:1px solid rgba(0,255,136,0.12);
+  border-radius:9px; padding:12px 14px; margin-bottom:20px;
+}
+.maxdeg-val {
+  font-family:var(--font-m); font-size:28px; font-weight:700; color:var(--green);
+  line-height:1;
+}
+.maxdeg-unit { font-family:var(--font-d); font-size:10px; color:var(--muted2); margin-top:3px; }
+.maxdeg-desc { font-size:.85rem; color:var(--muted2); flex:1; line-height:1.5; }
+
+/* Filter box */
+.filter-box {
+  background:var(--bg2); border:1px solid var(--borderB);
+  border-radius:9px; padding:12px 14px; margin-bottom:20px;
+}
+.filter-box-title { font-family:var(--font-d); font-size:9px; color:var(--blue); letter-spacing:.1em; margin-bottom:5px; }
+.filter-box-text  { font-size:.85rem; color:var(--muted2); margin-bottom:0; }
+
+/* Notes */
+.notes-list { margin-bottom:20px; display:flex; flex-direction:column; gap:6px; }
+.note-item {
+  display:flex; align-items:flex-start; gap:8px;
+  font-size:.85rem; color:var(--muted2); line-height:1.55;
+  padding:6px 10px; border-radius:7px;
+  background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03);
+}
+.note-dot { color:var(--green); font-size:12px; flex-shrink:0; margin-top:2px; }
+.note-item.warn { background:rgba(255,183,0,0.05); border-color:rgba(255,183,0,0.15); }
+.note-item.warn .note-dot { color:var(--amber); }
+
+/* CLI box */
+.cli-section { margin-bottom:20px; }
+.cli-head {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:8px;
+}
+.cli-copy-btn {
+  font-family:var(--font-d); font-size:9px; font-weight:600; letter-spacing:.08em;
+  padding:5px 12px; border-radius:6px;
+  background:transparent; border:1px solid rgba(0,255,136,0.25);
+  color:var(--green); cursor:pointer; transition:.18s;
+}
+.cli-copy-btn:hover { background:rgba(0,255,136,0.1); box-shadow:var(--glow-g); }
+.cli-box {
+  background:var(--bg); border:1px solid rgba(255,255,255,0.06);
+  border-radius:9px; padding:14px;
+  font-family:var(--font-m); font-size:11.5px; color:#79c0ff;
+  white-space:pre; line-height:1.85; overflow-x:auto;
+  max-height:360px; overflow-y:auto;
+}
+
+/* Actions */
+.result-actions {
+  background:var(--surface); border:1px solid var(--border);
+  border-top:none; border-radius:0 0 16px 16px;
+  padding:16px 24px;
+  display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+}
+.btn-primary-out {
+  display:inline-flex; align-items:center; gap:7px;
+  padding:10px 20px; border-radius:8px; text-decoration:none;
+  font-family:var(--font-d); font-size:10px; font-weight:700;
+  letter-spacing:.08em; text-transform:uppercase;
+  background:linear-gradient(135deg,var(--green),var(--green2));
+  color:#001a0a; border:none; cursor:pointer;
+  transition:.2s; box-shadow:0 3px 16px rgba(0,255,136,0.25);
+}
+.btn-primary-out:hover { box-shadow:0 5px 24px rgba(0,255,136,0.4); transform:translateY(-1px); }
+
+.btn-secondary-out {
+  display:inline-flex; align-items:center; gap:7px;
+  padding:10px 20px; border-radius:8px; text-decoration:none;
+  font-family:var(--font-d); font-size:10px; font-weight:700;
+  letter-spacing:.08em; text-transform:uppercase;
+  background:transparent; border:1px solid rgba(0,170,255,0.3);
+  color:var(--blue); cursor:pointer; transition:.18s;
+}
+.btn-secondary-out:hover { background:rgba(0,170,255,0.08); box-shadow:var(--glow-b); }
+
+.btn-ghost-out {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:10px 16px; border-radius:8px;
+  background:transparent; border:1px solid rgba(255,255,255,0.08);
+  font-family:var(--font-d); font-size:10px; font-weight:600;
+  letter-spacing:.06em; color:var(--muted2); cursor:pointer;
+  text-decoration:none; transition:.18s; margin-left:auto;
+}
+.btn-ghost-out:hover { border-color:rgba(255,255,255,0.2); color:var(--text); }
+
+/* ── Toast ── */
+#toast {
+  position:fixed; bottom:28px; left:50%;
+  transform:translateX(-50%) translateY(8px);
+  background:var(--green); color:#001a0a;
+  padding:9px 22px; border-radius:22px;
+  font-family:var(--font-d); font-weight:700; font-size:11px;
+  letter-spacing:.07em; z-index:9999; opacity:0;
+  transition:opacity .25s, transform .25s; pointer-events:none;
+  box-shadow:0 4px 24px rgba(0,255,136,0.4);
+}
+#toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ── Responsive ── */
+@media(max-width:600px) {
+  .page-wrap { padding:0 12px 70px; }
+  .hero { padding:28px 0 24px; }
+  .result-header, .result-body, .result-actions { padding-left:16px; padding-right:16px; }
+  .rates-table td, .rates-table th { padding:7px 7px; }
+  .q-footer { flex-direction:row; }
+}
+</style>
+</head>
+<body>
+
+<div class="scan-line"></div>
+
+<div class="page-wrap">
+
+  <!-- ── HERO ──────────────────────────────── -->
+  <div class="hero" id="heroSection">
+    <div class="hero-eyebrow">
+      <span class="hero-led"></span>
+      OBIX MISSION CALIBRATION
+    </div>
+    <h1>Flight Style<br><span class="g">Quiz</span></h1>
+    <p class="hero-sub">
+      ตอบ 5 คำถามสั้นๆ เกี่ยวกับตัวคุณและโดรน — ระบบจะแนะนำ <strong>Rates</strong> + <strong>Filter</strong> + <strong>CLI</strong> ที่เหมาะกับสไตล์การบินของคุณโดยเฉพาะ
+    </p>
+    <div class="hero-meta">
+      <span class="meta-chip g">5 คำถาม</span>
+      <span class="meta-chip b">~1 นาที</span>
+      <span class="meta-chip a">CLI พร้อม copy</span>
+    </div>
+    <button class="start-btn" onclick="startQuiz()" aria-label="เริ่ม Flight Style Quiz">
+      🚀 &nbsp;เริ่ม Quiz
+    </button>
+  </div>
+
+  <!-- ── QUIZ ──────────────────────────────── -->
+  <div class="quiz-wrap" id="quizSection">
+
+    <!-- Progress -->
+    <div class="progress-wrap">
+      <div class="progress-steps" id="progressSteps">
+        <!-- Rendered by JS -->
+      </div>
+      <div class="progress-labels" id="progressLabels">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Question card -->
+    <div id="qCardWrap">
+      <!-- Rendered by JS -->
+    </div>
+
+  </div>
+
+  <!-- ── COMPUTING ──────────────────────────── -->
+  <div class="computing-wrap" id="computingSection">
+    <div class="comp-icon">⚙️</div>
+    <div class="comp-title">กำลังวิเคราะห์ผล…</div>
+    <div class="comp-sub">ประมวลผลสไตล์การบินของคุณ</div>
+    <div class="comp-bar-wrap">
+      <div class="comp-bar-fill" id="compBar"></div>
+    </div>
+    <div class="comp-steps" id="compSteps"></div>
+  </div>
+
+  <!-- ── RESULT ────────────────────────────── -->
+  <div class="result-wrap" id="resultSection">
+    <!-- Rendered by JS -->
+  </div>
+
+</div><!-- /.page-wrap -->
+<div id="toast"></div>
+
+<!-- ══════════════════════════════════════════
+     DATA
+══════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ── QUESTIONS ─────────────────────────────── */
+const QUESTIONS = [
+  {
+    id: 'experience',
+    label: 'คุณบินโดรน FPV มานานแค่ไหน?',
+    sub: 'ประสบการณ์ช่วยให้เราแนะนำ rates ที่เหมาะกับการควบคุมของคุณ',
+    choices: [
+      { icon:'🐣', label:'มือใหม่', desc:'ไม่ถึง 6 เดือน หรือยังฝึกอยู่',
+        s: { beginner:3, cine:1 } },
+      { icon:'✈️', label:'พอใช้ได้', desc:'6 เดือน – 2 ปี คุมได้แน่นแล้ว',
+        s: { fl:3, beginner:1, freestyle:1 } },
+      { icon:'🎯', label:'มีประสบการณ์', desc:'2–4 ปี ทำ trick ได้หลายอย่าง',
+        s: { freestyle:3, race:1, fl:1 } },
+      { icon:'🏆', label:'เทพ', desc:'4 ปีขึ้นไป หรือแข่งขันระดับชมรม',
+        s: { race:3, freestyle:2 } },
+    ]
+  },
+  {
+    id: 'drone',
+    label: 'โดรนที่คุณบินเป็นหลักคืออะไร?',
+    sub: 'ขนาดและสไตล์โดรนมีผลต่อ rates ที่เหมาะสม',
+    choices: [
+      { icon:'🐝', label:'Micro / Whoop', desc:'1–3 นิ้ว โดรนขนาดเล็ก ใช้ใบพัด duct',
+        s: { beginner:3, cine:1 } },
+      { icon:'🎬', label:'Cinewhoop / Cinema', desc:'3–4 นิ้ว ถ่ายวีดีโอ ใบพัดมีกาบ',
+        s: { cine:4, beginner:1 } },
+      { icon:'✊', label:'5 นิ้ว Freestyle / Race', desc:'มาตรฐาน 5" เป็นที่นิยมสูงสุด',
+        s: { freestyle:3, race:2, fl:1 } },
+      { icon:'🗺️', label:'Long Range 7–10 นิ้ว', desc:'บินระยะไกล ใบพัดขนาดใหญ่',
+        s: { longrange:5 } },
+    ]
+  },
+  {
+    id: 'location',
+    label: 'คุณบินที่ไหนเป็นส่วนใหญ่?',
+    sub: 'สภาพแวดล้อมกำหนดว่าคุณต้องการ rates แบบไหน',
+    choices: [
+      { icon:'🏠', label:'ในร่ม / พื้นที่แคบ', desc:'ห้อง โกดัง ใต้ตึก สนามเล็ก',
+        s: { beginner:3, cine:2 } },
+      { icon:'🌿', label:'สวน / สนามกลาง', desc:'สวนสาธารณะ สนามโรงเรียน ลานบ้าน',
+        s: { fl:3, cine:1, beginner:1 } },
+      { icon:'🏟️', label:'สนามเปิด / โล่งกว้าง', desc:'ทุ่งนา สนามแข่ง ที่ว่างขนาดใหญ่',
+        s: { freestyle:3, race:3 } },
+      { icon:'🏔️', label:'ป่า / เขา / ที่ไกล', desc:'นอกเมือง เส้นทาง trail ระยะไกล',
+        s: { longrange:5, freestyle:1 } },
+    ]
+  },
+  {
+    id: 'goal',
+    label: 'สิ่งที่คุณต้องการจากการบินมากที่สุด?',
+    sub: 'เป้าหมายหลักของคุณ — เลือกที่ตรงใจมากที่สุด',
+    choices: [
+      { icon:'🎥', label:'ถ่ายวีดีโอสวยงาม', desc:'ภาพนิ่ง smooth ไม่มี jello ไม่สั่น',
+        s: { cine:4, longrange:1 } },
+      { icon:'😊', label:'สนุก ทำ trick เบาๆ', desc:'วน loop เบสิก split-S ไม่ต้องหักโหม',
+        s: { fl:4, beginner:2 } },
+      { icon:'⚡', label:'Freestyle จัดเต็ม', desc:'flip / roll / dive / gap ทุกแบบ',
+        s: { freestyle:4, race:1 } },
+      { icon:'🏁', label:'ความเร็วสูงสุด', desc:'แข่ง gate race หรือ proximity chase',
+        s: { race:5 } },
+    ]
+  },
+  {
+    id: 'feel',
+    label: 'คุณชอบโดรนที่ตอบสนอง stick แบบไหน?',
+    sub: 'ความรู้สึกของ stick เป็นส่วนสำคัญในการเลือก rates',
+    choices: [
+      { icon:'🕊️', label:'นุ่มนวล คุมง่าย', desc:'dead zone กว้าง ไม่กระตุก อยู่มือ',
+        s: { beginner:3, cine:2 } },
+      { icon:'🎯', label:'สมดุล ตอบสนองดี', desc:'ว่องไวพอ snap ชัดแต่ยังคุมได้',
+        s: { fl:3, freestyle:2 } },
+      { icon:'⚡', label:'ว่องไว snap ชัดเจน', desc:'หมุนเร็ว ตอบสนองทันที agile',
+        s: { freestyle:3, race:2 } },
+      { icon:'🔥', label:'สุดขีด ต้องมือเร็ว', desc:'race-spec ทุก input instant',
+        s: { race:5 } },
+    ]
+  },
+];
+
+/* ── PROFILES ──────────────────────────────── */
+const PROFILES = {
+  beginner: {
+    name:'BEGINNER',    nameth:'มือใหม่',    icon:'🐣',  color:'#00ff88',
+    desc:'ตั้งค่าสำหรับผู้เริ่มต้น — นิ่ง คุมง่าย ฝึกได้สบาย ลดโอกาสอุบัติเหตุ',
+    rates:{ roll:{rc:0.80,sr:0.40,expo:0.15}, pitch:{rc:0.80,sr:0.40,expo:0.15}, yaw:{rc:0.60,sr:0.30,expo:0.10} },
+    maxdeg:380, tag:'SAFE', tagColor:'#00ff88',
+    filter:'Conservative — Gyro LPF2 ต่ำ, D-term filter แน่น ลด motor noise',
+    fcli:['set gyro_lpf2_hz = 120','set dterm_lpf1_hz = 100','set anti_gravity_gain = 3','set throttle_limit_percent = 85'],
+    notes:[
+      {t:'เพิ่ม Expo ทีละ 0.05 ถ้าต้องการ dead zone กลาง stick มากขึ้น', w:false},
+      {t:'ฝึก hover ให้นิ่งก่อน แล้วค่อยเพิ่ม Super Rate ทีละ 0.05', w:false},
+      {t:'เมื่อคุมได้มั่นใจแล้ว ลองเปลี่ยนเป็น Freestyle Lite', w:false},
+    ],
+    persPos:8,
+  },
+  cine: {
+    name:'CINEMATIC',   nameth:'ถ่ายวีดีโอ', icon:'🎬', color:'#00aaff',
+    desc:'ออกแบบสำหรับการถ่ายวีดีโอ — ภาพนิ่ง smooth stick นุ่มมาก',
+    rates:{ roll:{rc:0.70,sr:0.20,expo:0.35}, pitch:{rc:0.70,sr:0.20,expo:0.35}, yaw:{rc:0.55,sr:0.15,expo:0.20} },
+    maxdeg:280, tag:'SMOOTH', tagColor:'#00aaff',
+    filter:'Aggressive filter — Gyro LPF2 ต่ำมาก ลด vibration สุดๆ ภาพนิ่ง',
+    fcli:['set gyro_lpf2_hz = 100','set dterm_lpf1_hz = 90','set anti_gravity_gain = 2','set iterm_relax = OFF','set throttle_limit_percent = 80'],
+    notes:[
+      {t:'Expo 0.35 ให้ dead zone กลาง stick กว้าง — key สำหรับ cinematic shot', w:false},
+      {t:'Super Rate 0.20 ทำให้ขอบ stick หมุนได้พอ แต่ไม่หักโหม', w:false},
+      {t:'เพิ่ม throttle_limit ถ้า footage ยังสั่นเล็กน้อย', w:false},
+    ],
+    persPos:5,
+  },
+  fl: {
+    name:'FREESTYLE LITE', nameth:'Freestyle เบา', icon:'😊', color:'#70ddff',
+    desc:'สำหรับนักบินระดับกลาง — สนุก ทำ trick ได้ ยังคุมได้สบาย',
+    rates:{ roll:{rc:1.10,sr:0.60,expo:0.20}, pitch:{rc:1.10,sr:0.60,expo:0.20}, yaw:{rc:0.75,sr:0.40,expo:0.10} },
+    maxdeg:580, tag:'BALANCED', tagColor:'#70ddff',
+    filter:'Balanced filter — เสียง motor เงียบ ตอบสนองดี ใช้งานทั่วไป',
+    fcli:['set gyro_lpf2_hz = 150','set dterm_lpf1_hz = 110','set anti_gravity_gain = 5','set iterm_relax = RP','set throttle_limit_percent = 100'],
+    notes:[
+      {t:'จุดเริ่มต้นที่ดีก่อนขึ้นไป Freestyle เต็มที่ — เหมาะสำหรับ intermediate', w:false},
+      {t:'เพิ่ม Super Rate ทีละ 0.05 จนรู้สึก comfortable กับความเร็ว rotation', w:false},
+      {t:'Yaw ต่ำกว่า Roll/Pitch — เจตนา ทำให้บินตรงง่ายกว่า', w:false},
+    ],
+    persPos:40,
+  },
+  freestyle: {
+    name:'FREESTYLE',   nameth:'Freestyle',  icon:'⚡', color:'#00ff88',
+    desc:'Rates มาตรฐาน Freestyle — ตอบสนองดี flip/roll ลื่น snap ชัด',
+    rates:{ roll:{rc:1.20,sr:0.70,expo:0.15}, pitch:{rc:1.20,sr:0.70,expo:0.15}, yaw:{rc:0.80,sr:0.45,expo:0.10} },
+    maxdeg:720, tag:'FREESTYLE', tagColor:'#00ff88',
+    filter:'Freestyle balance — filter พอเพียง latency ต่ำ ตอบสนองดี',
+    fcli:['set gyro_lpf2_hz = 175','set dterm_lpf1_hz = 120','set anti_gravity_gain = 5','set iterm_relax = RPY','set feedforward_transition = 50'],
+    notes:[
+      {t:'Yaw ต่ำกว่า Roll/Pitch เจตนา — yaw หนักเกินทำให้โดรนหมุนพาไปยาก', w:false},
+      {t:'ถ้าต้องการ snap มากขึ้น เพิ่ม RC Rate ทีละ 0.1 และทดสอบ', w:false},
+      {t:'Expo 0.15 ให้ center stick ตอบสนองโดยตรง — เหมาะ freestyle สไตล์',w:false},
+    ],
+    persPos:62,
+  },
+  race: {
+    name:'RACE',        nameth:'แข่งขัน',   icon:'🏁', color:'#ff4455',
+    desc:'Race-spec ความเร็วสูง — ต้องมือเร็วและมีประสบการณ์มาก',
+    rates:{ roll:{rc:1.80,sr:0.80,expo:0.00}, pitch:{rc:1.80,sr:0.80,expo:0.00}, yaw:{rc:1.10,sr:0.50,expo:0.00} },
+    maxdeg:1200, tag:'EXPERT', tagColor:'#ff4455',
+    filter:'Light filter — response เร็วสุด latency ต่ำมาก',
+    fcli:['set gyro_lpf2_hz = 250','set dterm_lpf1_hz = 150','set anti_gravity_gain = 3','set iterm_relax = RPY','set feedforward_transition = 0'],
+    notes:[
+      {t:'⚠️ ไม่แนะนำสำหรับมือใหม่ — โดรนจะตอบสนองรวดเร็วมาก อาจบินหลุดทันที', w:true},
+      {t:'Expo = 0 ทำให้ center stick ตรงแม่น race-style ไม่มี dead zone', w:false},
+      {t:'ถ้าบินผิดพลาดบ่อย ให้ลองปรับลดเป็น Freestyle Lite ก่อน', w:false},
+    ],
+    persPos:92,
+  },
+  longrange: {
+    name:'LONG RANGE',  nameth:'ระยะไกล',  icon:'🗺️', color:'#ffb700',
+    desc:'สำหรับบินระยะไกล — นิ่ง ประหยัดไฟ ต้านลมได้ดี',
+    rates:{ roll:{rc:1.00,sr:0.45,expo:0.20}, pitch:{rc:1.00,sr:0.45,expo:0.20}, yaw:{rc:0.65,sr:0.30,expo:0.15} },
+    maxdeg:520, tag:'ENDURANCE', tagColor:'#ffb700',
+    filter:'Stable filter — noise ต่ำ motor ไม่ร้อน flight time สูง',
+    fcli:['set gyro_lpf2_hz = 130','set dterm_lpf1_hz = 100','set anti_gravity_gain = 4','set iterm_relax = RP','set iterm_relax_type = SETPOINT'],
+    notes:[
+      {t:'I-term สูงขึ้นช่วยต้านลมระยะไกล — อย่าลดต่ำกว่า default', w:false},
+      {t:'RC Rate 1.0 ให้ response กลางพอดีสำหรับการบินยาว 20–40 นาที', w:false},
+      {t:'ถ้าต้องการ smooth กว่านี้ลดลง Expo เป็น 0.30 ได้', w:false},
+    ],
+    persPos:28,
+  },
+};
+
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+let state = { step:0, answers:[], scores:{} };
+
+function resetState() {
+  state = {
+    step: 0,
+    answers: new Array(QUESTIONS.length).fill(null),
+    scores: { beginner:0, cine:0, fl:0, freestyle:0, race:0, longrange:0 }
+  };
+}
+
+/* ══════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════ */
+function show(id)  { document.getElementById(id).classList.add('active'); }
+function hide(id)  { document.getElementById(id).classList.remove('active'); }
+function toggle(id, on) { on ? show(id) : hide(id); }
+function el(id)    { return document.getElementById(id); }
+
+function showToast(msg) {
+  const t = el('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ══════════════════════════════════════════
+   QUIZ FLOW
+══════════════════════════════════════════ */
+function startQuiz() {
+  resetState();
+  el('heroSection').style.display = 'none';
+  show('quizSection');
+  buildProgress();
+  renderQuestion(0);
+}
+
+/* ── Progress bar ── */
+function buildProgress() {
+  const icons = ['❓','🚁','📍','🎯','🕹️'];
+  const labels = ['ประสบการณ์','โดรน','สถานที่','เป้าหมาย','ความรู้สึก'];
+  let stepsHtml = '';
+  QUESTIONS.forEach((_, i) => {
+    if (i > 0) {
+      stepsHtml += `<div class="progress-connector" id="conn${i}">
+        <div class="progress-connector-fill"></div></div>`;
+    }
+    stepsHtml += `<div class="progress-step ${i===0?'current':''}" id="step${i}">${icons[i]}</div>`;
+  });
+  el('progressSteps').innerHTML = stepsHtml;
+
+  let labelsHtml = '';
+  QUESTIONS.forEach((_, i) => {
+    labelsHtml += `<div class="progress-label ${i===0?'current':''}" id="label${i}">${labels[i]}</div>`;
+  });
+  el('progressLabels').innerHTML = labelsHtml;
+}
+
+function updateProgress(step) {
+  QUESTIONS.forEach((_, i) => {
+    const s = el(`step${i}`);
+    const l = el(`label${i}`);
+    if (!s) return;
+    s.classList.toggle('done',    i < step);
+    s.classList.toggle('current', i === step);
+    l.classList.toggle('done',    i < step);
+    l.classList.toggle('current', i === step);
+    if (i > 0) {
+      el(`conn${i}`)?.classList.toggle('done', i <= step);
+    }
+  });
+}
+
+/* ── Render question ── */
+function renderQuestion(idx) {
+  const q = QUESTIONS[idx];
+  updateProgress(idx);
+
+  const html = `
+  <div class="q-card" id="qCard">
+    <div class="q-head">
+      <span class="q-num">คำถาม ${idx+1} / ${QUESTIONS.length}</span>
+      <div>
+        <div class="q-title">${q.label}</div>
+        <div class="q-sub">${q.sub}</div>
+      </div>
+    </div>
+    <div class="choices-grid">
+      ${q.choices.map((c, ci) => `
+      <div class="choice-card ${state.answers[idx]===ci?'selected':''}"
+           id="choice${ci}" onclick="selectChoice(${ci})">
+        <div class="choice-icon-wrap">${c.icon}</div>
+        <div class="choice-body">
+          <span class="choice-label">${c.label}</span>
+          <span class="choice-desc">${c.desc}</span>
+        </div>
+        <div class="choice-check"><div class="choice-check-inner"></div></div>
+      </div>`).join('')}
+    </div>
+    <div class="q-footer">
+      <button class="q-back" ${idx===0?'disabled':''} onclick="goBack()">← ย้อนกลับ</button>
+      <button class="q-next ${state.answers[idx]!==null?'ready':''}" id="nextBtn"
+        onclick="${idx<QUESTIONS.length-1 ? 'goNext()' : 'submitQuiz()'}">
+        ${idx<QUESTIONS.length-1 ? 'ถัดไป →' : '✓ ดูผลลัพธ์'}
+      </button>
+    </div>
+  </div>`;
+
+  el('qCardWrap').innerHTML = html;
+}
+
+function selectChoice(ci) {
+  state.answers[state.step] = ci;
+  // Update visual
+  document.querySelectorAll('.choice-card').forEach((c, i) => {
+    c.classList.toggle('selected', i === ci);
+  });
+  // Enable next
+  const nb = el('nextBtn');
+  if (nb) nb.classList.add('ready');
+  // Auto-advance after short delay (except last question)
+  if (state.step < QUESTIONS.length - 1) {
+    setTimeout(() => goNext(), 380);
+  }
+}
+
+function goNext() {
+  if (state.answers[state.step] === null) return;
+  const card = el('qCard');
+  if (card) {
+    card.classList.add('leaving');
+    setTimeout(() => {
+      state.step++;
+      renderQuestion(state.step);
+    }, 260);
+  }
+}
+
+function goBack() {
+  if (state.step === 0) return;
+  const card = el('qCard');
+  if (card) {
+    card.style.animation = 'qSlideIn .3s cubic-bezier(.4,0,.2,1) reverse both';
+    setTimeout(() => {
+      state.step--;
+      renderQuestion(state.step);
+    }, 260);
+  }
+}
+
+function submitQuiz() {
+  if (state.answers[state.step] === null) return;
+  hide('quizSection');
+  show('computingSection');
+  runComputing();
+}
+
+/* ── Computing animation ── */
+function runComputing() {
+  const msgs = [
+    '// วิเคราะห์สไตล์การบิน...',
+    '// คำนวณ RC Rate ที่เหมาะสม...',
+    '// ปรับ Super Rate ตามประสบการณ์...',
+    '// ตั้งค่า Filter สำหรับโดรนของคุณ...',
+    '// สร้าง CLI commands...',
+    '// เสร็จสิ้น ✓',
+  ];
+
+  const bar = el('compBar');
+  const steps = el('compSteps');
+  steps.innerHTML = msgs.map(m =>
+    `<div class="comp-step"><span class="comp-step-dot"></span>${m}</div>`
+  ).join('');
+  const stepEls = steps.querySelectorAll('.comp-step');
+
+  let pct = 0;
+  let msgIdx = 0;
+  const tick = setInterval(() => {
+    pct += 3 + Math.random() * 5;
+    if (pct > 100) pct = 100;
+    bar.style.width = pct + '%';
+
+    const targetMsg = Math.floor((pct / 100) * msgs.length);
+    while (msgIdx < targetMsg && msgIdx < stepEls.length) {
+      stepEls[msgIdx].classList.add('show');
+      msgIdx++;
+    }
+
+    if (pct >= 100) {
+      clearInterval(tick);
+      setTimeout(() => {
+        const winner = calcResult();
+        hide('computingSection');
+        renderResult(winner);
+        show('resultSection');
+      }, 600);
+    }
+  }, 80);
+}
+
+/* ── Scoring ── */
+function calcResult() {
+  const s = { beginner:0, cine:0, fl:0, freestyle:0, race:0, longrange:0 };
+  QUESTIONS.forEach((q, qi) => {
+    const chosen = state.answers[qi];
+    if (chosen === null) return;
+    const scores = q.choices[chosen].s || {};
+    Object.entries(scores).forEach(([k, v]) => { if (k in s) s[k] += v; });
+  });
+  state.scores = s;
+  return Object.entries(s).sort((a,b) => b[1]-a[1])[0][0];
+}
+
+/* ══════════════════════════════════════════
+   RENDER RESULT
+══════════════════════════════════════════ */
+function generateCLI(profile) {
+  const r = profile.rates;
+  const lines = [
+    `# OBIXConfig Doctor — ${profile.name} Rates`,
+    `# สร้างโดย Flight Style Quiz`,
+    ``,
+    `# ─── Rates Type ──────────────────────────`,
+    `set rates_type = ACTUAL`,
+    ``,
+    `# ─── Roll ────────────────────────────────`,
+    `set roll_rc_rate = ${Math.round(r.roll.rc * 100)}`,
+    `set roll_srate   = ${Math.round(r.roll.sr * 100)}`,
+    `set roll_expo    = ${Math.round(r.roll.expo * 100)}`,
+    ``,
+    `# ─── Pitch ───────────────────────────────`,
+    `set pitch_rc_rate = ${Math.round(r.pitch.rc * 100)}`,
+    `set pitch_srate   = ${Math.round(r.pitch.sr * 100)}`,
+    `set pitch_expo    = ${Math.round(r.pitch.expo * 100)}`,
+    ``,
+    `# ─── Yaw ─────────────────────────────────`,
+    `set yaw_rc_rate = ${Math.round(r.yaw.rc * 100)}`,
+    `set yaw_srate   = ${Math.round(r.yaw.sr * 100)}`,
+    `set yaw_expo    = ${Math.round(r.yaw.expo * 100)}`,
+    ``,
+    `# ─── Filter / Tuning ─────────────────────`,
+    ...profile.fcli,
+    ``,
+    `save`,
+  ];
+  return lines.join('\n');
+}
+
+function renderResult(key) {
+  const p = PROFILES[key];
+  const cli = generateCLI(p);
+
+  // Score breakdown for secondary display
+  const scores = Object.entries(state.scores)
+    .sort((a,b)=>b[1]-a[1])
+    .map(([k,v]) => `${PROFILES[k]?.name||k}: ${v}`)
+    .join(' · ');
+
+  // Rates rows
+  const axes = [
+    ['ROLL',  p.rates.roll,  'val-big'],
+    ['PITCH', p.rates.pitch, 'val-mid'],
+    ['YAW',   p.rates.yaw,   'val-lo'],
+  ];
+  const ratesRows = axes.map(([ax, rv, cls]) => `
+    <tr>
+      <td>${ax}</td>
+      <td><span class="${cls}">${rv.rc.toFixed(2)}</span></td>
+      <td><span class="${cls}">${rv.sr.toFixed(2)}</span></td>
+      <td><span class="${cls}">${rv.expo.toFixed(2)}</span></td>
+    </tr>`).join('');
+
+  // Notes
+  const notesHtml = p.notes.map(n => `
+    <div class="note-item ${n.w?'warn':''}">
+      <span class="note-dot">${n.w?'⚠️':'▸'}</span>
+      <span>${n.t}</span>
+    </div>`).join('');
+
+  el('resultSection').innerHTML = `
+    <div class="result-header">
+      <div class="result-header-top">
+        <div class="result-badge" style="border-color:${p.color}22;background:${p.color}12;">
+          ${p.icon}
+        </div>
+        <div class="result-badge-text">
+          <div class="result-profile-label">ผลลัพธ์ของคุณ — Flight Profile</div>
+          <div class="result-profile-name" style="color:${p.color};">${p.name}</div>
+          <div class="result-profile-nameth">${p.nameth}</div>
+          <span class="result-tag" style="color:${p.tagColor};border-color:${p.tagColor}44;background:${p.tagColor}12;">${p.tag}</span>
+        </div>
+      </div>
+      <p class="result-desc">${p.desc}</p>
+
+      <!-- Personality meter -->
+      <div class="pers-wrap">
+        <div class="pers-label">
+          <span>FLYING STYLE SPECTRUM</span>
+          <span style="color:${p.color};">${p.name}</span>
+        </div>
+        <div class="pers-bar">
+          <div class="pers-needle" id="persNeedle" style="left:${p.persPos}%"></div>
+        </div>
+        <div class="pers-ticks">
+          <span class="pers-tick">CINE</span>
+          <span class="pers-tick">SMOOTH</span>
+          <span class="pers-tick">BALANCED</span>
+          <span class="pers-tick">FREESTYLE</span>
+          <span class="pers-tick">RACE</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-body">
+
+      <!-- Max deg/s -->
+      <div class="maxdeg-box">
+        <div>
+          <div class="maxdeg-val" style="color:${p.color};">${p.maxdeg}</div>
+          <div class="maxdeg-unit">deg/s MAX</div>
+        </div>
+        <div class="maxdeg-desc">
+          อัตราหมุนสูงสุดที่ full stick — เป็นตัวบอกว่าโดรนคุณจะ<strong> ${p.maxdeg < 400 ? 'นิ่งและคุมง่าย' : p.maxdeg < 600 ? 'สมดุลระหว่างความสนุกและความปลอดภัย' : p.maxdeg < 800 ? 'ตอบสนองดีเหมาะ freestyle' : 'ว่องไวมาก ต้องการประสบการณ์'}</strong>
+        </div>
+      </div>
+
+      <!-- Rates table -->
+      <div class="section-label">RATES — ACTUAL MODE</div>
+      <table class="rates-table">
+        <thead>
+          <tr>
+            <th>Axis</th>
+            <th>RC Rate</th>
+            <th>Super Rate</th>
+            <th>Expo</th>
+          </tr>
+        </thead>
+        <tbody>${ratesRows}</tbody>
+      </table>
+
+      <!-- Filter -->
+      <div class="section-label">FILTER RECOMMENDATION</div>
+      <div class="filter-box">
+        <div class="filter-box-title">📡 ${p.filter}</div>
+      </div>
+
+      <!-- Notes -->
+      <div class="section-label">TUNING NOTES</div>
+      <div class="notes-list">${notesHtml}</div>
+
+      <!-- CLI -->
+      <div class="cli-section">
+        <div class="section-label">
+          BETAFLIGHT CLI
+          <button class="cli-copy-btn" onclick="copyCLI()">📋 Copy CLI</button>
+        </div>
+        <pre class="cli-box" id="cliBock">${cli.replace(/</g,'&lt;')}</pre>
+      </div>
+
+      <!-- Score breakdown (subtle) -->
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#3d5470;margin-top:4px;line-height:1.8;">
+        // scores: ${scores}
+      </div>
+    </div>
+
+    <div class="result-actions">
+      <a href="/rates-visualizer" class="btn-primary-out">📈 ลอง Rates ใน Visualizer</a>
+      <a href="/app" class="btn-secondary-out">🚁 วิเคราะห์โดรน</a>
+      <button class="btn-ghost-out" onclick="retakeQuiz()">🔄 ทำ Quiz ใหม่</button>
+    </div>
+  `;
+
+  // Animate needle
+  setTimeout(() => {
+    const needle = el('persNeedle');
+    if (needle) {
+      needle.style.transition = 'none';
+      needle.style.left = '0%';
+      setTimeout(() => {
+        needle.style.transition = 'left .9s cubic-bezier(.4,0,.2,1)';
+        needle.style.left = p.persPos + '%';
+      }, 80);
+    }
+  }, 300);
+}
+
+/* ── Copy CLI ── */
+function copyCLI() {
+  const pre = el('cliBock');
+  if (!pre) return;
+  navigator.clipboard.writeText(pre.innerText)
+    .then(() => showToast('✓ คัดลอก CLI แล้ว'));
+}
+
+/* ── Retake ── */
+function retakeQuiz() {
+  el('resultSection').innerHTML = '';
+  hide('resultSection');
+  el('heroSection').style.display = '';
+  // scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
