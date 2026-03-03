@@ -22,7 +22,7 @@
     *{box-sizing:border-box}
     html,body{height:100%; margin:0; background:radial-gradient(1200px 600px at 10% 10%, rgba(34,211,238,0.035), transparent), var(--bg); color:var(--text); -webkit-font-smoothing:antialiased}
     a{color:var(--accent)}
-    .container{max-width:1200px; margin:28px auto; padding:20px; }
+    .container{max-width:min(1200px,100%); margin:28px auto; padding:20px; }
 
     /* Header */
     .header{display:flex; gap:16px; align-items:center; justify-content:space-between}
@@ -81,7 +81,15 @@
     /* Subtle animations */
     .fade-in{animation:fadeIn .35s ease both}
     @keyframes fadeIn{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
-  </style>
+  
+  /* ── Responsive ── */
+  html,body{overflow-x:hidden}
+  @media(max-width:768px){
+    [style*="1fr 420px"]{grid-template-columns:1fr!important}
+    .surgeon-grid,.panel-row{grid-template-columns:1fr!important}
+  }
+  @media(max-width:480px){textarea{font-size:14px}}
+</style>
 </head>
 <body>
   <div class="container">

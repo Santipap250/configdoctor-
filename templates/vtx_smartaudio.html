@@ -12,7 +12,7 @@
   <style>
     :root { --accent:#0b76d1; --bg:#fff; --muted:#666; --card:#f8f9fb; }
     body{font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin:18px; color:#111; background:var(--bg);}
-    .wrap{max-width:900px;margin:0 auto;}
+    .wrap{max-width:min(900px,100%);margin:0 auto;}
     header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
     h1{font-size:1.2rem;margin:0}
     .card{background:var(--card);padding:14px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.04);margin-bottom:12px;}
@@ -25,7 +25,13 @@
     .note{background:#fffbe6;border-left:4px solid #f0c14b;padding:8px;border-radius:6px;margin-top:8px}
     .copybtn{background:#2d2d2d;color:#fff;padding:6px 10px;border-radius:6px;border:none;cursor:pointer}
     .row{display:flex;gap:8px;align-items:center}
-  </style>
+  
+  /* ── Responsive ── */
+  html,body{overflow-x:hidden}
+  input,select{font-size:16px;min-height:44px}
+  .wrap{max-width:min(900px,100%);padding:0 4px}
+  @media(max-width:600px){body{margin:10px}.grid{grid-template-columns:1fr!important}header{flex-wrap:wrap}pre{font-size:.78rem}}
+</style>
 </head>
 <body>
   <div class="wrap">

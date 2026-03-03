@@ -11,11 +11,11 @@
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <style>
-.rpm-wrap{max-width:900px;margin:0 auto;padding:16px;}
+.rpm-wrap{max-width:min(900px,100%);margin:0 auto;padding:16px;}
 .rpm-card{background:var(--card-bg,#0d2015);border:1px solid var(--border,#1a3a24);border-radius:12px;padding:22px;margin:14px 0;}
 .rpm-card h3{color:var(--green,#10c47a);font-size:1rem;margin-bottom:14px;}
 .form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
-@media(max-width:600px){.form-grid{grid-template-columns:1fr;}}
+@media(max-width:min(600px,100%)){.form-grid{grid-template-columns:1fr;}}
 label{font-size:.82rem;color:var(--muted,#7a9a88);display:block;margin-bottom:5px;}
 input,select{width:100%;padding:.55rem .85rem;background:#050d08;border:1px solid var(--border,#1a3a24);border-radius:7px;color:var(--fg,#e0f0e8);font-size:.9rem;}
 input:focus,select:focus{outline:2px solid var(--green,#10c47a);border-color:transparent;}
@@ -42,6 +42,11 @@ tr:hover td{background:#061309;}
 .leg{display:inline-flex;align-items:center;gap:6px;color:var(--muted,#7a9a88);}
 .dot{width:12px;height:12px;border-radius:3px;display:inline-block;}
 a.back{color:var(--green,#10c47a);font-size:.85rem;text-decoration:none;}
+
+  /* ── Responsive ── */
+  html,body{overflow-x:hidden}
+  input,select{font-size:16px;min-height:44px}
+  @media(max-width:480px){[style*="repeat(3"]{grid-template-columns:1fr!important}}
 </style>
 </head>
 <body>

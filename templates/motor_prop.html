@@ -12,6 +12,11 @@
   <link rel="stylesheet" href="/static/css/style.css"> <!-- ถ้ามี style หลัก -->
   <link rel="stylesheet" href="/static/css/motor_prop.css">
   <script defer src="/static/js/motor_prop.js"></script>
+<style>
+  /* ── Responsive ── */
+  html,body{overflow-x:hidden}
+  input,select{font-size:16px;min-height:44px}
+</style>
 </head>
 <body class="{{ 'dark' if request.cookies.get('theme','light')=='dark' else 'light' }}">
 <div class="tool-shell">

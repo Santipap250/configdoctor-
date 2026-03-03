@@ -11,11 +11,11 @@
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <style>
-.cmp-wrap{max-width:1100px;margin:0 auto;padding:16px;}
+.cmp-wrap{max-width:min(1100px,100%);margin:0 auto;padding:16px;}
 .cmp-card{background:var(--card-bg,#0d2015);border:1px solid var(--border,#1a3a24);border-radius:12px;padding:20px;margin:12px 0;}
 .cmp-card h3{color:var(--green,#10c47a);font-size:1rem;margin-bottom:12px;}
 .col2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-@media(max-width:700px){.col2{grid-template-columns:1fr;}}
+@media(max-width:min(700px,100%)){.col2{grid-template-columns:1fr;}}
 label{font-size:.82rem;color:var(--muted,#7a9a88);display:block;margin-bottom:5px;}
 textarea{width:100%;height:200px;background:#050d08;border:1px solid var(--border,#1a3a24);border-radius:8px;color:#e0f0e8;font-family:monospace;font-size:.78rem;padding:10px;resize:vertical;}
 textarea:focus{outline:2px solid var(--green,#10c47a);border-color:transparent;}
@@ -53,6 +53,13 @@ tr:hover td{background:#061309;}
 .empty-hint{text-align:center;padding:30px;color:var(--muted,#7a9a88);font-size:.85rem;}
 a.back{color:var(--green,#10c47a);font-size:.85rem;text-decoration:none;}
 .tip-box{background:#0a1a0a;border:1px solid #1a3a24;border-radius:8px;padding:12px 16px;font-size:.82rem;color:var(--muted,#7a9a88);}
+
+  /* ── Responsive ── */
+  html,body{overflow-x:hidden}
+  @media(max-width:700px){
+    [style*="1fr 1fr"]{grid-template-columns:1fr!important}
+    .compare-col,.diff-side{grid-template-columns:1fr!important}
+  }
 </style>
 </head>
 <body>

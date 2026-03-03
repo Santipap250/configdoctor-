@@ -36,7 +36,7 @@ body { font-family: var(--font-th); background: var(--bg); color: var(--text);
        font-size: 15px; -webkit-font-smoothing: antialiased; }
 
 /* ── Layout ──────────────────────────────────────────────── */
-.page-wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px 80px; }
+.page-wrap { max-width:min(1040px,100%); margin: 0 auto; padding: 0 16px 80px; }
 
 /* ── Top bar ─────────────────────────────────────────────── */
 .top-bar {
@@ -96,7 +96,7 @@ body { font-family: var(--font-th); background: var(--bg); color: var(--text);
   background-clip: text;
 }
 .hero p {
-  font-size: 14px; color: var(--muted); max-width: 540px; line-height: 1.7;
+  font-size: 14px; color: var(--muted); max-width:min(540px,100%); line-height: 1.7;
 }
 .hero-tags { display: flex; gap: 8px; flex-wrap: wrap; }
 .htag {
@@ -452,6 +452,16 @@ body { font-family: var(--font-th); background: var(--bg); color: var(--text);
   .axis-grid { grid-template-columns: 1fr; }
   .hero h1   { font-size: 20px; }
 }
+
+  /* ── Responsive ── */
+  html,body{overflow-x:hidden}
+  @media(max-width:700px){
+    .page-wrap{padding:0 12px 60px}
+    [style*="repeat(3"],[style*="repeat(4"]{grid-template-columns:1fr 1fr!important}
+  }
+  @media(max-width:450px){
+    [style*="repeat(3"],[style*="repeat(4"],[style*="1fr 1fr"]{grid-template-columns:1fr!important}
+  }
 </style>
 </head>
 <body>

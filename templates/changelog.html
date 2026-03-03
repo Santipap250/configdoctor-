@@ -15,7 +15,7 @@
   <style>
     :root{--accent:#3b82f6;--muted:#98a6b8}
     body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;margin:0;background:#071028;color:#e6eef8}
-    .wrap{max-width:920px;margin:28px auto;padding:18px}
+    .wrap{max-width:min(920px,100%);margin:28px auto;padding:18px}
     header{display:flex;align-items:center;justify-content:space-between;gap:12px}
     .logo{height:36px}
     .card{background:rgba(255,255,255,0.02);border-radius:10px;padding:14px;margin-top:14px}
@@ -24,8 +24,11 @@
     ul{margin:10px 0 0 18px}
     .foot{color:var(--muted);font-size:0.9rem;margin-top:14px}
     a{color:var(--accent)}
-    @media (max-width:640px){.wrap{padding:12px}}
-  </style>
+    @media (max-width:min(640px,100%)){.wrap{padding:12px}}
+  
+  /* ── Responsive ── */
+  html,body{overflow-x:hidden}
+</style>
 </head>
 <body>
   <div class="wrap">

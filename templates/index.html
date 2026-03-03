@@ -42,6 +42,7 @@ function showToast(msg){
 }
 function toggleConcept(){ document.querySelector('.concept-box').classList.toggle('open'); }
 </script>
+<style>html,body{overflow-x:hidden}</style>
 </head>
 
 <body>
@@ -538,7 +539,7 @@ function toggleConcept(){ document.querySelector('.concept-box').classList.toggl
   {% if analysis.class_meta.description %}
   <p style="color:var(--muted);font-size:.87rem;margin-bottom:14px;">{{ analysis.class_meta.description }}</p>
   {% endif %}
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+  <div class="g2">
     <div>
       <h4>🎯 PID Baseline</h4>
       <pre id="pid-baseline">ROLL   P {{ analysis.pid_baseline.roll.p }}  I {{ analysis.pid_baseline.roll.i }}  D {{ analysis.pid_baseline.roll.d }}
@@ -560,7 +561,7 @@ Dyn Notch : {{ analysis.filter_baseline.dyn_notch }}</pre>
 
 <div class="result-card">
   <h2>🔍 ผลการวิเคราะห์ (Style-based)</h2>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+  <div class="g2" style="margin-bottom:16px">
     <div>
       <h3>⚙️ PID แนะนำ</h3>
       <pre id="pid-main">ROLL   P {{ analysis.pid.roll.p }}  I {{ analysis.pid.roll.i }}  D {{ analysis.pid.roll.d }}
@@ -642,7 +643,7 @@ Dyn Notch : {{ analysis.filter.dyn_notch }}</pre>
 
 <div class="result-card">
   <h3 style="margin-top:0;">📊 Visualization</h3>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+  <div class="g2">
     <div class="chart-wrap"><canvas id="thrustChart"></canvas></div>
     <div class="chart-wrap"><canvas id="noiseChart"></canvas></div>
   </div>

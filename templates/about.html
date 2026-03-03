@@ -11,6 +11,11 @@
 
   <!-- ใช้ไฟล์ CSS เดิมของโปรเจค -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+  /* ── Responsive ── */
+  html,body{overflow-x:hidden}
+  input,select{font-size:16px;min-height:44px}
+</style>
 </head>
 <body>
   <header class="top-bar center-logo" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
@@ -28,7 +33,7 @@
   </header>
 
   <main class="container" role="main" style="padding-top:18px;">
-    <article class="short-section" style="max-width:900px; margin: 12px auto;">
+    <article class="short-section" style="max-width:min(900px,100%); margin: 12px auto;">
       <h1 style="margin-top:0;">เกี่ยวกับ OBIXConfig Doctor</h1>
 
       <p>OBIXConfig Doctor เป็นเครื่องมือที่ออกแบบมาเพื่อช่วยผู้เล่นโดรน FPV ให้เริ่มต้นตั้งค่า PID, Filter และ Preset ได้อย่างรวดเร็วและปลอดภัย โดยอาศัยแนวคิดและประสบการณ์จากนักบิน FPV ชุมชนไทย</p>

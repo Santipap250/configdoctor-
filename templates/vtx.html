@@ -136,13 +136,20 @@
 .info-card h4 { font-size: 0.78rem; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .05em; }
 .info-card p  { font-size: 0.82rem; color: var(--text); line-height: 1.55; }
 
-@media (max-width: 600px) {
+@media (max-width:min(600px,100%)) {
   .vtx-band-matrix { grid-template-columns: repeat(4, 1fr); }
   .ch-info-freq { font-size: 1.7rem; }
 }
-@media (max-width: 420px) {
+@media (max-width:min(420px,100%)) {
   .vtx-band-matrix { grid-template-columns: repeat(4, 1fr); }
 }
+
+  /* ── Responsive ── */
+  html,body{overflow-x:hidden}
+  @media(max-width:500px){
+    [style*="repeat(8"]{grid-template-columns:repeat(4,1fr)!important}
+    [style*="repeat(4"]{grid-template-columns:repeat(2,1fr)!important}
+  }
 </style>
 <script>
 (function(){

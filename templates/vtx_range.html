@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <style>
   body { font-family: sans-serif; background: #121212; color: #eee; padding: 20px; }
-  .container { max-width: 800px; margin: 0 auto; }
+  .container { max-width:min(800px,100%); margin: 0 auto; }
   h1 { color: #f1b65a; }
   .card { background: #1e1e1e; border-radius: 12px; padding: 20px; margin-top: 16px; }
   label { display: block; margin: 10px 0 4px; color: #aaa; font-size: 0.9em; }
@@ -36,6 +36,11 @@
     color: #aaa; text-decoration: none; font-size: 0.9em;
   }
   .back-link:hover { color: #f1b65a; }
+
+  /* ── Responsive ── */
+  html,body{overflow-x:hidden}
+  input,select,button{font-size:16px;min-height:44px}
+  @media(max-width:600px){body{padding:12px}.container{padding:0}.card{padding:14px}}
 </style>
 </head>
 <body>
