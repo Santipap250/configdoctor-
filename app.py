@@ -652,6 +652,39 @@ def rates_visualizer():
 def cli_comparator():
     return render_template('cli_comparator.html')
 
+
+# ── Blackbox CSV Analyzer ─────────────────────────────────────────────────────
+try:
+    from analyzer.blackbox_analyzer import analyze_blackbox_csv
+    BLACKBOX_AVAILABLE = True
+except Exception as _bb_err:
+    print("blackbox_analyzer import failed:", _bb_err)
+    BLACKBOX_AVAILABLE = False
+    def analyze_blackbox_csv(csv_text): return {"error": "blackbox_analyzer not available"}
+
+@app.route('/blackbox')
+def blackbox_page():
+    return render_template('blackbox.html')
+
+@app.route('/blackbox/analyze', methods=['POST'])
+def blackbox_analyze():
+    try:
+        data     = request.get_json(force=True)
+        csv_text = data.get('csv', '')
+        filename = data.get('filename', 'upload.csv')
+        if not csv_text:
+            return jsonify({"error": "ไม่พบข้อมูล CSV"}), 400
+        # 10MB limit
+        if len(csv_text.encode('utf-8')) > 10_000_000:
+            return jsonify({"error": "ไฟล์ใหญ่เกิน 10MB"}), 413
+        result = analyze_blackbox_csv(csv_text)
+        logger.info("blackbox_analyze: %s rows=%s",
+                    filename, result.get('meta', {}).get('rows_analyzed', '?'))
+        return jsonify(result)
+    except Exception as e:
+        logger.exception("blackbox_analyze error")
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/esc-checker')
 def esc_checker():
     return render_template('esc_checker.html')
