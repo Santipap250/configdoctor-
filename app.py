@@ -785,6 +785,7 @@ def robots_txt():
         "Disallow: /static/downloads/osd/\n"
         "Disallow: /analyze_cli\n"
         "Disallow: /compare_cli\n"
+        "Disallow: /blackbox/analyze\n"
         "\n"
         "Sitemap: https://configdoctor.onrender.com/sitemap.xml\n"
     )
@@ -809,6 +810,7 @@ def sitemap_xml():
         ("/vtx",              "monthly", "0.6"),
         ("/vtx-range",        "monthly", "0.6"),
         ("/vtx-smartaudio",   "monthly", "0.6"),
+        ("/blackbox",          "weekly",  "0.9"),
         ("/downloads",        "weekly",  "0.7"),
         ("/fpv",              "monthly", "0.6"),
         ("/about",            "monthly", "0.5"),
