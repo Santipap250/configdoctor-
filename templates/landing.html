@@ -2,10 +2,10 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>OBIXConfig Doctor — FPV Drone Tuning Tool</title>
+<title>OBIXConfig Doctor — FPV Drone Tuning Tool v2.2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 {% set og_title       = "OBIXConfig Doctor — FPV Drone Tuning Tool" %}
-{% set og_description = "เครื่องมือวิเคราะห์ PID · Filter · Motor · ESC · Rates สำหรับโดรน FPV ทุกขนาด — ชุมชนคนรัก FPVThailand🇹🇭" %}
+{% set og_description = "เครื่องมือวิเคราะห์ PID · Filter · Motor · ESC · Blackbox สำหรับโดรน FPV ทุกขนาด — ชุมชนคนรัก FPVThailand🇹🇭" %}
 {% set og_url         = "https://configdoctor.onrender.com/landing" %}
 {% set og_image       = "https://configdoctor.onrender.com/static/img/og-default.jpg" %}
 {% include "partials/og_tags.html" %}
@@ -15,22 +15,28 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Sarabun:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
-/* ═══════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════
    LANDING — OBIXConfig Doctor v2.2
-   Aesthetic: Luxury Aerospace Dark
-   ═══════════════════════════════════════════════ */
+   Aesthetic: Precision Aerospace · Deep Signal Dark
+   ═══════════════════════════════════════════════════ */
 
 :root {
-  --green:   #10c47a;
-  --gold:    #f1b65a;
-  --blue:    #58a6ff;
-  --bg:      #06090b;
-  --card:    #0c1115;
-  --border:  rgba(255,255,255,0.06);
-  --muted:   #7a8f9e;
-  --text:    #dde7ef;
-  --font-th: 'Sarabun', system-ui, sans-serif;
-  --font-en: 'Orbitron', monospace;
+  --green:    #10c47a;
+  --gold:     #f1b65a;
+  --blue:     #58a6ff;
+  --purple:   #a78bfa;
+  --teal:     #2dd4bf;
+  --red:      #f87171;
+  --bg:       #06090b;
+  --bg2:      #08090d;
+  --card:     #0c1115;
+  --border:   rgba(255,255,255,0.06);
+  --hi:       rgba(255,255,255,0.11);
+  --muted:    #7a8f9e;
+  --text:     #dde7ef;
+  --font-th:  'Sarabun', system-ui, sans-serif;
+  --font-en:  'Orbitron', monospace;
+  --mono:     'JetBrains Mono', monospace;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -43,7 +49,17 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── TOP NAV ──────────────────────────────── */
+/* ── Scroll reveal ── */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity .65s ease, transform .65s ease;
+}
+[data-reveal].revealed { opacity: 1; transform: none; }
+
+/* ══════════════════════════════════════════
+   NAV
+   ══════════════════════════════════════════ */
 .nav {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -52,9 +68,9 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 14px 32px;
-  background: rgba(6,9,11,0.75);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(6,9,11,0.82);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
   border-bottom: 1px solid rgba(16,196,122,0.08);
 }
 .nav-logo {
@@ -72,14 +88,10 @@ body {
   letter-spacing: .12em;
   line-height: 1.3;
 }
-.nav-logo-sub { font-size: .65rem; color: var(--muted); letter-spacing: .05em; font-family: var(--font-th); }
-.nav-links {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
+.nav-logo-sub { font-size: .65rem; color: var(--muted); letter-spacing: .05em; }
+.nav-links { display: flex; gap: 4px; align-items: center; }
 .nav-link {
-  padding: 6px 14px;
+  padding: 6px 13px;
   font-size: .8rem;
   color: var(--muted);
   text-decoration: none;
@@ -87,8 +99,9 @@ body {
   transition: color .2s, background .2s;
 }
 .nav-link:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+.nav-link.highlight { color: var(--gold); }
 .nav-cta {
-  padding: 8px 18px;
+  padding: 8px 20px;
   background: var(--green);
   color: #021a0e;
   font-weight: 800;
@@ -97,14 +110,17 @@ body {
   text-decoration: none;
   letter-spacing: .04em;
   transition: filter .2s, transform .2s;
+  margin-left: 6px;
 }
 .nav-cta:hover { filter: brightness(1.1); transform: translateY(-1px); }
-@media(max-width:640px) {
+@media(max-width:680px) {
   .nav { padding: 12px 18px; }
   .nav-links { display: none; }
 }
 
-/* ── HERO ────────────────────────────────── */
+/* ══════════════════════════════════════════
+   HERO
+   ══════════════════════════════════════════ */
 .hero {
   min-height: 100dvh;
   display: flex;
@@ -112,692 +128,500 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 120px 24px 80px;
+  padding: 130px 24px 80px;
   position: relative;
   overflow: hidden;
 }
 
 /* Animated grid */
 .hero-grid {
-  position: absolute;
-  inset: 0;
+  position: absolute; inset: 0;
   background-image:
-    linear-gradient(rgba(16,196,122,0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(16,196,122,0.035) 1px, transparent 1px);
+    linear-gradient(rgba(16,196,122,0.038) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16,196,122,0.038) 1px, transparent 1px);
   background-size: 52px 52px;
-  mask-image: radial-gradient(ellipse 75% 75% at 50% 40%, black 20%, transparent 100%);
+  mask-image: radial-gradient(ellipse 80% 75% at 50% 40%, black 20%, transparent 100%);
   animation: gridBreath 7s ease-in-out infinite;
 }
 @keyframes gridBreath {
-  0%,100% { opacity:.5; transform: scale(1); }
-  50%      { opacity:1; transform: scale(1.01); }
+  0%,100% { opacity:.55; transform:scale(1); }
+  50%     { opacity:1;   transform:scale(1.008); }
 }
 
 /* Glow orbs */
-.orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(100px);
-  pointer-events: none;
-  opacity: .18;
-  animation: orbFloat 10s ease-in-out infinite;
-}
+.orb { position:absolute; border-radius:50%; filter:blur(100px); pointer-events:none; }
 .orb-1 {
-  width: 600px; height: 400px;
+  width:600px; height:400px; opacity:.18;
   background: radial-gradient(circle, #10c47a, transparent 70%);
-  top: -10%; left: 20%;
-  animation-delay: 0s;
+  top:-10%; left:20%; animation: orbFloat 10s ease-in-out infinite;
 }
 .orb-2 {
-  width: 400px; height: 400px;
+  width:400px; height:400px; opacity:.1;
   background: radial-gradient(circle, #58a6ff, transparent 70%);
-  bottom: 10%; right: 5%;
-  opacity: .1;
-  animation-delay: -4s;
+  bottom:10%; right:5%; animation: orbFloat 10s -4s ease-in-out infinite;
 }
 .orb-3 {
-  width: 300px; height: 300px;
+  width:320px; height:320px; opacity:.09;
   background: radial-gradient(circle, #f1b65a, transparent 70%);
-  bottom: 20%; left: 5%;
-  opacity: .08;
-  animation-delay: -7s;
+  bottom:18%; left:4%; animation: orbFloat 10s -7s ease-in-out infinite;
 }
 @keyframes orbFloat {
-  0%,100% { transform: translate(0,0); }
-  33%     { transform: translate(20px,-30px); }
-  66%     { transform: translate(-15px,15px); }
+  0%,100% { transform:translate(0,0); }
+  33%     { transform:translate(20px,-30px); }
+  66%     { transform:translate(-15px,15px); }
 }
 
-/* Scan line */
 .scanline {
-  position: absolute;
-  inset: 0;
+  position:absolute; inset:0; pointer-events:none;
   background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(16,196,122,0.015) 2px,
-    rgba(16,196,122,0.015) 4px
+    0deg, transparent, transparent 2px,
+    rgba(16,196,122,0.012) 2px, rgba(16,196,122,0.012) 4px
   );
-  pointer-events: none;
 }
 
-.hero-inner {
-  position: relative;
-  z-index: 2;
-  max-width: 780px;
-}
+.hero-inner { position:relative; z-index:2; max-width:800px; }
 
 .hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  display: inline-flex; align-items: center; gap: 8px;
   padding: 6px 18px;
   background: rgba(16,196,122,0.08);
-  border: 1px solid rgba(16,196,122,0.2);
+  border: 1px solid rgba(16,196,122,0.22);
   border-radius: 30px;
-  font-size: .76rem;
-  font-weight: 700;
-  color: var(--green);
-  letter-spacing: .12em;
-  text-transform: uppercase;
+  font-size: .76rem; font-weight: 700;
+  color: var(--green); letter-spacing: .12em; text-transform: uppercase;
   margin-bottom: 28px;
   animation: fadeUp .7s ease both;
 }
 .badge-dot {
-  width: 6px; height: 6px;
-  background: var(--green);
-  border-radius: 50%;
+  width:6px; height:6px; background:var(--green); border-radius:50%;
   animation: blink 1.8s ease-in-out infinite;
 }
-@keyframes blink { 0%,100%{ opacity:1; } 50%{ opacity:.2; } }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
 
 .hero-logo {
-  width: 120px;
-  filter: drop-shadow(0 0 28px rgba(16,196,122,0.5))
-          drop-shadow(0 0 60px rgba(16,196,122,0.2));
-  margin-bottom: 24px;
+  width: 110px;
+  filter: drop-shadow(0 0 28px rgba(16,196,122,0.5)) drop-shadow(0 0 60px rgba(16,196,122,0.2));
+  margin-bottom: 22px;
   animation: fadeUp .7s .1s ease both, float 5s 1s ease-in-out infinite;
 }
 @keyframes float {
-  0%,100% { transform: translateY(0) rotate(0deg); }
-  50%     { transform: translateY(-8px) rotate(.5deg); }
+  0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-8px) rotate(.5deg)}
 }
 
 .hero-label {
   font-family: var(--font-en);
-  font-size: clamp(.65rem,.9vw,.78rem);
-  letter-spacing: .3em;
-  color: var(--green);
-  text-transform: uppercase;
-  margin-bottom: 12px;
-  animation: fadeUp .7s .15s ease both;
-  opacity: .75;
+  font-size: clamp(.64rem,.85vw,.76rem);
+  letter-spacing: .3em; color: var(--green); text-transform: uppercase;
+  margin-bottom: 12px; animation: fadeUp .7s .15s ease both; opacity:.75;
 }
 
 .hero-title {
   font-family: var(--font-th);
-  font-size: clamp(2.4rem, 6vw, 4rem);
-  font-weight: 800;
-  line-height: 1.1;
-  color: #fff;
-  margin-bottom: 8px;
-  animation: fadeUp .7s .2s ease both;
+  font-size: clamp(2.3rem, 5.5vw, 3.9rem);
+  font-weight: 800; line-height: 1.1; color: #fff;
+  margin-bottom: 8px; animation: fadeUp .7s .2s ease both;
 }
-.hero-title .accent {
-  color: var(--green);
-  text-shadow: 0 0 40px rgba(16,196,122,0.5);
-}
+.hero-title .accent { color: var(--green); text-shadow: 0 0 40px rgba(16,196,122,0.45); }
 .hero-title-en {
   font-family: var(--font-en);
-  font-size: clamp(.9rem,2vw,1.2rem);
-  color: rgba(255,255,255,0.25);
-  letter-spacing: .18em;
-  display: block;
-  margin-top: 6px;
-  font-weight: 700;
+  font-size: clamp(.85rem, 1.8vw, 1.15rem);
+  color: rgba(255,255,255,.22); letter-spacing: .18em;
+  display: block; margin-top: 6px; font-weight: 700;
   animation: fadeUp .7s .25s ease both;
 }
 
 .hero-desc {
-  font-size: clamp(.9rem,1.2vw,1.05rem);
-  color: var(--muted);
-  line-height: 1.7;
-  max-width: 580px;
-  margin: 22px auto 36px;
+  font-size: clamp(.9rem,1.1vw,1.02rem);
+  color: var(--muted); line-height: 1.72;
+  max-width: 600px; margin: 22px auto 36px;
   animation: fadeUp .7s .3s ease both;
 }
 .hero-desc strong { color: var(--text); }
 
 .hero-actions {
-  display: flex;
-  gap: 14px;
-  justify-content: center;
-  flex-wrap: wrap;
-  animation: fadeUp .7s .4s ease both;
+  display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+  animation: fadeUp .7s .4s ease both; margin-bottom: 28px;
 }
 
 .btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 16px 36px;
-  background: var(--green);
-  color: #021a0e;
-  font-weight: 800;
-  font-size: 1rem;
-  border-radius: 12px;
-  text-decoration: none;
-  box-shadow: 0 0 0 0 rgba(16,196,122,0.4);
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 16px 36px; background: var(--green);
+  color: #021a0e; font-weight: 800; font-size: 1rem;
+  border-radius: 12px; text-decoration: none; letter-spacing: .03em;
   transition: filter .2s, transform .2s, box-shadow .3s;
-  letter-spacing: .03em;
+  box-shadow: 0 0 0 0 rgba(16,196,122,0.4);
 }
 .btn-primary:hover {
-  filter: brightness(1.08);
-  transform: translateY(-3px);
+  filter: brightness(1.08); transform: translateY(-3px);
   box-shadow: 0 16px 50px rgba(16,196,122,0.35), 0 0 0 8px rgba(16,196,122,0.06);
 }
-
 .btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 16px 28px;
-  background: rgba(255,255,255,0.05);
-  color: var(--text);
-  font-weight: 600;
-  font-size: .95rem;
-  border-radius: 12px;
-  text-decoration: none;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 16px 28px; background: rgba(255,255,255,0.05);
+  color: var(--text); font-weight: 600; font-size: .95rem;
+  border-radius: 12px; text-decoration: none;
   border: 1px solid rgba(255,255,255,0.1);
   transition: background .2s, border-color .2s, transform .2s;
 }
 .btn-secondary:hover {
-  background: rgba(255,255,255,0.09);
-  border-color: rgba(255,255,255,0.18);
-  transform: translateY(-2px);
+  background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.18); transform: translateY(-2px);
 }
 
-/* scroll hint */
+/* Feature tags pill row */
+.hero-tags { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; animation: fadeUp .7s .5s ease both; }
+.hero-tag {
+  font-family: var(--font-en); font-size: .65rem; font-weight: 700;
+  letter-spacing: .09em; text-transform: uppercase;
+  color: var(--muted); border: 1px solid var(--border);
+  padding: 4px 11px; border-radius: 5px; background: rgba(255,255,255,0.03);
+}
+.hero-tag.hot { color: var(--gold); border-color: rgba(241,182,90,0.25); background: rgba(241,182,90,0.06); }
+
 .scroll-hint {
-  position: absolute;
-  bottom: 32px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  color: rgba(255,255,255,0.2);
-  font-size: .72rem;
-  letter-spacing: .1em;
-  text-transform: uppercase;
+  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  color: rgba(255,255,255,.18); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase;
   animation: fadeUp 1s .8s ease both;
 }
 .scroll-arrow {
-  width: 28px; height: 28px;
-  border-right: 2px solid rgba(16,196,122,0.3);
-  border-bottom: 2px solid rgba(16,196,122,0.3);
+  width: 26px; height: 26px;
+  border-right: 2px solid rgba(16,196,122,.25);
+  border-bottom: 2px solid rgba(16,196,122,.25);
   transform: rotate(45deg);
-  animation: scrollBounce 2s ease-in-out infinite;
+  animation: arrowBounce 2s ease-in-out infinite;
 }
-@keyframes scrollBounce { 0%,100%{transform:rotate(45deg) translateY(0)} 50%{transform:rotate(45deg) translateY(5px)} }
+@keyframes arrowBounce { 0%,100%{transform:rotate(45deg) translateY(0)} 50%{transform:rotate(45deg) translateY(5px)} }
 
-/* ── STATS BAR ────────────────────────────── */
+/* ══════════════════════════════════════════
+   STATS BAR
+   ══════════════════════════════════════════ */
 .stats-bar {
   display: flex;
-  justify-content: center;
-  gap: 0;
-  background: rgba(16,196,122,0.04);
+  background: linear-gradient(180deg, rgba(12,17,21,0.9), var(--card));
   border-top: 1px solid rgba(16,196,122,0.1);
-  border-bottom: 1px solid rgba(16,196,122,0.1);
-  overflow-x: auto;
+  border-bottom: 1px solid var(--border);
 }
 .stat-item {
-  flex: 1;
-  min-width: 120px;
-  padding: 22px 20px;
-  text-align: center;
-  border-right: 1px solid rgba(16,196,122,0.08);
+  flex: 1; padding: 24px 12px; text-align: center;
+  border-right: 1px solid var(--border);
+  transition: background .2s;
 }
 .stat-item:last-child { border-right: none; }
+.stat-item:hover { background: rgba(255,255,255,0.02); }
 .stat-num {
-  font-family: var(--font-en);
-  font-size: 2rem;
-  font-weight: 900;
-  color: var(--green);
-  line-height: 1;
-  text-shadow: 0 0 20px rgba(16,196,122,0.4);
-  display: block;
+  font-family: var(--font-en); font-size: 2rem; font-weight: 900;
+  color: var(--green); display: block; line-height: 1;
+  text-shadow: 0 0 30px rgba(16,196,122,0.3);
 }
-.stat-lbl { font-size: .76rem; color: var(--muted); margin-top: 4px; letter-spacing: .03em; }
+.stat-lbl { font-size: .72rem; color: var(--muted); margin-top: 5px; letter-spacing: .04em; }
 
-/* ── SECTION ──────────────────────────────── */
+/* ══════════════════════════════════════════
+   SECTION COMMONS
+   ══════════════════════════════════════════ */
 section { padding: 90px 24px; }
-.section-inner { max-width: 1060px; margin: 0 auto; }
+.section-inner { max-width: 1080px; margin: 0 auto; }
+
 .section-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 5px 14px;
-  border-radius: 30px;
-  font-size: .72rem;
-  font-weight: 800;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  margin-bottom: 16px;
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-en); font-size: .7rem; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+  padding: 5px 14px; border-radius: 30px; margin-bottom: 16px;
 }
-.badge-new {
-  background: rgba(241,182,90,0.1);
-  border: 1px solid rgba(241,182,90,0.25);
-  color: var(--gold);
-}
-.badge-core {
-  background: rgba(16,196,122,0.08);
-  border: 1px solid rgba(16,196,122,0.18);
-  color: var(--green);
-}
-.badge-tools {
-  background: rgba(88,166,255,0.08);
-  border: 1px solid rgba(88,166,255,0.18);
-  color: var(--blue);
-}
+.badge-new  { color: var(--gold);  background: rgba(241,182,90,0.1);  border: 1px solid rgba(241,182,90,0.25); }
+.badge-core { color: var(--green); background: rgba(16,196,122,0.08); border: 1px solid rgba(16,196,122,0.2); }
+.badge-tools{ color: var(--blue);  background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.2); }
 
 .section-title {
-  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
-  font-weight: 800;
-  color: #fff;
-  line-height: 1.15;
-  margin-bottom: 10px;
+  font-family: var(--font-en);
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  font-weight: 900; line-height: 1.18;
+  color: #fff; margin-bottom: 14px; letter-spacing: -.01em;
 }
-.section-title .hl-green { color: var(--green); }
-.section-title .hl-gold  { color: var(--gold); }
-.section-sub { font-size: .95rem; color: var(--muted); line-height: 1.65; max-width: 560px; }
+.hl-green { color: var(--green); }
+.hl-gold  { color: var(--gold); }
+.hl-blue  { color: var(--blue); }
 
-/* ── NEW FEATURES (5) ───────────────────── */
+.section-sub {
+  font-size: .95rem; color: var(--muted); line-height: 1.7; max-width: 560px;
+}
+
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border) 15%, var(--border) 85%, transparent);
+  margin: 0;
+}
+
+/* ══════════════════════════════════════════
+   NEW FEATURES SECTION v2.2
+   ══════════════════════════════════════════ */
 .new-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 18px;
-  margin-top: 44px;
-}
-@media(max-width:720px) { .new-grid { grid-template-columns: 1fr; } }
-
-/* Hero card (spans full width) */
-.new-card-hero { grid-column: 1 / -1; }
-
-.new-card {
-  position: relative;
-  background: linear-gradient(135deg, #0c1115 0%, #0a0e12 100%);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 18px;
-  padding: 28px 30px;
-  text-decoration: none;
-  color: inherit;
-  overflow: hidden;
-  transition: transform .25s, border-color .25s, box-shadow .25s;
-  display: flex;
-  flex-direction: column;
-}
-
-.new-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse 60% 50% at 80% 20%, var(--card-glow, rgba(16,196,122,0.06)), transparent 70%);
-  opacity: 0;
-  transition: opacity .3s;
-}
-.new-card:hover {
-  transform: translateY(-5px);
-  border-color: var(--card-accent, rgba(16,196,122,0.3));
-  box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px var(--card-accent, rgba(16,196,122,0.15));
-}
-.new-card:hover::before { opacity: 1; }
-
-/* Accent colors per card */
-.card-green { --card-accent: rgba(16,196,122,0.35); --card-glow: rgba(16,196,122,0.1); --card-color: #10c47a; }
-.card-gold  { --card-accent: rgba(241,182,90,0.35);  --card-glow: rgba(241,182,90,0.1);  --card-color: #f1b65a; }
-.card-blue  { --card-accent: rgba(88,166,255,0.35);  --card-glow: rgba(88,166,255,0.1);  --card-color: #58a6ff; }
-.card-teal  { --card-accent: rgba(45,212,191,0.35);  --card-glow: rgba(45,212,191,0.1);  --card-color: #2dd4bf; }
-.card-purple{ --card-accent: rgba(168,85,247,0.35);  --card-glow: rgba(168,85,247,0.1);  --card-color: #a855f7; }
-
-.new-card-new-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 10px;
-  background: rgba(241,182,90,0.12);
-  border: 1px solid rgba(241,182,90,0.25);
-  border-radius: 20px;
-  font-size: .68rem;
-  font-weight: 800;
-  color: var(--gold);
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  margin-bottom: 16px;
-  align-self: flex-start;
-}
-
-.new-card-icon {
-  font-size: 2.2rem;
-  margin-bottom: 14px;
-  display: block;
-  filter: drop-shadow(0 0 12px var(--card-color, #10c47a));
-}
-
-.new-card-title {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: #fff;
-  margin-bottom: 8px;
-  line-height: 1.25;
-}
-.new-card-title .en {
-  font-family: var(--font-en);
-  font-size: .78rem;
-  color: var(--card-color, #10c47a);
-  display: block;
-  margin-bottom: 6px;
-  letter-spacing: .1em;
-}
-
-.new-card-desc {
-  font-size: .87rem;
-  color: var(--muted);
-  line-height: 1.65;
-  flex: 1;
-}
-
-.new-card-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 18px;
-}
-.tag {
-  padding: 3px 10px;
-  border-radius: 6px;
-  font-size: .73rem;
-  font-weight: 600;
-  background: rgba(255,255,255,0.05);
-  color: rgba(255,255,255,0.45);
-  border: 1px solid rgba(255,255,255,0.07);
-}
-
-.new-card-arrow {
-  position: absolute;
-  bottom: 24px;
-  right: 24px;
-  width: 32px; height: 32px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255,255,255,0.3);
-  font-size: 1rem;
-  transition: background .2s, color .2s, transform .2s;
-}
-.new-card:hover .new-card-arrow {
-  background: var(--card-color, #10c47a);
-  color: #021a0e;
-  transform: translate(2px,-2px);
-}
-
-/* Hero card layout - horizontal */
-.new-card-hero .new-card-inner {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  align-items: center;
-}
-@media(max-width:600px) {
-  .new-card-hero .new-card-inner { grid-template-columns: 1fr; }
-}
-.new-card-hero .new-card-visual {
-  background: rgba(16,196,122,0.04);
-  border: 1px solid rgba(16,196,122,0.1);
-  border-radius: 12px;
-  padding: 20px;
-  font-family: var(--font-en);
-  font-size: .72rem;
-  color: rgba(16,196,122,0.7);
-  line-height: 2;
-  overflow: hidden;
-}
-.new-card-hero .new-card-visual span { color: rgba(255,255,255,0.5); }
-.new-card-hero .new-card-visual .hi { color: #10c47a; font-weight: 700; }
-
-/* ── CORE FEATURES GRID ───────────────────── */
-.core-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-top: 44px;
-}
-@media(max-width:860px) { .core-grid { grid-template-columns: repeat(2,1fr); } }
-@media(max-width:540px) { .core-grid { grid-template-columns: 1fr; } }
-
-.core-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 22px;
-  transition: transform .2s, border-color .2s;
-}
-.core-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(16,196,122,0.2);
-}
-.core-icon { font-size: 1.7rem; margin-bottom: 12px; display: block; }
-.core-title { font-size: .95rem; font-weight: 700; color: var(--text); margin-bottom: 7px; }
-.core-desc  { font-size: .83rem; color: var(--muted); line-height: 1.6; }
-
-/* ── SUPPORTED BUILDS ────────────────────── */
-.builds-section {
-  background: linear-gradient(180deg, transparent, rgba(16,196,122,0.03), transparent);
-  padding: 70px 24px;
-}
-.builds-wrap {
-  max-width: 860px;
-  margin: 0 auto;
-  text-align: center;
-}
-.builds-title {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 8px;
-}
-.builds-sub { font-size: .88rem; color: var(--muted); margin-bottom: 36px; }
-.builds-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
-}
-.build-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 10px;
-  font-size: .85rem;
-  color: var(--text);
-  font-weight: 600;
-  transition: background .2s, border-color .2s, transform .2s;
-}
-.build-pill:hover {
-  background: rgba(16,196,122,0.08);
-  border-color: rgba(16,196,122,0.25);
-  transform: translateY(-2px);
-  color: #fff;
-}
-.build-pill .bsize {
-  font-family: var(--font-en);
-  font-size: .7rem;
-  color: var(--green);
-  font-weight: 700;
-}
-
-/* ── TOOLS SHOWCASE ─────────────────────── */
-.tools-grid {
-  display: grid;
-  grid-template-columns: repeat(4,1fr);
-  gap: 12px;
+  gap: 16px;
   margin-top: 40px;
 }
-@media(max-width:780px) { .tools-grid { grid-template-columns: repeat(2,1fr); } }
-@media(max-width:420px) { .tools-grid { grid-template-columns: 1fr; } }
 
-.tool-card {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 18px;
+/* Blackbox flagship — spans full width */
+.new-card-flagship { grid-column: 1 / -1; }
+
+.new-card {
+  position: relative; overflow: hidden;
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  text-decoration: none;
-  color: inherit;
-  transition: transform .2s, border-color .2s, background .2s;
-  gap: 8px;
+  border-radius: 20px;
+  padding: 28px 30px;
+  text-decoration: none; color: inherit; display: block;
+  transition: transform .25s, border-color .3s, box-shadow .3s;
 }
-.tool-card:hover {
+.new-card:hover {
   transform: translateY(-3px);
-  border-color: rgba(88,166,255,0.25);
-  background: rgba(88,166,255,0.04);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
 }
-.tool-icon { font-size: 1.4rem; }
-.tool-name { font-size: .87rem; font-weight: 700; color: var(--text); }
-.tool-hint { font-size: .76rem; color: var(--muted); line-height: 1.5; }
+/* Color variants */
+.card-green:hover  { border-color: rgba(16,196,122,.38);  box-shadow: 0 24px 64px rgba(16,196,122,.09); }
+.card-gold:hover   { border-color: rgba(241,182,90,.38);  box-shadow: 0 24px 64px rgba(241,182,90,.07); }
+.card-blue:hover   { border-color: rgba(88,166,255,.38);  box-shadow: 0 24px 64px rgba(88,166,255,.07); }
+.card-teal:hover   { border-color: rgba(45,212,191,.38);  box-shadow: 0 24px 64px rgba(45,212,191,.07); }
+.card-purple:hover { border-color: rgba(167,139,250,.38); box-shadow: 0 24px 64px rgba(167,139,250,.07); }
+.card-red:hover    { border-color: rgba(248,113,113,.38); box-shadow: 0 24px 64px rgba(248,113,113,.07); }
 
-/* ── COMMUNITY ───────────────────────────── */
+/* Corner glow */
+.new-card::before {
+  content:''; position:absolute; top:0; right:0;
+  width:260px; height:260px; border-radius:50%;
+  pointer-events:none; opacity:.55; transition:opacity .25s;
+}
+.new-card:hover::before { opacity:1; }
+.card-green::before  { background:radial-gradient(circle at top right, rgba(16,196,122,.12), transparent 65%); }
+.card-gold::before   { background:radial-gradient(circle at top right, rgba(241,182,90,.10), transparent 65%); }
+.card-blue::before   { background:radial-gradient(circle at top right, rgba(88,166,255,.10), transparent 65%); }
+.card-teal::before   { background:radial-gradient(circle at top right, rgba(45,212,191,.10), transparent 65%); }
+.card-purple::before { background:radial-gradient(circle at top right, rgba(167,139,250,.10), transparent 65%); }
+.card-red::before    { background:radial-gradient(circle at top right, rgba(248,113,113,.10), transparent 65%); }
+
+.new-card-new-pill {
+  position:absolute; top:16px; right:16px;
+  font-family:var(--font-en); font-size:.68rem; font-weight:800; letter-spacing:.1em;
+  padding:3px 10px; border-radius:20px;
+}
+.pill-flagship {
+  color: var(--gold); background: rgba(241,182,90,.12); border:1px solid rgba(241,182,90,.28);
+}
+.pill-new { color:var(--green); background:rgba(16,196,122,.10); border:1px solid rgba(16,196,122,.25); }
+
+/* Flagship inner layout */
+.flagship-inner {
+  display: grid; grid-template-columns: 1fr auto; gap: 36px; align-items: center;
+}
+.flagship-visual {
+  font-family: var(--mono); font-size: .76rem; line-height: 1.85;
+  color: rgba(255,255,255,.35);
+  background: rgba(0,0,0,.35); border-radius: 14px;
+  padding: 20px 22px;
+  border: 1px solid rgba(16,196,122,.1);
+  min-width: 280px;
+  flex-shrink: 0;
+}
+.flagship-visual .hi  { color: var(--green); font-weight:600; }
+.flagship-visual .go  { color: var(--gold);  font-weight:600; }
+.flagship-visual .mu  { color: var(--muted); }
+.flagship-visual .re  { color: var(--red);   font-weight:600; }
+
+.new-card-icon { font-size:2rem; margin-bottom:12px; line-height:1; display:block; }
+.new-card-title .en {
+  font-family:var(--font-en); font-size:.75rem; font-weight:700;
+  letter-spacing:.1em; color:var(--muted); display:block; margin-bottom:5px;
+}
+.new-card-title {
+  font-size:1.22rem; font-weight:700; color:#fff; margin-bottom:12px; line-height:1.3;
+}
+.new-card-desc { font-size:.9rem; color:var(--muted); line-height:1.68; }
+.new-card-tags { display:flex; gap:7px; flex-wrap:wrap; margin-top:14px; }
+.tag {
+  font-family:var(--font-en); font-size:.63rem; font-weight:700; letter-spacing:.07em;
+  padding:3px 9px; border-radius:4px;
+  background:rgba(255,255,255,.05); border:1px solid var(--border); color:var(--muted);
+}
+.new-card-arrow {
+  position:absolute; bottom:20px; right:22px;
+  font-size:1.1rem; color:var(--muted); transition:all .25s;
+}
+.new-card:hover .new-card-arrow { color:var(--text); transform:translateX(4px); }
+
+@media(max-width:740px) {
+  .new-grid { grid-template-columns:1fr; }
+  .flagship-inner { grid-template-columns:1fr; }
+  .flagship-visual { display:none; }
+}
+
+/* ══════════════════════════════════════════
+   CORE FEATURES
+   ══════════════════════════════════════════ */
+.core-grid {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-top: 36px;
+}
+.core-card {
+  background:var(--card); border:1px solid var(--border); border-radius:14px;
+  padding:22px 20px; transition:border-color .2s, transform .2s;
+}
+.core-card:hover { border-color:var(--hi); transform:translateY(-2px); }
+.core-icon { font-size:1.5rem; margin-bottom:10px; }
+.core-title { font-size:.93rem; font-weight:700; color:var(--text); margin-bottom:6px; }
+.core-desc  { font-size:.82rem; color:var(--muted); line-height:1.6; }
+
+/* ══════════════════════════════════════════
+   BUILDS
+   ══════════════════════════════════════════ */
+.builds-section {
+  padding:56px 24px;
+  background:linear-gradient(180deg, var(--bg2), var(--bg));
+  border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+}
+.builds-wrap { max-width:1080px; margin:0 auto; text-align:center; }
+.builds-title {
+  font-family:var(--font-en);
+  font-size:clamp(1rem,2.2vw,1.65rem);
+  font-weight:800; color:#fff; margin-bottom:8px;
+}
+.builds-sub { font-size:.88rem; color:var(--muted); margin-bottom:28px; }
+.builds-row { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+.build-pill {
+  display:flex; align-items:center; gap:8px;
+  background:var(--card); border:1px solid var(--border); border-radius:10px;
+  padding:10px 16px; font-size:.85rem; transition:all .2s;
+}
+.build-pill:hover { border-color:var(--hi); transform:translateY(-2px); }
+.bsize { font-family:var(--font-en); font-size:.72rem; font-weight:800; color:var(--green); }
+
+/* ══════════════════════════════════════════
+   TOOLS GRID — 14 tools
+   ══════════════════════════════════════════ */
+.tools-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(152px,1fr));
+  gap:10px; margin-top:36px;
+}
+.tool-card {
+  background:var(--card); border:1px solid var(--border); border-radius:14px;
+  padding:20px 16px; text-decoration:none; color:inherit;
+  display:flex; flex-direction:column; gap:7px; align-items:flex-start;
+  transition:all .22s; position:relative; overflow:hidden;
+}
+.tool-card::before {
+  content:''; position:absolute; inset:0; border-radius:14px;
+  background:radial-gradient(circle at top right, rgba(16,196,122,.06), transparent 65%);
+  opacity:0; transition:opacity .25s;
+}
+.tool-card:hover::before { opacity:1; }
+.tool-card:hover { border-color:var(--hi); transform:translateY(-2px); }
+.tool-icon { font-size:1.4rem; line-height:1; }
+.tool-name { font-size:.87rem; font-weight:700; color:var(--text); }
+.tool-hint { font-size:.75rem; color:var(--muted); line-height:1.4; }
+.tool-badge {
+  font-family:var(--font-en); font-size:.6rem; font-weight:800; letter-spacing:.08em;
+  padding:2px 8px; border-radius:4px; margin-top:auto; align-self:flex-start;
+}
+.tb-new  { background:rgba(16,196,122,.12);  color:var(--green);  border:1px solid rgba(16,196,122,.25); }
+.tb-gold { background:rgba(241,182,90,.12);  color:var(--gold);   border:1px solid rgba(241,182,90,.25); }
+
+/* ══════════════════════════════════════════
+   COMMUNITY
+   ══════════════════════════════════════════ */
 .community-section {
-  padding: 80px 24px 100px;
+  padding:90px 24px;
+  background:linear-gradient(180deg, var(--bg), var(--bg2));
+  border-top:1px solid var(--border);
 }
 .community-inner {
-  max-width: 680px;
-  margin: 0 auto;
-  text-align: center;
-  padding: 60px 40px;
-  background: linear-gradient(135deg, rgba(16,196,122,0.06) 0%, rgba(88,166,255,0.04) 100%);
-  border: 1px solid rgba(16,196,122,0.15);
-  border-radius: 24px;
-  position: relative;
-  overflow: hidden;
+  max-width:680px; margin:0 auto; text-align:center;
+  background:rgba(16,196,122,.03);
+  border:1px solid rgba(16,196,122,.12);
+  border-radius:24px; padding:52px 40px;
+  position:relative;
 }
 .community-inner::before {
-  content: '';
-  position: absolute;
-  top: -60px; right: -60px;
-  width: 200px; height: 200px;
-  background: radial-gradient(circle, rgba(16,196,122,0.1), transparent 70%);
+  content:''; position:absolute; inset:-1px; border-radius:25px; z-index:-1;
+  background:linear-gradient(135deg, rgba(16,196,122,.12), transparent 60%, rgba(241,182,90,.07));
 }
 .community-tag {
-  font-family: var(--font-en);
-  font-size: .68rem;
-  letter-spacing: .2em;
-  color: var(--green);
-  text-transform: uppercase;
-  margin-bottom: 16px;
-  opacity: .8;
+  font-family:var(--font-en); font-size:.68rem; font-weight:700;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--green); margin-bottom:14px;
 }
 .community-title {
-  font-size: 1.7rem;
-  font-weight: 800;
-  color: #fff;
-  margin-bottom: 12px;
-  line-height: 1.2;
+  font-family:var(--font-en);
+  font-size:clamp(1.1rem,2.5vw,1.8rem);
+  font-weight:900; color:#fff; line-height:1.2; margin-bottom:14px;
 }
-.community-desc { color: var(--muted); font-size: .92rem; line-height: 1.65; margin-bottom: 28px; }
+.community-desc { font-size:.9rem; color:var(--muted); line-height:1.72; margin-bottom:26px; }
 .community-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 13px 28px;
-  background: rgba(16,196,122,0.12);
-  border: 1px solid rgba(16,196,122,0.3);
-  color: var(--green);
-  font-weight: 700;
-  font-size: .9rem;
-  border-radius: 10px;
-  text-decoration: none;
-  transition: background .2s, transform .2s;
+  display:inline-flex; align-items:center; gap:10px;
+  font-family:var(--font-en); font-size:.75rem; font-weight:700; letter-spacing:.08em;
+  color:var(--green); border:1px solid rgba(16,196,122,.3);
+  background:rgba(16,196,122,.07);
+  padding:12px 26px; border-radius:10px; text-decoration:none;
+  transition:all .25s;
 }
 .community-btn:hover {
-  background: rgba(16,196,122,0.2);
-  transform: translateY(-2px);
+  background:rgba(16,196,122,.14); border-color:rgba(16,196,122,.5);
+  box-shadow:0 0 24px rgba(16,196,122,.15); transform:translateY(-2px);
 }
 
-/* ── FOOTER ──────────────────────────────── */
+/* ══════════════════════════════════════════
+   FOOTER
+   ══════════════════════════════════════════ */
 footer {
-  padding: 28px 24px;
+  background: var(--bg2);
   border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-  max-width: 1060px;
-  margin: 0 auto;
+  padding: 24px 32px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
 }
-.footer-left { font-size: .8rem; color: var(--muted); }
-.footer-left strong { color: var(--green); font-family: var(--font-en); font-size: .72rem; }
-.footer-right { display: flex; gap: 18px; }
-.footer-link { font-size: .8rem; color: var(--muted); text-decoration: none; }
+.footer-left { font-size: .78rem; color: var(--muted); }
+.footer-left strong { font-family: var(--font-en); font-size: .7rem; color: var(--green); }
+.footer-right { display: flex; gap: 20px; }
+.footer-link { font-size: .78rem; color: var(--muted); text-decoration: none; transition: color .2s; }
 .footer-link:hover { color: var(--text); }
 
-/* ── DIVIDER ─────────────────────────────── */
-.section-divider {
-  max-width: 1060px;
-  margin: 0 auto;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border), transparent);
+/* ══════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════ */
+@media(max-width:900px) {
+  .core-grid  { grid-template-columns:repeat(2,1fr); }
 }
-
-/* ── ANIMATIONS ───────────────────────────── */
-@keyframes fadeUp {
-  from { opacity:0; transform: translateY(20px); }
-  to   { opacity:1; transform: translateY(0); }
+@media(max-width:640px) {
+  section     { padding:60px 18px; }
+  .core-grid  { grid-template-columns:1fr; }
+  .tools-grid { grid-template-columns:repeat(3,1fr); }
+  .community-inner { padding:36px 24px; }
 }
-
-[data-reveal] {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity .65s ease, transform .65s ease;
-}
-[data-reveal].revealed {
-  opacity: 1;
-  transform: translateY(0);
+@media(max-width:460px) {
+  .tools-grid { grid-template-columns:repeat(2,1fr); }
 }
 </style>
 </head>
-<body class="dark">
+<body>
 
-<!-- ── TOP NAV ── -->
+<!-- ── NAV ─────────────────────────────────────────────────── -->
 <nav class="nav">
   <a class="nav-logo" href="/landing">
     <img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="OBIX">
     <div>
       <div class="nav-logo-text">OBIX CONFIG DOCTOR</div>
-      <div class="nav-logo-sub">FPV Tuning Tool 🇹🇭</div>
+      <div class="nav-logo-sub">FPV Tuning Platform 🇹🇭 · v2.2</div>
     </div>
   </a>
   <div class="nav-links">
-    <a class="nav-link" href="/motor-prop">Motor</a>
+    <a class="nav-link highlight" href="/blackbox">📊 Blackbox</a>
     <a class="nav-link" href="/pid-advisor">PID Advisor</a>
-    <a class="nav-link" href="/cli-comparator">Diff</a>
+    <a class="nav-link" href="/cli_surgeon">CLI</a>
+    <a class="nav-link" href="/motor-prop">Motor</a>
     <a class="nav-link" href="{{ url_for('downloads_index') }}">Downloads</a>
     <a class="nav-link" href="{{ url_for('about') }}">About</a>
     <a class="nav-cta" href="/app">เริ่มวิเคราะห์ →</a>
   </div>
 </nav>
 
-<!-- ── HERO ── -->
+<!-- ── HERO ─────────────────────────────────────────────────── -->
 <section class="hero">
   <div class="hero-grid"></div>
   <div class="orb orb-1"></div>
@@ -808,7 +632,7 @@ footer {
   <div class="hero-inner">
     <div class="hero-badge">
       <span class="badge-dot"></span>
-      🇹🇭 สำหรับชุมชน FPV ไทย — v2.0
+      🇹🇭 สำหรับชุมชน FPV ไทย — v2.2
     </div>
 
     <img src="{{ url_for('static', filename='img/obix-logo.png') }}"
@@ -817,18 +641,27 @@ footer {
     <div class="hero-label">OBIXCONFIG DOCTOR</div>
 
     <h1 class="hero-title">
-      วิเคราะห์โดรน <span class="accent">FPV</span><br>ของคุณง่ายๆ ได้ที่นี่
-      <span class="hero-title-en">TUNE SMARTER. FLY BETTER.</span>
+      วิเคราะห์โดรน <span class="accent">FPV</span><br>
+      ของคุณ — ลึกที่สุดในไทย
+      <span class="hero-title-en">TUNE SMARTER. FLY BETTER. v2.2</span>
     </h1>
 
     <p class="hero-desc">
-      วิเคราะห์ <strong>PID · Filter · Motor · ESC · Rates · RPM</strong><br>
-      จากข้อมูลโดรนคุณ — แล้วให้ค่าพร้อมใช้พร้อม CLI command ทันที
+      วิเคราะห์ <strong>PID · Filter · Motor · ESC · Rates · RPM · Blackbox</strong><br>
+      จากข้อมูลโดรนของคุณ — ได้ค่าพร้อมใช้ + CLI command ทันที ฟรี 100%
     </p>
 
     <div class="hero-actions">
       <a href="/app" class="btn-primary">🚀 เริ่มวิเคราะห์โดรน</a>
       <a href="#new-features" class="btn-secondary">ดู Features ใหม่ ↓</a>
+    </div>
+
+    <div class="hero-tags">
+      <span class="hero-tag hot">🆕 Blackbox Analyzer</span>
+      <span class="hero-tag">14 Tools</span>
+      <span class="hero-tag">BF 4.3 · 4.4 · 4.5</span>
+      <span class="hero-tag">2.5&quot;–10&quot;</span>
+      <span class="hero-tag">ฟรี · ไม่ต้อง login</span>
     </div>
   </div>
 
@@ -838,19 +671,19 @@ footer {
   </div>
 </section>
 
-<!-- ── STATS BAR ── -->
+<!-- ── STATS BAR ──────────────────────────────────────────── -->
 <div class="stats-bar">
   <div class="stat-item">
-    <span class="stat-num">11</span>
-    <div class="stat-lbl">Tools & Features</div>
+    <span class="stat-num">14</span>
+    <div class="stat-lbl">Tools &amp; Features</div>
   </div>
   <div class="stat-item">
     <span class="stat-num">8</span>
     <div class="stat-lbl">Build Sizes</div>
   </div>
   <div class="stat-item">
-    <span class="stat-num">5</span>
-    <div class="stat-lbl">Features ใหม่</div>
+    <span class="stat-num">13</span>
+    <div class="stat-lbl">PID Symptoms</div>
   </div>
   <div class="stat-item">
     <span class="stat-num">🇹🇭</span>
@@ -858,121 +691,148 @@ footer {
   </div>
 </div>
 
-<!-- ── NEW FEATURES ── -->
+<!-- ══════════════════════════════════════════════════════════
+     NEW FEATURES v2.2
+     ══════════════════════════════════════════════════════════ -->
 <section id="new-features">
   <div class="section-inner">
     <div data-reveal>
-      <div class="section-badge badge-new">✦ &nbsp;Features ใหม่ v2.0</div>
+      <div class="section-badge badge-new">✦ &nbsp;Features ใหม่ v2.2</div>
       <h2 class="section-title">เครื่องมือที่<br><span class="hl-gold">ไม่มีที่ไหนในโลก FPV</span></h2>
-      <p class="section-sub">5 features ที่สร้างขึ้นจากความรู้ community จริงๆ — ไม่ต้องเดา ไม่ต้องลองผิดลองถูก</p>
+      <p class="section-sub">สร้างขึ้นจากความรู้ community จริงๆ — ไม่ต้องเดา ไม่ต้องลองผิดลองถูก รวม Blackbox Analyzer เครื่องมือใหม่ล่าสุด v2.2</p>
     </div>
 
     <div class="new-grid">
 
-      <!-- Card 1: PID Symptom Advisor (hero) -->
-      <a href="/pid-advisor" class="new-card card-green new-card-hero" data-reveal>
-        <div class="new-card-new-pill">✦ ใหม่</div>
-        <div class="new-card-inner">
+      <!-- ═══ FLAGSHIP: Blackbox CSV Analyzer ═══ -->
+      <a href="/blackbox" class="new-card card-green new-card-flagship" data-reveal>
+        <div class="new-card-new-pill pill-flagship">✦ v2.2 FLAGSHIP</div>
+
+        <div class="flagship-inner">
           <div>
-            <span class="new-card-icon">🩺</span>
+            <span class="new-card-icon">📊</span>
             <div class="new-card-title">
-              <span class="en">PID SYMPTOM ADVISOR</span>
-              PID Symptom Advisor
+              <span class="en">BLACKBOX CSV ANALYZER</span>
+              Blackbox CSV Analyzer
             </div>
             <p class="new-card-desc">
-              บินแล้วเจออาการแปลกๆ? บอกอาการ — ระบบวินิจฉัยสาเหตุ แนะนำค่าที่ต้องปรับ พร้อม CLI commands copy ได้เลย
-              ครอบคลุม propwash, bounce-back, yaw spin, motor hot, jello footage และอีกมาก
+              Upload ไฟล์ <strong style="color:var(--green)">CSV จาก Betaflight Blackbox</strong> — วิเคราะห์ได้ทันที ทั้ง PID quality score
+              (เกรด A–D), oscillation ต่อ axis (Roll/Pitch/Yaw), motor imbalance, battery sag, throttle distribution
+              และ CLI fix recommendations พร้อม copy ครบวงจร รองรับ BF 4.3/4.4/4.5 — ไม่มีเว็บไหนในไทยทำได้แบบนี้
             </p>
-            <div class="new-card-tags" style="margin-top:14px;">
-              <span class="tag">Propwash</span><span class="tag">Bounce-back</span>
-              <span class="tag">Yaw spin</span><span class="tag">Motor hot</span>
-              <span class="tag">Jello</span><span class="tag">Toilet bowl</span>
+            <div class="new-card-tags" style="margin-top:16px">
+              <span class="tag">PID Score A–D</span>
+              <span class="tag">Oscillation/Axis</span>
+              <span class="tag">Motor Balance</span>
+              <span class="tag">Battery Sag</span>
+              <span class="tag">Throttle Dist.</span>
+              <span class="tag">BF 4.3–4.5</span>
+              <span class="tag">CLI Auto-fix</span>
             </div>
           </div>
-          <div class="new-card-visual">
-            อาการ: <span class="hi">สั่นหลัง flip</span><br>
-            วินิจฉัย: <span>D-term สูงเกิน</span><br>
-            แก้ไข: <span class="hi">set d_roll -= 5%</span><br>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hi">set d_pitch -= 5%</span><br>
-            ————————————<br>
-            อาการ: <span class="hi">Propwash</span><br>
-            วินิจฉัย: <span>D ต่ำ + ไม่มี RPM filter</span><br>
-            แก้ไข: <span class="hi">enable rpm_filter</span>
+          <div class="flagship-visual">
+<span class="mu">╔══ Flight Analysis Report ═════╗</span>
+<span class="mu">║</span> PID Score <span class="hi">87/100</span> <span class="go">(Grade B)</span>  <span class="mu">║</span>
+<span class="mu">╠═══════════════════════════════╣</span>
+<span class="mu">║</span> Roll  RMS <span class="hi">12.4</span>  <span class="mu">← ดี</span>          <span class="mu">║</span>
+<span class="mu">║</span> D-noise    <span class="go">42.1</span>  <span class="mu">← warning</span>    <span class="mu">║</span>
+<span class="mu">║</span> Motor imb  <span class="hi">3.2%</span>  <span class="mu">← สมดุล</span>      <span class="mu">║</span>
+<span class="mu">║</span> Battery    <span class="hi">4S · sag 0.6V</span>       <span class="mu">║</span>
+<span class="mu">║</span> Style      <span class="hi">freestyle</span>           <span class="mu">║</span>
+<span class="mu">╠═══════════════════════════════╣</span>
+<span class="mu">║</span> Fix: <span class="hi">set dterm_lpf1_static_hz</span> <span class="mu">║</span>
+<span class="mu">║</span>      <span class="hi">= 90</span>                      <span class="mu">║</span>
+<span class="mu">╚═══════════════════════════════╝</span>
           </div>
         </div>
         <div class="new-card-arrow">→</div>
       </a>
 
-      <!-- Card 2: RPM Filter Calc -->
-      <a href="/rpm-filter" class="new-card card-gold" data-reveal>
-        <div class="new-card-new-pill">✦ ใหม่</div>
+      <!-- Card: PID Symptom Advisor -->
+      <a href="/pid-advisor" class="new-card card-gold" data-reveal>
+        <div class="new-card-new-pill pill-new">✦ ใหม่</div>
+        <span class="new-card-icon">🩺</span>
+        <div class="new-card-title">
+          <span class="en">PID SYMPTOM ADVISOR</span>
+          PID Symptom Advisor
+        </div>
+        <p class="new-card-desc">
+          บินแล้วเจออาการแปลกๆ? บอกอาการ — ระบบวินิจฉัยสาเหตุ แนะนำค่าที่ต้องปรับ พร้อม CLI commands copy ได้เลย ครอบคลุม 13 อาการ: propwash, bounce-back, yaw spin, motor hot, ESC desync และอีกมาก
+        </p>
+        <div class="new-card-tags">
+          <span class="tag">13 Symptoms</span>
+          <span class="tag">Auto Diagnose</span>
+          <span class="tag">CLI Ready</span>
+        </div>
+        <div class="new-card-arrow">→</div>
+      </a>
+
+      <!-- Card: RPM Filter -->
+      <a href="/rpm-filter" class="new-card card-blue" data-reveal>
+        <div class="new-card-new-pill pill-new">✦ ใหม่</div>
         <span class="new-card-icon">🔔</span>
         <div class="new-card-title">
           <span class="en">RPM FILTER CALCULATOR</span>
           RPM Filter Calculator
         </div>
         <p class="new-card-desc">
-          ใส่ KV + แบต → ได้ตารางความถี่ harmonic ครบ 4 levels
-          พร้อมค่า dyn_notch_min/max ที่แม่นยำ และ CLI command พร้อม paste
+          ใส่ KV + แบต → ได้ตารางความถี่ harmonic ครบ 4 levels พร้อมค่า dyn_notch_min/max ที่แม่นยำ และ CLI command พร้อม paste
         </p>
         <div class="new-card-tags">
           <span class="tag">Harmonic Table</span>
           <span class="tag">dyn_notch</span>
-          <span class="tag">CLI ready</span>
+          <span class="tag">CLI Ready</span>
         </div>
         <div class="new-card-arrow">→</div>
       </a>
 
-      <!-- Card 3: CLI Diff Comparator -->
-      <a href="/cli-comparator" class="new-card card-blue" data-reveal>
-        <div class="new-card-new-pill">✦ ใหม่</div>
+      <!-- Card: CLI Diff Comparator -->
+      <a href="/cli-comparator" class="new-card card-teal" data-reveal>
+        <div class="new-card-new-pill pill-new">✦ ใหม่</div>
         <span class="new-card-icon">⚖️</span>
         <div class="new-card-title">
           <span class="en">CLI DIFF COMPARATOR</span>
           CLI Diff Comparator
         </div>
         <p class="new-card-desc">
-          วาง config 2 ชุด — เห็นทุกค่าที่เปลี่ยนแปลงทันที พร้อมคำอธิบายแต่ละ parameter
-          ใช้เปรียบ before/after tuning หรือ config ของตัวเองกับ community preset
+          วาง config 2 ชุด — เห็นทุกค่าที่เปลี่ยนแปลงทันที พร้อมคำอธิบายแต่ละ parameter ใช้เปรียบ before/after tuning หรือกับ community preset
         </p>
         <div class="new-card-tags">
           <span class="tag">Before/After</span>
-          <span class="tag">Community preset</span>
-          <span class="tag">Auto explain</span>
+          <span class="tag">Community Preset</span>
+          <span class="tag">Auto Explain</span>
         </div>
         <div class="new-card-arrow">→</div>
       </a>
 
-      <!-- Card 4: Rates Visualizer -->
-      <a href="/rates-visualizer" class="new-card card-teal" data-reveal>
-        <div class="new-card-new-pill">✦ ใหม่</div>
+      <!-- Card: Rates Visualizer -->
+      <a href="/rates-visualizer" class="new-card card-purple" data-reveal>
+        <div class="new-card-new-pill pill-new">✦ ใหม่</div>
         <span class="new-card-icon">📈</span>
         <div class="new-card-title">
           <span class="en">RATES VISUALIZER</span>
           Rates Visualizer
         </div>
         <p class="new-card-desc">
-          ดู stick response curve real-time รองรับ Betaflight ACTUAL, RC+Super, KISS
-          6 presets สำเร็จรูป และ generate CLI command ได้ทันที
+          ดู stick response curve real-time รองรับ Betaflight ACTUAL, RC+Super, KISS — 6 presets สำเร็จรูป และ generate CLI command ได้ทันที
         </p>
         <div class="new-card-tags">
           <span class="tag">ACTUAL</span><span class="tag">KISS</span>
-          <span class="tag">6 Presets</span><span class="tag">Live curve</span>
+          <span class="tag">6 Presets</span><span class="tag">Live Curve</span>
         </div>
         <div class="new-card-arrow">→</div>
       </a>
 
-      <!-- Card 5: ESC Checker -->
-      <a href="/esc-checker" class="new-card card-purple" data-reveal>
-        <div class="new-card-new-pill">✦ ใหม่</div>
+      <!-- Card: ESC Checker -->
+      <a href="/esc-checker" class="new-card card-red" data-reveal>
+        <div class="new-card-new-pill pill-new">✦ ใหม่</div>
         <span class="new-card-icon">⚡</span>
         <div class="new-card-title">
           <span class="en">ESC COMPATIBILITY CHECKER</span>
           ESC Compatibility Checker
         </div>
         <p class="new-card-desc">
-          ใส่ KV + แบต + stator → คำนวณ peak current, แนะนำ ESC amperage ที่ต้องการ
-          และ protocol ที่เหมาะสม (DShot300/600/BiDir)
+          ใส่ KV + แบต + stator → คำนวณ peak current, แนะนำ ESC amperage ที่ต้องการ และ protocol ที่เหมาะสม (DShot300/600/BiDir)
         </p>
         <div class="new-card-tags">
           <span class="tag">Peak Current</span>
@@ -988,7 +848,9 @@ footer {
 
 <div class="section-divider"></div>
 
-<!-- ── CORE FEATURES ── -->
+<!-- ══════════════════════════════════════════════════════════
+     CORE FEATURES
+     ══════════════════════════════════════════════════════════ -->
 <section>
   <div class="section-inner">
     <div data-reveal>
@@ -999,32 +861,32 @@ footer {
 
     <div class="core-grid" data-reveal>
       <div class="core-card">
-        <span class="core-icon">⚙️</span>
-        <div class="core-title">PID & Filter Baseline</div>
+        <div class="core-icon">⚙️</div>
+        <div class="core-title">PID &amp; Filter Baseline</div>
         <p class="core-desc">ค่า PID และ Filter ที่ปลอดภัยตาม class โดรน พร้อม CLI copy ได้เลย</p>
       </div>
       <div class="core-card">
-        <span class="core-icon">🔬</span>
-        <div class="core-title">Advanced Analysis</div>
-        <p class="core-desc">ประมาณ TWR, กระแสไฟ, C-rating, เวลาบิน และ motor/battery health แบบลึก</p>
+        <div class="core-icon">🔬</div>
+        <div class="core-title">Advanced Physics Engine</div>
+        <p class="core-desc">ประมาณ TWR, กระแสไฟ, C-rating, เวลาบิน size-dependent (2.5"–10")</p>
       </div>
       <div class="core-card">
-        <span class="core-icon">🧭</span>
+        <div class="core-icon">🧭</div>
         <div class="core-title">Motor × Prop Recommender</div>
         <p class="core-desc">แนะนำ KV, stator size และประมาณกระแสตามน้ำหนัก + battery + style</p>
       </div>
       <div class="core-card">
-        <span class="core-icon">🛠️</span>
+        <div class="core-icon">🛠️</div>
         <div class="core-title">Smart Rule Checks</div>
         <p class="core-desc">ตรวจ warning อัตโนมัติ เช่น TWR ต่ำ, C-rating สูง, KV ไม่เหมาะ cell count</p>
       </div>
       <div class="core-card">
-        <span class="core-icon">🔧</span>
-        <div class="core-title">CLI Surgeon</div>
-        <p class="core-desc">วาง diff all หรือ dump — ได้ผลวิเคราะห์ทุก parameter พร้อม warning</p>
+        <div class="core-icon">🩻</div>
+        <div class="core-title">CLI Surgeon v2.1</div>
+        <p class="core-desc">วาง diff all หรือ dump — ตรวจ gyro_lpf1_static_hz, simplified filter, motor_poles พร้อม fix</p>
       </div>
       <div class="core-card">
-        <span class="core-icon">📁</span>
+        <div class="core-icon">📁</div>
         <div class="core-title">DIFF / DUMP Library</div>
         <p class="core-desc">รวมไฟล์จากโดรนหลายรุ่น — F4/F7, 5"/7", หลาย build แยก ดาวน์โหลดได้ทันที</p>
       </div>
@@ -1032,7 +894,9 @@ footer {
   </div>
 </section>
 
-<!-- ── BUILDS ── -->
+<!-- ══════════════════════════════════════════════════════════
+     BUILDS
+     ══════════════════════════════════════════════════════════ -->
 <section class="builds-section">
   <div class="builds-wrap" data-reveal>
     <h2 class="builds-title">รองรับทุกขนาด — ตั้งแต่ Whoop ถึง Long Range</h2>
@@ -1059,79 +923,111 @@ footer {
 
 <div class="section-divider"></div>
 
-<!-- ── TOOLS QUICK ACCESS ── -->
+<!-- ══════════════════════════════════════════════════════════
+     TOOLS QUICK ACCESS — ALL 14
+     ══════════════════════════════════════════════════════════ -->
 <section>
   <div class="section-inner">
     <div data-reveal>
       <div class="section-badge badge-tools">🔗 &nbsp;Quick Access</div>
-      <h2 class="section-title">เครื่องมือ<span class="hl-green">ทั้งหมด</span></h2>
+      <h2 class="section-title">เครื่องมือ<span class="hl-blue">ทั้งหมด</span></h2>
+      <p class="section-sub">คลิกได้เลย — ทุก tool ฟรีและไม่ต้อง login</p>
     </div>
     <div class="tools-grid" data-reveal>
+
       <a class="tool-card" href="/app">
         <div class="tool-icon">🚀</div>
         <div class="tool-name">วิเคราะห์โดรน</div>
         <div class="tool-hint">Main PID/Filter analyzer</div>
       </a>
+
+      <a class="tool-card" href="/blackbox">
+        <div class="tool-icon">📊</div>
+        <div class="tool-name">Blackbox Analyzer</div>
+        <div class="tool-hint">Flight log CSV → PID score</div>
+        <span class="tool-badge tb-new">v2.2 NEW</span>
+      </a>
+
+      <a class="tool-card" href="/pid-advisor">
+        <div class="tool-icon">🩺</div>
+        <div class="tool-name">PID Advisor</div>
+        <div class="tool-hint">อาการ → วิธีแก้ทันที</div>
+      </a>
+
       <a class="tool-card" href="/cli_surgeon">
-        <div class="tool-icon">🔧</div>
+        <div class="tool-icon">🩻</div>
         <div class="tool-name">CLI Surgeon</div>
         <div class="tool-hint">วิเคราะห์ diff all / dump</div>
       </a>
+
       <a class="tool-card" href="/motor-prop">
         <div class="tool-icon">🧭</div>
         <div class="tool-name">Motor × Prop</div>
         <div class="tool-hint">แนะนำ KV + stator</div>
       </a>
-      <a class="tool-card" href="/pid-advisor">
-        <div class="tool-icon">🩺</div>
-        <div class="tool-name">PID Advisor</div>
-        <div class="tool-hint">อาการ → วิธีแก้</div>
-      </a>
+
       <a class="tool-card" href="/rpm-filter">
         <div class="tool-icon">🔔</div>
         <div class="tool-name">RPM Filter</div>
         <div class="tool-hint">คำนวณ harmonic Hz</div>
       </a>
+
       <a class="tool-card" href="/rates-visualizer">
         <div class="tool-icon">📈</div>
         <div class="tool-name">Rates Visualizer</div>
-        <div class="tool-hint">ดู curve live</div>
+        <div class="tool-hint">ดู curve live + CLI</div>
       </a>
+
       <a class="tool-card" href="/cli-comparator">
         <div class="tool-icon">⚖️</div>
         <div class="tool-name">CLI Comparator</div>
         <div class="tool-hint">เปรียบ 2 config</div>
       </a>
+
       <a class="tool-card" href="/esc-checker">
         <div class="tool-icon">⚡</div>
         <div class="tool-name">ESC Checker</div>
         <div class="tool-hint">ตรวจ ESC + protocol</div>
       </a>
+
+      <a class="tool-card" href="/osd">
+        <div class="tool-icon">🖥️</div>
+        <div class="tool-name">OSD Designer</div>
+        <div class="tool-hint">ออกแบบ OSD layout</div>
+      </a>
+
       <a class="tool-card" href="/vtx">
         <div class="tool-icon">📡</div>
         <div class="tool-name">VTX Bands</div>
         <div class="tool-hint">ตาราง Band/Channel</div>
       </a>
+
       <a class="tool-card" href="/vtx-range">
         <div class="tool-icon">🏞️</div>
         <div class="tool-name">VTX Range</div>
         <div class="tool-hint">ประมาณระยะสัญญาณ</div>
       </a>
+
+      <a class="tool-card" href="/vtx-smartaudio">
+        <div class="tool-icon">🎙️</div>
+        <div class="tool-name">SmartAudio</div>
+        <div class="tool-hint">SmartAudio commands</div>
+      </a>
+
       <a class="tool-card" href="{{ url_for('downloads_index') }}">
         <div class="tool-icon">📁</div>
         <div class="tool-name">DIFF Library</div>
         <div class="tool-hint">ดาวน์โหลดไฟล์ตัวอย่าง</div>
+        <span class="tool-badge tb-gold">F4 / F7</span>
       </a>
-      <a class="tool-card" href="{{ url_for('about') }}">
-        <div class="tool-icon">ℹ️</div>
-        <div class="tool-name">About</div>
-        <div class="tool-hint">เกี่ยวกับ project</div>
-      </a>
+
     </div>
   </div>
 </section>
 
-<!-- ── COMMUNITY ── -->
+<!-- ══════════════════════════════════════════════════════════
+     COMMUNITY
+     ══════════════════════════════════════════════════════════ -->
 <section class="community-section">
   <div class="community-inner" data-reveal>
     <div class="community-tag">OPEN SOURCE COMMUNITY</div>
@@ -1146,14 +1042,7 @@ footer {
   </div>
 </section>
 
-<!-- ════════════════════════════════════════════════════════════════
-  💛 SUPPORT SECTION — OBIXConfig Doctor v2.0  
-  วิธีใช้:
-  1. วาง block นี้ใน templates/landing.html
-     ระหว่าง  </section>  (จบ community) กับ  <footer>  
-  2. บันทึก QR image ไว้ที่:
-     static/img/support-qr.png  
-  (ไม่ต้องแก้อะไรเพิ่ม — ทุก CSS/JS อยู่ใน block นี้ทั้งหมด)  ════════════════════════════════════════════════════════════════ -->
+
 <!-- ── SUPPORT SECTION ──────────────────────────────────────────── -->
 <section class="sup-section" id="support" aria-label="สนับสนุนโปรเจกต์">
 
