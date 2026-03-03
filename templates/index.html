@@ -1425,7 +1425,13 @@ Dyn Notch : {{ analysis.filter.dyn_notch }}</pre>
             <div>
               <div class="qr-wrapper" id="qrWrapper">
                 <!-- QR Code placeholder — replace with actual PromptPay QR image -->
-                <img src="{{ url_for('static', filename='img/promptpay-qr.png') }}"
+                <div class="sup-qr-frame">
+        <span class="sup-c sup-c-tl" aria-hidden="true"></span>
+        <span class="sup-c sup-c-tr" aria-hidden="true"></span>
+        <span class="sup-c sup-c-bl" aria-hidden="true"></span>
+        <span class="sup-c sup-c-br" aria-hidden="true"></span>
+        <div class="sup-qr-halo" aria-hidden="true"></div>
+                 <img src="{{ url_for('static', filename='img/promptpay-qr.png') }}"
                      alt="PromptPay QR"
                      onerror="this.parentElement.innerHTML='<div style=\'width:114px;height:114px;display:grid;place-items:center;font-size:11px;color:#999;text-align:center;font-family:monospace;\'>QR<br>PromptPay<br><br>วาง QR<br>ที่นี่</div>'"
                      style="width:114px;height:114px;object-fit:contain;">
