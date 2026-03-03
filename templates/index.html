@@ -42,7 +42,6 @@ function showToast(msg){
 }
 function toggleConcept(){ document.querySelector('.concept-box').classList.toggle('open'); }
 </script>
-<style>html,body{overflow-x:hidden}</style>
 </head>
 
 <body>
@@ -171,6 +170,15 @@ function toggleConcept(){ document.querySelector('.concept-box').classList.toggl
     <div class="drawer-divider"></div>
     <div class="drawer-group-label">📡 VTX & Signal</div>
 
+    <a class="drawer-link" href="/osd">
+      <span class="dl-icon-wrap purple">🖥️</span>
+      <span class="dl-body">
+        <span class="dl-title">OSD Designer</span>
+        <span class="dl-meta">ออกแบบ layout OSD + export</span>
+      </span>
+      <span class="dl-pill">tool</span>
+    </a>
+
     <a class="drawer-link" href="/vtx">
       <span class="dl-icon-wrap green">📡</span>
       <span class="dl-body">
@@ -185,6 +193,15 @@ function toggleConcept(){ document.querySelector('.concept-box').classList.toggl
       <span class="dl-body">
         <span class="dl-title">VTX Range Calculator</span>
         <span class="dl-meta">ประมาณระยะสัญญาณ + กราฟ</span>
+      </span>
+      <span class="dl-pill">tool</span>
+    </a>
+
+    <a class="drawer-link" href="/vtx-smartaudio">
+      <span class="dl-icon-wrap gold">🎙️</span>
+      <span class="dl-body">
+        <span class="dl-title">VTX SmartAudio</span>
+        <span class="dl-meta">SmartAudio / Tramp commands</span>
       </span>
       <span class="dl-pill">tool</span>
     </a>
@@ -539,7 +556,7 @@ function toggleConcept(){ document.querySelector('.concept-box').classList.toggl
   {% if analysis.class_meta.description %}
   <p style="color:var(--muted);font-size:.87rem;margin-bottom:14px;">{{ analysis.class_meta.description }}</p>
   {% endif %}
-  <div class="g2">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
     <div>
       <h4>🎯 PID Baseline</h4>
       <pre id="pid-baseline">ROLL   P {{ analysis.pid_baseline.roll.p }}  I {{ analysis.pid_baseline.roll.i }}  D {{ analysis.pid_baseline.roll.d }}
@@ -561,7 +578,7 @@ Dyn Notch : {{ analysis.filter_baseline.dyn_notch }}</pre>
 
 <div class="result-card">
   <h2>🔍 ผลการวิเคราะห์ (Style-based)</h2>
-  <div class="g2" style="margin-bottom:16px">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
     <div>
       <h3>⚙️ PID แนะนำ</h3>
       <pre id="pid-main">ROLL   P {{ analysis.pid.roll.p }}  I {{ analysis.pid.roll.i }}  D {{ analysis.pid.roll.d }}
@@ -643,7 +660,7 @@ Dyn Notch : {{ analysis.filter.dyn_notch }}</pre>
 
 <div class="result-card">
   <h3 style="margin-top:0;">📊 Visualization</h3>
-  <div class="g2">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
     <div class="chart-wrap"><canvas id="thrustChart"></canvas></div>
     <div class="chart-wrap"><canvas id="noiseChart"></canvas></div>
   </div>

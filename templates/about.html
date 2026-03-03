@@ -11,11 +11,6 @@
 
   <!-- ใช้ไฟล์ CSS เดิมของโปรเจค -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-<style>
-  /* ── Responsive ── */
-  html,body{overflow-x:hidden}
-  input,select{font-size:16px;min-height:44px}
-</style>
 </head>
 <body>
   <header class="top-bar center-logo" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
@@ -33,7 +28,7 @@
   </header>
 
   <main class="container" role="main" style="padding-top:18px;">
-    <article class="short-section" style="max-width:min(900px,100%); margin: 12px auto;">
+    <article class="short-section" style="max-width:900px; margin: 12px auto;">
       <h1 style="margin-top:0;">เกี่ยวกับ OBIXConfig Doctor</h1>
 
       <p>OBIXConfig Doctor เป็นเครื่องมือที่ออกแบบมาเพื่อช่วยผู้เล่นโดรน FPV ให้เริ่มต้นตั้งค่า PID, Filter และ Preset ได้อย่างรวดเร็วและปลอดภัย โดยอาศัยแนวคิดและประสบการณ์จากนักบิน FPV ชุมชนไทย</p>
@@ -45,12 +40,19 @@
         <li>ให้เครื่องมือคัดลอก CLI เพื่อนำไปใช้กับ Betaflight ได้ทันที</li>
       </ul>
 
-      <h3>ฟีเจอร์สำคัญ</h3>
+      <h3>ฟีเจอร์ v2.2 (14 เครื่องมือ)</h3>
       <ul>
-        <li>Preset สำหรับขนาดโดรนและสไตล์การบิน (Freestyle / Long-range / Beginner)</li>
-        <li>การคำนวณค่า PID/Filter แบบ baseline</li>
-        <li>CLI Presets ที่สามารถ Copy → Paste เข้า Betaflight</li>
-        <li>Pre-flight checklist และ FAQ เบื้องต้น</li>
+        <li><strong>Blackbox CSV Analyzer</strong> — วิเคราะห์ flight log · PID score A–D · motor imbalance (ใหม่ v2.2)</li>
+        <li><strong>PID Symptom Advisor</strong> — 13 อาการ → วินิจฉัยอัตโนมัติ + CLI fix</li>
+        <li><strong>CLI Surgeon</strong> — วิเคราะห์ diff all / dump · ตรวจ BF 4.3–4.5</li>
+        <li><strong>RPM Filter Calculator</strong> — harmonic table + dyn_notch ครบ</li>
+        <li><strong>ESC Compatibility Checker</strong> — ตรวจ amperage + DShot protocol</li>
+        <li><strong>Rates Visualizer</strong> — ACTUAL / KISS / RC+ curve real-time</li>
+        <li><strong>CLI Diff Comparator</strong> — เปรียบ 2 config ทันที</li>
+        <li><strong>Motor × Prop Recommender</strong> — แนะนำ KV + stator ตามสเปค</li>
+        <li><strong>VTX Suite</strong> — Bands, Range Calculator, SmartAudio</li>
+        <li><strong>OSD Designer</strong> — ออกแบบ layout + export</li>
+        <li>DIFF / DUMP Library — ดาวน์โหลดไฟล์ตัวอย่างสำเร็จรูป</li>
       </ul>
 
       <h3>ติดต่อ / ชุมชน</h3>
@@ -60,7 +62,7 @@
       <p>โค้ดหน้าเว็บนี้อยู่ใน repo ของโปรเจค — ถ้าจะแก้ template หรือต้องการเพิ่มภาษาอื่น แนะนำทำเป็น partial หรือใช้ base template เพื่อไม่ต้องซ้ำโค้ดส่วนหัว/ท้าย</p>
 
       <p style="margin-top:20px; font-size:0.95rem; color:#999;">
-        OBIXConfig Doctor • v1.0lite — พัฒนาโดยชุมชน FPV ไทย
+        OBIXConfig Doctor • v2.2 — พัฒนาโดยชุมชน FPV ไทย
       </p>
     </article>
   </main>

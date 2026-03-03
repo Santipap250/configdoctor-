@@ -15,7 +15,7 @@
   <style>
     :root{--accent:#3b82f6;--muted:#98a6b8}
     body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;margin:0;background:#071028;color:#e6eef8}
-    .wrap{max-width:min(920px,100%);margin:28px auto;padding:18px}
+    .wrap{max-width:920px;margin:28px auto;padding:18px}
     header{display:flex;align-items:center;justify-content:space-between;gap:12px}
     .logo{height:36px}
     .card{background:rgba(255,255,255,0.02);border-radius:10px;padding:14px;margin-top:14px}
@@ -24,11 +24,8 @@
     ul{margin:10px 0 0 18px}
     .foot{color:var(--muted);font-size:0.9rem;margin-top:14px}
     a{color:var(--accent)}
-    @media (max-width:min(640px,100%)){.wrap{padding:12px}}
-  
-  /* ── Responsive ── */
-  html,body{overflow-x:hidden}
-</style>
+    @media (max-width:640px){.wrap{padding:12px}}
+  </style>
 </head>
 <body>
   <div class="wrap">
@@ -37,7 +34,7 @@
         <a href="/"><img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="OBIX" class="logo"></a>
         <div>
           <div style="font-weight:700">OBIXConfig Doctor</div>
-          <div class="meta">Changelog — v2.0</div>
+          <div class="meta">Changelog — v2.2</div>
         </div>
       </div>
       <div class="meta" style="text-align:right">
@@ -47,13 +44,29 @@
     </header>
 
     <section class="card" aria-labelledby="latest">
+
       <!-- ═══════════════════════════════════════════════════════ -->
-      <!-- v2.1 — Bug Fixes & Filter Intelligence                  -->
+      <!-- v2.2 — Blackbox CSV Analyzer (LATEST)                   -->
       <!-- ═══════════════════════════════════════════════════════ -->
-      <h1 id="latest" style="color:#10c47a;">🔧 v2.0 — Filter Intelligence Update</h1>
-      <div class="meta">01/03/2026 · Physics & Parser Accuracy Patch</div>
+      <h1 id="latest" style="color:#10c47a;">📊 v2.2 — Blackbox CSV Analyzer</h1>
+      <div class="meta">03/03/2026 · Flagship Feature Release</div>
       <ul>
-        <li><strong>แก้บัค Critical:</strong> CLI Surgeon ตรวจ <code>gyro_lpf1_static_hz</code> / <code>dterm_lpf1_static_hz</code> ได้ถูกต้องแล้ว (BF4.4+ ใช้ชื่อ parameter ต่างจากเดิม)</li>
+        <li><strong>🆕 Blackbox CSV Analyzer:</strong> Upload ไฟล์ CSV จาก Betaflight Blackbox — วิเคราะห์ PID quality score (เกรด A–D), oscillation ต่อ axis (Roll/Pitch/Yaw), motor imbalance, battery sag, throttle distribution พร้อม CLI fix recommendations</li>
+        <li><strong>🆕 Landing Page:</strong> Redesign ใหม่สมบูรณ์ — Blackbox Flagship card, stats bar 14 tools, hero tags, scroll reveal animations</li>
+        <li><strong>🆕 Responsive Design:</strong> ทุกหน้ารองรับมือถือและแท็บเล็ตครบ — overflow-x fix, iOS zoom fix, 768/480px breakpoints</li>
+        <li><strong>🆕 SEO:</strong> JSON-LD Structured Data, sitemap 18 URLs, robots.txt อัปเดต, unique title tags</li>
+        <li><strong>รองรับ:</strong> Betaflight 4.3 / 4.4 / 4.5</li>
+      </ul>
+
+      <hr style="border:none;border-top:1px solid rgba(255,255,255,0.06);margin:18px 0;">
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- v2.1 — Filter Intelligence                              -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <h2 style="color:#58a6ff;margin-top:0;">🔧 v2.1 — Filter Intelligence Update</h2>
+      <div class="meta">02/03/2026 · Physics & Parser Accuracy Patch</div>
+      <ul>
+        <li><strong>แก้บัค Critical:</strong> CLI Surgeon ตรวจ <code>gyro_lpf1_static_hz</code> / <code>dterm_lpf1_static_hz</code> ได้ถูกต้องแล้ว (BF4.4+)</li>
         <li><strong>เพิ่ม:</strong> รองรับ <code>simplified_gyro_filter</code> — คำนวณ effective Hz จาก multiplier อัตโนมัติ</li>
         <li><strong>เพิ่ม:</strong> ตรวจ Dynamic Filter range (<code>dyn_min_hz</code> / <code>dyn_max_hz</code>)</li>
         <li><strong>แก้บัค:</strong> แบตเตอรี่เริ่มต้น 7" 6S ปรับเป็น 2200mAh (ค่าจริงจาก community)</li>
@@ -68,12 +81,11 @@
       <h2 style="color:#f1b65a;margin-top:0;">🚀 v2.0 — Size-Aware Physics Engine</h2>
       <div class="meta">01/03/2026 · Major Accuracy Overhaul</div>
       <ul>
-        <li><strong>แก้บัค Critical:</strong> Flight time คำนวณต่างกันตามขนาด prop — 3" whoop 4.8 min (เดิม 11.7 min ผิด), 5" freestyle 6.1 min ✅</li>
+        <li><strong>แก้บัค Critical:</strong> Flight time คำนวณต่างกันตามขนาด prop — 3" whoop 4.8 min ✅, 5" freestyle 6.1 min ✅</li>
         <li><strong>เพิ่ม Size-Dependent Power Model:</strong> W/g แตกต่างตาม prop size (2.5"=0.50 ถึง 10"=0.09 W/g)</li>
-        <li><strong>เพิ่ม Symptom Advisor:</strong> 13 อาการ → แก้ไข (เดิม 8) รวม ESC Desync, กันลม, ไม่ ARM, Turtle mode, VTX breakup</li>
-        <li><strong>เพิ่ม CLI Surgeon checks:</strong> DSHOT protocol, Bidirectional DShot, iterm_relax, TPA, vbat_pid_gain, thrust_linear, motor_poles, feedforward</li>
-        <li><strong>เพิ่ม Support Section:</strong> PromptPay QR พร้อมระบบ reveal ในหน้า Landing</li>
-        <li><strong>ปรับปรุง:</strong> advanced_analysis.py ใช้ size-dependent power model เดียวกัน</li>
+        <li><strong>เพิ่ม Symptom Advisor:</strong> 13 อาการ รวม ESC Desync, กันลม, ไม่ ARM, Turtle mode, VTX breakup</li>
+        <li><strong>เพิ่ม CLI Surgeon checks:</strong> DSHOT, BiDir DShot, iterm_relax, TPA, vbat_pid_gain, motor_poles, feedforward</li>
+        <li><strong>เพิ่ม Support Section:</strong> PromptPay QR ในหน้า Landing</li>
       </ul>
 
       <hr style="border:none;border-top:1px solid rgba(255,255,255,0.06);margin:18px 0;">
@@ -96,13 +108,13 @@
           <li>เริ่มต้นหน้าแอปวิเคราะห์ค่า PID/Filter</li>
           <li>เพิ่ม Quick Summary, Preset Box, CLI Presets</li>
         </ul>
-        <small style="color:#999;">วันที่ปรับปรุง: 12/02/2026</small>
+        <small style="color:#999;">12/02/2026</small>
       </article>
 
-      <p style="margin-top:18px;">ต้องการให้เพิ่ม item ไหนใน changelog แจ้งได้ที่เพจ: <a href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener">OBIXConfig Lab</a></p>
+      <p style="margin-top:18px;">ต้องการให้เพิ่ม feature ไหน? แจ้งได้ที่เพจ: <a href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener">OBIXConfig Lab</a></p>
 
       <p style="margin-top:20px; font-size:0.95rem; color:#999;">
-        OBIXConfig Doctor • v2.0
+        OBIXConfig Doctor • v2.2 — พัฒนาโดยชุมชน FPV ไทย ❤️
       </p>
     </section>
   </main>
