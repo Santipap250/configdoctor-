@@ -1,0 +1,1031 @@
+{% set og_title = "Blackbox Analyzer — OBIXConfig Doctor" %}
+{% set og_description = "วิเคราะห์ไฟล์ Blackbox CSV จาก Betaflight — ตรวจ oscillation, PID quality, motor balance, battery sag" %}
+{% set og_url = "https://configdoctor.onrender.com/blackbox" %}
+{% include "partials/og_tags.html" %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blackbox Analyzer — OBIXConfig Doctor</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Sarabun:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+/* ── Tokens ──────────────────────────────────────────────── */
+:root {
+  --bg:     #06090b;
+  --card:   #0b0f12;
+  --border: rgba(255,255,255,0.06);
+  --hi:     rgba(255,255,255,0.10);
+  --text:   #dde7ef;
+  --muted:  #7a8f9e;
+  --green:  #10c47a;
+  --gold:   #f1b65a;
+  --blue:   #58a6ff;
+  --red:    #f85149;
+  --orange: #e8874a;
+  --font-en: 'Orbitron', monospace;
+  --font-th: 'Sarabun', sans-serif;
+  --mono:   'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { min-height: 100%; }
+body { font-family: var(--font-th); background: var(--bg); color: var(--text);
+       font-size: 15px; -webkit-font-smoothing: antialiased; }
+
+/* ── Layout ──────────────────────────────────────────────── */
+.page-wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px 80px; }
+
+/* ── Top bar ─────────────────────────────────────────────── */
+.top-bar {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 18px;
+  background: rgba(6,9,11,0.90);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+.tb-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.tb-logo  { height: 34px; filter: drop-shadow(0 0 8px rgba(16,196,122,0.4)); }
+.tb-name  { font-family: var(--font-en); font-size: 13px; color: var(--text); letter-spacing: .05em; }
+.tb-back  {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--muted); text-decoration: none;
+  padding: 6px 12px; border: 1px solid var(--border); border-radius: 8px;
+  transition: all .2s;
+}
+.tb-back:hover { color: var(--text); border-color: var(--hi); }
+.tb-badge {
+  font-family: var(--font-en); font-size: 9px; font-weight: 700;
+  color: var(--green); border: 1px solid rgba(16,196,122,0.35);
+  background: rgba(16,196,122,0.08); padding: 2px 8px; border-radius: 100px;
+  letter-spacing: .1em; animation: badgePulse 3s ease-in-out infinite;
+}
+@keyframes badgePulse {
+  0%,100% { box-shadow: 0 0 0 0 transparent; }
+  50%      { box-shadow: 0 0 8px rgba(16,196,122,0.3); }
+}
+
+/* ── Hero ────────────────────────────────────────────────── */
+.hero {
+  padding: 52px 0 44px;
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: 14px;
+}
+.hero-eyebrow {
+  font-family: var(--font-en); font-size: 10px; font-weight: 700;
+  letter-spacing: .15em; text-transform: uppercase;
+  color: var(--orange);
+  display: flex; align-items: center; gap: 8px;
+}
+.hero-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--orange);
+  animation: dotBlink 2s ease-in-out infinite;
+}
+@keyframes dotBlink { 0%,100%{opacity:1}50%{opacity:.3} }
+.hero h1 {
+  font-family: var(--font-en); font-size: clamp(22px, 4vw, 38px);
+  font-weight: 900; line-height: 1.15; color: #f0f6ff;
+  letter-spacing: -.01em;
+}
+.hero h1 span {
+  background: linear-gradient(120deg, var(--green), var(--gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero p {
+  font-size: 14px; color: var(--muted); max-width: 540px; line-height: 1.7;
+}
+.hero-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.htag {
+  font-family: var(--font-en); font-size: 10px; font-weight: 600;
+  letter-spacing: .08em; color: var(--muted);
+  border: 1px solid var(--border); border-radius: 5px;
+  padding: 3px 9px; text-transform: uppercase;
+}
+
+/* ── Upload Zone ─────────────────────────────────────────── */
+.upload-zone {
+  border: 2px dashed rgba(255,255,255,0.10);
+  border-radius: 18px;
+  padding: 52px 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .3s;
+  background: rgba(255,255,255,0.015);
+  position: relative;
+  overflow: hidden;
+}
+.upload-zone::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 70% 50% at 50% 50%,
+    rgba(16,196,122,0.04), transparent);
+  pointer-events: none;
+}
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: rgba(16,196,122,0.45);
+  background: rgba(16,196,122,0.04);
+  box-shadow: 0 0 40px rgba(16,196,122,0.08);
+}
+.upload-zone.drag-over { border-style: solid; }
+.upload-icon {
+  font-size: 48px; margin-bottom: 16px;
+  filter: grayscale(.4);
+  animation: iconFloat 3s ease-in-out infinite;
+}
+@keyframes iconFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+.upload-title {
+  font-family: var(--font-en); font-size: 16px; font-weight: 700;
+  color: #f0f6ff; margin-bottom: 8px; letter-spacing: .03em;
+}
+.upload-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+.upload-sub code {
+  font-family: var(--mono); font-size: 12px; color: var(--green);
+  background: rgba(16,196,122,0.08); padding: 2px 7px; border-radius: 4px;
+}
+.upload-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-en); font-size: 11px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: #06090b; background: var(--green);
+  padding: 10px 24px; border-radius: 8px; border: none;
+  cursor: pointer; transition: all .2s;
+}
+.upload-btn:hover { background: #12df8c; box-shadow: 0 0 24px rgba(16,196,122,0.35); }
+.upload-hint {
+  margin-top: 20px; font-size: 11px; color: rgba(122,143,158,0.6);
+}
+#csvFileInput { display: none; }
+
+/* ── Progress ────────────────────────────────────────────── */
+.analyzing-bar {
+  display: none;
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 28px 32px; text-align: center;
+}
+.analyzing-bar.show { display: block; }
+.abar-label {
+  font-family: var(--font-en); font-size: 12px; color: var(--green);
+  letter-spacing: .1em; margin-bottom: 16px;
+}
+.abar-track {
+  height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden;
+}
+.abar-fill {
+  height: 100%; background: linear-gradient(90deg, var(--green), var(--gold));
+  border-radius: 2px; width: 0%;
+  animation: barSweep 1.6s ease-in-out infinite;
+}
+@keyframes barSweep {
+  0%   { width: 0%;   margin-left: 0%; }
+  50%  { width: 60%;  margin-left: 20%; }
+  100% { width: 0%;   margin-left: 100%; }
+}
+.abar-sub { margin-top: 12px; font-size: 12px; color: var(--muted); }
+
+/* ── Results Shell ───────────────────────────────────────── */
+#resultsSection { display: none; }
+#resultsSection.show { display: block; }
+
+/* ── Section headers ─────────────────────────────────────── */
+.sec-header {
+  display: flex; align-items: center; gap: 10px;
+  margin: 40px 0 18px;
+}
+.sec-icon { font-size: 18px; }
+.sec-title {
+  font-family: var(--font-en); font-size: 12px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+}
+.sec-line { flex: 1; height: 1px; background: var(--border); }
+
+/* ── Meta strip ──────────────────────────────────────────── */
+.meta-strip {
+  display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px;
+}
+.meta-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 8px;
+  background: var(--card); border: 1px solid var(--border);
+  font-size: 12px;
+}
+.meta-pill-key {
+  font-family: var(--font-en); font-size: 10px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+}
+.meta-pill-val { font-family: var(--mono); font-size: 12px; color: var(--text); }
+
+/* ── PID Grade Card ──────────────────────────────────────── */
+.grade-card {
+  display: grid; grid-template-columns: auto 1fr;
+  gap: 0; background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden; margin-bottom: 20px;
+}
+.grade-left {
+  padding: 32px 36px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, rgba(255,255,255,0.02), transparent);
+  border-right: 1px solid var(--border);
+  min-width: 130px;
+}
+.grade-letter {
+  font-family: var(--font-en); font-size: 64px; font-weight: 900; line-height: 1;
+  filter: drop-shadow(0 0 20px currentColor);
+}
+.grade-A { color: var(--green); }
+.grade-B { color: var(--blue); }
+.grade-C { color: var(--gold); }
+.grade-D { color: var(--red); }
+.grade-label {
+  font-family: var(--font-en); font-size: 9px; font-weight: 700;
+  letter-spacing: .15em; text-transform: uppercase;
+  color: var(--muted); margin-top: 6px;
+}
+.grade-right { padding: 28px 32px; }
+.grade-score-row {
+  display: flex; align-items: baseline; gap: 6px; margin-bottom: 14px;
+}
+.grade-score-num {
+  font-family: var(--font-en); font-size: 36px; font-weight: 900; color: #f0f6ff;
+}
+.grade-score-max { font-size: 16px; color: var(--muted); }
+.score-bar-track {
+  height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden;
+  margin-bottom: 20px;
+}
+.score-bar-fill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, var(--red), var(--gold), var(--green));
+  background-size: 200% 100%;
+  transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+}
+.grade-issues { display: flex; flex-direction: column; gap: 8px; }
+
+/* ── Issue rows ──────────────────────────────────────────── */
+.issue-row {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 10px 14px; border-radius: 10px;
+  border: 1px solid transparent;
+}
+.issue-danger  { background: rgba(248,81,73,0.06);  border-color: rgba(248,81,73,0.18); }
+.issue-warning { background: rgba(241,182,90,0.06); border-color: rgba(241,182,90,0.18); }
+.issue-info    { background: rgba(88,166,255,0.05); border-color: rgba(88,166,255,0.15); }
+.issue-good    { background: rgba(16,196,122,0.04); border-color: rgba(16,196,122,0.15); }
+.issue-badge {
+  font-family: var(--font-en); font-size: 9px; font-weight: 800;
+  letter-spacing: .08em; padding: 2px 8px; border-radius: 4px;
+  white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+}
+.badge-danger  { background: rgba(248,81,73,0.2);  color: var(--red); }
+.badge-warning { background: rgba(241,182,90,0.2); color: var(--gold); }
+.badge-info    { background: rgba(88,166,255,0.15); color: var(--blue); }
+.badge-good    { background: rgba(16,196,122,0.15); color: var(--green); }
+.issue-body { flex: 1; }
+.issue-title { font-size: 13px; font-weight: 700; color: var(--text); }
+.issue-desc  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.issue-fix   { font-size: 12px; color: var(--green); margin-top: 4px; }
+
+/* ── Axis Grid ───────────────────────────────────────────── */
+.axis-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.axis-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 20px; transition: border-color .3s;
+}
+.axis-card:hover { border-color: var(--hi); }
+.axis-name {
+  font-family: var(--font-en); font-size: 11px; font-weight: 700;
+  letter-spacing: .1em; color: var(--muted); margin-bottom: 16px;
+  text-transform: uppercase;
+}
+.axis-stat { margin-bottom: 10px; }
+.axis-stat-label { font-size: 10px; color: var(--muted); margin-bottom: 3px; font-family: var(--font-en); letter-spacing: .06em; }
+.axis-stat-val { font-family: var(--mono); font-size: 18px; font-weight: 600; }
+.val-good    { color: var(--green); }
+.val-info    { color: var(--blue); }
+.val-warning { color: var(--gold); }
+.val-danger  { color: var(--red); }
+.axis-sub { font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+
+/* ── Motor Grid ──────────────────────────────────────────── */
+.motor-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.motor-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 16px 14px; text-align: center;
+}
+.motor-id {
+  font-family: var(--font-en); font-size: 11px; font-weight: 700;
+  color: var(--muted); margin-bottom: 10px; letter-spacing: .08em;
+}
+.motor-avg {
+  font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--text);
+}
+.motor-range {
+  font-size: 10px; color: var(--muted); margin-top: 4px; font-family: var(--mono);
+}
+.motor-bar-wrap { margin-top: 10px; height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; }
+.motor-bar-fill { height: 100%; border-radius: 2px; background: var(--green); transition: width .6s; }
+
+/* ── Stat Cards ──────────────────────────────────────────── */
+.stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+.stat-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 18px 16px;
+}
+.stat-card-label {
+  font-family: var(--font-en); font-size: 10px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+  margin-bottom: 8px;
+}
+.stat-card-val {
+  font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--text);
+}
+.stat-card-unit { font-size: 12px; color: var(--muted); }
+.stat-card-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+/* ── Chart containers ────────────────────────────────────── */
+.chart-wrap {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 20px; margin-bottom: 16px;
+}
+.chart-title {
+  font-family: var(--font-en); font-size: 10px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 14px;
+}
+.chart-canvas { max-height: 160px; }
+
+/* ── Throttle Distribution ───────────────────────────────── */
+.thr-dist { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 16px; }
+.thr-bucket {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px 12px; text-align: center;
+}
+.thr-bucket-pct {
+  font-family: var(--font-en); font-size: 20px; font-weight: 800; color: var(--text);
+}
+.thr-bucket-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.thr-bucket-range { font-size: 10px; color: rgba(122,143,158,0.6); font-family: var(--mono); margin-top: 2px; }
+
+/* ── CLI Recommendations ─────────────────────────────────── */
+.cli-rec {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  overflow: hidden; margin-bottom: 12px;
+}
+.cli-rec-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.cli-rec-num {
+  font-family: var(--font-en); font-size: 10px; font-weight: 800;
+  color: var(--muted); min-width: 24px;
+}
+.cli-rec-title { font-size: 13px; font-weight: 700; flex: 1; }
+.cli-rec-reason { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.cli-chevron { color: var(--muted); transition: transform .25s; font-size: 12px; }
+.cli-rec.open .cli-chevron { transform: rotate(180deg); }
+.cli-rec-body {
+  display: none; padding: 14px 18px;
+}
+.cli-rec.open .cli-rec-body { display: block; }
+.cli-code {
+  font-family: var(--mono); font-size: 12px; color: var(--green);
+  background: rgba(16,196,122,0.05); border: 1px solid rgba(16,196,122,0.12);
+  border-radius: 8px; padding: 12px 14px; white-space: pre-wrap;
+  word-break: break-all; position: relative;
+}
+.cli-copy-btn {
+  position: absolute; top: 8px; right: 8px;
+  font-size: 10px; padding: 3px 10px;
+  background: rgba(16,196,122,0.15); border: 1px solid rgba(16,196,122,0.25);
+  border-radius: 4px; color: var(--green);
+  cursor: pointer; font-family: var(--font-en); font-weight: 700; letter-spacing: .06em;
+  transition: all .2s;
+}
+.cli-copy-btn:hover { background: rgba(16,196,122,0.25); }
+
+/* ── No Issues card ──────────────────────────────────────── */
+.no-issues {
+  text-align: center; padding: 36px; background: var(--card);
+  border: 1px solid rgba(16,196,122,0.2); border-radius: 14px;
+}
+.no-issues-icon { font-size: 36px; margin-bottom: 12px; }
+.no-issues-title {
+  font-family: var(--font-en); font-size: 14px; font-weight: 800;
+  color: var(--green); letter-spacing: .05em; margin-bottom: 6px;
+}
+.no-issues-sub { font-size: 13px; color: var(--muted); }
+
+/* ── Toast ───────────────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: rgba(16,196,122,0.9); color: #000; font-weight: 700;
+  padding: 10px 22px; border-radius: 100px; font-size: 13px;
+  opacity: 0; pointer-events: none; z-index: 9999;
+  transition: opacity .3s;
+}
+.toast.show { opacity: 1; }
+
+/* ── Re-analyze btn ──────────────────────────────────────── */
+.reanalyze-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-en); font-size: 11px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); border: 1px solid var(--border); background: transparent;
+  padding: 8px 18px; border-radius: 8px; cursor: pointer; transition: all .2s;
+  margin-bottom: 32px;
+}
+.reanalyze-btn:hover { color: var(--text); border-color: var(--hi); }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .axis-grid  { grid-template-columns: 1fr 1fr; }
+  .motor-grid { grid-template-columns: 1fr 1fr; }
+  .stat-row   { grid-template-columns: 1fr 1fr; }
+  .thr-dist   { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 450px) {
+  .axis-grid { grid-template-columns: 1fr; }
+  .hero h1   { font-size: 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="top-bar">
+  <a class="tb-brand" href="{{ url_for('index') }}">
+    <img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="OBIX" class="tb-logo">
+    <span class="tb-name">OBIXCONFIG</span>
+  </a>
+  <span class="tb-badge">BLACKBOX ANALYZER</span>
+  <a class="tb-back" href="{{ url_for('index') }}">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+    กลับ
+  </a>
+</div>
+
+<div class="page-wrap">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-eyebrow">
+      <span class="hero-dot"></span>
+      Flight Telemetry Analysis
+    </div>
+    <h1>Blackbox <span>CSV Analyzer</span></h1>
+    <p>
+      วิเคราะห์ข้อมูล flight log จาก Betaflight Blackbox — ตรวจ oscillation,
+      คุณภาพ PID, motor balance, battery sag และ throttle distribution
+      โดยไม่ต้องส่งข้อมูลออกไปไหน (ทุกอย่างประมวลผลบน server ของเรา)
+    </p>
+    <div class="hero-tags">
+      <span class="htag">BF 4.3</span>
+      <span class="htag">BF 4.4</span>
+      <span class="htag">BF 4.5</span>
+      <span class="htag">CSV format</span>
+      <span class="htag">ฟรี 100%</span>
+    </div>
+  </div>
+
+  <!-- Upload Zone -->
+  <div class="upload-zone" id="uploadZone">
+    <div class="upload-icon">📊</div>
+    <div class="upload-title">วาง CSV หรือคลิกเพื่อเลือกไฟล์</div>
+    <div class="upload-sub">
+      Export จาก Betaflight Blackbox Explorer เป็น <code>.csv</code>
+      หรือใช้ <code>blackbox_decode</code> tool แล้ว drag-drop ที่นี่
+    </div>
+    <button class="upload-btn" onclick="document.getElementById('csvFileInput').click()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+        <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+      </svg>
+      เลือกไฟล์ CSV
+    </button>
+    <div class="upload-hint">รองรับไฟล์ถึง 10MB · ข้อมูลไม่ถูกเก็บบันทึก</div>
+    <input type="file" id="csvFileInput" accept=".csv,.txt" onchange="handleFileSelect(event)">
+  </div>
+
+  <!-- Analyzing bar -->
+  <div class="analyzing-bar" id="analyzingBar">
+    <div class="abar-label">⚡ ANALYZING FLIGHT DATA...</div>
+    <div class="abar-track"><div class="abar-fill"></div></div>
+    <div class="abar-sub" id="analyzeStatus">กำลังโหลดไฟล์...</div>
+  </div>
+
+  <!-- Results -->
+  <div id="resultsSection">
+
+    <!-- Re-analyze -->
+    <button class="reanalyze-btn" onclick="resetUpload()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
+      </svg>
+      วิเคราะห์ไฟล์ใหม่
+    </button>
+
+    <!-- Meta -->
+    <div class="meta-strip" id="metaStrip"></div>
+
+    <!-- PID Grade -->
+    <div class="sec-header">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">PID Quality Score</span>
+      <div class="sec-line"></div>
+    </div>
+    <div class="grade-card" id="gradeCard"></div>
+
+    <!-- Oscillations -->
+    <div class="sec-header">
+      <span class="sec-icon">📡</span>
+      <span class="sec-title">Gyro & Oscillation Analysis</span>
+      <div class="sec-line"></div>
+    </div>
+    <div class="axis-grid" id="axisGrid"></div>
+
+    <!-- Motors -->
+    <div class="sec-header">
+      <span class="sec-icon">⚙️</span>
+      <span class="sec-title">Motor Balance</span>
+      <div class="sec-line"></div>
+    </div>
+    <div class="issue-row" id="motorBalanceRow" style="margin-bottom:16px;"></div>
+    <div class="motor-grid" id="motorGrid"></div>
+    <div class="chart-wrap" id="motorChartWrap" style="margin-top:14px;display:none;">
+      <div class="chart-title">Motor Output Over Time</div>
+      <canvas class="chart-canvas" id="motorChart"></canvas>
+    </div>
+
+    <!-- Battery -->
+    <div class="sec-header">
+      <span class="sec-icon">🔋</span>
+      <span class="sec-title">Battery Analysis</span>
+      <div class="sec-line"></div>
+    </div>
+    <div class="stat-row" id="battStatRow"></div>
+    <div class="chart-wrap" id="battChartWrap" style="margin-top:14px;display:none;">
+      <div class="chart-title">Voltage Over Time</div>
+      <canvas class="chart-canvas" id="battChart"></canvas>
+    </div>
+
+    <!-- Throttle -->
+    <div class="sec-header">
+      <span class="sec-icon">🕹️</span>
+      <span class="sec-title">Throttle Distribution</span>
+      <div class="sec-line"></div>
+    </div>
+    <div class="thr-dist" id="thrDist"></div>
+    <div class="chart-wrap" id="thrChartWrap" style="display:none;">
+      <div class="chart-title">Throttle % Over Time</div>
+      <canvas class="chart-canvas" id="thrChart"></canvas>
+    </div>
+
+    <!-- CLI Recommendations -->
+    <div class="sec-header">
+      <span class="sec-icon">🩺</span>
+      <span class="sec-title">CLI Recommendations</span>
+      <div class="sec-line"></div>
+    </div>
+    <div id="cliRecsList"></div>
+
+  </div><!-- /resultsSection -->
+
+</div><!-- /page-wrap -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+/* ── State ─────────────────────────────────────────────────── */
+let chartInstances = {};
+
+/* ── Upload / Drag-drop ────────────────────────────────────── */
+const uploadZone = document.getElementById('uploadZone');
+
+uploadZone.addEventListener('dragover', e => {
+  e.preventDefault();
+  uploadZone.classList.add('drag-over');
+});
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+});
+uploadZone.addEventListener('click', e => {
+  if (e.target.classList.contains('upload-btn') || e.target.closest('.upload-btn')) return;
+  document.getElementById('csvFileInput').click();
+});
+
+function handleFileSelect(evt) {
+  const file = evt.target.files[0];
+  if (file) processFile(file);
+}
+
+function processFile(file) {
+  if (file.size > 10 * 1024 * 1024) {
+    showToast('ไฟล์ใหญ่เกิน 10MB');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const text = e.target.result;
+    sendToAnalyze(text, file.name);
+  };
+  setStatus('กำลังอ่านไฟล์...');
+  showAnalyzing();
+  reader.readAsText(file);
+}
+
+function sendToAnalyze(csvText, filename) {
+  setStatus(`กำลังวิเคราะห์ ${filename}...`);
+  fetch('/blackbox/analyze', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({csv: csvText, filename: filename || 'upload.csv'})
+  })
+  .then(r => {
+    if (!r.ok) return r.json().then(e => Promise.reject(e));
+    return r.json();
+  })
+  .then(data => {
+    hideAnalyzing();
+    if (data.error) {
+      showToast('❌ ' + data.error);
+      return;
+    }
+    renderResults(data);
+  })
+  .catch(err => {
+    hideAnalyzing();
+    showToast('❌ ' + (err.error || err.message || 'เกิดข้อผิดพลาด'));
+  });
+}
+
+function showAnalyzing() {
+  document.getElementById('uploadZone').style.display = 'none';
+  document.getElementById('analyzingBar').classList.add('show');
+  document.getElementById('resultsSection').classList.remove('show');
+}
+function hideAnalyzing() {
+  document.getElementById('analyzingBar').classList.remove('show');
+}
+function setStatus(msg) {
+  document.getElementById('analyzeStatus').textContent = msg;
+}
+function resetUpload() {
+  document.getElementById('uploadZone').style.display = '';
+  document.getElementById('resultsSection').classList.remove('show');
+  document.getElementById('csvFileInput').value = '';
+  // Destroy charts
+  Object.values(chartInstances).forEach(c => { try { c.destroy(); } catch(e){} });
+  chartInstances = {};
+}
+
+/* ── Render ─────────────────────────────────────────────────── */
+function renderResults(data) {
+  renderMeta(data.meta || {});
+  renderGrade(data.pid_quality || {});
+  renderOscillations(data.oscillations || {});
+  renderMotors(data.motor_balance || {});
+  renderBattery(data.battery || {});
+  renderThrottle(data.throttle || {});
+  renderCliRecs(data.recommendations || []);
+  document.getElementById('resultsSection').classList.add('show');
+  document.getElementById('resultsSection').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* Meta strip */
+function renderMeta(meta) {
+  const strip = document.getElementById('metaStrip');
+  const items = [
+    ['ROWS',     fmtNum(meta.rows_analyzed)],
+    ['DURATION', meta.duration_s > 0 ? meta.duration_s + 's' : 'N/A'],
+    ['FIRMWARE', meta.firmware || 'Unknown'],
+    ['COLUMNS',  (meta.columns_found || []).length + ' found'],
+  ];
+  strip.innerHTML = items.map(([k,v]) =>
+    `<div class="meta-pill">
+       <span class="meta-pill-key">${k}</span>
+       <span class="meta-pill-val">${esc(String(v))}</span>
+     </div>`
+  ).join('');
+}
+
+/* PID Grade */
+function renderGrade(pq) {
+  const grade  = pq.grade  || 'A';
+  const score  = pq.score  ?? 100;
+  const issues = pq.issues || [];
+  const finds  = pq.findings || [];
+  const all    = [...issues, ...finds];
+
+  const barBg = score >= 90 ? '#10c47a' : score >= 75 ? '#58a6ff' : score >= 55 ? '#f1b65a' : '#f85149';
+
+  const issueHtml = all.length === 0
+    ? `<div class="issue-row issue-good">
+         <span class="issue-badge badge-good">GOOD</span>
+         <div class="issue-body">
+           <div class="issue-title">ไม่พบปัญหา</div>
+           <div class="issue-desc">PID และ filter ทำงานได้ดี</div>
+         </div>
+       </div>`
+    : all.map(issue => {
+        const sev = issue.severity || 'info';
+        return `<div class="issue-row issue-${sev}">
+          <span class="issue-badge badge-${sev}">${sev.toUpperCase()}</span>
+          <div class="issue-body">
+            <div class="issue-title">${esc(issue.axis||'')} ${esc(issue.diagnosis||issue.msg||issue.type||'')}</div>
+            ${issue.fix ? `<div class="issue-fix">💡 ${esc(issue.fix)}</div>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+
+  document.getElementById('gradeCard').innerHTML = `
+    <div class="grade-left">
+      <div class="grade-letter grade-${grade}">${grade}</div>
+      <div class="grade-label">PID GRADE</div>
+    </div>
+    <div class="grade-right">
+      <div class="grade-score-row">
+        <div class="grade-score-num">${score}</div>
+        <div class="grade-score-max">/ 100</div>
+      </div>
+      <div class="score-bar-track">
+        <div class="score-bar-fill" id="scoreBarFill" style="width:0%;background:${barBg}"></div>
+      </div>
+      <div class="grade-issues">${issueHtml}</div>
+    </div>`;
+
+  setTimeout(() => {
+    const fill = document.getElementById('scoreBarFill');
+    if (fill) fill.style.width = score + '%';
+  }, 100);
+}
+
+/* Oscillations */
+function renderOscillations(osc) {
+  const axes = ['roll','pitch','yaw'];
+  const labels = {roll:'ROLL',pitch:'PITCH',yaw:'YAW'};
+  document.getElementById('axisGrid').innerHTML = axes.map(ax => {
+    const d = osc[ax] || {};
+    const grms = d.gyro_rms ?? '-';
+    const freq = d.gyro_freq_hz ?? '-';
+    const drms = d.d_rms ?? '-';
+    const sev  = d.osc_severity || 'good';
+    const cls  = 'val-' + sev;
+    return `<div class="axis-card">
+      <div class="axis-name">${labels[ax]}</div>
+      <div class="axis-stat">
+        <div class="axis-stat-label">GYRO RMS</div>
+        <div class="axis-stat-val ${cls}">${grms}</div>
+      </div>
+      <div class="axis-stat">
+        <div class="axis-stat-label">DOMINANT FREQ</div>
+        <div class="axis-stat-val">${freq > 0 ? freq + ' Hz' : '—'}</div>
+      </div>
+      ${d.d_rms !== undefined ? `
+      <div class="axis-stat">
+        <div class="axis-stat-label">D-TERM NOISE</div>
+        <div class="axis-stat-val val-${d.d_severity || 'good'}">${drms}</div>
+      </div>` : ''}
+      <div class="axis-sub">${esc(d.osc_msg || '')}</div>
+    </div>`;
+  }).join('');
+}
+
+/* Motors */
+function renderMotors(mb) {
+  const sev = mb.balance_severity || 'good';
+  const balRow = document.getElementById('motorBalanceRow');
+  balRow.className = 'issue-row issue-' + sev;
+  balRow.innerHTML = `
+    <span class="issue-badge badge-${sev}">${sev.toUpperCase()}</span>
+    <div class="issue-body">
+      <div class="issue-title">Diagonal Imbalance ${mb.imbalance_pct ?? '—'}%</div>
+      <div class="issue-desc">${esc(mb.balance_msg || '')}</div>
+      ${(mb.stuck_motors||[]).length > 0 ?
+        `<div class="issue-fix">⚠️ Motor ผิดปกติ: ${mb.stuck_motors.join(', ')}</div>` : ''}
+    </div>`;
+
+  const stats = mb.motor_stats || [];
+  const avgs  = stats.filter(s=>s.available).map(s=>s.avg);
+  const maxAvg = avgs.length ? Math.max(...avgs) : 2000;
+
+  document.getElementById('motorGrid').innerHTML = stats.map(s => {
+    if (!s.available) return `<div class="motor-card"><div class="motor-id">MOTOR ${s.id+1}</div><div style="color:var(--muted);font-size:12px">N/A</div></div>`;
+    const pct = maxAvg > 0 ? Math.round(s.avg / maxAvg * 100) : 0;
+    return `<div class="motor-card">
+      <div class="motor-id">MOTOR ${s.id+1}</div>
+      <div class="motor-avg">${s.avg}</div>
+      <div class="motor-range">${s.min} – ${s.max}</div>
+      <div class="motor-bar-wrap"><div class="motor-bar-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+
+  // Chart
+  const cs = mb.chart_series || {};
+  const keys = Object.keys(cs);
+  if (keys.length) {
+    document.getElementById('motorChartWrap').style.display = '';
+    renderLineChart('motorChart', {
+      labels: cs[keys[0]].map((_,i)=>i),
+      datasets: keys.map((k,i) => ({
+        label: 'Motor ' + (parseInt(k.replace('m',''))+1),
+        data: cs[k],
+        borderColor: ['#10c47a','#58a6ff','#f1b65a','#f85149'][i] || '#999',
+        borderWidth: 1.5, pointRadius: 0, tension: 0.3,
+        fill: false,
+      }))
+    });
+  }
+}
+
+/* Battery */
+function renderBattery(batt) {
+  const statRow = document.getElementById('battStatRow');
+  if (!batt.available) {
+    statRow.innerHTML = `<div class="stat-card" style="grid-column:1/-1;text-align:center;color:var(--muted)">ไม่พบข้อมูล voltage ใน CSV</div>`;
+    return;
+  }
+  const cards = [
+    ['CELLS',         batt.cells + 'S', ''],
+    ['V MIN',         batt.v_min + 'V', batt.cell_msg],
+    ['SAG',           batt.sag_v + 'V', batt.sag_msg],
+    ['V/CELL MIN',    batt.v_per_cell_min + 'V', ''],
+  ];
+  statRow.innerHTML = cards.map(([label,val,sub]) =>
+    `<div class="stat-card">
+       <div class="stat-card-label">${label}</div>
+       <div class="stat-card-val">${esc(val)}</div>
+       ${sub ? `<div class="stat-card-sub">${esc(sub)}</div>` : ''}
+     </div>`
+  ).join('');
+
+  if (batt.chart_vbat && batt.chart_vbat.length) {
+    document.getElementById('battChartWrap').style.display = '';
+    renderLineChart('battChart', {
+      labels: batt.chart_vbat.map((_,i)=>i),
+      datasets: [{
+        label: 'Voltage (V)',
+        data: batt.chart_vbat,
+        borderColor: '#f1b65a',
+        borderWidth: 2, pointRadius: 0, tension: 0.3,
+        fill: { target: 'origin', above: 'rgba(241,182,90,0.06)' },
+      }]
+    });
+  }
+}
+
+/* Throttle */
+function renderThrottle(thr) {
+  const dist = document.getElementById('thrDist');
+  if (!thr.available) {
+    dist.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:20px">ไม่พบข้อมูล throttle ใน CSV</div>`;
+    return;
+  }
+  const buckets = [
+    ['HOVER',  thr.distribution.hover, '0–20%', '#10c47a'],
+    ['MID',    thr.distribution.mid,   '20–60%','#58a6ff'],
+    ['HIGH',   thr.distribution.high,  '60–85%','#f1b65a'],
+    ['FULL',   thr.distribution.full,  '85–100%','#f85149'],
+  ];
+  dist.innerHTML = buckets.map(([label,pct,range,color]) =>
+    `<div class="thr-bucket">
+       <div class="thr-bucket-pct" style="color:${color}">${pct}%</div>
+       <div class="thr-bucket-label">${label}</div>
+       <div class="thr-bucket-range">${range}</div>
+     </div>`
+  ).join('');
+
+  // Style guess badge under grid
+  dist.insertAdjacentHTML('afterend',
+    `<div class="meta-pill" style="margin-bottom:14px;display:inline-flex;">
+       <span class="meta-pill-key">FLIGHT STYLE</span>
+       <span class="meta-pill-val">${esc(thr.style_guess || '—')}</span>
+     </div>`
+  );
+
+  if (thr.chart_thr && thr.chart_thr.length) {
+    document.getElementById('thrChartWrap').style.display = '';
+    renderLineChart('thrChart', {
+      labels: thr.chart_thr.map((_,i)=>i),
+      datasets: [{
+        label: 'Throttle %',
+        data: thr.chart_thr,
+        borderColor: '#10c47a',
+        borderWidth: 1.5, pointRadius: 0, tension: 0.4,
+        fill: { target: 'origin', above: 'rgba(16,196,122,0.07)' },
+      }]
+    });
+  }
+}
+
+/* CLI Recommendations */
+function renderCliRecs(recs) {
+  const list = document.getElementById('cliRecsList');
+  if (!recs.length) {
+    list.innerHTML = `<div class="no-issues">
+      <div class="no-issues-icon">✅</div>
+      <div class="no-issues-title">ไม่มีคำแนะนำ CLI</div>
+      <div class="no-issues-sub">การตั้งค่าดูดีจากข้อมูล Blackbox ที่วิเคราะห์</div>
+    </div>`;
+    return;
+  }
+  list.innerHTML = recs.map((r,i) => {
+    const sev = r.severity || 'info';
+    return `<div class="cli-rec" id="rec-${i}">
+      <div class="cli-rec-header" onclick="toggleRec(${i})">
+        <span class="cli-rec-num">#${r.priority||i+1}</span>
+        <span class="issue-badge badge-${sev}">${sev.toUpperCase()}</span>
+        <div>
+          <div class="cli-rec-title">${esc(r.title||'')}</div>
+          <div class="cli-rec-reason">${esc(r.reason||'')}</div>
+        </div>
+        <span class="cli-chevron">▼</span>
+      </div>
+      ${r.cli ? `
+      <div class="cli-rec-body">
+        <div class="cli-code" id="cliCode-${i}"><span class="cli-copy-btn" onclick="copyCli(${i})">COPY</span>${esc(r.cli)}</div>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+/* ── Chart helper ───────────────────────────────────────────── */
+function renderLineChart(canvasId, chartData) {
+  if (chartInstances[canvasId]) {
+    try { chartInstances[canvasId].destroy(); } catch(e){}
+  }
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return;
+  chartInstances[canvasId] = new Chart(ctx, {
+    type: 'line',
+    data: chartData,
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      animation: { duration: 600 },
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: {
+          labels: { color: '#7a8f9e', font: { family: 'JetBrains Mono', size: 10 }, boxWidth: 12 }
+        },
+        tooltip: {
+          backgroundColor: '#0b0f12',
+          borderColor: 'rgba(255,255,255,0.08)',
+          borderWidth: 1,
+          titleColor: '#dde7ef',
+          bodyColor: '#7a8f9e',
+          titleFont: { family: 'JetBrains Mono', size: 11 },
+        }
+      },
+      scales: {
+        x: { display: false },
+        y: {
+          grid:  { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#7a8f9e', font: { family: 'JetBrains Mono', size: 10 } },
+        }
+      }
+    }
+  });
+}
+
+/* ── UI helpers ─────────────────────────────────────────────── */
+function toggleRec(i) {
+  document.getElementById('rec-'+i).classList.toggle('open');
+}
+function copyCli(i) {
+  const el = document.getElementById('cliCode-'+i);
+  const text = el ? el.innerText.replace('COPY','').trim() : '';
+  navigator.clipboard.writeText(text).then(() => showToast('คัดลอก CLI แล้ว ✓'));
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function fmtNum(n) {
+  return n ? Number(n).toLocaleString() : '—';
+}
+
+/* ── Open first rec on load ─────────────────────────────────── */
+function openFirstRec() {
+  const first = document.querySelector('.cli-rec');
+  if (first) first.classList.add('open');
+}
+</script>
+</body>
+</html>
