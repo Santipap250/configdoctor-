@@ -92,17 +92,9 @@
 </style>
 </head>
 <body>
-  <div class="container">
-    <header class="header">
-      <div class="brand">
-        <div class="logo">CS</div>
-        <div class="title">
-          <h1>The CLI Surgeon</h1>
-          <p class="muted">วาง <code>diff all</code> / <code>dump</code> แล้วรับคำแนะนำแก้ไขหน้า Betaflight CLI</p>
-        </div>
-      </div>
-      <div class="muted">ConfigDoctor · Diagnostic Tool</div>
-    </header>
+{% set nav_page = "cli_surgeon" %}
+{% include "partials/nav.html" %}
+  <div class="container" style="padding-top:12px;">
 
     <main class="grid">
       <!-- Input panel -->

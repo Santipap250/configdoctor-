@@ -456,20 +456,8 @@ body { font-family: var(--font-th); background: var(--bg); color: var(--text);
 </head>
 <body>
 
-<!-- Top bar -->
-<div class="top-bar">
-  <a class="tb-brand" href="{{ url_for('index') }}">
-    <img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="OBIX" class="tb-logo">
-    <span class="tb-name">OBIXCONFIG</span>
-  </a>
-  <span class="tb-badge"> v2.2 · BLACKBOX ANALYZER</span>
-  <a class="tb-back" href="{{ url_for('index') }}">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <polyline points="15 18 9 12 15 6"/>
-    </svg>
-    กลับ
-  </a>
-</div>
+{% set nav_page = "blackbox" %}
+{% include "partials/nav.html" %}
 
 <div class="page-wrap">
 
