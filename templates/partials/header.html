@@ -1,40 +1,79 @@
-<header class="header">
-  <div class="header-left">
-    <!-- Hamburger (ซ้ายบน) -->
-    <button id="hamburgerBtn" class="hamburger" aria-label="เปิดเมนู" aria-controls="mobileMenu" aria-expanded="false">
-      <span class="bar bar1"></span>
-      <span class="bar bar2"></span>
-      <span class="bar bar3"></span>
-    </button>
-  </div>
+{#
+  templates/partials/header.html
+  ─────────────────────────────────────────────────────────────────
+  Lightweight top-bar สำหรับหน้าที่ไม่ได้ใช้ full nav system
+  ใช้ร่วมกับ drawer.html หรือ nav.html
 
-  <div class="header-center">
-    <a class="brand" href="{{ url_for('index') }}">
-      <img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="OBIX" class="logo">
-      <span style="font-size:0.95rem;opacity:.95">OBIXConfig Doctor</span>
+  Variables (optional):
+    nav_page  — active page key (ส่งต่อไปให้ drawer.html)
+    page_name — ชื่อหน้าแสดงใน breadcrumb (default: OBIXCONFIG)
+  ─────────────────────────────────────────────────────────────────
+#}
+<style>
+/* ── Shared header styles (self-contained) ── */
+.hdr {
+  position: sticky; top: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 50px; padding: 0 16px;
+  background: rgba(6,9,11,0.92);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.hdr-left  { display: flex; align-items: center; gap: 10px; }
+.hdr-right { display: flex; align-items: center; gap: 8px; }
+
+.hdr-logo-wrap { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.hdr-logo  { height: 26px; }
+.hdr-brand {
+  font-family: 'Orbitron', 'Rajdhani', sans-serif;
+  font-size: 11px; font-weight: 700; letter-spacing: .06em;
+  color: #c8d8e8; white-space: nowrap;
+}
+@media(max-width:440px) { .hdr-brand { display: none; } }
+
+.hdr-page {
+  font-family: 'Orbitron', 'Rajdhani', sans-serif;
+  font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+  color: #10c47a;
+  border: 1px solid rgba(16,196,122,0.25);
+  background: rgba(16,196,122,0.06);
+  padding: 3px 10px; border-radius: 100px;
+}
+
+.hdr-back {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 12px; color: #7a8fa0; text-decoration: none;
+  padding: 5px 11px; border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 7px; transition: .18s;
+}
+.hdr-back:hover { color: #dde7ef; border-color: rgba(255,255,255,0.12); }
+
+.hdr-ham {
+  background: none; border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 6px; padding: 7px 8px; cursor: pointer;
+  display: flex; flex-direction: column; gap: 4px; transition: .18s;
+}
+.hdr-ham:hover { border-color: rgba(16,196,122,0.35); }
+.hdr-ham span { display: block; width: 17px; height: 1.5px; background: #7a8fa0; border-radius: 2px; transition: .18s; }
+.hdr-ham:hover span { background: #10c47a; }
+</style>
+
+<div class="hdr" role="banner">
+  <div class="hdr-left">
+    <a href="/app" class="hdr-logo-wrap">
+      <img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="OBIXConfig Doctor" class="hdr-logo">
+      <span class="hdr-brand">OBIXCONFIG</span>
+    </a>
+    {% if page_name %}
+    <span class="hdr-page">{{ page_name }}</span>
+    {% endif %}
+  </div>
+  <div class="hdr-right">
+    <a class="hdr-back" href="/app">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      กลับหน้าหลัก
     </a>
   </div>
-
-  <div class="header-right">
-    <button class="theme-toggle" id="themeToggle" aria-label="สลับธีม">🌗</button>
-  </div>
-</header>
-
-<!-- Mobile drawer menu -->
-<nav id="mobileMenu" class="mobile-menu" hidden>
-  <div class="mobile-brand">
-    <img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="logo" style="height:34px">
-    <div style="font-weight:700;color:var(--accent)">OBIXConfig</div>
-    <button id="mobileClose" class="mobile-close" aria-label="ปิดเมนู">✕</button>
-  </div>
-
-  <ul class="mobile-links">
-    <li><a href="{{ url_for('index') }}" class="{% if active=='home' %}active{% endif %}">หน้าแรก</a></li>
-    <li><a href="{{ url_for('tools') }}" class="{% if active=='tools' %}active{% endif %}">เครื่องมือ</a></li>
-    <li><a href="{{ url_for('checklists') }}" class="{% if active=='checklists' %}active{% endif %}">Checklist</a></li>
-    <li><a href="{{ url_for('map') }}" class="{% if active=='map' %}active{% endif %}">แผนที่</a></li>
-    <li><a href="{{ url_for('logs') }}" class="{% if active=='logs' %}active{% endif %}">Log</a></li>
-    <li><a href="{{ url_for('about') }}" class="{% if active=='about' %}active{% endif %}">เกี่ยวกับ</a></li>
-    <li class="mobile-cta"><a href="{{ url_for('login') }}">เข้าสู่ระบบ</a></li>
-  </ul>
-</nav>
+</div>
