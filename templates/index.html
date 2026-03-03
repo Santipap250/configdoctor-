@@ -13,7 +13,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-// ── Theme init (ทำก่อน paint เพื่อป้องกัน flash) ──
 (function(){
   var t = localStorage.getItem('theme') || 'dark';
   document.documentElement.className = t;
@@ -21,35 +20,27 @@
     document.body.classList.add(t);
   });
 })();
-
 function toggleTheme(){
   var isDark = document.body.classList.contains('dark');
   document.body.classList.toggle('dark', !isDark);
   document.body.classList.toggle('light', isDark);
   localStorage.setItem('theme', isDark ? 'light' : 'dark');
 }
-
 function copyText(id){
   var el = document.getElementById(id);
   if(!el) return;
-  navigator.clipboard.writeText(el.innerText).then(function(){
-    showToast('คัดลอกเรียบร้อย ✓');
-  });
+  navigator.clipboard.writeText(el.innerText).then(function(){ showToast('คัดลอกเรียบร้อย ✓'); });
 }
-
 function showToast(msg){
   var t = document.getElementById('toast');
   if(!t){ t = document.createElement('div'); t.id='toast';
-    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#10c47a;color:#021a0e;padding:8px 18px;border-radius:20px;font-weight:700;font-size:.87rem;z-index:999;transition:opacity .3s;';
+    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#10c47a;color:#021a0e;padding:8px 20px;border-radius:20px;font-weight:700;font-size:.87rem;z-index:9999;transition:opacity .3s;box-shadow:0 4px 20px rgba(16,196,122,0.4);';
     document.body.appendChild(t); }
   t.textContent = msg; t.style.opacity = '1';
   clearTimeout(t._t);
   t._t = setTimeout(function(){ t.style.opacity='0'; }, 2000);
 }
-
-function toggleConcept(){
-  document.querySelector('.concept-box').classList.toggle('open');
-}
+function toggleConcept(){ document.querySelector('.concept-box').classList.toggle('open'); }
 </script>
 </head>
 
@@ -58,9 +49,7 @@ function toggleConcept(){
 <div class="top-bar">
   <div class="top-left">
     <button id="hamburgerBtn" class="hamburger" aria-label="เปิดเมนู" aria-expanded="false">
-      <span class="lines" aria-hidden="true">
-        <span></span><span></span><span></span>
-      </span>
+      <span class="lines" aria-hidden="true"><span></span><span></span><span></span></span>
     </button>
     <a href="/landing">
       <img src="{{ url_for('static', filename='img/obix-logo.png') }}" class="logo" alt="OBIXConfig Doctor">
@@ -69,109 +58,129 @@ function toggleConcept(){
   <button class="toggle-theme" onclick="toggleTheme()" title="สลับธีม">🌗</button>
 </div>
 
-<!-- ── OVERLAY + DRAWER ── -->
+<!-- ── OVERLAY ── -->
 <div id="overlay" class="overlay" tabindex="-1" aria-hidden="true"></div>
 
+<!-- ── DRAWER ── -->
 <aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" hidden>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-    <span id="drawerTitle" style="font-weight:700;font-size:1rem;color:var(--green);">เมนู</span>
-    <button id="closeDrawer" aria-label="ปิดเมนู" style="background:none;border:0;color:var(--muted);font-size:20px;cursor:pointer;">✕</button>
+
+  <div class="drawer-header">
+    <div class="drawer-brand">
+      <div class="drawer-brand-icon">🚁</div>
+      <div>
+        <div class="drawer-brand-name" id="drawerTitle">OBIX Config Doctor</div>
+        <div class="drawer-brand-sub">FPV Tuning Toolkit · v2.2</div>
+      </div>
+    </div>
+    <button id="closeDrawer" class="drawer-close" aria-label="ปิดเมนู">✕</button>
   </div>
 
-  <hr style="margin-bottom:12px;">
+  <nav class="drawer-nav" aria-label="เมนูหลัก">
 
-  <nav aria-label="เมนูหลัก">
-    <a class="drawer-link" href="/app">
-      <span class="dl-icon">🏠</span>
+    <!-- MAIN -->
+    <div class="drawer-group-label">หน้าหลัก</div>
+
+    <a class="drawer-link active" href="/app">
+      <span class="dl-icon-wrap green">🏠</span>
       <span class="dl-body">
-        <span class="dl-title">หน้าหลัก / วิเคราะห์</span>
-        <span class="dl-meta">กรอกข้อมูลโดรนเพื่อดูผล</span>
+        <span class="dl-title">Drone Analyzer</span>
+        <span class="dl-meta">วิเคราะห์ PID · Filter · Motor</span>
       </span>
       <span class="dl-pill">main</span>
     </a>
 
+    <div class="drawer-divider"></div>
+    <div class="drawer-group-label">🔧 เครื่องมือ</div>
+
     <a class="drawer-link" href="/motor-prop">
-      <span class="dl-icon">🧭</span>
+      <span class="dl-icon-wrap blue">🧭</span>
       <span class="dl-body">
         <span class="dl-title">Motor × Prop Recommender</span>
-        <span class="dl-meta">แนะนำมอเตอร์/ใบพัดตามน้ำหนัก & แบต</span>
+        <span class="dl-meta">แนะนำมอเตอร์/ใบพัดตามสเปค</span>
       </span>
       <span class="dl-pill">tool</span>
     </a>
 
-<a class="drawer-link" href="/cli_surgeon" onclick="closeDrawer();">
-  <span class="dl-icon">🩺</span>
-  <span class="dl-body">
-    <span class="dl-title">วิเคราะห์ CLI Dump (The CLI Surgeon)</span>
-    <span class="dl-meta">วาง diff all / dump แล้วให้คำแนะนำแก้ไข</span>
-  </span>
-  <span class="dl-pill">tool</span>
-</a>
+    <a class="drawer-link" href="/cli_surgeon">
+      <span class="dl-icon-wrap gold">🩺</span>
+      <span class="dl-body">
+        <span class="dl-title">CLI Surgeon</span>
+        <span class="dl-meta">วิเคราะห์ diff all / dump</span>
+      </span>
+      <span class="dl-pill">tool</span>
+    </a>
 
-    <a class="drawer-link" href="/pid-advisor" onclick="closeDrawer();">
-  <span class="dl-icon">💊</span>
-  <span class="dl-body">
-    <span class="dl-title">PID Symptom Advisor</span>
-    <span class="dl-meta">บอกอาการ → ได้คำแนะนำ PID + CLI ทันที</span>
-  </span>
-  <span class="dl-pill">new</span>
-</a>
+    <a class="drawer-link" href="/pid-advisor">
+      <span class="dl-icon-wrap purple">💊</span>
+      <span class="dl-body">
+        <span class="dl-title">PID Symptom Advisor</span>
+        <span class="dl-meta">บอกอาการ → รับคำแนะนำ PID</span>
+      </span>
+      <span class="dl-pill new">new</span>
+    </a>
 
-<a class="drawer-link" href="/rpm-filter" onclick="closeDrawer();">
-  <span class="dl-icon">⚙️</span>
-  <span class="dl-body">
-    <span class="dl-title">RPM Filter Calculator</span>
-    <span class="dl-meta">คำนวณ harmonic frequency + dyn_notch จาก KV & แบต</span>
-  </span>
-  <span class="dl-pill">new</span>
-</a>
+    <a class="drawer-link" href="/rpm-filter">
+      <span class="dl-icon-wrap green">⚙️</span>
+      <span class="dl-body">
+        <span class="dl-title">RPM Filter Calculator</span>
+        <span class="dl-meta">คำนวณ harmonic + dyn_notch</span>
+      </span>
+      <span class="dl-pill new">new</span>
+    </a>
 
-<a class="drawer-link" href="/rates-visualizer" onclick="closeDrawer();">
-  <span class="dl-icon">📈</span>
-  <span class="dl-body">
-    <span class="dl-title">Rates Visualizer</span>
-    <span class="dl-meta">ดู curve แบบ real-time + สร้าง CLI command</span>
-  </span>
-  <span class="dl-pill">new</span>
-</a>
+    <a class="drawer-link" href="/rates-visualizer">
+      <span class="dl-icon-wrap blue">📈</span>
+      <span class="dl-body">
+        <span class="dl-title">Rates Visualizer</span>
+        <span class="dl-meta">curve real-time + CLI command</span>
+      </span>
+      <span class="dl-pill new">new</span>
+    </a>
 
-<a class="drawer-link" href="/cli-comparator" onclick="closeDrawer();">
-  <span class="dl-icon">⚖️</span>
-  <span class="dl-body">
-    <span class="dl-title">CLI Diff Comparator</span>
-    <span class="dl-meta">วาง 2 config → เห็นทุกค่าที่เปลี่ยน</span>
-  </span>
-  <span class="dl-pill">new</span>
-</a>
+    <div class="drawer-divider"></div>
+    <div class="drawer-group-label">⚡ ขั้นสูง</div>
 
-<a class="drawer-link" href="/esc-checker" onclick="closeDrawer();">
-  <span class="dl-icon">⚡</span>
-  <span class="dl-body">
-    <span class="dl-title">ESC Compatibility Checker</span>
-    <span class="dl-meta">ตรวจ ESC amps, protocol, KV+แบต compatibility</span>
-  </span>
-  <span class="dl-pill">new</span>
-</a>
-<a class="drawer-link" href="/blackbox" onclick="closeDrawer();">
-  <span class="dl-icon">📊</span>
-  <span class="dl-body">
-    <span class="dl-title">Blackbox CSV Analyzer</span>
-    <span class="dl-meta">วิเคราะห์ flight log — oscillation, PID score, motor balance</span>
-  </span>
-  <span class="dl-pill new" style="background:rgba(241,182,90,0.15);color:#f1b65a;border:1px solid rgba(241,182,90,0.25);">NEW</span>
-</a>
+    <a class="drawer-link" href="/cli-comparator">
+      <span class="dl-icon-wrap gold">⚖️</span>
+      <span class="dl-body">
+        <span class="dl-title">CLI Diff Comparator</span>
+        <span class="dl-meta">วาง 2 config → เห็นทุกค่าที่เปลี่ยน</span>
+      </span>
+      <span class="dl-pill new">new</span>
+    </a>
+
+    <a class="drawer-link" href="/esc-checker">
+      <span class="dl-icon-wrap gold">⚡</span>
+      <span class="dl-body">
+        <span class="dl-title">ESC Compatibility Checker</span>
+        <span class="dl-meta">ตรวจ ESC amps, protocol, KV</span>
+      </span>
+      <span class="dl-pill new">new</span>
+    </a>
+
+    <a class="drawer-link" href="/blackbox">
+      <span class="dl-icon-wrap blue">📊</span>
+      <span class="dl-body">
+        <span class="dl-title">Blackbox CSV Analyzer</span>
+        <span class="dl-meta">วิเคราะห์ flight log</span>
+      </span>
+      <span class="dl-pill hot">NEW</span>
+    </a>
+
+    <div class="drawer-divider"></div>
+    <div class="drawer-group-label">📡 VTX & Signal</div>
 
     <a class="drawer-link" href="/vtx">
-      <span class="dl-icon">📡</span>
+      <span class="dl-icon-wrap green">📡</span>
       <span class="dl-body">
         <span class="dl-title">VTX Bands & Channels</span>
-        <span class="dl-meta">สูตร band/channel + คำสั่งตัวอย่าง</span>
+        <span class="dl-meta">ตาราง Band/Channel + CLI</span>
       </span>
       <span class="dl-pill">tool</span>
     </a>
 
     <a class="drawer-link" href="/vtx-range">
-      <span class="dl-icon">📡🏞️</span>
+      <span class="dl-icon-wrap blue">🏞️</span>
       <span class="dl-body">
         <span class="dl-title">VTX Range Calculator</span>
         <span class="dl-meta">ประมาณระยะสัญญาณ + กราฟ</span>
@@ -179,26 +188,29 @@ function toggleConcept(){
       <span class="dl-pill">tool</span>
     </a>
 
+    <div class="drawer-divider"></div>
+    <div class="drawer-group-label">📚 แหล่งข้อมูล</div>
+
     <a class="drawer-link" href="/downloads">
-      <span class="dl-icon">📁</span>
+      <span class="dl-icon-wrap">📁</span>
       <span class="dl-body">
         <span class="dl-title">ไฟล์ DIFF และ DUMP</span>
-        <span class="dl-meta">รวม diff all / dump CLI สำเร็จรูป</span>
+        <span class="dl-meta">รวม CLI config สำเร็จรูป</span>
       </span>
       <span class="dl-pill">files</span>
     </a>
 
     <a class="drawer-link" href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener">
-      <span class="dl-icon">📘</span>
+      <span class="dl-icon-wrap blue">📘</span>
       <span class="dl-body">
         <span class="dl-title">เพจ OBIXConfig Lab</span>
-        <span class="dl-meta">ถาม-แนะนำ ฟีเจอร์ & ตัวอย่างการตั้งค่า</span>
+        <span class="dl-meta">ถาม-แนะนำ & ตัวอย่างการตั้งค่า</span>
       </span>
       <span class="dl-pill">open</span>
     </a>
 
     <a class="drawer-link" href="{{ url_for('about') }}">
-      <span class="dl-icon">ℹ️</span>
+      <span class="dl-icon-wrap">ℹ️</span>
       <span class="dl-body">
         <span class="dl-title">เกี่ยวกับ</span>
         <span class="dl-meta">ที่มา & วิธีใช้งาน</span>
@@ -207,71 +219,83 @@ function toggleConcept(){
     </a>
 
     <a class="drawer-link" href="{{ url_for('changelog') }}">
-      <span class="dl-icon">📝</span>
+      <span class="dl-icon-wrap green">📝</span>
       <span class="dl-body">
         <span class="dl-title">Changelog</span>
         <span class="dl-meta">บันทึกการอัปเดต</span>
       </span>
-      <span class="dl-pill">v2.1</span>
+      <span class="dl-pill">v2.2</span>
     </a>
+
   </nav>
+
+  <div class="drawer-footer">
+    <div class="drawer-footer-text">
+      OBIXConfig Doctor &nbsp;·&nbsp; <span class="drawer-footer-ver">v2.2</span>
+      <br>Developed for FPV community 🇹🇭
+    </div>
+  </div>
 </aside>
 
 <!-- ── MAIN CONTENT ── -->
 <div class="container">
 
+  <!-- PAGE HERO -->
+  <div class="page-hero">
+    <div class="page-hero-label">OBIXConfig Doctor</div>
+    <div class="page-hero-title">🚁 Drone Analyzer</div>
+    <div class="page-hero-sub">กรอกข้อมูลโดรน รับค่า PID · Filter · Motor ที่เหมาะสมทันที</div>
+    <div class="page-hero-badges">
+      <span class="hero-badge green">FPV Tuning</span>
+      <span class="hero-badge blue">Betaflight</span>
+      <span class="hero-badge gold">Community Free</span>
+    </div>
+  </div>
+
 <!-- ── CONCEPT BOX ── -->
-<div class="concept-box" style="margin-top:20px;">
+<div class="concept-box">
   <div class="concept-header" onclick="toggleConcept()">
     <span class="concept-title">🧠 แนวคิดการคำนวณค่า</span>
     <span class="concept-icon">▾</span>
   </div>
   <div class="concept-content">
-    <p>
-      ค่าแนะนำจาก <strong>OBIXConfig Doctor</strong>
-      ไม่ใช่สูตรตายตัว แต่เป็น <strong>จุดเริ่มต้นที่ปลอดภัย</strong>
-    </p>
+    <p>ค่าแนะนำจาก <strong>OBIXConfig Doctor</strong> ไม่ใช่สูตรตายตัว แต่เป็น <strong>จุดเริ่มต้นที่ปลอดภัย</strong></p>
     <ul>
       <li>🔧 คำนวณจาก <strong>ขนาด / น้ำหนัก / แบตเตอรี่ / สไตล์การบิน</strong></li>
       <li>📊 อ้างอิงแนวคิดเดียวกับนักบิน FPV ตัวจริง</li>
       <li>⚠️ อุปกรณ์ สภาพโดรน และการประกอบ มีผลกับค่าเสมอ</li>
     </ul>
-    <p class="concept-note">
-      แนะนำทดสอบบินจริงก่อน และปรับเพิ่ม–ลดเล็กน้อยตามพฤติกรรมของโดรน
-    </p>
+    <p class="concept-note">แนะนำทดสอบบินจริงก่อน และปรับเพิ่ม–ลดเล็กน้อยตามพฤติกรรมของโดรน</p>
   </div>
 </div>
 
 <!-- ── FORM ── -->
 <div class="form-card">
-  <h2 style="font-size:1rem;color:var(--green);margin-bottom:18px;">
-    ⚙️ กรอกข้อมูลโดรน
-  </h2>
+  <h2 style="font-size:1rem;color:var(--green);margin-bottom:4px;font-family:var(--font-display);">⚙️ กรอกข้อมูลโดรน</h2>
+  <p style="font-size:.8rem;color:var(--muted);margin-bottom:18px;">กรอกสเปคโดรนของคุณ หรือเลือก Preset เพื่อเริ่มต้นเร็ว</p>
 
   <form method="POST">
-    <!-- Preset -->
-    <label>Preset ชุดเริ่มต้น (แนะนำให้เลือก ไม่ใช้ preset)</label>
+    <div class="form-section-label">Preset / เริ่มต้น</div>
+    <label>Preset ชุดเริ่มต้น</label>
     <select id="preset-select" name="preset">
       <option value="">-- ไม่ใช้ preset --</option>
       {% for key, label in [
-        ('2.5_micro','2.5\" — Micro'),
-        ('3_whoop','3.0\" — Whoop / Toothpick'),
-        ('3.5_cine','3.5\" — Cine'),
-        ('4_mini','4.0\" — Mini'),
-        ('5_freestyle','5.0\" — Freestyle'),
-        ('6_heavy5','6.0\" — Heavy'),
-        ('7_midlr','7.0\" — Mid / LR'),
-        ('7.5_midlr','7.5\" — Mid / LR'),
-        ('8_lr','8.0\" — Long Range'),
-        ('10_lr','10\" — Long Range (Big)')
+        ('2.5_micro','2.5" — Micro'),
+        ('3_whoop','3.0" — Whoop / Toothpick'),
+        ('3.5_cine','3.5" — Cine'),
+        ('4_mini','4.0" — Mini'),
+        ('5_freestyle','5.0" — Freestyle'),
+        ('6_heavy5','6.0" — Heavy'),
+        ('7_midlr','7.0" — Mid / LR'),
+        ('7.5_midlr','7.5" — Mid / LR'),
+        ('8_lr','8.0" — Long Range'),
+        ('10_lr','10" — Long Range (Big)')
       ] %}
-      <option value="{{ key }}"
-        {% if request.form.get('preset','')==key or (analysis and analysis.preset_used==key) %}selected{% endif %}>
-        {{ label }}
-      </option>
+      <option value="{{ key }}" {% if request.form.get('preset','')==key or (analysis and analysis.preset_used==key) %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
 
+    <div class="form-section-label">ข้อมูลโดรน</div>
     <div class="form-grid">
       <div>
         <label>ขนาดโดรน (นิ้ว)</label>
@@ -283,9 +307,10 @@ function toggleConcept(){
       </div>
     </div>
 
+    <div class="form-section-label">แบตเตอรี่</div>
     <div class="form-grid">
       <div>
-        <label>แบตเตอรี่</label>
+        <label>Cell Count</label>
         <select name="battery" id="battery-select">
           {% for c in ['3S','4S','5S','6S','7S','8S'] %}
           <option value="{{ c }}" {% if request.form.get('battery','')==c %}selected{% endif %}>{{ c }}</option>
@@ -293,11 +318,12 @@ function toggleConcept(){
         </select>
       </div>
       <div>
-        <label>Battery capacity (mAh)</label>
+        <label>Capacity (mAh)</label>
         <input type="number" name="battery_mAh" placeholder="เช่น 1500" value="{{ request.form.get('battery_mAh','') }}">
       </div>
     </div>
 
+    <div class="form-section-label">สไตล์ & มอเตอร์</div>
     <div class="form-grid">
       <div>
         <label>สไตล์การบิน</label>
@@ -313,6 +339,7 @@ function toggleConcept(){
       </div>
     </div>
 
+    <div class="form-section-label">ใบพัด</div>
     <div class="form-grid">
       <div>
         <label>ขนาดใบพัด (นิ้ว)</label>
@@ -346,7 +373,6 @@ function toggleConcept(){
 <!-- ── RESULTS ── -->
 {% if analysis %}
 
-<!-- Quick Summary -->
 <section class="quick-summary">
   <div class="qs-header">🧾 สรุปภาพรวม</div>
   <div class="qs-grid">
@@ -360,10 +386,7 @@ function toggleConcept(){
     </div>
     <div class="qs-item">
       <span class="qs-label">TWR</span>
-      <span class="qs-value" style="color:
-        {% if analysis.thrust_ratio and analysis.thrust_ratio < 1.2 %}var(--red)
-        {% elif analysis.thrust_ratio and analysis.thrust_ratio > 3 %}var(--gold)
-        {% else %}var(--green){% endif %}">
+      <span class="qs-value" style="color:{% if analysis.thrust_ratio and analysis.thrust_ratio < 1.2 %}var(--red){% elif analysis.thrust_ratio and analysis.thrust_ratio > 3 %}var(--gold){% else %}var(--green){% endif %};">
         {% if analysis.thrust_ratio %}{{ analysis.thrust_ratio }}{% else %}—{% endif %}
       </span>
     </div>
@@ -377,27 +400,22 @@ function toggleConcept(){
     </div>
   </div>
   <div class="qs-advice">💡 {{ analysis.summary }}</div>
-  <div class="qs-warning" style="margin-top:8px;">
-    ⚠️ ค่านี้เป็นจุดเริ่มต้น ควรทดสอบบินจริงก่อนปรับ
-  </div>
+  <div class="qs-warning" style="margin-top:8px;">⚠️ ค่านี้เป็นจุดเริ่มต้น ควรทดสอบบินจริงก่อนปรับ</div>
 </section>
 
-<!-- Warnings -->
 {% if analysis.warnings %}
 <div class="result-card" style="padding-bottom:14px;">
   <h3 style="margin-top:0;">🚨 คำเตือนจากระบบ</h3>
   <div class="warning-box">
     {% for w in analysis.warnings %}
     <div class="alert {{ w.level }}">
-      {% if w.level == 'danger' %}❌{% elif w.level == 'warning' %}⚠️{% else %}ℹ️{% endif %}
-      {{ w.msg }}
+      {% if w.level == 'danger' %}❌{% elif w.level == 'warning' %}⚠️{% else %}ℹ️{% endif %} {{ w.msg }}
     </div>
     {% endfor %}
   </div>
 </div>
 {% endif %}
 
-<!-- Smart Checks -->
 {% if analysis.rules %}
 <div class="result-card">
   <h3 style="margin-top:0;color:var(--gold);">🛠️ Smart Checks</h3>
@@ -413,19 +431,15 @@ function toggleConcept(){
 </div>
 {% endif %}
 
-<!-- Advanced Analysis (ONE card, ไม่ซ้ำ) -->
 {% if analysis.advanced %}
 <div class="result-card" style="border-left:3px solid var(--green);">
   <h3 style="margin-top:0;color:var(--green);">🔬 Advanced Analysis</h3>
-
-  <!-- Tab Navigation -->
   <div class="result-tabs">
     <button class="tab-btn active" onclick="switchTab(this,'tab-power')">⚡ Power</button>
     <button class="tab-btn" onclick="switchTab(this,'tab-health')">🩺 Health</button>
     <button class="tab-btn" onclick="switchTab(this,'tab-kv')">🔧 Motor / KV</button>
   </div>
 
-  <!-- Tab: Power -->
   <div id="tab-power" class="tab-pane active">
     <div class="result-grid">
       <div class="card-metric">
@@ -435,9 +449,7 @@ function toggleConcept(){
       </div>
       <div class="card-metric">
         <div class="metric-label">Estimated Flight Time</div>
-        <div class="metric-value" style="color:var(--green);">
-          {{ analysis.advanced.est_flight_time_min }} min
-        </div>
+        <div class="metric-value" style="color:var(--green);">{{ analysis.advanced.est_flight_time_min }} min</div>
         <div class="muted small">Aggressive: {{ analysis.advanced.est_flight_time_min_aggr }} min</div>
       </div>
       <div class="card-metric">
@@ -447,10 +459,7 @@ function toggleConcept(){
       </div>
       <div class="card-metric">
         <div class="metric-label">Required C-Rating</div>
-        <div class="metric-value" style="color:
-          {% if analysis.advanced.c_required and analysis.advanced.c_required > 60 %}var(--red)
-          {% elif analysis.advanced.c_required and analysis.advanced.c_required > 40 %}var(--gold)
-          {% else %}var(--green){% endif %}">
+        <div class="metric-value" style="color:{% if analysis.advanced.c_required and analysis.advanced.c_required > 60 %}var(--red){% elif analysis.advanced.c_required and analysis.advanced.c_required > 40 %}var(--gold){% else %}var(--green){% endif %};">
           {% if analysis.advanced.c_required %}{{ analysis.advanced.c_required }}C{% else %}—{% endif %}
         </div>
         <div class="muted small">เลือกแบตที่ rating ≥ ค่านี้</div>
@@ -458,15 +467,11 @@ function toggleConcept(){
     </div>
   </div>
 
-  <!-- Tab: Health -->
   <div id="tab-health" class="tab-pane">
     <div class="result-grid">
       <div class="card-metric">
         <div class="metric-label">TWR</div>
-        <div class="metric-value" style="color:
-          {% if analysis.advanced.thrust_ratio and analysis.advanced.thrust_ratio < 1.2 %}var(--red)
-          {% elif analysis.advanced.thrust_ratio and analysis.advanced.thrust_ratio > 3 %}var(--gold)
-          {% else %}var(--green){% endif %}">
+        <div class="metric-value" style="color:{% if analysis.advanced.thrust_ratio and analysis.advanced.thrust_ratio < 1.2 %}var(--red){% elif analysis.advanced.thrust_ratio and analysis.advanced.thrust_ratio > 3 %}var(--gold){% else %}var(--green){% endif %};">
           {% if analysis.advanced.thrust_ratio %}{{ analysis.advanced.thrust_ratio }}{% else %}—{% endif %}
         </div>
         <div class="muted small">{{ analysis.advanced.efficiency_class | default('') }}</div>
@@ -480,18 +485,15 @@ function toggleConcept(){
         <div class="metric-value">{{ analysis.advanced.battery_health | default('—') }}</div>
       </div>
     </div>
-
     {% if analysis.advanced.warnings_advanced %}
     <div class="warning-box" style="margin-top:12px;">
       {% for w in analysis.advanced.warnings_advanced %}
       <div class="alert {{ w.level | default('warning') }}">
-        {% if w.level=='danger' %}❌{% elif w.level=='warning' %}⚠️{% else %}ℹ️{% endif %}
-        {{ w.msg }}
+        {% if w.level=='danger' %}❌{% elif w.level=='warning' %}⚠️{% else %}ℹ️{% endif %} {{ w.msg }}
       </div>
       {% endfor %}
     </div>
     {% endif %}
-
     {% if analysis.advanced.recommendations %}
     <h4 style="margin-top:14px;">💡 คำแนะนำ</h4>
     <ul style="padding-left:18px;font-size:.87rem;">
@@ -502,7 +504,6 @@ function toggleConcept(){
     {% endif %}
   </div>
 
-  <!-- Tab: Motor/KV -->
   <div id="tab-kv" class="tab-pane">
     <div style="padding:10px 0;">
       <h4>KV Suggestion</h4>
@@ -525,25 +526,18 @@ function toggleConcept(){
     <button class="btn-small" onclick="copyAdvancedJSON()">📋 Copy JSON</button>
     <a class="btn-small" href="{{ url_for('downloads_index') }}">📂 ดาวน์โหลด DIFF</a>
   </div>
-
   <pre id="advancedJSON" style="display:none;">{{ analysis.advanced | tojson(indent=2) }}</pre>
 </div>
 {% endif %}
 
-<!-- Drone Class + Baseline -->
 {% if analysis.detected_class %}
 <div class="result-card" style="border-left:3px solid var(--blue);">
   <h3 style="margin-top:0;display:flex;align-items:center;gap:8px;">
-    🔎 OBIX วิเคราะห์ลำนี้เป็น
-    <span class="class-badge">{{ analysis.detected_class }}</span>
+    🔎 OBIX วิเคราะห์ลำนี้เป็น <span class="class-badge">{{ analysis.detected_class }}</span>
   </h3>
-
   {% if analysis.class_meta.description %}
-  <p style="color:var(--muted);font-size:.87rem;margin-bottom:14px;">
-    {{ analysis.class_meta.description }}
-  </p>
+  <p style="color:var(--muted);font-size:.87rem;margin-bottom:14px;">{{ analysis.class_meta.description }}</p>
   {% endif %}
-
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
     <div>
       <h4>🎯 PID Baseline</h4>
@@ -560,17 +554,12 @@ Dyn Notch : {{ analysis.filter_baseline.dyn_notch }}</pre>
       <button class="btn-small" style="margin-top:6px;" onclick="copyText('filter-baseline')">Copy Filter</button>
     </div>
   </div>
-
-  <p style="margin-top:12px;font-size:.82rem;color:var(--muted);">
-    ⚠️ ค่านี้คือ <strong style="color:var(--text);">จุดเริ่มต้นที่ปลอดภัย</strong> — แนะนำทดสอบบินจริงก่อน
-  </p>
+  <p style="margin-top:12px;font-size:.82rem;color:var(--muted);">⚠️ ค่านี้คือ <strong style="color:var(--text);">จุดเริ่มต้นที่ปลอดภัย</strong> — แนะนำทดสอบบินจริงก่อน</p>
 </div>
 {% endif %}
 
-<!-- Main Analysis: PID + Filter (Analyzed) -->
 <div class="result-card">
   <h2>🔍 ผลการวิเคราะห์ (Style-based)</h2>
-
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
     <div>
       <h3>⚙️ PID แนะนำ</h3>
@@ -588,37 +577,24 @@ Dyn Notch : {{ analysis.filter.dyn_notch }}</pre>
     </div>
   </div>
 
-  <!-- Prop Analysis -->
   <h3>🛩️ ใบพัด</h3>
   <p style="color:var(--muted);font-size:.88rem;margin-bottom:8px;">{{ analysis.prop_result.summary }}</p>
   <div class="result-grid" style="grid-template-columns:repeat(3,1fr);gap:8px;">
     <div class="card-metric">
       <div class="metric-label">Noise</div>
-      <div class="metric-value" style="color:
-        {% if analysis.prop_result.effect.noise >= 7 %}var(--red)
-        {% elif analysis.prop_result.effect.noise >= 5 %}var(--gold)
-        {% else %}var(--green){% endif %}">
-        {{ analysis.prop_result.effect.noise }}/8
-      </div>
+      <div class="metric-value" style="color:{% if analysis.prop_result.effect.noise >= 7 %}var(--red){% elif analysis.prop_result.effect.noise >= 5 %}var(--gold){% else %}var(--green){% endif %};">{{ analysis.prop_result.effect.noise }}/8</div>
     </div>
     <div class="card-metric">
       <div class="metric-label">Motor Load</div>
-      <div class="metric-value" style="color:
-        {% if analysis.prop_result.effect.motor_load >= 5 %}var(--gold)
-        {% else %}var(--green){% endif %}">
-        {{ analysis.prop_result.effect.motor_load }}/6
-      </div>
+      <div class="metric-value" style="color:{% if analysis.prop_result.effect.motor_load >= 5 %}var(--gold){% else %}var(--green){% endif %};">{{ analysis.prop_result.effect.motor_load }}/6</div>
     </div>
     <div class="card-metric">
       <div class="metric-label">Grip</div>
       <div class="metric-value" style="font-size:.9rem;">{{ analysis.prop_result.effect.grip }}</div>
     </div>
   </div>
-  <p style="font-size:.85rem;color:var(--blue);margin-top:8px;">
-    💡 {{ analysis.prop_result.recommendation }}
-  </p>
+  <p style="font-size:.85rem;color:var(--blue);margin-top:8px;">💡 {{ analysis.prop_result.recommendation }}</p>
 
-  <!-- Tips -->
   {% if analysis.basic_tips %}
   <h3>📋 Tips</h3>
   <ul style="padding-left:18px;">
@@ -629,81 +605,51 @@ Dyn Notch : {{ analysis.filter.dyn_notch }}</pre>
   {% endif %}
 </div>
 
-<!-- Preset CLI Box -->
 <div class="result-card preset-box" style="border:1px solid rgba(88,166,255,0.12);">
   <h3 style="margin-top:0;color:var(--blue);">🎛 Preset แนะนำ</h3>
   <div class="preset-grid">
     <article class="preset-item preset-beginner">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-        <div style="width:40px;height:40px;border-radius:10px;background:var(--green-dim);display:grid;place-items:center;font-weight:800;color:var(--green);font-size:1.2rem;">B</div>
-        <div>
-          <h4 style="margin:0;">Beginner / Smooth</h4>
-          <div class="muted small">มือใหม่ บินนิ่ง คุมง่าย</div>
-        </div>
+        <div style="width:38px;height:38px;border-radius:10px;background:var(--green-dim);display:grid;place-items:center;font-weight:800;color:var(--green);font-size:1.1rem;font-family:var(--font-display);">B</div>
+        <div><h4 style="margin:0;">Beginner / Smooth</h4><div class="muted small">มือใหม่ บินนิ่ง คุมง่าย</div></div>
       </div>
-      <ul>
-        <li>Throttle limit: <strong>85%</strong></li>
-        <li>Rates: ต่ำ–กลาง | Filter: นุ่ม</li>
-      </ul>
+      <ul><li>Throttle limit: <strong>85%</strong></li><li>Rates: ต่ำ–กลาง | Filter: นุ่ม</li></ul>
       <button class="btn-primary" style="margin-top:10px;width:100%;font-size:.83rem;" onclick="showPreset('beginner')">แสดง CLI</button>
     </article>
-
     <article class="preset-item preset-freestyle">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-        <div style="width:40px;height:40px;border-radius:10px;background:var(--blue-dim);display:grid;place-items:center;font-weight:800;color:var(--blue);font-size:1.2rem;">F</div>
-        <div>
-          <h4 style="margin:0;">Freestyle</h4>
-          <div class="muted small">ตอบสนองไว คุมแม่น</div>
-        </div>
+        <div style="width:38px;height:38px;border-radius:10px;background:var(--blue-dim);display:grid;place-items:center;font-weight:800;color:var(--blue);font-size:1.1rem;font-family:var(--font-display);">F</div>
+        <div><h4 style="margin:0;">Freestyle</h4><div class="muted small">ตอบสนองไว คุมแม่น</div></div>
       </div>
-      <ul>
-        <li>Throttle: <strong>90–100%</strong></li>
-        <li>Rates: กลาง–สูง | Filter: สมดุล</li>
-      </ul>
+      <ul><li>Throttle: <strong>90–100%</strong></li><li>Rates: กลาง–สูง | Filter: สมดุล</li></ul>
       <button class="btn-primary" style="margin-top:10px;width:100%;font-size:.83rem;background:var(--blue);color:#001133;" onclick="showPreset('freestyle')">แสดง CLI</button>
     </article>
-
     <article class="preset-item preset-longrange">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-        <div style="width:40px;height:40px;border-radius:10px;background:rgba(201,166,255,0.1);display:grid;place-items:center;font-weight:800;color:#c9a6ff;font-size:1.2rem;">L</div>
-        <div>
-          <h4 style="margin:0;">Long-Range / Cinematic</h4>
-          <div class="muted small">นิ่ง ประหยัดไฟ ลอยนาน</div>
-        </div>
+        <div style="width:38px;height:38px;border-radius:10px;background:var(--purple-dim);display:grid;place-items:center;font-weight:800;color:var(--purple);font-size:1.1rem;font-family:var(--font-display);">L</div>
+        <div><h4 style="margin:0;">Long-Range / Cine</h4><div class="muted small">นิ่ง ประหยัดไฟ ลอยนาน</div></div>
       </div>
-      <ul>
-        <li>Throttle: <strong>80–85%</strong></li>
-        <li>Rates: ต่ำ | Filter: นิ่ง</li>
-      </ul>
+      <ul><li>Throttle: <strong>80–85%</strong></li><li>Rates: ต่ำ | Filter: นิ่ง</li></ul>
       <button class="btn-primary" style="margin-top:10px;width:100%;font-size:.83rem;background:#7a52b0;color:#fff;" onclick="showPreset('longrange')">แสดง CLI</button>
     </article>
   </div>
-
   <div class="cli-box" style="margin-top:16px;">
-    <div class="cli-btns">
-      <button class="btn-ghost" onclick="copyText('cliOutput')">📋 คัดลอก CLI</button>
-    </div>
+    <div class="cli-btns"><button class="btn-ghost" onclick="copyText('cliOutput')">📋 คัดลอก CLI</button></div>
     <pre id="cliOutput" style="min-height:60px;"># เลือก preset ด้านบนเพื่อแสดง CLI</pre>
   </div>
   <p class="preset-note">* Preset เหล่านี้เป็นแนวทางเริ่มต้น — ปรับต่อให้เหมาะกับโดรนของคุณ</p>
 </div>
 
-<!-- Charts -->
 <div class="result-card">
   <h3 style="margin-top:0;">📊 Visualization</h3>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-    <div class="chart-wrap">
-      <canvas id="thrustChart"></canvas>
-    </div>
-    <div class="chart-wrap">
-      <canvas id="noiseChart"></canvas>
-    </div>
+    <div class="chart-wrap"><canvas id="thrustChart"></canvas></div>
+    <div class="chart-wrap"><canvas id="noiseChart"></canvas></div>
   </div>
 </div>
 
-{% endif %}{# end if analysis #}
+{% endif %}
 
-<!-- Community -->
 <div class="community-box">
   <p class="community-text">
     <strong>OBIXConfig Doctor</strong> พัฒนาอยู่เรื่อย ๆ 🚧<br><br>
@@ -711,18 +657,15 @@ Dyn Notch : {{ analysis.filter.dyn_notch }}</pre>
     <span class="highlight">แนะนำได้ที่เพจ <strong>OBIXConfig Lab</strong></span><br><br>
     เว็บนี้ทำเพื่อชุมชน FPV จริง ๆ ❤️
   </p>
-  <a href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener" class="community-btn">
-    ไปที่เพจ OBIXConfig Lab
-  </a>
+  <a href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener" class="community-btn">ไปที่เพจ OBIXConfig Lab</a>
 </div>
 
-<div class="version-note">OBIXConfig Doctor • v1.0.1beta — Developed by FPV community 🇹🇭</div>
+<div class="version-note">OBIXConfig Doctor • v2.2 — Developed by FPV community 🇹🇭</div>
 
-</div>{# end .container #}
+</div>
 
 <!-- ── SCRIPTS ── -->
 <script>
-// ── Preset CLI data ──
 const presets = {
   beginner:`# OBIXConfig Lab - Beginner Preset
 set throttle_limit_percent = 85
@@ -744,13 +687,8 @@ set feedforward_transition = 0
 set anti_gravity_gain = 2
 save`
 };
+function showPreset(type){ var el = document.getElementById('cliOutput'); if(el) el.textContent = presets[type]||''; }
 
-function showPreset(type){
-  var el = document.getElementById('cliOutput');
-  if(el) el.textContent = presets[type] || '';
-}
-
-// ── Preset autofill ──
 const presetMap = {
   "2.5_micro":   {size:2.5,  weight:80,   battery:"3S", prop_size:2.5, pitch:2.0, blades:"2", style:"freestyle"},
   "3_whoop":     {size:3.0,  weight:120,  battery:"3S", prop_size:3.0, pitch:2.0, blades:"2", style:"freestyle"},
@@ -763,157 +701,62 @@ const presetMap = {
   "8_lr":        {size:8.0,  weight:1500, battery:"6S", prop_size:8.0, pitch:3.5, blades:"2", style:"longrange"},
   "10_lr":       {size:10.0, weight:2200, battery:"6S", prop_size:10.0,pitch:4.5, blades:"2", style:"longrange"}
 };
+function setField(sel,val){ var el=document.querySelector(sel); if(el) el.value=val; }
+var psEl=document.getElementById('preset-select');
+if(psEl) psEl.addEventListener('change',function(){
+  var p=presetMap[this.value]; if(!p) return;
+  setField('input[name="size"]',p.size); setField('input[name="weight"]',p.weight);
+  setField('select[name="battery"]',p.battery); setField('input[name="prop_size"]',p.prop_size);
+  setField('input[name="pitch"]',p.pitch); setField('select[name="blades"]',p.blades);
+  setField('select[name="style"]',p.style);
+});
 
-function setField(sel, val){
-  var el = document.querySelector(sel);
-  if(!el) return;
-  el.value = val;
-}
-
-var psEl = document.getElementById('preset-select');
-if(psEl){
-  psEl.addEventListener('change', function(){
-    var p = presetMap[this.value];
-    if(!p) return;
-    setField('input[name="size"]', p.size);
-    setField('input[name="weight"]', p.weight);
-    setField('select[name="battery"]', p.battery);
-    setField('input[name="prop_size"]', p.prop_size);
-    setField('input[name="pitch"]', p.pitch);
-    setField('select[name="blades"]', p.blades);
-    setField('select[name="style"]', p.style);
-  });
-}
-
-// ── Drawer (ONE implementation only) ──
+// ── DRAWER ──
 (function(){
-  var btn = document.getElementById('hamburgerBtn');
-  var drawer = document.getElementById('drawer');
-  var overlay = document.getElementById('overlay');
-  var closeBtn = document.getElementById('closeDrawer');
-
+  var btn=document.getElementById('hamburgerBtn'), drawer=document.getElementById('drawer'),
+      overlay=document.getElementById('overlay'), closeBtn=document.getElementById('closeDrawer');
   function open(){
-    btn && btn.setAttribute('aria-expanded','true');
-    drawer && drawer.classList.add('open');
-    drawer && drawer.removeAttribute('hidden');
-    overlay && overlay.classList.add('open');
-    overlay && overlay.setAttribute('aria-hidden','false');
-    document.addEventListener('keydown', onEsc);
+    btn&&btn.setAttribute('aria-expanded','true');
+    drawer&&drawer.classList.add('open'); drawer&&drawer.removeAttribute('hidden');
+    overlay&&overlay.classList.add('open'); overlay&&overlay.setAttribute('aria-hidden','false');
+    document.addEventListener('keydown',onEsc);
   }
   function close(){
-    btn && btn.setAttribute('aria-expanded','false');
-    drawer && drawer.classList.remove('open');
-    overlay && overlay.classList.remove('open');
-    overlay && overlay.setAttribute('aria-hidden','true');
-    document.removeEventListener('keydown', onEsc);
-    setTimeout(function(){ drawer && drawer.setAttribute('hidden',''); }, 260);
-    btn && btn.focus();
+    btn&&btn.setAttribute('aria-expanded','false');
+    drawer&&drawer.classList.remove('open'); overlay&&overlay.classList.remove('open');
+    overlay&&overlay.setAttribute('aria-hidden','true');
+    document.removeEventListener('keydown',onEsc);
+    setTimeout(function(){ drawer&&drawer.setAttribute('hidden',''); }, 280);
+    btn&&btn.focus();
   }
   function onEsc(e){ if(e.key==='Escape') close(); }
-
-  btn && btn.addEventListener('click', function(){
-    btn.getAttribute('aria-expanded')==='true' ? close() : open();
+  btn&&btn.addEventListener('click',function(){ btn.getAttribute('aria-expanded')==='true'?close():open(); });
+  overlay&&overlay.addEventListener('click',close);
+  closeBtn&&closeBtn.addEventListener('click',close);
+  window.addEventListener('resize',function(){
+    if(window.innerWidth>900){ drawer&&drawer.removeAttribute('hidden'); }
+    else if(drawer&&!drawer.classList.contains('open')){ drawer.setAttribute('hidden',''); }
   });
-  overlay && overlay.addEventListener('click', close);
-  closeBtn && closeBtn.addEventListener('click', close);
-
-  // responsive
-  window.addEventListener('resize', function(){
-    if(window.innerWidth > 900){
-      drawer && drawer.removeAttribute('hidden');
-    } else if(!drawer.classList.contains('open')){
-      drawer && drawer.setAttribute('hidden','');
-    }
-  });
-  if(window.innerWidth <= 900 && drawer) drawer.setAttribute('hidden','');
+  if(window.innerWidth<=900&&drawer) drawer.setAttribute('hidden','');
 })();
 
-// ── Tab switching ──
-function switchTab(btn, paneId){
-  var tabs = btn.closest('.result-card').querySelectorAll('.tab-btn');
-  var panes = btn.closest('.result-card').querySelectorAll('.tab-pane');
-  tabs.forEach(function(t){ t.classList.remove('active'); });
-  panes.forEach(function(p){ p.classList.remove('active'); });
+function switchTab(btn,paneId){
+  var card=btn.closest('.result-card');
+  card.querySelectorAll('.tab-btn').forEach(function(t){t.classList.remove('active');});
+  card.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('active');});
   btn.classList.add('active');
-  var pane = document.getElementById(paneId);
-  if(pane) pane.classList.add('active');
+  var pane=document.getElementById(paneId); if(pane) pane.classList.add('active');
 }
+function copyAdvancedJSON(){ var el=document.getElementById('advancedJSON'); if(el) navigator.clipboard.writeText(el.innerText).then(function(){showToast('คัดลอก JSON เรียบร้อย ✓');}); }
 
-// ── Advanced JSON copy ──
-function copyAdvancedJSON(){
-  var el = document.getElementById('advancedJSON');
-  if(el) navigator.clipboard.writeText(el.innerText).then(function(){ showToast('คัดลอก JSON เรียบร้อย ✓'); });
-}
-
-// ── Charts ──
 {% if analysis %}
 (function(){
-  var thrustEl = document.getElementById('thrustChart');
-  if(thrustEl){
-    new Chart(thrustEl, {
-      type: 'bar',
-      data: {
-        labels: ['Thrust-to-Weight Ratio'],
-        datasets: [{
-          label: 'TWR',
-          data: [{{ analysis.thrust_ratio or 0 }}],
-          backgroundColor: ['rgba(16,196,122,0.5)'],
-          borderColor: ['#10c47a'],
-          borderWidth: 1,
-          borderRadius: 6
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { beginAtZero: true, max: 5,
-               grid: { color: 'rgba(255,255,255,0.04)' },
-               ticks: { color: '#8a99a8' } },
-          x: { grid: { display: false }, ticks: { color: '#8a99a8' } }
-        }
-      }
-    });
-  }
-
-  var noiseEl = document.getElementById('noiseChart');
-  if(noiseEl){
-    new Chart(noiseEl, {
-      type: 'radar',
-      data: {
-        labels: ['Motor Load', 'Noise', 'Grip'],
-        datasets: [{
-          label: 'Prop Profile',
-          data: [
-            {{ analysis.prop_result.effect.motor_load }},
-            {{ analysis.prop_result.effect.noise }},
-            {% if analysis.prop_result.effect.grip == 'หนึบมาก' %}6
-            {% elif analysis.prop_result.effect.grip == 'หนึบดี' %}4
-            {% else %}2{% endif %}
-          ],
-          backgroundColor: 'rgba(88,166,255,0.15)',
-          borderColor: '#58a6ff',
-          pointBackgroundColor: '#58a6ff',
-          borderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          r: {
-            beginAtZero: true, max: 8,
-            grid: { color: 'rgba(255,255,255,0.06)' },
-            ticks: { display: false },
-            pointLabels: { color: '#8a99a8', font: { size: 11 } }
-          }
-        }
-      }
-    });
-  }
+  var thrustEl=document.getElementById('thrustChart');
+  if(thrustEl){ new Chart(thrustEl,{type:'bar',data:{labels:['Thrust-to-Weight Ratio'],datasets:[{label:'TWR',data:[{{ analysis.thrust_ratio or 0 }}],backgroundColor:['rgba(16,196,122,0.45)'],borderColor:['#10c47a'],borderWidth:1,borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:5,grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#7a8fa0'}},x:{grid:{display:false},ticks:{color:'#7a8fa0'}}}}}); }
+  var noiseEl=document.getElementById('noiseChart');
+  if(noiseEl){ new Chart(noiseEl,{type:'radar',data:{labels:['Motor Load','Noise','Grip'],datasets:[{label:'Prop Profile',data:[{{ analysis.prop_result.effect.motor_load }},{{ analysis.prop_result.effect.noise }},{% if analysis.prop_result.effect.grip=='หนึบมาก'%}6{% elif analysis.prop_result.effect.grip=='หนึบดี'%}4{% else %}2{% endif %}],backgroundColor:'rgba(88,166,255,0.14)',borderColor:'#58a6ff',pointBackgroundColor:'#58a6ff',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{beginAtZero:true,max:8,grid:{color:'rgba(255,255,255,0.05)'},ticks:{display:false},pointLabels:{color:'#7a8fa0',font:{size:11}}}}}}); }
 })();
 {% endif %}
 </script>
-
 </body>
 </html>
