@@ -5,1195 +5,940 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rates Visualizer — OBIXConfig Doctor</title>
 {% set og_title       = "Rates Visualizer — OBIXConfig Doctor" %}
-{% set og_description = "ดู stick response curve แบบ real-time รองรับ Betaflight ACTUAL, RCRATE/SuperRate และ KISS rates" %}
+{% set og_description = "ปรับและดู stick response curve แบบ real-time รองรับ ACTUAL / BF / KISS — แยก Roll Pitch Yaw ครบ" %}
 {% set og_url         = "https://configdoctor.onrender.com/rates-visualizer" %}
 {% include "partials/og_tags.html" %}
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 <style>
-/* ── Rates Visualizer Extra Styles ── */
-.rv-layout {
-  display: grid;
-  grid-template-columns: 340px 1fr;
-  gap: 18px;
-  align-items: start;
+:root {
+  --bg:#03050a; --bg2:#06090f; --card:#080d18; --card2:#0b1220;
+  --border:rgba(255,255,255,0.05); --borderG:rgba(0,232,122,0.18);
+  --text:#d4dde8; --muted:#4e5f74; --muted2:#8a9ab0;
+  --roll:#00e87a; --pitch:#4a9eff; --yaw:#ff9718;
+  --r-dim:rgba(0,232,122,0.08); --p-dim:rgba(74,158,255,0.08); --y-dim:rgba(255,151,24,0.08);
+  --font-d:'Rajdhani',sans-serif; --font-m:'Space Mono',monospace; --font-t:'Sarabun',sans-serif;
+  --radius:10px;
 }
-@media (max-width: 900px) { .rv-layout { grid-template-columns: 1fr; } }
-
-/* Rate Type Tabs */
-.rate-type-tabs {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 6px;
-  margin-bottom: 18px;
-}
-.rtt-btn {
-  padding: 9px 6px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  color: var(--muted);
-  font-family: var(--font-display);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: .04em;
-  cursor: pointer;
-  text-align: center;
-  transition: all .18s;
-}
-.rtt-btn:hover { border-color: var(--border-hi); color: var(--text); }
-.rtt-btn.active {
-  background: var(--green-dim);
-  border-color: rgba(16,196,122,0.4);
-  color: var(--green);
-  box-shadow: 0 0 12px rgba(16,196,122,0.12);
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow-x:hidden;}
+body{
+  font-family:var(--font-t); background:var(--bg); color:var(--text);
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(0,232,122,0.04) 0%,transparent 60%);
 }
 
-/* Axis tabs */
-.axis-tabs {
-  display: flex;
-  gap: 5px;
-  margin-bottom: 14px;
+/* ── Top Bar ── */
+.top-bar{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;gap:12px;padding:10px 20px;
+  background:rgba(3,5,10,0.95);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
 }
-.axis-tab {
-  flex: 1;
-  padding: 7px 6px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 700;
-  cursor: pointer;
-  text-align: center;
-  transition: all .15s;
+.back-btn{
+  display:flex;align-items:center;gap:6px;
+  font-family:var(--font-d);font-size:12px;font-weight:600;letter-spacing:.04em;
+  color:var(--muted2);text-decoration:none;
+  padding:5px 10px;border:1px solid var(--border);border-radius:6px;transition:all .18s;
 }
-.axis-tab[data-axis="roll"].active  { background: rgba(16,196,122,0.12); border-color: rgba(16,196,122,0.3); color: var(--green); }
-.axis-tab[data-axis="pitch"].active { background: rgba(88,166,255,0.12); border-color: rgba(88,166,255,0.3); color: var(--blue); }
-.axis-tab[data-axis="yaw"].active   { background: rgba(241,182,90,0.12); border-color: rgba(241,182,90,0.3); color: var(--gold); }
+.back-btn:hover{color:var(--roll);border-color:var(--borderG);}
+.tb-title{font-family:var(--font-d);font-size:15px;font-weight:700;letter-spacing:.08em;color:var(--text);}
+.tb-badge{
+  margin-left:auto;
+  font-family:var(--font-m);font-size:9px;color:var(--roll);
+  border:1px solid rgba(0,232,122,0.3);background:rgba(0,232,122,0.07);
+  padding:3px 10px;border-radius:100px;letter-spacing:.12em;
+  animation:pulse 3s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 16px rgba(0,232,122,0.25)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 
-/* Slider controls */
-.param-group {
-  margin-bottom: 16px;
-  padding: 14px;
-  background: rgba(0,0,0,0.18);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  transition: border-color .15s;
-}
-.param-group:hover { border-color: rgba(255,255,255,0.09); }
-.param-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 6px;
-}
-.param-name {
-  font-size: 0.83rem;
-  font-weight: 700;
-  color: var(--text);
-  font-family: var(--mono);
-}
-.param-val {
-  font-size: 1.0rem;
-  font-weight: 700;
-  color: var(--green);
-  font-family: var(--font-display);
-  min-width: 48px;
-  text-align: right;
-}
-.param-sub {
-  font-size: 0.72rem;
-  color: var(--muted);
-  margin-bottom: 8px;
-  line-height: 1.5;
-}
-.param-hint {
-  margin-top: 6px;
-  font-size: 0.70rem;
-  color: var(--muted);
-  opacity: 0.75;
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-.hint-tag {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 1px 7px;
-  font-size: 0.65rem;
-  letter-spacing: .03em;
-}
-.hint-tag.lo  { color: var(--blue);   border-color: rgba(88,166,255,0.2); }
-.hint-tag.mid { color: var(--green);  border-color: rgba(16,196,122,0.2); }
-.hint-tag.hi  { color: var(--red);    border-color: rgba(248,81,73,0.2); }
+/* ── Wrap ── */
+.wrap{max-width:1160px;margin:0 auto;padding:24px 18px 80px;}
 
-input[type="range"] {
-  width: 100%;
-  accent-color: var(--green);
-  cursor: pointer;
-  height: 4px;
-}
-input[type="range"]:focus { outline: none; }
+/* ── Hero ── */
+.hero{padding:24px 0 20px;display:flex;flex-direction:column;gap:8px;}
+.hero-ey{font-family:var(--font-d);font-size:10px;font-weight:600;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--roll);display:flex;align-items:center;gap:8px;}
+.hdot{width:5px;height:5px;border-radius:50%;background:var(--roll);animation:blink 2s ease-in-out infinite;}
+.hero h1{font-family:var(--font-d);font-size:clamp(24px,4vw,42px);font-weight:700;
+  line-height:1.1;letter-spacing:.02em;color:#f0f6ff;}
+.hero h1 em{font-style:normal;color:var(--roll);}
+.hero-sub{font-size:.88rem;color:var(--muted2);max-width:540px;}
+.htags{display:flex;gap:7px;flex-wrap:wrap;margin-top:4px;}
+.htag{font-family:var(--font-d);font-size:10px;font-weight:600;letter-spacing:.07em;
+  padding:2px 9px;border-radius:100px;border:1px solid;}
+.htag.r{color:var(--roll);border-color:rgba(0,232,122,0.3);background:rgba(0,232,122,0.06);}
+.htag.p{color:var(--pitch);border-color:rgba(74,158,255,0.3);background:rgba(74,158,255,0.06);}
+.htag.y{color:var(--yaw);border-color:rgba(255,151,24,0.3);background:rgba(255,151,24,0.06);}
 
-/* Sync toggle */
-.sync-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 14px;
-  padding: 8px 12px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  user-select: none;
-  font-size: 0.78rem;
-  color: var(--muted);
-  transition: all .15s;
-}
-.sync-toggle.on { border-color: rgba(16,196,122,0.25); color: var(--green); background: var(--green-dim); }
-.sync-toggle .toggle-dot {
-  width: 32px; height: 18px;
-  background: var(--border);
-  border-radius: 9px;
-  position: relative;
-  transition: background .2s;
-  flex-shrink: 0;
-}
-.sync-toggle.on .toggle-dot { background: var(--green); }
-.sync-toggle .toggle-dot::after {
-  content: '';
-  position: absolute;
-  width: 14px; height: 14px;
-  background: white;
-  border-radius: 50%;
-  top: 2px; left: 2px;
-  transition: transform .2s;
-}
-.sync-toggle.on .toggle-dot::after { transform: translateX(14px); }
+/* ── Main grid ── */
+.main-grid{display:grid;grid-template-columns:330px 1fr;gap:14px;align-items:start;}
+@media(max-width:860px){.main-grid{grid-template-columns:1fr;}}
 
-/* Stats */
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 7px;
-  margin-bottom: 14px;
-}
-@media (max-width: 540px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
-.stat-card {
-  background: rgba(0,0,0,0.22);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 10px 8px;
-  text-align: center;
-}
-.stat-val  { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: var(--green); }
-.stat-lbl  { font-size: 0.66rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-top: 2px; }
-.stat-sub  { font-size: 0.60rem; color: var(--muted); opacity: .65; }
+/* ── Panel ── */
+.pcard{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.psec{padding:13px 15px;border-bottom:1px solid var(--border);}
+.psec:last-child{border-bottom:none;}
+.sec-title{font-family:var(--font-d);font-size:10px;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
 
-/* Canvas */
-.chart-container {
-  position: relative;
-  background: #050810;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-canvas#rateCanvas {
-  width: 100%;
-  display: block;
-}
+/* ── Axis tabs ── */
+.axis-tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;}
+.atab{display:flex;align-items:center;justify-content:center;gap:5px;
+  padding:7px 4px;background:var(--bg2);border:1px solid var(--border);border-radius:7px;
+  font-family:var(--font-d);font-size:13px;font-weight:600;letter-spacing:.05em;
+  cursor:pointer;transition:all .18s;color:var(--muted2);}
+.atab .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.atab[data-a="roll"]  .dot{background:var(--roll);}
+.atab[data-a="pitch"] .dot{background:var(--pitch);}
+.atab[data-a="yaw"]   .dot{background:var(--yaw);}
+.atab[data-a="roll"].on {background:var(--r-dim);border-color:rgba(0,232,122,.35);color:var(--roll);box-shadow:0 0 16px rgba(0,232,122,.2);}
+.atab[data-a="pitch"].on{background:var(--p-dim);border-color:rgba(74,158,255,.35);color:var(--pitch);box-shadow:0 0 16px rgba(74,158,255,.2);}
+.atab[data-a="yaw"].on  {background:var(--y-dim);border-color:rgba(255,151,24,.35);color:var(--yaw);box-shadow:0 0 16px rgba(255,151,24,.2);}
+.link-row{display:flex;align-items:center;gap:7px;margin-top:10px;font-size:.8rem;color:var(--muted2);cursor:pointer;width:fit-content;}
+.link-row input{accent-color:var(--roll);width:14px;height:14px;cursor:pointer;}
 
-/* Legend */
-.chart-legend {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  padding: 8px 14px;
-  border-top: 1px solid var(--border);
-  background: rgba(0,0,0,0.15);
-}
-.leg-item { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--muted); }
-.leg-line { width: 20px; height: 3px; border-radius: 2px; }
+/* ── Rate type tabs ── */
+.rtabs{display:flex;gap:4px;}
+.rtab{flex:1;text-align:center;padding:6px 4px;background:var(--bg2);border:1px solid var(--border);
+  border-radius:6px;font-family:var(--font-d);font-size:12px;font-weight:600;
+  letter-spacing:.06em;cursor:pointer;transition:all .18s;color:var(--muted2);}
+.rtab.on{background:rgba(0,232,122,.1);border-color:rgba(0,232,122,.4);color:var(--roll);}
 
-/* Preset buttons */
-.preset-chips {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-bottom: 14px;
-}
-.preset-chip {
-  padding: 5px 12px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  color: var(--muted);
-  font-size: 0.75rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all .15s;
-}
-.preset-chip:hover { color: var(--text); border-color: var(--border-hi); }
+/* ── Slider ctrl ── */
+.cg{margin:9px 0;}
+.clabel{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.cname{font-family:var(--font-d);font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--muted2);text-transform:uppercase;}
+.cname .hint{font-size:10px;font-family:var(--font-t);text-transform:none;letter-spacing:0;color:var(--muted);font-weight:400;margin-left:5px;}
+.cval{font-family:var(--font-m);font-size:13px;font-weight:700;min-width:44px;text-align:right;}
+.cval.roll{color:var(--roll);} .cval.pitch{color:var(--pitch);} .cval.yaw{color:var(--yaw);}
 
-/* CLI box */
-.cli-out {
-  font-family: var(--mono);
-  font-size: 0.79rem;
-  background: #050810;
-  border: 1px solid rgba(16,196,122,0.12);
-  border-radius: var(--radius-md);
-  padding: 13px 15px;
-  color: #9dbfda;
-  line-height: 1.7;
-  white-space: pre;
-  overflow-x: auto;
-}
-.cli-comment { color: #445a4a; }
-.cli-cmd     { color: #10c47a; }
-.cli-key     { color: #58a6ff; }
-.cli-val     { color: #f1b65a; }
+input[type=range]{width:100%;height:4px;-webkit-appearance:none;appearance:none;
+  background:rgba(255,255,255,0.07);border-radius:4px;cursor:pointer;outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;
+  border:2px solid var(--bg);cursor:pointer;transition:transform .15s;}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.3);}
+input[type=range].rr::-webkit-slider-thumb{background:var(--roll);box-shadow:0 0 8px rgba(0,232,122,.5);}
+input[type=range].pr::-webkit-slider-thumb{background:var(--pitch);box-shadow:0 0 8px rgba(74,158,255,.5);}
+input[type=range].yr::-webkit-slider-thumb{background:var(--yaw);box-shadow:0 0 8px rgba(255,151,24,.5);}
 
-/* Guide section */
-.guide-section {
-  background: linear-gradient(135deg, #0c1810, #0a0e12);
-  border: 1px solid rgba(16,196,122,0.08);
-  border-radius: var(--radius-xl);
-  padding: 20px 22px;
-  margin-top: 18px;
-}
-.guide-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
-  margin-top: 14px;
-}
-.guide-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 14px;
-}
-.guide-card-title { font-size: 0.82rem; font-weight: 700; color: var(--text); margin-bottom: 5px; font-family: var(--mono); }
-.guide-card-body  { font-size: 0.80rem; color: var(--muted); line-height: 1.6; }
-.guide-card-body strong { color: var(--text); }
-.guide-example {
-  margin-top: 7px;
-  font-size: 0.73rem;
-  padding: 5px 9px;
-  border-radius: 6px;
-  border-left: 2px solid;
-  line-height: 1.5;
-}
-.guide-example.green  { background: var(--green-dim); border-color: var(--green); color: #a8dfc5; }
-.guide-example.blue   { background: var(--blue-dim);  border-color: var(--blue);  color: #a8c8f0; }
-.guide-example.gold   { background: var(--gold-dim);  border-color: var(--gold);  color: #e8d0a0; }
-.guide-example.red    { background: var(--red-dim);   border-color: var(--red);   color: #f0b0ae; }
+/* ── Stats ── */
+.sgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:4px;}
+.sbox{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 4px;text-align:center;}
+.snum{font-family:var(--font-m);font-size:15px;font-weight:700;line-height:1.2;display:block;}
+.slbl{font-size:9px;color:var(--muted);font-family:var(--font-d);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;display:block;}
 
-/* Feeling bar */
-.feeling-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-  padding: 8px 10px;
-  background: rgba(0,0,0,0.2);
-  border-radius: var(--radius-sm);
-  font-size: 0.72rem;
-}
-.feeling-track {
-  flex: 1; height: 6px;
-  background: var(--border);
-  border-radius: 3px;
-  position: relative;
-  overflow: hidden;
-}
-.feeling-fill {
-  position: absolute; left: 0; top: 0; height: 100%;
-  border-radius: 3px;
-  transition: width .25s ease, background .25s;
-}
+/* ── Personality ── */
+.pbar{display:flex;align-items:center;gap:10px;margin-top:8px;
+  padding:9px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;}
+.ptrack{flex:1;height:6px;background:linear-gradient(90deg,#3b82f6 0%,#00e87a 40%,#f1b65a 65%,#ff6b35 82%,#ff4444 100%);
+  border-radius:4px;position:relative;}
+.pneedle{position:absolute;top:50%;width:12px;height:12px;background:#fff;border:2px solid var(--bg);
+  border-radius:50%;transform:translate(-50%,-50%);transition:left .4s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 8px rgba(255,255,255,.4);}
+.plabel{font-family:var(--font-d);font-size:12px;font-weight:700;letter-spacing:.04em;min-width:86px;text-align:right;color:#fff;}
 
-/* Axis color accents per active axis */
-body[data-axis="pitch"] .param-val { color: var(--blue); }
-body[data-axis="pitch"] input[type="range"] { accent-color: var(--blue); }
-body[data-axis="yaw"] .param-val { color: var(--gold); }
-body[data-axis="yaw"] input[type="range"] { accent-color: var(--gold); }
+/* ── Presets ── */
+.prow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;}
+.pbtn{padding:6px 4px;text-align:center;background:var(--bg2);border:1px solid var(--border);
+  border-radius:6px;font-family:var(--font-d);font-size:11px;font-weight:600;
+  letter-spacing:.03em;cursor:pointer;transition:all .18s;color:var(--muted2);}
+.pbtn:hover{background:var(--r-dim);border-color:rgba(0,232,122,.3);color:var(--roll);}
 
-@media (max-width:600px) {
-  .rv-layout { gap: 12px; }
-  .stats-row { grid-template-columns: repeat(2,1fr); }
+/* ── CLI ── */
+.cli-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.cli-title{font-family:var(--font-d);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.cli-copy{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:5px;
+  background:transparent;border:1px solid var(--border);color:var(--muted2);
+  font-family:var(--font-d);font-size:10px;font-weight:600;letter-spacing:.06em;cursor:pointer;transition:all .18s;}
+.cli-copy:hover{border-color:rgba(0,232,122,.4);color:var(--roll);}
+.cli-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;
+  padding:11px;font-family:var(--font-m);font-size:11px;color:#79c0ff;
+  white-space:pre;overflow-x:auto;line-height:1.75;max-height:220px;overflow-y:auto;}
+
+/* ── Import ── */
+.import-ta{width:100%;min-height:58px;resize:vertical;background:var(--bg);
+  border:1px solid var(--border);border-radius:8px;padding:9px;
+  font-family:var(--font-m);font-size:11px;color:var(--muted2);outline:none;transition:border-color .18s;}
+.import-ta:focus{border-color:rgba(74,158,255,.4);}
+.import-btn{margin-top:7px;width:100%;padding:7px;background:rgba(74,158,255,.1);
+  border:1px solid rgba(74,158,255,.3);border-radius:6px;font-family:var(--font-d);font-size:11px;
+  font-weight:600;letter-spacing:.08em;color:var(--pitch);cursor:pointer;transition:all .18s;}
+.import-btn:hover{background:rgba(74,158,255,.18);}
+
+/* ── Canvas card ── */
+.ccard{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;position:sticky;top:60px;}
+.chead{display:flex;align-items:center;justify-content:space-between;padding:11px 15px;border-bottom:1px solid var(--border);}
+.chead-l{display:flex;align-items:center;gap:10px;}
+.ctitle{font-family:var(--font-d);font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;}
+.ovr-btns{display:flex;gap:5px;}
+.obtn{display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:5px;cursor:pointer;
+  font-family:var(--font-d);font-size:10px;font-weight:600;letter-spacing:.04em;border:1px solid;transition:all .18s;opacity:.38;}
+.obtn.on{opacity:1;}
+.obtn.roll {color:var(--roll);border-color:rgba(0,232,122,.3);background:rgba(0,232,122,.06);}
+.obtn.pitch{color:var(--pitch);border-color:rgba(74,158,255,.3);background:rgba(74,158,255,.06);}
+.obtn.yaw  {color:var(--yaw);border-color:rgba(255,151,24,.3);background:rgba(255,151,24,.06);}
+.ghost-btn{padding:4px 8px;border-radius:5px;cursor:pointer;font-family:var(--font-d);
+  font-size:10px;font-weight:600;letter-spacing:.04em;border:1px solid var(--border);
+  color:var(--muted2);background:transparent;transition:all .18s;}
+.ghost-btn:hover{border-color:rgba(255,255,255,.2);color:#fff;}
+.canvas-wrap{position:relative;}
+canvas#rv{width:100%;display:block;cursor:crosshair;}
+.tooltip{position:absolute;pointer-events:none;display:none;
+  background:rgba(3,5,10,.94);border:1px solid rgba(255,255,255,.12);
+  border-radius:7px;padding:8px 12px;font-family:var(--font-m);font-size:11px;
+  backdrop-filter:blur(8px);white-space:nowrap;z-index:10;}
+.tt-s{color:var(--muted2);margin-bottom:2px;font-size:10px;}
+.tt-v{font-weight:700;font-size:13px;}
+.cleg{display:flex;flex-wrap:wrap;gap:10px;padding:9px 15px;border-top:1px solid var(--border);}
+.li{display:flex;align-items:center;gap:6px;font-family:var(--font-d);font-size:10px;font-weight:600;letter-spacing:.04em;color:var(--muted2);}
+.ll{width:20px;height:2px;border-radius:2px;}
+.ll.dash{background:repeating-linear-gradient(90deg,#3b4260 0,#3b4260 4px,transparent 4px,transparent 8px);}
+
+/* ── Guide ── */
+.guide-section{margin-top:24px;}
+.g-head{font-family:var(--font-d);font-size:13px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted2);margin-bottom:14px;
+  padding-bottom:8px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;}
+.g-head::before{content:'';width:3px;height:16px;background:var(--roll);border-radius:2px;display:inline-block;}
+.ggrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:620px){.ggrid{grid-template-columns:1fr;}}
+.gc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.gch{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;
+  border-bottom:1px solid transparent;transition:border-color .18s;user-select:none;}
+.gch:hover{background:rgba(255,255,255,.02);}
+.gc.open .gch{border-color:var(--border);}
+.gi{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;font-size:15px;flex-shrink:0;}
+.gi.r{background:var(--r-dim);border:1px solid rgba(0,232,122,.2);}
+.gi.p{background:var(--p-dim);border:1px solid rgba(74,158,255,.2);}
+.gi.y{background:var(--y-dim);border:1px solid rgba(255,151,24,.2);}
+.gi.w{background:rgba(255,255,255,.04);border:1px solid var(--border);}
+.gcname{font-family:var(--font-d);font-size:13px;font-weight:700;letter-spacing:.03em;color:var(--text);}
+.gcsub{font-size:11px;color:var(--muted);}
+.gchev{margin-left:auto;color:var(--muted);transition:transform .25s;}
+.gc.open .gchev{transform:rotate(180deg);}
+.gcbody{display:none;padding:0 14px 14px;}
+.gc.open .gcbody{display:block;}
+.gcbody p{font-size:.87rem;color:var(--muted2);line-height:1.65;margin-bottom:8px;}
+.gcbody strong{color:var(--text);}
+.gtbl{width:100%;border-collapse:collapse;margin-top:8px;font-size:.82rem;}
+.gtbl th{font-family:var(--font-d);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);padding:5px 8px;border-bottom:1px solid var(--border);text-align:left;}
+.gtbl td{padding:5px 8px;color:var(--muted2);border-bottom:1px solid rgba(255,255,255,.03);}
+.gtbl td:first-child{font-family:var(--font-m);font-size:11px;color:var(--pitch);}
+.gtbl tr:last-child td{border-bottom:none;}
+.pill{display:inline-block;padding:1px 7px;border-radius:100px;font-size:10px;font-weight:600;
+  font-family:var(--font-d);letter-spacing:.04em;}
+.pill.g{background:rgba(0,232,122,.12);color:var(--roll);border:1px solid rgba(0,232,122,.25);}
+.pill.b{background:rgba(74,158,255,.12);color:var(--pitch);border:1px solid rgba(74,158,255,.25);}
+.pill.a{background:rgba(255,151,24,.12);color:var(--yaw);border:1px solid rgba(255,151,24,.25);}
+.pill.r{background:rgba(255,77,77,.12);color:#ff6b6b;border:1px solid rgba(255,77,77,.25);}
+.ptbl{width:100%;border-collapse:collapse;font-size:.82rem;}
+.ptbl th{font-family:var(--font-d);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);padding:6px 9px;border-bottom:1px solid var(--border);text-align:center;}
+.ptbl td{padding:6px 9px;text-align:center;border-bottom:1px solid rgba(255,255,255,.03);color:var(--muted2);}
+.ptbl td:first-child{text-align:left;font-weight:600;color:var(--text);}
+.ptbl tr:last-child td{border-bottom:none;}
+.ptbl .mv{font-family:var(--font-m);font-size:11px;color:var(--pitch);}
+
+/* ── Toast ── */
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(8px);
+  background:var(--roll);color:#001a08;padding:8px 20px;border-radius:20px;
+  font-family:var(--font-d);font-weight:700;font-size:12px;letter-spacing:.05em;
+  z-index:9999;opacity:0;transition:opacity .25s,transform .25s;
+  box-shadow:0 4px 24px rgba(0,232,122,.4);pointer-events:none;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── Responsive ── */
+@media(max-width:860px){.ccard{position:static;}}
+@media(max-width:600px){
+  .wrap{padding:14px 12px 56px;}
+  .hero h1{font-size:24px;}
+  .main-grid{grid-template-columns:1fr;}
 }
 </style>
-<script>
-(function(){
-  var t = localStorage.getItem('theme') || 'dark';
-  document.documentElement.className = t;
-  document.addEventListener('DOMContentLoaded', function(){ document.body.classList.add(t); });
-})();
-function toggleTheme(){
-  var isDark = document.body.classList.contains('dark');
-  document.body.classList.toggle('dark', !isDark);
-  document.body.classList.toggle('light', isDark);
-  localStorage.setItem('theme', isDark ? 'light' : 'dark');
-}
-function showToast(msg){
-  var t=document.getElementById('toast');
-  if(!t){t=document.createElement('div');t.id='toast';
-    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#10c47a;color:#021a0e;padding:8px 20px;border-radius:20px;font-weight:700;font-size:.87rem;z-index:9999;transition:opacity .3s;box-shadow:0 4px 20px rgba(16,196,122,.4);';
-    document.body.appendChild(t);}
-  t.textContent=msg;t.style.opacity='1';
-  clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity='0';},2000);
-}
-</script>
 </head>
-<body class="dark">
+<body>
 
-<!-- ── TOP BAR ── -->
 <div class="top-bar">
-  <div class="top-left">
-    <button id="hamburgerBtn" class="hamburger" aria-label="เปิดเมนู" aria-expanded="false">
-      <span class="lines" aria-hidden="true"><span></span><span></span><span></span></span>
-    </button>
-    <a href="/landing">
-      <img src="{{ url_for('static', filename='img/obix-logo.png') }}" class="logo" alt="OBIXConfig Doctor">
-    </a>
-  </div>
-  <div style="display:flex;align-items:center;gap:8px;">
-    <a href="/app" class="btn-ghost" style="padding:6px 12px;font-size:.82rem;">🏠 หน้าหลัก</a>
-    <button class="toggle-theme" onclick="toggleTheme()">🌗</button>
-  </div>
+  <a class="back-btn" href="/app">← Analyzer</a>
+  <span class="tb-title">RATES VISUALIZER</span>
+  <span class="tb-badge">LIVE</span>
 </div>
 
-<!-- ── OVERLAY + DRAWER ── -->
-<div id="overlay" class="overlay" aria-hidden="true"></div>
-<aside id="drawer" class="drawer" role="dialog" aria-modal="true" hidden>
-  <div class="drawer-header">
-    <div class="drawer-brand">
-      <div class="drawer-brand-icon">🚁</div>
-      <div>
-        <div class="drawer-brand-name">OBIX Config Doctor</div>
-        <div class="drawer-brand-sub">FPV Tuning Toolkit · v2.2</div>
-      </div>
-    </div>
-    <button id="closeDrawer" class="drawer-close">✕</button>
-  </div>
-  <nav class="drawer-nav">
-    <div class="drawer-group-label">หน้าหลัก</div>
-    <a class="drawer-link" href="/app"><span class="dl-icon-wrap green">🏠</span><span class="dl-body"><span class="dl-title">Drone Analyzer</span><span class="dl-meta">วิเคราะห์ PID · Filter · Motor</span></span></a>
-    <div class="drawer-divider"></div>
-    <div class="drawer-group-label">🔧 เครื่องมือ</div>
-    <a class="drawer-link" href="/motor-prop"><span class="dl-icon-wrap blue">🧭</span><span class="dl-body"><span class="dl-title">Motor × Prop Recommender</span></span></a>
-    <a class="drawer-link" href="/cli_surgeon"><span class="dl-icon-wrap gold">🩺</span><span class="dl-body"><span class="dl-title">CLI Surgeon</span></span></a>
-    <a class="drawer-link" href="/pid-advisor"><span class="dl-icon-wrap purple">💊</span><span class="dl-body"><span class="dl-title">PID Symptom Advisor</span></span><span class="dl-pill new">new</span></a>
-    <a class="drawer-link" href="/rpm-filter"><span class="dl-icon-wrap green">⚙️</span><span class="dl-body"><span class="dl-title">RPM Filter Calculator</span></span><span class="dl-pill new">new</span></a>
-    <a class="drawer-link active" href="/rates-visualizer"><span class="dl-icon-wrap blue">📈</span><span class="dl-body"><span class="dl-title">Rates Visualizer</span><span class="dl-meta">curve real-time + CLI command</span></span><span class="dl-pill new">new</span></a>
-    <div class="drawer-divider"></div>
-    <div class="drawer-group-label">⚡ ขั้นสูง</div>
-    <a class="drawer-link" href="/cli-comparator"><span class="dl-icon-wrap gold">⚖️</span><span class="dl-body"><span class="dl-title">CLI Diff Comparator</span></span><span class="dl-pill new">new</span></a>
-    <a class="drawer-link" href="/esc-checker"><span class="dl-icon-wrap gold">⚡</span><span class="dl-body"><span class="dl-title">ESC Compatibility Checker</span></span><span class="dl-pill new">new</span></a>
-    <a class="drawer-link" href="/blackbox"><span class="dl-icon-wrap blue">📊</span><span class="dl-body"><span class="dl-title">Blackbox CSV Analyzer</span></span><span class="dl-pill hot">NEW</span></a>
-    <div class="drawer-divider"></div>
-    <div class="drawer-group-label">📡 VTX & Signal</div>
-    <a class="drawer-link" href="/vtx"><span class="dl-icon-wrap green">📡</span><span class="dl-body"><span class="dl-title">VTX Bands & Channels</span></span></a>
-    <a class="drawer-link" href="/vtx-range"><span class="dl-icon-wrap blue">🏞️</span><span class="dl-body"><span class="dl-title">VTX Range Calculator</span></span></a>
-    <div class="drawer-divider"></div>
-    <div class="drawer-group-label">📚 แหล่งข้อมูล</div>
-    <a class="drawer-link" href="/downloads"><span class="dl-icon-wrap">📁</span><span class="dl-body"><span class="dl-title">ไฟล์ DIFF และ DUMP</span></span></a>
-    <a class="drawer-link" href="https://www.facebook.com/banmysanti/" target="_blank"><span class="dl-icon-wrap blue">📘</span><span class="dl-body"><span class="dl-title">เพจ OBIXConfig Lab</span></span><span class="dl-pill">open</span></a>
-    <a class="drawer-link" href="/about"><span class="dl-icon-wrap">ℹ️</span><span class="dl-body"><span class="dl-title">เกี่ยวกับ</span></span></a>
-    <a class="drawer-link" href="/changelog"><span class="dl-icon-wrap green">📝</span><span class="dl-body"><span class="dl-title">Changelog</span></span><span class="dl-pill">v2.2</span></a>
-  </nav>
-  <div class="drawer-footer"><div class="drawer-footer-text">OBIXConfig Doctor &nbsp;·&nbsp; <span class="drawer-footer-ver">v2.2</span><br>Developed for FPV community 🇹🇭</div></div>
-</aside>
+<div class="wrap">
 
-<!-- ── CONTENT ── -->
-<div class="container">
-
-  <!-- PAGE HERO -->
-  <div class="page-hero">
-    <div class="page-hero-label">OBIXConfig Doctor · Tools</div>
-    <div class="page-hero-title">📈 Rates Visualizer</div>
-    <div class="page-hero-sub">ดู stick response curve แบบ real-time · ปรับ slider แล้วเห็นผลทันที · สร้าง CLI command พร้อมใช้</div>
-    <div class="page-hero-badges">
-      <span class="hero-badge green">ACTUAL</span>
-      <span class="hero-badge blue">BF Legacy</span>
-      <span class="hero-badge gold">KISS</span>
+  <div class="hero">
+    <div class="hero-ey"><span class="hdot"></span> FPV FLIGHT COMPUTER</div>
+    <h1>Stick Response <em>Visualizer</em></h1>
+    <p class="hero-sub">ปรับ slider เห็น curve ทันที · แยก Roll / Pitch / Yaw · Import จาก CLI Paste · Copy CLI ออกได้เลย</p>
+    <div class="htags">
+      <span class="htag r">ACTUAL</span>
+      <span class="htag p">BETAFLIGHT</span>
+      <span class="htag y">KISS</span>
+      <span class="htag r">Per-Axis</span>
+      <span class="htag p">Ghost Compare</span>
+      <span class="htag y">CLI Export</span>
     </div>
   </div>
 
-  <!-- Presets -->
-  <div style="margin-bottom:16px;">
-    <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px;">⚡ โหลด Preset สำเร็จรูป</div>
-    <div class="preset-chips">
-      <button class="preset-chip" onclick="loadPreset('beginner')">🟢 Beginner</button>
-      <button class="preset-chip" onclick="loadPreset('freestyle')">🔵 Freestyle</button>
-      <button class="preset-chip" onclick="loadPreset('racing')">🔴 Racing</button>
-      <button class="preset-chip" onclick="loadPreset('longrange')">🟡 Long Range</button>
-      <button class="preset-chip" onclick="loadPreset('smooth')">⚪ Ultra Smooth</button>
+  <div class="main-grid">
+
+    <!-- ── LEFT CONTROLS ── -->
+    <div style="display:flex;flex-direction:column;gap:10px;">
+
+      <div class="pcard">
+        <!-- Axis -->
+        <div class="psec">
+          <div class="sec-title">Axis — เลือกแกน</div>
+          <div class="axis-tabs">
+            <div class="atab on" data-a="roll"  onclick="setAxis('roll')"><span class="dot"></span>ROLL</div>
+            <div class="atab"    data-a="pitch" onclick="setAxis('pitch')"><span class="dot"></span>PITCH</div>
+            <div class="atab"    data-a="yaw"   onclick="setAxis('yaw')"><span class="dot"></span>YAW</div>
+          </div>
+          <label class="link-row">
+            <input type="checkbox" id="lnk" onchange="update()">
+            <span>Link Roll + Pitch</span>
+          </label>
+        </div>
+
+        <!-- Rate type -->
+        <div class="psec">
+          <div class="sec-title">Rate Type</div>
+          <div class="rtabs">
+            <div class="rtab on" onclick="setRT('actual')">ACTUAL</div>
+            <div class="rtab"    onclick="setRT('bf')">BF Legacy</div>
+            <div class="rtab"    onclick="setRT('kiss')">KISS</div>
+          </div>
+        </div>
+
+        <!-- ACTUAL -->
+        <div class="psec" id="ca">
+          <div class="sec-title">Parameters</div>
+          <div class="cg">
+            <div class="clabel">
+              <span class="cname">RC Rate <span class="hint">ความไวตรงกลาง</span></span>
+              <span class="cval roll" id="vr">1.20</span>
+            </div>
+            <input type="range" id="rr" class="rr" min="0.01" max="2.55" step="0.01" value="1.20" oninput="update()">
+          </div>
+          <div class="cg">
+            <div class="clabel">
+              <span class="cname">Super Rate <span class="hint">ความไวขอบ</span></span>
+              <span class="cval roll" id="vs">0.70</span>
+            </div>
+            <input type="range" id="sr" class="rr" min="0.00" max="0.95" step="0.01" value="0.70" oninput="update()">
+          </div>
+          <div class="cg">
+            <div class="clabel">
+              <span class="cname">Expo <span class="hint">ความนุ่มตรงกลาง</span></span>
+              <span class="cval roll" id="ve">0.15</span>
+            </div>
+            <input type="range" id="er" class="rr" min="0.00" max="1.00" step="0.01" value="0.15" oninput="update()">
+          </div>
+        </div>
+
+        <!-- BF -->
+        <div class="psec" id="cb" style="display:none">
+          <div class="sec-title">Parameters</div>
+          <div class="cg">
+            <div class="clabel">
+              <span class="cname">RC Rate <span class="hint">ความไวพื้นฐาน</span></span>
+              <span class="cval roll" id="vbr">1.00</span>
+            </div>
+            <input type="range" id="bfr" class="rr" min="0.01" max="2.55" step="0.01" value="1.00" oninput="update()">
+          </div>
+          <div class="cg">
+            <div class="clabel">
+              <span class="cname">Super Rate <span class="hint">ขยาย rate ขอบ</span></span>
+              <span class="cval roll" id="vbs">0.70</span>
+            </div>
+            <input type="range" id="bfs" class="rr" min="0.00" max="0.95" step="0.01" value="0.70" oninput="update()">
+          </div>
+          <div class="cg">
+            <div class="clabel">
+              <span class="cname">RC Expo <span class="hint">dead zone กลาง</span></span>
+              <span class="cval roll" id="vbe">0.00</span>
+            </div>
+            <input type="range" id="bfe" class="rr" min="0.00" max="1.00" step="0.01" value="0.00" oninput="update()">
+          </div>
+        </div>
+
+        <!-- KISS -->
+        <div class="psec" id="ck" style="display:none">
+          <div class="sec-title">Parameters</div>
+          <div class="cg">
+            <div class="clabel">
+              <span class="cname">Rate <span class="hint">deg/s พื้นฐาน</span></span>
+              <span class="cval roll" id="vkr">60</span>
+            </div>
+            <input type="range" id="kr" class="rr" min="10" max="200" step="1" value="60" oninput="update()">
+          </div>
+          <div class="cg">
+            <div class="clabel">
+              <span class="cname">Acro+ <span class="hint">curve ขอบ</span></span>
+              <span class="cval roll" id="vka">0.02</span>
+            </div>
+            <input type="range" id="ka" class="rr" min="0.00" max="0.50" step="0.01" value="0.02" oninput="update()">
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="psec">
+          <div class="sec-title">Live Stats</div>
+          <div class="sgrid">
+            <div class="sbox"><span class="snum roll" id="smax">—</span><span class="slbl">Max deg/s</span></div>
+            <div class="sbox"><span class="snum roll" id="shalf">—</span><span class="slbl">50% Stick</span></div>
+            <div class="sbox"><span class="snum roll" id="sctr">—</span><span class="slbl">Center</span></div>
+          </div>
+          <div class="pbar">
+            <div class="ptrack"><div class="pneedle" id="pneedle" style="left:50%"></div></div>
+            <div class="plabel" id="plabel">Balanced</div>
+          </div>
+        </div>
+
+        <!-- Presets -->
+        <div class="psec">
+          <div class="sec-title">Presets</div>
+          <div class="prow">
+            <div class="pbtn" onclick="applyPreset('beginner')">🟢 Beginner</div>
+            <div class="pbtn" onclick="applyPreset('freestyle')">🔵 Freestyle</div>
+            <div class="pbtn" onclick="applyPreset('race')">🔴 Race</div>
+            <div class="pbtn" onclick="applyPreset('smooth')">🎬 Cinematic</div>
+            <div class="pbtn" onclick="applyPreset('longrange')">🟡 Long Range</div>
+            <div class="pbtn" onclick="applyPreset('locked')">🎯 Locked-in</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLI card -->
+      <div class="pcard">
+        <div class="psec">
+          <div class="cli-head">
+            <span class="cli-title">📋 CLI Output</span>
+            <button class="cli-copy" onclick="copyCLI()">COPY ALL</button>
+          </div>
+          <div class="cli-box" id="cliout">—</div>
+        </div>
+        <div class="psec">
+          <div class="sec-title">📥 Import จาก CLI Paste</div>
+          <textarea class="import-ta" id="impta" placeholder="วาง diff all หรือ CLI dump ที่นี่
+set roll_rc_rate = 120
+set roll_super_rate = 70
+set roll_expo = 15 ..."></textarea>
+          <button class="import-btn" onclick="parseCLI()">⚡ Parse &amp; Load</button>
+        </div>
+      </div>
+
     </div>
+
+    <!-- ── CANVAS ── -->
+    <div class="ccard">
+      <div class="chead">
+        <div class="chead-l">
+          <span class="ctitle">Response Curve</span>
+          <div class="ovr-btns">
+            <div class="obtn roll  on" data-a="roll"  onclick="togOvr('roll')">● R</div>
+            <div class="obtn pitch on" data-a="pitch" onclick="togOvr('pitch')">● P</div>
+            <div class="obtn yaw  on" data-a="yaw"   onclick="togOvr('yaw')">● Y</div>
+          </div>
+        </div>
+        <button class="ghost-btn" onclick="saveGhost()">👻 Save Ghost</button>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="rv"></canvas>
+        <div class="tooltip" id="tip">
+          <div class="tt-s" id="tts">Stick: 0%</div>
+          <div class="tt-v" id="ttv">—</div>
+        </div>
+      </div>
+      <div class="cleg">
+        <div class="li"><div class="ll" style="background:var(--roll);box-shadow:0 0 5px var(--roll)"></div>Roll</div>
+        <div class="li"><div class="ll" style="background:var(--pitch);box-shadow:0 0 5px var(--pitch)"></div>Pitch</div>
+        <div class="li"><div class="ll" style="background:var(--yaw);box-shadow:0 0 5px var(--yaw)"></div>Yaw</div>
+        <div class="li"><div class="ll dash"></div>Linear ref</div>
+        <div class="li" id="gleg" style="display:none"><div class="ll" style="background:#555"></div>Ghost</div>
+      </div>
+    </div>
+
   </div>
 
-  <div class="rv-layout">
-
-    <!-- ── LEFT PANEL: Controls ── -->
-    <div>
-
-      <!-- Rate Type -->
-      <div class="form-card" style="padding:18px 18px 14px;">
-        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:10px;">Rate Type</div>
-        <div class="rate-type-tabs">
-          <button class="rtt-btn active" id="tab-actual" onclick="setMode('actual')">ACTUAL<div style="font-size:.58rem;opacity:.7;font-family:var(--font);font-weight:400;margin-top:2px;">แนะนำ BF 4.2+</div></button>
-          <button class="rtt-btn" id="tab-bf" onclick="setMode('bf')">BF Legacy<div style="font-size:.58rem;opacity:.7;font-family:var(--font);font-weight:400;margin-top:2px;">RC+SuperRate</div></button>
-          <button class="rtt-btn" id="tab-kiss" onclick="setMode('kiss')">KISS<div style="font-size:.58rem;opacity:.7;font-family:var(--font);font-weight:400;margin-top:2px;">KISS/Quicksilver</div></button>
-        </div>
-
-        <!-- Axis Selector -->
-        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px;">แกนที่ปรับ</div>
-        <div class="axis-tabs">
-          <button class="axis-tab active" data-axis="roll"  onclick="setAxis('roll')">Roll</button>
-          <button class="axis-tab"        data-axis="pitch" onclick="setAxis('pitch')">Pitch</button>
-          <button class="axis-tab"        data-axis="yaw"   onclick="setAxis('yaw')">Yaw</button>
-        </div>
-
-        <!-- Sync toggle -->
-        <div class="sync-toggle on" id="syncToggle" onclick="toggleSync()">
-          <div class="toggle-dot"></div>
-          <span id="syncLabel">ซิงค์ Roll = Pitch (แนะนำ)</span>
-        </div>
-
-        <!-- ACTUAL controls -->
-        <div id="ctrl-actual">
-
-          <div class="param-group">
-            <div class="param-header">
-              <span class="param-name">RC Rate</span>
-              <span class="param-val" id="v-rc-rate-roll">1.00</span>
-            </div>
-            <div class="param-sub">
-              ⚡ <strong>ความไวตรงกลาง stick</strong> — ยิ่งสูง ยิ่งตอบสนองไวขึ้นตั้งแต่ stick เริ่มขยับ<br>
-              <span style="opacity:.7;">→ เพิ่มถ้ารู้สึก stick "หน่วง" หรือ "ไม่ตอบสนอง" ตรงกลาง</span>
-            </div>
-            <input type="range" id="rc-rate-roll" min="0.01" max="2.55" step="0.01" value="1.00" oninput="onSlider('rc-rate-roll','v-rc-rate-roll')">
-            <div class="param-hint">
-              <span class="hint-tag lo">0.5–0.8 = นุ่มมาก</span>
-              <span class="hint-tag mid">0.9–1.3 = ทั่วไป</span>
-              <span class="hint-tag hi">1.5+ = ว่องไวมาก</span>
-            </div>
-            <div class="feeling-bar">
-              <span style="font-size:.65rem;color:var(--muted);width:50px;">นุ่ม</span>
-              <div class="feeling-track"><div class="feeling-fill" id="feel-rc-rate" style="width:40%;background:var(--green);"></div></div>
-              <span style="font-size:.65rem;color:var(--muted);width:50px;text-align:right;">ไว</span>
-            </div>
-          </div>
-
-          <div class="param-group">
-            <div class="param-header">
-              <span class="param-name">Super Rate</span>
-              <span class="param-val" id="v-super-rate-roll">0.70</span>
-            </div>
-            <div class="param-sub">
-              🚀 <strong>ความไวขอบ stick (max rate)</strong> — ดัน curve ให้ชันขึ้นที่ stick เต็ม ทำให้ full flip เร็วขึ้น<br>
-              <span style="opacity:.7;">→ เพิ่มถ้าต้องการ flip/roll เร็ว ลดถ้า full stick ควบคุมยาก</span>
-            </div>
-            <input type="range" id="super-rate-roll" min="0.00" max="0.95" step="0.01" value="0.70" oninput="onSlider('super-rate-roll','v-super-rate-roll')">
-            <div class="param-hint">
-              <span class="hint-tag lo">0–0.4 = Cinematic</span>
-              <span class="hint-tag mid">0.5–0.7 = Freestyle</span>
-              <span class="hint-tag hi">0.8+ = Racing</span>
-            </div>
-            <div class="feeling-bar">
-              <span style="font-size:.65rem;color:var(--muted);width:50px;">ช้า</span>
-              <div class="feeling-track"><div class="feeling-fill" id="feel-super-rate" style="width:70%;background:var(--green);"></div></div>
-              <span style="font-size:.65rem;color:var(--muted);width:50px;text-align:right;">เร็ว</span>
-            </div>
-          </div>
-
-          <div class="param-group">
-            <div class="param-header">
-              <span class="param-name">Expo</span>
-              <span class="param-val" id="v-expo-roll">0.00</span>
-            </div>
-            <div class="param-sub">
-              🌊 <strong>ความโค้งของ curve ตรงกลาง</strong> — ทำให้ stick ตรงกลาง "อ่อน" ลง โดยไม่เปลี่ยน max rate<br>
-              <span style="opacity:.7;">→ เพิ่มถ้าต้องการถ่าย video นิ่ง หรือ stick ตรงกลางเดาใจยาก</span>
-            </div>
-            <input type="range" id="expo-roll" min="0.00" max="1.00" step="0.01" value="0.00" oninput="onSlider('expo-roll','v-expo-roll')">
-            <div class="param-hint">
-              <span class="hint-tag lo">0 = Linear</span>
-              <span class="hint-tag mid">0.1–0.4 = นุ่มกลาง</span>
-              <span class="hint-tag hi">0.5+ = นุ่มมาก</span>
-            </div>
-            <div class="feeling-bar">
-              <span style="font-size:.65rem;color:var(--muted);width:50px;">Linear</span>
-              <div class="feeling-track"><div class="feeling-fill" id="feel-expo" style="width:0%;background:var(--blue);"></div></div>
-              <span style="font-size:.65rem;color:var(--muted);width:50px;text-align:right;">นุ่มมาก</span>
-            </div>
-          </div>
-
-        </div><!-- /ctrl-actual -->
-
-        <!-- BF Legacy controls -->
-        <div id="ctrl-bf" style="display:none;">
-
-          <div class="param-group">
-            <div class="param-header">
-              <span class="param-name">RC Rate</span>
-              <span class="param-val" id="v-bf-rc">1.00</span>
-            </div>
-            <div class="param-sub">
-              ⚡ <strong>อัตราเร็วพื้นฐาน</strong> — ใน BF Legacy RC Rate &gt; 1.0 จะ boost max rate ด้วย<br>
-              <span style="opacity:.7;">→ BF Legacy: RC Rate มีผลต่อทั้ง center และ max rate</span>
-            </div>
-            <input type="range" id="bf-rc" min="0.01" max="2.55" step="0.01" value="1.00" oninput="onSlider('bf-rc','v-bf-rc')">
-            <div class="param-hint">
-              <span class="hint-tag lo">0.5–1.0 = ต่ำ</span>
-              <span class="hint-tag mid">1.0–1.5 = กลาง</span>
-              <span class="hint-tag hi">1.5+ = สูง</span>
-            </div>
-          </div>
-
-          <div class="param-group">
-            <div class="param-header">
-              <span class="param-name">Super Rate</span>
-              <span class="param-val" id="v-bf-super">0.70</span>
-            </div>
-            <div class="param-sub">🚀 <strong>Boost ขอบ stick</strong> — เช่นเดียวกับ ACTUAL แต่ผลต่าง curve ต่างกันเล็กน้อย</div>
-            <input type="range" id="bf-super" min="0.00" max="0.95" step="0.01" value="0.70" oninput="onSlider('bf-super','v-bf-super')">
-            <div class="param-hint">
-              <span class="hint-tag lo">0–0.5 = Cine</span>
-              <span class="hint-tag mid">0.5–0.7 = Freestyle</span>
-              <span class="hint-tag hi">0.75+ = Race</span>
-            </div>
-          </div>
-
-          <div class="param-group">
-            <div class="param-header">
-              <span class="param-name">RC Expo</span>
-              <span class="param-val" id="v-bf-expo">0.00</span>
-            </div>
-            <div class="param-sub">🌊 <strong>นุ่มกลาง stick</strong> — เหมือน Expo ใน ACTUAL mode</div>
-            <input type="range" id="bf-expo" min="0.00" max="1.00" step="0.01" value="0.00" oninput="onSlider('bf-expo','v-bf-expo')">
-          </div>
-
-        </div><!-- /ctrl-bf -->
-
-        <!-- KISS controls -->
-        <div id="ctrl-kiss" style="display:none;">
-
-          <div class="param-group">
-            <div class="param-header">
-              <span class="param-name">Rate</span>
-              <span class="param-val" id="v-kiss-rate">60 <span style="font-size:.65rem;">d/s</span></span>
-            </div>
-            <div class="param-sub">
-              ⚡ <strong>อัตราสูงสุด (deg/s)</strong> — ใน KISS ค่า Rate คือ deg/s ตรงๆ ไม่มี formula ซับซ้อน<br>
-              <span style="opacity:.7;">→ ตั้งตรงๆ ว่าต้องการ max rotation กี่ deg/s</span>
-            </div>
-            <input type="range" id="kiss-rate" min="10" max="1800" step="5" value="200" oninput="onSlider('kiss-rate','v-kiss-rate',true)">
-            <div class="param-hint">
-              <span class="hint-tag lo">100–300 = Beginner</span>
-              <span class="hint-tag mid">400–700 = Freestyle</span>
-              <span class="hint-tag hi">800+ = Racing</span>
-            </div>
-          </div>
-
-          <div class="param-group">
-            <div class="param-header">
-              <span class="param-name">Acro+</span>
-              <span class="param-val" id="v-kiss-acro">0.02</span>
-            </div>
-            <div class="param-sub">
-              🚀 <strong>Boost ขอบ stick</strong> — เพิ่ม rate เพิ่มเติมที่ full stick เหมือน Super Rate แต่ใช้ cubic curve<br>
-              <span style="opacity:.7;">→ ตั้ง 0 ถ้าต้องการ linear, เพิ่มเล็กน้อยเพื่อ boost flip</span>
-            </div>
-            <input type="range" id="kiss-acro" min="0.00" max="0.50" step="0.01" value="0.02" oninput="onSlider('kiss-acro','v-kiss-acro')">
-          </div>
-
-        </div><!-- /ctrl-kiss -->
-
-      </div><!-- /form-card controls -->
-
-      <!-- CLI Output -->
-      <div class="form-card" style="padding:16px 18px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-          <span style="font-size:.82rem;font-weight:700;color:var(--text);">📟 CLI Command</span>
-          <div style="display:flex;gap:6px;">
-            <button class="btn-small" onclick="copyCLI()">📋 Copy</button>
-          </div>
-        </div>
-        <div class="cli-out" id="cliOutput">—</div>
-        <p style="font-size:.72rem;color:var(--muted);margin-top:8px;">วางใน Betaflight CLI แล้วกด Enter ทีละบรรทัด</p>
-      </div>
-
-    </div><!-- /left panel -->
-
-    <!-- ── RIGHT PANEL: Chart ── -->
-    <div>
-
-      <!-- Stats -->
-      <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-val" id="stat-center">—</div>
-          <div class="stat-lbl">Center Sens.</div>
-          <div class="stat-sub">2% stick (deg/s)</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-val" id="stat-half">—</div>
-          <div class="stat-lbl">50% Stick</div>
-          <div class="stat-sub">deg/s</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-val" id="stat-75">—</div>
-          <div class="stat-lbl">75% Stick</div>
-          <div class="stat-sub">deg/s</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-val" id="stat-max">—</div>
-          <div class="stat-lbl">Max Rate</div>
-          <div class="stat-sub">full stick (deg/s)</div>
-        </div>
-      </div>
-
-      <!-- What the stats mean -->
-      <div style="background:rgba(88,166,255,0.05);border:1px solid rgba(88,166,255,0.12);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:14px;font-size:.78rem;color:var(--muted);line-height:1.65;">
-        💡 <strong style="color:var(--text);">อ่านค่าอย่างไร?</strong> &nbsp;
-        Center Sens. = ความไวเมื่อ stick เริ่มขยับ (ยิ่งสูง ยิ่งตอบสนองเร็ว) &nbsp;·&nbsp;
-        50% Stick = ถ้าบินในชีวิตจริง stick มักอยู่แถวนี้ &nbsp;·&nbsp;
-        Max Rate = ความเร็ว flip/roll สูงสุด
-      </div>
-
-      <!-- Canvas -->
-      <div class="chart-container">
-        <canvas id="rateCanvas"></canvas>
-        <div class="chart-legend">
-          <div class="leg-item"><div class="leg-line" style="background:#10c47a;"></div>Roll</div>
-          <div class="leg-item"><div class="leg-line" style="background:#58a6ff;border-top:2px dashed #58a6ff;height:0;"></div>Pitch</div>
-          <div class="leg-item"><div class="leg-line" style="background:#f1b65a;border-top:2px dashed #f1b65a;height:0;"></div>Yaw</div>
-          <div class="leg-item"><div class="leg-line" style="background:#444;border-top:1px dashed #555;height:0;"></div>Linear ref.</div>
-          <div class="leg-item" style="margin-left:auto;font-size:.68rem;opacity:.5;">X = Stick % · Y = deg/s</div>
-        </div>
-      </div>
-
-      <p style="font-size:.72rem;color:var(--muted);text-align:center;margin-top:10px;">ลาก cursor บน graph เพื่อดูค่า deg/s ที่ stick position นั้น</p>
-
-    </div><!-- /right panel -->
-  </div><!-- /rv-layout -->
-
-
-  <!-- ── GUIDE SECTION ── -->
+  <!-- ── GUIDE ── -->
   <div class="guide-section">
-    <div style="display:flex;align-items:center;gap:8px;">
-      <span style="font-size:1.1rem;">📖</span>
-      <div>
-        <div style="font-size:.95rem;font-weight:700;color:var(--text);">คู่มือ Rates — อ่านก่อนปรับ</div>
-        <div style="font-size:.78rem;color:var(--muted);">เข้าใจว่าแต่ละค่าส่งผลยังไงกับการบิน</div>
-      </div>
-    </div>
+    <div class="g-head">คู่มือการปรับ Rates — FPV Tuning Guide</div>
+    <div class="ggrid">
 
-    <div class="guide-grid">
-
-      <div class="guide-card">
-        <div class="guide-card-title">RC Rate คืออะไร?</div>
-        <div class="guide-card-body">
-          ควบคุม<strong>ความไว "ตรงกลาง" ของ stick</strong><br>
-          ถ้า RC Rate สูง → stick แค่ขยับนิดเดียวโดรนก็หมุนเร็วทันที<br>
-          ถ้า RC Rate ต่ำ → ต้องดัน stick ลึกกว่าจะรู้สึกตอบสนอง
-          <div class="guide-example green">🎮 Freestyle ทั่วไป: 1.0–1.2<br>มือใหม่แนะนำ: 0.6–0.8</div>
+      <div class="gc" id="g-rc">
+        <div class="gch" onclick="tog('rc')">
+          <div class="gi r">🎮</div>
+          <div><div class="gcname">RC Rate — ความไวตรงกลาง</div><div class="gcsub">Center sensitivity</div></div>
+          <span class="gchev">▾</span>
+        </div>
+        <div class="gcbody">
+          <p><strong>RC Rate</strong> กำหนด<strong>ความไวของ stick บริเวณตรงกลาง</strong> ใน ACTUAL mode ค่า 1.0 = 200 deg/s ที่ full stick (ก่อน super rate) ยิ่งสูงยิ่งตอบสนองไวตั้งแต่ต้น</p>
+          <p>ค่าต่ำ → นิ่ง คุมง่าย เหมาะมือใหม่ / ค่าสูง → ตอบสนองทันที เหมาะ freestyle/race</p>
+          <table class="gtbl">
+            <tr><th>ค่า</th><th>ความรู้สึก</th><th>เหมาะกับ</th></tr>
+            <tr><td>0.6–0.8</td><td><span class="pill b">Smooth</span></td><td>Cine / Beginner</td></tr>
+            <tr><td>1.0–1.2</td><td><span class="pill g">Balanced</span></td><td>Freestyle ทั่วไป</td></tr>
+            <tr><td>1.4–1.8</td><td><span class="pill a">Responsive</span></td><td>Aggressive</td></tr>
+            <tr><td>2.0+</td><td><span class="pill r">Race</span></td><td>Racing</td></tr>
+          </table>
         </div>
       </div>
 
-      <div class="guide-card">
-        <div class="guide-card-title">Super Rate คืออะไร?</div>
-        <div class="guide-card-body">
-          ดัน<strong>ความเร็วสูงสุด (max rate)</strong> ที่ full stick<br>
-          ทำให้ curve ชันขึ้นตรงขอบ stick — flip/roll เสร็จเร็วขึ้น<br>
-          แต่ถ้าสูงเกิน → full stick ควบคุมยาก เดาใจโดรนไม่ออก
-          <div class="guide-example blue">🏁 Racing: 0.75–0.85<br>Freestyle: 0.55–0.72</div>
+      <div class="gc" id="g-sr">
+        <div class="gch" onclick="tog('sr')">
+          <div class="gi r">📈</div>
+          <div><div class="gcname">Super Rate — ความไวขอบ stick</div><div class="gcsub">Edge sensitivity · curve shape</div></div>
+          <span class="gchev">▾</span>
+        </div>
+        <div class="gcbody">
+          <p><strong>Super Rate</strong> กำหนด<strong>ว่า curve โค้งแค่ไหน</strong> ยิ่งสูง = curve ชันขึ้นที่ขอบ stick ทำให้ full stick มี rate สูง แต่ตรงกลาง stick ยังนิ่ง</p>
+          <p>Freestyle นิยม super rate สูง (0.65–0.80) เพราะตรงกลาง hover นิ่ง แต่พอ full stick ทำ trick ได้เต็มที่</p>
+          <table class="gtbl">
+            <tr><th>ค่า</th><th>ผล</th><th>เหมาะกับ</th></tr>
+            <tr><td>0.0–0.3</td><td>Curve ตรง (linear)</td><td>Beginner / Racing</td></tr>
+            <tr><td>0.4–0.6</td><td>Curve เล็กน้อย</td><td>General Freestyle</td></tr>
+            <tr><td>0.65–0.80</td><td>Curve ชัดเจน</td><td>Freestyle / Trick</td></tr>
+            <tr><td>0.85+</td><td>Rate พุ่งที่ขอบมาก</td><td>Expert เท่านั้น</td></tr>
+          </table>
         </div>
       </div>
 
-      <div class="guide-card">
-        <div class="guide-card-title">Expo คืออะไร?</div>
-        <div class="guide-card-body">
-          <strong>ทำให้ตรงกลาง stick "นุ่ม" ขึ้น</strong> โดยไม่เปลี่ยน max rate<br>
-          curve จะแบนกว่าตรงกลาง แล้วชันขึ้นที่ขอบ<br>
-          เหมาะสำหรับถ่าย video หรือมือใหม่ที่ต้องการ stick ตรงกลางนุ่ม
-          <div class="guide-example gold">🎬 Cinematic/LR: 0.2–0.5<br>Freestyle: 0–0.2</div>
+      <div class="gc" id="g-ex">
+        <div class="gch" onclick="tog('ex')">
+          <div class="gi p">🪄</div>
+          <div><div class="gcname">Expo — ความนุ่มตรงกลาง</div><div class="gcsub">Dead zone feel · center softness</div></div>
+          <span class="gchev">▾</span>
+        </div>
+        <div class="gcbody">
+          <p><strong>Expo</strong> ทำให้ <strong>stick center ตอบสนองช้าลง</strong> แต่ไม่ลด max rate เหมาะถ้ารู้สึกว่าโดรน "กระตุก" เวลาขยับ stick น้อยๆ</p>
+          <p><strong>ข้อควรระวัง:</strong> Expo &gt; 0.5 ทำให้ dead zone กว้างเกิน นักบินจะรู้สึกว่า stick "ไม่ตอบสนอง" จนดันมากกว่าที่ต้องการ</p>
+          <table class="gtbl">
+            <tr><th>ค่า</th><th>ผล</th><th>เหมาะกับ</th></tr>
+            <tr><td>0.0</td><td>ไม่มี expo (linear)</td><td>Racing / ผู้ชำนาญ</td></tr>
+            <tr><td>0.1–0.2</td><td>Center นุ่มเล็กน้อย</td><td>Freestyle ทั่วไป</td></tr>
+            <tr><td>0.3–0.4</td><td>Center นุ่มมาก</td><td>Cinematic / เริ่มต้น</td></tr>
+            <tr><td>0.5+</td><td>Dead zone กว้าง</td><td>ไม่แนะนำ</td></tr>
+          </table>
         </div>
       </div>
 
-      <div class="guide-card">
-        <div class="guide-card-title">ACTUAL vs BF Legacy?</div>
-        <div class="guide-card-body">
-          <strong>ACTUAL</strong> (BF 4.2+) — RC Rate กำหนด deg/s ตรงๆ ที่ center, Super Rate กำหนด max rate แยกกัน → ตั้งค่าง่ายกว่า เป็นอิสระต่อกัน<br><br>
-          <strong>BF Legacy</strong> — RC Rate &gt; 1.0 จะ boost max ด้วย ทำให้ทั้ง center และ max เปลี่ยนพร้อมกัน → คาดเดาผลยากกว่า
-          <div class="guide-example green">✅ แนะนำ: ใช้ ACTUAL เสมอถ้าใช้ BF 4.2+</div>
+      <div class="gc" id="g-ax">
+        <div class="gch" onclick="tog('ax')">
+          <div class="gi w">🔄</div>
+          <div><div class="gcname">Roll / Pitch / Yaw</div><div class="gcsub">ทำไมต้องปรับแยกแต่ละแกน</div></div>
+          <span class="gchev">▾</span>
+        </div>
+        <div class="gcbody">
+          <p><strong>Roll</strong> (หมุนซ้าย-ขวา): rate สูงสุด โดรน aerodynamic ดีที่สุดแกนนี้ — RC Rate สูง Super Rate สูงได้</p>
+          <p><strong>Pitch</strong> (เอียงหน้า-หลัง): คล้าย Roll แต่บางโดรนรู้สึก "หนัก" กว่า — ปรับใกล้เคียง Roll หรือน้อยกว่าเล็กน้อย</p>
+          <p><strong>Yaw</strong> (หันซ้าย-ขวา): ช้ากว่าเสมอ — RC Rate 0.6–0.9, Super Rate 0.3–0.5 เพื่อ yaw นิ่ง ไม่ drift</p>
+          <p style="margin-top:6px;color:var(--yaw);">💡 เริ่มจาก Link Roll+Pitch ก่อน แล้วค่อยปรับ Yaw แยก</p>
         </div>
       </div>
 
-      <div class="guide-card">
-        <div class="guide-card-title">Roll vs Pitch vs Yaw?</div>
-        <div class="guide-card-body">
-          <strong>Roll</strong> = หมุนซ้าย/ขวา (aileron) — มักตั้งเท่ากับ Pitch<br>
-          <strong>Pitch</strong> = ก้ม/เงยหน้า (elevator) — ส่วนใหญ่ = Roll<br>
-          <strong>Yaw</strong> = หันซ้าย/ขวา (rudder) — ควรต่ำกว่า Roll/Pitch เสมอ เพราะ Yaw ตอบสนองช้ากว่า
-          <div class="guide-example blue">📐 Yaw max rate แนะนำ: ≤ 60% ของ Roll max rate</div>
+      <div class="gc" id="g-cmp">
+        <div class="gch" onclick="tog('cmp')">
+          <div class="gi y">⚡</div>
+          <div><div class="gcname">ตารางเปรียบเทียบ Presets</div><div class="gcsub">แต่ละสไตล์ต่างกันยังไง</div></div>
+          <span class="gchev">▾</span>
+        </div>
+        <div class="gcbody">
+          <table class="ptbl">
+            <tr><th>Profile</th><th>RC Rate</th><th>Super Rate</th><th>Expo</th><th>~Max</th></tr>
+            <tr><td>🟢 Beginner</td><td class="mv">0.80</td><td class="mv">0.40</td><td class="mv">0.10</td><td class="mv">380</td></tr>
+            <tr><td>🎬 Cinematic</td><td class="mv">0.70</td><td class="mv">0.20</td><td class="mv">0.35</td><td class="mv">280</td></tr>
+            <tr><td>🟡 Long Range</td><td class="mv">1.00</td><td class="mv">0.45</td><td class="mv">0.20</td><td class="mv">520</td></tr>
+            <tr><td>🔵 Freestyle</td><td class="mv">1.20</td><td class="mv">0.70</td><td class="mv">0.15</td><td class="mv">720</td></tr>
+            <tr><td>🎯 Locked-in</td><td class="mv">1.50</td><td class="mv">0.72</td><td class="mv">0.00</td><td class="mv">860</td></tr>
+            <tr><td>🔴 Race</td><td class="mv">1.80</td><td class="mv">0.80</td><td class="mv">0.00</td><td class="mv">1200</td></tr>
+          </table>
         </div>
       </div>
 
-      <div class="guide-card">
-        <div class="guide-card-title">ค่าเริ่มต้นสำหรับแต่ละสไตล์?</div>
-        <div class="guide-card-body">
-          ลอง Preset ด้านบน แล้วบินทดสอบ 1 กระบอก จดไว้ว่ารู้สึกอะไร:<br>
-          • <strong>หน่วง / ช้า</strong> → เพิ่ม RC Rate<br>
-          • <strong>full stick ควบคุมยาก</strong> → ลด Super Rate<br>
-          • <strong>stick กลาง twitchy</strong> → เพิ่ม Expo
-          <div class="guide-example red">⚠️ อย่าปรับครั้งละมากเกิน ±0.1 เพื่อรู้สึกถึงความต่าง</div>
+      <div class="gc" id="g-steps">
+        <div class="gch" onclick="tog('steps')">
+          <div class="gi w">🛠️</div>
+          <div><div class="gcname">ขั้นตอน tune Rates</div><div class="gcsub">เริ่มต้นยังไงไม่ให้งง</div></div>
+          <span class="gchev">▾</span>
+        </div>
+        <div class="gcbody">
+          <p><strong>Step 1:</strong> เลือก Preset ที่ใกล้เคียงสไตล์ก่อน → กด Apply</p>
+          <p><strong>Step 2:</strong> บิน Hover + figure-8 ช้าๆ — สังเกตว่า stick หนัก/เบาเกินไหม</p>
+          <p><strong>Step 3:</strong> Center กระตุก → เพิ่ม Expo ทีละ 0.05</p>
+          <p><strong>Step 4:</strong> Full stick rate ไม่พอ → เพิ่ม Super Rate ทีละ 0.05</p>
+          <p><strong>Step 5:</strong> อยากเร็วขึ้นทั้งหมด → เพิ่ม RC Rate ทีละ 0.1</p>
+          <p><strong>Step 6:</strong> ใช้ 👻 Save Ghost ก่อนปรับ เพื่อดู diff curve ว่าเปลี่ยนไปแค่ไหน</p>
+          <p style="margin-top:6px;color:var(--yaw);">⚠️ ปรับทีละค่า ทดสอบบินก่อนปรับต่อ</p>
         </div>
       </div>
 
     </div>
   </div>
 
-  <div class="version-note" style="margin-top:20px;">OBIXConfig Doctor • v2.2 — Rates Visualizer</div>
-
-</div><!-- /container -->
+</div>
+<div id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════════════════
-let mode     = 'actual';
-let curAxis  = 'roll';
-let syncRP   = true;
-let hoverX   = null;  // mouse position on canvas
+/* ── State ── */
+let rt = 'actual', curAx = 'roll';
+let ovr = {roll:true,pitch:true,yaw:true};
+let ghost = null;
 
-// Per-axis values: [rc_rate, super_rate, expo]
-const axisVals = {
-  roll:  { actual: [1.00, 0.70, 0.00], bf: [1.00, 0.70, 0.00], kiss: [200, 0.02] },
-  pitch: { actual: [1.00, 0.70, 0.00], bf: [1.00, 0.70, 0.00], kiss: [200, 0.02] },
-  yaw:   { actual: [0.70, 0.50, 0.00], bf: [0.70, 0.50, 0.00], kiss: [100, 0.00] }
+const profiles = {
+  roll:  {rr:1.20,sr:0.70,er:0.15,br:1.00,bs:0.70,be:0.00,kr:60,ka:0.02},
+  pitch: {rr:1.20,sr:0.70,er:0.15,br:1.00,bs:0.70,be:0.00,kr:60,ka:0.02},
+  yaw:   {rr:0.80,sr:0.40,er:0.10,br:0.80,bs:0.40,be:0.00,kr:40,ka:0.01},
 };
 
-const PRESETS = {
-  beginner:   { actual: [0.70, 0.40, 0.25], yaw_actual: [0.50, 0.30, 0.10] },
-  freestyle:  { actual: [1.00, 0.70, 0.05], yaw_actual: [0.70, 0.45, 0.00] },
-  racing:     { actual: [1.20, 0.80, 0.00], yaw_actual: [0.80, 0.60, 0.00] },
-  longrange:  { actual: [0.60, 0.30, 0.35], yaw_actual: [0.45, 0.20, 0.20] },
-  smooth:     { actual: [0.50, 0.20, 0.50], yaw_actual: [0.40, 0.10, 0.35] }
+const COL = {roll:'#00e87a',pitch:'#4a9eff',yaw:'#ff9718'};
+const GLW = {roll:'rgba(0,232,122,',pitch:'rgba(74,158,255,',yaw:'rgba(255,151,24,'};
+
+/* ── Rate Math ── */
+function actRate(s,rr,sr,er){
+  const e=er>0?s*(1-er)+er*Math.pow(s,3):s;
+  return Math.min(rr*200*e/Math.max(1e-5,1-sr*e),1998);
+}
+function bfRate(s,rr,sr,er){
+  const e=er>0?s*(1-er)+er*Math.pow(s,3):s;
+  const b=rr>1?(rr-1)+rr*rr:rr;
+  return Math.min(b*e*500/Math.max(1e-5,1-sr*e),1998);
+}
+function ksRate(s,r,a){return r*s+a*Math.pow(s,3)*1998;}
+
+function getAxisRate(ax,s){
+  const p=profiles[ax];
+  if(rt==='actual') return actRate(s,p.rr,p.sr,p.er);
+  if(rt==='bf')     return bfRate(s,p.br,p.bs,p.be);
+  return ksRate(s,p.kr,p.ka);
+}
+function getRate(s){return getAxisRate(curAx,s);}
+
+/* ── setAxis ── */
+function setAxis(ax){
+  saveSl(); curAx=ax; loadSl(ax);
+  document.querySelectorAll('.atab').forEach(t=>t.classList.toggle('on',t.dataset.a===ax));
+  const c=ax==='roll'?'rr':ax==='pitch'?'pr':'yr';
+  document.querySelectorAll('input[type=range]').forEach(i=>{i.className=i.className.replace(/\b(rr|pr|yr)\b/,c);});
+  document.querySelectorAll('.cval').forEach(v=>{v.className=v.className.replace(/\b(roll|pitch|yaw)\b/,ax);});
+  document.querySelectorAll('.snum').forEach(v=>{v.className=v.className.replace(/\b(roll|pitch|yaw)\b/,ax);});
+  update();
+}
+
+function setRT(t){
+  rt=t;
+  document.querySelectorAll('.rtab').forEach((el,i)=>el.classList.toggle('on',['actual','bf','kiss'][i]===t));
+  document.getElementById('ca').style.display=t==='actual'?'':'none';
+  document.getElementById('cb').style.display=t==='bf'?'':'none';
+  document.getElementById('ck').style.display=t==='kiss'?'':'none';
+  update();
+}
+
+function saveSl(){
+  const p=profiles[curAx];
+  const g=id=>parseFloat(document.getElementById(id).value);
+  p.rr=g('rr');p.sr=g('sr');p.er=g('er');
+  p.br=g('bfr');p.bs=g('bfs');p.be=g('bfe');
+  p.kr=g('kr');p.ka=g('ka');
+}
+function loadSl(ax){
+  const p=profiles[ax];
+  const s=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v;};
+  s('rr',p.rr);s('sr',p.sr);s('er',p.er);
+  s('bfr',p.br);s('bfs',p.bs);s('bfe',p.be);
+  s('kr',p.kr);s('ka',p.ka);
+}
+
+function update(){
+  saveSl();
+  if(document.getElementById('lnk').checked){
+    const r=profiles.roll;
+    Object.assign(profiles.pitch,{rr:r.rr,sr:r.sr,er:r.er,br:r.br,bs:r.bs,be:r.be,kr:r.kr,ka:r.ka});
+  }
+  updateLabels(); updateStats(); updatePersonality(); updateCLI(); draw();
+}
+
+function updateLabels(){
+  const p=profiles[curAx];
+  const f=(id,v,dp=2)=>{const el=document.getElementById(id);if(el)el.textContent=parseFloat(v).toFixed(dp);};
+  f('vr',p.rr);f('vs',p.sr);f('ve',p.er);
+  f('vbr',p.br);f('vbs',p.bs);f('vbe',p.be);
+  f('vkr',p.kr,0);f('vka',p.ka);
+}
+
+function updateStats(){
+  const s=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  s('smax',Math.round(getRate(1.0)));
+  s('shalf',Math.round(getRate(0.5)));
+  s('sctr',Math.round(getRate(0.04)));
+}
+
+function updatePersonality(){
+  const mx=getRate(1.0);
+  const lbls=['Cinematic','Smooth','Beginner','Balanced','Freestyle','Aggressive','Race'];
+  const thr=[200,320,420,540,680,860];
+  const idx=Math.min(thr.filter(t=>mx>t).length,lbls.length-1);
+  document.getElementById('pneedle').style.left=Math.min((mx/1200)*100,100)+'%';
+  document.getElementById('plabel').textContent=lbls[idx];
+}
+
+function updateCLI(){
+  saveSl();
+  const f=v=>String(Math.round(parseFloat(v)*100));
+  const fk=v=>String(Math.round(parseFloat(v)));
+  let lines=[];
+  if(rt==='actual'){
+    lines=['# OBIXConfig — ACTUAL Rates','set rates_type = ACTUAL',''];
+    for(const ax of ['roll','pitch','yaw']){
+      const p=profiles[ax];
+      lines.push(`# ${ax.toUpperCase()}`);
+      lines.push(`set ${ax}_rc_rate    = ${f(p.rr)}`);
+      lines.push(`set ${ax}_super_rate = ${f(p.sr)}`);
+      lines.push(`set ${ax}_expo       = ${f(p.er)}`);
+    }
+  }else if(rt==='bf'){
+    lines=['# OBIXConfig — BETAFLIGHT Rates','set rates_type = BETAFLIGHT',''];
+    for(const ax of ['roll','pitch','yaw']){
+      const p=profiles[ax];
+      lines.push(`# ${ax.toUpperCase()}`);
+      lines.push(`set ${ax}_rc_rate    = ${f(p.br)}`);
+      lines.push(`set ${ax}_super_rate = ${f(p.bs)}`);
+      lines.push(`set ${ax}_expo       = ${f(p.be)}`);
+    }
+  }else{
+    lines=['# OBIXConfig — KISS Rates','set rates_type = KISS',''];
+    for(const ax of ['roll','pitch','yaw']){
+      const p=profiles[ax];
+      lines.push(`set ${ax}_rc_rate    = ${fk(p.kr)}`);
+      lines.push(`set ${ax}_super_rate = ${f(p.ka)}`);
+    }
+  }
+  lines.push('','save');
+  document.getElementById('cliout').textContent=lines.join('\n');
+}
+
+function copyCLI(){
+  navigator.clipboard.writeText(document.getElementById('cliout').textContent)
+    .then(()=>toast('✓ คัดลอก CLI แล้ว'));
+}
+
+/* ── Import ── */
+function parseCLI(){
+  const raw=document.getElementById('impta').value;
+  if(!raw.trim()){toast('⚠️ ยังไม่ได้วาง CLI');return;}
+  const g=k=>{const m=raw.match(new RegExp('set\\s+'+k+'\\s*=\\s*([\\d.]+)','i'));return m?parseFloat(m[1]):null;};
+  const tm=raw.match(/set\s+rates_type\s*=\s*(\w+)/i);
+  if(tm)setRT(tm[1].toLowerCase().replace('betaflight','bf'));
+  for(const ax of['roll','pitch','yaw']){
+    const p=profiles[ax];
+    const rc=g(`${ax}_rc_rate`),sr=g(`${ax}_super_rate`),ex=g(`${ax}_expo`);
+    if(rc!==null){
+      if(rt==='actual'){p.rr=rc/100;p.sr=(sr||0)/100;p.er=(ex||0)/100;}
+      else if(rt==='bf'){p.br=rc/100;p.bs=(sr||0)/100;p.be=(ex||0)/100;}
+      else{p.kr=rc;p.ka=(sr||0)/100;}
+    }
+  }
+  loadSl(curAx);update();
+  document.getElementById('impta').value='';
+  toast('✅ โหลด Rates สำเร็จ');
+}
+
+/* ── Presets ── */
+const PRESETS={
+  beginner: {rr:0.80,sr:0.40,er:0.10},
+  freestyle:{rr:1.20,sr:0.70,er:0.15},
+  race:     {rr:1.80,sr:0.80,er:0.00},
+  smooth:   {rr:0.70,sr:0.20,er:0.35},
+  longrange:{rr:1.00,sr:0.45,er:0.20},
+  locked:   {rr:1.50,sr:0.72,er:0.00},
 };
-
-// ═══════════════════════════════════════════════════
-//  RATE MATH
-// ═══════════════════════════════════════════════════
-function actualRate(stick, rcRate, superRate, expo) {
-  const s = stick;
-  const es = expo > 0 ? s*(1-expo) + expo*Math.pow(s,3) : s;
-  const center = rcRate * 200;
-  return Math.min(center * es / (1 - superRate * es), 1998);
-}
-function bfRate(stick, rcRate, superRate, expo) {
-  const s = stick;
-  const es = expo > 0 ? s*(1-expo) + expo*Math.pow(s,3) : s;
-  const base = rcRate > 1.0 ? (rcRate-1) + rcRate*rcRate : rcRate;
-  return Math.min(base * es * 500 / (1.0 - superRate * es), 1998);
-}
-function kissRate(stick, rate, acro) {
-  return rate * stick + acro * Math.pow(stick, 3) * 1998;
-}
-
-function getRate(stick, axis) {
-  const ax = axis || 'roll';
-  if (mode === 'actual') {
-    const [rc,sr,ex] = axisVals[ax].actual;
-    return actualRate(stick, rc, sr, ex);
-  } else if (mode === 'bf') {
-    const [rc,sr,ex] = axisVals[ax].bf;
-    return bfRate(stick, rc, sr, ex);
-  } else {
-    const [r,a] = axisVals[ax].kiss;
-    return kissRate(stick, r, a);
+function applyPreset(n){
+  const pr=PRESETS[n];if(!pr)return;
+  for(const ax of['roll','pitch']){
+    Object.assign(profiles[ax],{rr:pr.rr,sr:pr.sr,er:pr.er,br:pr.rr,bs:pr.sr,be:pr.er});
   }
+  profiles.yaw.rr=parseFloat((pr.rr*0.65).toFixed(2));
+  profiles.yaw.sr=parseFloat((pr.sr*0.55).toFixed(2));
+  profiles.yaw.er=pr.er;
+  profiles.yaw.br=profiles.yaw.rr;profiles.yaw.bs=profiles.yaw.sr;
+  loadSl(curAx);update();
+  toast('✅ Preset: '+n);
 }
 
-// ═══════════════════════════════════════════════════
-//  CANVAS DRAW
-// ═══════════════════════════════════════════════════
-const AXIS_COLORS = { roll:'#10c47a', pitch:'#58a6ff', yaw:'#f1b65a' };
+/* ── Ghost ── */
+function saveGhost(){
+  ghost=JSON.parse(JSON.stringify(profiles));
+  document.getElementById('gleg').style.display='flex';
+  toast('👻 บันทึก Ghost curve');
+  draw();
+}
 
-function drawCurve() {
-  const canvas = document.getElementById('rateCanvas');
-  const ctx    = canvas.getContext('2d');
-  const dpr    = window.devicePixelRatio || 1;
+/* ── Overlay ── */
+function togOvr(ax){
+  ovr[ax]=!ovr[ax];
+  const b=document.querySelector(`.obtn[data-a="${ax}"]`);
+  if(b)b.classList.toggle('on',ovr[ax]);
+  draw();
+}
 
-  // Responsive sizing
-  const rect = canvas.parentElement.getBoundingClientRect();
-  const W0   = Math.floor(rect.width);
-  const H0   = Math.floor(Math.min(W0 * 0.62, 420));
-  if (canvas.width !== W0 * dpr) {
-    canvas.width  = W0 * dpr;
-    canvas.height = H0 * dpr;
-    canvas.style.width  = W0 + 'px';
-    canvas.style.height = H0 + 'px';
-    ctx.scale(dpr, dpr);
+/* ── Draw ── */
+function draw(){
+  const cv=document.getElementById('rv');if(!cv)return;
+  const rc=cv.getBoundingClientRect();
+  const W=Math.max(Math.round(rc.width),300);
+  const H=Math.round(W*0.60);
+  cv.width=W;cv.height=H;
+  const ctx=cv.getContext('2d');
+  const PL=50,PR=16,PT=16,PB=42;
+  const gW=W-PL-PR,gH=H-PT-PB;
+
+  ctx.fillStyle='#03050a';ctx.fillRect(0,0,W,H);
+
+  let maxR=100;
+  for(const ax of['roll','pitch','yaw'])if(ovr[ax])maxR=Math.max(maxR,getAxisRate(ax,1));
+  if(ghost)for(const ax of['roll','pitch','yaw']){
+    const p=ghost[ax];let r;
+    if(rt==='actual')r=actRate(1,p.rr,p.sr,p.er);
+    else if(rt==='bf')r=bfRate(1,p.br,p.bs,p.be);
+    else r=ksRate(1,p.kr,p.ka);
+    maxR=Math.max(maxR,r);
   }
-  const W = W0, H = H0;
-  const PL = 52, PR = 18, PT = 18, PB = 38;
+  maxR=Math.ceil(maxR/100)*100;
 
-  // All axis max rates
-  const maxRates = ['roll','pitch','yaw'].map(ax => getRate(1.0, ax));
-  const maxRate  = Math.ceil(Math.max(...maxRates, 200) / 100) * 100;
-
-  ctx.clearRect(0, 0, W, H);
-
-  // Background
-  ctx.fillStyle = '#050810';
-  ctx.fillRect(0, 0, W, H);
+  const tx=s=>PL+gW*s;
+  const ty=r=>H-PB-gH*Math.min(r,maxR)/maxR;
 
   // Grid
-  const gridLines = 5;
-  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
-  ctx.lineWidth = 1;
-  for (let i = 0; i <= gridLines; i++) {
-    const y = PT + (H-PT-PB)*i/gridLines;
-    ctx.beginPath(); ctx.moveTo(PL,y); ctx.lineTo(W-PR,y); ctx.stroke();
-  }
-  for (let i = 0; i <= 10; i++) {
-    const x = PL + (W-PL-PR)*i/10;
-    ctx.beginPath(); ctx.moveTo(x,PT); ctx.lineTo(x,H-PB); ctx.stroke();
-  }
+  ctx.strokeStyle='rgba(255,255,255,0.032)';ctx.lineWidth=1;
+  for(let i=1;i<=10;i++){ctx.beginPath();ctx.moveTo(tx(i/10),PT);ctx.lineTo(tx(i/10),H-PB);ctx.stroke();}
+  for(let i=1;i<=8;i++){ctx.beginPath();ctx.moveTo(PL,ty(maxR*i/8));ctx.lineTo(W-PR,ty(maxR*i/8));ctx.stroke();}
 
   // Axes
-  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-  ctx.lineWidth   = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(PL,PT); ctx.lineTo(PL,H-PB);
-  ctx.moveTo(PL,H-PB); ctx.lineTo(W-PR,H-PB);
-  ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(PL,PT);ctx.lineTo(PL,H-PB);ctx.moveTo(PL,H-PB);ctx.lineTo(W-PR,H-PB);ctx.stroke();
 
-  // Y labels
-  ctx.fillStyle = '#6a7a8a';
-  ctx.font = `11px 'JetBrains Mono', monospace`;
-  ctx.textAlign = 'right';
-  for (let i = 0; i <= gridLines; i++) {
-    const rate = maxRate*(gridLines-i)/gridLines;
-    const y    = PT + (H-PT-PB)*i/gridLines;
-    ctx.fillText(Math.round(rate), PL-6, y+4);
-  }
-  // X labels
-  ctx.textAlign = 'center';
-  for (let i = 0; i <= 5; i++) {
-    const x = PL + (W-PL-PR)*i/5;
-    ctx.fillText((i*20)+'%', x, H-PB+14);
-  }
-  // Axis titles
-  ctx.save();
-  ctx.translate(13, (H+PT-PB)/2);
-  ctx.rotate(-Math.PI/2);
-  ctx.fillStyle = '#5a6a7a';
-  ctx.font = '10px monospace';
-  ctx.textAlign = 'center';
-  ctx.fillText('deg/s', 0, 0);
-  ctx.restore();
-  ctx.fillStyle = '#5a6a7a';
-  ctx.textAlign = 'center';
-  ctx.font = '10px monospace';
-  ctx.fillText('stick %', PL+(W-PL-PR)/2, H-2);
+  // Labels
+  ctx.fillStyle='rgba(255,255,255,0.28)';ctx.font="10px 'Space Mono',monospace";
+  ctx.textAlign='right';
+  for(let i=0;i<=4;i++){const r=maxR*i/4;ctx.fillText(Math.round(r),PL-6,ty(r)+4);}
+  ctx.textAlign='center';
+  for(let i=0;i<=5;i++)ctx.fillText(i*20+'%',tx(i/5),H-PB+14);
+  ctx.save();ctx.translate(12,H/2);ctx.rotate(-Math.PI/2);
+  ctx.fillStyle='rgba(255,255,255,0.18)';ctx.font="10px 'Rajdhani',sans-serif";
+  ctx.fillText('deg/s',0,0);ctx.restore();
 
-  const toX = s => PL + (W-PL-PR)*s;
-  const toY = r => H-PB - (H-PT-PB)*Math.min(r,maxRate)/maxRate;
-
-  // Draw all 3 axes
-  ['roll','pitch','yaw'].forEach(function(ax, ai) {
-    const col   = AXIS_COLORS[ax];
-    const isAct = ax === curAxis;
-    ctx.strokeStyle = isAct ? col : col + '55';
-    ctx.lineWidth   = isAct ? 2.5 : 1.5;
-    if (ai > 0) ctx.setLineDash([5, 4]); else ctx.setLineDash([]);
-    ctx.beginPath();
-    for (let i = 0; i <= 240; i++) {
-      const s = i/240;
-      const r = getRate(s, ax);
-      const x = toX(s), y = toY(r);
-      i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  // Ghost
+  if(ghost){
+    for(const ax of['roll','pitch','yaw']){
+      if(!ovr[ax])continue;
+      const p=ghost[ax];
+      ctx.globalAlpha=0.2;ctx.strokeStyle=COL[ax];ctx.lineWidth=1.5;ctx.setLineDash([4,5]);
+      ctx.beginPath();
+      for(let i=0;i<=200;i++){
+        const s=i/200;let r;
+        if(rt==='actual')r=actRate(s,p.rr,p.sr,p.er);
+        else if(rt==='bf')r=bfRate(s,p.br,p.bs,p.be);
+        else r=ksRate(s,p.kr,p.ka);
+        i===0?ctx.moveTo(tx(s),ty(r)):ctx.lineTo(tx(s),ty(r));
+      }
+      ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;
     }
-    ctx.stroke();
-    ctx.setLineDash([]);
-  });
+  }
 
-  // Linear reference
-  ctx.strokeStyle = 'rgba(255,255,255,0.14)';
-  ctx.lineWidth   = 1;
-  ctx.setLineDash([3,5]);
-  ctx.beginPath();
-  ctx.moveTo(toX(0), toY(0));
-  ctx.lineTo(toX(1), toY(getRate(1.0, curAxis)));
-  ctx.stroke();
+  // Linear ref
+  ctx.strokeStyle='rgba(100,120,160,0.35)';ctx.lineWidth=1;ctx.setLineDash([5,5]);
+  ctx.beginPath();ctx.moveTo(tx(0),ty(0));ctx.lineTo(tx(1),ty(getAxisRate(curAx,1)));ctx.stroke();
   ctx.setLineDash([]);
 
-  // Hover line + dot
-  if (hoverX !== null) {
-    const stick  = (hoverX - PL) / (W - PL - PR);
-    const clamp  = Math.max(0, Math.min(1, stick));
-    const hx     = toX(clamp);
-    const rate   = getRate(clamp, curAxis);
-    const hy     = toY(rate);
+  // Curves
+  for(const ax of['roll','pitch','yaw']){
+    if(!ovr[ax])continue;
+    const col=COL[ax],gl=GLW[ax];
+    const isCur=ax===curAx;
+    const alpha=isCur?1:0.45;
+    const lw=isCur?2.5:1.5;
+    const pts=[];
+    for(let i=0;i<=280;i++){const s=i/280;pts.push({x:tx(s),y:ty(getAxisRate(ax,s))});}
 
-    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
-    ctx.lineWidth   = 1;
-    ctx.setLineDash([3,3]);
-    ctx.beginPath(); ctx.moveTo(hx,PT); ctx.lineTo(hx,H-PB); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(PL,hy); ctx.lineTo(W-PR,hy); ctx.stroke();
-    ctx.setLineDash([]);
+    // Fill
+    if(isCur){
+      const grad=ctx.createLinearGradient(0,PT,0,H-PB);
+      grad.addColorStop(0,gl+'0.22)');grad.addColorStop(1,gl+'0.0)');
+      ctx.globalAlpha=1;ctx.fillStyle=grad;
+      ctx.beginPath();ctx.moveTo(tx(0),H-PB);
+      pts.forEach(p=>ctx.lineTo(p.x,p.y));
+      ctx.lineTo(tx(1),H-PB);ctx.closePath();ctx.fill();
+    }
 
-    const col = AXIS_COLORS[curAxis];
-    ctx.fillStyle = col;
-    ctx.beginPath(); ctx.arc(hx,hy,5,0,Math.PI*2); ctx.fill();
+    // Glow
+    ctx.save();ctx.globalAlpha=alpha*0.35;ctx.shadowColor=col;ctx.shadowBlur=14;
+    ctx.strokeStyle=col;ctx.lineWidth=lw+3;
+    ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.stroke();
+    ctx.restore();
 
-    // Tooltip
-    const tipX = hx + 10 > W - 100 ? hx - 105 : hx + 10;
-    const tipY = hy - 30 < PT ? hy + 8 : hy - 30;
-    ctx.fillStyle   = 'rgba(5,8,16,0.92)';
-    ctx.strokeStyle = col + '88';
-    ctx.lineWidth   = 1;
-    ctx.beginPath();
-    ctx.roundRect(tipX, tipY, 95, 42, 6);
-    ctx.fill(); ctx.stroke();
-    ctx.fillStyle   = '#dde8f0';
-    ctx.font        = '11px monospace';
-    ctx.textAlign   = 'left';
-    ctx.fillText('Stick: ' + Math.round(clamp*100) + '%', tipX+8, tipY+15);
-    ctx.fillStyle = col;
-    ctx.font      = 'bold 12px monospace';
-    ctx.fillText(Math.round(rate) + ' deg/s', tipX+8, tipY+32);
+    // Main
+    ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.shadowColor=col;ctx.shadowBlur=5;
+    ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.stroke();
+    ctx.restore();
+
+    // Markers (current axis only)
+    if(isCur){
+      for(const pct of[0.25,0.5,0.75]){
+        const r=getAxisRate(ax,pct);
+        const mx=tx(pct),my=ty(r);
+        ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=1;ctx.setLineDash([2,3]);
+        ctx.beginPath();ctx.moveTo(mx,H-PB);ctx.lineTo(mx,my);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(PL,my);ctx.lineTo(mx,my);ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle='#fff';ctx.shadowColor=col;ctx.shadowBlur=8;
+        ctx.beginPath();ctx.arc(mx,my,3.5,0,Math.PI*2);ctx.fill();
+        ctx.shadowBlur=0;
+        ctx.fillStyle=col;ctx.font="bold 10px 'Space Mono',monospace";ctx.textAlign='center';
+        ctx.fillText(Math.round(r),mx,my-10);
+      }
+    }
   }
-
-  // 50% marker dot
-  const h50 = getRate(0.5, curAxis);
-  ctx.fillStyle = AXIS_COLORS[curAxis];
-  ctx.beginPath(); ctx.arc(toX(0.5), toY(h50), 4, 0, Math.PI*2); ctx.fill();
 }
 
-// ═══════════════════════════════════════════════════
-//  SLIDER INTERACTION
-// ═══════════════════════════════════════════════════
-function onSlider(inputId, labelId, isInt) {
-  const val = parseFloat(document.getElementById(inputId).value);
-  const disp = isInt ? String(Math.round(val)) : val.toFixed(2);
-  if (labelId) document.getElementById(labelId).textContent = disp + (isInt ? '' : '');
-
-  // Map slider → axisVals
-  if (inputId === 'rc-rate-roll')    { setAxisVal('actual', 0, val); }
-  else if (inputId === 'super-rate-roll') { setAxisVal('actual', 1, val); }
-  else if (inputId === 'expo-roll')  { setAxisVal('actual', 2, val); }
-  else if (inputId === 'bf-rc')      { setAxisValBf(0, val); }
-  else if (inputId === 'bf-super')   { setAxisValBf(1, val); }
-  else if (inputId === 'bf-expo')    { setAxisValBf(2, val); }
-  else if (inputId === 'kiss-rate')  { axisVals[curAxis].kiss[0] = val; if(syncRP&&curAxis!=='yaw') axisVals.pitch.kiss[0]=val; }
-  else if (inputId === 'kiss-acro')  { axisVals[curAxis].kiss[1] = val; if(syncRP&&curAxis!=='yaw') axisVals.pitch.kiss[1]=val; }
-
-  updateFeelingBars();
-  update();
-}
-
-function setAxisVal(m, idx, val) {
-  axisVals[curAxis][m][idx] = val;
-  if (syncRP && curAxis !== 'yaw') axisVals.pitch[m][idx] = val;
-  if (syncRP && curAxis !== 'yaw') axisVals.roll[m][idx] = val;
-}
-function setAxisValBf(idx, val) { setAxisVal('bf', idx, val); }
-
-// ═══════════════════════════════════════════════════
-//  UI HELPERS
-// ═══════════════════════════════════════════════════
-function setMode(m) {
-  mode = m;
-  ['actual','bf','kiss'].forEach(function(t){
-    document.getElementById('tab-'+t).classList.toggle('active', t===m);
-    document.getElementById('ctrl-'+t).style.display = t===m ? '' : 'none';
-  });
-  loadAxisToSliders();
-  update();
-}
-
-function setAxis(ax) {
-  curAxis = ax;
-  document.body.dataset.axis = ax;
-  document.querySelectorAll('.axis-tab').forEach(function(b){
-    b.classList.toggle('active', b.dataset.axis === ax);
-  });
-  loadAxisToSliders();
-  update();
-}
-
-function loadAxisToSliders() {
-  const v = axisVals[curAxis];
-  if (mode === 'actual') {
-    setSlider('rc-rate-roll',    v.actual[0], 'v-rc-rate-roll');
-    setSlider('super-rate-roll', v.actual[1], 'v-super-rate-roll');
-    setSlider('expo-roll',       v.actual[2], 'v-expo-roll');
-  } else if (mode === 'bf') {
-    setSlider('bf-rc',    v.bf[0], 'v-bf-rc');
-    setSlider('bf-super', v.bf[1], 'v-bf-super');
-    setSlider('bf-expo',  v.bf[2], 'v-bf-expo');
-  } else {
-    setSlider('kiss-rate', v.kiss[0], 'v-kiss-rate', true);
-    setSlider('kiss-acro', v.kiss[1], 'v-kiss-acro');
-  }
-  updateFeelingBars();
-}
-
-function setSlider(id, val, lblId, isInt) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.value = val;
-  if (lblId) document.getElementById(lblId).textContent = isInt ? Math.round(val) : parseFloat(val).toFixed(2);
-}
-
-function toggleSync() {
-  syncRP = !syncRP;
-  const st = document.getElementById('syncToggle');
-  st.classList.toggle('on', syncRP);
-  document.getElementById('syncLabel').textContent = syncRP ? 'ซิงค์ Roll = Pitch (แนะนำ)' : 'Roll / Pitch แยกกัน';
-}
-
-function updateFeelingBars() {
-  if (mode !== 'actual') return;
-  const v = axisVals[curAxis].actual;
-  // RC Rate bar: 0.01–2.55 → 0–100%
-  const rcPct = Math.round((v[0]-0.01)/2.54*100);
-  const srPct = Math.round(v[1]/0.95*100);
-  const exPct = Math.round(v[2]/1.00*100);
-  const rcColor = rcPct < 35 ? 'var(--blue)' : rcPct < 65 ? 'var(--green)' : 'var(--red)';
-  const srColor = srPct < 40 ? 'var(--blue)' : srPct < 70 ? 'var(--green)' : 'var(--red)';
-  setBar('feel-rc-rate', rcPct, rcColor);
-  setBar('feel-super-rate', srPct, srColor);
-  setBar('feel-expo', exPct, 'var(--blue)');
-}
-function setBar(id, pct, color) {
-  const el = document.getElementById(id);
-  if (el) { el.style.width = pct+'%'; el.style.background = color; }
-}
-
-// ═══════════════════════════════════════════════════
-//  STATS + CLI
-// ═══════════════════════════════════════════════════
-function update() {
-  drawCurve();
-  // Stats
-  document.getElementById('stat-center').textContent = Math.round(getRate(0.02, curAxis));
-  document.getElementById('stat-half').textContent   = Math.round(getRate(0.50, curAxis));
-  document.getElementById('stat-75').textContent     = Math.round(getRate(0.75, curAxis));
-  document.getElementById('stat-max').textContent    = Math.round(getRate(1.00, curAxis));
-  updateCLI();
-}
-
-function updateCLI() {
-  const cliEl = document.getElementById('cliOutput');
-  let html = '';
-  const axes = ['roll','pitch','yaw'];
-
-  if (mode === 'actual') {
-    html += `<span class="cli-comment"># Betaflight ACTUAL rates — OBIXConfig Doctor</span>\n`;
-    html += `<span class="cli-cmd">set</span> <span class="cli-key">rates_type</span> = <span class="cli-val">ACTUAL</span>\n`;
-    axes.forEach(function(ax){
-      const [rc,sr,ex] = axisVals[ax].actual;
-      html += `<span class="cli-comment"># ${ax.toUpperCase()}</span>\n`;
-      html += `<span class="cli-cmd">set</span> <span class="cli-key">${ax}_rc_rate</span>    = <span class="cli-val">${Math.round(rc*100)}</span>\n`;
-      html += `<span class="cli-cmd">set</span> <span class="cli-key">${ax}_super_rate</span> = <span class="cli-val">${Math.round(sr*100)}</span>\n`;
-      html += `<span class="cli-cmd">set</span> <span class="cli-key">${ax}_expo</span>       = <span class="cli-val">${Math.round(ex*100)}</span>\n`;
-    });
-  } else if (mode === 'bf') {
-    html += `<span class="cli-comment"># Betaflight LEGACY rates — OBIXConfig Doctor</span>\n`;
-    html += `<span class="cli-cmd">set</span> <span class="cli-key">rates_type</span> = <span class="cli-val">BETAFLIGHT</span>\n`;
-    axes.forEach(function(ax){
-      const [rc,sr,ex] = axisVals[ax].bf;
-      html += `<span class="cli-cmd">set</span> <span class="cli-key">${ax}_rc_rate</span>    = <span class="cli-val">${Math.round(rc*100)}</span>\n`;
-      html += `<span class="cli-cmd">set</span> <span class="cli-key">${ax}_super_rate</span> = <span class="cli-val">${Math.round(sr*100)}</span>\n`;
-      html += `<span class="cli-cmd">set</span> <span class="cli-key">${ax}_expo</span>       = <span class="cli-val">${Math.round(ex*100)}</span>\n`;
-    });
-  } else {
-    html += `<span class="cli-comment"># KISS rates — OBIXConfig Doctor</span>\n`;
-    html += `<span class="cli-cmd">set</span> <span class="cli-key">rates_type</span> = <span class="cli-val">KISS</span>\n`;
-    axes.forEach(function(ax){
-      const [r,a] = axisVals[ax].kiss;
-      html += `<span class="cli-cmd">set</span> <span class="cli-key">${ax}_rc_rate</span>    = <span class="cli-val">${Math.round(r)}</span>\n`;
-      html += `<span class="cli-cmd">set</span> <span class="cli-key">${ax}_super_rate</span> = <span class="cli-val">${Math.round(a*100)}</span>\n`;
-    });
-  }
-  html += `<span class="cli-cmd">save</span>`;
-  cliEl.innerHTML = html;
-}
-
-function copyCLI() {
-  const el = document.getElementById('cliOutput');
-  const text = el.innerText || el.textContent;
-  navigator.clipboard.writeText(text).then(function(){ showToast('คัดลอก CLI เรียบร้อย ✓'); });
-}
-
-// ═══════════════════════════════════════════════════
-//  PRESETS
-// ═══════════════════════════════════════════════════
-function loadPreset(name) {
-  const p = PRESETS[name];
-  if (!p) return;
-  ['roll','pitch'].forEach(function(ax){ axisVals[ax].actual = [...p.actual]; axisVals[ax].bf = [...p.actual]; });
-  axisVals.yaw.actual = [...p.yaw_actual];
-  axisVals.yaw.bf     = [...p.yaw_actual];
-  // Also set KISS roughly
-  const maxR = p.actual[0]*200/(1-p.actual[1]);
-  ['roll','pitch'].forEach(function(ax){ axisVals[ax].kiss = [Math.min(maxR,900), p.actual[1]*0.3]; });
-  axisVals.yaw.kiss = [Math.min(maxR*0.6,600), 0];
-
-  loadAxisToSliders();
-  update();
-  showToast('โหลด Preset: ' + name + ' ✓');
-}
-
-// ═══════════════════════════════════════════════════
-//  HOVER
-// ═══════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', function(){
-  const canvas = document.getElementById('rateCanvas');
-  canvas.addEventListener('mousemove', function(e){
-    const rect = canvas.getBoundingClientRect();
-    hoverX = e.clientX - rect.left;
-    drawCurve();
-  });
-  canvas.addEventListener('mouseleave', function(){
-    hoverX = null;
-    drawCurve();
-  });
-  // Touch support
-  canvas.addEventListener('touchmove', function(e){
-    e.preventDefault();
-    const rect  = canvas.getBoundingClientRect();
-    hoverX = e.touches[0].clientX - rect.left;
-    drawCurve();
-  }, { passive: false });
-  canvas.addEventListener('touchend', function(){ hoverX=null; drawCurve(); });
-
-  window.addEventListener('resize', function(){ update(); });
-  update();
+/* ── Hover tooltip ── */
+const CV=document.getElementById('rv');
+const TIP=document.getElementById('tip');
+CV.addEventListener('mousemove',e=>{
+  const rc=CV.getBoundingClientRect();
+  const W=CV.width,PL=50;
+  const raw=(e.clientX-rc.left)*(W/rc.width);
+  const s=Math.max(0,Math.min(1,(raw-PL)/(W-PL-16)));
+  document.getElementById('tts').textContent=`Stick: ${Math.round(s*100)}%`;
+  document.getElementById('ttv').textContent=`${Math.round(getRate(s))} deg/s`;
+  document.getElementById('ttv').style.color=COL[curAx];
+  TIP.style.display='block';
+  let lx=e.clientX-rc.left+14,ly=e.clientY-rc.top-44;
+  if(lx+150>rc.width)lx-=165;
+  TIP.style.left=lx+'px';TIP.style.top=ly+'px';
 });
+CV.addEventListener('mouseleave',()=>{TIP.style.display='none';});
 
-// ═══════════════════════════════════════════════════
-//  DRAWER
-// ═══════════════════════════════════════════════════
-(function(){
-  var btn=document.getElementById('hamburgerBtn'), drawer=document.getElementById('drawer'),
-      overlay=document.getElementById('overlay'), closeBtn=document.getElementById('closeDrawer');
-  function open(){btn&&btn.setAttribute('aria-expanded','true');drawer&&drawer.classList.add('open');drawer&&drawer.removeAttribute('hidden');overlay&&overlay.classList.add('open');document.addEventListener('keydown',onEsc);}
-  function close(){btn&&btn.setAttribute('aria-expanded','false');drawer&&drawer.classList.remove('open');overlay&&overlay.classList.remove('open');document.removeEventListener('keydown',onEsc);setTimeout(function(){drawer&&drawer.setAttribute('hidden','');},280);}
-  function onEsc(e){if(e.key==='Escape')close();}
-  btn&&btn.addEventListener('click',function(){btn.getAttribute('aria-expanded')==='true'?close():open();});
-  overlay&&overlay.addEventListener('click',close);
-  closeBtn&&closeBtn.addEventListener('click',close);
-  if(window.innerWidth<=900&&drawer)drawer.setAttribute('hidden','');
-})();
+/* ── Guide accordion ── */
+function tog(id){document.getElementById('g-'+id).classList.toggle('open');}
+
+/* ── Toast ── */
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+/* ── Resize ── */
+let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(draw,80);});
+
+/* ── Init ── */
+window.addEventListener('load',()=>setTimeout(()=>{loadSl('roll');update();},60));
 </script>
 </body>
 </html>
