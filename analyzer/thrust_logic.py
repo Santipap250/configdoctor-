@@ -85,18 +85,21 @@ def _hover_w_per_g(size_inch: float) -> float:
 def calculate_thrust_weight(motor_load, weight):
     """
     Rough TWR estimate from motor_load score (0–6).
-    Returns None if data insufficient.
+    Returns 0.0 if data insufficient (never None — prevents downstream crash).
     advanced_analysis.py overrides this with real data when available.
+
+    FIX v2.2: เปลี่ยนจาก return None → return 0.0
+    เหตุผล: downstream code ที่ใช้ค่านี้ไม่ได้ตรวจ None เสมอ
     """
     try:
         w  = float(weight)
         ml = float(motor_load)
         if w <= 0 or ml <= 0:
-            return None
+            return 0.0          # ← FIX: was None
         # score 0-6 → TWR 0-3.0 (rough)
         return round((ml / 6.0) * 3.0, 2)
     except (TypeError, ValueError, ZeroDivisionError):
-        return None
+        return 0.0              # ← FIX: was None
 
 
 def estimate_battery_runtime(weight, battery, battery_mAh=None, style="freestyle",
