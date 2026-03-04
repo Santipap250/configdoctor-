@@ -122,15 +122,150 @@ body::after {
 }
 .top-left { display:flex; align-items:center; gap:10px; }
 
-/* Hamburger */
-.hamburger {
-  background: none; border: 1px solid var(--border); border-radius: 6px;
-  padding: 7px 8px; cursor: pointer; display: flex; flex-direction: column;
-  gap: 4px; transition: border-color .2s;
+/* ═══ NAV TRIGGER — Tactical Reticle ═══ */
+.nav-trigger {
+  position: relative;
+  width: 40px; height: 40px;
+  background: rgba(0,255,136,0.03);
+  border: 1px solid rgba(0,255,136,0.15);
+  border-radius: 7px;
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+  transition: border-color .25s, background .25s, box-shadow .25s;
+  flex-shrink: 0;
 }
-.hamburger:hover { border-color: rgba(0,255,136,0.4); }
-.hamburger span { display:block; width:18px; height:1.5px; background:var(--muted2); transition:.2s; border-radius:2px; }
-.hamburger:hover span { background:var(--green); }
+.nav-trigger:hover {
+  border-color: rgba(0,255,136,0.55);
+  background: rgba(0,255,136,0.06);
+  box-shadow: 0 0 16px rgba(0,255,136,0.18), inset 0 0 12px rgba(0,255,136,0.05);
+}
+.nav-trigger[aria-expanded="true"] {
+  border-color: rgba(0,255,136,0.7);
+  background: rgba(0,255,136,0.08);
+  box-shadow: 0 0 22px rgba(0,255,136,0.28), inset 0 0 16px rgba(0,255,136,0.07);
+}
+
+/* SVG reticle */
+.nt-svg {
+  width: 100%; height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+/* Corner L-brackets */
+.nt-tl, .nt-tr, .nt-bl, .nt-br {
+  stroke: #00ff88; stroke-width: 1.6; fill: none; stroke-linecap: square;
+  transition: stroke-dashoffset .35s cubic-bezier(.4,0,.2,1),
+              opacity .35s,
+              transform .35s cubic-bezier(.4,0,.2,1);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.nt-tl { transform-origin: 6px 6px; }
+.nt-tr { transform-origin: 30px 6px; }
+.nt-bl { transform-origin: 6px 30px; }
+.nt-br { transform-origin: 30px 30px; }
+
+/* Hover: brackets glow brighter */
+.nav-trigger:hover .nt-tl,
+.nav-trigger:hover .nt-tr,
+.nav-trigger:hover .nt-bl,
+.nav-trigger:hover .nt-br {
+  filter: drop-shadow(0 0 3px #00ff88);
+}
+
+/* Open state: brackets push outward */
+.nav-trigger[aria-expanded="true"] .nt-tl { transform: translate(-2px,-2px); }
+.nav-trigger[aria-expanded="true"] .nt-tr { transform: translate(2px,-2px); }
+.nav-trigger[aria-expanded="true"] .nt-bl { transform: translate(-2px,2px); }
+.nav-trigger[aria-expanded="true"] .nt-br { transform: translate(2px,2px); }
+
+/* Hamburger lines */
+.nt-l1, .nt-l2, .nt-l3 {
+  stroke: rgba(0,255,136,0.6); stroke-width: 1.4; stroke-linecap: round;
+  transition: opacity .22s ease, transform .28s cubic-bezier(.4,0,.2,1);
+  transform-box: fill-box; transform-origin: 18px 18px;
+}
+.nt-l1 { transition-delay: .04s; }
+.nt-l3 { transition-delay: .02s; }
+
+/* Open: lines collapse to center + fade */
+.nav-trigger[aria-expanded="true"] .nt-l1 {
+  opacity: 0; transform: translateY(4px) scaleX(.4);
+}
+.nav-trigger[aria-expanded="true"] .nt-l2 {
+  opacity: 0; transform: scaleX(.1);
+}
+.nav-trigger[aria-expanded="true"] .nt-l3 {
+  opacity: 0; transform: translateY(-4px) scaleX(.4);
+}
+
+/* X lines — hidden by default */
+.nt-x1, .nt-x2 {
+  stroke: #00ff88; stroke-width: 1.4; stroke-linecap: round;
+  opacity: 0;
+  transition: opacity .25s ease .08s, transform .3s cubic-bezier(.4,0,.2,1) .06s;
+  transform-box: fill-box; transform-origin: 18px 18px;
+  transform: scale(.3) rotate(45deg);
+}
+.nt-x2 { transform: scale(.3) rotate(-45deg); }
+
+/* Open: X appears */
+.nav-trigger[aria-expanded="true"] .nt-x1 {
+  opacity: 1; transform: scale(1) rotate(0deg);
+}
+.nav-trigger[aria-expanded="true"] .nt-x2 {
+  opacity: 1; transform: scale(1) rotate(0deg);
+}
+
+/* Center dot */
+.nt-dot {
+  fill: #00ff88; opacity: .5;
+  transition: opacity .2s, r .2s;
+}
+.nav-trigger:hover .nt-dot { opacity: 1; }
+.nav-trigger[aria-expanded="true"] .nt-dot {
+  fill: #00ff88; opacity: 0;
+}
+
+/* Scan line sweep */
+.nt-scan {
+  position: absolute; left: 0; top: -2px;
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(0,255,136,.5) 50%, transparent 100%);
+  animation: ntScan 3.2s linear infinite;
+  pointer-events: none;
+}
+@keyframes ntScan {
+  0%   { top: -2px; opacity: 0; }
+  8%   { opacity: 1; }
+  92%  { opacity: 1; }
+  100% { top: 42px; opacity: 0; }
+}
+
+/* Subtle corner sparkle on hover */
+@keyframes ntPing {
+  0%   { transform: scale(1); opacity: .8; }
+  60%  { transform: scale(1.35); opacity: .3; }
+  100% { transform: scale(1); opacity: .8; }
+}
+.nav-trigger:hover .nt-tl,
+.nav-trigger:hover .nt-br {
+  animation: ntPing 1.6s ease-in-out infinite;
+}
+.nav-trigger:hover .nt-tr,
+.nav-trigger:hover .nt-bl {
+  animation: ntPing 1.6s ease-in-out infinite .4s;
+}
+.nav-trigger[aria-expanded="true"] .nt-tl,
+.nav-trigger[aria-expanded="true"] .nt-tr,
+.nav-trigger[aria-expanded="true"] .nt-bl,
+.nav-trigger[aria-expanded="true"] .nt-br {
+  stroke: #00ff88;
+  filter: drop-shadow(0 0 4px #00ff88);
+  animation: none;
+}
 
 .logo { height: 28px; }
 
@@ -806,8 +941,24 @@ input[type=number]::placeholder { color: var(--muted); font-size: 12px; }
 <!-- ── TOP BAR ────────────────────────────────── -->
 <div class="top-bar">
   <div class="top-left">
-    <button id="hamburgerBtn" class="hamburger" aria-label="เปิดเมนู" aria-expanded="false">
-      <span></span><span></span><span></span>
+    <button id="hamburgerBtn" class="nav-trigger" aria-label="เปิดเมนู" aria-expanded="false">
+      <svg class="nt-svg" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Corner L-brackets: targeting reticle -->
+        <path class="nt-tl" d="M6 13 L6 6 L13 6"/>
+        <path class="nt-tr" d="M23 6 L30 6 L30 13"/>
+        <path class="nt-bl" d="M6 23 L6 30 L13 30"/>
+        <path class="nt-br" d="M23 30 L30 30 L30 23"/>
+        <!-- Hamburger lines -->
+        <line class="nt-l1" x1="11" y1="13.5" x2="25" y2="13.5"/>
+        <line class="nt-l2" x1="11" y1="18"   x2="25" y2="18"/>
+        <line class="nt-l3" x1="11" y1="22.5" x2="25" y2="22.5"/>
+        <!-- X lines (close state) -->
+        <line class="nt-x1" x1="12" y1="12" x2="24" y2="24"/>
+        <line class="nt-x2" x1="24" y1="12" x2="12" y2="24"/>
+        <!-- Center dot -->
+        <circle class="nt-dot" cx="18" cy="18" r="1.5"/>
+      </svg>
+      <span class="nt-scan"></span>
     </button>
     <a href="/landing">
       <img src="{{ url_for('static', filename='img/obix-logo.png') }}" class="logo" alt="OBIXConfig Doctor">
