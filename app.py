@@ -354,7 +354,8 @@ def index():
             "yaw":   {"p": y["P"],  "i": y["I"],  "d": 0},
         }
         analysis["filter_baseline"] = {
-            "gyro_lpf2":  filter_baseline.get("gyro_lpf1"),     # legacy template key
+            "gyro_lpf1":  filter_baseline.get("gyro_lpf1"),     # FIX: was "gyro_lpf2" (wrong key)
+            "gyro_lpf2":  filter_baseline.get("gyro_lpf2"),     # proper LPF2 key
             "dterm_lpf1": filter_baseline.get("dterm_lpf1"),
             "dyn_notch":  filter_baseline.get("dyn_notch"),
             # Extended
@@ -612,6 +613,10 @@ def pid_advisor():
 
 @app.route('/api/symptom/<symptom_id>')
 def api_symptom(symptom_id):
+    # SECURITY: allow only alphanumeric + underscore IDs
+    import re as _re
+    if not _re.match(r'^[a-zA-Z0-9_]{1,80}$', str(symptom_id)):
+        return jsonify({"error": "invalid symptom ID"}), 400
     advice = _get_symptom_advice(symptom_id)
     # FIX v2.2: คืน 404 สำหรับ unknown symptom ID
     if "error" in advice:
@@ -698,9 +703,13 @@ def blackbox_page():
 @app.route('/blackbox/analyze', methods=['POST'])
 def blackbox_analyze():
     try:
-        data     = request.get_json(force=True)
+        if not request.is_json and not request.content_type.startswith('application/json'):
+            return jsonify({"error": "Content-Type must be application/json"}), 415
+        data     = request.get_json(force=True) or {}
         csv_text = data.get('csv', '')
         filename = data.get('filename', 'upload.csv')
+        # Sanitize filename (logged only, never used in file ops)
+        filename = secure_filename(str(filename)[:64]) or 'upload.csv'
         if not csv_text:
             return jsonify({"error": "ไม่พบข้อมูล CSV"}), 400
         # 10MB limit
@@ -721,7 +730,9 @@ def esc_checker():
 @app.route('/analyze_cli', methods=['POST'])
 def analyze_cli():
     try:
-        data = request.get_json(force=True)
+        if not request.is_json and not request.content_type.startswith('application/json'):
+            return jsonify({"error": "Content-Type must be application/json"}), 415
+        data = request.get_json(force=True) or {}
         dump = data.get('dump', '')
         if not dump:
             return jsonify({"error": "no dump provided"}), 400
@@ -744,7 +755,9 @@ def analyze_cli():
 def compare_cli():
     """Compare two CLI dumps and return diff."""
     try:
-        data  = request.get_json(force=True)
+        if not request.is_json and not request.content_type.startswith('application/json'):
+            return jsonify({"error": "Content-Type must be application/json"}), 415
+        data  = request.get_json(force=True) or {}
         dump_a = data.get('dump_a', '')
         dump_b = data.get('dump_b', '')
         if not dump_a or not dump_b:
@@ -783,6 +796,9 @@ def osd_export():
     elif fmt == 'json': content, ext = json.dumps(data, ensure_ascii=False, indent=2), 'json'
     else:               content, ext = _generate_osd_text_from_model(data), 'txt'
     if save_flag:
+        # SECURITY: limit OSD save to 100KB to prevent disk fill attacks
+        if len(content.encode('utf-8')) > 100_000:
+            return ("Content too large (max 100KB)", 413)
         out_dir = os.path.join(app.root_path, 'static', 'downloads', 'osd')
         os.makedirs(out_dir, exist_ok=True)
         fname = secure_filename(_timestamped_filename(prefix="obix_osd", ext=ext))
@@ -793,6 +809,29 @@ def osd_export():
         return jsonify({"ok": True, "download_url": url_for('static', filename=f'downloads/osd/{fname}'), "filename": fname})
     buf = io.BytesIO(); buf.write(content.encode('utf-8')); buf.seek(0)
     return send_file(buf, mimetype='text/plain', as_attachment=True, download_name=f"obix_osd.{ext}")
+
+
+# ═════════════════════════════════════════════════════════════════════════
+# Security Headers — applied to every response
+# ═════════════════════════════════════════════════════════════════════════
+@app.after_request
+def set_security_headers(response):
+    response.headers["X-Frame-Options"]        = "SAMEORIGIN"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-XSS-Protection"]       = "1; mode=block"
+    response.headers["Referrer-Policy"]        = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"]     = "geolocation=(), microphone=(), camera=()"
+    # CSP: block inline scripts from third parties, allow self + Google Fonts + CDNs we use
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; "
+        "font-src 'self' https://fonts.gstatic.com; "
+        "img-src 'self' data: https:; "
+        "connect-src 'self'; "
+        "frame-ancestors 'self';"
+    )
+    return response
 
 # ── Error handlers ─────────────────────────────────────────────────────────
 @app.errorhandler(404)
