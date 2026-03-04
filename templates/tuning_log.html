@@ -258,7 +258,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-t);min-height
       </div>
 
       <div class="mfield mfield-full"><label>ผลการบิน</label>
-        <div class="result-pills">
+        <div class="result-pills" id="resultPills">
           <span class="rpill on-g" data-v="BETTER">🟢 ดีขึ้น</span>
           <span class="rpill" data-v="NEUTRAL">🟡 เหมือนเดิม</span>
           <span class="rpill" data-v="WORSE">🔴 แย่ลง</span>
@@ -307,10 +307,10 @@ function openModal(){
   const today=new Date().toISOString().split('T')[0];
   document.getElementById('m_date').value=today;
   selectedResult='BETTER';selectedSymptoms=[];
-  document.querySelectorAll('.result-pills .rpill').forEach(p=>{
+  document.querySelectorAll('#resultPills .rpill').forEach(p=>{
     p.classList.remove('on-g','on-a','on-r');
   });
-  document.querySelector('.result-pills .rpill[data-v="BETTER"]').classList.add('on-g');
+  document.querySelector('#resultPills .rpill[data-v="BETTER"]').classList.add('on-g');
   document.querySelectorAll('#symptomPills .rpill').forEach(p=>p.classList.remove('on-a'));
 }
 function closeModal(){document.getElementById('modal').classList.remove('open');}
@@ -318,13 +318,12 @@ document.getElementById('modal').addEventListener('click',e=>{
   if(e.target===document.getElementById('modal'))closeModal();
 });
 
-// result pills
-document.querySelectorAll('.result-pills:first-of-type .rpill,.modal .result-pills:not(#symptomPills) .rpill').forEach(p=>{
+// result pills — ใช้ #resultPills เพื่อไม่ conflict กับ #symptomPills
+document.querySelectorAll('#resultPills .rpill').forEach(p=>{
   p.addEventListener('click',()=>{
-    if(p.closest('#symptomPills'))return;
-    document.querySelectorAll('.modal .result-pills:not(#symptomPills) .rpill').forEach(x=>x.classList.remove('on-g','on-a','on-r'));
+    document.querySelectorAll('#resultPills .rpill').forEach(x=>x.classList.remove('on-g','on-a','on-r'));
     const cls=p.dataset.v==='BETTER'?'on-g':p.dataset.v==='WORSE'?'on-r':'on-a';
-    p.classList.add(cls);selectedResult=p.dataset.v;
+    p.classList.add(cls); selectedResult=p.dataset.v;
   });
 });
 document.getElementById('symptomPills').querySelectorAll('.rpill').forEach(p=>{

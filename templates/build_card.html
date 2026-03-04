@@ -421,11 +421,16 @@ function roundRect(ctx,x,y,w,h,r){
 }
 
 function downloadCard(){
-  drawCard();
-  const cv=document.getElementById('cardCanvas');
-  const name=(g('f_name')||'build_card').replace(/[^a-zA-Z0-9]/g,'_').toLowerCase();
-  const a=document.createElement('a');
-  a.download=`obix_${name}.png`; a.href=cv.toDataURL('image/png'); a.click();
+  const doDownload = () => {
+    drawCard();
+    const cv=document.getElementById('cardCanvas');
+    const name=(g('f_name')||'build_card').replace(/[^a-zA-Z0-9]/g,'_').toLowerCase();
+    const a=document.createElement('a');
+    a.download=`obix_${name}.png`; a.href=cv.toDataURL('image/png'); a.click();
+  };
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(doDownload);
+  } else { doDownload(); }
 }
 
 // ── Init ──────────────────────────────────────
@@ -446,7 +451,12 @@ document.querySelectorAll('input,textarea').forEach(el=>{
 });
 
 // Initial draw
-window.addEventListener('load', drawCard);
+// รอ web fonts load ก่อน draw — Orbitron/JetBrains Mono ต้องพร้อมก่อน
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => drawCard());
+} else {
+  window.addEventListener('load', drawCard);
+}
 </script>
 </body>
 </html>
