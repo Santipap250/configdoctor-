@@ -950,7 +950,8 @@ function initPills(gid,key,cb){
   g.querySelectorAll('.pill-btn').forEach(b=>{
     b.addEventListener('click',()=>{
       g.querySelectorAll('.pill-btn').forEach(x=>x.classList.remove('sel','sel-b','sel-a'));
-      b.classList.add('sel');S[key]=b.dataset.val;
+      b.classList.add('sel');
+      if(key)S[key]=b.dataset.val;
       if(cb)cb(b.dataset.val);refreshCLI();
     });
   });
@@ -1000,7 +1001,7 @@ initPills('pg_vtx','vtx');
 initPills('pg_air','airmode');
 initPills('pg_irelax','irelax');
 initPills('pg_rtype','rtype');
-initPills('pg_ratepre','_dummy',pr=>{
+initPills('pg_ratepre',null,pr=>{
   const p=RP[pr];if(!p)return;
   Object.assign(S,p);
   const m={rrc:'r_rrc',rsr:'r_rsr',rex:'r_rex',prc:'r_prc',psr:'r_psr',pex:'r_pex',yrc:'r_yrc',ysr:'r_ysr',yex:'r_yex'};
@@ -1008,7 +1009,7 @@ initPills('pg_ratepre','_dummy',pr=>{
   Object.keys(m).forEach(k=>{sl(m[k],S[k]);el(d[k],(S[k]/100).toFixed(2));});
   drawRates();
 });
-initPills('pg_pidpre','_dummy',v=>{
+initPills('pg_pidpre',null,v=>{
   S.master=parseInt(v);sl('s_master',v);el('v_master',(parseInt(v)/100).toFixed(2)+'×');applyPID();
 });
 

@@ -413,7 +413,7 @@ function showDetail(id){
         </div>`).join('')}
     </div>
     ${c.note?`<div style="font-size:12px;color:var(--muted2);border-left:2px solid var(--border);padding-left:10px;margin-bottom:12px;line-height:1.6;font-style:italic">"${esc(c.note)}"</div>`:''}
-    ${c.cli?`<div style="font-family:var(--font-d);font-size:9px;color:var(--green);letter-spacing:.1em;margin-bottom:6px">CLI CONFIG</div><div class="cli-block">${esc(c.cli)}</div><button class="copy-cli-btn" onclick="copyCLI(${c.id})">📋 COPY CLI</button>`:''}
+    ${c.cli?`<div style="font-family:var(--font-d);font-size:9px;color:var(--green);letter-spacing:.1em;margin-bottom:6px">CLI CONFIG</div><div class="cli-block">${esc(c.cli)}</div><button class="copy-cli-btn" id="copyCLIBtn_${c.id}" onclick="copyCLI(${c.id})">📋 COPY CLI</button>`:''}
     <div style="margin-top:12px;display:flex;align-items:center;gap:10px">
       <button class="vote-btn ${voted[id]?'voted':''}" onclick="vote(${id});closeDetail()" style="padding:7px 18px;font-size:13px">${voted[id]?'✅ Voted':'👍 Vote'}</button>
       <span style="font-family:var(--font-m);color:var(--amber);font-size:18px;font-weight:700">${c.votes} votes</span>
@@ -426,7 +426,8 @@ document.getElementById('detailModal').addEventListener('click',e=>{if(e.target=
 function copyCLI(id){
   const c=configs.find(x=>x.id===id);if(!c||!c.cli)return;
   navigator.clipboard.writeText(c.cli).then(()=>{
-    const btn=document.querySelector('.copy-cli-btn');if(btn){btn.textContent='✅ Copied!';setTimeout(()=>btn.textContent='📋 COPY CLI',2000);}
+    const btn=document.getElementById('copyCLIBtn_'+id);
+    if(btn){btn.textContent='✅ Copied!';setTimeout(()=>btn.textContent='📋 COPY CLI',2000);}
   });
 }
 
