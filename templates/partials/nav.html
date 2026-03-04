@@ -238,6 +238,32 @@
       </span>
       <span class="on-pill nw">new</span>
     </a>
+    <!-- Community -->
+    <div class="on-dgroup">Community</div>
+    <a class="on-dlink {% if nav_page=='build_card' %}on-act{% endif %}" href="/build-card">
+      <span class="on-ico a">🃏</span>
+      <span class="on-dbody">
+        <span class="on-dtitle">Build Card Generator</span>
+        <span class="on-dmeta">สร้างรูปสเปคโดรนแชร์ Social</span>
+      </span>
+      <span class="on-pill nw">new</span>
+    </a>
+    <a class="on-dlink {% if nav_page=='tuning_log' %}on-act{% endif %}" href="/tuning-log">
+      <span class="on-ico b">📊</span>
+      <span class="on-dbody">
+        <span class="on-dtitle">Tuning Log</span>
+        <span class="on-dmeta">บันทึก session · เปรียบเทียบ PID</span>
+      </span>
+      <span class="on-pill nw">new</span>
+    </a>
+    <a class="on-dlink {% if nav_page=='leaderboard' %}on-act{% endif %}" href="/leaderboard">
+      <span class="on-ico a">🏆</span>
+      <span class="on-dbody">
+        <span class="on-dtitle">Config Leaderboard</span>
+        <span class="on-dmeta">vote · rank · copy config ชุมชน</span>
+      </span>
+      <span class="on-pill nw">new</span>
+    </a>
     <a class="on-dlink {% if nav_page=='motor_prop' %}on-act{% endif %}" href="/motor-prop">
       <span class="on-ico b">🧭</span>
       <span class="on-dbody">
@@ -417,6 +443,9 @@
       {% elif nav_page == 'about' %}ABOUT
       {% elif nav_page == 'changelog' %}CHANGELOG
       {% elif nav_page == 'bf_wizard' %}BF CONFIG WIZARD
+      {% elif nav_page == 'build_card' %}BUILD CARD
+      {% elif nav_page == 'tuning_log' %}TUNING LOG
+      {% elif nav_page == 'leaderboard' %}LEADERBOARD
       {% else %}DRONE ANALYZER
       {% endif %}
     </span>
