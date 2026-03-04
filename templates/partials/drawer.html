@@ -129,6 +129,52 @@
 </a>
 
 <div class="drawer-divider"></div>
+<div class="drawer-group-label">🚀 Wizard & ฟีเจอร์ใหม่</div>
+<a class="drawer-link {% if nav_page=='flight_quiz' %}active{% endif %}" href="/flight-quiz" onclick="closeDrawer && closeDrawer();">
+  <span class="dl-icon-wrap green">🎯</span>
+  <span class="dl-body">
+    <span class="dl-title">Flight Style Quiz</span>
+    <span class="dl-meta">5 คำถาม → rates + preset แนะนำ</span>
+  </span>
+  <span class="dl-pill new">new</span>
+</a>
+<a class="drawer-link {% if nav_page=='bf_wizard' %}active{% endif %}" href="/bf-wizard" onclick="closeDrawer && closeDrawer();">
+  <span class="dl-icon-wrap green">⚡</span>
+  <span class="dl-body">
+    <span class="dl-title">BF Config Wizard</span>
+    <span class="dl-meta">7 ขั้นตอน → CLI พร้อม paste</span>
+  </span>
+  <span class="dl-pill new">new</span>
+</a>
+
+<div class="drawer-divider"></div>
+<div class="drawer-group-label">🌐 Community</div>
+<a class="drawer-link {% if nav_page=='build_card' %}active{% endif %}" href="/build-card" onclick="closeDrawer && closeDrawer();">
+  <span class="dl-icon-wrap gold">🃏</span>
+  <span class="dl-body">
+    <span class="dl-title">Build Card Generator</span>
+    <span class="dl-meta">สร้างรูปสเปคโดรนแชร์ Social</span>
+  </span>
+  <span class="dl-pill new">new</span>
+</a>
+<a class="drawer-link {% if nav_page=='tuning_log' %}active{% endif %}" href="/tuning-log" onclick="closeDrawer && closeDrawer();">
+  <span class="dl-icon-wrap blue">📊</span>
+  <span class="dl-body">
+    <span class="dl-title">Tuning Log</span>
+    <span class="dl-meta">บันทึก session · เปรียบเทียบ PID</span>
+  </span>
+  <span class="dl-pill new">new</span>
+</a>
+<a class="drawer-link {% if nav_page=='leaderboard' %}active{% endif %}" href="/leaderboard" onclick="closeDrawer && closeDrawer();">
+  <span class="dl-icon-wrap gold">🏆</span>
+  <span class="dl-body">
+    <span class="dl-title">Config Leaderboard</span>
+    <span class="dl-meta">vote · rank · copy config ชุมชน</span>
+  </span>
+  <span class="dl-pill new">new</span>
+</a>
+
+<div class="drawer-divider"></div>
 <div class="drawer-group-label">📚 แหล่งข้อมูล</div>
 
 <a class="drawer-link {% if nav_page=='downloads' %}active{% endif %}" href="/downloads" onclick="closeDrawer && closeDrawer();">
@@ -161,5 +207,5 @@
     <span class="dl-title">Changelog</span>
     <span class="dl-meta">บันทึกการอัปเดต</span>
   </span>
-  <span class="dl-pill">v2.2</span>
+  <span class="dl-pill">v2.3</span>
 </a>
