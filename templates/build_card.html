@@ -23,7 +23,7 @@
   --r:8px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:var(--font-t);min-height:100vh}
+body{background:var(--bg);color:var(--text);font-family:var(--font-t);min-height:100vh;overflow-x:hidden}
 .scan-line{position:fixed;inset:0;pointer-events:none;z-index:0;
   background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,136,.01) 2px,rgba(0,255,136,.01) 4px)}
 .wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:32px 20px 60px}
@@ -105,6 +105,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-t);min-height
 .tip-list{display:flex;flex-direction:column;gap:7px}
 .tip{font-size:12px;color:var(--muted2);display:flex;align-items:flex-start;gap:8px;line-height:1.5}
 .tip .ico{flex-shrink:0;font-size:14px}
+
+/* ── MOBILE RESPONSIVE ── */
+@media(max-width:860px){
+  .layout{grid-template-columns:1fr!important}
+  .preview-pane{order:-1}
+  .form-card{position:static!important}
+  #cardCanvas{max-width:100%;height:auto}
+  .canvas-wrap{padding:10px}
+  .field-row,.field-row3{grid-template-columns:1fr 1fr!important}
+}
+@media(max-width:480px){
+  .field-row,.field-row3{grid-template-columns:1fr!important}
+  .theme-grid{grid-template-columns:repeat(4,1fr)}
+  .hero h1{font-size:20px}
+}
 </style>
 </head>
 <body>

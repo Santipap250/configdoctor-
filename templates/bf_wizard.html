@@ -238,6 +238,19 @@ input[type=range].wslider.amber::-webkit-slider-thumb{background:var(--amber)}
   font-weight:700;transform:translateY(60px);opacity:0;
   transition:all .28s cubic-bezier(.4,0,.2,1);pointer-events:none}
 #toast.show{transform:translateY(0);opacity:1}
+
+/* ── EXTRA MOBILE (480px) ── */
+@media(max-width:480px){
+  .step-indicator{gap:4px;padding:10px}
+  .si-dot{width:26px;height:26px;font-size:9px}
+  .si-label{display:none}
+  .layout{grid-template-columns:1fr!important}
+  .cli-panel{position:static!important;max-height:240px}
+  body{overflow-x:hidden}
+}
+@media(max-width:360px){
+  .si-dot{width:22px;height:22px;font-size:8px}
+}
 </style>
 </head>
 <body>

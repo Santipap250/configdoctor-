@@ -21,7 +21,7 @@
   --font-d:'Orbitron',sans-serif;--font-m:'JetBrains Mono',monospace;--font-t:'Sarabun',sans-serif;--r:8px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:var(--font-t);min-height:100vh}
+body{background:var(--bg);color:var(--text);font-family:var(--font-t);min-height:100vh;overflow-x:hidden}
 .bg-grid{position:fixed;inset:0;pointer-events:none;z-index:0;
   background-image:radial-gradient(circle,rgba(0,255,136,.05) 1px,transparent 1px);
   background-size:32px 32px;animation:gd 18s linear infinite}
@@ -167,6 +167,28 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-t);min-height
   border-radius:var(--r);background:transparent;border:1px solid var(--border);
   color:var(--muted2);cursor:pointer;transition:all .15s;white-space:nowrap}
 .export-all-btn:hover{border-color:rgba(0,170,255,.3);color:var(--blue)}
+
+/* ── MOBILE RESPONSIVE ── */
+@media(max-width:600px){
+  .timeline::before{left:14px}
+  .tl-entry{padding-left:44px}
+  .tl-dot{left:8px}
+  .entry-pid{grid-template-columns:1fr!important}
+  .form-grid{grid-template-columns:1fr!important}
+  .modal{padding:18px 14px}
+  .top-bar{flex-direction:column;align-items:flex-start}
+  .log-stats{gap:10px}
+  .filter-bar{flex-wrap:wrap}
+  .fbar-input{min-width:100%}
+  .modal-overlay{align-items:flex-end}
+  .modal{border-radius:16px 16px 0 0;max-height:92vh;width:100%!important}
+}
+@media(max-width:400px){
+  .entry-hd{flex-direction:column;gap:8px}
+  .entry-badge{align-self:flex-start}
+  .pid-vals{gap:6px}
+  .pval-v{font-size:12px}
+}
 </style>
 </head>
 <body>
