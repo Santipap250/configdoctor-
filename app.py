@@ -613,7 +613,17 @@ def pid_advisor():
 @app.route('/api/symptom/<symptom_id>')
 def api_symptom(symptom_id):
     advice = _get_symptom_advice(symptom_id)
+    # FIX v2.2: คืน 404 สำหรับ unknown symptom ID
+    if "error" in advice:
+        return jsonify(advice), 404
     return jsonify(advice)
+
+
+# ── Flight Style Quiz ────────────────────────────────────────────────────────
+@app.route('/flight-quiz')
+def flight_quiz():
+    """Flight Style Quiz — 5 คำถาม แนะนำ rates + preset"""
+    return render_template('flight_quiz.html')
 
 # ── RPM Filter Calculator ────────────────────────────────────────────────
 try:
@@ -794,6 +804,7 @@ def robots_txt():
 def sitemap_xml():
     from flask import Response
     pages = [
+        ("/flight-quiz",      "weekly",  "0.8"),
         ("/landing",          "weekly",  "1.0"),
         ("/blackbox",          "weekly",  "1.0"),
         ("/app",              "weekly",  "0.9"),
