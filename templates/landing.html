@@ -133,6 +133,30 @@ body {
   overflow: hidden;
 }
 
+/* ── Hero background image layer ── */
+.hero-bg-img {
+  position: absolute;
+  inset: 0;
+  background-image: url("{{ url_for('static', filename='img/landing-bg.png') }}");
+  background-size: cover;
+  background-position: center 30%;
+  background-repeat: no-repeat;
+  opacity: 0.28;
+  z-index: 0;
+  /* Subtle parallax via CSS transform — no JS needed */
+  transform: scale(1.06);
+  transition: transform 0.1s linear;
+  /* Fade out towards bottom so content sections blend cleanly */
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
+  pointer-events: none;
+}
+
+/* JS parallax class */
+.hero-bg-img.parallax-active {
+  will-change: transform;
+}
+
 /* Animated grid */
 .hero-grid {
   position: absolute; inset: 0;
@@ -621,7 +645,9 @@ footer {
 </nav>
 
 <!-- ── HERO ─────────────────────────────────────────────────── -->
-<section class="hero">
+<section class="hero" id="heroSection">
+  <!-- Background image layer -->
+  <div class="hero-bg-img" id="heroBgImg"></div>
   <div class="hero-grid"></div>
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
@@ -1795,5 +1821,29 @@ const statsBar = document.querySelector('.stats-bar');
 if (statsBar) statsObs.observe(statsBar);
 </script>
 
+<script>
+(function(){
+  var bg = document.getElementById('heroBgImg');
+  var hero = document.getElementById('heroSection');
+  if (!bg || !hero) return;
+
+  // Parallax: scroll down → image shifts up slightly
+  var ticking = false;
+  window.addEventListener('scroll', function(){
+    if (!ticking) {
+      requestAnimationFrame(function(){
+        var scrollY = window.pageYOffset;
+        var heroH   = hero.offsetHeight;
+        // Move image up at 30% scroll speed (parallax ratio)
+        var shift = scrollY * 0.30;
+        // Scale slightly to avoid white edges
+        bg.style.transform = 'scale(1.06) translateY(' + shift + 'px)';
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+})();
+</script>
 </body>
 </html>
