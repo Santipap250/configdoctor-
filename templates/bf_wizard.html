@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Betaflight Config Wizard — OBIXConfig Doctor</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+{% set og_title       = "Betaflight Config Wizard — OBIXConfig Doctor" %}
+{% set og_description = "Wizard 7 ขั้นตอน กรอกสเปคโดรน → ได้ CLI Betaflight ครบสมบูรณ์ PID · Rates · Filter · Hardware พร้อม copy" %}
+{% set og_url         = "https://configdoctor.onrender.com/bf-wizard" %}
+{% include "partials/og_tags.html" %}
+<link rel="icon" href="{{ url_for('static',filename='favicon.ico') }}" type="image/x-icon">
+{% set nav_page = "bf_wizard" %}
+{% include "partials/nav.html" %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@400;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#020509;--bg2:#040b14;--surface:#060e1c;--panel:#081428;--panel2:#0a1830;
+  --border:rgba(0,255,136,.08);--borderB:rgba(0,170,255,.12);
+  --text:#c8d8e8;--muted:#3d5470;--muted2:#7090a8;
+  --green:#00ff88;--green2:#00cc6a;--blue:#00aaff;--amber:#ffb700;--red:#ff4455;
+  --g-dim:rgba(0,255,136,.07);--b-dim:rgba(0,170,255,.07);--a-dim:rgba(255,183,0,.07);
+  --glow-g:0 0 20px rgba(0,255,136,.25);--glow-b:0 0 20px rgba(0,170,255,.25);
+  --font-d:'Orbitron',sans-serif;--font-m:'JetBrains Mono',monospace;--font-t:'Sarabun',sans-serif;
+  --r:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font-t);min-height:100vh;overflow-x:hidden}
+.scan-line{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,136,.012) 2px,rgba(0,255,136,.012) 4px);
+  animation:scanDrift 8s linear infinite}
+@keyframes scanDrift{0%{background-position:0 0}100%{background-position:0 40px}}
+.dot-grid{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle,rgba(0,255,136,.06) 1px,transparent 1px);
+  background-size:28px 28px;animation:gridDrift 20s linear infinite}
+@keyframes gridDrift{0%{background-position:0 0}100%{background-position:28px 28px}}
+
+/* Hero */
+.hero{position:relative;z-index:1;padding:44px 24px 28px;text-align:center;
+  background:linear-gradient(180deg,rgba(0,255,136,.04) 0%,transparent 100%);
+  border-bottom:1px solid var(--border)}
+.hero-eye{font-family:var(--font-d);font-size:9px;letter-spacing:.2em;color:var(--green);
+  text-transform:uppercase;margin-bottom:10px;display:inline-flex;align-items:center;gap:7px}
+.hero-eye::before,.hero-eye::after{content:'';width:24px;height:1px;background:var(--green);opacity:.4}
+.hero h1{font-family:var(--font-d);font-size:clamp(18px,4vw,30px);font-weight:900;
+  letter-spacing:.04em;color:var(--text);line-height:1.2;margin-bottom:8px}
+.hero h1 span{color:var(--green)}
+.hero p{font-size:13px;color:var(--muted2);max-width:520px;margin:0 auto 14px;line-height:1.6}
+.hero-chips{display:flex;justify-content:center;flex-wrap:wrap;gap:6px}
+.hero-chip{font-family:var(--font-d);font-size:9px;letter-spacing:.1em;padding:3px 10px;
+  border-radius:100px;border:1px solid var(--border);color:var(--muted2);background:var(--g-dim)}
+
+/* Layout */
+.wiz-wrap{position:relative;z-index:1;display:grid;grid-template-columns:1fr 360px;
+  max-width:1280px;margin:0 auto;min-height:calc(100vh - 160px)}
+@media(max-width:900px){.wiz-wrap{grid-template-columns:1fr}}
+
+/* Step Indicator */
+.step-ind{display:flex;align-items:center;padding:16px 20px 0;gap:0;overflow-x:auto;scrollbar-width:none}
+.step-ind::-webkit-scrollbar{display:none}
+.step-item{display:flex;align-items:center;gap:5px;cursor:pointer;flex-shrink:0;padding:7px 9px;
+  border-radius:var(--r);transition:all .18s;border:1px solid transparent}
+.step-item:hover{background:var(--g-dim);border-color:var(--border)}
+.step-item.active{background:var(--g-dim);border-color:rgba(0,255,136,.25)}
+.step-num{font-family:var(--font-d);font-size:10px;font-weight:700;width:20px;height:20px;
+  border-radius:50%;display:grid;place-items:center;flex-shrink:0;
+  border:1px solid var(--muted);color:var(--muted);transition:all .2s}
+.step-item.active .step-num{border-color:var(--green);color:var(--green);
+  box-shadow:0 0 8px rgba(0,255,136,.3);background:rgba(0,255,136,.08)}
+.step-item.done .step-num{border-color:var(--green2);color:var(--green2);background:rgba(0,204,106,.15)}
+.step-lbl{font-size:9px;color:var(--muted2);white-space:nowrap;font-family:var(--font-d);letter-spacing:.07em}
+.step-item.active .step-lbl{color:var(--green)}
+.step-sep{width:14px;height:1px;background:var(--border);flex-shrink:0;margin:0 1px}
+.step-item.done~.step-sep,.step-item.done+.step-sep{background:rgba(0,204,106,.3)}
+
+/* Left pane */
+.wiz-left{padding:0 20px 20px;display:flex;flex-direction:column}
+.step-panel{display:none;flex-direction:column;flex:1;animation:fadeUp .28s ease}
+.step-panel.active{display:flex}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.step-head{padding:18px 0 10px}
+.step-title{font-family:var(--font-d);font-size:15px;font-weight:700;color:var(--text);
+  display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.step-desc{font-size:12px;color:var(--muted2);line-height:1.6}
+.step-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:16px;margin-bottom:12px}
+.step-card h3{font-family:var(--font-d);font-size:9px;letter-spacing:.12em;color:var(--green);
+  text-transform:uppercase;margin-bottom:12px}
+
+/* Preset grid */
+.preset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:7px}
+.preset-card{background:var(--panel);border:1px solid var(--border);border-radius:7px;
+  padding:9px 7px;cursor:pointer;transition:all .16s;text-align:center}
+.preset-card:hover{border-color:rgba(0,255,136,.3);background:var(--g-dim)}
+.preset-card.sel{border-color:var(--green);background:rgba(0,255,136,.08);box-shadow:0 0 10px rgba(0,255,136,.12)}
+.pico{font-size:18px;margin-bottom:3px}
+.pname{font-family:var(--font-d);font-size:8px;letter-spacing:.06em;color:var(--text);margin-bottom:2px}
+.pmeta{font-size:10px;color:var(--muted2)}
+
+/* Pill groups */
+.pill-group{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px}
+.pill-btn{font-family:var(--font-d);font-size:9px;letter-spacing:.07em;
+  padding:5px 12px;border-radius:100px;border:1px solid var(--border);
+  background:var(--panel);color:var(--muted2);cursor:pointer;transition:all .14s}
+.pill-btn:hover{border-color:rgba(0,255,136,.3);color:var(--text)}
+.pill-btn.sel{border-color:var(--green);background:rgba(0,255,136,.1);color:var(--green)}
+.pill-btn.sel-b{border-color:var(--blue);background:rgba(0,170,255,.1);color:var(--blue)}
+.pill-btn.sel-a{border-color:var(--amber);background:rgba(255,183,0,.1);color:var(--amber)}
+
+/* Form */
+.form-row{margin-bottom:14px}
+.form-label{font-family:var(--font-d);font-size:9px;letter-spacing:.1em;color:var(--muted2);
+  text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.form-val{font-family:var(--font-m);font-size:12px;color:var(--green);font-weight:700}
+.form-hint{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4}
+
+/* Sliders */
+input[type=range].wslider{-webkit-appearance:none;width:100%;height:4px;border-radius:4px;
+  outline:none;cursor:pointer;
+  background:linear-gradient(to right,var(--green) 0%,var(--green) var(--pct,50%),rgba(0,255,136,.12) var(--pct,50%),rgba(0,255,136,.12) 100%)}
+input[type=range].wslider::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;
+  border-radius:50%;background:var(--green);cursor:pointer;border:2px solid var(--bg2);
+  box-shadow:0 0 6px rgba(0,255,136,.4);transition:transform .12s}
+input[type=range].wslider::-webkit-slider-thumb:hover{transform:scale(1.2)}
+input[type=range].wslider.blue{
+  background:linear-gradient(to right,var(--blue) 0%,var(--blue) var(--pct,50%),rgba(0,170,255,.12) var(--pct,50%),rgba(0,170,255,.12) 100%)}
+input[type=range].wslider.blue::-webkit-slider-thumb{background:var(--blue);box-shadow:0 0 6px rgba(0,170,255,.4)}
+input[type=range].wslider.amber{
+  background:linear-gradient(to right,var(--amber) 0%,var(--amber) var(--pct,50%),rgba(255,183,0,.12) var(--pct,50%),rgba(255,183,0,.12) 100%)}
+input[type=range].wslider.amber::-webkit-slider-thumb{background:var(--amber)}
+
+/* PID Grid */
+.pid-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+@media(max-width:600px){.pid-grid{grid-template-columns:1fr}}
+.pid-axis{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:10px}
+.pid-axis-lbl{font-family:var(--font-d);font-size:8px;letter-spacing:.1em;margin-bottom:9px;text-transform:uppercase}
+.pid-axis-lbl.r{color:var(--green)}.pid-axis-lbl.p{color:var(--blue)}.pid-axis-lbl.y{color:var(--amber)}
+.pid-row{margin-bottom:7px}
+.pid-row-head{font-size:9px;color:var(--muted2);display:flex;justify-content:space-between;margin-bottom:3px}
+.pid-val{font-family:var(--font-m);font-size:11px;font-weight:700;color:var(--green)}
+.pid-val.b{color:var(--blue)}.pid-val.a{color:var(--amber)}
+
+/* Rates canvas */
+.rates-canvas-wrap{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);
+  padding:10px;margin-bottom:12px}
+#ratesCanvas{width:100%;height:150px;display:block;border-radius:4px}
+.canvas-legend{display:flex;gap:12px;margin-top:7px;flex-wrap:wrap}
+.canvas-leg{display:flex;align-items:center;gap:4px;font-family:var(--font-m);font-size:10px}
+.canvas-dot{width:8px;height:8px;border-radius:50%}
+.rates-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+@media(max-width:680px){.rates-grid{grid-template-columns:1fr}}
+.rates-axis{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:10px}
+.rates-axis-lbl{font-family:var(--font-d);font-size:8px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:9px}
+.rates-axis-lbl.r{color:var(--green)}.rates-axis-lbl.p{color:var(--blue)}.rates-axis-lbl.y{color:var(--amber)}
+
+/* Toggle */
+.wtoggle-wrap{display:flex;align-items:center;justify-content:space-between;
+  padding:9px 12px;background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--r);margin-bottom:7px;cursor:pointer;transition:border-color .16s}
+.wtoggle-wrap:hover{border-color:rgba(0,255,136,.2)}
+.wtoggle-wrap.on{border-color:rgba(0,255,136,.28)}
+.wtoggle-lbl{font-size:12px;color:var(--text)}
+.wtoggle-sub{font-size:10px;color:var(--muted2);margin-top:2px}
+.wtoggle{position:relative;width:38px;height:21px;flex-shrink:0}
+.wtoggle input{opacity:0;width:0;height:0}
+.wtoggle-track{position:absolute;inset:0;background:var(--panel);border:1px solid var(--muted);
+  border-radius:11px;transition:all .2s;cursor:pointer}
+.wtoggle-track::before{content:'';position:absolute;width:15px;height:15px;background:var(--muted);
+  border-radius:50%;top:2px;left:2px;transition:all .2s}
+.wtoggle input:checked+.wtoggle-track{background:rgba(0,255,136,.15);border-color:var(--green)}
+.wtoggle input:checked+.wtoggle-track::before{background:var(--green);transform:translateX(17px);
+  box-shadow:0 0 5px rgba(0,255,136,.5)}
+
+/* Wizard nav */
+.wiz-nav{display:flex;align-items:center;justify-content:space-between;
+  padding:14px 0;border-top:1px solid var(--border);margin-top:auto}
+.nav-btn{font-family:var(--font-d);font-size:10px;letter-spacing:.1em;
+  padding:9px 20px;border-radius:100px;cursor:pointer;transition:all .16s;border:none}
+.nav-btn.prev{background:transparent;border:1px solid var(--border);color:var(--muted2)}
+.nav-btn.prev:hover{border-color:rgba(0,255,136,.3);color:var(--text)}
+.nav-btn.prev:disabled{opacity:.3;cursor:not-allowed}
+.nav-btn.next{background:linear-gradient(135deg,var(--green),var(--green2));color:#020509;font-weight:700}
+.nav-btn.next:hover{box-shadow:var(--glow-g)}
+.nav-btn.gen{background:linear-gradient(135deg,var(--amber),#cc8800);color:#020509;font-weight:700}
+.nav-btn.gen:hover{box-shadow:0 0 18px rgba(255,183,0,.3)}
+.step-counter{font-family:var(--font-d);font-size:9px;color:var(--muted2);letter-spacing:.1em}
+
+/* Right — CLI Preview */
+.wiz-right{background:var(--bg2);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;position:sticky;top:52px;height:calc(100vh - 52px)}
+@media(max-width:900px){.wiz-right{position:static;height:auto;border-left:none;border-top:1px solid var(--border)}}
+.cli-hd{padding:12px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.cli-hd-title{font-family:var(--font-d);font-size:9px;letter-spacing:.14em;color:var(--green)}
+.cli-actions{display:flex;gap:7px}
+.cli-btn{font-family:var(--font-d);font-size:9px;letter-spacing:.09em;padding:5px 11px;
+  border-radius:100px;cursor:pointer;transition:all .16s}
+.cli-btn.copy{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);color:var(--green)}
+.cli-btn.copy:hover{background:rgba(0,255,136,.2);box-shadow:var(--glow-g)}
+.cli-btn.dl{background:rgba(0,170,255,.1);border:1px solid rgba(0,170,255,.3);color:var(--blue)}
+.cli-btn.dl:hover{background:rgba(0,170,255,.2)}
+.cli-body{flex:1;overflow-y:auto;padding:14px;scrollbar-width:thin;
+  scrollbar-color:rgba(0,255,136,.15) transparent}
+#cliOut{font-family:var(--font-m);font-size:10.5px;line-height:1.8;color:var(--muted2);white-space:pre;margin:0}
+#cliOut .cc{color:rgba(0,255,136,.4)}
+#cliOut .ck{color:var(--blue)}
+#cliOut .cv{color:var(--green)}
+#cliOut .cf{color:var(--amber)}
+#cliOut .cs{color:var(--green);font-weight:700}
+.cli-stats{padding:9px 14px;border-top:1px solid var(--border);flex-shrink:0;
+  display:flex;gap:12px;flex-wrap:wrap}
+.cli-stat{font-size:9px;color:var(--muted2);font-family:var(--font-d)}
+.cli-stat span{color:var(--green);font-size:10px}
+
+/* Output step */
+.out-summary{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px}
+@media(max-width:480px){.out-summary{grid-template-columns:1fr}}
+.out-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:10px}
+.oc-lbl{font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--muted2);text-transform:uppercase;margin-bottom:5px}
+.oc-val{font-family:var(--font-m);font-size:12px;color:var(--text);font-weight:600}
+.out-copy-block{background:var(--panel);border:1px solid rgba(0,255,136,.15);
+  border-radius:var(--r);padding:12px;font-family:var(--font-m);font-size:10px;
+  color:var(--muted2);max-height:280px;overflow-y:auto;white-space:pre;
+  margin-bottom:10px;scrollbar-width:thin;scrollbar-color:rgba(0,255,136,.15) transparent}
+.out-links{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.out-link{font-family:var(--font-d);font-size:9px;letter-spacing:.07em;padding:7px 14px;
+  border-radius:var(--r);border:1px solid var(--border);color:var(--muted2);
+  text-decoration:none;transition:all .16s}
+.out-link:hover{border-color:rgba(0,255,136,.3);color:var(--green)}
+.warn-box{background:rgba(255,183,0,.05);border:1px solid rgba(255,183,0,.22);
+  border-radius:var(--r);padding:9px 12px;font-size:11px;color:var(--amber);
+  margin-bottom:10px;line-height:1.5;display:none}
+.warn-box.show{display:block}
+#toast{position:fixed;bottom:24px;right:24px;z-index:9999;
+  font-family:var(--font-d);font-size:10px;letter-spacing:.1em;
+  background:var(--green);color:#020509;padding:9px 18px;border-radius:100px;
+  font-weight:700;transform:translateY(60px);opacity:0;
+  transition:all .28s cubic-bezier(.4,0,.2,1);pointer-events:none}
+#toast.show{transform:translateY(0);opacity:1}
+</style>
+</head>
+<body>
+<div class="scan-line"></div>
+<div class="dot-grid"></div>
+
+<section class="hero">
+  <div class="hero-eye">CONFIG WIZARD</div>
+  <h1>Betaflight Config <span>Wizard</span></h1>
+  <p>กรอกสเปคโดรน 7 ขั้นตอน → ได้ CLI ครบสมบูรณ์ paste ลง Betaflight ได้เลย</p>
+  <div class="hero-chips">
+    <span class="hero-chip">7 ขั้นตอน</span>
+    <span class="hero-chip">~3 นาที</span>
+    <span class="hero-chip">PID · Rates · Filter · Features</span>
+    <span class="hero-chip">BF 4.4 / 4.5</span>
+  </div>
+</section>
+
+<div class="wiz-wrap">
+<div class="wiz-left">
+
+<!-- STEP INDICATOR -->
+<div class="step-ind" id="stepInd">
+  <div class="step-item active" data-goto="1"><div class="step-num">1</div><div class="step-lbl">DRONE</div></div>
+  <div class="step-sep"></div>
+  <div class="step-item" data-goto="2"><div class="step-num">2</div><div class="step-lbl">HARDWARE</div></div>
+  <div class="step-sep"></div>
+  <div class="step-item" data-goto="3"><div class="step-num">3</div><div class="step-lbl">PID</div></div>
+  <div class="step-sep"></div>
+  <div class="step-item" data-goto="4"><div class="step-num">4</div><div class="step-lbl">RATES</div></div>
+  <div class="step-sep"></div>
+  <div class="step-item" data-goto="5"><div class="step-num">5</div><div class="step-lbl">FILTERS</div></div>
+  <div class="step-sep"></div>
+  <div class="step-item" data-goto="6"><div class="step-num">6</div><div class="step-lbl">FEATURES</div></div>
+  <div class="step-sep"></div>
+  <div class="step-item" data-goto="7"><div class="step-num">7</div><div class="step-lbl">OUTPUT</div></div>
+</div>
+
+<!-- ═══ STEP 1 — DRONE ═══ -->
+<div class="step-panel active" id="stp1">
+  <div class="step-head">
+    <div class="step-title">🚁 DRONE CLASS</div>
+    <div class="step-desc">เลือก preset หรือกรอกสเปคเอง — ค่า PID / Filter จะถูกตั้งให้อัตโนมัติ</div>
+  </div>
+  <div class="step-card">
+    <h3>⚡ QUICK PRESET</h3>
+    <div class="preset-grid" id="presetGrid">
+      <div class="preset-card sel" data-p="5_freestyle"><div class="pico">✈️</div><div class="pname">5" FREESTYLE</div><div class="pmeta">750g · 4S</div></div>
+      <div class="preset-card" data-p="2.5_micro"><div class="pico">🐝</div><div class="pname">2.5" MICRO</div><div class="pmeta">80g · 3S</div></div>
+      <div class="preset-card" data-p="3_whoop"><div class="pico">🌀</div><div class="pname">3" WHOOP</div><div class="pmeta">120g · 3S</div></div>
+      <div class="preset-card" data-p="3.5_cine"><div class="pico">🎬</div><div class="pname">3.5" CINE</div><div class="pmeta">350g · 4S</div></div>
+      <div class="preset-card" data-p="4_mini"><div class="pico">🚀</div><div class="pname">4" MINI</div><div class="pmeta">420g · 4S</div></div>
+      <div class="preset-card" data-p="6_heavy5"><div class="pico">💪</div><div class="pname">6" HEAVY</div><div class="pmeta">1kg · 6S</div></div>
+      <div class="preset-card" data-p="7_midlr"><div class="pico">🏔️</div><div class="pname">7" MID-LR</div><div class="pmeta">1.1kg · 6S</div></div>
+      <div class="preset-card" data-p="10_lr"><div class="pico">🗺️</div><div class="pname">10" LR</div><div class="pmeta">2.2kg · 6S</div></div>
+    </div>
+  </div>
+  <div class="step-card">
+    <h3>📐 SIZE & WEIGHT</h3>
+    <div class="form-row">
+      <div class="form-label">ขนาด (นิ้ว)<span class="form-val" id="v_size">5.0"</span></div>
+      <input type="range" class="wslider" id="s_size" min="25" max="100" step="5" value="50">
+      <div class="form-hint">2.5" Micro → 10" Long Range</div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">น้ำหนักรวม (g)<span class="form-val" id="v_weight">750 g</span></div>
+      <input type="range" class="wslider" id="s_weight" min="50" max="2500" step="10" value="750">
+      <div class="form-hint">รวม battery, motor, camera, VTX ทุกอย่าง</div>
+    </div>
+  </div>
+  <div class="step-card">
+    <h3>🎯 STYLE & BATTERY</h3>
+    <div class="form-row">
+      <div class="form-label">Flying Style</div>
+      <div class="pill-group" id="pg_style">
+        <button class="pill-btn sel" data-val="freestyle">Freestyle</button>
+        <button class="pill-btn" data-val="racing">Racing</button>
+        <button class="pill-btn" data-val="longrange">Long Range</button>
+        <button class="pill-btn" data-val="cine">Cinematic</button>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">Battery</div>
+      <div class="pill-group" id="pg_cells">
+        <button class="pill-btn" data-val="2">2S</button>
+        <button class="pill-btn" data-val="3">3S</button>
+        <button class="pill-btn sel" data-val="4">4S</button>
+        <button class="pill-btn" data-val="5">5S</button>
+        <button class="pill-btn" data-val="6">6S</button>
+        <button class="pill-btn" data-val="8">8S</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ STEP 2 — HARDWARE ═══ -->
+<div class="step-panel" id="stp2">
+  <div class="step-head">
+    <div class="step-title">⚡ HARDWARE</div>
+    <div class="step-desc">FC, ESC Protocol, Motor KV, Receiver และ VTX — ส่งผลต่อ CLI ที่ generate</div>
+  </div>
+  <div class="step-card">
+    <h3>🎛️ FLIGHT CONTROLLER</h3>
+    <div class="form-row">
+      <div class="form-label">FC Type</div>
+      <div class="pill-group" id="pg_fc">
+        <button class="pill-btn sel" data-val="F4">F4</button>
+        <button class="pill-btn" data-val="F7">F7</button>
+        <button class="pill-btn" data-val="H7">H7</button>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">Betaflight Version</div>
+      <div class="pill-group" id="pg_bfver">
+        <button class="pill-btn" data-val="4.3">BF 4.3</button>
+        <button class="pill-btn sel" data-val="4.4">BF 4.4</button>
+        <button class="pill-btn" data-val="4.5">BF 4.5</button>
+      </div>
+    </div>
+  </div>
+  <div class="step-card">
+    <h3>⚙️ MOTOR & ESC</h3>
+    <div class="form-row">
+      <div class="form-label">ESC Protocol</div>
+      <div class="pill-group" id="pg_esc">
+        <button class="pill-btn" data-val="DSHOT150">D150</button>
+        <button class="pill-btn" data-val="DSHOT300">D300</button>
+        <button class="pill-btn sel" data-val="DSHOT600">D600</button>
+        <button class="pill-btn" data-val="DSHOT1200">D1200</button>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">Motor KV<span class="form-val" id="v_kv">2400 KV</span></div>
+      <input type="range" class="wslider blue" id="s_kv" min="900" max="5000" step="100" value="2400">
+      <div class="form-hint">1700–2600: 5" 4S · 1400–1800: 7"+ 6S</div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">Motor Poles</div>
+      <div class="pill-group" id="pg_poles">
+        <button class="pill-btn" data-val="12">12</button>
+        <button class="pill-btn sel" data-val="14">14</button>
+        <button class="pill-btn" data-val="16">16</button>
+      </div>
+      <div class="form-hint">นับ magnet ใน bell ÷ 2 (ส่วนใหญ่ = 14)</div>
+    </div>
+  </div>
+  <div class="step-card">
+    <h3>📡 RECEIVER & VIDEO</h3>
+    <div class="form-row">
+      <div class="form-label">Receiver Protocol</div>
+      <div class="pill-group" id="pg_rx">
+        <button class="pill-btn sel" data-val="ELRS">ELRS 2.4G</button>
+        <button class="pill-btn" data-val="ELRS900">ELRS 900</button>
+        <button class="pill-btn" data-val="CRSF">Crossfire</button>
+        <button class="pill-btn" data-val="SBUS">SBUS</button>
+        <button class="pill-btn" data-val="PPM">PPM</button>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">Video System</div>
+      <div class="pill-group" id="pg_vtx">
+        <button class="pill-btn sel" data-val="analog">Analog</button>
+        <button class="pill-btn" data-val="dji_o3">DJI O3</button>
+        <button class="pill-btn" data-val="dji_o4">DJI O4</button>
+        <button class="pill-btn" data-val="hdzero">HDZero</button>
+        <button class="pill-btn" data-val="avatar">Avatar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ STEP 3 — PID ═══ -->
+<div class="step-panel" id="stp3">
+  <div class="step-head">
+    <div class="step-title">🎯 PID CONTROLLER</div>
+    <div class="step-desc">ค่า PID คำนวณอัตโนมัติจากขนาด + สไตล์ ปรับ Master Multiplier เพื่อ scale ทุกแกนพร้อมกัน</div>
+  </div>
+  <div class="step-card">
+    <h3>🎚️ MASTER MULTIPLIER</h3>
+    <div class="form-row">
+      <div class="form-label">Scale PID ทั้งหมด<span class="form-val" id="v_master">1.00×</span></div>
+      <input type="range" class="wslider" id="s_master" min="50" max="200" step="5" value="100">
+      <div class="form-hint">Conservative 0.8× → Stock 1.0× → Aggressive 1.3×</div>
+    </div>
+    <div class="form-row">
+      <div class="pill-group" id="pg_pidpre">
+        <button class="pill-btn" data-val="80">Conservative</button>
+        <button class="pill-btn sel" data-val="100">Stock</button>
+        <button class="pill-btn" data-val="120">Slightly Hot</button>
+        <button class="pill-btn" data-val="140">Aggressive</button>
+      </div>
+    </div>
+  </div>
+  <div class="step-card">
+    <h3>📊 PID — ROLL / PITCH / YAW</h3>
+    <div class="pid-grid">
+      <div class="pid-axis">
+        <div class="pid-axis-lbl r">🟢 ROLL</div>
+        <div class="pid-row"><div class="pid-row-head"><span>P</span><span class="pid-val" id="pv_rp">48</span></div><input type="range" class="wslider" id="s_rp" min="10" max="120" value="48"></div>
+        <div class="pid-row"><div class="pid-row-head"><span>I</span><span class="pid-val" id="pv_ri">90</span></div><input type="range" class="wslider" id="s_ri" min="20" max="200" value="90"></div>
+        <div class="pid-row"><div class="pid-row-head"><span>D</span><span class="pid-val" id="pv_rd">38</span></div><input type="range" class="wslider" id="s_rd" min="0" max="80" value="38"></div>
+        <div class="pid-row"><div class="pid-row-head"><span>FF</span><span class="pid-val" id="pv_rf">100</span></div><input type="range" class="wslider" id="s_rf" min="0" max="200" value="100"></div>
+      </div>
+      <div class="pid-axis">
+        <div class="pid-axis-lbl p">🔵 PITCH</div>
+        <div class="pid-row"><div class="pid-row-head"><span>P</span><span class="pid-val b" id="pv_pp">52</span></div><input type="range" class="wslider blue" id="s_pp" min="10" max="120" value="52"></div>
+        <div class="pid-row"><div class="pid-row-head"><span>I</span><span class="pid-val b" id="pv_pi">90</span></div><input type="range" class="wslider blue" id="s_pi" min="20" max="200" value="90"></div>
+        <div class="pid-row"><div class="pid-row-head"><span>D</span><span class="pid-val b" id="pv_pd">40</span></div><input type="range" class="wslider blue" id="s_pd" min="0" max="80" value="40"></div>
+        <div class="pid-row"><div class="pid-row-head"><span>FF</span><span class="pid-val b" id="pv_pf">100</span></div><input type="range" class="wslider blue" id="s_pf" min="0" max="200" value="100"></div>
+      </div>
+      <div class="pid-axis">
+        <div class="pid-axis-lbl y">🟡 YAW</div>
+        <div class="pid-row"><div class="pid-row-head"><span>P</span><span class="pid-val a" id="pv_yp">40</span></div><input type="range" class="wslider amber" id="s_yp" min="10" max="100" value="40"></div>
+        <div class="pid-row"><div class="pid-row-head"><span>I</span><span class="pid-val a" id="pv_yi">90</span></div><input type="range" class="wslider amber" id="s_yi" min="20" max="200" value="90"></div>
+        <div class="pid-row"><div class="pid-row-head"><span>D</span><span class="pid-val a" id="pv_yd">0</span></div><input type="range" class="wslider amber" id="s_yd" min="0" max="40" value="0"></div>
+        <div class="pid-row"><div class="pid-row-head"><span>FF</span><span class="pid-val a" id="pv_yf">80</span></div><input type="range" class="wslider amber" id="s_yf" min="0" max="200" value="80"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ STEP 4 — RATES ═══ -->
+<div class="step-panel" id="stp4">
+  <div class="step-head">
+    <div class="step-title">🕹️ RATES</div>
+    <div class="step-desc">กำหนดความไว stick และ max rotation — กราฟแสดง deg/s จริงตาม input</div>
+  </div>
+  <div class="step-card">
+    <h3>📋 TYPE & PROFILE</h3>
+    <div class="form-row">
+      <div class="pill-group" id="pg_rtype">
+        <button class="pill-btn sel" data-val="ACTUAL">ACTUAL (แนะนำ)</button>
+        <button class="pill-btn" data-val="BETAFLIGHT">BETAFLIGHT</button>
+        <button class="pill-btn" data-val="KISS">KISS</button>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">Rates Profile</div>
+      <div class="pill-group" id="pg_ratepre">
+        <button class="pill-btn" data-val="beginner">Beginner</button>
+        <button class="pill-btn" data-val="cine">Cine</button>
+        <button class="pill-btn sel" data-val="freestyle">Freestyle</button>
+        <button class="pill-btn" data-val="race">Race</button>
+      </div>
+    </div>
+  </div>
+  <div class="rates-canvas-wrap">
+    <canvas id="ratesCanvas"></canvas>
+    <div class="canvas-legend">
+      <div class="canvas-leg"><div class="canvas-dot" style="background:#00ff88"></div>Roll</div>
+      <div class="canvas-leg"><div class="canvas-dot" style="background:#00aaff"></div>Pitch</div>
+      <div class="canvas-leg"><div class="canvas-dot" style="background:#ffb700"></div>Yaw</div>
+      <div class="canvas-leg" style="margin-left:auto;font-size:9px;color:#3d5470">Max <span id="rateMaxLbl" style="color:#00ff88">—</span> °/s</div>
+    </div>
+  </div>
+  <div class="step-card">
+    <h3>🕹️ RATES PER AXIS</h3>
+    <div class="rates-grid">
+      <div class="rates-axis">
+        <div class="rates-axis-lbl r">🟢 ROLL</div>
+        <div class="form-row"><div class="form-label" style="font-size:8px">RC Rate<span class="form-val" id="rv_rrc">1.20</span></div><input type="range" class="wslider" id="r_rrc" min="10" max="255" value="120"></div>
+        <div class="form-row"><div class="form-label" style="font-size:8px">Super Rate<span class="form-val" id="rv_rsr">0.70</span></div><input type="range" class="wslider" id="r_rsr" min="0" max="100" value="70"></div>
+        <div class="form-row"><div class="form-label" style="font-size:8px">Expo<span class="form-val" id="rv_rex">0.15</span></div><input type="range" class="wslider" id="r_rex" min="0" max="100" value="15"></div>
+      </div>
+      <div class="rates-axis">
+        <div class="rates-axis-lbl p">🔵 PITCH</div>
+        <div class="form-row"><div class="form-label" style="font-size:8px">RC Rate<span class="form-val b" id="rv_prc">1.20</span></div><input type="range" class="wslider blue" id="r_prc" min="10" max="255" value="120"></div>
+        <div class="form-row"><div class="form-label" style="font-size:8px">Super Rate<span class="form-val b" id="rv_psr">0.70</span></div><input type="range" class="wslider blue" id="r_psr" min="0" max="100" value="70"></div>
+        <div class="form-row"><div class="form-label" style="font-size:8px">Expo<span class="form-val b" id="rv_pex">0.15</span></div><input type="range" class="wslider blue" id="r_pex" min="0" max="100" value="15"></div>
+      </div>
+      <div class="rates-axis">
+        <div class="rates-axis-lbl y">🟡 YAW</div>
+        <div class="form-row"><div class="form-label" style="font-size:8px">RC Rate<span class="form-val a" id="rv_yrc">0.80</span></div><input type="range" class="wslider amber" id="r_yrc" min="10" max="255" value="80"></div>
+        <div class="form-row"><div class="form-label" style="font-size:8px">Super Rate<span class="form-val a" id="rv_ysr">0.45</span></div><input type="range" class="wslider amber" id="r_ysr" min="0" max="100" value="45"></div>
+        <div class="form-row"><div class="form-label" style="font-size:8px">Expo<span class="form-val a" id="rv_yex">0.10</span></div><input type="range" class="wslider amber" id="r_yex" min="0" max="100" value="10"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ STEP 5 — FILTERS ═══ -->
+<div class="step-panel" id="stp5">
+  <div class="step-head">
+    <div class="step-title">🔧 FILTERS</div>
+    <div class="step-desc">ค่า filter ตั้งอัตโนมัติตามขนาดโดรน เพิ่มถ้า motor ร้อนหรือมี oscillation</div>
+  </div>
+  <div class="step-card">
+    <h3>📡 GYRO LOWPASS</h3>
+    <div class="form-row">
+      <div class="form-label">Gyro LPF1 (Hz)<span class="form-val" id="v_glpf1">200 Hz</span></div>
+      <input type="range" class="wslider" id="s_glpf1" min="60" max="500" step="10" value="200">
+      <div class="form-hint">ต่ำ = filter หนัก latency สูง · สูง = fast response แต่ noise มาก</div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">Gyro LPF2 (Hz) — 0=ปิด<span class="form-val" id="v_glpf2">0</span></div>
+      <input type="range" class="wslider" id="s_glpf2" min="0" max="500" step="10" value="0">
+    </div>
+  </div>
+  <div class="step-card">
+    <h3>📉 D-TERM LOWPASS</h3>
+    <div class="form-row">
+      <div class="form-label">D-term LPF1 (Hz)<span class="form-val" id="v_dlpf1">110 Hz</span></div>
+      <input type="range" class="wslider blue" id="s_dlpf1" min="50" max="300" step="10" value="110">
+      <div class="form-hint">ต่ำเกิน = โดรนตอบช้า · สูงเกิน = motor ร้อน</div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">D-term LPF2 (Hz) — 0=ปิด<span class="form-val" id="v_dlpf2">0</span></div>
+      <input type="range" class="wslider blue" id="s_dlpf2" min="0" max="300" step="10" value="0">
+    </div>
+  </div>
+  <div class="step-card">
+    <h3>⚡ RPM FILTER & DYNAMIC NOTCH</h3>
+    <div class="wtoggle-wrap on" id="tw_rpm" onclick="twClick(this,'rpm_filter','t_rpm')">
+      <div><div class="wtoggle-lbl">RPM Filter</div><div class="wtoggle-sub">ลด motor noise — ต้องใช้ DSHOT telemetry (BLHeli32 / AM32)</div></div>
+      <label class="wtoggle" onclick="event.stopPropagation()"><input type="checkbox" id="t_rpm" checked onchange="S.rpm_filter=this.checked;this.closest('.wtoggle-wrap').classList.toggle('on',this.checked);refreshCLI()"><span class="wtoggle-track"></span></label>
+    </div>
+    <div class="wtoggle-wrap on" id="tw_dyn" onclick="twClick(this,'dyn_notch','t_dyn')">
+      <div><div class="wtoggle-lbl">Dynamic Notch Filter</div><div class="wtoggle-sub">กำจัด noise peak อัตโนมัติ — แนะนำเปิดทิ้งไว้เสมอ</div></div>
+      <label class="wtoggle" onclick="event.stopPropagation()"><input type="checkbox" id="t_dyn" checked onchange="S.dyn_notch=this.checked;this.closest('.wtoggle-wrap').classList.toggle('on',this.checked);document.getElementById('dynExt').style.display=this.checked?'':'none';refreshCLI()"><span class="wtoggle-track"></span></label>
+    </div>
+    <div id="dynExt">
+      <div class="form-row" style="margin-top:10px">
+        <div class="form-label">Notch Count<span class="form-val" id="v_dync">2</span></div>
+        <input type="range" class="wslider" id="s_dync" min="1" max="4" step="1" value="2">
+      </div>
+      <div class="form-row">
+        <div class="form-label">Min<span class="form-val" id="v_dynmin">80</span> Hz &nbsp;·&nbsp; Max<span class="form-val" id="v_dynmax" style="margin-left:4px">400</span> Hz</div>
+        <input type="range" class="wslider" id="s_dynmin" min="40" max="200" step="10" value="80" style="margin-bottom:7px">
+        <input type="range" class="wslider" id="s_dynmax" min="200" max="800" step="20" value="400">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ STEP 6 — FEATURES ═══ -->
+<div class="step-panel" id="stp6">
+  <div class="step-head">
+    <div class="step-title">✨ FEATURES</div>
+    <div class="step-desc">Airmode, Anti-gravity, iterm_relax, Failsafe — ค่า default ปลอดภัยสำหรับ freestyle</div>
+  </div>
+  <div class="step-card">
+    <h3>💨 AIRMODE & THROTTLE</h3>
+    <div class="form-row">
+      <div class="form-label">Airmode</div>
+      <div class="pill-group" id="pg_air">
+        <button class="pill-btn sel" data-val="always">Always On</button>
+        <button class="pill-btn" data-val="switch">Switch</button>
+        <button class="pill-btn" data-val="off">Off</button>
+      </div>
+      <div class="form-hint">Always On = control ดีที่สุดขณะ idle throttle (แนะนำ freestyle)</div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">Throttle Boost<span class="form-val" id="v_tboost">5</span></div>
+      <input type="range" class="wslider" id="s_tboost" min="0" max="25" step="1" value="5">
+    </div>
+  </div>
+  <div class="step-card">
+    <h3>⚡ ANTI-GRAVITY & ITERM RELAX</h3>
+    <div class="form-row">
+      <div class="form-label">Anti-Gravity Gain<span class="form-val" id="v_ag">5</span></div>
+      <input type="range" class="wslider amber" id="s_ag" min="1" max="20" step="1" value="5">
+      <div class="form-hint">ป้องกัน nose dip เวลา punch throttle — 3-7 แนะนำสำหรับ freestyle</div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">iterm_relax</div>
+      <div class="pill-group" id="pg_irelax">
+        <button class="pill-btn sel" data-val="RPY">RPY (ทุกแกน)</button>
+        <button class="pill-btn" data-val="RP">RP (Roll+Pitch)</button>
+        <button class="pill-btn" data-val="OFF">OFF</button>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">iterm_relax Cutoff<span class="form-val" id="v_irc">15</span> Hz</div>
+      <input type="range" class="wslider" id="s_irc" min="5" max="50" step="1" value="15">
+    </div>
+  </div>
+  <div class="step-card">
+    <h3>🛡️ SAFETY & FAILSAFE</h3>
+    <div class="wtoggle-wrap" id="tw_mstop" onclick="twClick(this,'motor_stop','t_mstop')">
+      <div><div class="wtoggle-lbl">Motor Stop</div><div class="wtoggle-sub">motor หยุดเมื่อ throttle=0 · ปิดสำหรับ freestyle</div></div>
+      <label class="wtoggle" onclick="event.stopPropagation()"><input type="checkbox" id="t_mstop" onchange="S.motor_stop=this.checked;this.closest('.wtoggle-wrap').classList.toggle('on',this.checked);refreshCLI()"><span class="wtoggle-track"></span></label>
+    </div>
+    <div class="form-row" style="margin-top:10px">
+      <div class="form-label">Failsafe Throttle<span class="form-val" id="v_fs">1000</span></div>
+      <input type="range" class="wslider" id="s_fs" min="1000" max="1200" step="10" value="1000">
+      <div class="form-hint">1000 = disarm ทันที (แนะนำ) · 1050+ = land ช้าๆ</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ STEP 7 — OUTPUT ═══ -->
+<div class="step-panel" id="stp7">
+  <div class="step-head">
+    <div class="step-title">📋 OUTPUT</div>
+    <div class="step-desc">Copy CLI แล้ว paste ใน Betaflight Configurator → CLI tab → กด Enter</div>
+  </div>
+  <div class="out-summary" id="outSum"></div>
+  <div id="warnBox" class="warn-box"></div>
+  <div class="out-copy-block" id="outCopy"></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+    <button class="cli-btn copy" style="padding:9px 22px;font-size:10px" onclick="copyCLI()">📋 COPY CLI</button>
+    <button class="cli-btn dl"   style="padding:9px 22px;font-size:10px" onclick="downloadCLI()">⬇️ DOWNLOAD .TXT</button>
+    <button class="nav-btn prev" style="margin-left:auto" onclick="goStep(1)">🔄 เริ่มใหม่</button>
+  </div>
+  <div class="out-links">
+    <a href="/rates-visualizer" class="out-link">📈 Rates Visualizer</a>
+    <a href="/app" class="out-link">🚁 Drone Analyzer</a>
+    <a href="/flight-quiz" class="out-link">🎯 Flight Quiz</a>
+    <a href="/pid-advisor" class="out-link">💊 PID Advisor</a>
+    <a href="/rpm-filter" class="out-link">⚙️ RPM Filter</a>
+  </div>
+</div>
+
+<!-- Wizard nav -->
+<div class="wiz-nav">
+  <button class="nav-btn prev" id="btnPrev" onclick="stepPrev()" disabled>← ก่อนหน้า</button>
+  <div class="step-counter" id="stepCtr">ขั้นที่ 1 / 7</div>
+  <button class="nav-btn next" id="btnNext" onclick="stepNext()">ถัดไป →</button>
+</div>
+</div><!-- end wiz-left -->
+
+<!-- RIGHT — CLI PREVIEW -->
+<div class="wiz-right">
+  <div class="cli-hd">
+    <div class="cli-hd-title">⚡ LIVE CLI PREVIEW</div>
+    <div class="cli-actions">
+      <button class="cli-btn copy" onclick="copyCLI()">COPY</button>
+      <button class="cli-btn dl" onclick="downloadCLI()">DL</button>
+    </div>
+  </div>
+  <div class="cli-body"><pre id="cliOut"></pre></div>
+  <div class="cli-stats">
+    <div class="cli-stat">Lines: <span id="statLines">—</span></div>
+    <div class="cli-stat">P/I/D: <span id="statPID">—</span></div>
+    <div class="cli-stat">Max °/s: <span id="statRate">—</span></div>
+  </div>
+</div>
+</div><!-- end wiz-wrap -->
+<div id="toast"></div>
+
+<script>
+'use strict';
+const S={
+  size:5,weight:750,style:'freestyle',cells:4,
+  fc:'F4',bfver:'4.4',esc:'DSHOT600',kv:2400,poles:14,rx:'ELRS',vtx:'analog',
+  rp:48,ri:90,rd:38,rf:100,pp:52,pi:90,pd:40,pf:100,yp:40,yi:90,yd:0,yf:80,master:100,
+  rtype:'ACTUAL',rrc:120,rsr:70,rex:15,prc:120,psr:70,pex:15,yrc:80,ysr:45,yex:10,
+  glpf1:200,glpf2:0,dlpf1:110,dlpf2:0,rpm_filter:true,dyn_notch:true,dync:2,dynmin:80,dynmax:400,
+  airmode:'always',tboost:5,ag:5,irelax:'RPY',irc:15,motor_stop:false,fs:1000
+};
+
+const BL={
+  micro:     {rp:52,ri:80,rd:20,pp:55,pi:80,pd:20,yp:38,yi:80,glpf1:250,dlpf1:130,dync:2,dynmin:100,dynmax:500},
+  whoop:     {rp:55,ri:85,rd:24,pp:58,pi:85,pd:25,yp:40,yi:85,glpf1:230,dlpf1:120,dync:2,dynmin:100,dynmax:500},
+  cine:      {rp:50,ri:88,rd:28,pp:53,pi:88,pd:30,yp:38,yi:88,glpf1:200,dlpf1:110,dync:2,dynmin:80,dynmax:400},
+  mini:      {rp:50,ri:90,rd:33,pp:53,pi:90,pd:35,yp:40,yi:90,glpf1:200,dlpf1:110,dync:2,dynmin:80,dynmax:400},
+  freestyle: {rp:48,ri:90,rd:38,pp:52,pi:90,pd:40,yp:40,yi:90,glpf1:200,dlpf1:110,dync:2,dynmin:80,dynmax:400},
+  heavy_5:   {rp:42,ri:88,rd:28,pp:45,pi:88,pd:30,yp:35,yi:85,glpf1:170,dlpf1:100,dync:2,dynmin:80,dynmax:350},
+  mid_lr:    {rp:38,ri:85,rd:22,pp:40,pi:85,pd:24,yp:32,yi:82,glpf1:150,dlpf1:90,dync:1,dynmin:60,dynmax:300},
+  long_range:{rp:32,ri:80,rd:16,pp:35,pi:80,pd:18,yp:28,yi:78,glpf1:130,dlpf1:80,dync:1,dynmin:50,dynmax:250}
+};
+const PD={
+  '2.5_micro':  {cls:'micro',      sz:2.5, wt:80,   cells:3,kv:19000,style:'freestyle'},
+  '3_whoop':    {cls:'whoop',      sz:3.0, wt:120,  cells:3,kv:15000,style:'freestyle'},
+  '3.5_cine':   {cls:'cine',       sz:3.5, wt:350,  cells:4,kv:3000, style:'cine'},
+  '4_mini':     {cls:'mini',       sz:4.0, wt:420,  cells:4,kv:2800, style:'freestyle'},
+  '5_freestyle':{cls:'freestyle',  sz:5.0, wt:750,  cells:4,kv:2400, style:'freestyle'},
+  '6_heavy5':   {cls:'heavy_5',    sz:6.0, wt:1000, cells:6,kv:2200, style:'freestyle'},
+  '7_midlr':    {cls:'mid_lr',     sz:7.0, wt:1100, cells:6,kv:1750, style:'longrange'},
+  '10_lr':      {cls:'long_range', sz:10.0,wt:2200, cells:6,kv:1400, style:'longrange'}
+};
+const RP={
+  beginner:{rrc:80, rsr:30,rex:20,prc:80, psr:30,pex:20,yrc:60,ysr:20,yex:10},
+  cine:    {rrc:70, rsr:20,rex:35,prc:70, psr:20,pex:35,yrc:50,ysr:20,yex:20},
+  freestyle:{rrc:120,rsr:70,rex:15,prc:120,psr:70,pex:15,yrc:80,ysr:45,yex:10},
+  race:    {rrc:180,rsr:80,rex:0, prc:180,psr:80,pex:0, yrc:120,ysr:60,yex:0}
+};
+
+function cls(sz){
+  if(sz<=2.5)return'micro';if(sz<=3)return'whoop';if(sz<=3.5)return'cine';
+  if(sz<=4.5)return'mini';if(sz<=5.5)return'freestyle';if(sz<=6)return'heavy_5';
+  if(sz<=7.5)return'mid_lr';return'long_range';
+}
+function smul(st){
+  if(st==='racing')   return{p:1.15,i:0.92,d:1.12};
+  if(st==='longrange')return{p:0.88,i:1.00,d:0.82};
+  if(st==='cine')     return{p:0.92,i:1.00,d:0.88};
+  return{p:1,i:1,d:1};
+}
+function applyPID(){
+  const b=BL[cls(S.size)]||BL.freestyle,m=smul(S.style),f=S.master/100;
+  S.rp=Math.round(b.rp*m.p*f);S.ri=Math.round(b.ri*m.i*f);S.rd=Math.round(b.rd*m.d*f);
+  S.pp=Math.round(b.pp*m.p*f);S.pi=Math.round(b.pi*m.i*f);S.pd=Math.round(b.pd*m.d*f);
+  S.yp=Math.round(b.yp*m.p*f);S.yi=Math.round(b.yi*m.i*f);S.yd=0;
+  S.glpf1=b.glpf1;S.dlpf1=b.dlpf1;S.dync=b.dync;S.dynmin=b.dynmin;S.dynmax=b.dynmax;
+  syncPIDUI();syncFilterUI();
+}
+function syncPIDUI(){
+  [['s_rp','pv_rp','rp'],['s_ri','pv_ri','ri'],['s_rd','pv_rd','rd'],['s_rf','pv_rf','rf'],
+   ['s_pp','pv_pp','pp'],['s_pi','pv_pi','pi'],['s_pd','pv_pd','pd'],['s_pf','pv_pf','pf'],
+   ['s_yp','pv_yp','yp'],['s_yi','pv_yi','yi'],['s_yd','pv_yd','yd'],['s_yf','pv_yf','yf']
+  ].forEach(([s,v,k])=>{sl(s,S[k]);el(v,S[k])});
+}
+function syncFilterUI(){
+  [['s_glpf1','v_glpf1','glpf1',' Hz'],['s_glpf2','v_glpf2','glpf2',' Hz'],
+   ['s_dlpf1','v_dlpf1','dlpf1',' Hz'],['s_dlpf2','v_dlpf2','dlpf2',' Hz'],
+   ['s_dync','v_dync','dync',''],['s_dynmin','v_dynmin','dynmin',''],['s_dynmax','v_dynmax','dynmax','']
+  ].forEach(([s,v,k,u])=>{sl(s,S[k]);el(v,S[k]+u)});
+}
+function sl(id,val){const e=document.getElementById(id);if(e){e.value=val;sbg(e);}}
+function el(id,val){const e=document.getElementById(id);if(e)e.textContent=val;}
+
+function sbg(e){
+  const p=((e.value-e.min)/(e.max-e.min))*100;
+  e.style.setProperty('--pct',p+'%');
+}
+
+// Rates calc (ACTUAL type)
+function actualRate(stick,rcr,sr,ex){
+  const S_=sr/100,E_=ex/100,R_=rcr/100;
+  const ec=stick*(1-E_)+stick*stick*stick*E_;
+  return R_*ec*(1/Math.max(0.0001,1-S_*stick))*200;
+}
+
+function drawRates(){
+  const cv=document.getElementById('ratesCanvas');if(!cv)return;
+  const dpr=window.devicePixelRatio||1,W=cv.offsetWidth,H=150;
+  cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+'px';
+  const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+  ctx.fillStyle='#040b14';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(0,255,136,.06)';ctx.lineWidth=1;
+  for(let i=1;i<4;i++){ctx.beginPath();ctx.moveTo(W*i/4,0);ctx.lineTo(W*i/4,H);ctx.stroke();}
+  for(let i=1;i<4;i++){ctx.beginPath();ctx.moveTo(0,H*i/4);ctx.lineTo(W,H*i/4);ctx.stroke();}
+  const axes=[{r:S.rrc,s:S.rsr,e:S.rex,c:'#00ff88'},{r:S.prc,s:S.psr,e:S.pex,c:'#00aaff'},{r:S.yrc,s:S.ysr,e:S.yex,c:'#ffb700'}];
+  let mx=0;axes.forEach(a=>{const v=actualRate(1,a.r,a.s,a.e);if(v>mx)mx=v;});
+  const sc=mx>0?(H-16)/mx:1;
+  axes.forEach(a=>{
+    ctx.beginPath();ctx.strokeStyle=a.c;ctx.lineWidth=2;ctx.shadowColor=a.c;ctx.shadowBlur=5;
+    for(let px=0;px<=W;px++){
+      const st=px/W,y=H-8-actualRate(st,a.r,a.s,a.e)*sc;
+      px===0?ctx.moveTo(px,y):ctx.lineTo(px,y);
+    }
+    ctx.stroke();ctx.shadowBlur=0;
+  });
+  el('rateMaxLbl',Math.round(mx));el('statRate',Math.round(mx));
+}
+
+// CLI generate
+function genCLI(){
+  const clsN={micro:'Micro',whoop:'Whoop',cine:'Cine',mini:'Mini 4"',freestyle:'5" Freestyle',heavy_5:'Heavy 5"',mid_lr:'7" Mid-LR',long_range:'10" LR'}[cls(S.size)]||'Freestyle';
+  const rxM={ELRS:'CRSF',ELRS900:'CRSF',CRSF:'CRSF',SBUS:'SBUS',PPM:'PPM',IBUS:'IBUS'};
+  const d=new Date();
+  const dt=`${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()+543}`;
+  const L=[];
+  L.push(`# ════════════════════════════════════════════════`);
+  L.push(`# BETAFLIGHT CONFIG WIZARD — OBIXConfig Doctor v2.2`);
+  L.push(`# โดรน   : ${S.size}" ${clsN} | ${S.weight}g | ${S.cells}S | ${S.kv}KV`);
+  L.push(`# สไตล์  : ${S.style.toUpperCase()} | BF ${S.bfver} | FC ${S.fc}`);
+  L.push(`# สร้างวัน: ${dt}`);
+  L.push(`# ════════════════════════════════════════════════`);
+  L.push('');
+  L.push('# ─── Rates ──────────────────────────────────────');
+  L.push(`set rates_type       = ${S.rtype}`);
+  L.push(`set roll_rc_rate     = ${S.rrc}`);
+  L.push(`set roll_super_rate  = ${S.rsr}`);
+  L.push(`set roll_expo        = ${S.rex}`);
+  L.push(`set pitch_rc_rate    = ${S.prc}`);
+  L.push(`set pitch_super_rate = ${S.psr}`);
+  L.push(`set pitch_expo       = ${S.pex}`);
+  L.push(`set yaw_rc_rate      = ${S.yrc}`);
+  L.push(`set yaw_super_rate   = ${S.ysr}`);
+  L.push(`set yaw_expo         = ${S.yex}`);
+  L.push('');
+  L.push('# ─── PID ─────────────────────────────────────────');
+  L.push(`set p_roll  = ${S.rp}`);
+  L.push(`set i_roll  = ${S.ri}`);
+  L.push(`set d_roll  = ${S.rd}`);
+  L.push(`set f_roll  = ${S.rf}`);
+  L.push(`set p_pitch = ${S.pp}`);
+  L.push(`set i_pitch = ${S.pi}`);
+  L.push(`set d_pitch = ${S.pd}`);
+  L.push(`set f_pitch = ${S.pf}`);
+  L.push(`set p_yaw   = ${S.yp}`);
+  L.push(`set i_yaw   = ${S.yi}`);
+  L.push(`set f_yaw   = ${S.yf}`);
+  L.push('');
+  L.push('# ─── Filters ─────────────────────────────────────');
+  L.push(`set gyro_lowpass_hz  = ${S.glpf1}`);
+  if(S.glpf2>0)L.push(`set gyro_lowpass2_hz = ${S.glpf2}`);
+  L.push(`set dterm_lowpass_hz  = ${S.dlpf1}`);
+  if(S.dlpf2>0)L.push(`set dterm_lowpass2_hz = ${S.dlpf2}`);
+  L.push(`set rpm_filter       = ${S.rpm_filter?'ON':'OFF'}`);
+  if(S.rpm_filter){L.push(`set rpm_filter_harmonics = 3`);L.push(`set rpm_filter_min_hz    = 100`);}
+  L.push(`set dyn_notch_count  = ${S.dyn_notch?S.dync:0}`);
+  if(S.dyn_notch){L.push(`set dyn_notch_min_hz = ${S.dynmin}`);L.push(`set dyn_notch_max_hz = ${S.dynmax}`);}
+  L.push('');
+  L.push('# ─── Motor / ESC ─────────────────────────────────');
+  L.push(`set motor_pwm_protocol = ${S.esc}`);
+  L.push(`set motor_poles        = ${S.poles}`);
+  L.push(S.motor_stop?'feature MOTOR_STOP':'feature -MOTOR_STOP');
+  L.push('');
+  L.push('# ─── Receiver ────────────────────────────────────');
+  if(S.rx==='PPM'){L.push('feature RX_PPM');L.push('feature -SERIALRX');}
+  else{L.push(`set serialrx_provider = ${rxM[S.rx]||'CRSF'}`);L.push('feature SERIALRX');L.push('feature -RX_PPM');}
+  L.push('');
+  L.push('# ─── Features ────────────────────────────────────');
+  L.push(S.airmode==='always'?'feature AIRMODE':'feature -AIRMODE');
+  L.push(`set anti_gravity_gain    = ${S.ag}`);
+  L.push(`set iterm_relax          = ${S.irelax}`);
+  L.push(`set iterm_relax_cutoff   = ${S.irc}`);
+  L.push(`set throttle_boost       = ${S.tboost}`);
+  L.push(`set throttle_boost_cutoff = 15`);
+  L.push('');
+  L.push('# ─── Failsafe ────────────────────────────────────');
+  L.push(`set failsafe_throttle  = ${S.fs}`);
+  L.push('set failsafe_procedure = DROP');
+  L.push('');
+  L.push('save');
+  return L.join('\n');
+}
+
+function hl(raw){
+  return raw
+    .replace(/(^# ═+.*)$/gm,'<span class="cc">$1</span>')
+    .replace(/(^# ─+.*)$/gm,'<span class="cc">$1</span>')
+    .replace(/(^# .*)$/gm,'<span class="cc">$1</span>')
+    .replace(/^(feature )(.+)$/gm,'<span class="cf">$1$2</span>')
+    .replace(/^(set )(\S+)(\s*=\s*)(.+)$/gm,'<span class="ck">$1</span>$2$3<span class="cv">$4</span>')
+    .replace(/^(save)$/gm,'<span class="cs">$1</span>');
+}
+
+function refreshCLI(){
+  const cli=genCLI();
+  const co=document.getElementById('cliOut');if(co)co.innerHTML=hl(cli);
+  el('statLines',cli.split('\n').length);
+  el('statPID',`${S.rp}/${S.ri}/${S.rd}`);
+  const oc=document.getElementById('outCopy');if(oc)oc.textContent=cli;
+  // warnings
+  const w=[];
+  if(S.kv>3000&&S.cells>=6)w.push('⚠️ KV สูงมากบน 6S+ — เสี่ยง motor ร้อน');
+  if(S.rx==='PPM')w.push('⚠️ PPM ไม่รองรับ RSSI/telemetry — แนะนำ ELRS/CRSF');
+  if(S.glpf1>400)w.push('⚠️ Gyro LPF1 สูงมาก — เสี่ยง oscillation');
+  const wb=document.getElementById('warnBox');
+  if(wb){wb.className='warn-box'+(w.length?' show':'');wb.innerHTML=w.join('<br>');}
+}
+
+function refreshOutSummary(){
+  const mr=Math.round(actualRate(1,S.rrc,S.rsr,S.rex));
+  const items=[
+    {l:'Frame',v:`${S.size}" · ${S.weight}g`},{l:'Battery',v:`${S.cells}S · ${S.kv}KV`},
+    {l:'Style',v:S.style.toUpperCase()},{l:'Class',v:cls(S.size).replace('_',' ').toUpperCase()},
+    {l:'PID P/I/D',v:`${S.rp}/${S.ri}/${S.rd}`},{l:'Max Rates',v:`${mr} °/s`},
+    {l:'Gyro LPF',v:`${S.glpf1} Hz`},{l:'ESC',v:S.esc},
+  ];
+  const os=document.getElementById('outSum');
+  if(os)os.innerHTML=items.map(i=>`<div class="out-card"><div class="oc-lbl">${i.l}</div><div class="oc-val">${i.v}</div></div>`).join('');
+}
+
+// Step nav
+let cur=1;
+function goStep(n){
+  if(n<1||n>7)return;
+  document.getElementById('stp'+cur).classList.remove('active');
+  cur=n;
+  document.getElementById('stp'+n).classList.add('active');
+  document.querySelectorAll('.step-item').forEach((e,i)=>{
+    const s=i+1;e.classList.remove('active','done');
+    if(s===n)e.classList.add('active');else if(s<n)e.classList.add('done');
+    const sep=e.nextElementSibling;
+    if(sep&&sep.classList.contains('step-sep'))sep.style.background=s<n?'rgba(0,204,106,.3)':'';
+  });
+  el('stepCtr',`ขั้นที่ ${n} / 7`);
+  document.getElementById('btnPrev').disabled=(n===1);
+  const nb=document.getElementById('btnNext');
+  if(n===6){nb.textContent='🔥 GENERATE';nb.className='nav-btn gen';}
+  else if(n===7){nb.style.display='none';}
+  else{nb.textContent='ถัดไป →';nb.className='nav-btn next';nb.style.display='';}
+  if(n===4)setTimeout(drawRates,50);
+  if(n===7)refreshOutSummary();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function stepNext(){if(cur<7)goStep(cur+1);}
+function stepPrev(){if(cur>1)goStep(cur-1);}
+document.querySelectorAll('.step-item').forEach(e=>{
+  e.addEventListener('click',()=>{const n=parseInt(e.dataset.goto);if(n<=cur+1)goStep(n);});
+});
+
+// Preset cards
+document.querySelectorAll('.preset-card').forEach(c=>{
+  c.addEventListener('click',()=>{
+    document.querySelectorAll('.preset-card').forEach(x=>x.classList.remove('sel'));
+    c.classList.add('sel');
+    const p=PD[c.dataset.p];if(!p)return;
+    S.size=p.sz;S.weight=p.wt;S.cells=p.cells;S.kv=p.kv;S.style=p.style;
+    sl('s_size',p.sz*10);el('v_size',p.sz.toFixed(1)+'"');
+    sl('s_weight',p.wt);el('v_weight',p.wt+' g');
+    sl('s_kv',p.kv);el('v_kv',p.kv+' KV');
+    setActivePill('pg_style',p.style);setActivePill('pg_cells',p.cells.toString());
+    applyPID();refreshCLI();
+  });
+});
+
+// Pill groups
+function setActivePill(gid,val){
+  const g=document.getElementById(gid);if(!g)return;
+  g.querySelectorAll('.pill-btn').forEach(b=>b.classList.toggle('sel',b.dataset.val===val));
+}
+function initPills(gid,key,cb){
+  const g=document.getElementById(gid);if(!g)return;
+  g.querySelectorAll('.pill-btn').forEach(b=>{
+    b.addEventListener('click',()=>{
+      g.querySelectorAll('.pill-btn').forEach(x=>x.classList.remove('sel','sel-b','sel-a'));
+      b.classList.add('sel');S[key]=b.dataset.val;
+      if(cb)cb(b.dataset.val);refreshCLI();
+    });
+  });
+}
+
+// Slider bind
+function bind(id,key,vid,fmt,cb){
+  const e=document.getElementById(id);if(!e)return;
+  sbg(e);
+  e.addEventListener('input',()=>{
+    const v=parseFloat(e.value);S[key]=v;sbg(e);
+    if(vid)el(vid,fmt?fmt(v):v);
+    if(cb)cb(v);refreshCLI();
+  });
+}
+
+// Toggle
+function twClick(wrap,key,cbId){
+  const cb=document.getElementById(cbId);if(!cb)return;
+  cb.checked=!cb.checked;S[key]=cb.checked;
+  wrap.classList.toggle('on',cb.checked);
+  if(key==='dyn_notch')document.getElementById('dynExt').style.display=cb.checked?'':'none';
+  refreshCLI();
+}
+
+// Copy/Download
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+function copyCLI(){navigator.clipboard.writeText(genCLI()).then(()=>showToast('✅ Copied!'));}
+function downloadCLI(){
+  const fn=`bf_config_${cls(S.size)}_${S.cells}S_${S.style}.txt`;
+  const a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(genCLI());a.download=fn;a.click();
+  showToast('⬇️ Downloaded '+fn);
+}
+
+// INIT
+initPills('pg_style','style',()=>applyPID());
+initPills('pg_cells','cells');
+initPills('pg_fc','fc');
+initPills('pg_bfver','bfver');
+initPills('pg_esc','esc');
+initPills('pg_poles','poles',v=>S.poles=parseInt(v));
+initPills('pg_rx','rx');
+initPills('pg_vtx','vtx');
+initPills('pg_air','airmode');
+initPills('pg_irelax','irelax');
+initPills('pg_rtype','rtype');
+initPills('pg_ratepre','_dummy',pr=>{
+  const p=RP[pr];if(!p)return;
+  Object.assign(S,p);
+  const m={rrc:'r_rrc',rsr:'r_rsr',rex:'r_rex',prc:'r_prc',psr:'r_psr',pex:'r_pex',yrc:'r_yrc',ysr:'r_ysr',yex:'r_yex'};
+  const d={rrc:'rv_rrc',rsr:'rv_rsr',rex:'rv_rex',prc:'rv_prc',psr:'rv_psr',pex:'rv_pex',yrc:'rv_yrc',ysr:'rv_ysr',yex:'rv_yex'};
+  Object.keys(m).forEach(k=>{sl(m[k],S[k]);el(d[k],(S[k]/100).toFixed(2));});
+  drawRates();
+});
+initPills('pg_pidpre','_dummy',v=>{
+  S.master=parseInt(v);sl('s_master',v);el('v_master',(parseInt(v)/100).toFixed(2)+'×');applyPID();
+});
+
+bind('s_size','size','v_size',v=>(v/10).toFixed(1)+'"',()=>applyPID());
+bind('s_weight','weight','v_weight',v=>v+' g');
+bind('s_kv','kv','v_kv',v=>v+' KV');
+bind('s_master','master','v_master',v=>(v/100).toFixed(2)+'×',()=>applyPID());
+bind('s_glpf1','glpf1','v_glpf1',v=>v+' Hz');
+bind('s_glpf2','glpf2','v_glpf2',v=>v+(v==0?' (ปิด)':' Hz'));
+bind('s_dlpf1','dlpf1','v_dlpf1',v=>v+' Hz');
+bind('s_dlpf2','dlpf2','v_dlpf2',v=>v+(v==0?' (ปิด)':' Hz'));
+bind('s_dync','dync','v_dync',v=>Math.round(v));
+bind('s_dynmin','dynmin','v_dynmin',v=>Math.round(v));
+bind('s_dynmax','dynmax','v_dynmax',v=>Math.round(v));
+bind('s_tboost','tboost','v_tboost',v=>Math.round(v));
+bind('s_ag','ag','v_ag',v=>Math.round(v));
+bind('s_irc','irc','v_irc',v=>Math.round(v)+' Hz');
+bind('s_fs','fs','v_fs',v=>Math.round(v));
+
+// PID sliders
+[['s_rp','pv_rp','rp'],['s_ri','pv_ri','ri'],['s_rd','pv_rd','rd'],['s_rf','pv_rf','rf'],
+ ['s_pp','pv_pp','pp'],['s_pi','pv_pi','pi'],['s_pd','pv_pd','pd'],['s_pf','pv_pf','pf'],
+ ['s_yp','pv_yp','yp'],['s_yi','pv_yi','yi'],['s_yd','pv_yd','yd'],['s_yf','pv_yf','yf']
+].forEach(([s,v,k])=>{
+  const e=document.getElementById(s);if(!e)return;sbg(e);
+  e.addEventListener('input',()=>{S[k]=parseInt(e.value);sbg(e);el(v,e.value);refreshCLI();});
+});
+// Rates sliders
+[['r_rrc','rv_rrc','rrc'],['r_rsr','rv_rsr','rsr'],['r_rex','rv_rex','rex'],
+ ['r_prc','rv_prc','prc'],['r_psr','rv_psr','psr'],['r_pex','rv_pex','pex'],
+ ['r_yrc','rv_yrc','yrc'],['r_ysr','rv_ysr','ysr'],['r_yex','rv_yex','yex']
+].forEach(([s,v,k])=>{
+  const e=document.getElementById(s);if(!e)return;sbg(e);
+  e.addEventListener('input',()=>{S[k]=parseInt(e.value);sbg(e);el(v,(S[k]/100).toFixed(2));drawRates();refreshCLI();});
+});
+
+// First render
+applyPID();syncPIDUI();syncFilterUI();refreshCLI();
+document.querySelectorAll('input[type=range].wslider').forEach(sbg);
+el('v_size',(parseInt(document.getElementById('s_size').value)/10).toFixed(1)+'"');
+</script>
+</body>
+</html>
