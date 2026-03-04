@@ -631,6 +631,22 @@ def bf_wizard():
     """Betaflight Config Wizard — 7 ขั้นตอน → CLI พร้อม paste"""
     return render_template('bf_wizard.html')
 
+# ── v2.3 Community Features ───────────────────────────────────────────────────
+@app.route('/build-card')
+def build_card():
+    """Build Card Generator — สร้างรูปสเปคโดรนแชร์ Social ได้เลย"""
+    return render_template('build_card.html')
+
+@app.route('/tuning-log')
+def tuning_log():
+    """Tuning Log — บันทึก session การ tune ทุก session"""
+    return render_template('tuning_log.html')
+
+@app.route('/leaderboard')
+def leaderboard():
+    """Community Config Leaderboard — vote + rank config"""
+    return render_template('leaderboard.html')
+
 # ── RPM Filter Calculator ────────────────────────────────────────────────
 try:
     from analyzer.rpm_filter_calc import calculate_rpm_filter
@@ -812,6 +828,9 @@ def sitemap_xml():
     pages = [
         ("/flight-quiz",      "weekly",  "0.8"),
         ("/bf-wizard",        "weekly",  "0.9"),
+        ("/build-card",       "weekly",  "0.8"),
+        ("/tuning-log",       "weekly",  "0.7"),
+        ("/leaderboard",      "weekly",  "0.8"),
         ("/landing",          "weekly",  "1.0"),
         ("/blackbox",          "weekly",  "1.0"),
         ("/app",              "weekly",  "0.9"),
