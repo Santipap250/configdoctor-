@@ -181,6 +181,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-t);min-height
   .lb-head span:nth-child(3),.lb-row>*:nth-child(3),
   .lb-head span:nth-child(6),.lb-row>*:nth-child(6){display:none}
 }
+
+/* ── EXTRA MOBILE FIXES ── */
+@media(max-width:480px){
+  .podium{display:none}
+  .lb-head,.lb-row{grid-template-columns:36px 1fr 70px 52px!important;gap:6px!important}
+  .controls{flex-direction:column;align-items:flex-start}
+  .hero h1{font-size:22px}
+  .modal{padding:18px 14px;border-radius:16px 16px 0 0}
+  .modal-overlay{align-items:flex-end}
+  .mgrid{grid-template-columns:1fr!important}
+  .pid-mini-grid{grid-template-columns:1fr!important}
+}
 </style>
 </head>
 <body>
