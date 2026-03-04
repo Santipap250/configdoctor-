@@ -117,7 +117,7 @@ def evaluate_rules(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
         noise_v = float(noise)
     except Exception:
         noise_v = 0
-    if noise_v >= 7:
+    if noise_v >= 5:  # FIX: max noise score=6 (was threshold=7, never triggered)
         add("noise_high", "warning",
             "ระดับเสียง/สัญญาณสั่นสูง — อาจเกิดแบนด์สปริงหรืออาการสั่น",
             "ตรวจสอบการ balance ใบพัด และปรับ filter (dterm/gyro lowpass)",

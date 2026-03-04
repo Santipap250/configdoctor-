@@ -419,7 +419,9 @@ def make_advanced_report(
         # ---- คำนวณ fields เพิ่มเติมที่ template ต้องการแต่ยังไม่มีใน advanced dict ----
         pack_voltage_nominal = float(comp.get("pack_voltage_nominal", cells * NOMINAL_CELL_V))
         current_draw_a = round(total_power_w / pack_voltage_nominal, 2) if pack_voltage_nominal > 0 else 0
-        peak_current_a = round(current_draw_a * 1.8, 2)
+        # FIX: peak = hover × 4.5 (empirical: 5" 4S hover~8A/motor, peak~35-40A/motor)
+        # This gives a much more realistic peak estimate for ESC sizing
+        peak_current_a = round(current_draw_a * 4.5, 2)
         c_required = round((current_draw_a * 1000) / batt_mAh_used, 1) if batt_mAh_used > 0 else None
 
         stress = analysis.get("motor_esc_stress", "low")
