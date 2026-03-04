@@ -366,8 +366,21 @@
           if (res.ok){
             const j = await res.json();
             applyResult(j); return;
+          } else {
+            // FIX v2.2: แจ้ง user ว่า server analysis ล้มเหลว แทนการ silent fallback
+            // ก่อนหน้า: if(res.ok) → ถ้าไม่ ok ก็ตกลงไป local โดยไม่บอก user
+            // หลังแก้:  แสดง error จาก server ก่อน แล้วค่อย fallback
+            try {
+              const errData = await res.json();
+              summaryText.textContent = '⚠️ Server: ' + (errData.error || 'วิเคราะห์ไม่ได้') + ' — ใช้ Local mode';
+            } catch(_) {
+              summaryText.textContent = '⚠️ Server ไม่ตอบสนอง — ใช้ Local mode';
+            }
           }
-        } catch(e){ console.warn('Server analyze failed', e); }
+        } catch(e){
+          console.warn('Server analyze failed', e);
+          summaryText.textContent = '⚠️ เชื่อมต่อ Server ไม่ได้ — ใช้ Local mode';
+        }
       }
 
       // local fallback
