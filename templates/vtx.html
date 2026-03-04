@@ -4,632 +4,1742 @@
 <meta charset="utf-8">
 <title>VTX Bands & Channels — OBIXConfig Doctor</title>
 {% set og_title       = "VTX Bands & Channels — OBIXConfig Doctor" %}
-{% set og_description = "ตาราง VTX Band/Channel ครบทุก Band พร้อม SmartAudio · Tramp CLI command — FPV community tool 🇹🇭" %}
+{% set og_description = "ตาราง VTX Band/Channel ครบทุก Band · Spectrum Visualizer · Race Planner · CLI Generator · SmartAudio · Tramp — FPV community tool 🇹🇭" %}
 {% set og_url         = "https://configdoctor.onrender.com/vtx" %}
 {% include "partials/og_tags.html" %}
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% set nav_page = "vtx" %}
+{% set page_name = "VTX BANDS" %}
+{% include "partials/header.html" %}
+
 <style>
-/* ── VTX Page Specific ── */
-.vtx-band-matrix { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; margin: 14px 0; }
-.vtx-band-matrix .band-header {
-  font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em;
-  color: var(--muted); text-align: center; padding: 5px 2px;
-}
-.ch-cell {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 7px 3px;
+/* ══════════════════════════════════════════════════════
+   VTX BANDS & CHANNELS — OBIXConfig Doctor v3
+   Full redesign: Spectrum, RacePlanner, Education
+══════════════════════════════════════════════════════ */
+
+.vtx-root { max-width: 980px; margin: 0 auto; padding: 0 16px 80px; }
+
+/* ─── HERO ─────────────────────────────────────────── */
+.vtx-hero {
   text-align: center;
-  cursor: pointer;
-  transition: all .15s;
+  padding: 28px 0 22px;
   position: relative;
 }
-.ch-cell:hover { border-color: rgba(255,255,255,0.16); transform: translateY(-1px); }
-.ch-cell.selected {
-  background: var(--green-dim);
-  border-color: rgba(16,196,122,0.45);
-  box-shadow: 0 0 10px rgba(16,196,122,0.18);
+.vtx-hero-eyebrow {
+  font-size: .68rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--green); background: var(--green-dim);
+  border: 1px solid rgba(16,196,122,.22); border-radius: 100px;
+  display: inline-block; padding: 3px 12px; margin-bottom: 10px;
 }
-.ch-cell.selected .ch-freq { color: var(--green); }
-.ch-cell.selected .ch-label { color: var(--green); font-weight: 700; }
-.ch-num { font-size: 0.60rem; color: var(--muted); display: block; }
-.ch-freq { font-size: 0.72rem; font-family: var(--mono); color: var(--text); display: block; margin-top: 2px; font-weight: 600; }
-.ch-label { font-size: 0.62rem; color: var(--muted); display: block; margin-top: 1px; }
-
-/* Band row labels */
-.band-row-label {
-  display: flex; align-items: center; gap: 8px;
-  padding: 6px 0 4px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 2px;
+.vtx-hero-title {
+  font-family: var(--font-display); font-size: clamp(1.6rem,5vw,2.4rem);
+  font-weight: 700; color: var(--text); line-height: 1.1;
+  letter-spacing: -.01em; margin-bottom: 8px;
 }
-.band-row-label .band-dot {
-  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+.vtx-hero-title span { color: var(--green); }
+.vtx-hero-sub {
+  font-size: .9rem; color: var(--muted); max-width: 520px; margin: 0 auto 14px;
+  line-height: 1.55;
 }
-.band-row-label span { font-size: 0.78rem; font-weight: 700; }
-
-/* Power bar */
-.pwr-bar-wrap { position: relative; height: 8px; background: var(--bg-elevated); border-radius: 4px; overflow: hidden; margin-top: 6px; }
-.pwr-bar-fill { height: 100%; border-radius: 4px; transition: width .3s ease, background .3s; }
-
-/* Protocol tabs */
-.proto-tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
-.proto-tab {
-  padding: 6px 14px; border-radius: 20px;
-  font-size: 0.78rem; font-weight: 700;
-  background: rgba(255,255,255,0.04); color: var(--muted);
-  border: 1px solid var(--border); cursor: pointer; transition: all .15s;
+.vtx-hero-badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.vbadge {
+  padding: 4px 12px; border-radius: 100px; font-size: .7rem; font-weight: 700;
+  letter-spacing: .05em; border: 1px solid;
 }
-.proto-tab.active { background: var(--green-dim); color: var(--green); border-color: rgba(16,196,122,0.3); }
-.proto-tab:hover:not(.active) { background: rgba(255,255,255,0.07); color: var(--text); }
+.vbadge-g { background: var(--green-dim); color: var(--green); border-color: rgba(16,196,122,.3); }
+.vbadge-b { background: var(--blue-dim); color: var(--blue); border-color: rgba(88,166,255,.3); }
+.vbadge-gold { background: var(--gold-dim); color: var(--gold); border-color: rgba(241,182,90,.3); }
+.vbadge-r { background: var(--red-dim); color: var(--red); border-color: rgba(248,81,73,.3); }
+.vbadge-p { background: var(--purple-dim); color: var(--purple); border-color: rgba(201,166,255,.3); }
 
-/* Channel info display */
-.ch-info-card {
-  background: linear-gradient(135deg, #0c1810, #0a1014);
-  border: 1px solid rgba(16,196,122,0.15);
-  border-radius: var(--radius-lg);
-  padding: 16px 18px;
-  margin-bottom: 14px;
+/* ─── PANEL CARD ───────────────────────────────────── */
+.vtx-panel {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 20px; margin-bottom: 16px;
   position: relative; overflow: hidden;
 }
-.ch-info-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(16,196,122,0.3), transparent);
+.vtx-panel-title {
+  font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 7px;
 }
-.ch-info-freq {
-  font-family: var(--font-display); font-size: 2.2rem; font-weight: 700;
-  color: var(--green); line-height: 1;
-  text-shadow: 0 0 30px rgba(16,196,122,0.35);
+.vtx-panel-title::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
 }
-.ch-info-freq span { font-size: 1rem; color: var(--muted); font-weight: 400; margin-left: 4px; }
-.ch-info-band { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
 
-/* CLI output enhanced */
-.cli-output-box {
-  background: #050810;
-  border: 1px solid rgba(16,196,122,0.12);
-  border-radius: var(--radius-md);
-  padding: 14px 16px;
-  font-family: var(--mono); font-size: 0.82rem;
-  color: #9dbfda; line-height: 1.65;
-  min-height: 68px; position: relative;
-  overflow-x: auto;
+/* ─── SELECTED CHANNEL HERO DISPLAY ───────────────── */
+.ch-live-display {
+  background: linear-gradient(135deg, rgba(16,196,122,.05) 0%, rgba(7,9,11,0) 60%);
+  border: 1px solid rgba(16,196,122,.12);
+  border-radius: 14px; padding: 18px 20px; margin-bottom: 16px;
+  display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center;
 }
-.cli-comment { color: #4a6a5a; }
+.ch-live-freq {
+  font-family: var(--font-display); font-size: clamp(2rem,8vw,3.2rem); font-weight: 700;
+  color: var(--green); line-height: 1; letter-spacing: -.02em;
+  text-shadow: 0 0 40px rgba(16,196,122,.3);
+  transition: all .25s ease;
+}
+.ch-live-freq sup { font-size: .35em; color: var(--muted); font-weight: 400; vertical-align: super; }
+.ch-live-meta { font-size: .85rem; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+.ch-live-meta strong { color: var(--text); }
+.ch-live-right { text-align: right; }
+.ch-live-power-val {
+  font-family: var(--font-display); font-size: 1.3rem; font-weight: 700;
+  color: var(--gold); line-height: 1;
+}
+.ch-live-power-label { font-size: .68rem; color: var(--muted); margin-top: 2px; }
+.pwr-bar-wrap { height: 5px; background: rgba(255,255,255,.05); border-radius: 3px; margin-top: 7px; overflow: hidden; width: 90px; margin-left: auto; }
+.pwr-bar-fill { height: 100%; border-radius: 3px; transition: width .35s ease, background .35s; }
+
+/* ─── SPECTRUM VISUALIZER ──────────────────────────── */
+.spectrum-wrap {
+  position: relative; height: 90px; margin: 8px 0 4px;
+  background: rgba(0,0,0,.3); border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.spectrum-axis {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 22px; border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 8px;
+}
+.spectrum-axis-lbl { font-size: .58rem; color: var(--muted); font-family: var(--mono); }
+.spectrum-bg-band {
+  position: absolute; top: 0; bottom: 22px;
+  opacity: .06; transition: opacity .2s;
+}
+.spectrum-bg-band:hover { opacity: .12; }
+.spectrum-channel-dot {
+  position: absolute; bottom: 27px;
+  width: 8px; height: 8px; border-radius: 50%;
+  transform: translateX(-50%);
+  cursor: pointer; transition: all .2s;
+  border: 1.5px solid rgba(255,255,255,.2);
+}
+.spectrum-channel-dot:hover { transform: translateX(-50%) scale(1.7); z-index: 10; }
+.spectrum-channel-dot.selected { transform: translateX(-50%) scale(2); z-index: 20; box-shadow: 0 0 10px currentColor; }
+.spectrum-label {
+  position: absolute; bottom: 26px;
+  font-size: .48rem; font-family: var(--mono); font-weight: 700;
+  transform: translateX(-50%);
+  pointer-events: none; white-space: nowrap;
+  transition: all .2s;
+  opacity: .7;
+}
+.spectrum-selected-line {
+  position: absolute; top: 0; bottom: 22px; width: 1px;
+  background: var(--green); opacity: .4;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.wifi-zone {
+  position: absolute; top: 0; bottom: 22px;
+  background: rgba(248,81,73,.08);
+  border-left: 1px dashed rgba(248,81,73,.3);
+  border-right: 1px dashed rgba(248,81,73,.3);
+}
+.wifi-zone-label {
+  position: absolute; top: 4px; left: 50%; transform: translateX(-50%);
+  font-size: .5rem; color: var(--red); font-weight: 700; white-space: nowrap;
+  text-transform: uppercase; letter-spacing: .06em;
+}
+.spectrum-tooltip {
+  position: absolute; bottom: 56px;
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: 7px; padding: 6px 10px; pointer-events: none;
+  font-size: .7rem; white-space: nowrap; z-index: 100;
+  transform: translateX(-50%);
+  box-shadow: 0 4px 16px rgba(0,0,0,.5);
+  opacity: 0; transition: opacity .15s;
+}
+.spectrum-tooltip.show { opacity: 1; }
+.spectrum-legend {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;
+}
+.spec-leg-item {
+  display: flex; align-items: center; gap: 5px;
+  font-size: .68rem; color: var(--muted); cursor: pointer;
+  padding: 3px 8px; border-radius: 6px; border: 1px solid transparent;
+  transition: .15s;
+}
+.spec-leg-item:hover { border-color: var(--border); color: var(--text); }
+.spec-leg-item.active { border-color: rgba(255,255,255,.12); color: var(--text); }
+.spec-leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* ─── CONTROLS ──────────────────────────────────────── */
+.vtx-controls-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;
+}
+@media(max-width:520px){ .vtx-controls-row { grid-template-columns: 1fr; } }
+
+.vtx-label {
+  font-size: .68rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); display: block; margin-bottom: 6px;
+}
+.vtx-select {
+  width: 100%; padding: 9px 12px;
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius-md); color: var(--text); font-size: .87rem;
+  transition: border-color .15s;
+}
+.vtx-select:focus { outline: none; border-color: rgba(16,196,122,.4); }
+
+.proto-tabs { display: flex; gap: 5px; flex-wrap: wrap; }
+.proto-tab {
+  padding: 7px 13px; border-radius: 20px; font-size: .75rem; font-weight: 700;
+  background: rgba(255,255,255,.04); color: var(--muted);
+  border: 1px solid var(--border); cursor: pointer; transition: all .15s;
+}
+.proto-tab.active { background: var(--green-dim); color: var(--green); border-color: rgba(16,196,122,.3); }
+.proto-tab:hover:not(.active) { background: rgba(255,255,255,.07); color: var(--text); }
+
+/* ─── BAND MATRIX ───────────────────────────────────── */
+.band-section { margin-bottom: 12px; }
+.band-row-header {
+  display: flex; align-items: center; gap: 8px; padding: 6px 0 5px;
+  border-bottom: 1px solid var(--border); margin-bottom: 6px;
+  cursor: pointer;
+}
+.band-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.band-row-name { font-size: .8rem; font-weight: 700; }
+.band-row-key {
+  font-size: .65rem; font-family: var(--mono); color: var(--muted);
+  background: rgba(255,255,255,.05); padding: 1px 6px; border-radius: 4px;
+}
+.band-row-desc { font-size: .68rem; color: var(--muted); margin-left: auto; }
+.band-info-pill {
+  font-size: .62rem; padding: 1px 7px; border-radius: 100px;
+  border: 1px solid; margin-left: 4px;
+}
+
+.ch-grid {
+  display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px;
+}
+@media(max-width:440px){ .ch-grid { grid-template-columns: repeat(4, 1fr); gap: 4px; } }
+
+.ch-cell {
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: 7px; padding: 7px 3px; text-align: center;
+  cursor: pointer; transition: all .15s; position: relative;
+  border-top-width: 2px;
+}
+.ch-cell:hover { border-color: rgba(255,255,255,.14); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.3); }
+.ch-cell.selected { box-shadow: 0 0 0 2px var(--cell-color), 0 6px 20px rgba(0,0,0,.4); }
+.ch-cell.conflict-warn { animation: conflictPulse 1.2s ease-in-out infinite; }
+@keyframes conflictPulse { 0%,100%{box-shadow:0 0 0 1px rgba(248,81,73,.5)} 50%{box-shadow:0 0 0 3px rgba(248,81,73,.3)} }
+.ch-num { font-size: .55rem; color: var(--muted); display: block; }
+.ch-freq { font-size: .68rem; font-family: var(--mono); display: block; margin-top: 1px; font-weight: 600; color: var(--text); }
+.ch-label { font-size: .58rem; color: var(--muted); display: block; margin-top: 1px; }
+.ch-conflict-dot {
+  position: absolute; top: 3px; right: 3px;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--red); display: none;
+}
+.ch-cell.conflict-warn .ch-conflict-dot { display: block; }
+.ch-wifi-warn {
+  position: absolute; top: 2px; left: 2px; font-size: .5rem;
+  line-height: 1;
+}
+
+/* ─── CLI OUTPUT ────────────────────────────────────── */
+.cli-box {
+  background: #04080f; border: 1px solid rgba(16,196,122,.1);
+  border-radius: 10px; padding: 14px 16px;
+  font-family: var(--mono); font-size: .82rem;
+  color: #8ab8d4; line-height: 1.7; position: relative;
+  min-height: 60px; overflow-x: auto;
+}
+.cli-comment { color: #3a5c4a; }
 .cli-cmd { color: #10c47a; }
 .cli-val { color: #58a6ff; }
-
-/* Conflict indicator */
-.conflict-dot {
-  position: absolute; top: 4px; right: 4px;
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--red);
-  animation: conflictBlink 1s ease-in-out infinite;
+.cli-band { color: #f1b65a; }
+.cli-freq { color: #c9a6ff; }
+.cli-copy-btn {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(16,196,122,.1); border: 1px solid rgba(16,196,122,.25);
+  border-radius: 6px; color: var(--green); font-size: .7rem; font-weight: 700;
+  padding: 4px 10px; cursor: pointer; transition: .15s; font-family: var(--font);
 }
-@keyframes conflictBlink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.cli-copy-btn:hover { background: rgba(16,196,122,.2); }
 
-/* Freq table enhanced */
-.vtx-freq-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
-.vtx-freq-table th {
-  padding: 7px 10px; text-align: left; font-size: 0.68rem; font-weight: 700;
-  letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
-  border-bottom: 1px solid var(--border);
+/* ─── POWER WARNING ─────────────────────────────────── */
+.pwr-warn {
+  background: rgba(241,182,90,.07); border: 1px solid rgba(241,182,90,.2);
+  border-radius: 8px; padding: 10px 14px; margin-top: 8px;
+  font-size: .8rem; color: var(--gold); display: none;
+  line-height: 1.5;
 }
-.vtx-freq-table td { padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,0.025); }
-.vtx-freq-table tr:hover td { background: rgba(255,255,255,0.025); }
-.vtx-freq-table tr.highlighted td { background: var(--green-dim); }
-.vtx-freq-table tr.highlighted .td-freq { color: var(--green); font-weight: 700; }
-.band-badge {
-  display: inline-block; padding: 1px 7px; border-radius: 10px;
-  font-size: 0.65rem; font-weight: 700; letter-spacing: .04em;
-}
+.pwr-warn.show { display: block; }
 
-/* Info cards row */
-.info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 12px; }
-.info-card {
+/* ─── RACE PLANNER ──────────────────────────────────── */
+.pilot-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.pilot-row {
+  display: grid; grid-template-columns: 24px 120px 1fr auto;
+  gap: 8px; align-items: center;
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: 9px; padding: 8px 12px;
+  transition: border-color .15s;
+}
+.pilot-row.has-conflict { border-color: rgba(248,81,73,.4); }
+.pilot-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .7rem; font-weight: 700; font-family: var(--font-display);
+  color: #000; flex-shrink: 0;
+}
+.pilot-name-input {
+  padding: 5px 9px; background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text); font-size: .82rem; font-family: var(--font);
+  width: 100%;
+}
+.pilot-name-input:focus { outline: none; border-color: rgba(16,196,122,.35); }
+.pilot-ch-select {
+  padding: 5px 9px; background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text); font-size: .82rem; width: 100%;
+}
+.pilot-remove-btn {
+  background: none; border: none; color: var(--muted); cursor: pointer;
+  font-size: 1rem; padding: 2px 4px; border-radius: 4px; transition: .15s;
+}
+.pilot-remove-btn:hover { color: var(--red); }
+.conflict-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--red-dim); border: 1px solid rgba(248,81,73,.3);
+  border-radius: 6px; padding: 4px 10px; font-size: .72rem; color: var(--red);
+  font-weight: 600;
+}
+.planner-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.planner-btn {
+  padding: 8px 16px; border-radius: 8px; font-size: .8rem; font-weight: 700;
+  cursor: pointer; transition: all .15s; font-family: var(--font); border: 1px solid;
+}
+.planner-btn-green {
+  background: var(--green-dim); color: var(--green); border-color: rgba(16,196,122,.3);
+}
+.planner-btn-green:hover { background: rgba(16,196,122,.18); }
+.planner-btn-blue {
+  background: var(--blue-dim); color: var(--blue); border-color: rgba(88,166,255,.3);
+}
+.planner-btn-blue:hover { background: rgba(88,166,255,.18); }
+.planner-btn-ghost {
+  background: rgba(255,255,255,.04); color: var(--muted); border-color: var(--border);
+}
+.planner-btn-ghost:hover { background: rgba(255,255,255,.07); color: var(--text); }
+
+.conflict-report {
+  background: rgba(248,81,73,.06); border: 1px solid rgba(248,81,73,.2);
+  border-radius: 8px; padding: 12px 14px; margin-top: 10px;
+  font-size: .8rem; color: var(--red); line-height: 1.6;
+  display: none;
+}
+.conflict-report.show { display: block; }
+.ok-report {
+  background: var(--green-dim); border: 1px solid rgba(16,196,122,.2);
+  border-radius: 8px; padding: 10px 14px; margin-top: 10px;
+  font-size: .82rem; color: var(--green);
+  display: none;
+}
+.ok-report.show { display: block; }
+
+/* ─── PILOT COLORS ──────────────────────────────────── */
+.pilot-color-1 { background: #f85149; }
+.pilot-color-2 { background: #58a6ff; }
+.pilot-color-3 { background: #10c47a; }
+.pilot-color-4 { background: #f1b65a; }
+.pilot-color-5 { background: #c9a6ff; }
+.pilot-color-6 { background: #ff9966; }
+.pilot-color-7 { background: #66ddcc; }
+.pilot-color-8 { background: #ff66aa; }
+
+/* ─── EDUCATION SECTIONS ────────────────────────────── */
+.edu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media(max-width:620px){ .edu-grid { grid-template-columns: 1fr; } }
+
+.edu-card {
   background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius-md); padding: 14px;
+  border-radius: 12px; padding: 16px; position: relative; overflow: hidden;
 }
-.info-card h4 { font-size: 0.78rem; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .05em; }
-.info-card p  { font-size: 0.82rem; color: var(--text); line-height: 1.55; }
+.edu-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  border-radius: 12px 12px 0 0;
+}
+.edu-card-g::before { background: linear-gradient(90deg, var(--green), transparent); }
+.edu-card-b::before { background: linear-gradient(90deg, var(--blue), transparent); }
+.edu-card-gold::before { background: linear-gradient(90deg, var(--gold), transparent); }
+.edu-card-r::before { background: linear-gradient(90deg, var(--red), transparent); }
+.edu-card-p::before { background: linear-gradient(90deg, var(--purple), transparent); }
 
-@media (max-width:min(600px,100%)) {
-  .vtx-band-matrix { grid-template-columns: repeat(4, 1fr); }
-  .ch-info-freq { font-size: 1.7rem; }
+.edu-card-icon { font-size: 1.4rem; margin-bottom: 8px; display: block; }
+.edu-card-title { font-size: .82rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.edu-card-body { font-size: .78rem; color: var(--muted); line-height: 1.65; }
+.edu-card-body strong { color: var(--text); }
+.edu-card-body code {
+  font-family: var(--mono); font-size: .75rem;
+  background: rgba(255,255,255,.06); padding: 1px 5px; border-radius: 4px; color: var(--green);
 }
-@media (max-width:min(420px,100%)) {
-  .vtx-band-matrix { grid-template-columns: repeat(4, 1fr); }
+.edu-highlight {
+  background: rgba(16,196,122,.07); border-left: 3px solid var(--green);
+  border-radius: 0 7px 7px 0; padding: 8px 12px; margin: 8px 0;
+  font-size: .78rem; color: var(--text); line-height: 1.6;
+}
+.edu-list { list-style: none; padding: 0; margin: 6px 0 0; }
+.edu-list li {
+  font-size: .78rem; color: var(--muted); padding: 4px 0;
+  border-bottom: 1px solid rgba(255,255,255,.03); line-height: 1.5;
+  display: flex; gap: 7px;
+}
+.edu-list li:last-child { border-bottom: none; }
+.edu-list li::before { flex-shrink: 0; }
+
+/* ─── FREQ TABLE ────────────────────────────────────── */
+.vtx-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.vtx-table th {
+  padding: 7px 10px; text-align: left; font-size: .62rem; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.vtx-table td { padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,.025); }
+.vtx-table tr:hover td { background: rgba(255,255,255,.02); cursor: pointer; }
+.vtx-table tr.hl td { background: var(--green-dim); }
+.vtx-table tr.hl .td-freq { color: var(--green); font-weight: 700; }
+.vtx-table .td-band {
+  display: inline-block; padding: 2px 8px; border-radius: 10px;
+  font-size: .63rem; font-weight: 700; white-space: nowrap;
+}
+.vtx-table .td-freq { font-family: var(--mono); font-weight: 600; color: var(--text); }
+.vtx-table .td-note { font-size: .73rem; color: var(--muted); }
+.vtx-table .td-conflict { color: var(--red); font-size: .7rem; }
+.vtx-table .td-wifi { color: var(--red); font-size: .72rem; }
+
+/* ─── POWER TABLE ───────────────────────────────────── */
+.pwr-table-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;
+}
+.pwr-card {
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 14px; position: relative; overflow: hidden;
+  cursor: pointer; transition: .15s; border-top-width: 2px;
+}
+.pwr-card:hover { border-color: rgba(255,255,255,.12); transform: translateY(-1px); }
+.pwr-card.active { background: rgba(16,196,122,.07); border-color: rgba(16,196,122,.3) !important; }
+.pwr-card-mw { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; }
+.pwr-card-label { font-size: .68rem; color: var(--muted); margin-top: 2px; }
+.pwr-card-temp { font-size: .7rem; margin-top: 6px; }
+.pwr-heat-bar { height: 3px; border-radius: 2px; margin-top: 5px; }
+.pwr-card-use { font-size: .68rem; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+.pwr-legal-badge {
+  position: absolute; top: 8px; right: 8px;
+  font-size: .55rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; border: 1px solid;
 }
 
-  /* ── Responsive ── */
-  html,body{overflow-x:hidden}
-  @media(max-width:500px){
-    [style*="repeat(8"]{grid-template-columns:repeat(4,1fr)!important}
-    [style*="repeat(4"]{grid-template-columns:repeat(2,1fr)!important}
-  }
+/* ─── PROTOCOL GUIDE ────────────────────────────────── */
+.proto-compare { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media(max-width:580px){ .proto-compare { grid-template-columns: 1fr; } }
+.proto-card {
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px;
+}
+.proto-card-title { font-size: .82rem; font-weight: 700; color: var(--text); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.proto-card-body { font-size: .75rem; color: var(--muted); line-height: 1.6; }
+.proto-tick { color: var(--green); }
+.proto-cross { color: var(--red); }
+
+/* ─── TIPS ──────────────────────────────────────────── */
+.tips-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.tip-item {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: 9px; padding: 10px 13px;
+  font-size: .8rem; line-height: 1.55; color: var(--muted);
+}
+.tip-item strong { color: var(--text); }
+.tip-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+/* ─── TABS ──────────────────────────────────────────── */
+.main-tabs { display: flex; gap: 4px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 2px; }
+.main-tab {
+  padding: 7px 16px; border-radius: 8px; font-size: .78rem; font-weight: 700;
+  background: rgba(255,255,255,.04); color: var(--muted);
+  border: 1px solid var(--border); cursor: pointer; transition: .15s;
+  white-space: nowrap;
+}
+.main-tab.active { background: var(--green-dim); color: var(--green); border-color: rgba(16,196,122,.3); }
+.main-tab:hover:not(.active) { background: rgba(255,255,255,.07); color: var(--text); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ─── BF TABLE SECTION ──────────────────────────────── */
+.bf-band-index { display: grid; grid-template-columns: 30px 1fr 1fr 1fr; gap: 8px; font-size: .78rem; }
+.bf-row { display: contents; }
+.bf-row > * { padding: 5px 8px; border-bottom: 1px solid rgba(255,255,255,.03); }
+.bf-index { font-family: var(--mono); color: var(--green); font-weight: 700; }
+.bf-label { color: var(--text); }
+.bf-key { font-family: var(--mono); color: var(--gold); }
+.bf-freq-list { font-family: var(--mono); font-size: .68rem; color: var(--muted); }
+
+/* ─── TOAST ─────────────────────────────────────────── */
+.vtx-toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--green); color: #021a0e;
+  padding: 10px 22px; border-radius: 100px; font-weight: 700; font-size: .85rem;
+  z-index: 9999; opacity: 0; pointer-events: none;
+  transition: opacity .25s, transform .25s;
+  box-shadow: 0 6px 24px rgba(16,196,122,.4);
+}
+.vtx-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ─── SECTION DIVIDER ───────────────────────────────── */
+.section-divider {
+  display: flex; align-items: center; gap: 12px;
+  font-size: .65rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); margin: 24px 0 16px;
+}
+.section-divider::before, .section-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ─── MISC ──────────────────────────────────────────── */
+.btn-sm {
+  padding: 7px 14px; border-radius: 7px; font-size: .78rem; font-weight: 700;
+  cursor: pointer; transition: .15s; font-family: var(--font); border: 1px solid;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.btn-sm-green { background: var(--green-dim); color: var(--green); border-color: rgba(16,196,122,.3); }
+.btn-sm-green:hover { background: rgba(16,196,122,.18); }
+.btn-sm-ghost { background: rgba(255,255,255,.04); color: var(--muted); border-color: var(--border); }
+.btn-sm-ghost:hover { background: rgba(255,255,255,.07); color: var(--text); }
+
+.badge-inline {
+  display: inline-block; padding: 1px 7px; border-radius: 6px; font-size: .63rem;
+  font-weight: 700; vertical-align: middle; margin-left: 4px;
+}
+
+.text-green { color: var(--green); }
+.text-blue  { color: var(--blue); }
+.text-gold  { color: var(--gold); }
+.text-red   { color: var(--red); }
+.text-muted { color: var(--muted); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.2); }
+
+/* ─── VTXTABLE COPY ─────────────────────────────────── */
+.vtxtable-box {
+  background: #04080f; border: 1px solid rgba(16,196,122,.1);
+  border-radius: 10px; padding: 14px 16px;
+  font-family: var(--mono); font-size: .75rem;
+  color: #8ab8d4; line-height: 1.7; position: relative;
+  overflow-x: auto; white-space: pre;
+}
+
+/* Responsive */
+@media(max-width:480px){
+  .ch-live-freq { font-size: 1.9rem; }
+  .ch-grid { grid-template-columns: repeat(4,1fr); }
+}
 </style>
-<script>
-(function(){
-  var t = localStorage.getItem('theme') || 'dark';
-  document.documentElement.className = t;
-  document.addEventListener('DOMContentLoaded', function(){ document.body.classList.add(t); });
-})();
-function toggleTheme(){
-  var isDark = document.body.classList.contains('dark');
-  document.body.classList.toggle('dark', !isDark);
-  document.body.classList.toggle('light', isDark);
-  localStorage.setItem('theme', isDark ? 'light' : 'dark');
-}
-</script>
 </head>
 <body class="dark">
 
-<!-- ── TOP BAR ── -->
-<div class="top-bar">
-  <div class="top-left">
-    <button id="hamburgerBtn" class="hamburger" aria-label="เปิดเมนู" aria-expanded="false">
-      <span class="lines" aria-hidden="true"><span></span><span></span><span></span></span>
-    </button>
-    <a href="/landing">
-      <img src="{{ url_for('static', filename='img/obix-logo.png') }}" class="logo" alt="OBIXConfig Doctor">
-    </a>
-  </div>
-  <div style="display:flex;align-items:center;gap:8px;">
-    <a href="/app" class="btn-ghost" style="padding:6px 12px;font-size:.82rem;">🏠 หน้าหลัก</a>
-    <button class="toggle-theme" onclick="toggleTheme()">🌗</button>
+<div class="vtx-root">
+
+<!-- ── HERO ── -->
+<div class="vtx-hero">
+  <div class="vtx-hero-eyebrow">📡 VTX Reference & Tools</div>
+  <h1 class="vtx-hero-title">VTX <span>Bands & Channels</span></h1>
+  <p class="vtx-hero-sub">ตาราง Frequency ครบทุก Band · Spectrum Visualizer · Race Day Planner · CLI Generator<br>เหมาะสำหรับ<strong style="color:var(--text)"> มือใหม่ – มือเก่า</strong> ใช้งานได้ทันที</p>
+  <div class="vtx-hero-badges">
+    <span class="vbadge vbadge-g">5.8 GHz FPV</span>
+    <span class="vbadge vbadge-b">SmartAudio v1/v2</span>
+    <span class="vbadge vbadge-gold">IRC Tramp</span>
+    <span class="vbadge vbadge-p">MSP VTX</span>
+    <span class="vbadge vbadge-r">6 Bands · 48 Channels</span>
   </div>
 </div>
 
-<!-- ── OVERLAY + DRAWER (reuse main) ── -->
-<div id="overlay" class="overlay" tabindex="-1" aria-hidden="true"></div>
-<aside id="drawer" class="drawer" role="dialog" aria-modal="true" hidden>
-  <div class="drawer-header">
-    <div class="drawer-brand">
-      <div class="drawer-brand-icon">🚁</div>
-      <div>
-        <div class="drawer-brand-name">OBIX Config Doctor</div>
-        <div class="drawer-brand-sub">FPV Tuning Toolkit · v2.3</div>
-      </div>
-    </div>
-    <button id="closeDrawer" class="drawer-close">✕</button>
+<!-- ── SELECTED CHANNEL LIVE DISPLAY ── -->
+<div class="ch-live-display" id="liveDisplay">
+  <div>
+    <div class="ch-live-freq" id="liveFreq">— <sup>MHz</sup></div>
+    <div class="ch-live-meta" id="liveMeta">คลิกเลือก Band / Channel จากตารางด้านล่าง หรือจะลากดูบน Spectrum ก็ได้</div>
   </div>
-  <nav class="drawer-nav">
-    <div class="drawer-group-label">หน้าหลัก</div>
-    <a class="drawer-link" href="/app"><span class="dl-icon-wrap green">🏠</span><span class="dl-body"><span class="dl-title">Drone Analyzer</span><span class="dl-meta">วิเคราะห์ PID · Filter · Motor</span></span></a>
-    <div class="drawer-divider"></div>
-    <div class="drawer-group-label">🔧 เครื่องมือ</div>
-    <a class="drawer-link" href="/motor-prop"><span class="dl-icon-wrap blue">🧭</span><span class="dl-body"><span class="dl-title">Motor × Prop Recommender</span><span class="dl-meta">แนะนำมอเตอร์/ใบพัดตามสเปค</span></span></a>
-    <a class="drawer-link" href="/cli_surgeon"><span class="dl-icon-wrap gold">🩺</span><span class="dl-body"><span class="dl-title">CLI Surgeon</span><span class="dl-meta">วิเคราะห์ diff all / dump</span></span></a>
-    <a class="drawer-link" href="/pid-advisor"><span class="dl-icon-wrap purple">💊</span><span class="dl-body"><span class="dl-title">PID Symptom Advisor</span><span class="dl-meta">บอกอาการ → รับคำแนะนำ PID</span></span><span class="dl-pill new">new</span></a>
-    <a class="drawer-link" href="/rpm-filter"><span class="dl-icon-wrap green">⚙️</span><span class="dl-body"><span class="dl-title">RPM Filter Calculator</span><span class="dl-meta">คำนวณ harmonic + dyn_notch</span></span><span class="dl-pill new">new</span></a>
-    <a class="drawer-link" href="/rates-visualizer"><span class="dl-icon-wrap blue">📈</span><span class="dl-body"><span class="dl-title">Rates Visualizer</span><span class="dl-meta">curve real-time + CLI command</span></span><span class="dl-pill new">new</span></a>
-    <div class="drawer-divider"></div>
-    <div class="drawer-group-label">⚡ ขั้นสูง</div>
-    <a class="drawer-link" href="/cli-comparator"><span class="dl-icon-wrap gold">⚖️</span><span class="dl-body"><span class="dl-title">CLI Diff Comparator</span></span><span class="dl-pill new">new</span></a>
-    <a class="drawer-link" href="/esc-checker"><span class="dl-icon-wrap gold">⚡</span><span class="dl-body"><span class="dl-title">ESC Compatibility Checker</span></span><span class="dl-pill new">new</span></a>
-    <a class="drawer-link" href="/blackbox"><span class="dl-icon-wrap blue">📊</span><span class="dl-body"><span class="dl-title">Blackbox CSV Analyzer</span></span><span class="dl-pill hot">NEW</span></a>
-    <div class="drawer-divider"></div>
-    <div class="drawer-group-label">📡 VTX & Signal</div>
-    <a class="drawer-link active" href="/vtx"><span class="dl-icon-wrap green">📡</span><span class="dl-body"><span class="dl-title">VTX Bands & Channels</span><span class="dl-meta">ตาราง Band/Channel + CLI</span></span><span class="dl-pill">tool</span></a>
-    <a class="drawer-link" href="/vtx-range"><span class="dl-icon-wrap blue">🏞️</span><span class="dl-body"><span class="dl-title">VTX Range Calculator</span><span class="dl-meta">ประมาณระยะสัญญาณ + กราฟ</span></span><span class="dl-pill">tool</span></a>
-    <div class="drawer-divider"></div>
-    <div class="drawer-group-label">📚 แหล่งข้อมูล</div>
-    <a class="drawer-link" href="/downloads"><span class="dl-icon-wrap">📁</span><span class="dl-body"><span class="dl-title">ไฟล์ DIFF และ DUMP</span></span></a>
-    <a class="drawer-link" href="https://www.facebook.com/banmysanti/" target="_blank"><span class="dl-icon-wrap blue">📘</span><span class="dl-body"><span class="dl-title">เพจ OBIXConfig Lab</span></span><span class="dl-pill">open</span></a>
-    <a class="drawer-link" href="/about"><span class="dl-icon-wrap">ℹ️</span><span class="dl-body"><span class="dl-title">เกี่ยวกับ</span></span><span class="dl-pill">info</span></a>
-    <a class="drawer-link" href="/flight-quiz">
-  <span class="dl-icon-wrap green">🎯</span>
-  <span class="dl-body"><span class="dl-title">Flight Style Quiz</span><span class="dl-meta">5 คำถาม → rates + preset</span></span>
-  <span class="dl-pill new">new</span>
-</a>
-<a class="drawer-link" href="/bf-wizard">
-  <span class="dl-icon-wrap green">⚡</span>
-  <span class="dl-body"><span class="dl-title">BF Config Wizard</span><span class="dl-meta">7 ขั้นตอน → CLI พร้อม paste</span></span>
-  <span class="dl-pill new">new</span>
-</a>
-<a class="drawer-link" href="/build-card">
-  <span class="dl-icon-wrap gold">🃏</span>
-  <span class="dl-body"><span class="dl-title">Build Card Generator</span><span class="dl-meta">สร้างรูปสเปคโดรนแชร์ Social</span></span>
-  <span class="dl-pill new">new</span>
-</a>
-<a class="drawer-link" href="/tuning-log">
-  <span class="dl-icon-wrap blue">📊</span>
-  <span class="dl-body"><span class="dl-title">Tuning Log</span><span class="dl-meta">บันทึก session PID</span></span>
-  <span class="dl-pill new">new</span>
-</a>
-<a class="drawer-link" href="/leaderboard">
-  <span class="dl-icon-wrap gold">🏆</span>
-  <span class="dl-body"><span class="dl-title">Config Leaderboard</span><span class="dl-meta">vote · rank · copy config</span></span>
-  <span class="dl-pill new">new</span>
-</a>
-<a class="drawer-link" href="/changelog"><span class="dl-icon-wrap green">📝</span><span class="dl-body"><span class="dl-title">Changelog</span></span><span class="dl-pill">v2.3</span></a>
-  </nav>
-  <div class="drawer-footer"><div class="drawer-footer-text">OBIXConfig Doctor &nbsp;·&nbsp; <span class="drawer-footer-ver">v2.3</span><br>Developed for FPV community 🇹🇭</div></div>
-</aside>
+  <div class="ch-live-right">
+    <div class="ch-live-power-label">กำลังส่ง</div>
+    <div class="ch-live-power-val" id="livePwr">—</div>
+    <div class="pwr-bar-wrap">
+      <div class="pwr-bar-fill" id="pwrBar" style="width:0%"></div>
+    </div>
+  </div>
+</div>
 
-<!-- ── CONTENT ── -->
-<div class="container">
+<!-- ── MAIN TABS ── -->
+<div class="main-tabs" role="tablist">
+  <button class="main-tab active" onclick="switchTab('picker',this)" role="tab">📡 เลือก Channel</button>
+  <button class="main-tab" onclick="switchTab('planner',this)" role="tab">🏁 Race Planner</button>
+  <button class="main-tab" onclick="switchTab('ref',this)" role="tab">📋 ตารางอ้างอิง</button>
+  <button class="main-tab" onclick="switchTab('cli',this)" role="tab">💻 CLI Commands</button>
+  <button class="main-tab" onclick="switchTab('edu',this)" role="tab">📖 คู่มือ</button>
+</div>
 
-  <!-- PAGE HERO -->
-  <div class="page-hero">
-    <div class="page-hero-label">OBIXConfig Doctor · VTX Tools</div>
-    <div class="page-hero-title">📡 VTX Band & Channel Helper</div>
-    <div class="page-hero-sub">เลือก Band / Channel · สร้าง CLI command · ตรวจ channel conflict</div>
-    <div class="page-hero-badges">
-      <span class="hero-badge green">SmartAudio</span>
-      <span class="hero-badge blue">Tramp</span>
-      <span class="hero-badge gold">5.8 GHz FPV</span>
+<!-- ══════════════════════════════════════════
+     TAB 1: PICKER
+══════════════════════════════════════════ -->
+<div class="tab-panel active" id="tab-picker">
+
+  <!-- Spectrum Visualizer -->
+  <div class="vtx-panel">
+    <div class="vtx-panel-title">🌈 Spectrum Visualizer — ตำแหน่ง Channel บน Frequency Axis</div>
+    <div class="spectrum-wrap" id="spectrumWrap">
+      <div id="spectrumBands"></div>
+      <div id="wifiZones"></div>
+      <div id="spectrumDots"></div>
+      <div id="spectrumLine" class="spectrum-selected-line" style="display:none;left:50%"></div>
+      <div id="specTooltip" class="spectrum-tooltip"></div>
+      <div class="spectrum-axis" id="spectrumAxis"></div>
+    </div>
+    <div class="spectrum-legend" id="spectrumLegend"></div>
+    <div style="font-size:.68rem;color:var(--muted);margin-top:8px;line-height:1.5;">
+      💡 <strong style="color:var(--text)">โซนแดง</strong> = ช่องที่ overlap กับ WiFi 5.8GHz (5725–5875 MHz) · คลิก dot บน spectrum เพื่อเลือก channel ได้เลย
     </div>
   </div>
 
-  <!-- MAIN VTX CARD -->
-  <div class="form-card">
-
-    <!-- CHANNEL INFO DISPLAY -->
-    <div class="ch-info-card" id="chInfoCard">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-        <div>
-          <div class="ch-info-freq" id="chInfoFreq">— <span>MHz</span></div>
-          <div class="ch-info-band" id="chInfoBand">เลือก Band และ Channel จากตารางด้านล่าง</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:.72rem;color:var(--muted);margin-bottom:4px;">Power</div>
-          <div id="chInfoPower" style="font-size:1.1rem;font-weight:700;color:var(--gold);">—</div>
-          <div class="pwr-bar-wrap" style="width:90px;">
-            <div class="pwr-bar-fill" id="pwrBarFill" style="width:0%;background:var(--gold);"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CONTROLS ROW -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
-      <div>
-        <label style="font-size:.72rem;color:var(--muted);font-weight:700;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em;">กำลังส่ง (Power)</label>
-        <select id="pwrSelect" onchange="updateOutput()" style="width:100%;padding:9px 12px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text);font-size:14px;">
-          <option value="25">25 mW — ต่ำมาก (Indoor)</option>
-          <option value="100">100 mW — ต่ำ (Practice)</option>
-          <option value="200" selected>200 mW — กลาง (ทั่วไป)</option>
-          <option value="400">400 mW — สูง</option>
-          <option value="600">600 mW — สูงมาก ⚠️</option>
-          <option value="1000">1000 mW — 1W ⚠️⚠️</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:.72rem;color:var(--muted);font-weight:700;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em;">Protocol</label>
-        <div class="proto-tabs" style="margin-bottom:0;">
-          <button class="proto-tab active" onclick="setProto('smartaudio',this)">SmartAudio</button>
-          <button class="proto-tab" onclick="setProto('tramp',this)">IRC Tramp</button>
-          <button class="proto-tab" onclick="setProto('msp',this)">MSP VTX</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- BAND MATRIX -->
-    <div style="margin-bottom:16px;">
-      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px;">เลือก Channel จากตาราง</div>
-      <div id="bandMatrix"></div>
-    </div>
-
-    <!-- CLI OUTPUT -->
+  <!-- Controls -->
+  <div class="vtx-controls-row">
     <div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">CLI Command</div>
-        <div style="display:flex;gap:6px;">
-          <button class="btn-small" onclick="copyCmd()">📋 คัดลอก</button>
-          <button class="btn-small" onclick="clearSelection()">✕ ล้าง</button>
-        </div>
-      </div>
-      <div class="cli-output-box" id="cliOut">
-        <span class="cli-comment"># เลือก Band / Channel จากตารางด้านบนเพื่อสร้าง CLI command</span>
-      </div>
-      <div id="pwrWarning" style="display:none;background:rgba(241,182,90,0.1);border:1px solid rgba(241,182,90,0.25);border-radius:var(--radius-md);padding:9px 13px;margin-top:8px;font-size:.82rem;color:var(--gold);">
-        ⚠️ กำลังส่งสูง (≥600mW) อาจรบกวนผู้อื่นและทำให้ VTX ร้อนมาก — ตรวจสอบกฎหมายท้องถิ่น และระวังอุณหภูมิ
+      <label class="vtx-label">⚡ กำลังส่ง (Power Level)</label>
+      <select id="pwrSelect" class="vtx-select" onchange="updateAll()">
+        <option value="25">25 mW — ต่ำมาก (Indoor / Proximity)</option>
+        <option value="100">100 mW — ต่ำ (ซ้อมบิน / Micro)</option>
+        <option value="200" selected>200 mW — กลาง (ทั่วไป / สนาม)</option>
+        <option value="400">400 mW — สูง (Outdoor)</option>
+        <option value="600">600 mW — สูงมาก ⚠️</option>
+        <option value="800">800 mW — สูงมากๆ ⚠️⚠️</option>
+        <option value="1000">1000 mW (1W) — สูงสุด ⚠️⚠️⚠️</option>
+      </select>
+    </div>
+    <div>
+      <label class="vtx-label">🔌 Protocol</label>
+      <div class="proto-tabs">
+        <button class="proto-tab active" onclick="setProto('smartaudio',this)">SmartAudio</button>
+        <button class="proto-tab" onclick="setProto('tramp',this)">IRC Tramp</button>
+        <button class="proto-tab" onclick="setProto('msp',this)">MSP VTX</button>
+        <button class="proto-tab" onclick="setProto('vtxtable',this)">vtxTable (BF4.3+)</button>
       </div>
     </div>
   </div>
 
-  <!-- FREQUENCY REFERENCE TABLE -->
-  <div class="result-card">
-    <h3 style="margin-top:0;color:var(--blue);">📋 ตารางความถี่อ้างอิง (5.8 GHz)</h3>
-    <p style="font-size:.82rem;color:var(--muted);margin-bottom:12px;">คลิกที่แถวเพื่อเลือก Channel</p>
+  <!-- Band Matrix -->
+  <div class="vtx-panel">
+    <div class="vtx-panel-title">📡 Band Matrix — คลิกเลือก Channel</div>
+    <div id="bandMatrix"></div>
+  </div>
+
+  <!-- CLI Output -->
+  <div class="vtx-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="vtx-panel-title" style="margin-bottom:0;">💻 CLI Command — พร้อม Copy</div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn-sm btn-sm-green" onclick="copyAllCLI()">📋 คัดลอก</button>
+        <button class="btn-sm btn-sm-ghost" onclick="clearSelection()">✕ ล้าง</button>
+      </div>
+    </div>
+    <div class="cli-box" id="cliOut">
+      <span class="cli-comment"># เลือก Band / Channel จากตารางด้านบนเพื่อสร้าง CLI command<br># แล้ว paste ใน Betaflight CLI Tab แล้วกด Enter</span>
+    </div>
+    <div class="pwr-warn" id="pwrWarn">
+      ⚠️ <strong>กำลังส่งสูงมาก (≥600mW)</strong> — VTX จะร้อนมาก ควรต่อ heatsink หรือระบายความร้อนให้ดี
+      นอกจากนี้อาจรบกวน pilot คนอื่นและ WiFi ในบริเวณใกล้เคียง
+      <strong>ตรวจสอบกฎหมายก่อนใช้งาน</strong>
+    </div>
+  </div>
+
+</div><!-- end tab-picker -->
+
+<!-- ══════════════════════════════════════════
+     TAB 2: RACE PLANNER
+══════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-planner">
+  <div class="vtx-panel">
+    <div class="vtx-panel-title">🏁 Race Day Channel Planner — จัดช่อง pilot ไม่ให้ชนกัน</div>
+    <div style="background:var(--blue-dim);border:1px solid rgba(88,166,255,.2);border-radius:9px;padding:12px 14px;margin-bottom:14px;font-size:.8rem;color:var(--blue);line-height:1.6;">
+      📌 <strong>หลักการ:</strong> Channel 2 ช่องที่ความถี่ต่างกันน้อยกว่า <strong>20 MHz</strong> จะ interfere กัน
+      ทำให้ภาพแตก ค้าง หรือหายไปได้ — Race Planner นี้จะตรวจสอบ conflict และแนะนำช่องที่ปลอดภัย
+    </div>
+    <div class="pilot-list" id="pilotList"></div>
+    <div class="planner-actions" style="margin-top:4px;">
+      <button class="planner-btn planner-btn-green" onclick="addPilot()">+ เพิ่ม Pilot</button>
+      <button class="planner-btn planner-btn-blue" onclick="autoAssign()">✨ Auto-Assign ช่องให้อัตโนมัติ</button>
+      <button class="planner-btn planner-btn-ghost" onclick="checkConflicts()">🔍 ตรวจสอบ Conflict</button>
+      <button class="planner-btn planner-btn-ghost" onclick="clearPilots()">✕ ล้างทั้งหมด</button>
+    </div>
+    <div id="conflictReport" class="conflict-report"></div>
+    <div id="okReport" class="ok-report"></div>
+  </div>
+
+  <!-- Best combo presets -->
+  <div class="vtx-panel">
+    <div class="vtx-panel-title">⭐ ชุดช่องที่แนะนำสำหรับ Race Day</div>
+    <div id="racePresets"></div>
+  </div>
+</div><!-- end tab-planner -->
+
+<!-- ══════════════════════════════════════════
+     TAB 3: REFERENCE TABLE
+══════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-ref">
+  <div class="vtx-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+      <div class="vtx-panel-title" style="margin-bottom:0;">📋 ตาราง Frequency อ้างอิงครบทุก Band</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <select id="refBandFilter" class="vtx-select" style="width:auto;padding:6px 10px;font-size:.78rem;" onchange="filterRefTable()">
+          <option value="">ทุก Band</option>
+          <option value="Raceband">Raceband (R)</option>
+          <option value="Band A">Band A</option>
+          <option value="Band B">Band B</option>
+          <option value="Band E">Band E</option>
+          <option value="Band F">Band F (Fatshark)</option>
+          <option value="Band D">Band D (Low)</option>
+        </select>
+        <button class="btn-sm btn-sm-ghost" onclick="exportFreqCSV()">⬇ Export CSV</button>
+      </div>
+    </div>
     <div style="overflow-x:auto;">
-      <table class="vtx-freq-table" id="freqRefTable">
+      <table class="vtx-table" id="refTable">
         <thead>
           <tr>
             <th>Band</th>
-            <th>Channel</th>
+            <th>Ch</th>
+            <th>Name</th>
             <th>Frequency</th>
+            <th>BF Band #</th>
+            <th>WiFi Overlap</th>
             <th>หมายเหตุ</th>
           </tr>
         </thead>
-        <tbody id="freqRefBody"></tbody>
+        <tbody id="refTableBody"></tbody>
       </table>
     </div>
   </div>
 
-  <!-- INFO CARDS -->
-  <div class="result-card">
-    <h3 style="margin-top:0;">📖 คู่มือย่อ VTX</h3>
-    <div class="info-grid">
-      <div class="info-card">
-        <h4>📡 SmartAudio</h4>
-        <p>ใช้กับ VTX ที่รองรับ TBS SmartAudio — ควบคุมผ่าน FC UART หรือ OSD โดยตรง รองรับ V1/V2/V2.1</p>
+  <!-- Betaflight Band Index -->
+  <div class="vtx-panel">
+    <div class="vtx-panel-title">🔢 Betaflight Band Index (vtx_band = ?)</div>
+    <div style="font-size:.78rem;color:var(--muted);margin-bottom:12px;line-height:1.6;">
+      ใน <code style="font-family:var(--mono);font-size:.75rem;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px;">set vtx_band = X</code>
+      ตัวเลข X หมายถึง Band ดังนี้
+    </div>
+    <div id="bfBandIndex"></div>
+  </div>
+</div><!-- end tab-ref -->
+
+<!-- ══════════════════════════════════════════
+     TAB 4: CLI
+══════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-cli">
+  <div class="vtx-panel">
+    <div class="vtx-panel-title">💻 CLI Commands Reference — ทุก Protocol</div>
+
+    <!-- SmartAudio -->
+    <div style="margin-bottom:20px;">
+      <div style="font-size:.82rem;font-weight:700;color:var(--green);margin-bottom:8px;">SmartAudio (Betaflight CLI)</div>
+      <div style="font-size:.78rem;color:var(--muted);margin-bottom:8px;line-height:1.6;">
+        ใช้กับ VTX ที่รองรับ TBS SmartAudio — ตั้งค่าผ่าน CLI หรือ OSD → Video Transmitter Settings
       </div>
-      <div class="info-card">
-        <h4>🔌 IRC Tramp</h4>
-        <p>Protocol อีกตัวของ ImmersionRC — ใช้ command <code style="font-family:var(--mono);font-size:.78rem;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px;">vtx &lt;band&gt; &lt;ch&gt;</code> ผ่าน OSD หรือ CLI</p>
+      <div class="cli-box" style="position:relative;">
+        <button class="cli-copy-btn" onclick="copyBox(this)">Copy</button>
+        <span class="cli-comment"># ตัวอย่าง: Raceband Ch1 (5658 MHz), 200mW, SmartAudio</span><br>
+        <span class="cli-cmd">set</span> <span class="cli-val">vtx_band = 5</span>       <span class="cli-comment">  # 1=A, 2=B, 3=E, 4=F, 5=R, 6=D</span><br>
+        <span class="cli-cmd">set</span> <span class="cli-val">vtx_channel = 1</span>    <span class="cli-comment">  # Ch 1–8</span><br>
+        <span class="cli-cmd">set</span> <span class="cli-val">vtx_power = 2</span>      <span class="cli-comment">  # index: 1=25mW, 2=200mW, 3=500mW ...</span><br>
+        <span class="cli-cmd">set</span> <span class="cli-val">vtx_low_power_disarm = ON</span>  <span class="cli-comment">  # ลดกำลังส่งขณะ disarm (แนะนำ)</span><br>
+        <span class="cli-cmd">save</span>
       </div>
-      <div class="info-card">
-        <h4>🏁 Raceband (R)</h4>
-        <p>มาตรฐานการแข่งขัน FPV ทั่วโลก ช่อง R1–R8 เว้นระยะห่างกัน 37 MHz ลด interference ได้ดี</p>
+    </div>
+
+    <!-- Tramp -->
+    <div style="margin-bottom:20px;">
+      <div style="font-size:.82rem;font-weight:700;color:var(--blue);margin-bottom:8px;">IRC Tramp (Frequency Direct)</div>
+      <div style="font-size:.78rem;color:var(--muted);margin-bottom:8px;line-height:1.6;">
+        ส่ง command โดยตรงด้วยความถี่ MHz — ยืดหยุ่นกว่า SmartAudio
       </div>
-      <div class="info-card">
-        <h4>⚡ Power Guidelines</h4>
-        <p>ในไทย FPV มักใช้ ≤200mW บินซ้อม, ≥400mW สำหรับ long range — ตรวจสอบกฎ กสทช. ก่อนใช้งาน</p>
+      <div class="cli-box" style="position:relative;">
+        <button class="cli-copy-btn" onclick="copyBox(this)">Copy</button>
+        <span class="cli-comment"># IRC Tramp: ตั้งตรงๆ ด้วย freq + power</span><br>
+        <span class="cli-comment"># vtx &lt;frequency_mhz&gt; &lt;power_mw&gt;</span><br>
+        <span class="cli-cmd">vtx</span> <span class="cli-freq">5658</span> <span class="cli-val">200</span>   <span class="cli-comment">  # R1 @ 5658 MHz, 200mW</span><br>
+        <span class="cli-comment"># หรือตั้งแบบ band/channel:</span><br>
+        <span class="cli-cmd">vtxtable</span> <span class="cli-band">band</span> <span class="cli-val">5</span> <span class="cli-comment">  # band index</span><br>
+        <span class="cli-cmd">vtxtable</span> <span class="cli-band">channel</span> <span class="cli-val">1</span>
+      </div>
+    </div>
+
+    <!-- vtxTable (modern) -->
+    <div style="margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="font-size:.82rem;font-weight:700;color:var(--gold);">vtxTable Commands (Betaflight 4.3+)</div>
+        <span class="vbadge vbadge-g" style="font-size:.6rem;">แนะนำ</span>
+      </div>
+      <div style="font-size:.78rem;color:var(--muted);margin-bottom:8px;line-height:1.6;">
+        วิธีใหม่ที่ Betaflight 4.3+ ใช้ — กำหนด band/channel/power ทั้งหมดไว้ในตาราง
+        แล้วอ้างอิง index แทนค่า MHz ตรงๆ ยืดหยุ่นและปรับแต่งได้เต็มที่
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+        <button class="btn-sm btn-sm-green" onclick="showVtxTable('standard')">Standard Bands</button>
+        <button class="btn-sm btn-sm-ghost" onclick="showVtxTable('raceonly')">Raceband Only</button>
+        <button class="btn-sm btn-sm-ghost" onclick="showVtxTable('power25')">25mW Safe</button>
+      </div>
+      <div id="vtxtableOutput" class="vtxtable-box" style="position:relative;">
+        <button class="cli-copy-btn" onclick="copyBox(this)" style="top:8px;right:8px;">Copy</button>
+<span class="cli-comment"># กด "Standard Bands" ด้านบนเพื่อสร้าง vtxTable command</span></div>
+    </div>
+
+    <!-- Power index reference -->
+    <div>
+      <div style="font-size:.82rem;font-weight:700;color:var(--purple);margin-bottom:8px;">Power Index Reference</div>
+      <div style="font-size:.78rem;color:var(--muted);margin-bottom:8px;">
+        ค่า <code style="font-family:var(--mono);background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px;">vtx_power</code> ที่ใส่ใน CLI เป็น index (ตัวเลขลำดับ) ไม่ใช่ค่า mW โดยตรง
+      </div>
+      <div id="powerIndexTable"></div>
+    </div>
+  </div>
+</div><!-- end tab-cli -->
+
+<!-- ══════════════════════════════════════════
+     TAB 5: EDUCATION
+══════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-edu">
+
+  <!-- WHAT IS VTX -->
+  <div class="section-divider">📡 ทำความเข้าใจ VTX</div>
+  <div class="edu-grid">
+    <div class="edu-card edu-card-g">
+      <span class="edu-card-icon">📡</span>
+      <div class="edu-card-title">VTX คืออะไร?</div>
+      <div class="edu-card-body">
+        <strong>VTX</strong> (Video Transmitter) คืออุปกรณ์ส่งสัญญาณวิดีโอจากโดรนไปยัง Goggle/Monitor
+        ในความถี่ <strong>5.8 GHz</strong> แบบ analog หรือ digital (DJI, Walksnail, HDZero)
+        <div class="edu-highlight">
+          ความถี่ 5.8 GHz แบ่งเป็น <strong>Band</strong> (กลุ่ม) แต่ละ Band มี <strong>8 Channel</strong>
+          ในแต่ละ Channel คือ ความถี่ MHz ที่ต่างกัน
+        </div>
+      </div>
+    </div>
+    <div class="edu-card edu-card-b">
+      <span class="edu-card-icon">🌊</span>
+      <div class="edu-card-title">Band vs Channel คืออะไร?</div>
+      <div class="edu-card-body">
+        <strong>Band</strong> = กลุ่มความถี่ (เหมือนสถานีวิทยุ เช่น FM, AM)<br>
+        <strong>Channel</strong> = ความถี่ MHz เฉพาะในแต่ละ Band<br><br>
+        เช่น <code>Raceband Ch1 = 5658 MHz</code><br>
+        หรือ <code>Band A Ch1 = 5865 MHz</code>
+        <div class="edu-highlight">
+          pilot 2 คนที่ใช้ channel ใกล้กัน (น้อยกว่า 20 MHz) จะ <strong>interfere กัน</strong>
+          ทำให้ภาพแตกหรือหายไปได้ในระหว่างบิน
+        </div>
+      </div>
+    </div>
+    <div class="edu-card edu-card-gold">
+      <span class="edu-card-icon">🏁</span>
+      <div class="edu-card-title">ทำไม Raceband ถึงดีที่สุด?</div>
+      <div class="edu-card-body">
+        Raceband ถูกออกแบบมาเฉพาะสำหรับการแข่งขัน FPV — ช่องทั้ง 8 เว้นระยะห่างกัน
+        <strong>37 MHz</strong> เท่าๆ กัน ซึ่งมากกว่า threshold interference (20 MHz)
+        <ul class="edu-list" style="margin-top:8px;">
+          <li><span>✅</span> สามารถบินพร้อมกันได้ <strong>8 pilot</strong> โดยไม่ interference กัน</li>
+          <li><span>✅</span> เป็นมาตรฐาน MultiGP / FAI FPV ทั่วโลก</li>
+          <li><span>✅</span> ช่อง R1–R4 อยู่นอกโซน WiFi 5.8GHz</li>
+          <li><span>⚠️</span> R7 (5880) overlap กับ WiFi Band ที่ใช้บ่อย</li>
+        </ul>
+      </div>
+    </div>
+    <div class="edu-card edu-card-r">
+      <span class="edu-card-icon">📶</span>
+      <div class="edu-card-title">WiFi Interference คืออะไร?</div>
+      <div class="edu-card-body">
+        WiFi 5GHz (802.11ac/n) ใช้ความถี่ <strong>5725–5875 MHz</strong>
+        ซึ่ง overlap กับหลาย Channel ของ FPV VTX
+        <div class="edu-highlight">
+          ช่อง F1–F8 ทับกับ WiFi ทั้งหมด! Band B / Band A บางช่องก็ทับด้วย
+          หาก Router หรือ Drone มี WiFi ใกล้ — ภาพจะรบกวน
+        </div>
+        <strong>แนะนำ:</strong> ใช้ Raceband R1–R4 เพื่อหลีกเลี่ยง WiFi
       </div>
     </div>
   </div>
 
-  <div class="version-note">OBIXConfig Doctor • v2.3 — VTX Band Helper</div>
-</div>
+  <!-- POWER GUIDE -->
+  <div class="section-divider">⚡ Power Level Guide</div>
+  <div class="vtx-panel">
+    <div class="vtx-panel-title">⚡ เลือก Power Level ให้เหมาะสม</div>
+    <div id="powerGuideCards"></div>
+    <div style="margin-top:14px;font-size:.78rem;color:var(--muted);line-height:1.7;">
+      <strong style="color:var(--text)">กฎหมายไทย (กสทช.):</strong>
+      การส่งสัญญาณ 5.8 GHz ในประเทศไทยสำหรับ FPV อยู่ในย่าน ISM Band
+      ทางเทคนิคต้องมีกำลังส่งไม่เกิน <strong style="color:var(--gold)">100 mW EIRP</strong>
+      แต่ชุมชน FPV ไทยส่วนใหญ่ใช้ 200mW ในพื้นที่โล่ง
+      ควรตรวจสอบกฎระเบียบปัจจุบันก่อนใช้งาน
+    </div>
+  </div>
+
+  <!-- PROTOCOL GUIDE -->
+  <div class="section-divider">🔌 Protocol Comparison</div>
+  <div class="vtx-panel">
+    <div class="vtx-panel-title">🔌 SmartAudio vs Tramp vs MSP</div>
+    <div class="proto-compare" id="protocolCompare"></div>
+  </div>
+
+  <!-- TIPS -->
+  <div class="section-divider">💡 Tips & Best Practice</div>
+  <div class="vtx-panel">
+    <div class="vtx-panel-title">💡 Tips สำหรับ Race Day &amp; การใช้งาน VTX</div>
+    <ul class="tips-list">
+      <li class="tip-item"><span class="tip-icon">🏁</span><div><strong>Race Day:</strong> ประสานงาน channel ก่อน arm เสมอ ใช้ Race Planner ในแท็บด้านบนเพื่อหลีกเลี่ยง conflict กับ pilot คนอื่น</div></li>
+      <li class="tip-item"><span class="tip-icon">🌡️</span><div><strong>VTX ร้อน:</strong> VTX ที่กำลังสูงโดยไม่ได้บินจะร้อนมาก — ตั้ง <code style="font-family:var(--mono);background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px;">set vtx_low_power_disarm = ON</code> เพื่อลดกำลังส่งขณะ disarm อัตโนมัติ</div></li>
+      <li class="tip-item"><span class="tip-icon">🏠</span><div><strong>Indoor / Proximity:</strong> ใช้ไม่เกิน 25–100 mW ในอาคาร สัญญาณสะท้อนผนังรบกวนมากกว่ากำลังส่งต่ำ</div></li>
+      <li class="tip-item"><span class="tip-icon">📶</span><div><strong>หลีกเลี่ยง WiFi:</strong> Raceband R1–R4 (5658–5769 MHz) อยู่นอกโซน WiFi ถ้าสนามมี Router เยอะ เลือกช่องนี้ก่อน</div></li>
+      <li class="tip-item"><span class="tip-icon">🎥</span><div><strong>DJI / Digital VTX:</strong> Digital VTX (DJI O3, Walksnail, HDZero) ใช้ protocol และ channel system ต่างกัน ไม่ต้องตั้ง vtx_band ใน Betaflight เพราะจัดการเองผ่าน app</div></li>
+      <li class="tip-item"><span class="tip-icon">⚙️</span><div><strong>vtx_low_power_disarm:</strong> แนะนำเสมอสำหรับ pilot ทุกคน ป้องกัน VTX ร้อน และลด RF noise ขณะ setup บนสนาม</div></li>
+      <li class="tip-item"><span class="tip-icon">📡</span><div><strong>Antenna ทิศทาง:</strong> Antenna ของ Goggle ควรหันเข้าหาทิศทางบิน Circularly Polarized (Clover/AXII) ดีกว่า Dipole ในสนามแข่ง</div></li>
+      <li class="tip-item"><span class="tip-icon">🔋</span><div><strong>Pitmode:</strong> VTX บางรุ่นมี Pit Mode (กำลังส่งต่ำมาก ~1mW) — ใช้ขณะนั่ง paddock เพื่อไม่รบกวนคนบินอยู่</div></li>
+    </ul>
+  </div>
+
+  <!-- VTX POPULAR MODELS -->
+  <div class="section-divider">📦 VTX ยอดนิยม</div>
+  <div class="vtx-panel">
+    <div class="vtx-panel-title">📦 VTX ยอดนิยมในชุมชน FPV ไทย</div>
+    <div style="overflow-x:auto;">
+      <table class="vtx-table">
+        <thead>
+          <tr>
+            <th>รุ่น</th>
+            <th>Protocol</th>
+            <th>Power</th>
+            <th>น้ำหนัก</th>
+            <th>เหมาะกับ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>TBS Unify Pro32 Nano</td><td><span class="badge-inline" style="background:var(--green-dim);color:var(--green);border:1px solid rgba(16,196,122,.3);">SmartAudio</span></td><td>25–1000mW</td><td>~2g</td><td>Freestyle / Race 5"</td></tr>
+          <tr><td>Rush Tank Ultimate</td><td><span class="badge-inline" style="background:var(--green-dim);color:var(--green);border:1px solid rgba(16,196,122,.3);">SmartAudio</span></td><td>25–1000mW</td><td>~6g</td><td>Long Range / 7"+</td></tr>
+          <tr><td>Foxeer Reaper Nano</td><td><span class="badge-inline" style="background:var(--green-dim);color:var(--green);border:1px solid rgba(16,196,122,.3);">SmartAudio</span></td><td>25–1000mW</td><td>~1.8g</td><td>Micro / Toothpick</td></tr>
+          <tr><td>AKK FX3</td><td><span class="badge-inline" style="background:var(--gold-dim);color:var(--gold);border:1px solid rgba(241,182,90,.3);">Tramp</span></td><td>25–200mW</td><td>~5g</td><td>Budget Freestyle</td></tr>
+          <tr><td>Betafpv VTX (AIO)</td><td><span class="badge-inline" style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(88,166,255,.3);">MSP</span></td><td>25–200mW</td><td>built-in</td><td>Micro / Whoop</td></tr>
+          <tr><td>DJI O3 Air Unit</td><td><span class="badge-inline" style="background:var(--purple-dim);color:var(--purple);border:1px solid rgba(201,166,255,.3);">Digital</span></td><td>auto</td><td>~34g</td><td>Cinematic / Long Range</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- end tab-edu -->
+
+</div><!-- end vtx-root -->
+
+<!-- TOAST -->
+<div class="vtx-toast" id="vtxToast"></div>
 
 <script>
-// ─── Band / Channel Data ───────────────────────────
-const BANDS = {
-  "Raceband": {
-    key: "R", color: "#10c47a",
+// ══════════════════════════════════════════════════════
+//  OBIXConfig Doctor — VTX Bands & Channels v3
+//  Comprehensive: Spectrum, Planner, CLI, Education
+// ══════════════════════════════════════════════════════
+
+// ─── DATA ─────────────────────────────────────────────
+const BANDS = [
+  {
+    name: "Raceband", key: "R", bfIndex: 5, color: "#10c47a",
+    desc: "มาตรฐานการแข่งขัน — แนะนำที่สุด", tag: "⭐ แนะนำ", tagColor: "#10c47a",
+    info: "ทุกช่องห่างกัน 37 MHz → บินได้ 8 คนพร้อมกัน",
     channels: [
-      {ch:"R1",f:5658},{ch:"R2",f:5695},{ch:"R3",f:5732},{ch:"R4",f:5769},
-      {ch:"R5",f:5806},{ch:"R6",f:5843},{ch:"R7",f:5880},{ch:"R8",f:5917}
+      {ch:"R1",f:5658,note:"ปลอดภัยที่สุด — ไกล WiFi"},{ch:"R2",f:5695,note:"Race มาตรฐาน"},
+      {ch:"R3",f:5732,note:"Race มาตรฐาน"},{ch:"R4",f:5769,note:"Race มาตรฐาน"},
+      {ch:"R5",f:5806,note:"Race มาตรฐาน"},{ch:"R6",f:5843,note:"Race มาตรฐาน"},
+      {ch:"R7",f:5880,note:"⚠️ ใกล้ WiFi Ch140"},{ch:"R8",f:5917,note:"สูงสุด Raceband"}
     ]
   },
-  "Band A": {
-    key: "A", color: "#58a6ff",
+  {
+    name: "Band A", key: "A", bfIndex: 1, color: "#58a6ff",
+    desc: "Boscam A — เรียง frequency จากมากไปน้อย", tag: "Classic", tagColor: "#58a6ff",
+    info: "A1 เริ่มที่ 5865 ลงมา — สังเกต: เรียงกลับด้านกับช่อง",
     channels: [
-      {ch:"A1",f:5865},{ch:"A2",f:5845},{ch:"A3",f:5825},{ch:"A4",f:5805},
-      {ch:"A5",f:5785},{ch:"A6",f:5765},{ch:"A7",f:5745},{ch:"A8",f:5725}
+      {ch:"A1",f:5865,note:"⚠️ WiFi overlap"},{ch:"A2",f:5845,note:"⚠️ WiFi overlap"},
+      {ch:"A3",f:5825,note:"⚠️ WiFi overlap"},{ch:"A4",f:5805,note:"⚠️ WiFi borderline"},
+      {ch:"A5",f:5785,note:"⚠️ WiFi overlap"},{ch:"A6",f:5765,note:"⚠️ WiFi overlap"},
+      {ch:"A7",f:5745,note:"⚠️ WiFi overlap"},{ch:"A8",f:5725,note:"⚠️ WiFi edge"}
     ]
   },
-  "Band B": {
-    key: "B", color: "#f1b65a",
+  {
+    name: "Band B", key: "B", bfIndex: 2, color: "#f1b65a",
+    desc: "Boscam B — เรียง frequency จากน้อยไปมาก", tag: "Classic", tagColor: "#f1b65a",
+    info: "B ห่างกัน 19 MHz — บินพร้อมกันได้น้อยกว่า Raceband",
     channels: [
-      {ch:"B1",f:5733},{ch:"B2",f:5752},{ch:"B3",f:5771},{ch:"B4",f:5790},
-      {ch:"B5",f:5809},{ch:"B6",f:5828},{ch:"B7",f:5847},{ch:"B8",f:5866}
+      {ch:"B1",f:5733,note:"⚠️ WiFi overlap"},{ch:"B2",f:5752,note:"⚠️ WiFi overlap"},
+      {ch:"B3",f:5771,note:"⚠️ WiFi overlap"},{ch:"B4",f:5790,note:"⚠️ WiFi overlap"},
+      {ch:"B5",f:5809,note:"⚠️ WiFi borderline"},{ch:"B6",f:5828,note:"⚠️ WiFi overlap"},
+      {ch:"B7",f:5847,note:"⚠️ WiFi overlap"},{ch:"B8",f:5866,note:"⚠️ WiFi overlap"}
     ]
   },
-  "Band E": {
-    key: "E", color: "#c9a6ff",
+  {
+    name: "Band E", key: "E", bfIndex: 3, color: "#c9a6ff",
+    desc: "ImmersionRC E — E1–E4 อยู่ต่ำ, E5–E8 อยู่สูง", tag: "Mixed", tagColor: "#c9a6ff",
+    info: "ระวัง: E5–E8 อยู่เหนือ WiFi band แต่หายาก VTX รองรับ",
     channels: [
-      {ch:"E1",f:5705},{ch:"E2",f:5685},{ch:"E3",f:5665},{ch:"E4",f:5645},
-      {ch:"E5",f:5885},{ch:"E6",f:5905},{ch:"E7",f:5925},{ch:"E8",f:5945}
+      {ch:"E1",f:5705,note:"ค่อนข้างปลอดภัย"},{ch:"E2",f:5685,note:"ปลอดภัย"},
+      {ch:"E3",f:5665,note:"ปลอดภัย"},{ch:"E4",f:5645,note:"ต่ำที่สุดของ E band"},
+      {ch:"E5",f:5885,note:"เหนือ WiFi — rare VTX"},{ch:"E6",f:5905,note:"เหนือ WiFi"},
+      {ch:"E7",f:5925,note:"เหนือ WiFi"},{ch:"E8",f:5945,note:"สูงสุด — rare VTX"}
     ]
   },
-  "Band F": {
-    key: "F", color: "#f85149",
+  {
+    name: "Band F", key: "F", bfIndex: 4, color: "#f85149",
+    desc: "Fatshark F — ทับ WiFi ทั้งหมด!", tag: "⚠️ WiFi!", tagColor: "#f85149",
+    info: "F band อยู่ในช่วง 5740–5880 MHz ทับ WiFi 5.8G ทั้งหมด",
     channels: [
-      {ch:"F1",f:5740},{ch:"F2",f:5760},{ch:"F3",f:5780},{ch:"F4",f:5800},
-      {ch:"F5",f:5820},{ch:"F6",f:5840},{ch:"F7",f:5860},{ch:"F8",f:5880}
+      {ch:"F1",f:5740,note:"⚠️ WiFi overlap"},{ch:"F2",f:5760,note:"⚠️ WiFi overlap"},
+      {ch:"F3",f:5780,note:"⚠️ WiFi overlap"},{ch:"F4",f:5800,note:"⚠️ WiFi overlap"},
+      {ch:"F5",f:5820,note:"⚠️ WiFi overlap"},{ch:"F6",f:5840,note:"⚠️ WiFi overlap"},
+      {ch:"F7",f:5860,note:"⚠️ WiFi overlap"},{ch:"F8",f:5880,note:"⚠️ WiFi overlap"}
     ]
   },
-  "Band D": {
-    key: "D", color: "#88d4ab",
+  {
+    name: "Band D", key: "D", bfIndex: 6, color: "#88d4ab",
+    desc: "Low Band (5.3 GHz) — VTX ทั่วไปไม่รองรับ", tag: "Low 5.3G", tagColor: "#88d4ab",
+    info: "5.3 GHz band ระยะไกลกว่า 5.8G แต่ VTX / Goggle ส่วนใหญ่ไม่รองรับ",
     channels: [
-      {ch:"D1",f:5362},{ch:"D2",f:5399},{ch:"D3",f:5436},{ch:"D4",f:5473},
-      {ch:"D5",f:5510},{ch:"D6",f:5547},{ch:"D7",f:5584},{ch:"D8",f:5621}
+      {ch:"D1",f:5362,note:"5.3GHz — rare"},{ch:"D2",f:5399,note:"5.3GHz — rare"},
+      {ch:"D3",f:5436,note:"5.3GHz — rare"},{ch:"D4",f:5473,note:"5.3GHz — rare"},
+      {ch:"D5",f:5510,note:"5.3GHz — rare"},{ch:"D6",f:5547,note:"5.3GHz — rare"},
+      {ch:"D7",f:5584,note:"5.3GHz — rare"},{ch:"D8",f:5621,note:"5.3GHz — rare"}
     ]
   }
-};
+];
 
-const BAND_NAMES = Object.keys(BANDS);
-let selectedBand = null, selectedCh = null, selectedFreq = null;
+const WIFI_ZONES = [
+  {label:"WiFi 5.8G Ch36–48",minF:5180,maxF:5240},
+  {label:"WiFi 5.8G Ch149–165 (ใช้บ่อย)",minF:5725,maxF:5875},
+  {label:"WiFi 5.8G Ch100–140",minF:5500,maxF:5700}
+];
+
+const POWER_LEVELS = [
+  {mw:25,  label:"Pitmode / Indoor", color:"#4a9e7a", heat:1, legal:"✅ ปลอดภัยที่สุด", use:"Indoor / ซ้อมใกล้ๆ / Pitmode"},
+  {mw:100, label:"Practice",        color:"#10c47a", heat:2, legal:"✅ แนะนำ",          use:"ซ้อมบิน / สนามเล็ก / Micro"},
+  {mw:200, label:"Standard",        color:"#58a6ff", heat:3, legal:"✅ ทั่วไป",         use:"Freestyle / Race / สนามใหญ่"},
+  {mw:400, label:"High Power",      color:"#f1b65a", heat:4, legal:"⚠️ ระวัง",         use:"Long Range / obstacle course"},
+  {mw:600, label:"Very High",       color:"#ff8844", heat:5, legal:"⚠️⚠️ ร้อนมาก",   use:"Long Range extreme — ต้อง heatsink"},
+  {mw:800, label:"Extreme",         color:"#f85149", heat:5, legal:"⚠️⚠️",            use:"Long range สุด — ระวัง VTX พัง"},
+  {mw:1000,label:"MAX 1W",          color:"#ff2244", heat:6, legal:"⚠️⚠️⚠️",         use:"ใช้ด้วยความระมัดระวังสูงสุด"}
+];
+
+const PILOT_COLORS = ["#f85149","#58a6ff","#10c47a","#f1b65a","#c9a6ff","#ff9966","#66ddcc","#ff66aa"];
+const RACE_PRESETS = [
+  {name:"4 Pilots (Raceband R1/R2/R3/R4)", pilots:[{n:"Pilot 1",ch:"R1"},{n:"Pilot 2",ch:"R2"},{n:"Pilot 3",ch:"R3"},{n:"Pilot 4",ch:"R4"}]},
+  {name:"6 Pilots (R1/R2/R3/R4/R5/R6)",   pilots:[{n:"Pilot 1",ch:"R1"},{n:"Pilot 2",ch:"R2"},{n:"Pilot 3",ch:"R3"},{n:"Pilot 4",ch:"R4"},{n:"Pilot 5",ch:"R5"},{n:"Pilot 6",ch:"R6"}]},
+  {name:"8 Pilots (Raceband R1–R8)",        pilots:BANDS[0].channels.map((c,i)=>({n:"Pilot "+(i+1),ch:c.ch}))},
+  {name:"Mixed 4 Pilots (ห่างมาก)",         pilots:[{n:"Pilot 1",ch:"R1"},{n:"Pilot 2",ch:"E3"},{n:"Pilot 3",ch:"R5"},{n:"Pilot 4",ch:"B8"}]}
+];
+
+// Build lookup
+const FREQ_MAP = {};
+const ALL_CHANNELS_LIST = [];
+BANDS.forEach(b => b.channels.forEach(c => {
+  FREQ_MAP[c.ch] = {freq:c.f, band:b.name, bandKey:b.key, bfIndex:b.bfIndex, color:b.color, note:c.note};
+  ALL_CHANNELS_LIST.push({...c, band:b.name, bandKey:b.key, bfIndex:b.bfIndex, color:b.color});
+}));
+const ALL_FREQS = ALL_CHANNELS_LIST.map(c=>c.f).sort((a,b)=>a-b);
+const FREQ_MIN = Math.min(...ALL_FREQS) - 100;
+const FREQ_MAX = Math.max(...ALL_FREQS) + 100;
+
+// State
+let selBand = null, selCh = null, selFreq = null;
 let currentProto = 'smartaudio';
+let pilots = [];
+let hiddenBands = new Set();
 
-// ─── Build Band Matrix ─────────────────────────────
+// ─── UTIL ──────────────────────────────────────────────
+function toastMsg(msg){ const t=document.getElementById('vtxToast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2200); }
+function freqToX(f){ return ((f-FREQ_MIN)/(FREQ_MAX-FREQ_MIN))*100; }
+function isWifi(f){ return f>=5725 && f<=5875; }
+function chDist(ch1,ch2){ const f1=FREQ_MAP[ch1]?.freq, f2=FREQ_MAP[ch2]?.freq; return f1&&f2?Math.abs(f1-f2):9999; }
+
+// ─── TAB ───────────────────────────────────────────────
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.main-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ─── SPECTRUM ─────────────────────────────────────────
+function buildSpectrum(){
+  const wrap = document.getElementById('spectrumWrap');
+  const w = wrap.clientWidth || 600;
+
+  // Axis
+  const axis = document.getElementById('spectrumAxis');
+  axis.innerHTML = '';
+  [5350,5400,5500,5600,5658,5700,5800,5880,5950].forEach(f=>{
+    const pct = freqToX(f);
+    const lbl = document.createElement('span');
+    lbl.className='spectrum-axis-lbl';
+    lbl.style.cssText=`position:absolute;left:${pct}%;transform:translateX(-50%)`;
+    lbl.textContent=f;
+    axis.appendChild(lbl);
+  });
+
+  // WiFi Zones
+  const wz = document.getElementById('wifiZones');
+  wz.innerHTML='';
+  WIFI_ZONES.forEach(zone=>{
+    const lPct=freqToX(zone.minF), rPct=freqToX(zone.maxF);
+    const el=document.createElement('div');
+    el.className='wifi-zone';
+    el.style.cssText=`left:${lPct}%;width:${rPct-lPct}%`;
+    const lbl=document.createElement('div');
+    lbl.className='wifi-zone-label';
+    lbl.textContent=zone.label;
+    el.appendChild(lbl);
+    wz.appendChild(el);
+  });
+
+  // Band BG
+  const bgs = document.getElementById('spectrumBands');
+  bgs.innerHTML='';
+  BANDS.forEach(band=>{
+    const freqs=band.channels.map(c=>c.f);
+    const lo=Math.min(...freqs)-15, hi=Math.max(...freqs)+15;
+    const lPct=freqToX(lo), rPct=freqToX(hi);
+    const el=document.createElement('div');
+    el.className='spectrum-bg-band';
+    el.style.cssText=`left:${lPct}%;width:${rPct-lPct}%;background:${band.color}`;
+    bgs.appendChild(el);
+  });
+
+  // Dots + Labels
+  const dotsWrap = document.getElementById('spectrumDots');
+  dotsWrap.innerHTML='';
+  const tooltip = document.getElementById('specTooltip');
+
+  ALL_CHANNELS_LIST.forEach(c=>{
+    const pct=freqToX(c.f);
+    const dot=document.createElement('div');
+    dot.className='spectrum-channel-dot';
+    dot.id='spc-'+c.ch;
+    dot.style.cssText=`left:${pct}%;background:${c.color}`;
+    dot.title=c.ch+' '+c.f+' MHz';
+
+    dot.addEventListener('mouseenter', function(e){
+      const info = FREQ_MAP[c.ch];
+      tooltip.style.left = pct+'%';
+      tooltip.innerHTML = `<strong style="color:${c.color}">${c.ch}</strong> &nbsp;${c.f} MHz<br><span style="color:var(--muted);font-size:.65rem;">${info.band} · ${info.note}</span>`;
+      tooltip.classList.add('show');
+    });
+    dot.addEventListener('mouseleave', ()=>tooltip.classList.remove('show'));
+    dot.addEventListener('click', ()=>selectChannel(c.band, c.ch, c.f));
+    dotsWrap.appendChild(dot);
+
+    // Label for selected bands
+    const lbl=document.createElement('div');
+    lbl.className='spectrum-label';
+    lbl.id='splbl-'+c.ch;
+    lbl.style.cssText=`left:${pct}%;color:${c.color}`;
+    lbl.textContent=c.ch;
+    dotsWrap.appendChild(lbl);
+  });
+
+  // Legend
+  const leg = document.getElementById('spectrumLegend');
+  leg.innerHTML='';
+  BANDS.forEach(band=>{
+    const item=document.createElement('div');
+    item.className='spec-leg-item active';
+    item.id='leg-'+band.key;
+    item.innerHTML=`<span class="spec-leg-dot" style="background:${band.color}"></span>${band.name}`;
+    item.addEventListener('click', ()=>toggleBandVis(band.key, item));
+    leg.appendChild(item);
+  });
+}
+
+function toggleBandVis(key, el){
+  if(hiddenBands.has(key)){
+    hiddenBands.delete(key);
+    el.classList.add('active');
+  } else {
+    hiddenBands.add(key);
+    el.classList.remove('active');
+  }
+  const band = BANDS.find(b=>b.key===key);
+  if(band) band.channels.forEach(c=>{
+    const dot=document.getElementById('spc-'+c.ch);
+    const lbl=document.getElementById('splbl-'+c.ch);
+    const vis=hiddenBands.has(key)?'hidden':'visible';
+    if(dot)dot.style.visibility=vis;
+    if(lbl)lbl.style.visibility=vis;
+  });
+}
+
+// ─── BAND MATRIX ──────────────────────────────────────
 function buildMatrix(){
-  const matrix = document.getElementById('bandMatrix');
-  matrix.innerHTML = '';
-  BAND_NAMES.forEach(function(bandName){
-    const band = BANDS[bandName];
-    const row = document.createElement('div');
-    row.style.cssText = 'margin-bottom:10px;';
+  const mat = document.getElementById('bandMatrix');
+  mat.innerHTML = '';
+  BANDS.forEach(band=>{
+    const sec = document.createElement('div');
+    sec.className = 'band-section';
 
-    const label = document.createElement('div');
-    label.className = 'band-row-label';
-    label.innerHTML = `<span class="band-dot" style="background:${band.color}"></span><span style="color:${band.color}">${bandName}</span><span class="muted small" style="margin-left:4px;opacity:.7;">(${band.key}1–${band.key}8)</span>`;
-    row.appendChild(label);
+    const hdr = document.createElement('div');
+    hdr.className = 'band-row-header';
+    hdr.innerHTML = `
+      <span class="band-dot" style="background:${band.color}"></span>
+      <span class="band-row-name" style="color:${band.color}">${band.name}</span>
+      <span class="band-row-key">${band.key}1–${band.key}8 · BF band=${band.bfIndex}</span>
+      <span class="band-info-pill" style="color:${band.tagColor};border-color:${band.tagColor}44;background:${band.tagColor}11">${band.tag}</span>
+      <span class="band-row-desc">${band.info}</span>`;
+    sec.appendChild(hdr);
 
     const grid = document.createElement('div');
-    grid.className = 'vtx-band-matrix';
-    grid.style.gridTemplateColumns = 'repeat(8,1fr)';
+    grid.className = 'ch-grid';
 
-    band.channels.forEach(function(item, idx){
+    band.channels.forEach((item,idx)=>{
       const cell = document.createElement('div');
       cell.className = 'ch-cell';
-      cell.dataset.band = bandName;
+      cell.id = 'cell-'+item.ch;
+      cell.dataset.band = band.name;
       cell.dataset.ch = item.ch;
       cell.dataset.freq = item.f;
-      cell.innerHTML = `<span class="ch-num">Ch ${idx+1}</span><span class="ch-freq">${item.f}</span><span class="ch-label">${item.ch}</span>`;
-      cell.style.borderTopColor = band.color + '33';
-      cell.addEventListener('click', function(){ selectCell(this); });
+      cell.style.setProperty('--cell-color', band.color);
+      cell.style.borderTopColor = band.color+'88';
+
+      const wifiOverlap = isWifi(item.f);
+      cell.innerHTML = `
+        <span class="ch-num">Ch ${idx+1}</span>
+        <span class="ch-freq">${item.f}</span>
+        <span class="ch-label">${item.ch}</span>
+        ${wifiOverlap?'<span class="ch-wifi-warn" title="WiFi overlap">📶</span>':''}
+        <span class="ch-conflict-dot"></span>`;
+      cell.addEventListener('click', ()=>selectChannel(band.name, item.ch, item.f));
       grid.appendChild(cell);
     });
-    row.appendChild(grid);
-    matrix.appendChild(row);
+    sec.appendChild(grid);
+    mat.appendChild(sec);
   });
 }
 
-function selectCell(el){
-  // Clear previous
-  document.querySelectorAll('.ch-cell.selected').forEach(function(c){ c.classList.remove('selected'); });
-  el.classList.add('selected');
-  selectedBand = el.dataset.band;
-  selectedCh   = el.dataset.ch;
-  selectedFreq = parseInt(el.dataset.freq);
-  updateOutput();
-  // Highlight ref table
-  document.querySelectorAll('#freqRefBody tr').forEach(function(tr){
-    tr.classList.toggle('highlighted', tr.dataset.ch === selectedCh);
+// ─── SELECT CHANNEL ────────────────────────────────────
+function selectChannel(bandName, ch, freq){
+  selBand = bandName; selCh = ch; selFreq = freq;
+
+  // Cell highlight
+  document.querySelectorAll('.ch-cell').forEach(c=>{
+    c.classList.remove('selected');
+    c.style.boxShadow='';
   });
-}
-
-function clearSelection(){
-  document.querySelectorAll('.ch-cell.selected').forEach(function(c){ c.classList.remove('selected'); });
-  document.querySelectorAll('#freqRefBody tr').forEach(function(tr){ tr.classList.remove('highlighted'); });
-  selectedBand = selectedCh = selectedFreq = null;
-  document.getElementById('chInfoFreq').innerHTML = '— <span>MHz</span>';
-  document.getElementById('chInfoBand').textContent = 'เลือก Band และ Channel จากตารางด้านล่าง';
-  document.getElementById('chInfoPower').textContent = '—';
-  document.getElementById('pwrBarFill').style.width = '0%';
-  document.getElementById('cliOut').innerHTML = '<span class="cli-comment"># เลือก Band / Channel จากตารางด้านบนเพื่อสร้าง CLI command</span>';
-  document.getElementById('pwrWarning').style.display = 'none';
-}
-
-function setProto(proto, btn){
-  currentProto = proto;
-  document.querySelectorAll('.proto-tab').forEach(function(t){ t.classList.remove('active'); });
-  btn.classList.add('active');
-  updateOutput();
-}
-
-function updateOutput(){
-  const pwr = parseInt(document.getElementById('pwrSelect').value);
-  const pwrPct = Math.min(100, Math.round(pwr / 10));
-  const pwrColor = pwr >= 600 ? '#f85149' : pwr >= 400 ? '#f1b65a' : '#10c47a';
-
-  // Update power display
-  document.getElementById('chInfoPower').textContent = pwr + ' mW';
-  document.getElementById('chInfoPower').style.color = pwrColor;
-  document.getElementById('pwrBarFill').style.width = pwrPct + '%';
-  document.getElementById('pwrBarFill').style.background = pwrColor;
-  document.getElementById('pwrWarning').style.display = pwr >= 600 ? 'block' : 'none';
-
-  if(!selectedFreq){ return; }
-
-  // Update freq display
-  document.getElementById('chInfoFreq').innerHTML = selectedFreq + ' <span>MHz</span>';
-  const bandColor = BANDS[selectedBand] ? BANDS[selectedBand].color : 'var(--green)';
-  document.getElementById('chInfoFreq').style.color = bandColor;
-  document.getElementById('chInfoBand').textContent = selectedBand + ' · ' + selectedCh + ' · ' + selectedFreq + ' MHz';
-
-  // Generate CLI
-  const cliOut = document.getElementById('cliOut');
-  const bandObj = BANDS[selectedBand];
-  const bandKey = bandObj ? bandObj.key : selectedCh.charAt(0);
-  const chNum   = parseInt(selectedCh.replace(/[A-Z]/,''));
-
-  let lines = '';
-  if(currentProto === 'smartaudio'){
-    lines = `<span class="cli-comment"># SmartAudio — ${selectedBand} ${selectedCh} @ ${selectedFreq} MHz, ${pwr} mW</span>\n` +
-            `<span class="cli-cmd">set</span> <span class="cli-val">vtx_band = ${chNum > 0 ? chNum : 1}</span>\n` +
-            `<span class="cli-cmd">set</span> <span class="cli-val">vtx_channel = ${chNum}</span>\n` +
-            `<span class="cli-cmd">set</span> <span class="cli-val">vtx_power = ${getPowerIndex(pwr)}</span>\n` +
-            `<span class="cli-comment"># (หรือตั้งผ่าน OSD → Video Transmitter)</span>\n` +
-            `<span class="cli-cmd">save</span>`;
-  } else if(currentProto === 'tramp'){
-    lines = `<span class="cli-comment"># IRC Tramp — ${selectedBand} ${selectedCh} @ ${selectedFreq} MHz, ${pwr} mW</span>\n` +
-            `<span class="cli-cmd">vtx</span> <span class="cli-val">${selectedFreq} ${pwr}</span>\n` +
-            `<span class="cli-comment"># หรือ: vtxtable band ${bandKey} channel ${chNum}</span>`;
-  } else {
-    lines = `<span class="cli-comment"># MSP VTX — ${selectedBand} ${selectedCh} @ ${selectedFreq} MHz, ${pwr} mW</span>\n` +
-            `<span class="cli-cmd">set</span> <span class="cli-val">vtx_freq = ${selectedFreq}</span>\n` +
-            `<span class="cli-cmd">set</span> <span class="cli-val">vtx_power = ${pwr}</span>\n` +
-            `<span class="cli-cmd">save</span>`;
+  const cell = document.getElementById('cell-'+ch);
+  if(cell){
+    cell.classList.add('selected');
   }
-  cliOut.innerHTML = lines;
+
+  // Spectrum dot
+  document.querySelectorAll('.spectrum-channel-dot').forEach(d=>d.classList.remove('selected'));
+  const spcDot = document.getElementById('spc-'+ch);
+  if(spcDot) spcDot.classList.add('selected');
+
+  // Spectrum line
+  const line = document.getElementById('spectrumLine');
+  const band = BANDS.find(b=>b.name===bandName);
+  const bColor = band?band.color:'var(--green)';
+  line.style.left = freqToX(freq)+'%';
+  line.style.background = bColor;
+  line.style.display='block';
+
+  // Live display
+  const liveFq = document.getElementById('liveFreq');
+  liveFq.innerHTML = freq+' <sup>MHz</sup>';
+  liveFq.style.color = bColor;
+  document.getElementById('liveMeta').innerHTML =
+    `<strong style="color:${bColor}">${bandName}</strong> &nbsp;·&nbsp; <strong>${ch}</strong> &nbsp;·&nbsp;
+     BF <code style="font-family:var(--mono);font-size:.75rem;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px;">vtx_band=${FREQ_MAP[ch].bfIndex}</code> &nbsp;
+     <code style="font-family:var(--mono);font-size:.75rem;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px;">vtx_channel=${ch.replace(/[A-Za-z]/g,'')}</code>
+     ${isWifi(freq)?'&nbsp;<span style="color:var(--red);font-size:.75rem;">⚠️ WiFi overlap</span>':''}`;
+
+  // Ref table
+  document.querySelectorAll('#refTableBody tr').forEach(tr=>{
+    tr.classList.toggle('hl', tr.dataset.ch===ch);
+    if(tr.dataset.ch===ch) tr.scrollIntoView({behavior:'smooth',block:'nearest'});
+  });
+
+  updateAll();
 }
 
-function getPowerIndex(mw){
-  if(mw <= 25)  return '1 (25mW)';
-  if(mw <= 100) return '2 (100mW)';
-  if(mw <= 200) return '3 (200mW)';
-  if(mw <= 400) return '4 (400mW)';
-  if(mw <= 600) return '5 (600mW)';
-  return '6 (1W)';
+// ─── CLEAR ─────────────────────────────────────────────
+function clearSelection(){
+  selBand=selCh=selFreq=null;
+  document.querySelectorAll('.ch-cell').forEach(c=>c.classList.remove('selected'));
+  document.querySelectorAll('.spectrum-channel-dot').forEach(d=>d.classList.remove('selected'));
+  document.getElementById('spectrumLine').style.display='none';
+  document.getElementById('liveFreq').innerHTML='— <sup>MHz</sup>';
+  document.getElementById('liveFreq').style.color='var(--green)';
+  document.getElementById('liveMeta').textContent='คลิกเลือก Band / Channel จากตารางด้านล่าง หรือจะลากดูบน Spectrum ก็ได้';
+  document.getElementById('cliOut').innerHTML='<span class="cli-comment"># เลือก Band / Channel จากตารางด้านบนเพื่อสร้าง CLI command<br># แล้ว paste ใน Betaflight CLI Tab แล้วกด Enter</span>';
+  document.getElementById('pwrWarn').classList.remove('show');
+  document.getElementById('livePwr').textContent='—';
+  document.getElementById('pwrBar').style.width='0%';
+  document.querySelectorAll('#refTableBody tr').forEach(tr=>tr.classList.remove('hl'));
 }
 
-function copyCmd(){
-  const el = document.getElementById('cliOut');
-  const text = el.innerText || el.textContent;
-  navigator.clipboard.writeText(text).then(function(){ showToast('คัดลอก CLI เรียบร้อย ✓'); });
+// ─── PROTO ─────────────────────────────────────────────
+function setProto(p, btn){
+  currentProto = p;
+  document.querySelectorAll('.proto-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  updateAll();
 }
 
-function showToast(msg){
-  var t = document.getElementById('toast');
-  if(!t){ t = document.createElement('div'); t.id='toast';
-    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#10c47a;color:#021a0e;padding:8px 20px;border-radius:20px;font-weight:700;font-size:.87rem;z-index:9999;transition:opacity .3s;box-shadow:0 4px 20px rgba(16,196,122,.4);';
-    document.body.appendChild(t); }
-  t.textContent = msg; t.style.opacity = '1';
-  clearTimeout(t._t); t._t = setTimeout(function(){ t.style.opacity='0'; }, 2000);
+// ─── UPDATE ALL ────────────────────────────────────────
+function updateAll(){
+  const pwr = parseInt(document.getElementById('pwrSelect').value);
+  const pctBar = Math.min(100, Math.round((pwr/1000)*100));
+  const pColor = pwr>=600?'#f85149':pwr>=400?'#f1b65a':'#10c47a';
+
+  const livePwr = document.getElementById('livePwr');
+  livePwr.textContent = pwr+' mW';
+  livePwr.style.color = pColor;
+  document.getElementById('pwrBar').style.width = pctBar+'%';
+  document.getElementById('pwrBar').style.background = pColor;
+  document.getElementById('pwrWarn').classList.toggle('show', pwr>=600);
+
+  if(!selCh) return;
+
+  const band = BANDS.find(b=>b.name===selBand);
+  const bfIdx = band?band.bfIndex:5;
+  const chNum = parseInt(selCh.replace(/[A-Za-z]/g,''));
+  const bandKey = band?band.key:'R';
+
+  let html='';
+  if(currentProto==='smartaudio'){
+    html=`<span class="cli-comment"># SmartAudio — ${selBand} ${selCh} @ ${selFreq} MHz · ${pwr} mW</span>\n`+
+         `<span class="cli-cmd">set</span> <span class="cli-val">vtx_band = ${bfIdx}</span>         <span class="cli-comment"># ${selBand} (A=1,B=2,E=3,F=4,R=5,D=6)</span>\n`+
+         `<span class="cli-cmd">set</span> <span class="cli-val">vtx_channel = ${chNum}</span>      <span class="cli-comment"># Ch ${chNum} = ${selFreq} MHz</span>\n`+
+         `<span class="cli-cmd">set</span> <span class="cli-val">vtx_power = ${getPwrIdx(pwr)}</span>          <span class="cli-comment"># power index ${getPwrIdx(pwr)} = ${pwr}mW</span>\n`+
+         `<span class="cli-cmd">set</span> <span class="cli-val">vtx_low_power_disarm = ON</span>  <span class="cli-comment"># ลดกำลังขณะ disarm ✅</span>\n`+
+         `<span class="cli-cmd">save</span>`;
+  } else if(currentProto==='tramp'){
+    html=`<span class="cli-comment"># IRC Tramp — ${selBand} ${selCh} @ ${selFreq} MHz · ${pwr} mW</span>\n`+
+         `<span class="cli-cmd">vtx</span> <span class="cli-freq">${selFreq}</span> <span class="cli-val">${pwr}</span>   <span class="cli-comment"># frequency direct + power</span>\n`+
+         `<span class="cli-comment"># หรือผ่าน vtxtable:</span>\n`+
+         `<span class="cli-cmd">vtxtable</span> <span class="cli-band">band</span> <span class="cli-val">${bfIdx}</span>     <span class="cli-comment"># band index</span>\n`+
+         `<span class="cli-cmd">vtxtable</span> <span class="cli-band">channel</span> <span class="cli-val">${chNum}</span>`;
+  } else if(currentProto==='msp'){
+    html=`<span class="cli-comment"># MSP VTX — ${selBand} ${selCh} @ ${selFreq} MHz · ${pwr} mW</span>\n`+
+         `<span class="cli-cmd">set</span> <span class="cli-val">vtx_band = ${bfIdx}</span>\n`+
+         `<span class="cli-cmd">set</span> <span class="cli-val">vtx_channel = ${chNum}</span>\n`+
+         `<span class="cli-cmd">set</span> <span class="cli-val">vtx_power = ${getPwrIdx(pwr)}</span>\n`+
+         `<span class="cli-cmd">save</span>`;
+  } else {
+    // vtxtable — show full config
+    html=`<span class="cli-comment"># vtxTable — Betaflight 4.3+ · สั่งแล้ว save ทันที</span>\n`+
+         `<span class="cli-comment"># กดปุ่ม "vtxTable (BF4.3+)" ด้านบน แล้วเลือก Standard Bands เพื่อดู full vtxtable</span>\n\n`+
+         `<span class="cli-comment"># ตั้งเฉพาะ channel ที่เลือก:</span>\n`+
+         `<span class="cli-cmd">set</span> <span class="cli-val">vtx_band = ${bfIdx}</span>         <span class="cli-comment"># ${selBand}</span>\n`+
+         `<span class="cli-cmd">set</span> <span class="cli-val">vtx_channel = ${chNum}</span>      <span class="cli-comment"># ${selCh} = ${selFreq} MHz</span>\n`+
+         `<span class="cli-cmd">set</span> <span class="cli-val">vtx_power = ${getPwrIdx(pwr)}</span>\n`+
+         `<span class="cli-cmd">save</span>`;
+  }
+  document.getElementById('cliOut').innerHTML=html;
 }
 
-// ─── Build Freq Reference Table ────────────────────
+function getPwrIdx(mw){
+  if(mw<=25)  return '1';
+  if(mw<=100) return '2';
+  if(mw<=200) return '3';
+  if(mw<=400) return '4';
+  if(mw<=600) return '5';
+  return '6';
+}
+
+// ─── COPY ──────────────────────────────────────────────
+function copyAllCLI(){
+  const el=document.getElementById('cliOut');
+  navigator.clipboard.writeText(el.innerText||el.textContent).then(()=>toastMsg('คัดลอก CLI เรียบร้อย ✓'));
+}
+function copyBox(btn){
+  const box=btn.closest('.cli-box,.vtxtable-box');
+  const txt=box?box.innerText||box.textContent:'';
+  navigator.clipboard.writeText(txt).then(()=>toastMsg('คัดลอกแล้ว ✓'));
+}
+
+// ─── REF TABLE ─────────────────────────────────────────
 function buildRefTable(){
-  const tbody = document.getElementById('freqRefBody');
-  tbody.innerHTML = '';
-  BAND_NAMES.forEach(function(bandName){
-    const band = BANDS[bandName];
-    band.channels.forEach(function(item){
-      const tr = document.createElement('tr');
-      tr.dataset.ch = item.ch;
-      tr.style.cursor = 'pointer';
-      tr.innerHTML = `<td><span class="band-badge" style="background:${band.color}22;color:${band.color};border:1px solid ${band.color}44;">${bandName}</span></td>
-        <td style="font-family:var(--mono);font-weight:600;">${item.ch}</td>
-        <td class="td-freq" style="font-family:var(--mono);color:var(--text);">${item.f} <span style="color:var(--muted);font-size:.78rem;">MHz</span></td>
-        <td style="font-size:.78rem;color:var(--muted);">${getFreqNote(bandName, item.ch)}</td>`;
-      tr.addEventListener('click', function(){
-        // find corresponding cell
-        const cell = document.querySelector(`.ch-cell[data-ch="${item.ch}"]`);
-        if(cell){ selectCell(cell); cell.scrollIntoView({behavior:'smooth',block:'center'}); }
+  const tbody=document.getElementById('refTableBody');
+  tbody.innerHTML='';
+  BANDS.forEach(band=>{
+    band.channels.forEach((item,idx)=>{
+      const tr=document.createElement('tr');
+      tr.dataset.ch=item.ch;
+      tr.style.cursor='pointer';
+      const wifi=isWifi(item.f);
+      tr.innerHTML=`<td><span class="td-band" style="background:${band.color}22;color:${band.color};border:1px solid ${band.color}44;">${band.name}</span></td>
+        <td style="font-family:var(--mono);font-weight:700;color:${band.color}">${item.ch}</td>
+        <td style="font-size:.72rem;color:var(--muted);">${band.channels[idx].ch}</td>
+        <td class="td-freq">${item.f} <span style="color:var(--muted);font-size:.72rem;">MHz</span></td>
+        <td style="font-family:var(--mono);color:var(--muted);">${band.bfIndex}</td>
+        <td class="td-wifi">${wifi?'⚠️ YES':''}</td>
+        <td class="td-note">${item.note}</td>`;
+      tr.addEventListener('click',()=>{
+        selectChannel(band.name,item.ch,item.f);
+        switchTab('picker', document.querySelector('[onclick*="picker"]'));
       });
       tbody.appendChild(tr);
     });
   });
 }
 
-function getFreqNote(band, ch){
-  if(band === 'Raceband'){
-    if(ch==='R1') return 'มักใช้กับ pilot 1';
-    if(ch==='R7') return 'พื้นที่ใกล้ 5.8G WiFi — ระวัง';
-    return 'มาตรฐาน race';
-  }
-  if(band === 'Band E'){
-    if(['E5','E6','E7','E8'].includes(ch)) return '5.8G อาจ overlap WiFi';
-  }
-  if(band === 'Band D') return '5.3 GHz — ไม่รองรับใน VTX ทั่วไป';
-  return '—';
+function filterRefTable(){
+  const val=document.getElementById('refBandFilter').value;
+  document.querySelectorAll('#refTableBody tr').forEach(tr=>{
+    const chBand=FREQ_MAP[tr.dataset.ch]?.band||'';
+    tr.style.display=(!val||chBand===val)?'':'none';
+  });
 }
 
-// ─── Drawer ────────────────────────────────────────
-(function(){
-  var btn=document.getElementById('hamburgerBtn'), drawer=document.getElementById('drawer'),
-      overlay=document.getElementById('overlay'), closeBtn=document.getElementById('closeDrawer');
-  function open(){
-    btn&&btn.setAttribute('aria-expanded','true');
-    drawer&&drawer.classList.add('open'); drawer&&drawer.removeAttribute('hidden');
-    overlay&&overlay.classList.add('open');
-    document.addEventListener('keydown',onEsc);
-  }
-  function close(){
-    btn&&btn.setAttribute('aria-expanded','false');
-    drawer&&drawer.classList.remove('open'); overlay&&overlay.classList.remove('open');
-    document.removeEventListener('keydown',onEsc);
-    setTimeout(function(){ drawer&&drawer.setAttribute('hidden',''); }, 280);
-  }
-  function onEsc(e){ if(e.key==='Escape') close(); }
-  btn&&btn.addEventListener('click',function(){ btn.getAttribute('aria-expanded')==='true'?close():open(); });
-  overlay&&overlay.addEventListener('click',close);
-  closeBtn&&closeBtn.addEventListener('click',close);
-  if(window.innerWidth<=900&&drawer) drawer.setAttribute('hidden','');
-})();
+// ─── BF BAND INDEX ─────────────────────────────────────
+function buildBFIndex(){
+  const cont=document.getElementById('bfBandIndex');
+  cont.innerHTML='';
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px;';
 
-// ─── Init ──────────────────────────────────────────
-buildMatrix();
-buildRefTable();
-document.getElementById('pwrSelect').addEventListener('change', updateOutput);
+  const sorted=[...BANDS].sort((a,b)=>a.bfIndex-b.bfIndex);
+  sorted.forEach(band=>{
+    const card=document.createElement('div');
+    card.style.cssText=`background:var(--bg-elevated);border:1px solid var(--border);border-left:3px solid ${band.color};border-radius:8px;padding:10px 14px;`;
+    card.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+      <span style="font-family:var(--mono);font-size:1.1rem;font-weight:700;color:${band.color};">${band.bfIndex}</span>
+      <span style="font-size:.82rem;font-weight:700;color:var(--text);">${band.name}</span>
+      <span style="font-family:var(--mono);font-size:.68rem;background:rgba(255,255,255,.06);padding:1px 6px;border-radius:4px;color:var(--muted);">[${band.key}]</span>
+    </div>
+    <div style="font-size:.72rem;color:var(--muted);">${band.channels.map(c=>c.f).join(' · ')} MHz</div>`;
+    grid.appendChild(card);
+  });
+  cont.appendChild(grid);
+}
+
+// ─── VTXTABLE OUTPUT ───────────────────────────────────
+function showVtxTable(type){
+  const el=document.getElementById('vtxtableOutput');
+  let lines=[];
+
+  if(type==='standard'){
+    lines.push('# vtxTable — Standard 6 Bands (Betaflight 4.3+)');
+    lines.push('# paste ใน CLI tab แล้วกด Enter ทีละบรรทัด หรือ paste ทั้งหมดแล้ว Enter ครั้งเดียว');
+    lines.push('');
+    lines.push('vtxtable bands 6');
+    lines.push('vtxtable channels 8');
+    lines.push('');
+    BANDS.forEach(b=>{
+      const freqs=b.channels.map(c=>c.f).join(' ');
+      lines.push(`vtxtable band ${b.bfIndex} ${b.name.replace(' ','_').toUpperCase()} ${b.key} FACTORY ${freqs}`);
+    });
+    lines.push('');
+    lines.push('vtxtable powerlevels 5');
+    lines.push('vtxtable powervalues 25 200 500 800 1000');
+    lines.push('vtxtable powerlabels 25 200 500 800 1000');
+    lines.push('');
+    lines.push('# ตั้ง active channel:');
+    lines.push('set vtx_band = 5          # Raceband');
+    lines.push('set vtx_channel = 1       # R1 = 5658 MHz');
+    lines.push('set vtx_power = 2         # 200mW');
+    lines.push('set vtx_low_power_disarm = ON');
+    lines.push('save');
+  } else if(type==='raceonly'){
+    lines.push('# vtxTable — Raceband Only (สะอาด ไม่สับสน)');
+    lines.push('');
+    lines.push('vtxtable bands 1');
+    lines.push('vtxtable channels 8');
+    lines.push('vtxtable band 1 RACEBAND R FACTORY 5658 5695 5732 5769 5806 5843 5880 5917');
+    lines.push('');
+    lines.push('vtxtable powerlevels 3');
+    lines.push('vtxtable powervalues 25 200 600');
+    lines.push('vtxtable powerlabels 25 200 600');
+    lines.push('');
+    lines.push('set vtx_band = 1');
+    lines.push('set vtx_channel = 1       # R1 = 5658 MHz');
+    lines.push('set vtx_power = 2         # 200mW');
+    lines.push('set vtx_low_power_disarm = ON');
+    lines.push('save');
+  } else {
+    lines.push('# vtxTable — 25mW Safe Indoor Setup');
+    lines.push('');
+    lines.push('vtxtable bands 2');
+    lines.push('vtxtable channels 8');
+    lines.push('vtxtable band 1 RACEBAND R FACTORY 5658 5695 5732 5769 5806 5843 5880 5917');
+    lines.push('vtxtable band 5 BOSCAM_A A FACTORY 5865 5845 5825 5805 5785 5765 5745 5725');
+    lines.push('');
+    lines.push('vtxtable powerlevels 2');
+    lines.push('vtxtable powervalues 25 100');
+    lines.push('vtxtable powerlabels 25 100');
+    lines.push('');
+    lines.push('set vtx_band = 1');
+    lines.push('set vtx_channel = 1');
+    lines.push('set vtx_power = 1         # 25mW');
+    lines.push('set vtx_low_power_disarm = ON');
+    lines.push('save');
+  }
+
+  el.innerHTML=`<button class="cli-copy-btn" onclick="copyBox(this)" style="top:8px;right:8px;">Copy</button><span class="cli-comment">${lines.map(l=>l.startsWith('#')?`<span class="cli-comment">${l}</span>`:l.startsWith('set ')?`<span class="cli-cmd">set</span> <span class="cli-val">${l.slice(4)}</span>`:l.startsWith('vtxtable')?`<span class="cli-cmd">vtxtable</span> <span class="cli-val">${l.slice(9)}</span>`:l.startsWith('save')?`<span class="cli-cmd">${l}</span>`:l).join('\n')}</span>`;
+}
+
+// ─── POWER GUIDE ───────────────────────────────────────
+function buildPowerGuide(){
+  const cont=document.getElementById('powerGuideCards');
+  cont.innerHTML='';
+  const grid=document.createElement('div');
+  grid.className='pwr-table-grid';
+
+  POWER_LEVELS.forEach((p,i)=>{
+    const card=document.createElement('div');
+    card.className='pwr-card';
+    card.style.borderTopColor=p.color;
+    const heatW=Math.min(100,(p.heat/6)*100);
+    const heatColor=p.heat<=2?'#10c47a':p.heat<=3?'#58a6ff':p.heat<=4?'#f1b65a':'#f85149';
+    card.innerHTML=`<div class="pwr-card-mw" style="color:${p.color}">${p.mw}<span style="font-size:.6em;font-weight:400;color:var(--muted);">mW</span></div>
+      <div class="pwr-card-label">${p.label}</div>
+      <div class="pwr-card-temp">🌡️ ความร้อน</div>
+      <div class="pwr-heat-bar"><div style="width:${heatW}%;background:${heatColor};height:3px;border-radius:2px;"></div></div>
+      <div class="pwr-card-use" style="margin-top:7px;">${p.use}</div>
+      <div class="pwr-legal-badge" style="color:${heatColor};border-color:${heatColor}44;background:${heatColor}11;">${p.legal}</div>`;
+    grid.appendChild(card);
+  });
+  cont.appendChild(grid);
+}
+
+// ─── PROTOCOL COMPARE ──────────────────────────────────
+function buildProtoCompare(){
+  const cont=document.getElementById('protocolCompare');
+  const protos=[
+    {
+      name:'SmartAudio', icon:'🟢', color:'var(--green)',
+      pros:['รองรับ VTX ส่วนใหญ่','ควบคุมผ่าน OSD ได้ทันที','Betaflight รองรับดีที่สุด','ปรับ Power/Band/Channel จาก OSD'],
+      cons:['ต้องเชื่อมต่อ UART ถูก pin','บาง VTX ต้องการ V1/V2.1 specific']
+    },
+    {
+      name:'IRC Tramp', icon:'🔵', color:'var(--blue)',
+      pros:['ใช้ frequency MHz ตรงๆ','ยืดหยุ่นสูง','บาง VTX ราคาถูกรองรับแค่ Tramp'],
+      cons:['ไม่รองรับทุก VTX','Command syntax ต่างออกไป']
+    },
+    {
+      name:'MSP VTX', icon:'🟡', color:'var(--gold)',
+      pros:['built-in ใน AIO boards','ไม่ต้องต่อสาย extra','เหมาะกับ Micro/Whoop'],
+      cons:['ส่วนใหญ่อยู่ใน AIO เท่านั้น','ปรับ power range จำกัด','ไม่รองรับ power สูง']
+    }
+  ];
+
+  cont.innerHTML='';
+  protos.forEach(p=>{
+    const card=document.createElement('div');
+    card.className='proto-card';
+    card.innerHTML=`<div class="proto-card-title"><span>${p.icon}</span><span style="color:${p.color}">${p.name}</span></div>
+      <div class="proto-card-body">
+        ${p.pros.map(x=>`<div><span class="proto-tick">✓</span> ${x}</div>`).join('')}
+        ${p.cons.map(x=>`<div style="margin-top:4px;"><span class="proto-cross">✗</span> ${x}</div>`).join('')}
+      </div>`;
+    cont.appendChild(card);
+  });
+}
+
+// ─── POWER INDEX TABLE ─────────────────────────────────
+function buildPowerIndexTable(){
+  const cont=document.getElementById('powerIndexTable');
+  const rows=[
+    {idx:1,mw:25,note:'Pitmode / Indoor'},
+    {idx:2,mw:200,note:'Standard'},
+    {idx:3,mw:500,note:'High (ขึ้นอยู่กับ VTX)'},
+    {idx:4,mw:800,note:'Very High'},
+    {idx:5,mw:1000,note:'1W MAX (ระวัง)'},
+  ];
+  cont.innerHTML=`<table class="vtx-table"><thead><tr><th>vtx_power =</th><th>Power (mW)</th><th>หมายเหตุ</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr><td style="font-family:var(--mono);color:var(--green);font-weight:700;">${r.idx}</td><td style="font-family:var(--mono);">${r.mw} mW</td><td style="color:var(--muted);font-size:.75rem;">${r.note}</td></tr>`).join('')}</tbody></table>
+    <div style="font-size:.73rem;color:var(--muted);margin-top:8px;line-height:1.6;">⚠️ index จริงขึ้นอยู่กับ vtxTable powervalues ที่ตั้งไว้ — ค่าด้านบนเป็นค่าเริ่มต้น default ของ Betaflight</div>`;
+}
+
+// ─── RACE PLANNER ──────────────────────────────────────
+function buildPilotSelect(){
+  const opts=['<option value="">— ไม่ระบุ —'];
+  BANDS.forEach(band=>{
+    band.channels.forEach(c=>{
+      const wifi=isWifi(c.f)?'📶':'';
+      opts.push(`<option value="${c.ch}">${c.ch} — ${c.f} MHz (${band.name}) ${wifi}</option>`);
+    });
+  });
+  return opts.join('');
+}
+
+function renderPilots(){
+  const list=document.getElementById('pilotList');
+  list.innerHTML='';
+  pilots.forEach((p,i)=>{
+    const row=document.createElement('div');
+    row.className='pilot-row';
+    row.id='pilot-'+i;
+    row.innerHTML=`<div class="pilot-num pilot-color-${i+1}" style="background:${PILOT_COLORS[i]||'#aaa'}">${i+1}</div>
+      <input class="pilot-name-input" value="${p.name}" placeholder="ชื่อ Pilot ${i+1}" oninput="pilots[${i}].name=this.value">
+      <select class="pilot-ch-select" onchange="pilots[${i}].ch=this.value;checkConflicts()">
+        ${buildPilotSelect().replace(`value="${p.ch}"`,`value="${p.ch}" selected`)}
+      </select>
+      <button class="pilot-remove-btn" onclick="removePilot(${i})" title="ลบ">✕</button>`;
+    list.appendChild(row);
+  });
+}
+
+function addPilot(){
+  if(pilots.length>=8){ toastMsg('สูงสุด 8 pilots'); return; }
+  pilots.push({name:'Pilot '+(pilots.length+1), ch:''});
+  renderPilots();
+}
+
+function removePilot(i){
+  pilots.splice(i,1);
+  pilots.forEach((p,j)=>{ if(p.name==='Pilot '+(j+2)) p.name='Pilot '+(j+1); });
+  renderPilots();
+  checkConflicts();
+}
+
+function checkConflicts(){
+  const conflicts=[];
+  const assigned=pilots.filter(p=>p.ch);
+
+  for(let i=0;i<assigned.length;i++){
+    for(let j=i+1;j<assigned.length;j++){
+      const dist=chDist(assigned[i].ch,assigned[j].ch);
+      if(dist<20 && dist>0){
+        conflicts.push({p1:assigned[i],p2:assigned[j],dist});
+      }
+    }
+  }
+
+  const rep=document.getElementById('conflictReport');
+  const ok=document.getElementById('okReport');
+
+  // Mark rows
+  pilots.forEach((_,i)=>{
+    const row=document.getElementById('pilot-'+i);
+    if(row){
+      const hasConflict=conflicts.some(c=>c.p1===pilots[i]||c.p2===pilots[i]);
+      row.classList.toggle('has-conflict',hasConflict);
+    }
+  });
+
+  if(conflicts.length>0){
+    rep.innerHTML='<strong>⚠️ พบ Conflict ดังนี้:</strong><br>'+
+      conflicts.map(c=>`• <strong>${c.p1.name}</strong> (${c.p1.ch}=${FREQ_MAP[c.p1.ch]?.freq}MHz) กับ <strong>${c.p2.name}</strong> (${c.p2.ch}=${FREQ_MAP[c.p2.ch]?.freq}MHz) — ห่างกันแค่ <strong>${c.dist} MHz</strong> (ต้อง ≥20 MHz)`).join('<br>');
+    rep.classList.add('show');
+    ok.classList.remove('show');
+  } else if(assigned.length>=2){
+    const chList=assigned.map(p=>`${p.name}:${p.ch}(${FREQ_MAP[p.ch]?.freq}MHz)`).join(' · ');
+    ok.innerHTML=`✅ ไม่มี Conflict! ทุก Channel ห่างกัน ≥20 MHz — บินได้พร้อมกันทันที<br><span style="font-size:.75rem;opacity:.8;">${chList}</span>`;
+    ok.classList.add('show');
+    rep.classList.remove('show');
+  } else {
+    rep.classList.remove('show');
+    ok.classList.remove('show');
+  }
+}
+
+function autoAssign(){
+  if(pilots.length===0){ toastMsg('เพิ่ม pilot ก่อน'); return; }
+  // Use Raceband R1–R8 first, then expand
+  const raceChs=BANDS[0].channels.map(c=>c.ch);
+  const allSorted=[...raceChs, ...ALL_CHANNELS_LIST.filter(c=>!raceChs.includes(c.ch)).map(c=>c.ch)];
+  const used=[];
+  let assigned=0;
+  for(const ch of allSorted){
+    if(assigned>=pilots.length) break;
+    const ok=used.every(u=>chDist(u,ch)>=20);
+    if(ok){ pilots[assigned].ch=ch; used.push(ch); assigned++; }
+  }
+  renderPilots();
+  checkConflicts();
+  toastMsg('Auto-Assign เสร็จแล้ว ✓');
+}
+
+function clearPilots(){
+  pilots=[];
+  renderPilots();
+  document.getElementById('conflictReport').classList.remove('show');
+  document.getElementById('okReport').classList.remove('show');
+}
+
+function buildRacePresets(){
+  const cont=document.getElementById('racePresets');
+  cont.innerHTML='';
+  RACE_PRESETS.forEach(preset=>{
+    const card=document.createElement('div');
+    card.style.cssText='background:var(--bg-elevated);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:10px;';
+    const rows=preset.pilots.map((p,i)=>{
+      const info=FREQ_MAP[p.ch];
+      return `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:3px 8px;font-size:.72rem;margin:3px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:${PILOT_COLORS[i]};flex-shrink:0;"></span>
+        <strong style="color:var(--text)">${p.n}:</strong> <span style="font-family:var(--mono);color:${info?info.color:'var(--green)'}">${p.ch}</span> <span style="color:var(--muted)">${info?info.freq+' MHz':''}</span>
+      </span>`;
+    }).join('');
+    card.innerHTML=`<div style="font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:8px;">${preset.name}</div>
+      <div>${rows}</div>
+      <button class="btn-sm btn-sm-green" style="margin-top:10px;" onclick='loadPreset(${JSON.stringify(preset.pilots)})'>โหลด Preset นี้</button>`;
+    cont.appendChild(card);
+  });
+}
+
+function loadPreset(pilotData){
+  pilots=pilotData.map(p=>({name:p.n,ch:p.ch}));
+  renderPilots();
+  checkConflicts();
+  switchTab('planner', document.querySelectorAll('.main-tab')[1]);
+  toastMsg('โหลด Preset เรียบร้อย ✓');
+}
+
+// ─── EXPORT CSV ────────────────────────────────────────
+function exportFreqCSV(){
+  const rows=[['Band','Channel','Frequency_MHz','BF_Band_Index','WiFi_Overlap','Note']];
+  BANDS.forEach(b=>b.channels.forEach(c=>{
+    rows.push([b.name,c.ch,c.f,b.bfIndex,isWifi(c.f)?'YES':'NO',c.note.replace(/,/g,' ')]);
+  }));
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='vtx_channels_obix.csv';
+  a.click();
+  toastMsg('Export CSV เสร็จแล้ว ✓');
+}
+
+// ─── INIT ──────────────────────────────────────────────
+(function init(){
+  buildSpectrum();
+  buildMatrix();
+  buildRefTable();
+  buildBFIndex();
+  buildPowerGuide();
+  buildProtoCompare();
+  buildPowerIndexTable();
+  buildRacePresets();
+  // Default 2 pilots for planner
+  pilots=[{name:'Pilot 1',ch:''},{name:'Pilot 2',ch:''}];
+  renderPilots();
+
+  // Re-build spectrum on resize
+  let _resizeT;
+  window.addEventListener('resize', ()=>{
+    clearTimeout(_resizeT);
+    _resizeT=setTimeout(buildSpectrum, 200);
+  });
+
+  document.getElementById('pwrSelect').addEventListener('change', updateAll);
+})();
 </script>
 </body>
 </html>
