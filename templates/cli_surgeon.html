@@ -1,433 +1,1146 @@
 <!doctype html>
 <html lang="th">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>CLI Surgeon — OBIXConfig Doctor</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CLI Surgeon — OBIXConfig Doctor</title>
 {% set og_title       = "CLI Surgeon — OBIXConfig Doctor" %}
-{% set og_description = "วาง diff all / dump แล้วรับคำแนะนำแก้ไขทันที — วิเคราะห์ Betaflight CLI อัตโนมัติ" %}
+{% set og_description = "วาง diff all / dump รับการวินิจฉัย PID · filter · protocol · failsafe พร้อม auto-fix CLI ทันที" %}
 {% set og_url         = "https://configdoctor.onrender.com/cli_surgeon" %}
+{% set nav_page       = "cli_surgeon" %}
 {% include "partials/og_tags.html" %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@400;500;600&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   CLI SURGEON — Operating Theater
+═══════════════════════════════════════════════════════ */
+:root {
+  --bg:      #010306;
+  --bg2:     #02060f;
+  --panel:   #04090f;
+  --panel2:  #060d1a;
+  --border:  rgba(0,255,136,.07);
+  --green:   #00ff88;
+  --blue:    #00aaff;
+  --amber:   #ffb700;
+  --red:     #ff4455;
+  --cyan:    #00e5ff;
+  --muted:   #1e3a28;
+  --muted2:  #0d2018;
+  --text:    #a8d4bc;
+  --font-d:  'Orbitron', sans-serif;
+  --font-m:  'JetBrains Mono', monospace;
+  --font-t:  'Sarabun', sans-serif;
+  --glow-g:  0 0 24px rgba(0,255,136,.25);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { overflow-x: hidden; height: 100%; }
 
-  <!-- Embedded modern responsive styles (mobile-first). ถ้าต้องการ map ไปยัง static/style.css ให้ย้ายคลาสไปยังไฟล์ CSS ภายนอก -->
-  <style>
-    /* Reset + base */
-    :root{
-      --bg:#0b1220; --card:#0f1724; --muted:#9aa4b2; --text:#e6eef8;
-      --accent:#22d3ee; --accent-2:#7c3aed; --good:#6ee7b7; --warn:#fbbf24; --danger:#fb7185;
-      --surface: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      --radius:14px; --glass: rgba(255,255,255,0.03);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%; margin:0; background:radial-gradient(1200px 600px at 10% 10%, rgba(34,211,238,0.035), transparent), var(--bg); color:var(--text); -webkit-font-smoothing:antialiased}
-    a{color:var(--accent)}
-    .container{max-width:min(1200px,100%); margin:28px auto; padding:20px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-t);
+  font-size: 14px;
+  min-height: 100vh;
+}
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px,
+    rgba(0,255,136,.006) 2px, rgba(0,255,136,.006) 4px);
+}
+body::after {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background: radial-gradient(ellipse 60% 40% at 10% 5%, rgba(0,255,136,.04) 0%, transparent 65%);
+}
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,255,136,.2); border-radius: 2px; }
 
-    /* Header */
-    .header{display:flex; gap:16px; align-items:center; justify-content:space-between}
-    .brand{display:flex; gap:12px; align-items:center}
-    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:800;color:#04111a;font-size:18px;box-shadow: 0 6px 24px rgba(124,58,237,0.18)}
-    .title h1{margin:0;font-size:18px}
-    .title p{margin:0;color:var(--muted);font-size:13px}
+.page { position: relative; z-index: 1; max-width: 1500px; margin: 0 auto; padding: 0 16px 60px; }
 
-    /* Layout */
-    .grid{display:grid; grid-template-columns: 1fr 420px; gap:18px; margin-top:18px}
-    @media (max-width:980px){ .grid{grid-template-columns:1fr} }
+/* ── Hero ── */
+.hero {
+  padding: 26px 0 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-end; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+}
+.hero-eye {
+  font-family: var(--font-d); font-size: 8.5px; font-weight: 700;
+  letter-spacing: .2em; color: var(--green); text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+.hero-led {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green); box-shadow: var(--glow-g);
+  animation: ledB 1.2s ease-in-out infinite;
+}
+@keyframes ledB { 0%,100%{opacity:1} 50%{opacity:.25} }
+.hero-title {
+  font-family: var(--font-d); font-size: clamp(20px,3vw,36px);
+  font-weight: 900; letter-spacing: .04em; color: #fff; line-height: 1.1;
+}
+.hero-title .hl { color: var(--green); text-shadow: var(--glow-g); }
+.hero-sub { margin-top: 8px; font-size: 12.5px; color: var(--muted); line-height: 1.65; color: #4a7060; }
 
-    /* Panels */
-    .panel{background:var(--card); border-radius:var(--radius); padding:14px; box-shadow: 0 8px 30px rgba(2,6,23,0.6); border:1px solid rgba(255,255,255,0.02)}
-    .panel h2{margin:0 0 8px 0;font-size:15px}
-    .muted{color:var(--muted); font-size:13px}
+/* ── Pipeline ── */
+.pipeline {
+  display: flex; align-items: center; gap: 0;
+  margin: 18px 0; flex-wrap: wrap; gap: 6px;
+}
+.pipe-step {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 14px; border-radius: 8px;
+  border: 1px solid var(--border);
+  font-family: var(--font-d); font-size: 8.5px; font-weight: 700; letter-spacing: .12em;
+  background: var(--panel); transition: .3s;
+  position: relative;
+}
+.pipe-step.active {
+  border-color: rgba(0,255,136,.35);
+  background: rgba(0,255,136,.08);
+  color: var(--green);
+  box-shadow: var(--glow-g);
+}
+.pipe-step.done { border-color: rgba(0,255,136,.2); color: rgba(0,255,136,.6); }
+.pipe-step.error { border-color: rgba(255,68,85,.3); color: var(--red); background: rgba(255,68,85,.06); }
+.pipe-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: currentColor; opacity: .5;
+  transition: .3s;
+}
+.pipe-step.active .pipe-dot {
+  opacity: 1; animation: ledB .8s ease-in-out infinite;
+  box-shadow: 0 0 8px currentColor;
+}
+.pipe-arrow { color: rgba(0,255,136,.2); font-size: 12px; flex-shrink: 0; }
 
-    /* Input area */
-    .dropzone{border:1px dashed rgba(255,255,255,0.04); border-radius:10px; padding:10px; min-height:180px; display:flex; flex-direction:column; gap:8px; background:var(--surface)}
-    .textarea{width:100%; min-height:140px; background:transparent; border:0; color:var(--text); outline:none; resize:vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; font-size:13px; padding:6px}
-    .controls{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
-    .btn{background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--accent); padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:600}
-    .btn.ghost{color:var(--muted); border-style:dashed}
-    .btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:#04111a; border:0}
-    .small{padding:6px 10px; font-size:13px}
-    .upload{position:relative; overflow:hidden}
-    .upload input[type=file]{position:absolute; left:0; top:0; opacity:0; width:100%; height:100%; cursor:pointer}
+/* ── Main grid ── */
+.or-grid {
+  display: grid;
+  grid-template-columns: 1fr 440px;
+  gap: 16px;
+  align-items: start;
+}
+@media(max-width: 1100px) { .or-grid { grid-template-columns: 1fr; } }
 
-    /* Result area */
-    .summary-row{display:flex; justify-content:space-between; align-items:flex-start; gap:12px}
-    .severity{display:flex; gap:8px; align-items:center}
-    .badge{padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px;}
-    .badge.ok{background:var(--good); color:#042014}
-    .badge.warn{background:var(--warn); color:#042014}
-    .badge.crit{background:var(--danger); color:#fff}
+/* ── Panel ── */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+}
+.panel::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: 14px;
+  background: linear-gradient(135deg, rgba(0,255,136,.015) 0%, transparent 60%);
+}
+.panel-hd {
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.panel-title {
+  font-family: var(--font-d); font-size: 9px; font-weight: 700;
+  letter-spacing: .15em; color: var(--green); text-transform: uppercase;
+  display: flex; align-items: center; gap: 7px;
+}
+.panel-body { padding: 14px; }
 
-    .rules{margin-top:12px; display:flex; flex-direction:column; gap:10px}
-    .rule{display:flex; gap:12px; align-items:flex-start; padding:10px; border-radius:10px; background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent); border:1px solid rgba(255,255,255,0.02)}
-    .rule .dot{width:10px;height:40px;border-radius:6px}
-    .rule .body h4{margin:0;font-size:14px}
-    .rule .body p{margin:6px 0 0 0;color:var(--muted);font-size:13px}
+/* ── Editor panel ── */
+.editor-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+  flex-wrap: wrap; gap: 8px;
+}
+.ed-filename {
+  font-family: var(--font-m); font-size: 11px; color: rgba(0,255,136,.5);
+}
+.ed-actions { display: flex; gap: 7px; flex-wrap: wrap; }
+.ed-btn {
+  font-family: var(--font-d); font-size: 8px; font-weight: 700; letter-spacing: .1em;
+  padding: 6px 12px; border-radius: 7px; cursor: pointer; border: 1px solid; transition: .18s;
+  text-transform: uppercase;
+}
+.ed-btn.primary {
+  background: rgba(0,255,136,.12); border-color: rgba(0,255,136,.3); color: var(--green);
+}
+.ed-btn.primary:hover { background: rgba(0,255,136,.2); border-color: rgba(0,255,136,.5); }
+.ed-btn.ghost {
+  background: none; border-color: var(--border); color: var(--muted);
+  color: #3a6050;
+}
+.ed-btn.ghost:hover { color: var(--text); border-color: rgba(255,255,255,.12); }
 
-    /* CLI box */
-    .cli-box{margin-top:12px; background:linear-gradient(180deg, rgba(7,10,14,0.6), rgba(7,10,14,0.4)); border-radius:10px; padding:10px; border:1px solid rgba(255,255,255,0.02)}
-    .cli-line{display:flex; gap:8px; align-items:center; justify-content:space-between; padding:6px 8px; border-radius:8px; background:rgba(255,255,255,0.01)}
-    .cli-text{font-family: ui-monospace, monospace; color:#cfe8ff; font-size:13px}
-    .copy-btn{background:transparent; color:var(--muted); border:1px solid rgba(255,255,255,0.02); padding:6px 8px; border-radius:8px; cursor:pointer}
+/* Dropzone */
+.dropzone-outer {
+  position: relative; margin: 0;
+}
+.dropzone-outer.drag-over {
+  outline: 2px solid rgba(0,255,136,.4);
+}
+.cli-editor {
+  width: 100%;
+  min-height: 320px;
+  max-height: 480px;
+  background: transparent;
+  border: none;
+  color: var(--green);
+  font-family: var(--font-m);
+  font-size: 12px;
+  line-height: 1.7;
+  resize: vertical;
+  padding: 14px 16px;
+  outline: none;
+  display: block;
+}
+.cli-editor::placeholder { color: rgba(0,255,136,.18); }
 
-    /* Raw params */
-    .raw{margin-top:12px}
-    pre.raw-pre{background:#031027; padding:12px; border-radius:8px; font-family: ui-monospace, monospace; font-size:13px; color:#cfe8ff; max-height:220px; overflow:auto; border:1px solid rgba(255,255,255,0.02)}
+/* Drop overlay */
+.drop-hint {
+  display: none;
+  position: absolute; inset: 0;
+  background: rgba(0,10,6,.8);
+  border: 2px dashed rgba(0,255,136,.4);
+  border-radius: 0;
+  align-items: center; justify-content: center;
+  flex-direction: column; gap: 10px;
+  font-family: var(--font-d); font-size: 11px; letter-spacing: .1em; color: var(--green);
+  z-index: 10;
+}
+.dropzone-outer.drag-over .drop-hint { display: flex; }
 
-    /* Footer small */
-    .meta-row{display:flex; gap:12px; justify-content:space-between; align-items:center; margin-top:12px; color:var(--muted); font-size:13px}
+/* Line count bar */
+.line-count-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 7px 14px; border-top: 1px solid var(--border);
+  font-family: var(--font-m); font-size: 10px; color: #2a5040;
+}
+.line-count-bar span { color: var(--green); }
 
-    /* Subtle animations */
-    .fade-in{animation:fadeIn .35s ease both}
-    @keyframes fadeIn{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
-  
-  /* ── Responsive ── */
-  html,body{overflow-x:hidden}
-  @media(max-width:768px){
-    [style*="1fr 420px"]{grid-template-columns:1fr!important}
-    .surgeon-grid,.panel-row{grid-template-columns:1fr!important}
-  }
-  @media(max-width:480px){textarea{font-size:14px}}
+/* Server status */
+.srv-status {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-d); font-size: 8.5px; font-weight: 700; letter-spacing: .1em;
+  padding: 4px 12px; border-radius: 100px; border: 1px solid;
+}
+.srv-status.online { color: var(--green); border-color: rgba(0,255,136,.3); background: rgba(0,255,136,.07); }
+.srv-status.offline { color: var(--muted); border-color: var(--border); background: none; color: #3a6050; }
+
+/* ── Result panels ── */
+
+/* Summary bar */
+.summary-bar {
+  padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.sum-text { font-size: 13px; color: var(--text); font-weight: 500; }
+.sev-badges { display: flex; gap: 7px; }
+.sev-badge {
+  font-family: var(--font-d); font-size: 9px; font-weight: 700; letter-spacing: .1em;
+  padding: 4px 12px; border-radius: 100px; border: 1px solid;
+  display: none;
+}
+.sev-badge.ok    { color: var(--green); border-color: rgba(0,255,136,.3);  background: rgba(0,255,136,.08); }
+.sev-badge.warn  { color: var(--amber); border-color: rgba(255,183,0,.3); background: rgba(255,183,0,.08); }
+.sev-badge.crit  { color: var(--red);   border-color: rgba(255,68,85,.3); background: rgba(255,68,85,.08); }
+.sev-badge.info  { color: var(--blue);  border-color: rgba(0,170,255,.3);  background: rgba(0,170,255,.08); }
+.sev-badge.show  { display: inline-flex; }
+
+/* Firmware badge */
+.fw-badge {
+  font-family: var(--font-m); font-size: 9.5px;
+  padding: 3px 10px; border-radius: 100px;
+  border: 1px solid rgba(0,229,255,.2); background: rgba(0,229,255,.07);
+  color: #00e5ff;
+}
+
+/* Rule cards */
+.rules-list { display: flex; flex-direction: column; gap: 8px; }
+.rule-card {
+  border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--panel2);
+  transition: .2s;
+}
+.rule-card:hover { border-color: rgba(0,255,136,.15); }
+
+.rule-hd {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 13px; cursor: pointer;
+}
+.rule-sev-bar { width: 3px; height: 36px; border-radius: 2px; flex-shrink: 0; }
+.rule-icon { font-size: 16px; flex-shrink: 0; }
+.rule-body { flex: 1; min-width: 0; }
+.rule-msg { font-size: 12.5px; color: var(--text); font-weight: 500; line-height: 1.4; }
+.rule-sug { font-size: 11px; color: #3a6050; margin-top: 3px; line-height: 1.5; }
+.rule-expand { font-size: 11px; color: #2a5040; transition: transform .2s; flex-shrink: 0; }
+.rule-card.open .rule-expand { transform: rotate(180deg); }
+
+.rule-detail {
+  max-height: 0; overflow: hidden;
+  transition: max-height .3s cubic-bezier(.4,0,.2,1);
+  border-top: 0 solid var(--border);
+}
+.rule-card.open .rule-detail {
+  max-height: 200px;
+  border-top-width: 1px;
+}
+.rule-detail-inner {
+  padding: 10px 13px 13px 40px;
+}
+.rule-fix-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 8px; padding: 5px 13px; border-radius: 7px; cursor: pointer;
+  font-family: var(--font-d); font-size: 8px; font-weight: 700; letter-spacing: .1em;
+  border: 1px solid rgba(0,255,136,.25); background: rgba(0,255,136,.07); color: var(--green);
+  transition: .18s;
+}
+.rule-fix-btn:hover { background: rgba(0,255,136,.14); }
+
+/* Param Explorer */
+.param-search {
+  width: 100%; background: var(--panel2); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-family: var(--font-m); font-size: 12px;
+  padding: 8px 12px; outline: none; transition: .18s; margin-bottom: 10px;
+}
+.param-search:focus { border-color: rgba(0,255,136,.3); }
+.param-search::placeholder { color: #2a5040; }
+.param-grid {
+  display: flex; flex-direction: column; gap: 3px;
+  max-height: 280px; overflow-y: auto;
+}
+.param-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 5px 8px; border-radius: 6px; transition: .15s;
+}
+.param-row:hover { background: rgba(0,255,136,.05); }
+.param-key { font-family: var(--font-m); font-size: 11px; color: #79c0ff; }
+.param-val {
+  font-family: var(--font-m); font-size: 11px; color: var(--green);
+  max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.param-row.flagged .param-key { color: var(--amber); }
+.param-row.flagged .param-val { color: var(--amber); }
+
+/* CLI Fix Output */
+.fix-cli-wrap {
+  background: rgba(0,0,0,.5); border-radius: 10px; border: 1px solid var(--border);
+  padding: 13px; font-family: var(--font-m); font-size: 11.5px; line-height: 1.8;
+  min-height: 80px; max-height: 320px; overflow-y: auto; position: relative;
+}
+.fc-cmt  { color: rgba(0,255,136,.35); }
+.fc-cmd  { color: #c8dce8; }
+.fc-val  { color: var(--amber); }
+.fc-key  { color: #79c0ff; }
+.fix-empty { color: #2a5040; font-size: 12px; }
+.copy-all-btn {
+  font-family: var(--font-d); font-size: 8.5px; font-weight: 700; letter-spacing: .1em;
+  padding: 6px 14px; border-radius: 7px; cursor: pointer;
+  border: 1px solid rgba(0,255,136,.25); background: rgba(0,255,136,.07); color: var(--green);
+  transition: .18s;
+}
+.copy-all-btn:hover { background: rgba(0,255,136,.14); }
+.copy-all-btn.ok { color: var(--amber); border-color: rgba(255,183,0,.3); }
+
+/* Download */
+.dl-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--font-d); font-size: 8.5px; font-weight: 700; letter-spacing: .1em;
+  padding: 7px 14px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--border); background: none; color: #3a6050; transition: .18s;
+}
+.dl-btn:hover { color: var(--text); border-color: rgba(255,255,255,.12); }
+
+/* Compare mode */
+.cmp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cmp-label {
+  font-family: var(--font-d); font-size: 8px; letter-spacing: .12em; font-weight: 700;
+  margin-bottom: 6px;
+}
+.cmp-ta {
+  width: 100%; background: var(--panel2); border: 1px solid var(--border);
+  border-radius: 9px; color: var(--green); font-family: var(--font-m); font-size: 11px;
+  padding: 10px 12px; outline: none; resize: vertical; min-height: 140px; transition: .18s;
+}
+.cmp-ta:focus { border-color: rgba(0,255,136,.3); }
+.diff-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 10px; border-radius: 7px; font-size: 11.5px;
+  font-family: var(--font-m); margin-bottom: 4px;
+}
+.diff-row.added   { background: rgba(0,255,136,.07); border-left: 2px solid var(--green); }
+.diff-row.removed { background: rgba(255,68,85,.06); border-left: 2px solid var(--red); }
+.diff-row.changed { background: rgba(255,183,0,.06); border-left: 2px solid var(--amber); }
+.diff-key { color: #79c0ff; }
+.diff-a   { color: var(--red); }
+.diff-b   { color: var(--green); }
+
+/* Tabs */
+.tab-row { display: flex; border-bottom: 1px solid var(--border); }
+.tab-btn {
+  font-family: var(--font-d); font-size: 8.5px; font-weight: 700; letter-spacing: .12em;
+  padding: 10px 16px; border: none; background: none; color: #3a6050;
+  cursor: pointer; border-bottom: 2px solid transparent; transition: .18s; text-transform: uppercase;
+}
+.tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+.tab-btn:hover:not(.active) { color: var(--text); }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* Stats row */
+.stats-row {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--border);
+}
+.stat-chip {
+  text-align: center; padding: 8px 6px;
+  background: var(--panel2); border: 1px solid var(--border); border-radius: 9px;
+}
+.sc-val { font-family: var(--font-m); font-size: 18px; font-weight: 600; color: #fff; }
+.sc-lbl { font-family: var(--font-d); font-size: 7px; letter-spacing: .1em; color: #3a6050; margin-top: 3px; }
+
+/* Responsive */
+@media(max-width:680px) {
+  .cmp-grid { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: repeat(2,1fr); }
+  .ed-actions { gap: 5px; }
+  .ed-btn { font-size: 7.5px; padding: 5px 9px; }
+}
+
+/* Animate in */
+.fade-in { animation: fadeUp .35s ease both; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
 </style>
 </head>
 <body>
+
 {% set nav_page = "cli_surgeon" %}
 {% include "partials/nav.html" %}
-  <div class="container" style="padding-top:12px;">
 
-    <main class="grid">
-      <!-- Input panel -->
-      <section class="panel fade-in" aria-labelledby="input-title">
-        <h2 id="input-title">วาง CLI Dump / Upload</h2>
+<div class="page">
 
-        <div class="dropzone" id="dropzone" aria-label="CLI dump dropzone">
-          <textarea id="dump" class="textarea" placeholder="วาง diff all / dump ที่นี่..."></textarea>
+  <!-- Hero -->
+  <div class="hero">
+    <div>
+      <div class="hero-eye">
+        <span class="hero-led"></span>
+        OBIX · CLI SURGEON · OPERATING THEATER
+      </div>
+      <h1 class="hero-title">CLI <span class="hl">Surgeon</span></h1>
+      <p class="hero-sub">
+        วาง diff all / dump → วินิจฉัย PID · filter · protocol · failsafe · TPA อัตโนมัติ<br>
+        Auto-fix CLI · Param Explorer · A/B Compare · JSON report export
+      </p>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span class="srv-status offline" id="srvStatus">
+        <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="currentColor"/></svg>
+        ตรวจสอบ...
+      </span>
+      <a href="/app" style="font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.12em;color:#3a6050;text-decoration:none;border:1px solid var(--border);border-radius:7px;padding:8px 14px;transition:.18s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='#3a6050'">← กลับ</a>
+    </div>
+  </div>
 
-          <div class="controls">
-            <button id="analyzeBtn" class="btn primary">🔎 Analyze</button>
-            <button id="analyzeLocalBtn" class="btn ghost small">🖥️ Analyze (Local)</button>
-            <button id="sampleBtn" class="btn small">📄 ตัวอย่าง</button>
+  <!-- Analysis Pipeline -->
+  <div class="pipeline">
+    <div class="pipe-step" id="pipe0">
+      <div class="pipe-dot"></div>PASTE
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step" id="pipe1">
+      <div class="pipe-dot"></div>PARSE
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step" id="pipe2">
+      <div class="pipe-dot"></div>DIAGNOSE
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step" id="pipe3">
+      <div class="pipe-dot"></div>FIX
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step" id="pipe4">
+      <div class="pipe-dot"></div>EXPORT
+    </div>
+  </div>
 
-            <label class="btn ghost upload small">
-              📁 Upload
-              <input id="fileInput" type="file" accept=".txt,.log" />
+  <!-- Main grid -->
+  <div class="or-grid">
+
+    <!-- ══ LEFT: Editor + Param Explorer ══ -->
+    <div>
+
+      <!-- Editor panel -->
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="editor-topbar">
+          <div class="ed-filename" id="edFilename">untitled.txt</div>
+          <div class="ed-actions">
+            <button class="ed-btn primary" id="analyzeBtn">⚡ ANALYZE</button>
+            <label class="ed-btn ghost" style="cursor:pointer;position:relative;overflow:hidden;">
+              📁 UPLOAD
+              <input type="file" accept=".txt,.log,.diff" id="fileInput"
+                style="position:absolute;left:0;top:0;opacity:0;width:100%;height:100%;cursor:pointer;">
             </label>
-
-            <button id="clearBtn" class="btn ghost small">🧹 ล้าง</button>
-            <button id="downloadBtn" class="btn ghost small">⬇️ ดาวน์โหลดรายงาน</button>
-          </div>
-
-          <div class="muted" style="margin-top:8px">เคล็ดลับ: ใส่ผลจาก Betaflight CLI (diff all) เพื่อผลการวิเคราะห์แม่นยำที่สุด</div>
-        </div>
-
-        <div style="margin-top:12px; display:flex; gap:12px; align-items:center; justify-content:space-between">
-          <div class="muted">Server:</div>
-          <div id="serverStatus" class="badge" style="background:transparent; color:var(--muted); font-weight:700; padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,0.02)">ตรวจสอบ...</div>
-        </div>
-      </section>
-
-      <!-- Result panel -->
-      <aside class="panel fade-in" aria-labelledby="result-title">
-        <div class="summary-row">
-          <div>
-            <div class="muted">ผลการวิเคราะห์</div>
-            <div id="summaryText" style="font-weight:800; margin-top:6px">ยังไม่ได้วิเคราะห์</div>
-          </div>
-          <div class="severity">
-            <div id="okBadge" class="badge ok" style="display:none">OK</div>
-            <div id="warnBadge" class="badge warn" style="display:none">WARN</div>
-            <div id="critBadge" class="badge crit" style="display:none">CRIT</div>
+            <button class="ed-btn ghost" id="sampleBtn">📄 SAMPLE</button>
+            <button class="ed-btn ghost" id="clearBtn">🧹 CLEAR</button>
           </div>
         </div>
 
-        <div id="rulesArea" class="rules" aria-live="polite" style="margin-top:12px">
-          <div class="muted">ผลการวิเคราะห์จะปรากฏที่นี่</div>
+        <div class="dropzone-outer" id="dropzone">
+          <div class="drop-hint">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 14v4a2 2 0 002 2h12a2 2 0 002-2v-4M12 3v11M8 10l4-4 4 4"/></svg>
+            DROP FILE HERE
+          </div>
+          <textarea class="cli-editor" id="dumpEditor"
+            placeholder="# วาง output จาก Betaflight CLI ที่นี่
+# คำสั่ง: diff all (แนะนำ) หรือ dump
+#
+# Betaflight CLI → พิมพ์ diff all → copy ผลลัพธ์ → วางที่นี่
+#
+# หรือ drag & drop ไฟล์ .txt / .log มาได้เลย
+# รองรับ Betaflight 4.x · EdgeTX · iNav"></textarea>
         </div>
 
-        <div style="margin-top:12px">
-          <div style="display:flex; justify-content:space-between; align-items:center">
-            <div class="muted">คำสั่ง CLI ที่แนะนำ</div>
-            <button id="copyAllBtn" class="copy-btn">Copy all</button>
+        <div class="line-count-bar">
+          <span id="lineInfo">0 บรรทัด</span>
+          <span id="paramCount" style="color:#3a6050;">รอวิเคราะห์...</span>
+        </div>
+      </div>
+
+      <!-- Param Explorer -->
+      <div class="panel">
+        <div class="panel-hd">
+          <div class="panel-title">Param Explorer</div>
+          <span style="font-family:var(--font-d);font-size:8.5px;color:#3a6050;" id="paramCountBadge">0 params</span>
+        </div>
+        <div class="panel-body">
+          <input class="param-search" id="paramSearch" placeholder="ค้นหา parameter... (เช่น p_roll, failsafe, dshot)">
+          <div class="param-grid" id="paramGrid">
+            <div style="color:#2a5040;font-size:12px;padding:8px 0;">วิเคราะห์ก่อนเพื่อดู parameters</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══ RIGHT: Diagnosis ══ -->
+    <div>
+
+      <!-- Tab bar -->
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="tab-row">
+          <button class="tab-btn active" data-tab="diagnosis">🔍 Diagnosis</button>
+          <button class="tab-btn" data-tab="fix">⚡ Fix CLI</button>
+          <button class="tab-btn" data-tab="compare">↔ Compare</button>
+        </div>
+
+        <!-- ── TAB: DIAGNOSIS ── -->
+        <div class="tab-pane active" id="tab-diagnosis">
+
+          <!-- Stats -->
+          <div class="stats-row">
+            <div class="stat-chip">
+              <div class="sc-val" id="st_params">—</div>
+              <div class="sc-lbl">Params</div>
+            </div>
+            <div class="stat-chip">
+              <div class="sc-val" style="color:var(--red);" id="st_crit">—</div>
+              <div class="sc-lbl">Critical</div>
+            </div>
+            <div class="stat-chip">
+              <div class="sc-val" style="color:var(--amber);" id="st_warn">—</div>
+              <div class="sc-lbl">Warnings</div>
+            </div>
+            <div class="stat-chip">
+              <div class="sc-val" style="color:var(--blue);" id="st_info">—</div>
+              <div class="sc-lbl">Info</div>
+            </div>
           </div>
 
-          <div class="cli-box" id="cliBox" style="margin-top:8px">
-            <div id="cliLines">
-              <div class="muted">ยังไม่มีคำสั่งแนะนำ</div>
+          <!-- Summary bar -->
+          <div class="summary-bar">
+            <div class="sum-text" id="sumText">วางไฟล์แล้วกด ANALYZE</div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span class="fw-badge" id="fwBadge" style="display:none;">BF —</span>
+              <div class="sev-badges">
+                <span class="sev-badge ok"   id="badgeOk">ALL CLEAR</span>
+                <span class="sev-badge warn"  id="badgeWarn">WARN</span>
+                <span class="sev-badge crit"  id="badgeCrit">CRITICAL</span>
+                <span class="sev-badge info"  id="badgeInfo">INFO</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rules -->
+          <div class="panel-body">
+            <div class="rules-list" id="rulesList">
+              <!-- Empty state -->
+              <div id="rulesEmpty" style="text-align:center;padding:30px;color:#2a5040;">
+                <div style="font-size:28px;margin-bottom:10px;">🔬</div>
+                <div style="font-family:var(--font-d);font-size:10px;letter-spacing:.12em;color:#3a6050;">AWAITING DUMP INPUT</div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="raw">
-          <div class="muted" style="margin-top:12px">ค่าที่อ่านได้ (raw)</div>
-          <pre id="rawParams" class="raw-pre">ยังไม่มีข้อมูล</pre>
+        <!-- ── TAB: FIX CLI ── -->
+        <div class="tab-pane" id="tab-fix">
+          <div class="panel-body">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+              <div style="font-family:var(--font-d);font-size:8px;letter-spacing:.12em;color:#3a6050;">AUTO-GENERATED FIX COMMANDS</div>
+              <button class="copy-all-btn" id="copyAllBtn" onclick="copyAllFixes()">📋 COPY ALL</button>
+            </div>
+            <div class="fix-cli-wrap" id="fixCLIWrap">
+              <div class="fix-empty">วิเคราะห์ก่อนเพื่อดู fix commands...</div>
+            </div>
+            <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="dl-btn" id="dlBtn" onclick="downloadReport()">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14h8M8 3v8M5 8l3 3 3-3"/></svg>
+                DOWNLOAD JSON
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div class="meta-row">
-          <div class="muted">เวอร์ชัน: 1.0 · The CLI Surgeon</div>
-          <div class="muted">หากต้องการฟีเจอร์เพิ่ม บอกผมได้เลย</div>
+        <!-- ── TAB: COMPARE ── -->
+        <div class="tab-pane" id="tab-compare">
+          <div class="panel-body">
+            <p style="font-size:12px;color:#3a6050;margin-bottom:12px;line-height:1.6;">วาง Config A และ B เพื่อ diff parameters ที่ต่างกัน</p>
+            <div class="cmp-grid" style="margin-bottom:12px;">
+              <div>
+                <div class="cmp-label" style="color:var(--green);">CONFIG A (Before)</div>
+                <textarea class="cmp-ta" id="cmpA" placeholder="# diff all A..."></textarea>
+              </div>
+              <div>
+                <div class="cmp-label" style="color:var(--amber);">CONFIG B (After)</div>
+                <textarea class="cmp-ta" id="cmpB" placeholder="# diff all B..."></textarea>
+              </div>
+            </div>
+            <button class="ed-btn primary" onclick="runCompare()" style="margin-bottom:14px;">↔ COMPARE A vs B</button>
+            <div id="diffResult" style="max-height:280px;overflow-y:auto;">
+              <div style="color:#2a5040;font-size:12px;">กด Compare เพื่อดูความต่าง</div>
+            </div>
+          </div>
         </div>
-      </aside>
-    </main>
+
+      </div>
+
+    </div>
   </div>
+</div>
 
-  <!-- Script: server-first analyze, local fallback, drag/drop, copy/download -->
-  <script>
-  (function(){
-    const dumpEl = document.getElementById('dump');
-    const analyzeBtn = document.getElementById('analyzeBtn');
-    const analyzeLocalBtn = document.getElementById('analyzeLocalBtn');
-    const sampleBtn = document.getElementById('sampleBtn');
-    const fileInput = document.getElementById('fileInput');
-    const clearBtn = document.getElementById('clearBtn');
-    const downloadBtn = document.getElementById('downloadBtn');
-    const serverStatus = document.getElementById('serverStatus');
-    const rulesArea = document.getElementById('rulesArea');
-    const cliLines = document.getElementById('cliLines');
-    const rawParams = document.getElementById('rawParams');
-    const summaryText = document.getElementById('summaryText');
-    const copyAllBtn = document.getElementById('copyAllBtn');
-    const okBadge = document.getElementById('okBadge');
-    const warnBadge = document.getElementById('warnBadge');
-    const critBadge = document.getElementById('critBadge');
-    const dropzone = document.getElementById('dropzone');
+<script>
+/* ═══════════════════════════════════════════════════════
+   CLI SURGEON — Operating Theater Brain
+═══════════════════════════════════════════════════════ */
 
-    let lastResult = null;
+const RULE_ICONS = {
+  critical: '🔴', danger: '🔴',
+  warning: '🟡',
+  info: '🔵',
+};
+const RULE_COLORS = {
+  critical: 'var(--red)', danger: 'var(--red)',
+  warning:  'var(--amber)',
+  info:     'var(--blue)',
+};
 
-    async function checkServer(){
-      try{
-        const r = await fetch('/analyze_cli', { method: 'OPTIONS' });
-        serverStatus.textContent = 'Online';
-        serverStatus.style.background = 'linear-gradient(90deg,var(--accent),var(--accent-2))';
-        serverStatus.style.color = '#04111a';
-        return true;
-      }catch(e){
-        serverStatus.textContent = 'Offline (local)';
-        serverStatus.style.background = 'transparent';
-        serverStatus.style.color = 'var(--muted)';
-        return false;
-      }
-    }
-    checkServer();
+let lastResult = null;
+let allParams  = {};
 
-    /* ---------- Parser (lightweight, local fallback) ---------- */
-    function parseDumpToParams(text){
-      const params = {};
-      const lines = text.split(/\r?\n/);
-      for (let raw of lines){
-        let ln = raw.replace(/(#|;).*$/,'').trim();
-        if (!ln) continue;
-        const m = ln.match(/^(?:set\s+)?([a-z0-9_\-]+)\s*=\s*(.+)$/i);
-        if (m){
-          const k = m[1].toLowerCase().replace(/-/g,'_');
-          let v = m[2].trim().replace(/^["']|["']$/g,'');
-          if (/^-?\d+(\.\d+)?$/.test(v)) v = (v.indexOf('.')>-1? parseFloat(v) : parseInt(v));
-          params[k] = v;
-        } else {
-          const parts = ln.split(/\s+/,2);
-          if (parts.length==2){
-            const k = parts[0].toLowerCase().replace(/-/g,'_');
-            let v = parts[1].trim();
-            if (/^-?\d+(\.\d+)?$/.test(v)) v = (v.indexOf('.')>-1? parseFloat(v) : parseInt(v));
-            params[k] = params[k] || v;
-          }
-        }
-      }
-      params['_raw_lines'] = lines.slice(0,200);
-      return params;
-    }
+// ── Pipeline ────────────────────────────────────────────
+function pipe(step) {
+  // step: 0=paste,1=parse,2=diagnose,3=fix,4=export
+  document.querySelectorAll('.pipe-step').forEach((el, i) => {
+    el.classList.remove('active', 'done', 'error');
+    if (i < step) el.classList.add('done');
+    else if (i === step) el.classList.add('active');
+  });
+}
+function pipeError(step) {
+  document.querySelectorAll('.pipe-step').forEach((el, i) => {
+    if (i === step) el.classList.add('error');
+  });
+}
 
-    function localAnalyze(params){
-      const rules = [];
-      // min throttle checks
-      const minKeys = ['min_throttle','mincommand','min_throttle_percent'];
-      for (let k of minKeys){
-        if (k in params){
-          const v = Number(params[k]);
-          if (!isNaN(v)){
-            if (v < 1000) rules.push({id:'min_throttle_low', level:'warning', msg:`${k} ต่ำ (${v}) — อาจเกิด motor stutter/idle`, suggestion:'ตั้ง min_throttle ~1000-1020 และทดสอบ hover'});
-            else if (v > 1100) rules.push({id:'min_throttle_high', level:'info', msg:`${k} สูง (${v})`, suggestion:'พิจารณาลดหาก response แย่'});
-          }
-          break;
-        }
-      }
-      // failsafe
-      const raw = (params['_raw_lines']||[]).join('\n').toLowerCase();
-      if (!(/failsafe|failsafe_delay|failsafe_throttle|failsafe_action/.test(raw))) {
-        rules.push({id:'no_failsafe', level:'warning', msg:'ไม่พบการตั้งค่า failsafe', suggestion:'ตั้ง failsafe action/delay/throttle'});
-      }
-      // looptime
-      if ('looptime' in params){
-        const lt = Number(params['looptime']);
-        if (!isNaN(lt)){
-          if (lt < 1000) rules.push({id:'looptime_low', level:'warning', msg:`looptime ต่ำ (${lt})`, suggestion:'พิจารณาเพิ่มหาก instability'});
-          if (lt > 4000) rules.push({id:'looptime_high', level:'warning', msg:`looptime สูง (${lt})`, suggestion:'ลดเพื่อลด latency หากฮาร์ดแวร์รองรับ'});
-        }
-      }
-      // pid
-      ['p_roll','p_pitch','p_yaw','p_roll','p_pitch','p_yaw','pid_p'].forEach(k=>{
-        if (k in params){
-          const v = Number(params[k]);
-          if (!isNaN(v) && v > 80) rules.push({id:'pid_high_'+k, level:'critical', msg:`${k} สูง (${v})`, suggestion:'ลด P/I/D ลง 15-25% และทดสอบ'});
-          if (!isNaN(v) && v === 0) rules.push({id:'pid_zero_'+k, level:'info', msg:`${k} = 0`, suggestion:'ตรวจสอบว่าตั้งใจหรือไม่'});
-        }
-      });
-      // serial/telemetry
-      if (!(/serial|telemetry|uart|receiver|serialrx/.test(raw))) {
-        rules.push({id:'no_serial', level:'info', msg:'ไม่พบการตั้งค่า serial/telemetry/receiver', suggestion:'ตรวจสอบพอร์ตสำหรับ ELRS/FrSky/OSD'});
-      }
-      // vtx/osd tokens
-      if (/vtx|smartaudio|tramp|pitmode|vtx_power/.test(raw)){
-        rules.push({id:'vtx_found', level:'info', msg:'พบการตั้งค่า VTX/SmartAudio/Tramp', suggestion:'ตรวจสอบ power/channel/antenna/region'});
-      }
+// ── Server check ─────────────────────────────────────
+async function checkServer() {
+  try {
+    const r = await fetch('/analyze_cli', { method: 'OPTIONS' });
+    setStatus(true);
+  } catch { setStatus(false); }
+}
+function setStatus(on) {
+  const el = document.getElementById('srvStatus');
+  el.className = 'srv-status ' + (on ? 'online' : 'offline');
+  el.innerHTML = `<svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="currentColor"/></svg> ${on ? 'Server Online' : 'Local Mode'}`;
+}
+checkServer();
 
-      return rules;
-    }
+// ── Line counter ─────────────────────────────────────
+const dumpEl = document.getElementById('dumpEditor');
+dumpEl.addEventListener('input', () => {
+  const lines = dumpEl.value.split('\n').length;
+  document.getElementById('lineInfo').textContent = lines.toLocaleString() + ' บรรทัด';
+  if (dumpEl.value.trim()) pipe(0);
+});
 
-    function suggestCliFixes(rules, params){
-      const fixes = [];
-      const push = (k,v)=> fixes.push(`set ${k} = ${v}`);
-      rules.forEach(r=>{
-        if (r.id==='min_throttle_low'){
-          if ('min_throttle' in params) push('min_throttle', 1000);
-          else push('min_throttle', 1000);
-        } else if (r.id.startsWith('pid_high_')){
-          const key = r.id.replace('pid_high_','');
-          if (key in params && !isNaN(Number(params[key]))){
-            const cur = Number(params[key]);
-            const newv = Math.round(cur * 0.8 * 1000) / 1000;
-            push(key, newv);
-          }
-        } else if (r.id==='no_failsafe'){
-          push('failsafe_delay', 10);
-          push('failsafe_off_delay', 60);
-          push('failsafe_throttle', 1000);
-        } else if (r.id==='looptime_low'){
-          if ('looptime' in params) push('looptime', 1000);
-        }
-      });
-      if (fixes.length && fixes[fixes.length-1] !== 'save') fixes.push('save');
-      return fixes;
-    }
+// ── Analyze ───────────────────────────────────────────
+async function analyze() {
+  const txt = dumpEl.value.trim();
+  if (!txt) { alert('กรุณาวาง diff all / dump ก่อน'); return; }
 
-    // render helpers
-    function renderRules(rules){
-      rulesArea.innerHTML = '';
-      if (!rules || rules.length===0){
-        const el = document.createElement('div'); el.className='muted'; el.textContent='✅ ไม่พบปัญหาใหญ่จากการสแกนเบื้องต้น'; rulesArea.appendChild(el); return;
-      }
-      rules.forEach(r=>{
-        const el = document.createElement('div'); el.className='rule';
-        const dot = document.createElement('div'); dot.className='dot';
-        dot.style.background = (r.level==='critical' ? 'var(--danger)' : (r.level==='warning' ? 'var(--warn)' : 'var(--accent)'));
-        const body = document.createElement('div'); body.className='body';
-        const h4 = document.createElement('h4'); h4.textContent = `[${r.level.toUpperCase()}] ${r.msg}`;
-        const p = document.createElement('p'); p.className='muted'; p.textContent = r.suggestion;
-        body.appendChild(h4); body.appendChild(p);
-        el.appendChild(dot); el.appendChild(body);
-        rulesArea.appendChild(el);
-      });
-    }
+  pipe(1);
+  document.getElementById('sumText').textContent = 'กำลังวิเคราะห์...';
+  document.getElementById('rulesList').innerHTML = '<div style="color:#3a6050;font-size:12px;padding:16px;text-align:center;font-family:var(--font-d);letter-spacing:.1em;">SCANNING...</div>';
 
-    function renderCli(fixes){
-      cliLines.innerHTML = '';
-      if (!fixes || fixes.length===0){ cliLines.innerHTML = '<div class="muted">ยังไม่มีคำสั่งแนะนำ</div>'; return; }
-      fixes.forEach(c=>{
-        const row = document.createElement('div'); row.className='cli-line';
-        const left = document.createElement('div'); left.className='cli-text'; left.textContent = c;
-        const cp = document.createElement('button'); cp.className='copy-btn'; cp.textContent='Copy';
-        cp.onclick = ()=>{ navigator.clipboard.writeText(c); cp.textContent='Copied'; setTimeout(()=>cp.textContent='Copy',1100); };
-        row.appendChild(left); row.appendChild(cp); cliLines.appendChild(row);
-      });
-    }
-
-    function renderRaw(params){
-      rawParams.textContent = JSON.stringify(params, null, 2);
-    }
-
-    function updateSeverity(rules){
-      okBadge.style.display = warnBadge.style.display = critBadge.style.display = 'none';
-      if (!rules || rules.length===0) { okBadge.style.display='inline-flex'; return; }
-      const levels = rules.map(r=>r.level);
-      if (levels.includes('critical') || levels.includes('danger')) critBadge.style.display='inline-flex';
-      if (levels.includes('warning')) warnBadge.style.display='inline-flex';
-      if (!levels.includes('warning') && !levels.includes('critical')) okBadge.style.display='inline-flex';
-    }
-
-    async function analyzeFlow(useLocal=false){
-      const txt = dumpEl.value.trim();
-      if (!txt){ alert('กรุณาวาง diff all / dump ก่อน'); return; }
-      summaryText.textContent = 'กำลังวิเคราะห์...';
-      rulesArea.innerHTML = ''; cliLines.innerHTML = '<div class="muted">รอผล...</div>'; rawParams.textContent = 'อ่านพารามิเตอร์...';
-
-      if (!useLocal){
-        try{
-          const res = await fetch('/analyze_cli', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({dump:txt}) });
-          if (res.ok){
-            const j = await res.json();
-            applyResult(j); return;
-          } else {
-            // FIX v2.2: แจ้ง user ว่า server analysis ล้มเหลว แทนการ silent fallback
-            // ก่อนหน้า: if(res.ok) → ถ้าไม่ ok ก็ตกลงไป local โดยไม่บอก user
-            // หลังแก้:  แสดง error จาก server ก่อน แล้วค่อย fallback
-            try {
-              const errData = await res.json();
-              summaryText.textContent = '⚠️ Server: ' + (errData.error || 'วิเคราะห์ไม่ได้') + ' — ใช้ Local mode';
-            } catch(_) {
-              summaryText.textContent = '⚠️ Server ไม่ตอบสนอง — ใช้ Local mode';
-            }
-          }
-        } catch(e){
-          console.warn('Server analyze failed', e);
-          summaryText.textContent = '⚠️ เชื่อมต่อ Server ไม่ได้ — ใช้ Local mode';
-        }
-      }
-
-      // local fallback
-      const params = parseDumpToParams(txt);
-      const rules = localAnalyze(params);
-      const fixes = suggestCliFixes(rules, params);
-      const out = { summary: `พารามิเตอร์อ่านได้: ${Object.keys(params).length}`, rules, fix_commands: fixes, params };
-      applyResult(out);
-    }
-
-    function applyResult(data){
-      lastResult = data;
-      summaryText.textContent = data.summary || 'วิเคราะห์แล้ว';
-      const rules = data.rules || [];
-      renderRules(rules);
-      let fixes = data.fix_commands || data.fixCommands || data.fixCommands || [];
-      renderCli(fixes);
-      renderRaw(data.params || {});
-      updateSeverity(rules);
-    }
-
-    // events
-    analyzeBtn.addEventListener('click', ()=>analyzeFlow(false));
-    analyzeLocalBtn.addEventListener('click', ()=>analyzeFlow(true));
-    sampleBtn.addEventListener('click', ()=>{ dumpEl.value = "# sample\nset min_throttle = 980\nset looptime = 500\nset p_roll = 95\n# end"; });
-    clearBtn.addEventListener('click', ()=>{ dumpEl.value=''; rulesArea.innerHTML=''; cliLines.innerHTML='<div class=\"muted\">ยังไม่มีคำสั่งแนะนำ</div>'; rawParams.textContent='ยังไม่มีข้อมูล'; summaryText.textContent='ยังไม่ได้วิเคราะห์'; lastResult=null;});
-    fileInput.addEventListener('change', (ev)=>{ const f = ev.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = ()=> dumpEl.value = r.result; r.readAsText(f); });
-
-    copyAllBtn.addEventListener('click', ()=>{
-      if (!lastResult || !lastResult.fix_commands || lastResult.fix_commands.length===0){ alert('ไม่มีคำสั่งให้คัดลอก'); return; }
-      const txt = lastResult.fix_commands.join('\n');
-      navigator.clipboard.writeText(txt).then(()=>{ copyAllBtn.textContent='Copied'; setTimeout(()=>copyAllBtn.textContent='Copy all',1200); });
+  try {
+    pipe(2);
+    const res = await fetch('/analyze_cli', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dump: txt }),
     });
 
-    downloadBtn.addEventListener('click', ()=>{
-      if (!lastResult){ alert('ยังไม่มีรายงาน'); return; }
-      const blob = new Blob([JSON.stringify(lastResult, null, 2)], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = 'cli_surgeon_report.json'; a.click(); URL.revokeObjectURL(url);
-    });
+    if (res.ok) {
+      const data = await res.json();
+      pipe(3);
+      applyResult(data);
+      pipe(4);
+    } else {
+      // Fallback to local
+      const data = localAnalyze(txt);
+      pipe(3);
+      applyResult(data);
+      pipe(4);
+    }
+  } catch (e) {
+    console.warn('Server fail, local fallback:', e);
+    setStatus(false);
+    const data = localAnalyze(txt);
+    pipe(3);
+    applyResult(data);
+    pipe(4);
+  }
+}
 
-    // drag & drop
-    dropzone.addEventListener('dragover', e=>{ e.preventDefault(); dropzone.style.borderColor='rgba(255,255,255,0.08)'; });
-    dropzone.addEventListener('dragleave', e=>{ dropzone.style.borderColor='rgba(255,255,255,0.04)'; });
-    dropzone.addEventListener('drop', e=>{ e.preventDefault(); dropzone.style.borderColor='rgba(255,255,255,0.04)'; const f = e.dataTransfer.files && e.dataTransfer.files[0]; if (f){ const r = new FileReader(); r.onload = ()=> dumpEl.value = r.result; r.readAsText(f); } else { const t = e.dataTransfer.getData('text'); if (t) dumpEl.value = t; } });
+// ── Local analysis fallback ───────────────────────────
+function parseParams(text) {
+  const params = {};
+  const rawLines = text.split('\n');
+  for (const raw of rawLines) {
+    let ln = raw.replace(/(#|;).*$/, '').trim();
+    if (!ln) continue;
+    const m = ln.match(/^(?:set\s+)?([a-z0-9_\-]+)\s*=\s*(.+)$/i);
+    if (m) {
+      const k = m[1].toLowerCase().replace(/-/g, '_');
+      let v = m[2].trim();
+      if (/^-?\d+$/.test(v)) v = parseInt(v);
+      else if (/^-?\d+\.\d+$/.test(v)) v = parseFloat(v);
+      params[k] = v;
+    }
+  }
+  params._raw = text.toLowerCase();
+  return params;
+}
 
-  })();
-  </script>
+function localAnalyze(text) {
+  const params = parseParams(text);
+  const rules = [];
+  const raw = params._raw || '';
+
+  const add = (id, level, msg, suggestion) => rules.push({ id, level, msg, suggestion });
+
+  // min throttle
+  for (const k of ['min_throttle','mincommand']) {
+    if (k in params) {
+      const v = Number(params[k]);
+      if (!isNaN(v)) {
+        if (v < 1000) add('min_throttle_low','warning',`${k} ต่ำ (${v}) — อาจเกิด motor stutter/idle`,'ตั้ง min_throttle ~1000-1020');
+        else if (v > 1100) add('min_throttle_high','info',`${k} สูง (${v})`,'พิจารณาลดหาก throttle response แย่');
+      }
+      break;
+    }
+  }
+
+  // failsafe
+  if (!/(failsafe|failsafe_delay|failsafe_action)/.test(raw))
+    add('no_failsafe','warning','ไม่พบการตั้งค่า failsafe','ตั้ง failsafe_delay, failsafe_action, failsafe_throttle');
+
+  // protocol
+  const proto = String(params.motor_pwm_protocol||'').toUpperCase();
+  if (proto && ['DISABLED','STANDARD','ONESHOT125','ONESHOT42','MULTISHOT'].includes(proto))
+    add('protocol_old','warning',`motor_pwm_protocol = ${proto} เป็น protocol เก่า`,'set motor_pwm_protocol = DSHOT600');
+
+  // bidir + rpm
+  const bidir = String(params.dshot_bidir||'').toUpperCase();
+  if (/rpm_filter/.test(raw) && bidir === 'OFF')
+    add('bidir_off_with_rpm','warning','RPM filter เปิดอยู่แต่ dshot_bidir = OFF — RPM filter ไม่ทำงาน','set dshot_bidir = ON');
+
+  // iterm_relax
+  if (String(params.iterm_relax||'').toUpperCase() === 'OFF')
+    add('iterm_relax_off','warning','iterm_relax = OFF — I-term wind up ระหว่าง maneuver','set iterm_relax = RPH');
+
+  // TPA
+  if (params.tpa_rate !== undefined) {
+    const t = Number(params.tpa_rate);
+    if (!isNaN(t)) {
+      if (t > 70) add('tpa_high','warning',`tpa_rate = ${t}% สูงมาก`,'set tpa_rate = 50 | set tpa_breakpoint = 1600');
+      if (t === 0) add('tpa_zero','info','tpa_rate = 0 — D-term ไม่ถูก attenuate','set tpa_rate = 40 | set tpa_breakpoint = 1600');
+    }
+  }
+
+  // PID extremes
+  const pidMap = { p: 100, i: 130, d: 80 };
+  for (const [type, thresh] of Object.entries(pidMap)) {
+    for (const axis of ['roll','pitch','yaw']) {
+      const key = `${type}_${axis}`;
+      if (key in params) {
+        const v = Number(params[key]);
+        if (!isNaN(v) && v > thresh)
+          add(`pid_high_${key}`, 'critical', `${key} สูง (${v}) — อาจเกิด oscillation (threshold ${thresh})`, 'ลด PID ลงทีละ 10-20% แล้วทดสอบ');
+        if (!isNaN(v) && v === 0)
+          add(`pid_zero_${key}`, 'info', `${key} = 0 — แกนนี้ไม่มีการควบคุม`, 'ตรวจสอบว่าตั้งใจหรือไม่');
+      }
+    }
+  }
+
+  // VTX
+  if (/vtx|smartaudio|tramp/.test(raw))
+    add('vtx_found','info','พบ VTX config (SmartAudio/Tramp)','ตรวจสอบ power/channel/pitmode/antenna');
+
+  // serial
+  if (!/(serial|uart|serialrx|receiver)/.test(raw))
+    add('no_serial','info','ไม่พบ serial/receiver config','ตรวจสอบ port สำหรับ ELRS/FrSky/OSD');
+
+  // looptime
+  if (params.looptime !== undefined) {
+    const lt = Number(params.looptime);
+    if (!isNaN(lt)) {
+      if (lt < 1000) add('looptime_low','warning',`looptime ต่ำ (${lt}µs)`,'ESC/CPU อาจไม่รองรับ — ลองเพิ่มเป็น 1000');
+      if (lt > 4000) add('looptime_high','warning',`looptime สูง (${lt}µs)`,'ลดเพื่อลด input lag หากฮาร์ดแวร์รองรับ');
+    }
+  }
+
+  const fixes = buildFixes(rules, params);
+  return {
+    summary: `พบ ${Object.keys(params).length - 1} parameters · ${rules.length} issues`,
+    rules, fix_commands: fixes, params,
+  };
+}
+
+function buildFixes(rules, params) {
+  const fixes = [];
+  fixes.push('# OBIX Auto-Fix — ตรวจสอบก่อน paste เสมอ');
+  rules.forEach(r => {
+    if (r.id === 'min_throttle_low')   fixes.push('set min_throttle = 1000');
+    if (r.id === 'no_failsafe') {
+      fixes.push('set failsafe_delay = 10');
+      fixes.push('set failsafe_off_delay = 60');
+      fixes.push('set failsafe_throttle = 1000');
+      fixes.push('set failsafe_action = DROP');
+    }
+    if (r.id === 'protocol_old')       fixes.push('set motor_pwm_protocol = DSHOT600');
+    if (r.id === 'bidir_off_with_rpm') fixes.push('set dshot_bidir = ON');
+    if (r.id === 'iterm_relax_off')    fixes.push('set iterm_relax = RPH\nset iterm_relax_type = SETPOINT');
+    if (r.id === 'tpa_high')           fixes.push('set tpa_rate = 50\nset tpa_breakpoint = 1600');
+    if (r.id === 'tpa_zero')           fixes.push('set tpa_rate = 40\nset tpa_breakpoint = 1600');
+    if (r.id === 'looptime_low')       fixes.push('set looptime = 1000');
+    if (r.id.startsWith('pid_high_')) {
+      const key = r.id.replace('pid_high_', '');
+      if (params[key] !== undefined) {
+        const cur = Number(params[key]);
+        if (!isNaN(cur)) fixes.push(`set ${key} = ${Math.round(cur * 0.80)}`);
+      }
+    }
+  });
+  if (fixes.length > 1) fixes.push('save');
+  return fixes;
+}
+
+// ── Apply result ──────────────────────────────────────
+function applyResult(data) {
+  lastResult = data;
+  const rules = data.rules || [];
+  const params = data.params || {};
+  allParams = params;
+
+  // Summary
+  document.getElementById('sumText').textContent = data.summary || `${rules.length} issues พบ`;
+
+  // Firmware badge
+  const fw = data.firmware;
+  const fwEl = document.getElementById('fwBadge');
+  if (fw && fw !== 'unknown') {
+    fwEl.style.display = '';
+    fwEl.textContent = 'BF ' + fw;
+  } else {
+    fwEl.style.display = 'none';
+  }
+
+  // Stats
+  const critN = rules.filter(r => ['critical','danger'].includes(r.level)).length;
+  const warnN = rules.filter(r => r.level === 'warning').length;
+  const infoN = rules.filter(r => r.level === 'info').length;
+  const paramN = Object.keys(params).filter(k => !k.startsWith('_')).length;
+  setEl('st_params', paramN);
+  setEl('st_crit',   critN);
+  setEl('st_warn',   warnN);
+  setEl('st_info',   infoN);
+  document.getElementById('paramCount').textContent = paramN + ' params detected';
+  document.getElementById('paramCountBadge').textContent = paramN + ' params';
+
+  // Severity badges
+  ['Ok','Warn','Crit','Info'].forEach(s => document.getElementById('badge'+s).classList.remove('show'));
+  if (critN > 0) document.getElementById('badgeCrit').classList.add('show');
+  if (warnN > 0) document.getElementById('badgeWarn').classList.add('show');
+  if (infoN > 0) document.getElementById('badgeInfo').classList.add('show');
+  if (critN === 0 && warnN === 0) document.getElementById('badgeOk').classList.add('show');
+
+  // Rules
+  renderRules(rules);
+
+  // Fix CLI
+  renderFixCLI(data.fix_commands || []);
+
+  // Param explorer
+  renderParams(params);
+}
+
+function renderRules(rules) {
+  const list = document.getElementById('rulesList');
+  document.getElementById('rulesEmpty').style.display = rules.length ? 'none' : 'block';
+
+  const existing = list.querySelectorAll('.rule-card');
+  existing.forEach(e => e.remove());
+
+  if (rules.length === 0) return;
+
+  rules.forEach((r, i) => {
+    const level = r.level === 'danger' ? 'critical' : r.level;
+    const color = RULE_COLORS[level] || 'var(--blue)';
+    const icon  = RULE_ICONS[level]  || '🔵';
+
+    const card = document.createElement('div');
+    card.className = 'rule-card fade-in';
+    card.style.animationDelay = (i * 0.05) + 's';
+    card.innerHTML = `
+      <div class="rule-hd" onclick="toggleRule(this)">
+        <div class="rule-sev-bar" style="background:${color}"></div>
+        <div class="rule-icon">${icon}</div>
+        <div class="rule-body">
+          <div class="rule-msg">${escHtml(r.msg)}</div>
+          <div class="rule-sug">${escHtml(r.suggestion || '')}</div>
+        </div>
+        <div class="rule-expand" style="color:${color};">▾</div>
+      </div>
+      <div class="rule-detail">
+        <div class="rule-detail-inner">
+          <div style="font-family:var(--font-m);font-size:11px;color:#3a6050;margin-bottom:8px;">
+            ID: ${r.id} · Level: ${r.level.toUpperCase()}
+          </div>
+          ${r.suggestion ? `<div style="font-size:12px;color:var(--text);line-height:1.6;margin-bottom:10px;">${escHtml(r.suggestion)}</div>` : ''}
+          ${r.suggestion && r.suggestion.includes('set ') ? `<button class="rule-fix-btn" onclick="addFix('${escHtml(r.suggestion)}')">⚡ Add to Fix CLI</button>` : ''}
+        </div>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+function toggleRule(hd) {
+  const card = hd.closest('.rule-card');
+  card.classList.toggle('open');
+}
+
+function renderFixCLI(lines) {
+  const wrap = document.getElementById('fixCLIWrap');
+  if (!lines || lines.length === 0) {
+    wrap.innerHTML = '<div class="fix-empty">ไม่มี fix command (ไม่พบปัญหา หรือยังไม่ได้วิเคราะห์)</div>';
+    return;
+  }
+  wrap.innerHTML = lines.map(line => {
+    const l = line.trim();
+    if (!l) return '<br>';
+    if (l.startsWith('#')) return `<div><span class="fc-cmt">${escHtml(line)}</span></div>`;
+    if (l === 'save') return `<div><span class="fc-cmd" style="color:var(--green);font-weight:600;">save</span></div>`;
+    const m = l.match(/^(set\s+)(\S+)(\s*=\s*)(.+)$/);
+    if (m) return `<div><span class="fc-cmd">${escHtml(m[1])}</span><span class="fc-key">${escHtml(m[2])}</span><span class="fc-cmd">${escHtml(m[3])}</span><span class="fc-val">${escHtml(m[4])}</span></div>`;
+    return `<div><span class="fc-cmd">${escHtml(line)}</span></div>`;
+  }).join('');
+}
+
+function renderParams(params) {
+  const flagged = new Set((lastResult?.rules||[]).flatMap(r => {
+    const m = r.msg.match(/^([a-z0-9_]+)\s/);
+    return m ? [m[1]] : [];
+  }));
+
+  const entries = Object.entries(params).filter(([k]) => !k.startsWith('_'));
+  const grid = document.getElementById('paramGrid');
+  const query = document.getElementById('paramSearch').value.toLowerCase();
+
+  const filtered = entries.filter(([k, v]) => !query || k.includes(query) || String(v).includes(query));
+
+  grid.innerHTML = filtered.slice(0, 200).map(([k, v]) => `
+    <div class="param-row ${flagged.has(k) ? 'flagged' : ''}">
+      <span class="param-key">${k}</span>
+      <span class="param-val">${String(v)}</span>
+    </div>`).join('') || '<div style="color:#2a5040;font-size:11px;padding:6px 0;">ไม่พบ parameter ที่ตรงกัน</div>';
+}
+
+document.getElementById('paramSearch').addEventListener('input', () => {
+  if (allParams) renderParams(allParams);
+});
+
+function addFix(sug) {
+  const wrap = document.getElementById('fixCLIWrap');
+  const div = document.createElement('div');
+  div.innerHTML = `<span class="fc-cmt"># (added manually)</span>\n<span class="fc-cmd">${escHtml(sug)}</span>`;
+  wrap.appendChild(div);
+}
+
+// ── Compare ────────────────────────────────────────────
+function runCompare() {
+  const a = document.getElementById('cmpA').value.trim();
+  const b = document.getElementById('cmpB').value.trim();
+  if (!a || !b) { alert('ต้องการทั้ง Config A และ B'); return; }
+
+  const pA = parseParams(a), pB = parseParams(b);
+  const allKeys = new Set([
+    ...Object.keys(pA).filter(k => !k.startsWith('_')),
+    ...Object.keys(pB).filter(k => !k.startsWith('_')),
+  ]);
+
+  const diffs = [];
+  for (const k of allKeys) {
+    const va = pA[k], vb = pB[k];
+    if (va === undefined) diffs.push({ type: 'added', k, va: '—', vb });
+    else if (vb === undefined) diffs.push({ type: 'removed', k, va, vb: '—' });
+    else if (String(va) !== String(vb)) diffs.push({ type: 'changed', k, va, vb });
+  }
+
+  const res = document.getElementById('diffResult');
+  if (diffs.length === 0) {
+    res.innerHTML = '<div style="color:var(--green);font-size:12px;padding:8px 0;">✅ ไม่พบความต่าง — config ทั้งสองเหมือนกัน</div>';
+    return;
+  }
+
+  res.innerHTML = `
+    <div style="font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:#3a6050;margin-bottom:10px;">${diffs.length} DIFFERENCES FOUND</div>` +
+    diffs.map(d => `
+      <div class="diff-row ${d.type}">
+        <span class="diff-key">${d.k}</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="diff-a">${d.va}</span>
+          <span style="color:#3a6050;">→</span>
+          <span class="diff-b">${d.vb}</span>
+        </div>
+      </div>`).join('');
+}
+
+// ── Utilities ─────────────────────────────────────────
+function copyAllFixes() {
+  if (!lastResult || !lastResult.fix_commands?.length) { alert('ไม่มี fix command'); return; }
+  navigator.clipboard.writeText(lastResult.fix_commands.join('\n')).then(() => {
+    const btn = document.getElementById('copyAllBtn');
+    btn.textContent = '✅ Copied!'; btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = '📋 COPY ALL'; btn.classList.remove('ok'); }, 2000);
+  });
+}
+
+function downloadReport() {
+  if (!lastResult) { alert('ยังไม่มีผลการวิเคราะห์'); return; }
+  const blob = new Blob([JSON.stringify(lastResult, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'obix_cli_surgeon_report.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function setEl(id, v) { const e = document.getElementById(id); if (e) e.textContent = v; }
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Tabs ──────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ── Events ────────────────────────────────────────────
+document.getElementById('analyzeBtn').addEventListener('click', analyze);
+document.getElementById('clearBtn').addEventListener('click', () => {
+  dumpEl.value = '';
+  document.getElementById('lineInfo').textContent = '0 บรรทัด';
+  document.getElementById('paramCount').textContent = 'รอวิเคราะห์...';
+  lastResult = null; allParams = {};
+  pipe(0);
+});
+document.getElementById('sampleBtn').addEventListener('click', () => {
+  dumpEl.value = `# Betaflight / INAV CLI diff all — sample
+set min_throttle = 980
+set motor_pwm_protocol = ONESHOT125
+set dshot_bidir = OFF
+set p_roll = 95
+set i_roll = 90
+set d_roll = 75
+set p_pitch = 95
+set i_pitch = 90
+set d_pitch = 70
+set p_yaw = 40
+set i_yaw = 45
+set tpa_rate = 80
+set tpa_breakpoint = 1450
+set iterm_relax = OFF
+set rpm_filter_harmonics = 3
+# save`;
+  document.getElementById('lineInfo').textContent = dumpEl.value.split('\n').length + ' บรรทัด';
+  pipe(0);
+});
+
+document.getElementById('fileInput').addEventListener('change', ev => {
+  const f = ev.target.files[0]; if (!f) return;
+  document.getElementById('edFilename').textContent = f.name;
+  const r = new FileReader(); r.onload = () => {
+    dumpEl.value = r.result;
+    document.getElementById('lineInfo').textContent = dumpEl.value.split('\n').length + ' บรรทัด';
+    pipe(0);
+  };
+  r.readAsText(f);
+});
+
+// Drag & drop
+const dz = document.getElementById('dropzone');
+dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', e => { dz.classList.remove('drag-over'); });
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('drag-over');
+  const f = e.dataTransfer.files?.[0];
+  if (f) {
+    document.getElementById('edFilename').textContent = f.name;
+    const r = new FileReader(); r.onload = () => {
+      dumpEl.value = r.result;
+      document.getElementById('lineInfo').textContent = dumpEl.value.split('\n').length + ' บรรทัด';
+      pipe(0);
+    };
+    r.readAsText(f);
+  } else {
+    const t = e.dataTransfer.getData('text'); if (t) { dumpEl.value = t; pipe(0); }
+  }
+});
+
+pipe(0);
+</script>
 </body>
 </html>

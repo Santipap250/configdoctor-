@@ -3,168 +3,921 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RPM Filter Calculator — OBIXConfig Doctor</title>
-{% set og_title       = "RPM Filter Calculator — OBIXConfig Doctor" %}
-{% set og_description = "คำนวณ harmonic frequency และ dyn_notch ที่เหมาะสมจาก KV และแรงดันแบต" %}
+<title>RPM Filter Spectrum Analyzer — OBIXConfig Doctor</title>
+{% set og_title       = "RPM Filter Spectrum Analyzer — OBIXConfig Doctor" %}
+{% set og_description = "คำนวณ RPM harmonic แบบ real-time พร้อม interactive spectrum visualization และ CLI export" %}
 {% set og_url         = "https://configdoctor.onrender.com/rpm-filter" %}
+{% set nav_page       = "rpm_filter" %}
 {% include "partials/og_tags.html" %}
-<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@400;500;600&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-.rpm-wrap{max-width:min(900px,100%);margin:0 auto;padding:16px;}
-.rpm-card{background:var(--card-bg,#0d2015);border:1px solid var(--border,#1a3a24);border-radius:12px;padding:22px;margin:14px 0;}
-.rpm-card h3{color:var(--green,#10c47a);font-size:1rem;margin-bottom:14px;}
-.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
-@media(max-width:min(600px,100%)){.form-grid{grid-template-columns:1fr;}}
-label{font-size:.82rem;color:var(--muted,#7a9a88);display:block;margin-bottom:5px;}
-input,select{width:100%;padding:.55rem .85rem;background:#050d08;border:1px solid var(--border,#1a3a24);border-radius:7px;color:var(--fg,#e0f0e8);font-size:.9rem;}
-input:focus,select:focus{outline:2px solid var(--green,#10c47a);border-color:transparent;}
-.submit-btn{margin-top:14px;background:var(--green,#10c47a);color:#021a0e;border:none;border-radius:8px;padding:10px 26px;font-weight:700;cursor:pointer;font-size:.95rem;}
-.submit-btn:hover{opacity:.88;}
-table{width:100%;border-collapse:collapse;}
-th{background:#061309;color:var(--muted,#7a9a88);padding:.5rem .8rem;font-size:.8rem;text-align:center;border-bottom:1px solid var(--border,#1a3a24);}
-td{padding:.5rem .8rem;border-bottom:1px solid #0d1a10;font-size:.85rem;text-align:center;}
-tr:hover td{background:#061309;}
-.hz1{color:#10c47a;font-weight:600;}
-.hz2{color:#60a5fa;}
-.hz3{color:#c084fc;}
-.hz4{color:#f59e0b;}
-.rec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:10px 0;}
-.rec-item{background:#050d08;border:1px solid var(--border,#1a3a24);border-radius:10px;padding:14px;text-align:center;}
-.rec-val{font-size:1.5rem;font-weight:700;color:var(--green,#10c47a);}
-.rec-lbl{font-size:.75rem;color:var(--muted,#7a9a88);margin-top:4px;}
-.cli-box{background:#050d08;border:1px solid #1a3a24;border-radius:8px;padding:14px;font-family:monospace;font-size:.82rem;color:#10c47a;white-space:pre;overflow-x:auto;}
-.copy-btn{background:transparent;border:1px solid var(--border,#1a3a24);color:var(--muted,#7a9a88);padding:.3rem .75rem;border-radius:6px;cursor:pointer;font-size:.8rem;float:right;}
-.copy-btn:hover{color:var(--fg,#e0f0e8);border-color:var(--green,#10c47a);}
-.warn-box{background:#1a0a0033;border:1px solid #7c2d12;border-radius:8px;padding:10px 14px;margin:6px 0;color:#fde68a;font-size:.85rem;}
-.note-item{color:var(--muted,#7a9a88);font-size:.84rem;padding:.2rem 0;}
-.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.82rem;margin-bottom:10px;}
-.leg{display:inline-flex;align-items:center;gap:6px;color:var(--muted,#7a9a88);}
-.dot{width:12px;height:12px;border-radius:3px;display:inline-block;}
-a.back{color:var(--green,#10c47a);font-size:.85rem;text-decoration:none;}
+/* ═══════════════════════════════════════════════════════
+   RPM FILTER SPECTRUM ANALYZER
+═══════════════════════════════════════════════════════ */
+:root {
+  --bg:     #020407;
+  --bg2:    #040810;
+  --panel:  #060c18;
+  --panel2: #091526;
+  --border: rgba(0,170,255,.09);
+  --blue:   #00aaff;
+  --cyan:   #00e5ff;
+  --green:  #00ff88;
+  --amber:  #ffb700;
+  --red:    #ff4455;
+  --purple: #cc55ff;
+  --muted:  #2a4560;
+  --muted2: #162030;
+  --text:   #b8d4e8;
+  --font-d: 'Orbitron', sans-serif;
+  --font-m: 'JetBrains Mono', monospace;
+  --font-t: 'Sarabun', sans-serif;
 
-  /* ── Responsive ── */
-  html,body{overflow-x:hidden}
-  input,select{font-size:16px;min-height:44px}
-  @media(max-width:480px){[style*="repeat(3"]{grid-template-columns:1fr!important}}
+  /* Harmonic colors */
+  --h1: #00e5ff;
+  --h2: #00ff88;
+  --h3: #ffb700;
+  --h4: #ff4455;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { overflow-x: hidden; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-t);
+  font-size: 14px;
+  min-height: 100vh;
+}
+/* Grid scanlines */
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0,170,255,.015) 40px, rgba(0,170,255,.015) 41px),
+    repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(0,170,255,.008) 40px, rgba(0,170,255,.008) 41px);
+}
+body::after {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0,170,255,.05) 0%, transparent 70%);
+}
+
+.page { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 0 16px 60px; }
+
+/* ── Hero ── */
+.hero {
+  padding: 28px 0 22px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-end; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+}
+.hero-eye {
+  font-family: var(--font-d); font-size: 8.5px; font-weight: 700;
+  letter-spacing: .2em; color: var(--cyan); text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+.hero-pulse {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--cyan); box-shadow: 0 0 12px var(--cyan);
+  animation: hPulse 2s ease-in-out infinite;
+}
+@keyframes hPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.65)} }
+.hero-title {
+  font-family: var(--font-d); font-size: clamp(20px,3vw,38px);
+  font-weight: 900; letter-spacing: .04em; color: #fff; line-height: 1.1;
+}
+.hero-title span { color: var(--cyan); text-shadow: 0 0 24px rgba(0,229,255,.4); }
+.hero-sub { margin-top: 8px; font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+.hero-back a {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--font-d); font-size: 9px; font-weight: 700; letter-spacing: .12em;
+  color: var(--muted); text-decoration: none;
+  border: 1px solid var(--muted2); border-radius: 7px; padding: 8px 14px;
+  transition: .18s;
+}
+.hero-back a:hover { color: var(--text); border-color: rgba(255,255,255,.12); }
+
+/* ── Layout ── */
+.rfl-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 16px;
+  margin-top: 20px;
+  align-items: start;
+}
+@media(max-width: 900px) { .rfl-layout { grid-template-columns: 1fr; } }
+
+/* ── Panel ── */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+}
+.panel::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: 14px;
+  background: linear-gradient(135deg, rgba(0,170,255,.02) 0%, transparent 60%);
+}
+.panel-hd {
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.panel-title {
+  font-family: var(--font-d); font-size: 9px; font-weight: 700;
+  letter-spacing: .16em; color: var(--cyan); text-transform: uppercase;
+  display: flex; align-items: center; gap: 7px;
+}
+.panel-body { padding: 16px; }
+
+/* ── Inputs ── */
+.rfl-field { margin-bottom: 16px; }
+.rfl-label {
+  font-family: var(--font-d); font-size: 8.5px; letter-spacing: .12em; font-weight: 700;
+  color: var(--muted); text-transform: uppercase;
+  display: flex; justify-content: space-between; margin-bottom: 7px;
+}
+.rfl-label .live-val {
+  color: var(--cyan); font-size: 11px; letter-spacing: .04em;
+  font-family: var(--font-m);
+}
+input[type=range] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 4px; border-radius: 2px;
+  background: var(--muted2); cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--cyan); box-shadow: 0 0 10px rgba(0,229,255,.5);
+  border: 2px solid var(--bg); cursor: pointer; transition: transform .15s;
+}
+input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.2); }
+
+.seg-row {
+  display: flex; border-radius: 9px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.seg-btn {
+  flex: 1; padding: 8px 4px;
+  font-family: var(--font-d); font-size: 8px; font-weight: 700; letter-spacing: .1em;
+  background: none; border: none; color: var(--muted); cursor: pointer;
+  transition: .18s; text-align: center; text-transform: uppercase;
+}
+.seg-btn.active { background: rgba(0,229,255,.12); color: var(--cyan); }
+.seg-btn:hover:not(.active) { color: var(--text); background: rgba(255,255,255,.03); }
+
+/* Preset buttons */
+.preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 14px; }
+.preset-btn {
+  padding: 7px 6px; border-radius: 8px;
+  border: 1px solid var(--border); background: none;
+  font-family: var(--font-d); font-size: 7px; font-weight: 700; letter-spacing: .07em;
+  color: var(--muted); cursor: pointer; text-align: center; transition: .18s;
+  line-height: 1.4;
+}
+.preset-btn .pb-name { display: block; color: var(--text); font-size: 9.5px; margin-bottom: 1px; }
+.preset-btn:hover { border-color: rgba(0,229,255,.25); color: var(--cyan); background: rgba(0,229,255,.04); }
+.preset-btn.active { border-color: var(--cyan); background: rgba(0,229,255,.1); color: var(--cyan); box-shadow: 0 0 14px rgba(0,229,255,.12); }
+
+/* Motor stat chips */
+.motor-stats {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px;
+}
+.mstat {
+  background: var(--panel2); border: 1px solid var(--border); border-radius: 9px;
+  padding: 10px 12px; text-align: center;
+}
+.mstat-val { font-family: var(--font-m); font-size: 16px; color: #fff; font-weight: 600; }
+.mstat-lbl { font-family: var(--font-d); font-size: 7px; letter-spacing: .1em; color: var(--muted); margin-top: 3px; }
+
+/* ── Spectrum Visualizer ── */
+.spectrum-wrap {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.spectrum-title {
+  font-family: var(--font-d); font-size: 8px; letter-spacing: .14em; color: var(--muted);
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+}
+.spectrum-svg {
+  width: 100%; overflow: visible;
+  display: block;
+}
+.spec-axis { stroke: var(--muted2); stroke-width: 1; }
+.spec-grid { stroke: var(--muted2); stroke-width: .5; stroke-dasharray: 3 4; opacity: .5; }
+.spec-label { font-family: var(--font-m); font-size: 9px; fill: var(--muted); }
+.spec-bar { transition: height .4s cubic-bezier(.4,0,.2,1), y .4s cubic-bezier(.4,0,.2,1), opacity .3s; }
+.spec-marker { transition: x1 .4s, x2 .4s; }
+.spec-zone { transition: x .4s, width .4s; }
+
+/* Throttle sweep track */
+.sweep-wrap {
+  padding: 12px 16px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.sweep-label {
+  font-family: var(--font-d); font-size: 8px; letter-spacing: .12em; color: var(--muted);
+  margin-bottom: 8px; display: flex; justify-content: space-between;
+}
+.sweep-track { height: 5px; background: var(--muted2); border-radius: 3px; overflow: hidden; }
+.sweep-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--cyan), var(--purple)); transition: width .3s; }
+
+/* Throttle table */
+.thr-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.thr-table th {
+  font-family: var(--font-d); font-size: 7.5px; letter-spacing: .1em; font-weight: 700;
+  color: var(--muted); padding: 6px 10px; border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+.thr-table td {
+  font-family: var(--font-m); font-size: 11px;
+  padding: 7px 10px; border-bottom: 1px solid rgba(0,170,255,.05);
+  text-align: center;
+}
+.thr-table tr:hover td { background: rgba(0,170,255,.04); }
+.hz-h1 { color: var(--h1); font-weight: 600; }
+.hz-h2 { color: var(--h2); }
+.hz-h3 { color: var(--h3); }
+.hz-h4 { color: var(--h4); }
+.thr-row { font-weight: 700; color: var(--text); }
+
+/* Recommended section */
+.rec-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; padding: 16px; }
+.rec-card {
+  background: var(--panel2); border: 1px solid var(--border); border-radius: 11px;
+  padding: 14px 12px; text-align: center;
+  position: relative; overflow: hidden;
+}
+.rec-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-col, var(--cyan)), transparent);
+}
+.rec-val { font-family: var(--font-m); font-size: 24px; font-weight: 600; color: #fff; line-height: 1; }
+.rec-lbl { font-family: var(--font-d); font-size: 7.5px; letter-spacing: .1em; color: var(--muted); margin-top: 6px; }
+
+/* Harmonic legend */
+.h-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; }
+.h-leg-item {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-d); font-size: 8px; letter-spacing: .08em; color: var(--muted);
+}
+.h-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+/* CLI panel */
+.cli-wrap { padding: 14px 16px; }
+.cli-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+.cli-dots { display: flex; gap: 5px; }
+.cli-dot { width: 9px; height: 9px; border-radius: 50%; }
+.cli-body {
+  background: rgba(0,0,0,.5); border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px; font-family: var(--font-m); font-size: 11.5px; line-height: 1.8;
+  position: relative;
+}
+.cli-cmt { color: rgba(0,229,255,.4); }
+.cli-cmd { color: #c8dce8; }
+.cli-val { color: var(--amber); }
+.cli-key { color: var(--cyan); }
+.cli-copy {
+  position: absolute; top: 10px; right: 10px;
+  font-family: var(--font-d); font-size: 8px; font-weight: 700; letter-spacing: .1em;
+  padding: 5px 12px; border-radius: 6px;
+  border: 1px solid rgba(0,229,255,.25); background: rgba(0,229,255,.07);
+  color: var(--cyan); cursor: pointer; transition: .18s;
+}
+.cli-copy:hover { background: rgba(0,229,255,.14); border-color: rgba(0,229,255,.4); }
+.cli-copy.ok { color: var(--green); border-color: rgba(0,255,136,.3); }
+
+/* Warning cards */
+.warn-card {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 13px; border-radius: 9px;
+  border-left: 2px solid var(--amber);
+  background: rgba(255,183,0,.05);
+  margin-bottom: 8px; font-size: 12px; line-height: 1.55;
+}
+.warn-icon { font-size: 16px; flex-shrink: 0; }
+
+/* Notes */
+.notes-list { font-size: 12px; line-height: 1.7; }
+.notes-list li { padding: 4px 0; color: var(--muted); }
+.notes-list li::marker { color: var(--cyan); }
+
+@media(max-width:600px) {
+  .rec-grid { grid-template-columns: 1fr; }
+  .preset-grid { grid-template-columns: repeat(3,1fr); }
+}
 </style>
 </head>
 <body>
-<div class="top-bar">
-  <div class="top-left">
-    <a href="/landing"><img src="{{ url_for('static', filename='img/obix-logo.png') }}" class="logo" alt="OBIXConfig Doctor"></a>
-  </div>
-  <button class="toggle-theme" onclick="toggleTheme()" title="สลับธีม">🌗</button>
-</div>
 
-<div class="rpm-wrap">
-  <div style="margin-bottom:16px;">
-    <a class="back" href="/app">← กลับหน้าหลัก</a>
-    <h2 style="color:var(--green);font-size:1.1rem;margin:6px 0 2px;">🔔 RPM Filter Frequency Calculator</h2>
-    <p style="color:var(--muted);font-size:.84rem;">ใส่ KV + แบต → ได้ตาราง harmonic + ค่า dyn_notch พร้อม CLI command</p>
-  </div>
+{% set nav_page = "rpm_filter" %}
+{% include "partials/nav.html" %}
 
-  <div class="rpm-card">
-    <h3>⚙️ ข้อมูลมอเตอร์</h3>
-    <form method="POST" action="/rpm-filter">
-      <div class="form-grid">
-        <div>
-          <label>Motor KV</label>
-          <input type="number" name="kv" min="200" max="8000" value="{{ form.kv or 2400 }}" placeholder="เช่น 2400" required>
-        </div>
-        <div>
-          <label>Battery</label>
-          <select name="battery">
-            {% for s in ['3S','4S','5S','6S','7S','8S'] %}
-            <option value="{{ s }}" {% if form.battery == s %}selected{% endif %}>{{ s }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div>
-          <label>Prop Size (นิ้ว)</label>
-          <select name="prop_size">
-            {% for p in [2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 7.0, 8.0] %}
-            <option value="{{ p }}" {% if form.prop_size and form.prop_size|float == p %}selected{% endif %}>{{ p }}"</option>
-            {% endfor %}
-          </select>
-        </div>
+<div class="page">
+
+  <!-- ── Hero ── -->
+  <div class="hero">
+    <div>
+      <div class="hero-eye">
+        <span class="hero-pulse"></span>
+        OBIX · RPM FILTER · SPECTRUM ANALYZER
       </div>
-      <button class="submit-btn" type="submit">📊 คำนวณ RPM Filter →</button>
-    </form>
-  </div>
-
-  {% if result %}
-    {% if result.error is defined %}
-    <div class="warn-box">❌ {{ result.error }}</div>
-    {% else %}
-
-    {% for w in result.warnings %}
-    <div class="warn-box">{{ w }}</div>
-    {% endfor %}
-
-    <div class="rpm-card">
-      <h3>📊 ตาราง Harmonic Frequency</h3>
-      <p style="color:var(--muted);font-size:.83rem;margin-bottom:10px;">
-        Max RPM (loaded): <strong style="color:var(--green);">{{ "{:,}".format(result.rpm_loaded_max) }} RPM</strong> &nbsp;·&nbsp;
-        Freq ที่ full throttle (1×): <strong style="color:var(--green);">{{ result.throttle_table[-1].harmonics[0].hz }} Hz</strong>
+      <h1 class="hero-title">RPM Filter<br><span>Spectrum Analyzer</span></h1>
+      <p class="hero-sub">
+        คำนวณ harmonic frequency แบบ real-time · Interactive spectrum visualization<br>
+        Motor preset DB · Throttle sweep · dyn_notch CLI export พร้อม paste
       </p>
-      <div class="legend">
-        <span class="leg"><span class="dot" style="background:#10c47a"></span> 1× fundamental</span>
-        <span class="leg"><span class="dot" style="background:#60a5fa"></span> 2× harmonic</span>
-        <span class="leg"><span class="dot" style="background:#c084fc"></span> 3× harmonic</span>
-        <span class="leg"><span class="dot" style="background:#f59e0b"></span> 4× harmonic</span>
+    </div>
+    <div class="hero-back">
+      <a href="/app">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+        กลับหน้าหลัก
+      </a>
+    </div>
+  </div>
+
+  <!-- ── Layout ── -->
+  <div class="rfl-layout">
+
+    <!-- ══ LEFT: Controls ══ -->
+    <div>
+
+      <!-- Motor presets -->
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-hd">
+          <div class="panel-title">Motor Presets</div>
+          <span style="font-family:var(--font-m);font-size:9px;color:var(--muted);">กดเลือก</span>
+        </div>
+        <div class="panel-body" style="padding:12px;">
+          <div class="preset-grid" id="presetGrid">
+            <button class="preset-btn" data-kv="8000" data-cell="2" data-prop="2.5">
+              <span class="pb-name">8000KV 2S</span>WHOOP
+            </button>
+            <button class="preset-btn" data-kv="4000" data-cell="3" data-prop="3">
+              <span class="pb-name">4000KV 3S</span>MICRO
+            </button>
+            <button class="preset-btn" data-kv="2600" data-cell="4" data-prop="4">
+              <span class="pb-name">2600KV 4S</span>MINI
+            </button>
+            <button class="preset-btn active" data-kv="2400" data-cell="4" data-prop="5">
+              <span class="pb-name">2400KV 4S</span>5" STD
+            </button>
+            <button class="preset-btn" data-kv="2000" data-cell="4" data-prop="5">
+              <span class="pb-name">2000KV 4S</span>5" CINE
+            </button>
+            <button class="preset-btn" data-kv="1750" data-cell="6" data-prop="5">
+              <span class="pb-name">1750KV 6S</span>5" 6S
+            </button>
+            <button class="preset-btn" data-kv="1500" data-cell="6" data-prop="6">
+              <span class="pb-name">1500KV 6S</span>6" LR
+            </button>
+            <button class="preset-btn" data-kv="900" data-cell="6" data-prop="7">
+              <span class="pb-name">900KV 6S</span>7" LR
+            </button>
+          </div>
+        </div>
       </div>
-      <table>
-        <tr>
-          <th>Throttle</th><th>RPM (est.)</th>
-          <th class="hz1">1× Hz</th><th class="hz2">2× Hz</th><th class="hz3">3× Hz</th><th class="hz4">4× Hz</th>
-        </tr>
-        {% for row in result.throttle_table %}
-        <tr>
-          <td><strong>{{ row.throttle }}</strong></td>
-          <td>{{ "{:,}".format(row.rpm) }}</td>
-          {% for h in row.harmonics %}
-          <td class="hz{{ h.n }}">{{ h.hz }}</td>
-          {% endfor %}
-        </tr>
-        {% endfor %}
-      </table>
-    </div>
 
-    <div class="rpm-card">
-      <h3>🎯 ค่าแนะนำสำหรับ Betaflight</h3>
-      <div class="rec-grid">
-        <div class="rec-item"><div class="rec-val">{{ result.recommended.dyn_notch_min }}</div><div class="rec-lbl">dyn_notch_min_hz</div></div>
-        <div class="rec-item"><div class="rec-val">{{ result.recommended.dyn_notch_max }}</div><div class="rec-lbl">dyn_notch_max_hz</div></div>
-        <div class="rec-item"><div class="rec-val">{{ result.recommended.dyn_notch_count }}</div><div class="rec-lbl">dyn_notch_count</div></div>
+      <!-- Parameters -->
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-hd">
+          <div class="panel-title">Parameters</div>
+        </div>
+        <div class="panel-body">
+
+          <div class="rfl-field">
+            <div class="rfl-label">
+              Motor KV
+              <span class="live-val" id="lv_kv">2400 KV</span>
+            </div>
+            <input type="range" id="s_kv" min="500" max="10000" step="50" value="2400">
+          </div>
+
+          <div class="rfl-field">
+            <div class="rfl-label">Battery</div>
+            <div class="seg-row" id="seg_cells">
+              <button class="seg-btn" data-val="2">2S</button>
+              <button class="seg-btn" data-val="3">3S</button>
+              <button class="seg-btn active" data-val="4">4S</button>
+              <button class="seg-btn" data-val="5">5S</button>
+              <button class="seg-btn" data-val="6">6S</button>
+              <button class="seg-btn" data-val="7">7S</button>
+              <button class="seg-btn" data-val="8">8S</button>
+            </div>
+          </div>
+
+          <div class="rfl-field">
+            <div class="rfl-label">
+              Prop Size
+              <span class="live-val" id="lv_prop">5.0"</span>
+            </div>
+            <input type="range" id="s_prop" min="2" max="10" step="0.5" value="5">
+          </div>
+
+          <div class="rfl-field">
+            <div class="rfl-label">
+              Throttle (sweep preview)
+              <span class="live-val" id="lv_thr">50%</span>
+            </div>
+            <input type="range" id="s_thr" min="0" max="100" step="1" value="50">
+          </div>
+
+          <div class="rfl-field" style="margin-bottom:0;">
+            <div class="rfl-label">RPM Filter Harmonics</div>
+            <div class="seg-row" id="seg_harm">
+              <button class="seg-btn" data-val="1">1×</button>
+              <button class="seg-btn" data-val="2">2×</button>
+              <button class="seg-btn active" data-val="3">3×</button>
+              <button class="seg-btn" data-val="4">4×</button>
+            </div>
+          </div>
+
+        </div>
       </div>
+
+      <!-- Live motor stats -->
+      <div class="panel">
+        <div class="panel-hd">
+          <div class="panel-title">Live Stats</div>
+          <span style="font-size:9px;color:var(--cyan);font-family:var(--font-m);animation:hPulse 1.5s ease-in-out infinite;">● LIVE</span>
+        </div>
+        <div class="panel-body">
+          <div class="motor-stats">
+            <div class="mstat">
+              <div class="mstat-val" id="st_rpm">—</div>
+              <div class="mstat-lbl">MAX RPM</div>
+            </div>
+            <div class="mstat">
+              <div class="mstat-val" style="color:var(--cyan);" id="st_f1">—</div>
+              <div class="mstat-lbl">1× Hz (max)</div>
+            </div>
+            <div class="mstat">
+              <div class="mstat-val" style="color:var(--green);" id="st_f2">—</div>
+              <div class="mstat-lbl">2× Hz (max)</div>
+            </div>
+            <div class="mstat">
+              <div class="mstat-val" style="color:var(--amber);" id="st_f3">—</div>
+              <div class="mstat-lbl">3× Hz (max)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <div class="rpm-card">
-      <h3>📋 CLI Commands <button class="copy-btn" onclick="copyCLI()">📋 Copy</button></h3>
-      <div class="cli-box" id="cli-out">{% for line in result.cli_commands %}{{ line }}
-{% endfor %}</div>
-    </div>
+    <!-- ══ RIGHT: Spectrum + Output ══ -->
+    <div>
 
-    <div class="rpm-card">
-      <h3>ℹ️ หมายเหตุ</h3>
-      {% for note in result.notes %}
-      <p class="note-item">• {{ note }}</p>
-      {% endfor %}
-    </div>
-    {% endif %}
-  {% endif %}
+      <!-- Spectrum Visualizer -->
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-hd">
+          <div class="panel-title">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="9" width="3" height="6" rx="1"/><rect x="6" y="5" width="3" height="10" rx="1"/><rect x="11" y="1" width="3" height="14" rx="1"/></svg>
+            Harmonic Spectrum
+          </div>
+          <div id="thrLabel" style="font-family:var(--font-d);font-size:9px;font-weight:700;color:var(--cyan);padding:3px 10px;border-radius:100px;border:1px solid rgba(0,229,255,.2);background:rgba(0,229,255,.07);">50% throttle</div>
+        </div>
+        <div class="spectrum-wrap">
+          <div class="h-legend">
+            <div class="h-leg-item"><div class="h-dot" style="background:var(--h1)"></div>1× Fundamental</div>
+            <div class="h-leg-item"><div class="h-dot" style="background:var(--h2)"></div>2× Harmonic</div>
+            <div class="h-leg-item"><div class="h-dot" style="background:var(--h3)"></div>3× Harmonic</div>
+            <div class="h-leg-item"><div class="h-dot" style="background:var(--h4)"></div>4× Harmonic</div>
+          </div>
+          <svg class="spectrum-svg" id="specSvg" viewBox="0 0 760 200" preserveAspectRatio="xMidYMid meet">
+            <!-- Y-axis -->
+            <line class="spec-axis" x1="50" y1="10" x2="50" y2="175"/>
+            <!-- X-axis -->
+            <line class="spec-axis" x1="50" y1="175" x2="755" y2="175"/>
+            <!-- Grid lines + Y labels -->
+            <g id="gridLines"></g>
+            <!-- Notch zone (dyn_notch range) -->
+            <rect class="spec-zone" id="notchZone" x="50" y="10" width="100" height="165"
+                  fill="rgba(0,229,255,.04)" stroke="rgba(0,229,255,.15)" stroke-width="1" stroke-dasharray="4 3"/>
+            <!-- Bars group -->
+            <g id="specBars"></g>
+            <!-- Frequency labels -->
+            <g id="freqLabels"></g>
+            <!-- Current throttle line -->
+            <line id="thrLine" class="spec-marker" x1="400" y1="10" x2="400" y2="175"
+                  stroke="rgba(255,255,255,.15)" stroke-width="1" stroke-dasharray="4 3"/>
+          </svg>
+        </div>
 
-  <p style="margin-top:16px;font-size:.82rem;color:var(--muted);">
-    💡 ยืนยันผลด้วย Blackbox + Betaflight Spectrum Analyzer เสมอ — ค่านี้เป็นจุดเริ่มต้น
-  </p>
+        <!-- Throttle sweep bar -->
+        <div class="sweep-wrap">
+          <div class="sweep-label">
+            <span>THROTTLE SWEEP</span>
+            <span id="sweepHz" style="color:var(--cyan);font-family:var(--font-m);">— Hz</span>
+          </div>
+          <div class="sweep-track">
+            <div class="sweep-fill" id="sweepFill" style="width:50%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Throttle Table -->
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-hd">
+          <div class="panel-title">Harmonic Frequency Table</div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="thr-table">
+            <tr>
+              <th>Throttle</th>
+              <th>RPM (est.)</th>
+              <th style="color:var(--h1);">1× Hz</th>
+              <th style="color:var(--h2);">2× Hz</th>
+              <th style="color:var(--h3);">3× Hz</th>
+              <th style="color:var(--h4);">4× Hz</th>
+            </tr>
+            <tbody id="thrTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Recommended + CLI -->
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-hd">
+          <div class="panel-title">Betaflight Recommendations</div>
+        </div>
+        <div class="rec-grid">
+          <div class="rec-card" style="--accent-col:var(--cyan);">
+            <div class="rec-val" id="rec_min">—</div>
+            <div class="rec-lbl">dyn_notch_min_hz</div>
+          </div>
+          <div class="rec-card" style="--accent-col:var(--purple);">
+            <div class="rec-val" id="rec_max">—</div>
+            <div class="rec-lbl">dyn_notch_max_hz</div>
+          </div>
+          <div class="rec-card" style="--accent-col:var(--green);">
+            <div class="rec-val" id="rec_cnt">—</div>
+            <div class="rec-lbl">rpm_filter_harmonics</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLI Export -->
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-hd">
+          <div class="panel-title">CLI Export</div>
+        </div>
+        <div class="cli-wrap">
+          <div class="cli-body" id="cliBody">
+            <span class="cli-cmt"># ...</span>
+            <button class="cli-copy" id="cliCopyBtn" onclick="copyCLI()">📋 COPY</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Warnings + Notes -->
+      <div class="panel" id="warnPanel" style="display:none;margin-bottom:14px;">
+        <div class="panel-hd">
+          <div class="panel-title">Warnings</div>
+        </div>
+        <div class="panel-body" id="warnBody"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-hd">
+          <div class="panel-title">Notes</div>
+        </div>
+        <div class="panel-body">
+          <ul class="notes-list" id="notesList"></ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
 
 <script>
-(function(){ var t=localStorage.getItem('theme')||'dark'; document.documentElement.className=t; document.addEventListener('DOMContentLoaded',function(){ document.body.classList.add(t); }); })();
-function toggleTheme(){ var isDark=document.body.classList.contains('dark'); document.body.classList.toggle('dark',!isDark); document.body.classList.toggle('light',isDark); localStorage.setItem('theme',isDark?'light':'dark'); }
-function copyCLI(){ var el=document.getElementById('cli-out'); if(!el) return; navigator.clipboard.writeText(el.textContent).then(function(){ showToast('คัดลอก CLI command แล้ว ✓'); }); }
-function showToast(msg){ var t=document.getElementById('toast'); if(!t){ t=document.createElement('div'); t.id='toast'; t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#10c47a;color:#021a0e;padding:8px 18px;border-radius:20px;font-weight:700;font-size:.87rem;z-index:999;'; document.body.appendChild(t); } t.textContent=msg; t.style.opacity='1'; clearTimeout(t._t); t._t=setTimeout(function(){ t.style.opacity='0'; },2200); }
+/* ═══════════════════════════════════════════════════════
+   RPM FILTER SPECTRUM ANALYZER — Brain
+═══════════════════════════════════════════════════════ */
+
+const LOAD_FACTOR = 0.75;
+const MAX_CELL_V  = 4.2;
+const THROTTLE_LEVELS = [
+  { label: '20%',  pct: 0.20 },
+  { label: '50%',  pct: 0.50 },
+  { label: '70%',  pct: 0.70 },
+  { label: '100%', pct: 1.00 },
+];
+const HARMONIC_COLORS = ['var(--h1)', 'var(--h2)', 'var(--h3)', 'var(--h4)'];
+
+// State
+let ST = { kv: 2400, cells: 4, prop: 5, thr: 50, harmonics: 3 };
+
+// ── Calculate ──────────────────────────────────────────
+function calc() {
+  const { kv, cells, prop, harmonics } = ST;
+  const vMax = cells * MAX_CELL_V;
+  const rpmMax = kv * vMax * LOAD_FACTOR;
+
+  const table = THROTTLE_LEVELS.map(t => {
+    const rpm = rpmMax * t.pct;
+    const harms = [1,2,3,4].map(n => ({ n, hz: Math.round(rpm * n / 60) }));
+    return { label: t.label, pct: t.pct, rpm: Math.round(rpm), harmonics: harms };
+  });
+
+  // Current throttle row
+  const thrRpm = rpmMax * (ST.thr / 100);
+  const thrHarms = [1,2,3,4].map(n => ({ n, hz: Math.round(thrRpm * n / 60) }));
+
+  // Notch window
+  const f1Min = Math.round(rpmMax * 0.20 / 60);
+  const f1Max = Math.round(rpmMax * 1.00 / 60);
+  const notchMin = Math.max(60,  Math.round(f1Min * 0.80 / 10) * 10);
+  const notchMax = Math.min(1000, Math.round(f1Max * 1.20 / 10) * 10);
+  const notchCnt = (cells >= 6 || kv >= 2200) ? 3 : 2;
+
+  // Warnings
+  const warnings = [];
+  if (cells >= 7 && kv > 1500)
+    warnings.push(`KV ${kv} สูงบน ${cells}S — harmonic จะอยู่ย่าน Hz สูงมาก ระวัง motor ร้อน`);
+  if (notchMax > 700)
+    warnings.push(`Max notch freq ${notchMax}Hz สูง — ตรวจสอบ RPM filter mode = ON ใน BF Configurator`);
+  if (kv > 3000 && cells >= 4)
+    warnings.push(`KV ${kv} สูงมากบน ${cells}S — ตรวจสอบ ESC demag และ prop balance`);
+
+  // Notes
+  const notes = [
+    `Max RPM (loaded 100% thr): ${Math.round(rpmMax).toLocaleString()} RPM`,
+    `Fundamental at max throttle: ${Math.round(rpmMax / 60).toLocaleString()} Hz`,
+    `ค่าเหล่านี้เป็นประมาณ — ยืนยันด้วย Blackbox + RPM filter graph เสมอ`,
+    `Prop ${prop}" ส่งผลต่อ actual RPM — ใบใหญ่ = RPM ต่ำกว่า unloaded estimate`,
+    `Load factor ที่ใช้ = ${LOAD_FACTOR} (75% ของ RPM ไม่มีโหลด — ค่าเฉลี่ย FPV)`,
+  ];
+
+  return { rpmMax: Math.round(rpmMax), table, thrHarms, notchMin, notchMax, notchCnt, warnings, notes };
+}
+
+// ── Spectrum visualizer ────────────────────────────────
+const SVG_W = 760, SVG_H = 200, PAD_L = 50, PAD_B = 25, PLOT_W = SVG_W - PAD_L - 5, PLOT_H = SVG_H - 10 - PAD_B;
+
+function buildGrid(maxHz) {
+  const g = document.getElementById('gridLines');
+  g.innerHTML = '';
+  const steps = 5;
+  for (let i = 0; i <= steps; i++) {
+    const y = 10 + PLOT_H * (1 - i / steps);
+    const hz = Math.round(maxHz * i / steps);
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('class', 'spec-grid');
+    line.setAttribute('x1', PAD_L); line.setAttribute('y1', y);
+    line.setAttribute('x2', SVG_W - 5); line.setAttribute('y2', y);
+    g.appendChild(line);
+    const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    txt.setAttribute('class', 'spec-label');
+    txt.setAttribute('x', PAD_L - 4); txt.setAttribute('y', y + 3);
+    txt.setAttribute('text-anchor', 'end');
+    txt.textContent = hz >= 1000 ? (hz/1000).toFixed(1)+'k' : hz;
+    g.appendChild(txt);
+  }
+}
+
+function renderSpectrum(R) {
+  const { kv, cells, thr, harmonics } = ST;
+  const maxHz = R.notchMax * 1.3 || 800;
+
+  buildGrid(maxHz);
+
+  const barsG = document.getElementById('specBars');
+  const labsG = document.getElementById('freqLabels');
+  barsG.innerHTML = '';
+  labsG.innerHTML = '';
+
+  // Show current throttle bars
+  const thrHarms = R.thrHarms;
+  const barW = 18;
+  const barGap = 4;
+  const harmCount = harmonics; // how many to show
+
+  thrHarms.slice(0, 4).forEach((h, i) => {
+    if (i >= harmCount) { /* draw ghost */ }
+    const xFrac = Math.min(1, h.hz / maxHz);
+    const cx = PAD_L + xFrac * PLOT_W;
+    const heightFrac = Math.min(1, h.hz / maxHz);
+    const barH = Math.max(4, heightFrac * PLOT_H);
+    const y = 10 + PLOT_H - barH;
+    const color = HARMONIC_COLORS[i];
+    const opacity = i < harmonics ? '1' : '0.18';
+
+    // Bar
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('class', 'spec-bar');
+    rect.setAttribute('x', cx - barW/2);
+    rect.setAttribute('y', y);
+    rect.setAttribute('width', barW);
+    rect.setAttribute('height', barH);
+    rect.setAttribute('rx', '3');
+    rect.setAttribute('fill', color);
+    rect.setAttribute('opacity', opacity);
+    rect.style.filter = i < harmonics ? `drop-shadow(0 0 6px ${color})` : 'none';
+    barsG.appendChild(rect);
+
+    // Hz label
+    const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    txt.setAttribute('class', 'spec-label');
+    txt.setAttribute('x', cx);
+    txt.setAttribute('y', y - 4);
+    txt.setAttribute('text-anchor', 'middle');
+    txt.setAttribute('fill', i < harmonics ? color : 'var(--muted)');
+    txt.setAttribute('font-size', '8');
+    txt.textContent = `${h.n}×  ${h.hz}Hz`;
+    labsG.appendChild(txt);
+
+    // X-axis label
+    const xtxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    xtxt.setAttribute('class', 'spec-label');
+    xtxt.setAttribute('x', cx);
+    xtxt.setAttribute('y', SVG_H - 5);
+    xtxt.setAttribute('text-anchor', 'middle');
+    xtxt.textContent = `${h.hz}`;
+    labsG.appendChild(xtxt);
+  });
+
+  // Notch zone
+  const nz = document.getElementById('notchZone');
+  const x1Frac = Math.min(1, R.notchMin / maxHz);
+  const x2Frac = Math.min(1, R.notchMax / maxHz);
+  const nzX = PAD_L + x1Frac * PLOT_W;
+  const nzW = Math.max(4, (x2Frac - x1Frac) * PLOT_W);
+  nz.setAttribute('x', nzX);
+  nz.setAttribute('width', nzW);
+
+  // Throttle line
+  const thrFrac = Math.min(1, R.thrHarms[0].hz / maxHz);
+  const tl = document.getElementById('thrLine');
+  const tlX = PAD_L + thrFrac * PLOT_W;
+  tl.setAttribute('x1', tlX); tl.setAttribute('x2', tlX);
+}
+
+// ── Render all ─────────────────────────────────────────
+function render() {
+  const R = calc();
+
+  // Live stats
+  setEl('st_rpm', Math.round(R.rpmMax).toLocaleString());
+  setEl('st_f1', Math.round(R.rpmMax / 60).toLocaleString() + ' Hz');
+  setEl('st_f2', Math.round(R.rpmMax * 2 / 60).toLocaleString() + ' Hz');
+  setEl('st_f3', Math.round(R.rpmMax * 3 / 60).toLocaleString() + ' Hz');
+
+  // Throttle label
+  setEl('thrLabel', ST.thr + '% throttle');
+  setEl('sweepHz', `${R.thrHarms[0].hz} Hz (1×)`);
+  document.getElementById('sweepFill').style.width = ST.thr + '%';
+
+  // Spectrum
+  renderSpectrum(R);
+
+  // Table
+  const tbody = document.getElementById('thrTableBody');
+  tbody.innerHTML = R.table.map(row => `
+    <tr>
+      <td class="thr-row">${row.label}</td>
+      <td>${row.rpm.toLocaleString()}</td>
+      ${row.harmonics.map((h,i) => `<td class="hz-h${i+1}">${h.hz}</td>`).join('')}
+    </tr>`).join('');
+
+  // Recommendations
+  setEl('rec_min', R.notchMin);
+  setEl('rec_max', R.notchMax);
+  setEl('rec_cnt', R.notchCnt);
+
+  // CLI
+  renderCLI(R);
+
+  // Warnings
+  const wp = document.getElementById('warnPanel');
+  const wb = document.getElementById('warnBody');
+  if (R.warnings.length) {
+    wp.style.display = '';
+    wb.innerHTML = R.warnings.map(w => `
+      <div class="warn-card">
+        <div class="warn-icon">⚠</div>
+        <div>${w}</div>
+      </div>`).join('');
+  } else {
+    wp.style.display = 'none';
+  }
+
+  // Notes
+  document.getElementById('notesList').innerHTML =
+    R.notes.map(n => `<li>${n}</li>`).join('');
+}
+
+function renderCLI(R) {
+  const { kv, cells } = ST;
+  const body = document.getElementById('cliBody');
+  const btn = document.getElementById('cliCopyBtn');
+  body.innerHTML = `
+<span class="cli-cmt"># OBIX RPM Filter Setup — KV ${kv}, ${cells}S</span><br>
+<span class="cli-cmt"># ─── dyn_notch settings ───</span><br>
+<span class="cli-cmd">set </span><span class="cli-key">dyn_notch_count</span><span class="cli-cmd"> = </span><span class="cli-val">${R.notchCnt}</span><br>
+<span class="cli-cmd">set </span><span class="cli-key">dyn_notch_min_hz</span><span class="cli-cmd"> = </span><span class="cli-val">${R.notchMin}</span><br>
+<span class="cli-cmd">set </span><span class="cli-key">dyn_notch_max_hz</span><span class="cli-cmd"> = </span><span class="cli-val">${R.notchMax}</span><br>
+<span class="cli-cmt"># ─── RPM filter harmonics ───</span><br>
+<span class="cli-cmd">set </span><span class="cli-key">rpm_filter_harmonics</span><span class="cli-cmd"> = </span><span class="cli-val">${ST.harmonics}</span><br>
+<span class="cli-cmd">set </span><span class="cli-key">rpm_filter_min_hz</span><span class="cli-cmd"> = </span><span class="cli-val">${R.notchMin}</span><br>
+<span class="cli-cmt"># enable bidir + RPM filter in BF Configurator</span><br>
+<span class="cli-cmd">set </span><span class="cli-key">dshot_bidir</span><span class="cli-cmd"> = </span><span class="cli-val">ON</span><br>
+<span class="cli-cmd" style="color:var(--green);font-weight:600;">save</span>`;
+  body.appendChild(btn);
+}
+
+function copyCLI() {
+  const body = document.getElementById('cliBody');
+  const lines = [];
+  body.childNodes.forEach(n => {
+    if (n.nodeType === 3) lines.push(n.textContent);
+    else if (n.tagName === 'BR') lines.push('\n');
+    else if (n.classList?.contains('cli-copy')) return;
+    else lines.push(n.textContent);
+  });
+  navigator.clipboard.writeText(lines.join('').replace(/\n\n+/g, '\n').trim()).then(() => {
+    const btn = document.getElementById('cliCopyBtn');
+    btn.textContent = '✅ Copied!';
+    btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = '📋 COPY'; btn.classList.remove('ok'); }, 2000);
+  });
+}
+
+function setEl(id, v) { const e = document.getElementById(id); if (e) e.textContent = v; }
+
+// ── Wire controls ──────────────────────────────────────
+const kvEl = document.getElementById('s_kv');
+kvEl.addEventListener('input', () => {
+  ST.kv = parseInt(kvEl.value);
+  setEl('lv_kv', ST.kv.toLocaleString() + ' KV');
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  render();
+});
+
+const propEl = document.getElementById('s_prop');
+propEl.addEventListener('input', () => {
+  ST.prop = parseFloat(propEl.value);
+  setEl('lv_prop', ST.prop + '"');
+  render();
+});
+
+const thrEl = document.getElementById('s_thr');
+thrEl.addEventListener('input', () => {
+  ST.thr = parseInt(thrEl.value);
+  setEl('lv_thr', ST.thr + '%');
+  setEl('thrLabel', ST.thr + '% throttle');
+  render();
+});
+
+document.getElementById('seg_cells').querySelectorAll('.seg-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#seg_cells .seg-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    ST.cells = parseInt(btn.dataset.val);
+    render();
+  });
+});
+
+document.getElementById('seg_harm').querySelectorAll('.seg-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#seg_harm .seg-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    ST.harmonics = parseInt(btn.dataset.val);
+    render();
+  });
+});
+
+document.getElementById('presetGrid').querySelectorAll('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    ST.kv    = parseInt(btn.dataset.kv);
+    ST.cells = parseInt(btn.dataset.cell);
+    ST.prop  = parseFloat(btn.dataset.prop);
+    kvEl.value   = ST.kv;
+    propEl.value = ST.prop;
+    setEl('lv_kv', ST.kv.toLocaleString() + ' KV');
+    setEl('lv_prop', ST.prop + '"');
+    // Update cell seg
+    document.querySelectorAll('#seg_cells .seg-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.val == String(ST.cells));
+    });
+    render();
+  });
+});
+
+// ── Init ───────────────────────────────────────────────
+setEl('lv_kv', ST.kv.toLocaleString() + ' KV');
+setEl('lv_prop', ST.prop + '"');
+setEl('lv_thr', ST.thr + '%');
+render();
 </script>
 </body>
 </html>
