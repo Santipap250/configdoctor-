@@ -246,11 +246,11 @@ PRESETS: Dict[str, Dict[str, Any]] = {
     "3.5_cine":    {"class": "cine",       "size": 3.5,  "weight": 350,  "battery": "4S", "prop_size": 3.5,  "pitch": 2.5, "blades": 2, "style": "longrange"},
     "4_mini":      {"class": "mini",       "size": 4.0,  "weight": 420,  "battery": "4S", "prop_size": 4.0,  "pitch": 3.0, "blades": 2, "style": "freestyle"},
     "5_freestyle": {"class": "freestyle",  "size": 5.0,  "weight": 750,  "battery": "4S", "prop_size": 5.0,  "pitch": 4.0, "blades": 3, "style": "freestyle"},
-    "6_heavy5":    {"class": "heavy_5",    "size": 6.0,  "weight": 1000, "battery": "6S", "prop_size": 6.0,  "pitch": 4.0, "blades": 3, "style": "freestyle"},
+    "6_heavy5":    {"class": "heavy_5",    "size": 6.0,  "weight": 850,  "battery": "6S", "prop_size": 6.0,  "pitch": 4.0, "blades": 3, "style": "freestyle"},  # FIX: 1000g→850g (typical 6" with stack)
     "7_midlr":     {"class": "mid_lr",     "size": 7.0,  "weight": 1100, "battery": "6S", "prop_size": 7.0,  "pitch": 3.5, "blades": 2, "style": "longrange"},
     "7.5_midlr":   {"class": "mid_lr",     "size": 7.5,  "weight": 1200, "battery": "6S", "prop_size": 7.5,  "pitch": 3.0, "blades": 2, "style": "longrange"},
     "8_lr":        {"class": "long_range", "size": 8.0,  "weight": 1500, "battery": "6S", "prop_size": 8.0,  "pitch": 3.5, "blades": 2, "style": "longrange"},
-    "10_lr":       {"class": "long_range", "size": 10.0, "weight": 2200, "battery": "6S", "prop_size": 10.0, "pitch": 4.5, "blades": 2, "style": "longrange"},
+    "10_lr":       {"class": "long_range", "size": 10.0, "weight": 1500, "battery": "6S", "prop_size": 10.0, "pitch": 4.5, "blades": 2, "style": "longrange"},  # FIX: 2200g→1500g (typical 10" LR without payload)
 }
 
 # ─────────────────────────────────────────────────────────────
