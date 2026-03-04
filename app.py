@@ -625,6 +625,12 @@ def flight_quiz():
     """Flight Style Quiz — 5 คำถาม แนะนำ rates + preset"""
     return render_template('flight_quiz.html')
 
+# ── Betaflight Config Wizard ─────────────────────────────────────────────────
+@app.route('/bf-wizard')
+def bf_wizard():
+    """Betaflight Config Wizard — 7 ขั้นตอน → CLI พร้อม paste"""
+    return render_template('bf_wizard.html')
+
 # ── RPM Filter Calculator ────────────────────────────────────────────────
 try:
     from analyzer.rpm_filter_calc import calculate_rpm_filter
@@ -805,6 +811,7 @@ def sitemap_xml():
     from flask import Response
     pages = [
         ("/flight-quiz",      "weekly",  "0.8"),
+        ("/bf-wizard",        "weekly",  "0.9"),
         ("/landing",          "weekly",  "1.0"),
         ("/blackbox",          "weekly",  "1.0"),
         ("/app",              "weekly",  "0.9"),
