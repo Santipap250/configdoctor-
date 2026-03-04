@@ -222,23 +222,19 @@
 
     <!-- หน้าหลัก -->
     <div class="on-dgroup">หน้าหลัก</div>
-    <a class="on-dlink {% if nav_page=='home' %}on-act{% endif %}" href="/app">
-      <span class="on-ico g">🏠</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">Drone Analyzer</span>
-        <span class="on-dmeta">วิเคราะห์ PID · Filter · Motor</span>
-      </span>
-      <span class="on-pill {% if nav_page=='home' %}act{% endif %}">MAIN</span>
-    </a>
-
-    <div class="on-ddiv"></div>
-    <div class="on-dgroup">🔧 เครื่องมือ</div>
-
     <a class="on-dlink {% if nav_page=='flight_quiz' %}on-act{% endif %}" href="/flight-quiz">
       <span class="on-ico g">🎯</span>
       <span class="on-dbody">
         <span class="on-dtitle">Flight Style Quiz</span>
         <span class="on-dmeta">5 คำถาม → rates + preset แนะนำ</span>
+      </span>
+      <span class="on-pill nw">new</span>
+    </a>
+    <a class="on-dlink {% if nav_page=='bf_wizard' %}on-act{% endif %}" href="/bf-wizard">
+      <span class="on-ico g">⚡</span>
+      <span class="on-dbody">
+        <span class="on-dtitle">BF Config Wizard</span>
+        <span class="on-dmeta">7 ขั้นตอน → CLI พร้อม paste</span>
       </span>
       <span class="on-pill nw">new</span>
     </a>
@@ -420,6 +416,7 @@
       {% elif nav_page == 'downloads' %}DOWNLOADS
       {% elif nav_page == 'about' %}ABOUT
       {% elif nav_page == 'changelog' %}CHANGELOG
+      {% elif nav_page == 'bf_wizard' %}BF CONFIG WIZARD
       {% else %}DRONE ANALYZER
       {% endif %}
     </span>
