@@ -803,7 +803,7 @@ input[type=number]::placeholder { color: var(--muted); font-size: 12px; }
     </a>
   </div>
   <div class="tb-right">
-    <span class="tb-version">v2.2 LIVE</span>
+    <span class="tb-version">v2.3 LIVE</span>
     <button class="toggle-theme" onclick="toggleTheme()" title="สลับธีม">🌗</button>
   </div>
 </div>
@@ -818,7 +818,7 @@ input[type=number]::placeholder { color: var(--muted); font-size: 12px; }
       <div class="drawer-brand-icon">🚁</div>
       <div>
         <div class="drawer-brand-name" id="drawerTitle">OBIX Config Doctor</div>
-        <div class="drawer-brand-sub">FPV Tuning Toolkit · v2.2</div>
+        <div class="drawer-brand-sub">FPV Tuning Toolkit · v2.3</div>
       </div>
     </div>
     <button id="closeDrawer" class="drawer-close" aria-label="ปิดเมนู">✕</button>
@@ -905,6 +905,39 @@ input[type=number]::placeholder { color: var(--muted); font-size: 12px; }
     </a>
 
     <div class="drawer-divider"></div>
+    <div class="drawer-group-label">🚀 Wizard & ฟีเจอร์ใหม่</div>
+
+    <a class="drawer-link" href="/flight-quiz">
+      <span class="dl-icon-wrap green">🎯</span>
+      <span class="dl-body"><span class="dl-title">Flight Style Quiz</span><span class="dl-meta">5 คำถาม → rates + preset แนะนำ</span></span>
+      <span class="dl-pill new">new</span>
+    </a>
+    <a class="drawer-link" href="/bf-wizard">
+      <span class="dl-icon-wrap green">⚡</span>
+      <span class="dl-body"><span class="dl-title">BF Config Wizard</span><span class="dl-meta">7 ขั้นตอน → CLI พร้อม paste</span></span>
+      <span class="dl-pill new">new</span>
+    </a>
+
+    <div class="drawer-divider"></div>
+    <div class="drawer-group-label">🌐 Community</div>
+
+    <a class="drawer-link" href="/build-card">
+      <span class="dl-icon-wrap gold">🃏</span>
+      <span class="dl-body"><span class="dl-title">Build Card Generator</span><span class="dl-meta">สร้างรูปสเปคโดรนแชร์ Social</span></span>
+      <span class="dl-pill new">new</span>
+    </a>
+    <a class="drawer-link" href="/tuning-log">
+      <span class="dl-icon-wrap blue">📊</span>
+      <span class="dl-body"><span class="dl-title">Tuning Log</span><span class="dl-meta">บันทึก session · เปรียบเทียบ PID</span></span>
+      <span class="dl-pill new">new</span>
+    </a>
+    <a class="drawer-link" href="/leaderboard">
+      <span class="dl-icon-wrap gold">🏆</span>
+      <span class="dl-body"><span class="dl-title">Config Leaderboard</span><span class="dl-meta">vote · rank · copy config ชุมชน</span></span>
+      <span class="dl-pill new">new</span>
+    </a>
+
+    <div class="drawer-divider"></div>
     <div class="drawer-group-label">📚 แหล่งข้อมูล</div>
 
     <a class="drawer-link" href="/downloads">
@@ -925,13 +958,13 @@ input[type=number]::placeholder { color: var(--muted); font-size: 12px; }
     <a class="drawer-link" href="{{ url_for('changelog') }}">
       <span class="dl-icon-wrap green">📝</span>
       <span class="dl-body"><span class="dl-title">Changelog</span><span class="dl-meta">บันทึกการอัปเดต</span></span>
-      <span class="dl-pill">v2.2</span>
+      <span class="dl-pill">v2.3</span>
     </a>
   </nav>
 
   <div class="drawer-footer">
     <div class="drawer-footer-text">
-      OBIXConfig Doctor &nbsp;·&nbsp; <span class="drawer-footer-ver">v2.2</span>
+      OBIXConfig Doctor &nbsp;·&nbsp; <span class="drawer-footer-ver">v2.3</span>
       <br>Developed for FPV community 🇹🇭
     </div>
   </div>
@@ -955,7 +988,7 @@ input[type=number]::placeholder { color: var(--muted); font-size: 12px; }
     </h1>
     <p class="hero-sub">กรอกสเปคโดรน รับค่า PID · Filter · Motor ที่เหมาะสมทันที ฟรี 100% — เพื่อนักบิน FPV Thailand🇹🇭</p>
     <div class="hero-chips">
-      <span class="chip g">14 Tools</span>
+      <span class="chip g">19 Tools</span>
       <span class="chip b">Betaflight 4.3–4.5</span>
       <span class="chip a">Blackbox Analyzer</span>
       <span class="chip g">Community Free</span>
@@ -1461,7 +1494,7 @@ Dyn Notch : {{ analysis.filter.dyn_notch }}</pre>
         </a>
       </div>
 
-      <div class="version-note">OBIXCONFIG DOCTOR &nbsp;·&nbsp; v2.2 &nbsp;·&nbsp; FPV COMMUNITY 🇹🇭</div>
+      <div class="version-note">OBIXCONFIG DOCTOR &nbsp;·&nbsp; v2.3 &nbsp;·&nbsp; FPV COMMUNITY 🇹🇭</div>
 
     </div><!-- end results-col -->
   </div><!-- end content-grid -->
