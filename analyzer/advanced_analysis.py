@@ -378,6 +378,8 @@ def make_advanced_report(
         _STYLE_FACTORS = {
             "freestyle": 1.55, "racing": 2.00,
             "longrange": 1.05, "cine": 1.25,
+            "micro":     1.45,  # FIX: add micro style factor (consistent with thrust_logic.py)
+            "whoop":     1.45,
         }
         _usable_wh = battery_wh  # already calculated above with 0.85 factor
         _style_factor = _STYLE_FACTORS.get(str(style).lower(), 1.55)

@@ -35,7 +35,26 @@ _HOVER_W_PER_G_BY_SIZE = {
 }
 
 _NOMINAL_CELL_V  = 3.7    # V/cell nominal (สูตรพลังงาน)
-_DEFAULT_MAH     = 1500   # mAh default ถ้าไม่รู้
+_DEFAULT_MAH     = 1500   # mAh default fallback (ใช้แค่กรณีไม่รู้จริงๆ)
+
+# FIX: size-aware default mAh — ไม่ใช้ 1500 คงที่ทุกขนาด
+_DEFAULT_MAH_BY_SIZE = {
+    2.5: 450, 3.0: 550, 3.5: 850, 4.0: 1000,
+    4.5: 1200, 5.0: 1500, 5.5: 1500, 6.0: 1800,
+    7.0: 2200, 7.5: 2200, 8.0: 3000, 10.0: 3000,
+}
+
+def _default_mah_for_size(size_inch: float) -> int:
+    """Return realistic default mAh based on frame size."""
+    sizes = sorted(_DEFAULT_MAH_BY_SIZE.keys())
+    if size_inch <= sizes[0]:  return _DEFAULT_MAH_BY_SIZE[sizes[0]]
+    if size_inch >= sizes[-1]: return _DEFAULT_MAH_BY_SIZE[sizes[-1]]
+    for i in range(len(sizes)-1):
+        lo, hi = sizes[i], sizes[i+1]
+        if lo <= size_inch <= hi:
+            t = (size_inch - lo) / (hi - lo)
+            return int(_DEFAULT_MAH_BY_SIZE[lo] + t * (_DEFAULT_MAH_BY_SIZE[hi] - _DEFAULT_MAH_BY_SIZE[lo]))
+    return _DEFAULT_MAH
 _USABLE_CAPACITY = 0.85   # 85% usable (land at 3.5V from 4.2V)
 
 # Style-based average power consumption multiplier (relative to hover)
@@ -139,7 +158,7 @@ def estimate_battery_runtime_detail(weight, battery, battery_mAh=None,
     try:
         w     = float(weight)
         cells = _cells_from_str(battery)
-        mAh   = float(battery_mAh) if battery_mAh else _DEFAULT_MAH
+        mAh   = float(battery_mAh) if battery_mAh else _default_mah_for_size(float(size_inch) if size_inch else 5.0)
         size  = float(size_inch) if size_inch else 5.0
 
         voltage      = cells * _NOMINAL_CELL_V

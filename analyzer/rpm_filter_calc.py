@@ -103,14 +103,19 @@ def calculate_rpm_filter(kv: int, battery: str, prop_size: float = 5.0) -> Dict[
         warnings.append(f"⚠️ KV {kv} สูงมากบน {cells}S — ตรวจสอบ ESC motor demag และการ balance ใบพัดก่อน")
 
     # CLI commands
+    # BF4.4/4.5 CLI commands (ตรวจสอบ version ก่อนใช้)
     cli_commands = [
         f"# === RPM Filter Setup (KV={kv}, {cells}S) ===",
+        f"# Dynamic Notch Filter",
         f"set dyn_notch_count = {notch_count}",
         f"set dyn_notch_min_hz = {notch_min}",
         f"set dyn_notch_max_hz = {notch_max}",
+        f"# RPM Filter (ต้องการ BLHeli ESC ที่รองรับ DSHOT telemetry)",
         f"set rpm_filter_harmonics = {notch_count}",
         f"set rpm_filter_min_hz = {notch_min}",
-        "# ตรวจสอบใน Betaflight Configurator → Filters tab → RPM Filter = ON",
+        f"# motor_poles: ตรวจสอบจาก motor spec (ปกติ 14 สำหรับ 2306/2207)",
+        f"set motor_poles = 14",
+        "# ตรวจสอบใน BF Configurator → Filters tab → RPM Filter = ON + DSHOT = enabled",
         "save",
     ]
 
