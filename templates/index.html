@@ -1366,56 +1366,154 @@ input[type=number]::placeholder { color: var(--muted); font-size: 12px; }
           <span class="chip a">Power Analysis</span>
         </div>
       </div>
-
       {% else %}
       <!-- RESULTS -->
       <div class="tele-grid">
 
-        <!-- ── 1. Quick Summary ── -->
+        <!-- ══ 1. Mission Summary ══ -->
         <div class="tpanel">
           <div class="tpanel-head">
             <div class="tpanel-head-icon" style="background:var(--g-dim);border-color:rgba(0,255,136,0.2);">🧾</div>
             <div>
               <div class="tpanel-title">Mission Summary</div>
-              <div class="tpanel-sub">ผลการวิเคราะห์ภาพรวม</div>
+              <div class="tpanel-sub">{{ analysis.detected_class | default('—') }} · {{ analysis.style | capitalize }}</div>
             </div>
           </div>
           <div class="tpanel-body">
             <div class="qs-stats">
               <div class="qs-stat">
-                <span class="qs-stat-val counter">{{ analysis.style | capitalize }}</span>
-                <span class="qs-stat-lbl">Style</span>
+                <span class="qs-stat-val blue">{{ analysis.detected_class | default('—') }}</span>
+                <span class="qs-stat-lbl">Class</span>
               </div>
               <div class="qs-stat">
-                <span class="qs-stat-val blue">{{ analysis.weight_class }}</span>
-                <span class="qs-stat-lbl">Weight Class</span>
-              </div>
-              <div class="qs-stat">
-                <span class="qs-stat-val {% if analysis.thrust_ratio and analysis.thrust_ratio < 1.2 %}red{% elif analysis.thrust_ratio and analysis.thrust_ratio > 3 %}amber{% else %}{% endif %}">
-                  {% if analysis.thrust_ratio %}{{ analysis.thrust_ratio }}{% else %}—{% endif %}
+                <span class="qs-stat-val
+                  {% if analysis.advanced and analysis.advanced.thrust_ratio %}
+                    {% set twr_v = analysis.advanced.thrust_ratio %}
+                    {% if twr_v < 1.2 %}red{% elif twr_v > 3.5 %}amber{% else %}green{% endif %}
+                  {% endif %}">
+                  {% if analysis.advanced and analysis.advanced.thrust_ratio %}{{ analysis.advanced.thrust_ratio }}:1{% else %}—{% endif %}
                 </span>
                 <span class="qs-stat-lbl">TWR</span>
               </div>
               <div class="qs-stat">
                 <span class="qs-stat-val amber">
-                  {% if analysis.est_flight_time_min %}{{ analysis.est_flight_time_min }}m
-                  {% elif analysis.battery_est %}{{ analysis.battery_est }}m
+                  {% if analysis.est_flight_time_min %}{{ analysis.est_flight_time_min }} min
+                  {% elif analysis.battery_est %}{{ analysis.battery_est }} min
                   {% else %}—{% endif %}
                 </span>
-                <span class="qs-stat-lbl">Flight Time</span>
+                <span class="qs-stat-lbl">Hover Flight</span>
+              </div>
+              <div class="qs-stat">
+                <span class="qs-stat-val
+                  {% if analysis.advanced and analysis.advanced.avg_power_w %}
+                    {% if analysis.advanced.avg_power_w > 300 %}red
+                    {% elif analysis.advanced.avg_power_w > 150 %}amber
+                    {% else %}{% endif %}
+                  {% endif %}">
+                  {% if analysis.advanced and analysis.advanced.avg_power_w %}{{ analysis.advanced.avg_power_w | int }}W{% else %}—{% endif %}
+                </span>
+                <span class="qs-stat-lbl">Hover Power</span>
               </div>
             </div>
-            <div class="qs-summary-box">💡 {{ analysis.summary }}</div>
-            <div style="margin-top:8px;font-size:.78rem;color:var(--muted);">⚠️ ค่านี้คือจุดเริ่มต้น — ควรทดสอบบินจริงก่อนปรับ</div>
+
+            <!-- Overview bar -->
+            {% if analysis.advanced %}
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0;">
+              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 10px;text-align:center;">
+                <div style="font-family:var(--font-m);font-size:15px;font-weight:700;color:var(--blue);">{{ analysis.advanced.cells }}S · {{ analysis.advanced.pack_voltage_nominal }}V</div>
+                <div style="font-family:var(--font-d);font-size:8px;color:var(--muted);letter-spacing:.08em;margin-top:2px;">BATTERY PACK</div>
+              </div>
+              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 10px;text-align:center;">
+                <div style="font-family:var(--font-m);font-size:15px;font-weight:700;color:var(--green);">{{ analysis.advanced.battery_mAh_used }}mAh</div>
+                <div style="font-family:var(--font-d);font-size:8px;color:var(--muted);letter-spacing:.08em;margin-top:2px;">CAPACITY</div>
+              </div>
+              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 10px;text-align:center;">
+                <div style="font-family:var(--font-m);font-size:15px;font-weight:700;color:var(--amber);">{{ analysis.advanced.battery_wh }}Wh</div>
+                <div style="font-family:var(--font-d);font-size:8px;color:var(--muted);letter-spacing:.08em;margin-top:2px;">ENERGY</div>
+              </div>
+            </div>
+            {% endif %}
+
+            <div class="qs-summary-box" style="margin-top:4px;">
+              💡 {{ analysis.summary }}
+              {% if analysis.class_meta and analysis.class_meta.description %}
+              <br><span style="font-size:.8rem;color:var(--muted);margin-top:3px;display:block;">{{ analysis.class_meta.description }}</span>
+              {% endif %}
+            </div>
+            {% if analysis.baseline_notes %}
+            <div style="margin-top:8px;font-size:.78rem;color:var(--muted);font-style:italic;">📝 {{ analysis.baseline_notes }}</div>
+            {% endif %}
+            <div style="margin-top:6px;font-size:.75rem;color:var(--muted);">⚠️ ค่านี้คือจุดเริ่มต้น — ทดสอบบินจริงก่อนปรับ</div>
           </div>
         </div>
 
-        <!-- ── 2. Warnings ── -->
+        <!-- ══ 2. Prop Analysis ══ -->
+        {% if analysis.prop_result %}
+        <div class="tpanel" style="border-left:3px solid var(--blue);">
+          <div class="tpanel-head">
+            <div class="tpanel-head-icon" style="background:var(--b-dim);border-color:rgba(0,170,255,0.2);">🔩</div>
+            <div>
+              <div class="tpanel-title">Prop Analysis</div>
+              <div class="tpanel-sub">{{ analysis.prop_result.summary | default('—') }}</div>
+            </div>
+          </div>
+          <div class="tpanel-body">
+            {% set eff = analysis.prop_result.effect %}
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">
+              <div class="metric-card">
+                <span class="metric-val {% if eff.motor_load >= 5 %}red{% elif eff.motor_load >= 4 %}amber{% else %}green{% endif %}">{{ eff.motor_load }}/6</span>
+                <span class="metric-lbl">Motor Load</span>
+                <span class="metric-sub">{% if eff.motor_load >= 5 %}หนักมาก{% elif eff.motor_load >= 4 %}หนัก{% else %}ปกติ{% endif %}</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-val {% if eff.noise >= 5 %}amber{% else %}{% endif %}">{{ eff.noise }}/6</span>
+                <span class="metric-lbl">Noise/Vibe</span>
+                <span class="metric-sub">{% if eff.noise >= 5 %}สูง{% elif eff.noise >= 3 %}กลาง{% else %}ต่ำ{% endif %}</span>
+              </div>
+              <div class="metric-card">
+                <span class="metric-val blue">{% if eff.pitch_speed_kmh %}{{ eff.pitch_speed_kmh }} km/h{% else %}—{% endif %}</span>
+                <span class="metric-lbl">Pitch Speed</span>
+                <span class="metric-sub">theoretical</span>
+              </div>
+              {% if eff.est_g_per_w %}
+              <div class="metric-card">
+                <span class="metric-val green">{{ eff.est_g_per_w }}g/W</span>
+                <span class="metric-lbl">Efficiency</span>
+                <span class="metric-sub">hover hover</span>
+              </div>
+              {% endif %}
+              {% if eff.est_thrust_100w %}
+              <div class="metric-card">
+                <span class="metric-val">{{ eff.est_thrust_100w | int }}g</span>
+                <span class="metric-lbl">Thrust @100W</span>
+                <span class="metric-sub">per motor</span>
+              </div>
+              {% endif %}
+              {% if eff.disk_loading %}
+              <div class="metric-card">
+                <span class="metric-val amber">{{ eff.disk_loading }}</span>
+                <span class="metric-lbl">Disk Load</span>
+                <span class="metric-sub">g/cm²</span>
+              </div>
+              {% endif %}
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <div style="padding:5px 12px;border-radius:100px;font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.08em;background:var(--g-dim);border:1px solid rgba(0,255,136,0.25);color:var(--green);">{{ eff.grip | default('—') }}</div>
+              <div style="padding:5px 12px;border-radius:100px;font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.08em;background:var(--b-dim);border:1px solid rgba(0,170,255,0.25);color:var(--blue);">{{ eff.efficiency | default('—') }}</div>
+              {% if analysis.prop_result.recommendation %}
+              <div style="font-size:.82rem;color:var(--muted2);padding:5px 0;">💡 {{ analysis.prop_result.recommendation }}</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- ══ 3. Warnings ══ -->
         {% if analysis.warnings %}
         <div class="tpanel" style="border-left:3px solid var(--red);">
           <div class="tpanel-head">
             <div class="tpanel-head-icon" style="background:var(--r-dim);border-color:rgba(255,68,85,0.2);">🚨</div>
-            <div><div class="tpanel-title">System Warnings</div><div class="tpanel-sub">{{ analysis.warnings|length }} รายการ</div></div>
+            <div><div class="tpanel-title">Input Warnings</div><div class="tpanel-sub">{{ analysis.warnings|length }} รายการ</div></div>
           </div>
           <div class="tpanel-body">
             <div class="alert-list">
@@ -1430,21 +1528,21 @@ input[type=number]::placeholder { color: var(--muted); font-size: 12px; }
         </div>
         {% endif %}
 
-        <!-- ── 3. Smart Checks ── -->
+        <!-- ══ 4. Smart Rule Checks ══ -->
         {% if analysis.rules %}
         <div class="tpanel" style="border-left:3px solid var(--amber);">
           <div class="tpanel-head">
             <div class="tpanel-head-icon" style="background:var(--a-dim);border-color:rgba(255,183,0,0.2);">🛠️</div>
-            <div><div class="tpanel-title">Smart Checks</div><div class="tpanel-sub">{{ analysis.rules|length }} checks</div></div>
+            <div><div class="tpanel-title">Smart Checks</div><div class="tpanel-sub">{{ analysis.rules|length }} ผลการตรวจ</div></div>
           </div>
           <div class="tpanel-body">
             <div class="alert-list">
               {% for r in analysis.rules %}
               <div class="alert-item {{ r.level }}">
-                <span class="alert-ico">{% if r.level=='danger' %}❌{% elif r.level=='warning' %}⚠️{% else %}ℹ️{% endif %}</span>
+                <span class="alert-ico">{% if r.level=='danger' %}❌{% elif r.level=='warning' %}⚠️{% else %}✅{% endif %}</span>
                 <div>
                   <strong>{{ r.msg }}</strong>
-                  {% if r.suggestion %}<div style="font-size:.8rem;color:var(--muted2);margin-top:2px;">{{ r.suggestion }}</div>{% endif %}
+                  {% if r.suggestion %}<div style="font-size:.8rem;color:var(--muted2);margin-top:3px;">→ {{ r.suggestion }}</div>{% endif %}
                 </div>
               </div>
               {% endfor %}
@@ -1453,16 +1551,19 @@ input[type=number]::placeholder { color: var(--muted); font-size: 12px; }
         </div>
         {% endif %}
 
-        <!-- ── 4. PID & Filter ── -->
+        <!-- ══ 5. PID Baseline (Class-based) ══ -->
         {% if analysis.detected_class %}
         <div class="tpanel" style="border-left:3px solid var(--blue);">
           <div class="tpanel-head">
             <div class="tpanel-head-icon" style="background:var(--b-dim);border-color:rgba(0,170,255,0.2);">🔎</div>
             <div>
               <div class="tpanel-title">
-                OBIX วิเคราะห์ — <span class="class-badge">{{ analysis.detected_class }}</span>
+                Class Baseline — <span class="class-badge">{{ analysis.detected_class }}</span>
               </div>
-              <div class="tpanel-sub">{% if analysis.class_meta.description %}{{ analysis.class_meta.description }}{% endif %}</div>
+              <div class="tpanel-sub">
+                {% if analysis.class_meta and analysis.class_meta.description %}{{ analysis.class_meta.description }}{% endif %}
+                · BF4.4/4.5 verified
+              </div>
             </div>
           </div>
           <div class="tpanel-body">
@@ -1472,69 +1573,175 @@ input[type=number]::placeholder { color: var(--muted); font-size: 12px; }
                   <span class="pf-box-title">🎯 PID Baseline</span>
                   <button class="pf-copy-btn" onclick="copyEl('pid-bl')">Copy</button>
                 </div>
-                <pre class="pf-code" id="pid-bl">ROLL   P {{ analysis.pid_baseline.roll.p }}  I {{ analysis.pid_baseline.roll.i }}  D {{ analysis.pid_baseline.roll.d }}
-PITCH  P {{ analysis.pid_baseline.pitch.p }} I {{ analysis.pid_baseline.pitch.i }} D {{ analysis.pid_baseline.pitch.d }}
-YAW    P {{ analysis.pid_baseline.yaw.p }}  I {{ analysis.pid_baseline.yaw.i }}</pre>
+                <pre class="pf-code" id="pid-bl"
+>ROLL   P={{ analysis.pid_baseline.roll.p }}  I={{ analysis.pid_baseline.roll.i }}  D={{ analysis.pid_baseline.roll.d }}
+PITCH  P={{ analysis.pid_baseline.pitch.p }} I={{ analysis.pid_baseline.pitch.i }} D={{ analysis.pid_baseline.pitch.d }}
+YAW    P={{ analysis.pid_baseline.yaw.p }}  I={{ analysis.pid_baseline.yaw.i }}</pre>
               </div>
               <div class="pf-box">
                 <div class="pf-box-head">
                   <span class="pf-box-title">🔊 Filter Baseline</span>
                   <button class="pf-copy-btn" onclick="copyEl('flt-bl')">Copy</button>
                 </div>
-                <pre class="pf-code" id="flt-bl">Gyro LPF1 : {{ analysis.filter_baseline.gyro_lpf1 or '—' }} Hz
-Gyro LPF2 : {{ analysis.filter_baseline.gyro_lpf2 or 'ปิด' }}
-D-Term LPF: {{ analysis.filter_baseline.dterm_lpf1 or '—' }} Hz
-Dyn Notch : {{ analysis.filter_baseline.dyn_notch or '—' }} ตัว</pre>
+                <pre class="pf-code" id="flt-bl"
+>Gyro LPF1 : {{ analysis.filter_baseline.gyro_lpf1 or '—' }} Hz
+Gyro LPF2 : {{ analysis.filter_baseline.gyro_lpf2 or 'OFF' }}
+DTerm LPF1: {{ analysis.filter_baseline.dterm_lpf1 or '—' }} Hz
+Dyn Notch : {{ analysis.filter_baseline.dyn_notch or '—' }} ตัว
+RPM Filter: {{ 'ON' if analysis.filter_baseline.rpm_filter else 'OFF' }}
+Anti-Grav : {{ analysis.filter_baseline.anti_gravity or '—' }}</pre>
               </div>
             </div>
           </div>
         </div>
         {% endif %}
 
-        <!-- ── 5. Style-based PID/Filter ── -->
+        <!-- ══ 6. Style-Based PID + Filter (FULL CLI) ══ -->
         <div class="tpanel">
           <div class="tpanel-head">
-            <div class="tpanel-head-icon" style="background:var(--g-dim);border-color:rgba(0,255,136,0.2);">🔍</div>
-            <div><div class="tpanel-title">Style-Based Analysis</div><div class="tpanel-sub">ผลตาม flying style</div></div>
+            <div class="tpanel-head-icon" style="background:var(--g-dim);border-color:rgba(0,255,136,0.2);">⚙️</div>
+            <div>
+              <div class="tpanel-title">{{ analysis.style | capitalize }} Tuning — Full CLI</div>
+              <div class="tpanel-sub">Class × Style · คัดลอกไป paste ใน Betaflight CLI</div>
+            </div>
           </div>
           <div class="tpanel-body">
-            <div class="pf-grid">
-              <div class="pf-box">
-                <div class="pf-box-head">
-                  <span class="pf-box-title">⚙️ PID แนะนำ</span>
-                  <button class="pf-copy-btn" onclick="copyEl('pid-main')">Copy</button>
+            <div class="tab-row">
+              <button class="tab-btn active" onclick="switchTab(this,'t-pid')">🎯 PID</button>
+              <button class="tab-btn" onclick="switchTab(this,'t-filter')">🔊 Filter</button>
+              <button class="tab-btn" onclick="switchTab(this,'t-fullcli')">📋 Full CLI</button>
+            </div>
+
+            <!-- PID tab -->
+            <div id="t-pid" class="tab-pane active">
+              <div class="pf-grid">
+                <div class="pf-box">
+                  <div class="pf-box-head">
+                    <span class="pf-box-title">⚙️ PID แนะนำ</span>
+                    <button class="pf-copy-btn" onclick="copyEl('pid-main')">Copy</button>
+                  </div>
+                  <pre class="pf-code" id="pid-main"
+>ROLL   P={{ analysis.pid.roll.p }}  I={{ analysis.pid.roll.i }}  D={{ analysis.pid.roll.d }}
+PITCH  P={{ analysis.pid.pitch.p }} I={{ analysis.pid.pitch.i }} D={{ analysis.pid.pitch.d }}
+YAW    P={{ analysis.pid.yaw.p }}  I={{ analysis.pid.yaw.i }}</pre>
                 </div>
-                <pre class="pf-code" id="pid-main">ROLL   P {{ analysis.pid.roll.p }}  I {{ analysis.pid.roll.i }}  D {{ analysis.pid.roll.d }}
-PITCH  P {{ analysis.pid.pitch.p }} I {{ analysis.pid.pitch.i }} D {{ analysis.pid.pitch.d }}
-YAW    P {{ analysis.pid.yaw.p }}  I {{ analysis.pid.yaw.i }}</pre>
+                <div class="pf-box">
+                  <div class="pf-box-head">
+                    <span class="pf-box-title">📟 BF CLI set</span>
+                    <button class="pf-copy-btn" onclick="copyEl('pid-cli')">Copy</button>
+                  </div>
+                  <pre class="pf-code" id="pid-cli" style="font-size:10.5px;"
+>set p_roll  = {{ analysis.pid.roll.p }}
+set i_roll  = {{ analysis.pid.roll.i }}
+set d_roll  = {{ analysis.pid.roll.d }}
+set p_pitch = {{ analysis.pid.pitch.p }}
+set i_pitch = {{ analysis.pid.pitch.i }}
+set d_pitch = {{ analysis.pid.pitch.d }}
+set p_yaw   = {{ analysis.pid.yaw.p }}
+set i_yaw   = {{ analysis.pid.yaw.i }}</pre>
+                </div>
               </div>
+              <div style="margin-top:10px;padding:9px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:7px;font-size:.82rem;color:var(--muted2);">
+                💡 {{ analysis.extra_tips[0] if analysis.extra_tips else '' }}<br>
+                <span style="color:var(--muted);font-size:.78rem;">Pitch P สูงกว่า Roll ~5-8% เสมอ (เพราะ CoG อยู่ด้านหน้า) · BF4.4/4.5: I ควรอยู่ที่ 80-100</span>
+              </div>
+            </div>
+
+            <!-- Filter tab -->
+            <div id="t-filter" class="tab-pane">
+              <div class="pf-grid">
+                <div class="pf-box">
+                  <div class="pf-box-head">
+                    <span class="pf-box-title">🧠 Filter Summary</span>
+                    <button class="pf-copy-btn" onclick="copyEl('flt-main')">Copy</button>
+                  </div>
+                  <pre class="pf-code" id="flt-main"
+>Gyro LPF1 : {{ analysis.filter.gyro_lpf1 or '—' }} Hz
+Gyro LPF2 : {{ analysis.filter.gyro_lpf2 or 'OFF' }}
+DTerm LPF1: {{ analysis.filter.dterm_lpf1 or '—' }} Hz
+DTerm LPF2: {{ analysis.filter.dterm_lpf2 or 'OFF' }}
+Dyn Notch : {{ analysis.filter.dyn_notch or '—' }} ตัว
+RPM Filter: {{ 'ON (แนะนำ)' if analysis.filter.rpm_filter else 'OFF' }}
+Anti-Grav : {{ analysis.filter.anti_gravity or '—' }}</pre>
+                </div>
+                <div class="pf-box">
+                  <div class="pf-box-head">
+                    <span class="pf-box-title">📟 BF CLI set</span>
+                    <button class="pf-copy-btn" onclick="copyEl('flt-cli')">Copy</button>
+                  </div>
+                  <pre class="pf-code" id="flt-cli" style="font-size:10.5px;"
+>set gyro_lpf1_hz         = {{ analysis.filter.gyro_lpf1 or 0 }}
+set gyro_lpf2_hz         = {{ analysis.filter.gyro_lpf2 or 0 }}
+set dterm_lpf1_hz        = {{ analysis.filter.dterm_lpf1 or 0 }}
+set dterm_lpf2_hz        = {{ analysis.filter.dterm_lpf2 or 0 }}
+set dyn_notch_count      = {{ analysis.filter.dyn_notch or 1 }}
+set motor_pwm_protocol   = DSHOT300
+set dshot_bidir          = {{ 'ON' if analysis.filter.rpm_filter else 'OFF' }}
+set anti_gravity_gain    = {{ analysis.filter.anti_gravity or 3 }}</pre>
+                </div>
+              </div>
+              <div style="margin-top:10px;padding:9px 12px;background:var(--bg2);border:1px solid rgba(0,170,255,.12);border-radius:7px;border-left:2px solid var(--blue);font-size:.82rem;color:var(--muted2);">
+                🔊 <strong style="color:var(--text);">แนะนำ RPM Filter:</strong> ต้องใช้ BLHeli_32 / AM32 + DSHOT Bidir — ลด motor noise ได้มาก ช่วย D term ไม่สั่น
+                {% if analysis.filter.dyn_notch and analysis.filter.gyro_lpf1 %}
+                <br>📐 Dyn Notch {{ analysis.filter.dyn_notch }} ตัว + Gyro LPF1 {{ analysis.filter.gyro_lpf1 }}Hz เหมาะกับ {{ analysis.detected_class | default('') }} build
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Full CLI tab -->
+            <div id="t-fullcli" class="tab-pane">
               <div class="pf-box">
                 <div class="pf-box-head">
-                  <span class="pf-box-title">🧠 Filter แนะนำ</span>
-                  <button class="pf-copy-btn" onclick="copyEl('flt-main')">Copy</button>
+                  <span class="pf-box-title">📋 Full CLI — Paste ใน Betaflight</span>
+                  <button class="pf-copy-btn" onclick="copyEl('fullcli-box')">Copy All</button>
                 </div>
-                <pre class="pf-code" id="flt-main">Gyro LPF1 : {{ analysis.filter.gyro_lpf1 or '—' }} Hz
-Gyro LPF2 : {{ analysis.filter.gyro_lpf2 or 'ปิด' }}
-D-Term LPF: {{ analysis.filter.dterm_lpf1 or '—' }} Hz
-Dyn Notch : {{ analysis.filter.dyn_notch or '—' }} ตัว
-Anti-Grav : {{ analysis.filter.anti_gravity or '—' }}</pre>
+                <pre class="pf-code" id="fullcli-box" style="font-size:10px;line-height:1.7;"
+># OBIXConfig Doctor — {{ analysis.detected_class }} · {{ analysis.style | capitalize }}
+# Generated for {{ analysis.overview | default('') }}
+# ─────────────────────────────────────────────
+# PID
+set p_roll  = {{ analysis.pid.roll.p }}
+set i_roll  = {{ analysis.pid.roll.i }}
+set d_roll  = {{ analysis.pid.roll.d }}
+set p_pitch = {{ analysis.pid.pitch.p }}
+set i_pitch = {{ analysis.pid.pitch.i }}
+set d_pitch = {{ analysis.pid.pitch.d }}
+set p_yaw   = {{ analysis.pid.yaw.p }}
+set i_yaw   = {{ analysis.pid.yaw.i }}
+set d_yaw   = 0
+# Filter
+set gyro_lpf1_hz         = {{ analysis.filter.gyro_lpf1 or 0 }}
+set gyro_lpf2_hz         = {{ analysis.filter.gyro_lpf2 or 0 }}
+set dterm_lpf1_hz        = {{ analysis.filter.dterm_lpf1 or 0 }}
+set dterm_lpf2_hz        = {{ analysis.filter.dterm_lpf2 or 0 }}
+set dyn_notch_count      = {{ analysis.filter.dyn_notch or 1 }}
+set motor_pwm_protocol   = DSHOT300
+set dshot_bidir          = {{ 'ON' if analysis.filter.rpm_filter else 'OFF' }}
+set anti_gravity_gain    = {{ analysis.filter.anti_gravity or 3 }}
+# Style
+set iterm_relax          = {% if analysis.style == 'longrange' %}OFF{% else %}RP{% endif %}
+set iterm_relax_type     = {% if analysis.style == 'racing' %}GYRO{% else %}SETPOINT{% endif %}
+set feedforward_averaging= 2_POINT
+set tpa_rate             = {% if analysis.style == 'racing' %}20{% else %}10{% endif %}
+set tpa_breakpoint       = 1650
+save</pre>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- ── 6. Advanced Analysis ── -->
+        <!-- ══ 7. Advanced Telemetry ══ -->
         {% if analysis.advanced %}
         <div class="tpanel" style="border-left:3px solid var(--green);">
           <div class="tpanel-head">
             <div class="tpanel-head-icon" style="background:var(--g-dim);border-color:rgba(0,255,136,0.2);">🔬</div>
-            <div><div class="tpanel-title">Advanced Telemetry</div><div class="tpanel-sub">Power · Health · KV</div></div>
+            <div><div class="tpanel-title">Advanced Telemetry</div><div class="tpanel-sub">Power · Current · Battery · Health</div></div>
           </div>
           <div class="tpanel-body">
             <div class="tab-row">
               <button class="tab-btn active" onclick="switchTab(this,'t-power')">⚡ Power</button>
               <button class="tab-btn" onclick="switchTab(this,'t-health')">🩺 Health</button>
-              <button class="tab-btn" onclick="switchTab(this,'t-kv')">🔧 KV/Prop</button>
+              <button class="tab-btn" onclick="switchTab(this,'t-kv')">🔧 Motor/KV</button>
             </div>
 
             <div id="t-power" class="tab-pane active">
@@ -1542,72 +1749,145 @@ Anti-Grav : {{ analysis.filter.anti_gravity or '—' }}</pre>
                 <div class="metric-card">
                   <span class="metric-val blue">{{ analysis.advanced.cells }}S</span>
                   <span class="metric-lbl">Pack</span>
-                  <span class="metric-sub">{{ analysis.advanced.pack_voltage_nominal }}V · {{ analysis.advanced.battery_mAh_used }}mAh</span>
+                  <span class="metric-sub">{{ analysis.advanced.pack_voltage_nominal }}V nominal</span>
                 </div>
                 <div class="metric-card">
-                  <span class="metric-val">{{ analysis.advanced.est_flight_time_min }} min</span>
+                  <span class="metric-val">
+                    {% if analysis.est_flight_time_min %}{{ analysis.est_flight_time_min }}{% else %}—{% endif %} min
+                  </span>
                   <span class="metric-lbl">Flight Time</span>
-                  <span class="metric-sub">Aggr: {{ analysis.advanced.est_flight_time_min_aggr }} min</span>
+                  <span class="metric-sub">Aggressive: {{ analysis.advanced.est_flight_time_min_aggr | default('—') }} min</span>
                 </div>
                 <div class="metric-card">
-                  <span class="metric-val amber">{{ analysis.advanced.avg_power_w }} W</span>
-                  <span class="metric-lbl">Avg Power</span>
-                  <span class="metric-sub">{{ analysis.advanced.current_draw_a }}A · Peak {{ analysis.advanced.peak_current_a }}A</span>
+                  <span class="metric-val amber">{{ analysis.advanced.avg_power_w | int }}W</span>
+                  <span class="metric-lbl">Hover Power</span>
+                  <span class="metric-sub">per pack total</span>
+                </div>
+                <div class="metric-card">
+                  <span class="metric-val">{{ analysis.advanced.current_draw_a }}A</span>
+                  <span class="metric-lbl">Hover Current</span>
+                  <span class="metric-sub">Peak ≈ {{ analysis.advanced.peak_current_a }}A</span>
                 </div>
                 <div class="metric-card">
                   <span class="metric-val {% if analysis.advanced.c_required and analysis.advanced.c_required > 60 %}red{% elif analysis.advanced.c_required and analysis.advanced.c_required > 40 %}amber{% else %}{% endif %}">
                     {% if analysis.advanced.c_required %}{{ analysis.advanced.c_required }}C{% else %}—{% endif %}
                   </span>
-                  <span class="metric-lbl">Required C</span>
-                  <span class="metric-sub">{{ analysis.advanced.battery_wh }} Wh pack</span>
+                  <span class="metric-lbl">C-Required</span>
+                  <span class="metric-sub">{{ analysis.advanced.battery_mAh_used }}mAh pack</span>
+                </div>
+                <div class="metric-card">
+                  <span class="metric-val green">{{ analysis.advanced.battery_wh }}Wh</span>
+                  <span class="metric-lbl">Pack Energy</span>
+                  <span class="metric-sub">usable ~85%</span>
                 </div>
               </div>
+              <!-- Power quality bar -->
+              {% if analysis.advanced.est_flight_time_min %}
+              <div style="margin-top:12px;">
+                <div style="display:flex;justify-content:space-between;font-family:var(--font-d);font-size:8px;letter-spacing:.08em;color:var(--muted);margin-bottom:5px;">
+                  <span>Flight Time Quality</span>
+                  <span style="color:
+                    {% if analysis.advanced.est_flight_time_min >= 8 %}var(--green)
+                    {% elif analysis.advanced.est_flight_time_min >= 5 %}var(--amber)
+                    {% else %}var(--red){% endif %}">
+                    {% if analysis.advanced.est_flight_time_min >= 8 %}✅ ดี
+                    {% elif analysis.advanced.est_flight_time_min >= 5 %}⚡ ปานกลาง
+                    {% else %}⚠️ สั้น{% endif %}
+                  </span>
+                </div>
+                <div style="height:6px;background:var(--muted);border-radius:3px;overflow:hidden;">
+                  <div style="height:100%;border-radius:3px;width:{{ [100, analysis.advanced.est_flight_time_min * 6] | min }}%;
+                    background:{% if analysis.advanced.est_flight_time_min >= 8 %}var(--green){% elif analysis.advanced.est_flight_time_min >= 5 %}var(--amber){% else %}var(--red){% endif %};
+                    transition:width .5s;"></div>
+                </div>
+              </div>
+              {% endif %}
             </div>
 
             <div id="t-health" class="tab-pane">
               <div class="metric-grid">
                 <div class="metric-card">
-                  <span class="metric-val {% if analysis.advanced.thrust_ratio and analysis.advanced.thrust_ratio < 1.2 %}red{% elif analysis.advanced.thrust_ratio and analysis.advanced.thrust_ratio > 3 %}amber{% else %}{% endif %}">
-                    {% if analysis.advanced.thrust_ratio %}{{ analysis.advanced.thrust_ratio }}{% else %}—{% endif %}
+                  <span class="metric-val {% if analysis.advanced.thrust_ratio and analysis.advanced.thrust_ratio < 1.2 %}red{% elif analysis.advanced.thrust_ratio and analysis.advanced.thrust_ratio > 3.5 %}amber{% else %}green{% endif %}">
+                    {% if analysis.advanced.thrust_ratio %}{{ analysis.advanced.thrust_ratio }}:1{% else %}—{% endif %}
                   </span>
                   <span class="metric-lbl">TWR</span>
                   <span class="metric-sub">{{ analysis.advanced.efficiency_class | default('') }}</span>
                 </div>
                 <div class="metric-card">
-                  <span class="metric-val blue">{{ analysis.advanced.motor_health | default('—') }}</span>
+                  <span class="metric-val {% if '⚠️' in (analysis.advanced.motor_health or '') %}amber{% elif '✅' in (analysis.advanced.motor_health or '') %}green{% endif %}">
+                    {{ analysis.advanced.motor_health | default('—') }}</span>
                   <span class="metric-lbl">Motor Health</span>
                 </div>
                 <div class="metric-card">
-                  <span class="metric-val">{{ analysis.advanced.battery_health | default('—') }}</span>
+                  <span class="metric-val {% if '⚠️' in (analysis.advanced.battery_health or '') %}amber{% elif '✅' in (analysis.advanced.battery_health or '') %}green{% endif %}">
+                    {{ analysis.advanced.battery_health | default('—') }}</span>
                   <span class="metric-lbl">Battery Health</span>
                 </div>
               </div>
+
+              <!-- TWR gauge bar -->
+              {% if analysis.advanced.thrust_ratio %}
+              {% set twr_pct = [(analysis.advanced.thrust_ratio / 4.0 * 100) | int, 100] | min %}
+              <div style="margin-top:12px;">
+                <div style="display:flex;justify-content:space-between;font-family:var(--font-d);font-size:8px;letter-spacing:.08em;color:var(--muted);margin-bottom:5px;">
+                  <span>Thrust-to-Weight Ratio</span><span>{{ analysis.advanced.thrust_ratio }}:1 / 4:1 max shown</span>
+                </div>
+                <div style="height:8px;background:var(--muted);border-radius:4px;overflow:hidden;position:relative;">
+                  <div style="position:absolute;top:0;bottom:0;left:45%;width:1px;background:rgba(255,255,255,.15);"></div>
+                  <div style="position:absolute;top:0;bottom:0;left:62.5%;width:1px;background:rgba(255,255,255,.15);"></div>
+                  <div style="height:100%;border-radius:4px;width:{{ twr_pct }}%;
+                    background:{% if analysis.advanced.thrust_ratio < 1.2 %}var(--red){% elif analysis.advanced.thrust_ratio > 3.0 %}var(--amber){% else %}var(--green){% endif %};"></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-family:var(--font-m);font-size:8px;color:var(--muted);margin-top:3px;">
+                  <span>1.0</span><span style="color:var(--muted2);">1.8 Freestyle</span><span style="color:var(--muted2);">2.5 Racing</span><span>4.0+</span>
+                </div>
+              </div>
+              {% endif %}
+
               {% if analysis.advanced.recommendations %}
               <div style="margin-top:12px;">
                 <div style="font-family:var(--font-d);font-size:9px;color:var(--green);letter-spacing:.12em;margin-bottom:6px;">RECOMMENDATIONS</div>
                 {% for r in analysis.advanced.recommendations %}
-                <div style="font-size:.83rem;color:var(--muted2);padding:4px 0;border-bottom:1px solid var(--border);">💡 {{ r }}</div>
+                <div style="font-size:.83rem;color:var(--muted2);padding:5px 0;border-bottom:1px solid var(--border);">💡 {{ r }}</div>
                 {% endfor %}
               </div>
               {% endif %}
             </div>
 
             <div id="t-kv" class="tab-pane">
-              <div style="padding:8px 0;">
+              <div style="padding:10px 0;">
                 <div style="font-family:var(--font-d);font-size:9px;color:var(--muted);letter-spacing:.12em;margin-bottom:6px;">KV SUGGESTION</div>
-                <div style="font-family:var(--font-m);font-size:16px;font-weight:700;color:var(--blue);">{{ analysis.advanced.kv_suggestion | default('—') }}</div>
+                <div style="font-family:var(--font-m);font-size:20px;font-weight:700;color:var(--blue);">{{ analysis.advanced.kv_suggestion | default('—') }}</div>
               </div>
+
+              <!-- KV guide table -->
+              <div style="margin-top:10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+                <div style="padding:8px 10px;border-bottom:1px solid var(--border);font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--muted);">KV REFERENCE TABLE</div>
+                {% for row in [
+                  ('3S','2300–2800','4–5\"','Micro / Budget'),
+                  ('4S','1800–2500','5–6\"','Freestyle'),
+                  ('6S','1300–2000','5–6\"','Performance'),
+                  ('6S','900–1500','7–10\"','Long Range'),
+                  ('7S–8S','900–1500','6–8\"','High Voltage')
+                ] %}
+                <div style="display:grid;grid-template-columns:50px 90px 60px 1fr;gap:6px;padding:6px 10px;border-bottom:1px solid rgba(0,200,255,.04);font-family:var(--font-m);font-size:10.5px;">
+                  <span style="color:var(--amber);">{{ row[0] }}</span>
+                  <span style="color:var(--blue);">{{ row[1] }} KV</span>
+                  <span style="color:var(--green);">{{ row[2] }}</span>
+                  <span style="color:var(--muted2);">{{ row[3] }}</span>
+                </div>
+                {% endfor %}
+              </div>
+
               {% if analysis.advanced.prop_notes %}
               <div style="margin-top:10px;">
                 <div style="font-family:var(--font-d);font-size:9px;color:var(--muted);letter-spacing:.12em;margin-bottom:6px;">PROP NOTES</div>
                 {% for n in analysis.advanced.prop_notes %}
                 <div style="font-size:.83rem;color:var(--muted2);padding:3px 0;">• {{ n }}</div>
-                {% else %}
-                <div class="muted small">ไม่มีหมายเหตุเพิ่มเติม</div>
                 {% endfor %}
               </div>
               {% endif %}
-              <div style="margin-top:12px;display:flex;gap:8px;">
+              <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
                 <button class="btn-small" onclick="copyAdvJSON()">📋 Copy JSON</button>
                 <a class="btn-small" href="{{ url_for('downloads_index') }}">📂 DIFF Files</a>
               </div>
@@ -1617,54 +1897,72 @@ Anti-Grav : {{ analysis.filter.anti_gravity or '—' }}</pre>
         </div>
         {% endif %}
 
-        <!-- ── 7. CLI Presets ── -->
+        <!-- ══ 8. CLI Style Presets (Real Commands) ══ -->
         <div class="tpanel">
           <div class="tpanel-head">
             <div class="tpanel-head-icon" style="background:var(--b-dim);border-color:rgba(0,170,255,0.2);">🎮</div>
-            <div><div class="tpanel-title">CLI Presets</div><div class="tpanel-sub">เลือกสไตล์ → Copy CLI</div></div>
+            <div><div class="tpanel-title">CLI Style Presets</div><div class="tpanel-sub">Betaflight CLI commands — paste ได้เลย</div></div>
           </div>
           <div class="tpanel-body">
             <div class="preset-grid">
               <div class="preset-card">
                 <div class="preset-letter g">B</div>
                 <div class="preset-name">Beginner</div>
-                <div class="preset-desc">มือใหม่ บินนิ่ง คุมง่าย</div>
-                <ul class="preset-list"><li>Throttle limit: 85%</li><li>Filter นุ่ม</li></ul>
+                <div class="preset-desc">มือใหม่ บินนิ่ง ปลอดภัย</div>
+                <ul class="preset-list">
+                  <li>Throttle limit 80%</li>
+                  <li>P ลด 10%, D ลด 15%</li>
+                  <li>Filter นุ่มขึ้น</li>
+                </ul>
                 <button class="preset-apply-btn g" onclick="showPreset('beginner')">แสดง CLI</button>
               </div>
               <div class="preset-card">
                 <div class="preset-letter b">F</div>
                 <div class="preset-name">Freestyle</div>
-                <div class="preset-desc">ตอบสนองไว คุมแม่น</div>
-                <ul class="preset-list"><li>Throttle: 90–100%</li><li>Filter สมดุล</li></ul>
+                <div class="preset-desc">ตอบสนองไว สมดุล</div>
+                <ul class="preset-list">
+                  <li>ค่าตามการวิเคราะห์</li>
+                  <li>iterm_relax = RP</li>
+                  <li>RPM Filter ON</li>
+                </ul>
                 <button class="preset-apply-btn b" onclick="showPreset('freestyle')">แสดง CLI</button>
               </div>
               <div class="preset-card">
                 <div class="preset-letter p">L</div>
                 <div class="preset-name">Long Range</div>
                 <div class="preset-desc">นิ่ง ประหยัดไฟ ลอยนาน</div>
-                <ul class="preset-list"><li>Throttle: 80–85%</li><li>Filter นิ่ง</li></ul>
+                <ul class="preset-list">
+                  <li>P/D ลด 12%</li>
+                  <li>iterm_relax = OFF</li>
+                  <li>Throttle limit 85%</li>
+                </ul>
                 <button class="preset-apply-btn p" onclick="showPreset('longrange')">แสดง CLI</button>
               </div>
             </div>
-            <pre class="cli-output-box" id="cliOutput"># เลือก preset ด้านบนเพื่อแสดง CLI</pre>
+            <pre class="cli-output-box" id="cliOutput"># เลือก preset ด้านบนเพื่อแสดง CLI commands</pre>
             <div style="display:flex;gap:8px;margin-top:8px;">
               <button class="btn-small" onclick="copyEl('cliOutput')">📋 Copy CLI</button>
             </div>
-            <p class="preset-note">* Preset เหล่านี้เป็นแนวทางเริ่มต้น — ปรับต่อตามโดรนของคุณ</p>
+            <p class="preset-note">* Preset ปรับค่าจาก class+style ที่วิเคราะห์แล้ว — ไม่ใช่ค่าสำเร็จรูปทั่วไป</p>
           </div>
         </div>
 
-        <!-- ── 8. Charts ── -->
+        <!-- ══ 9. Visualization ══ -->
         <div class="tpanel">
           <div class="tpanel-head">
             <div class="tpanel-head-icon" style="background:var(--b-dim);border-color:rgba(0,170,255,0.2);">📊</div>
-            <div><div class="tpanel-title">Visualization</div><div class="tpanel-sub">TWR · Prop Profile</div></div>
+            <div><div class="tpanel-title">Visualization</div><div class="tpanel-sub">TWR · Power Budget · Prop Profile</div></div>
           </div>
           <div class="tpanel-body">
             <div class="chart-grid">
-              <div class="chart-wrap"><canvas id="thrustChart"></canvas></div>
-              <div class="chart-wrap"><canvas id="noiseChart"></canvas></div>
+              <div class="chart-wrap">
+                <div style="font-family:var(--font-d);font-size:8px;color:var(--muted);letter-spacing:.1em;margin-bottom:6px;">POWER BUDGET</div>
+                <canvas id="thrustChart"></canvas>
+              </div>
+              <div class="chart-wrap">
+                <div style="font-family:var(--font-d);font-size:8px;color:var(--muted);letter-spacing:.1em;margin-bottom:6px;">PROP PROFILE</div>
+                <canvas id="noiseChart"></canvas>
+              </div>
             </div>
           </div>
         </div>
@@ -1834,15 +2132,77 @@ if (ps) ps.addEventListener('change', function(){
   showToast('✓ โหลด preset แล้ว');
 });
 
-/* ── CLI Presets ── */
-var presets = {
-  beginner: '# OBIXConfig Lab — Beginner\nset throttle_limit_percent = 85\nset dshot_bidir = OFF\nset iterm_relax = RP\nset feedforward_transition = 0\nset anti_gravity_gain = 3\nsave',
-  freestyle: '# OBIXConfig Lab — Freestyle\nset throttle_limit_percent = 100\nset iterm_relax = RPY\nset feedforward_transition = 0.5\nset anti_gravity_gain = 5\nsave',
-  longrange: '# OBIXConfig Lab — Long Range\nset throttle_limit_percent = 80\nset iterm_relax = OFF\nset feedforward_transition = 0\nset anti_gravity_gain = 2\nsave'
+/* ── Dynamic presets using real analysis values ── */
+{% if analysis %}
+var _pRoll=  {{ analysis.pid.roll.p }}, _iRoll=  {{ analysis.pid.roll.i }}, _dRoll=  {{ analysis.pid.roll.d }};
+var _pPitch= {{ analysis.pid.pitch.p }},_iPitch= {{ analysis.pid.pitch.i }},_dPitch= {{ analysis.pid.pitch.d }};
+var _pYaw=   {{ analysis.pid.yaw.p }},  _iYaw=   {{ analysis.pid.yaw.i }};
+var _gLpf1=  {{ analysis.filter.gyro_lpf1 or 200 }};
+var _dLpf1=  {{ analysis.filter.dterm_lpf1 or 110 }};
+var _notch=  {{ analysis.filter.dyn_notch or 2 }};
+var _ag=     {{ analysis.filter.anti_gravity or 5 }};
+{% else %}
+var _pRoll=48,_iRoll=90,_dRoll=38,_pPitch=52,_iPitch=90,_dPitch=40,_pYaw=40,_iYaw=90;
+var _gLpf1=200,_dLpf1=110,_notch=2,_ag=5;
+{% endif %}
+function _r(v){ return Math.max(1, Math.round(v)); }
+var presetBuilders = {
+  beginner: function(){
+    return ['# OBIXConfig Doctor — Beginner Safe',
+      '# P-10% D-15% filter นุ่มขึ้น throttle 80%',
+      'set p_roll  = '+_r(_pRoll*0.90), 'set i_roll  = '+_r(_iRoll*0.95), 'set d_roll  = '+_r(_dRoll*0.85),
+      'set p_pitch = '+_r(_pPitch*0.90),'set i_pitch = '+_r(_iPitch*0.95),'set d_pitch = '+_r(_dPitch*0.85),
+      'set p_yaw   = '+_r(_pYaw*0.88),  'set i_yaw   = '+_r(_iYaw),
+      'set gyro_lpf1_hz        = '+_r(_gLpf1*0.85),
+      'set dterm_lpf1_hz       = '+_r(_dLpf1*0.85),
+      'set dyn_notch_count     = '+_notch,
+      'set motor_pwm_protocol  = DSHOT300',
+      'set dshot_bidir         = ON',
+      'set anti_gravity_gain   = '+Math.max(2,_ag-2),
+      'set throttle_limit_percent = 80',
+      'set throttle_limit_type = SCALE',
+      'set iterm_relax         = RP',
+      'set feedforward_averaging = 2_POINT', 'save'].join('\n');},
+  freestyle: function(){
+    return ['# OBIXConfig Doctor — Freestyle',
+      '# ค่าตามการวิเคราะห์ class+style',
+      'set p_roll  = '+_pRoll, 'set i_roll  = '+_iRoll, 'set d_roll  = '+_dRoll,
+      'set p_pitch = '+_pPitch,'set i_pitch = '+_iPitch,'set d_pitch = '+_dPitch,
+      'set p_yaw   = '+_pYaw,  'set i_yaw   = '+_iYaw,  'set d_yaw   = 0',
+      'set gyro_lpf1_hz        = '+_gLpf1,
+      'set dterm_lpf1_hz       = '+_dLpf1,
+      'set dyn_notch_count     = '+_notch,
+      'set motor_pwm_protocol  = DSHOT300',
+      'set dshot_bidir         = ON',
+      'set anti_gravity_gain   = '+_ag,
+      'set iterm_relax         = RP',
+      'set iterm_relax_type    = SETPOINT',
+      'set feedforward_averaging = 2_POINT',
+      'set tpa_rate            = 10',
+      'set tpa_breakpoint      = 1650', 'save'].join('\n');},
+  longrange: function(){
+    return ['# OBIXConfig Doctor — Long Range',
+      '# P/D-12% iterm_relax OFF throttle 85%',
+      'set p_roll  = '+_r(_pRoll*0.88), 'set i_roll  = '+_r(_iRoll), 'set d_roll  = '+_r(_dRoll*0.88),
+      'set p_pitch = '+_r(_pPitch*0.88),'set i_pitch = '+_r(_iPitch),'set d_pitch = '+_r(_dPitch*0.88),
+      'set p_yaw   = '+_r(_pYaw*0.85),  'set i_yaw   = '+_r(_iYaw),
+      'set gyro_lpf1_hz        = '+_r(_gLpf1*0.88),
+      'set dterm_lpf1_hz       = '+_r(_dLpf1*0.88),
+      'set dyn_notch_count     = 1',
+      'set motor_pwm_protocol  = DSHOT300',
+      'set dshot_bidir         = ON',
+      'set anti_gravity_gain   = '+Math.max(2,_ag-2),
+      'set throttle_limit_percent = 85',
+      'set iterm_relax         = OFF',
+      'set feedforward_averaging = 2_POINT',
+      'set tpa_rate            = 8',
+      'set tpa_breakpoint      = 1700', 'save'].join('\n');}
 };
 function showPreset(type){
-  var el = document.getElementById('cliOutput');
-  if (el) el.textContent = presets[type] || '';
+  var el=document.getElementById('cliOutput');
+  if(!el) return;
+  var b=presetBuilders[type];
+  el.textContent = b ? b() : '# preset not found';
 }
 
 /* ── Donate amount buttons ── */
@@ -1858,27 +2218,35 @@ document.querySelectorAll('.amt-btn').forEach(function(btn){
 (function(){
   var tEl = document.getElementById('thrustChart');
   if (tEl) {
+    {% if analysis.advanced %}
+    var _hoverW  = {{ analysis.advanced.avg_power_w | int }};
+    var _aggrW   = Math.round(_hoverW * 1.8);
+    var _peakW   = Math.round(_hoverW * 4.5);
+    {% else %}
+    var _hoverW=0,_aggrW=0,_peakW=0;
+    {% endif %}
     new Chart(tEl, {
       type: 'bar',
       data: {
-        labels: ['Thrust-to-Weight Ratio'],
+        labels: ['Hover', 'Aggressive', 'Peak'],
         datasets: [{
-          label: 'TWR',
-          data: [{{ analysis.thrust_ratio or 0 }}],
-          backgroundColor: ['rgba(0,255,136,0.35)'],
-          borderColor: ['#00ff88'],
+          label: 'Power (W)',
+          data: [_hoverW, _aggrW, _peakW],
+          backgroundColor: ['rgba(0,255,136,0.35)', 'rgba(255,183,0,0.35)', 'rgba(255,68,85,0.35)'],
+          borderColor: ['#00ff88','#ffb700','#ff4455'],
           borderWidth: 1, borderRadius: 6
         }]
       },
       options: {
         responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
+        plugins: { legend: { display: false },
+          tooltip: { callbacks: { label: function(c){ return c.raw + ' W'; }}}},
         scales: {
-          y: { beginAtZero: true, max: 5,
+          y: { beginAtZero: true,
                grid: { color: 'rgba(255,255,255,0.04)' },
-               ticks: { color: '#3d5470', font: { family: 'JetBrains Mono' } } },
+               ticks: { color: '#3d5470', font: { family: 'JetBrains Mono' }, callback: function(v){ return v+'W'; }}},
           x: { grid: { display: false },
-               ticks: { color: '#3d5470', font: { family: 'JetBrains Mono' } } }
+               ticks: { color: '#3d5470', font: { family: 'JetBrains Mono' }}}
         }
       }
     });
@@ -1889,15 +2257,19 @@ document.querySelectorAll('.amt-btn').forEach(function(btn){
     new Chart(nEl, {
       type: 'radar',
       data: {
-        labels: ['Motor Load', 'Noise', 'Grip'],
+        labels: ['Motor Load', 'Noise', 'Grip', 'Efficiency', 'Speed'],
         datasets: [{
           label: 'Prop Profile',
           data: [
             {{ analysis.prop_result.effect.motor_load }},
             {{ analysis.prop_result.effect.noise }},
-            {% if analysis.prop_result.effect.grip == 'หนึบมาก' %}6
-            {% elif analysis.prop_result.effect.grip == 'หนึบดี' %}4
-            {% else %}2{% endif %}
+            {% if 'หนึบมาก' in (analysis.prop_result.effect.grip or '') %}6
+            {% elif 'หนึบดี' in (analysis.prop_result.effect.grip or '') %}4
+            {% else %}2{% endif %},
+            {% if 'สูง' in (analysis.prop_result.effect.efficiency or '') %}5
+            {% elif 'กลาง' in (analysis.prop_result.effect.efficiency or '') %}3
+            {% else %}2{% endif %},
+            {% if analysis.prop_result.effect.pitch_speed_kmh %}{{ [(analysis.prop_result.effect.pitch_speed_kmh / 20) | int, 6] | min }}{% else %}3{% endif %}
           ],
           backgroundColor: 'rgba(0,170,255,0.12)',
           borderColor: '#00aaff',
