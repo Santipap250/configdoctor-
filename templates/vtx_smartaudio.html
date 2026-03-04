@@ -1,178 +1,414 @@
-<!-- templates/vtx_smartaudio.html -->
-<!doctype html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>VTX SmartAudio / Tramp Helper — OBIXConfig Doctor</title>
-{% set og_title       = "VTX SmartAudio / Tramp Helper — OBIXConfig Doctor" %}
-{% set og_description = "คู่มือและ CLI command สำหรับตั้งค่า VTX ผ่าน SmartAudio และ Tramp protocol" %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>VTX SmartAudio Control Center — OBIXConfig Doctor</title>
+{% set og_title       = "VTX SmartAudio Control Center — OBIXConfig Doctor" %}
+{% set og_description = "ตั้งค่า VTX Band/Channel/Power พร้อม CLI, conflict detector, country limits" %}
 {% set og_url         = "https://configdoctor.onrender.com/vtx-smartaudio" %}
+{% set nav_page       = "vtx_smartaudio" %}
 {% include "partials/og_tags.html" %}
-  <style>
-    :root { --accent:#0b76d1; --bg:#fff; --muted:#666; --card:#f8f9fb; }
-    body{font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin:18px; color:#111; background:var(--bg);}
-    .wrap{max-width:min(900px,100%);margin:0 auto;}
-    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-    h1{font-size:1.2rem;margin:0}
-    .card{background:var(--card);padding:14px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.04);margin-bottom:12px;}
-    label{display:block;margin-top:8px;font-weight:600}
-    select,input{width:100%;padding:8px;margin-top:6px;border-radius:6px;border:1px solid #ddd;background:#fff}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-    button{background:var(--accent);color:white;padding:10px 12px;border:none;border-radius:8px;cursor:pointer;margin-top:12px}
-    pre{background:#111;color:#e6e6e6;padding:10px;border-radius:6px;overflow:auto}
-    .small{font-size:0.9rem;color:var(--muted)}
-    .note{background:#fffbe6;border-left:4px solid #f0c14b;padding:8px;border-radius:6px;margin-top:8px}
-    .copybtn{background:#2d2d2d;color:#fff;padding:6px 10px;border-radius:6px;border:none;cursor:pointer}
-    .row{display:flex;gap:8px;align-items:center}
-  
-  /* ── Responsive ── */
-  html,body{overflow-x:hidden}
-  input,select{font-size:16px;min-height:44px}
-  .wrap{max-width:min(900px,100%);padding:0 4px}
-  @media(max-width:600px){body{margin:10px}.grid{grid-template-columns:1fr!important}header{flex-wrap:wrap}pre{font-size:.78rem}}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@400;500;600&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#010307;--panel:#04070f;--panel2:#060b18;--border:rgba(0,200,255,.08);
+  --cyan:#00e5ff;--blue:#00aaff;--green:#00ff88;--amber:#ffb700;
+  --red:#ff4455;--purple:#cc55ff;--orange:#ff8844;
+  --muted:#162038;--text:#8cc8e0;
+  --font-d:'Orbitron',sans-serif;--font-m:'JetBrains Mono',monospace;--font-t:'Sarabun',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font-t);font-size:14px;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,200,255,.004) 2px,rgba(0,200,255,.004) 4px)}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 60% 40% at 80% 10%,rgba(0,200,255,.05) 0%,transparent 70%)}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:rgba(0,200,255,.2);border-radius:2px}
+.page{position:relative;z-index:1;max-width:1500px;margin:0 auto;padding:0 14px 60px}
+.hero{padding:24px 0 18px;border-bottom:1px solid var(--border);display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.hero-eye{font-family:var(--font-d);font-size:8px;font-weight:700;letter-spacing:.2em;color:var(--cyan);display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.tx-led{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 14px var(--cyan);animation:txB .8s ease-in-out infinite}
+@keyframes txB{0%,100%{opacity:1}50%{opacity:.2}}
+.hero-title{font-family:var(--font-d);font-size:clamp(18px,2.8vw,34px);font-weight:900;letter-spacing:.04em;color:#fff;line-height:1.1}
+.hero-title span{color:var(--cyan);text-shadow:0 0 24px rgba(0,229,255,.4)}
+.hero-sub{margin-top:7px;font-size:12.5px;color:#1e4060;line-height:1.65}
+.sa-grid{display:grid;grid-template-columns:290px 1fr 260px;gap:14px;margin-top:16px;align-items:start}
+@media(max-width:1200px){.sa-grid{grid-template-columns:250px 1fr}}
+@media(max-width:760px){.sa-grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;position:relative}
+.panel::before{content:'';position:absolute;inset:0;pointer-events:none;border-radius:14px;background:linear-gradient(135deg,rgba(0,200,255,.015) 0%,transparent 55%)}
+.panel-hd{padding:11px 15px 9px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.panel-title{font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.15em;color:var(--cyan);text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.panel-body{padding:14px}
+.proto-row{display:flex;gap:8px;margin-bottom:14px}
+.proto-btn{flex:1;padding:10px 8px;border-radius:10px;border:1px solid var(--border);background:none;color:#2a4060;cursor:pointer;font-family:var(--font-d);font-size:8.5px;font-weight:700;letter-spacing:.1em;text-align:center;transition:.2s;text-transform:uppercase}
+.proto-btn .pb-name{display:block;font-size:11px;color:var(--text);margin-bottom:3px}
+.proto-btn.active{border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.1);color:var(--cyan)}
+.proto-btn:hover:not(.active){border-color:rgba(0,229,255,.2);color:var(--text)}
+.band-label{font-family:var(--font-d);font-size:8px;font-weight:700;letter-spacing:.12em;color:#2a4060;text-transform:uppercase;display:flex;align-items:center;gap:7px;padding:10px 0 7px;border-bottom:1px solid var(--border);margin-bottom:10px}
+.band-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.ch-matrix{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;margin-bottom:10px}
+.ch-cell{border:1px solid var(--border);border-radius:8px;padding:7px 3px;text-align:center;cursor:pointer;transition:.18s;background:var(--panel2);position:relative}
+.ch-cell:hover{border-color:rgba(0,229,255,.3);background:rgba(0,229,255,.06);transform:translateY(-2px)}
+.ch-cell.active{border-color:var(--cyan)!important;background:rgba(0,229,255,.14)!important;box-shadow:0 0 14px rgba(0,229,255,.2)!important}
+.ch-cell.conflict{border-color:rgba(255,68,85,.5)!important;background:rgba(255,68,85,.08)!important}
+.ch-cell.conflict::after{content:'⚠';position:absolute;top:-8px;right:0;font-size:9px}
+.ch-num{font-family:var(--font-d);font-size:7.5px;color:#2a4060;display:block;margin-bottom:2px}
+.ch-freq{font-family:var(--font-m);font-size:9.5px;color:var(--text);display:block;font-weight:600}
+.spectrum-bar{position:relative;height:52px;background:var(--panel2);border-radius:10px;border:1px solid var(--border);overflow:hidden;margin:14px 0 6px}
+.sb-canvas{position:absolute;inset:0;width:100%;height:100%}
+.sb-marker{position:absolute;top:0;bottom:0;width:2px;background:var(--cyan);box-shadow:0 0 8px var(--cyan);transform:translateX(-50%);transition:left .35s cubic-bezier(.4,0,.2,1)}
+.sb-label{position:absolute;top:3px;font-family:var(--font-m);font-size:8px;color:var(--cyan);transform:translateX(-50%);transition:left .35s;white-space:nowrap}
+.pwr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.pwr-btn{padding:9px 4px;border-radius:9px;border:1px solid var(--border);background:none;color:#2a4060;cursor:pointer;font-family:var(--font-d);font-size:7.5px;font-weight:700;letter-spacing:.06em;text-align:center;transition:.18s;line-height:1.5}
+.pwr-btn .pw-mw{display:block;font-size:11.5px;color:var(--text);margin-bottom:2px;font-family:var(--font-m)}
+.pwr-btn .pw-dbm{display:block;font-size:8px;color:#2a4060;font-family:var(--font-m)}
+.pwr-btn:hover,.pwr-btn.active{border-color:rgba(255,183,0,.4);background:rgba(255,183,0,.08);color:var(--amber)}
+.pwr-btn.active .pw-mw{color:var(--amber)}
+.pwr-bar-track{height:7px;background:var(--muted);border-radius:4px;overflow:hidden;margin:10px 0 4px}
+.pwr-bar-fill{height:100%;border-radius:4px;transition:width .4s,background .4s}
+.country-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.country-card{background:var(--panel2);border:1px solid var(--border);border-radius:9px;padding:10px 11px;cursor:pointer;transition:.18s}
+.country-card:hover,.country-card.active{border-color:rgba(0,229,255,.3);background:rgba(0,229,255,.06)}
+.cc-flag{font-size:18px;margin-bottom:4px}
+.cc-name{font-family:var(--font-d);font-size:8px;letter-spacing:.08em;color:var(--text);margin-bottom:3px}
+.cc-limit{font-family:var(--font-m);font-size:10px;color:var(--amber)}
+.conflict-alert{padding:10px 13px;border-radius:9px;border-left:2px solid var(--red);background:rgba(255,68,85,.07);font-size:12px;line-height:1.6;margin-bottom:8px;display:none}
+.conflict-alert.show{display:block}
+.active-display{background:var(--panel2);border-radius:12px;border:1px solid rgba(0,229,255,.2);padding:18px;text-align:center;margin-bottom:14px;position:relative;overflow:hidden}
+.ad-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(0,229,255,.08) 0%,transparent 70%)}
+.ad-band{font-family:var(--font-d);font-size:10px;letter-spacing:.15em;color:var(--cyan);margin-bottom:6px;position:relative}
+.ad-freq{font-family:var(--font-m);font-size:36px;font-weight:600;color:#fff;line-height:1;position:relative}
+.ad-unit{font-family:var(--font-d);font-size:11px;color:var(--cyan);margin-left:4px}
+.ad-ch{font-family:var(--font-d);font-size:9px;letter-spacing:.12em;color:#2a4060;margin-top:6px;position:relative}
+.ad-power{font-family:var(--font-m);font-size:22px;color:var(--amber);margin-top:6px;position:relative}
+.info-card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
+.ic-row{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(0,200,255,.05)}
+.ic-row:last-child{border-bottom:none;padding-bottom:0}
+.ic-key{font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:#2a4060;text-transform:uppercase}
+.ic-val{font-family:var(--font-m);font-size:12px;text-align:right}
+.cli-box{background:rgba(0,0,0,.6);border:1px solid var(--border);border-radius:10px;padding:13px;font-family:var(--font-m);font-size:11px;line-height:1.85;min-height:120px;position:relative}
+.cc-cmt{color:rgba(0,229,255,.35)}
+.cc-key{color:#79c0ff}
+.cc-val{color:var(--amber)}
+.cc-cmd{color:#c8dce8}
+.cc-prot{color:var(--green);font-weight:600}
+.cli-copy-btn{position:absolute;top:8px;right:8px;font-family:var(--font-d);font-size:8px;font-weight:700;letter-spacing:.1em;padding:5px 12px;border-radius:6px;border:1px solid rgba(0,229,255,.25);background:rgba(0,229,255,.07);color:var(--cyan);cursor:pointer;transition:.18s}
+.cli-copy-btn:hover{background:rgba(0,229,255,.14)}
+.cli-copy-btn.ok{color:var(--green);border-color:rgba(0,255,136,.3)}
+@media(max-width:600px){.ch-matrix{grid-template-columns:repeat(4,1fr)}.pwr-grid{grid-template-columns:repeat(3,1fr)}.country-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1>VTX Control Helper — SmartAudio / Tramp</h1>
-      <nav>
-        <a href="/" style="color:var(--accent);text-decoration:none">Home</a> &nbsp; • &nbsp;
-        <a href="/vtx" style="color:var(--accent);text-decoration:none">VTX Bands</a>
-      </nav>
-    </header>
-
-    <section class="card">
-      <div class="small">เลือก Band, Channel และ Power ที่ต้องการ แล้วกด <strong>Generate</strong> — ระบบจะสร้างคำสั่งแนะนำสำหรับ SmartAudio (OSD) และ Tramp (OSD/serial) ให้คุณคัด-วาง หรือ copy เป็น JSON เพื่อส่งต่อ</div>
-
-      <div class="grid" style="margin-top:12px">
-        <div>
-          <label>Band</label>
-          <select id="band">
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="E">E</option>
-            <option value="F">F</option>
-            <option value="R">R (Race)</option>
-          </select>
-        </div>
-        <div>
-          <label>Channel (1–8)</label>
-          <select id="channel">
-            <option>1</option><option>2</option><option>3</option><option>4</option>
-            <option>5</option><option>6</option><option>7</option><option>8</option>
-          </select>
-        </div>
-      </div>
-
-      <label>VTX Power</label>
-      <select id="power">
-        <option value="25">25 mW</option>
-        <option value="100">100 mW</option>
-        <option value="200">200 mW</option>
-        <option value="500">500 mW</option>
-        <option value="800">800 mW</option>
-      </select>
-
-      <div style="margin-top:10px" class="row">
-        <button id="gen">Generate</button>
-        <button id="copyAll" class="copybtn" style="display:none">Copy All</button>
-      </div>
-
-      <div id="results" style="margin-top:12px;display:none">
-        <h3 style="margin-bottom:6px">ผลลัพธ์</h3>
-
-        <div class="small">คำสั่งเชิงคนอ่าน (ใช้กับ Betaflight OSD หรือ App ที่รองรับ SmartAudio/Tramp)</div>
-        <pre id="humanCmd"></pre>
-
-        <div class="small" style="margin-top:8px">Generic command strings (copy ไปใช้กับเครื่องมือที่รองรับ หรือส่งเป็น JSON ให้ backend)</div>
-        <pre id="genericCmd"></pre>
-
-        <div style="margin-top:8px" class="note">
-          <strong>หมายเหตุ:</strong> คำสั่งด้านล่างเป็นรูปแบบ <em>generic</em> ที่อธิบายให้มนุษย์และระบบ front-end เข้าใจ — โปรดตรวจสอบเอกสาร VTX/FC ของคุณเพื่อใช้ syntax ของโปรแกรม/OSD ที่ถูกต้อง (SmartAudio/Tramp มีเวอร์ชันย่อยที่รับค่า parameter ต่างกัน). ห้ามส่งกำลัง (power) เกินกฎหมายท้องถิ่น.
-        </div>
-      </div>
-    </section>
-
-    <section class="card">
-      <h3>วิธีใช้จริง (สั้นๆ)</h3>
-      <ol class="small">
-        <li>เชื่อมสาย SmartAudio/Tramp จาก VTX → Flight Controller (UART TX/RX ตามคู่มือ VTX/FC)</li>
-        <li>ใน Betaflight Configurator: เปิด Ports → ตั้ง UART ที่ต่อกับ VTX เป็น \"IRC / SmartAudio\" หรือ Tramp ตามรุ่น</li>
-        <li>ใน OSD (Betaflight OSD) หรือ OSD menu บน OpenTX/edgeTX: ไปที่ VTX control → เลือก SmartAudio/Tramp → ใช้ค่าที่ระบบสร้างให้ (Band/Channel/Power)</li>
-        <li>ถ้าต้องการส่งผ่าน CLI/Serial: ใช้เครื่องมือ/คำสั่งเฉพาะยี่ห้อ (ตรวจคู่มือ VTX) — UI นี้ช่วย generate ค่า human-readable และ JSON ให้คุณคัดวาง</li>
-      </ol>
-
-      <div class="note">
-        ตัวอย่างการเชื่อมต่อ: VTX TX → FC RX (บน UART), VTX RX → FC TX (ถ้าจำเป็นสำหรับ SmartAudio bidirectional). ตรวจสอบว่า FC baudrate ถูกตั้งให้ตรงกับ VTX (ดูคู่มือ).
-      </div>
-    </section>
-
-    <section class="card small">
-      <h3>ตัวอย่าง JSON (ใช้ส่งไป backend)</h3>
-      <pre id="jsonOut">{}</pre>
-    </section>
+{% set nav_page = "vtx_smartaudio" %}
+{% include "partials/nav.html" %}
+<div class="page">
+<div class="hero">
+  <div>
+    <div class="hero-eye"><span class="tx-led"></span>OBIX · VTX CONTROL CENTER · SmartAudio / Tramp</div>
+    <h1 class="hero-title">VTX <span>Control Center</span></h1>
+    <p class="hero-sub">Band/Channel matrix · Spectrum bar · Power selector · Conflict detector · Country limits · BF CLI export</p>
   </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <a href="/vtx-range" style="font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.12em;color:#2a4060;text-decoration:none;border:1px solid var(--border);border-radius:7px;padding:7px 12px;transition:.18s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='#2a4060'">Range Lab</a>
+    <a href="/vtx" style="font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.12em;color:#2a4060;text-decoration:none;border:1px solid var(--border);border-radius:7px;padding:7px 12px;transition:.18s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='#2a4060'">VTX Bands</a>
+    <a href="/app" style="font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.12em;color:#2a4060;text-decoration:none;border:1px solid var(--border);border-radius:7px;padding:7px 12px;transition:.18s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='#2a4060'">← กลับ</a>
+  </div>
+</div>
+<div class="sa-grid">
+<!-- LEFT -->
+<div>
+  <div class="panel" style="margin-bottom:12px">
+    <div class="panel-hd"><div class="panel-title">Protocol</div></div>
+    <div class="panel-body">
+      <div class="proto-row">
+        <button class="proto-btn active" data-proto="smartaudio" onclick="setProto('smartaudio',this)"><span class="pb-name">SmartAudio</span>SA v1/v2</button>
+        <button class="proto-btn" data-proto="tramp" onclick="setProto('tramp',this)"><span class="pb-name">IRC Tramp</span>TBS/IRC</button>
+      </div>
+      <div style="font-size:11.5px;color:#2a4060;line-height:1.8" id="protoDesc">
+        FC <span style="color:var(--cyan);font-family:var(--font-m)">UART TX</span> → VTX SmartAudio Pin<br>
+        BF Ports: ตั้ง UART เป็น <span style="color:var(--cyan);font-family:var(--font-m)">IRC Tramp / SA</span><br>
+        TX-only · ไม่ต้องการ RX pin
+      </div>
+    </div>
+  </div>
+  <div class="panel" style="margin-bottom:12px">
+    <div class="panel-hd"><div class="panel-title">Power Level</div><span style="font-family:var(--font-m);font-size:10px;color:var(--amber)" id="pwrDisplay">400 mW</span></div>
+    <div class="panel-body">
+      <div class="pwr-grid" id="pwrGrid"></div>
+      <div class="pwr-bar-track"><div class="pwr-bar-fill" id="pwrBar" style="width:50%"></div></div>
+      <div style="font-size:11px;color:#2a4060;margin-top:4px" id="pwrNote">Standard freestyle</div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-hd"><div class="panel-title">Country Limits</div></div>
+    <div class="panel-body">
+      <div class="country-grid" id="countryGrid"></div>
+      <div style="margin-top:10px;font-size:11px;line-height:1.6" id="countryNote"></div>
+    </div>
+  </div>
+</div>
+<!-- CENTER -->
+<div>
+  <div class="active-display">
+    <div class="ad-bg"></div>
+    <div class="ad-band" id="adBand">SELECT BAND · CHANNEL</div>
+    <div><span class="ad-freq" id="adFreq">—</span><span class="ad-unit">MHz</span></div>
+    <div class="ad-ch" id="adCh">BAND — · CH —</div>
+    <div class="ad-power" id="adPower">— mW</div>
+  </div>
+  <div class="conflict-alert" id="conflictAlert"></div>
+  <div class="panel" style="margin-bottom:12px">
+    <div class="panel-hd"><div class="panel-title">Band x Channel Matrix</div></div>
+    <div class="panel-body" id="matrixBody"></div>
+  </div>
+  <div class="panel" style="margin-bottom:12px">
+    <div class="panel-hd"><div class="panel-title">5.8 GHz Spectrum</div><span style="font-size:9px;font-family:var(--font-m);color:var(--cyan)" id="specLabel">—</span></div>
+    <div class="panel-body">
+      <div class="spectrum-bar"><canvas class="sb-canvas" id="specCanvas"></canvas><div class="sb-marker" id="specMarker"></div><div class="sb-label" id="specMhzLabel"></div></div>
+      <div style="display:flex;justify-content:space-between;font-family:var(--font-m);font-size:9px;color:#2a4060;margin-top:4px"><span>5580</span><span>5660</span><span>5740</span><span>5820</span><span>5900</span></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-hd"><div class="panel-title">Wiring Guide</div></div>
+    <div class="panel-body" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="background:var(--panel2);border-radius:10px;border:1px solid var(--border);padding:12px">
+        <div style="font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--green);margin-bottom:8px">SmartAudio</div>
+        <div style="font-family:var(--font-m);font-size:10.5px;line-height:2;color:var(--text)">FC <span style="color:var(--cyan)">TX</span> → VTX SA pin<br>BF Ports → SA/IRC<br><span style="color:#2a4060">TX-only, 1 wire</span></div>
+      </div>
+      <div style="background:var(--panel2);border-radius:10px;border:1px solid var(--border);padding:12px">
+        <div style="font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--amber);margin-bottom:8px">IRC Tramp</div>
+        <div style="font-family:var(--font-m);font-size:10.5px;line-height:2;color:var(--text)">FC <span style="color:var(--amber)">TX</span> → VTX Data<br>BF Ports → IRC Tramp<br><span style="color:#2a4060">บาง VTX ต้อง TX+RX</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- RIGHT -->
+<div>
+  <div class="panel" style="margin-bottom:12px">
+    <div class="panel-hd"><div class="panel-title">Channel Info</div></div>
+    <div class="panel-body">
+      <div class="info-card">
+        <div class="ic-row"><span class="ic-key">Band</span><span class="ic-val" id="ii_band">—</span></div>
+        <div class="ic-row"><span class="ic-key">Channel</span><span class="ic-val" id="ii_ch">—</span></div>
+        <div class="ic-row"><span class="ic-key">Frequency</span><span class="ic-val" style="color:var(--cyan)" id="ii_freq">—</span></div>
+        <div class="ic-row"><span class="ic-key">Power</span><span class="ic-val" style="color:var(--amber)" id="ii_pwr">—</span></div>
+        <div class="ic-row"><span class="ic-key">Protocol</span><span class="ic-val" style="color:var(--green)" id="ii_proto">—</span></div>
+        <div class="ic-row"><span class="ic-key">Notes</span><span class="ic-val" style="font-family:var(--font-t);font-size:11px;color:#2a4060;max-width:130px;text-align:right" id="ii_note">เลือก channel</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel" style="margin-bottom:12px">
+    <div class="panel-hd"><div class="panel-title">Betaflight CLI</div></div>
+    <div class="panel-body">
+      <div class="cli-box" id="cliBox">
+        <span class="cc-cmt"># เลือก Band / Channel / Power...</span>
+        <button class="cli-copy-btn" id="cliCopyBtn" onclick="copyCLI()">COPY</button>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-hd"><div class="panel-title">Race Conflict Check</div></div>
+    <div class="panel-body">
+      <div id="conflictPilots" style="display:flex;flex-direction:column;gap:7px;margin-bottom:10px"></div>
+      <div style="font-size:11px;color:#2a4060;line-height:1.6" id="conflictSummary">กำหนด pilot channels เพื่อตรวจ conflict</div>
+    </div>
+  </div>
+</div>
+</div></div>
+<script>
+const BANDS={
+  Raceband:{key:'R',color:'#00e5ff',ch:[5658,5695,5732,5769,5806,5843,5880,5917],notes:['Pilot 1 std','Pilot 2','Pilot 3','Pilot 4','Pilot 5','Pilot 6','ใกล้ WiFi','Edge band']},
+  Fatshark:{key:'F',color:'#00ff88',ch:[5740,5760,5780,5800,5820,5840,5860,5880],notes:['F1','F2','F3','F4 Center','F5','F6','F7','F8']},
+  BoscamA:{key:'A',color:'#ffb700',ch:[5865,5845,5825,5805,5785,5765,5745,5725],notes:['A1','A2','A3','A4','A5','A6','A7','A8']},
+  BoscamB:{key:'B',color:'#cc55ff',ch:[5733,5752,5771,5790,5809,5828,5847,5866],notes:['B1','B2','B3','B4','B5','B6','B7','B8']},
+  BoscamE:{key:'E',color:'#ff8844',ch:[5705,5685,5665,5645,5885,5905,5925,5945],notes:['E1','E2','E3','E4','E5 ออกนอกช่วง','E6','E7','E8']},
+};
+const PWR=[{mw:25,dbm:14,note:'Indoor/Pit',pct:10},{mw:100,dbm:20,note:'Proximity',pct:25},{mw:200,dbm:23,note:'Indoor std',pct:38},{mw:400,dbm:26,note:'Freestyle std',pct:55},{mw:800,dbm:29,note:'Long range',pct:78},{mw:1000,dbm:30,note:'Max legal (many)',pct:88},{mw:2000,dbm:33,note:'⚠ ตรวจสอบกฎหมาย',pct:100}];
+const COUNTRIES=[{flag:'🇹🇭',name:'Thailand',maxMw:100,note:'100mW · กสทช. (>100mW ต้องมีใบอนุญาต)'},{flag:'🇺🇸',name:'USA',maxMw:1000,note:'FCC Part15 · 1W EIRP'},{flag:'🇪🇺',name:'EU',maxMw:25,note:'25mW EIRP · CE required'},{flag:'🇯🇵',name:'Japan',maxMw:10,note:'10mW · 5.8GHz restricted'},{flag:'🇦🇺',name:'Australia',maxMw:200,note:'200mW EIRP · ACMA'},{flag:'🇬🇧',name:'UK',maxMw:25,note:'25mW · Ofcom regs'}];
+let ST={band:'Raceband',ch:0,power:400,proto:'smartaudio',country:'Thailand'};
+let pilots=[null,null,null,null];
 
-  <script>
-    // mapping: band -> label (the UI uses human terms)
-    const bandLabels = { A: 'A', B: 'B', E: 'E', F: 'F', R: 'R' };
-
-    function generateHumanText(band, ch, power) {
-      return [
-        `SmartAudio / Tramp — วิธีเปลี่ยน (human):`,
-        `1) เชื่อมสาย SmartAudio/Tramp ระหว่าง VTX และ FC (UART).`,
-        `2) ใน Betaflight Configurator เปิด OSD → VTX Control (หรือใช้รุ่น App ของ VTX).`,
-        `3) เลือก Band: ${band}, Channel: ${ch}, Power: ${power} mW.`,
-        `4) ยืนยันการเปลี่ยนและทดสอบสัญญาณจาก VRX / Goggles.`,
-        ``,
-        `หมายเหตุ: อย่าตั้ง power เกินกฎหมายท้องถิ่น. หากไม่แน่ใจ ให้ใช้ 25 mW สำหรับ indoor.`
-      ].join('\\n');
-    }
-
-    function generateGenericStrings(band, ch, power) {
-      // Generic formats (human-readable command strings)
-      const smartAudioCmd = `SMARTAUDIO: SET BAND=${band} CHANNEL=${ch} POWER=${power}mW`;
-      const trampCmd = `TRAMP: SET BAND=${band} CHANNEL=${ch} POWER=${power}mW`;
-      // JSON payload for backend
-      const jsonPayload = {
-        protocol: 'smartaudio', // or 'tramp'
-        band: band,
-        channel: parseInt(ch),
-        power_mw: parseInt(power)
-      };
-      return {
-        smartAudioCmd, trampCmd, jsonPayload
-      };
-    }
-
-    function onGen() {
-      const band = document.getElementById('band').value;
-      const ch = document.getElementById('channel').value;
-      const power = document.getElementById('power').value;
-      const human = generateHumanText(band, ch, power);
-      const gen = generateGenericStrings(band, ch, power);
-
-      document.getElementById('humanCmd').textContent = human;
-      document.getElementById('genericCmd').textContent =
-        gen.smartAudioCmd + '\\n' + gen.trampCmd + '\\n\\nJSON:\\n' + JSON.stringify(gen.jsonPayload, null, 2);
-      document.getElementById('jsonOut').textContent = JSON.stringify(gen.jsonPayload, null, 2);
-
-      document.getElementById('results').style.display = 'block';
-      document.getElementById('copyAll').style.display = 'inline-block';
-    }
-
-    document.getElementById('gen').addEventListener('click', onGen);
-
-    document.getElementById('copyAll').addEventListener('click', function(){
-      const t = document.getElementById('genericCmd').textContent;
-      navigator.clipboard.writeText(t).then(()=> {
-        alert('Copied generic commands to clipboard');
-      }, ()=> {
-        alert('Copy failed — please select text and copy manually');
-      });
+function buildMatrix(){
+  let html='';
+  Object.entries(BANDS).forEach(([bn,bd])=>{
+    html+=`<div class="band-label"><div class="band-dot" style="background:${bd.color}"></div>${bn} (${bd.key})</div><div class="ch-matrix">`;
+    bd.ch.forEach((f,i)=>{
+      const act=ST.band===bn&&ST.ch===i;
+      const con=checkConflict(f,bn,i);
+      html+=`<div class="ch-cell${act?' active':''}${con?' conflict':''}" onclick="selectCh('${bn}',${i},${f})"><span class="ch-num">${bd.key}${i+1}</span><span class="ch-freq">${f}</span></div>`;
     });
-  </script>
+    html+='</div>';
+  });
+  document.getElementById('matrixBody').innerHTML=html;
+}
+function buildPower(){
+  document.getElementById('pwrGrid').innerHTML=PWR.map(p=>`
+    <button class="pwr-btn${ST.power===p.mw?' active':''}" onclick="selPwr(${p.mw},this)">
+      <span class="pw-mw">${p.mw>=1000?(p.mw/1000)+'W':p.mw+'mW'}</span>
+      <span class="pw-dbm">${p.dbm}dBm</span>
+    </button>`).join('');
+}
+function buildCountries(){
+  document.getElementById('countryGrid').innerHTML=COUNTRIES.map(c=>`
+    <div class="country-card${ST.country===c.name?' active':''}" onclick="selCountry('${c.name}',this)">
+      <div class="cc-flag">${c.flag}</div>
+      <div class="cc-name">${c.name}</div>
+      <div class="cc-limit">max ${c.maxMw}mW</div>
+    </div>`).join('');
+}
+function buildPilots(){
+  const bnames=Object.keys(BANDS);
+  const cols=['#ff4455','#ffb700','#cc55ff','#00ff88'];
+  document.getElementById('conflictPilots').innerHTML=pilots.map((pc,i)=>{
+    let opts=['<option value="">— none —</option>'];
+    bnames.forEach(bn=>{BANDS[bn].ch.forEach((f,ci)=>{opts.push(`<option value="${bn}|${ci}"${pc===`${bn}|${ci}`?' selected':''}>${BANDS[bn].key}${ci+1}: ${f}MHz</option>`);});});
+    return `<div style="display:flex;align-items:center;gap:8px">
+      <span style="font-family:var(--font-d);font-size:9px;font-weight:700;width:22px;text-align:center;color:${cols[i]}">P${i+1}</span>
+      <select style="flex:1;background:var(--panel2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:var(--font-m);font-size:11px;padding:5px 8px;outline:none" onchange="setPilot(${i},this.value)">${opts.join('')}</select></div>`;
+  }).join('');
+  checkAllConflicts();
+}
+function selectCh(bn,ci,freq){ST.band=bn;ST.ch=ci;buildMatrix();updateDisplay();updateCLI();updateSpectrum();}
+function selPwr(mw,btn){
+  ST.power=mw;
+  document.querySelectorAll('.pwr-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const p=PWR.find(x=>x.mw===mw);
+  document.getElementById('pwrBar').style.width=p.pct+'%';
+  document.getElementById('pwrBar').style.background=mw<=100?'var(--green)':mw<=400?'var(--amber)':mw<=800?'var(--orange)':'var(--red)';
+  document.getElementById('pwrDisplay').textContent=mw>=1000?(mw/1000)+'W':mw+'mW';
+  document.getElementById('pwrNote').textContent=p.note;
+  document.getElementById('adPower').textContent=mw>=1000?(mw/1000)+'W':mw+'mW';
+  updateCLI();checkCountryWarn();
+}
+function selCountry(name,el){
+  ST.country=name;
+  document.querySelectorAll('.country-card').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  checkCountryWarn();
+}
+function setProto(proto,btn){
+  ST.proto=proto;
+  document.querySelectorAll('.proto-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('protoDesc').innerHTML=proto==='smartaudio'
+    ?'FC <span style="color:var(--cyan);font-family:var(--font-m)">UART TX</span> → VTX SA Pin<br>BF Ports: ตั้ง UART เป็น <span style="color:var(--cyan);font-family:var(--font-m)">IRC Tramp/SA</span><br>TX-only · ไม่ต้องการ RX pin'
+    :'FC <span style="color:var(--amber);font-family:var(--font-m)">UART TX</span> → VTX Data Pin<br>BF Ports: ตั้ง UART เป็น <span style="color:var(--amber);font-family:var(--font-m)">IRC Tramp</span><br>บาง VTX ต้องการ bidirectional TX+RX';
+  updateCLI();
+}
+function setPilot(i,val){pilots[i]=val||null;checkAllConflicts();buildMatrix();}
+function updateDisplay(){
+  const bd=BANDS[ST.band];const freq=bd.ch[ST.ch];
+  document.getElementById('adBand').textContent=ST.band.toUpperCase();
+  document.getElementById('adFreq').textContent=freq;
+  document.getElementById('adCh').textContent=`${ST.band} · CH${ST.ch+1} (${bd.key}${ST.ch+1})`;
+  document.getElementById('adPower').textContent=ST.power>=1000?(ST.power/1000)+'W':ST.power+'mW';
+  document.getElementById('ii_band').textContent=ST.band;
+  document.getElementById('ii_ch').textContent=`${bd.key}${ST.ch+1} (Ch${ST.ch+1})`;
+  document.getElementById('ii_freq').textContent=freq+' MHz';
+  document.getElementById('ii_pwr').textContent=ST.power>=1000?(ST.power/1000)+'W':ST.power+'mW';
+  document.getElementById('ii_proto').textContent=ST.proto==='smartaudio'?'SmartAudio':'IRC Tramp';
+  document.getElementById('ii_note').textContent=bd.notes[ST.ch]||'';
+}
+function updateSpectrum(){
+  const canvas=document.getElementById('specCanvas');
+  const W=canvas.offsetWidth,H=canvas.offsetHeight;
+  if(!W)return;
+  canvas.width=W;canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  const FMIN=5580,FMAX=5960,FR=FMAX-FMIN;
+  const fToX=f=>((f-FMIN)/FR)*W;
+  Object.values(BANDS).forEach(b=>{
+    b.ch.forEach(f=>{
+      const x=fToX(f),bw=20*(W/FR);
+      ctx.fillStyle=b.color+'28';ctx.fillRect(x-bw/2,0,bw,H);
+    });
+  });
+  const af=BANDS[ST.band].ch[ST.ch];
+  const ax=fToX(af);
+  ctx.fillStyle='rgba(0,229,255,.22)';ctx.fillRect(ax-16,0,32,H);
+  pilots.forEach((pc,i)=>{
+    if(!pc)return;
+    const[bn,ci]=pc.split('|');const f=BANDS[bn]?.ch[parseInt(ci)];if(!f)return;
+    const px=fToX(f);const cols=['#ff4455','#ffb700','#cc55ff','#00ff88'];
+    ctx.strokeStyle=cols[i];ctx.lineWidth=1.5;ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.moveTo(px,0);ctx.lineTo(px,H);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=cols[i];ctx.font='8px JetBrains Mono';ctx.fillText('P'+(i+1),px+3,H-4);
+  });
+  const pct=(af-FMIN)/FR*100;
+  document.getElementById('specMarker').style.left=pct+'%';
+  document.getElementById('specMhzLabel').style.left=pct+'%';
+  document.getElementById('specMhzLabel').textContent=af+' MHz';
+  document.getElementById('specLabel').textContent=`${ST.band} ${BANDS[ST.band].key}${ST.ch+1} · ${af} MHz`;
+}
+function checkConflict(freq,bn,ci){
+  for(const pc of pilots){
+    if(!pc)continue;
+    const[pbn,pci]=pc.split('|');const pf=BANDS[pbn]?.ch[parseInt(pci)];
+    if(pf&&pf!==freq&&Math.abs(pf-freq)<37)return true;
+  }
+  return false;
+}
+function checkAllConflicts(){
+  const conflicts=[];
+  for(let i=0;i<4;i++){
+    if(!pilots[i])continue;
+    const[bn1,ci1]=pilots[i].split('|');const f1=BANDS[bn1]?.ch[parseInt(ci1)];if(!f1)continue;
+    for(let j=i+1;j<4;j++){
+      if(!pilots[j])continue;
+      const[bn2,ci2]=pilots[j].split('|');const f2=BANDS[bn2]?.ch[parseInt(ci2)];if(!f2)continue;
+      if(Math.abs(f1-f2)<37)conflicts.push(`P${i+1}(${f1}MHz) ↔ P${j+1}(${f2}MHz) ห่างกัน ${Math.abs(f1-f2)}MHz`);
+    }
+  }
+  const ca=document.getElementById('conflictAlert');
+  ca.className='conflict-alert'+(conflicts.length?' show':'');
+  if(conflicts.length)ca.innerHTML='🔴 <strong>Conflict Detected</strong><br>'+conflicts.map(c=>`<div>${c} — ต่ำกว่า 37MHz threshold</div>`).join('');
+  document.getElementById('conflictSummary').textContent=conflicts.length?`${conflicts.length} conflict(s) — แนะนำ Raceband R1-R4 ห่างกัน ≥37MHz`:'ไม่พบ conflict ✅ (separation ≥37MHz ทุก pair)';
+}
+function checkCountryWarn(){
+  const c=COUNTRIES.find(x=>x.name===ST.country);if(!c)return;
+  const n=document.getElementById('countryNote');
+  n.innerHTML=ST.power>c.maxMw
+    ?`<span style="color:var(--red)">⚠ ${ST.power}mW เกินขีดสูงสุดของ ${c.name} (${c.maxMw}mW)</span><br><span style="color:#2a4060">${c.note}</span>`
+    :`<span style="color:var(--green)">✅ ${ST.power}mW อยู่ในขีดจำกัดของ ${c.name}</span><br><span style="color:#2a4060">${c.note}</span>`;
+}
+function updateCLI(){
+  const bd=BANDS[ST.band];const freq=bd.ch[ST.ch];
+  const bIdx=Object.keys(BANDS).indexOf(ST.band)+1;
+  const pIdx=PWR.findIndex(p=>p.mw===ST.power)+1;
+  const box=document.getElementById('cliBox');const btn=document.getElementById('cliCopyBtn');
+  box.innerHTML=`<div><span class="cc-cmt"># OBIX VTX Control — ${ST.proto==='smartaudio'?'SmartAudio':'IRC Tramp'}</span></div>
+<div><span class="cc-cmt"># ${ST.band} ${bd.key}${ST.ch+1} · ${freq}MHz · ${ST.power}mW</span></div>
+<div><span class="cc-cmt"># ───────────────────────────────</span></div><br>
+<div><span class="cc-cmd">set </span><span class="cc-key">vtx_band</span><span class="cc-cmd"> = </span><span class="cc-val">${bIdx}</span><span class="cc-cmt">  # ${ST.band}</span></div>
+<div><span class="cc-cmd">set </span><span class="cc-key">vtx_channel</span><span class="cc-cmd"> = </span><span class="cc-val">${ST.ch+1}</span><span class="cc-cmt">  # ${bd.key}${ST.ch+1} ${freq}MHz</span></div>
+<div><span class="cc-cmd">set </span><span class="cc-key">vtx_power</span><span class="cc-cmd"> = </span><span class="cc-val">${pIdx}</span><span class="cc-cmt">  # ${ST.power}mW</span></div>
+<div><span class="cc-cmd">set </span><span class="cc-key">vtx_low_power_disarm</span><span class="cc-cmd"> = </span><span class="cc-val">ON</span></div><br>
+<div><span class="cc-cmt"># Ports tab: ตั้ง UART เป็น "${ST.proto==='smartaudio'?'SmartAudio':'IRC Tramp'}"</span></div><br>
+<div><span class="cc-prot">save</span></div>`;
+  box.appendChild(btn);
+}
+function copyCLI(){
+  const text=document.getElementById('cliBox').innerText.replace(/COPY/g,'').trim();
+  navigator.clipboard.writeText(text).then(()=>{
+    const b=document.getElementById('cliCopyBtn');b.textContent='✅ OK';b.classList.add('ok');
+    setTimeout(()=>{b.textContent='COPY';b.classList.remove('ok');},2000);
+  });
+}
+buildMatrix();buildPower();buildCountries();buildPilots();
+updateDisplay();updateCLI();
+const ip=PWR.find(p=>p.mw===ST.power);
+document.getElementById('pwrBar').style.width=ip.pct+'%';
+document.getElementById('pwrBar').style.background='var(--amber)';
+checkCountryWarn();
+setTimeout(updateSpectrum,100);
+window.addEventListener('resize',updateSpectrum);
+</script>
 </body>
 </html>

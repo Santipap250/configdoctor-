@@ -2,110 +2,535 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>VTX Range Calculator — OBIXConfig Doctor</title>
-{% set og_title       = "VTX Range Calculator — OBIXConfig Doctor" %}
-{% set og_description = "ประมาณระยะสัญญาณวิดีโอ FPV จากกำลังส่งและสภาพแวดล้อม พร้อมกราฟ" %}
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>VTX Signal Range Lab — OBIXConfig Doctor</title>
+{% set og_title       = "VTX Signal Range Lab — OBIXConfig Doctor" %}
+{% set og_description = "คำนวณระยะ VTX แบบ real-time พร้อม SVG ring visualization, antenna presets, multi-frequency comparison" %}
 {% set og_url         = "https://configdoctor.onrender.com/vtx-range" %}
+{% set nav_page       = "vtx_range" %}
 {% include "partials/og_tags.html" %}
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@400;500;600&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  body { font-family: sans-serif; background: #121212; color: #eee; padding: 20px; }
-  .container { max-width:min(800px,100%); margin: 0 auto; }
-  h1 { color: #f1b65a; }
-  .card { background: #1e1e1e; border-radius: 12px; padding: 20px; margin-top: 16px; }
-  label { display: block; margin: 10px 0 4px; color: #aaa; font-size: 0.9em; }
-  input, select {
-    width: 100%; padding: 8px 10px;
-    background: #2a2a2a; border: 1px solid #444;
-    border-radius: 6px; color: #eee;
-  }
-  button {
-    margin-top: 16px; padding: 10px 24px;
-    background: #f1b65a; color: #111;
-    border: none; border-radius: 8px;
-    cursor: pointer; font-weight: bold;
-  }
-  .result {
-    margin-top: 20px; background: #2a2a2a;
-    border-radius: 8px; padding: 16px;
-  }
-  .result span { font-size: 1.4em; color: #f1b65a; font-weight: bold; }
-  .back-link {
-    display: inline-block; margin-top: 20px;
-    color: #aaa; text-decoration: none; font-size: 0.9em;
-  }
-  .back-link:hover { color: #f1b65a; }
+:root{
+  --bg:#010507; --panel:#050d12; --panel2:#08141e; --border:rgba(0,170,255,.09);
+  --blue:#00aaff; --cyan:#00e5ff; --green:#00ff88; --amber:#ffb700; --red:#ff4455; --purple:#cc55ff;
+  --muted:#1a3a50; --text:#9ac8e0; --font-d:'Orbitron',sans-serif;
+  --font-m:'JetBrains Mono',monospace; --font-t:'Sarabun',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font-t);font-size:14px;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(0,170,255,.05) 0%,transparent 70%)}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:rgba(0,170,255,.25);border-radius:2px}
 
-  /* ── Responsive ── */
-  html,body{overflow-x:hidden}
-  input,select,button{font-size:16px;min-height:44px}
-  @media(max-width:600px){body{padding:12px}.container{padding:0}.card{padding:14px}}
+.page{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:0 16px 60px}
+
+.hero{padding:26px 0 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.hero-eye{font-family:var(--font-d);font-size:8.5px;font-weight:700;letter-spacing:.2em;
+  color:var(--cyan);display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--cyan);
+  box-shadow:0 0 14px var(--cyan);animation:pa 2s ease-in-out infinite}
+@keyframes pa{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.65)}}
+.hero-title{font-family:var(--font-d);font-size:clamp(20px,3vw,36px);font-weight:900;
+  letter-spacing:.04em;color:#fff;line-height:1.1}
+.hero-title span{color:var(--cyan);text-shadow:0 0 24px rgba(0,229,255,.4)}
+.hero-sub{margin-top:8px;font-size:12.5px;color:#2a5060;line-height:1.65}
+
+.lab-grid{display:grid;grid-template-columns:280px 1fr;gap:14px;margin-top:18px;align-items:start}
+@media(max-width:900px){.lab-grid{grid-template-columns:1fr}}
+
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;position:relative}
+.panel::before{content:'';position:absolute;inset:0;pointer-events:none;border-radius:14px;
+  background:linear-gradient(135deg,rgba(0,170,255,.015) 0%,transparent 60%)}
+.panel-hd{padding:11px 15px 9px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between}
+.panel-title{font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.15em;
+  color:var(--cyan);text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.panel-body{padding:14px}
+
+/* Slider */
+.field{margin-bottom:14px}
+.field-label{font-family:var(--font-d);font-size:8.5px;letter-spacing:.12em;font-weight:700;
+  color:#2a5060;text-transform:uppercase;display:flex;justify-content:space-between;margin-bottom:6px}
+.field-label .live{color:var(--cyan);font-family:var(--font-m);font-size:11px;letter-spacing:.03em}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;
+  border-radius:2px;background:var(--muted);cursor:pointer;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;
+  border-radius:50%;background:var(--cyan);box-shadow:0 0 10px rgba(0,229,255,.5);
+  border:2px solid var(--bg);cursor:pointer;transition:transform .15s}
+input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.2)}
+.seg-row{display:flex;border-radius:9px;overflow:hidden;border:1px solid var(--border)}
+.seg-btn{flex:1;padding:8px 4px;font-family:var(--font-d);font-size:8px;font-weight:700;
+  letter-spacing:.08em;background:none;border:none;color:#2a5060;cursor:pointer;
+  transition:.18s;text-align:center;text-transform:uppercase}
+.seg-btn.active{background:rgba(0,229,255,.12);color:var(--cyan)}
+.seg-btn:hover:not(.active){color:var(--text);background:rgba(255,255,255,.03)}
+
+/* Antenna presets */
+.ant-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:12px}
+.ant-btn{padding:8px 6px;border-radius:8px;border:1px solid var(--border);background:none;
+  color:#2a5060;cursor:pointer;font-family:var(--font-d);font-size:7.5px;font-weight:700;
+  letter-spacing:.07em;text-align:center;transition:.18s;line-height:1.5}
+.ant-btn .ab-name{display:block;color:var(--text);font-size:9.5px;margin-bottom:1px}
+.ant-btn .ab-gain{display:block;color:var(--cyan);font-family:var(--font-m);font-size:8.5px}
+.ant-btn:hover,.ant-btn.active{border-color:rgba(0,229,255,.3);background:rgba(0,229,255,.06);color:var(--cyan)}
+
+/* Environment */
+.env-row{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:12px}
+.env-btn{padding:7px 4px;border-radius:8px;border:1px solid var(--border);background:none;
+  color:#2a5060;cursor:pointer;font-size:8px;font-family:var(--font-d);letter-spacing:.06em;
+  font-weight:700;text-align:center;transition:.18s;line-height:1.5}
+.env-btn .ev-icon{display:block;font-size:14px;margin-bottom:2px}
+.env-btn:hover,.env-btn.active{border-color:rgba(255,183,0,.3);background:rgba(255,183,0,.06);color:var(--amber)}
+
+/* Result chips */
+.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.res-chip{background:var(--panel2);border:1px solid var(--border);border-radius:10px;
+  padding:12px;text-align:center}
+.rc-val{font-family:var(--font-m);font-size:22px;font-weight:600;color:#fff;line-height:1}
+.rc-lbl{font-family:var(--font-d);font-size:7.5px;letter-spacing:.1em;color:#2a5060;margin-top:4px}
+.rc-sub{font-size:10.5px;color:#2a5060;margin-top:3px}
+
+/* Ring SVG */
+.ring-wrap{background:var(--panel2);border-radius:12px;border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;padding:16px}
+#ringSvg{display:block;width:100%;max-width:480px;height:auto}
+.ring-drone{animation:dronePulse 2s ease-in-out infinite}
+@keyframes dronePulse{0%,100%{r:6;opacity:1}50%{r:9;opacity:.7}}
+.ring-pulse{animation:ringExpand 2.5s ease-out infinite}
+@keyframes ringExpand{0%{r:0;opacity:.7}100%{r:200;opacity:0}}
+
+/* Comparison table */
+.cmp-table{width:100%;border-collapse:collapse}
+.cmp-table th{font-family:var(--font-d);font-size:7.5px;letter-spacing:.1em;font-weight:700;
+  color:#2a5060;padding:8px 12px;border-bottom:1px solid var(--border);text-align:left}
+.cmp-table td{font-family:var(--font-m);font-size:12px;padding:8px 12px;
+  border-bottom:1px solid rgba(0,170,255,.05)}
+.cmp-table tr:hover td{background:rgba(0,170,255,.04)}
+.cmp-table tr:last-child td{border-bottom:none}
+.freq-badge{display:inline-block;padding:2px 8px;border-radius:100px;
+  font-size:9px;font-family:var(--font-d);letter-spacing:.07em;font-weight:700}
+
+/* Link budget bar */
+.lb-bar-track{height:8px;background:var(--muted);border-radius:4px;overflow:hidden;margin:8px 0}
+.lb-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--amber),var(--green));transition:width .6s}
+
+/* Warning */
+.warn-item{padding:9px 12px;border-radius:8px;border-left:2px solid var(--amber);
+  background:rgba(255,183,0,.05);font-size:12px;margin-bottom:6px;line-height:1.55}
+
+@media(max-width:600px){.result-grid{grid-template-columns:1fr}.ant-grid{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
-<div class="container">
-  <h1>📡 VTX Range Calculator</h1>
-  <p style="color:#aaa;">
-    ประมาณระยะส่งสัญญาณ VTX จากกำลังส่ง + antenna
-    (Free-Space Path Loss model)
-  </p>
+{% set nav_page = "vtx_range" %}
+{% include "partials/nav.html" %}
+<div class="page">
 
-  <div class="card">
-    <label>กำลังส่ง VTX (mW)</label>
-    <input type="number" id="txPower" value="400" min="25" max="2000" step="25">
+<!-- Hero -->
+<div class="hero">
+  <div>
+    <div class="hero-eye"><span class="pulse"></span>OBIX · VTX SIGNAL RANGE LAB</div>
+    <h1 class="hero-title">Signal Range <span>Lab</span></h1>
+    <p class="hero-sub">Real-time link budget · SVG range visualization · Antenna presets · Multi-frequency comparison</p>
+  </div>
+  <a href="/vtx" style="font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.12em;
+    color:#2a5060;text-decoration:none;border:1px solid var(--border);border-radius:7px;padding:8px 14px;transition:.18s"
+    onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='#2a5060'">VTX Bands →</a>
+</div>
 
-    <label>ความถี่</label>
-    <select id="freq">
-      <option value="5800">5.8 GHz (5800 MHz) — ทั่วไป</option>
-      <option value="2400">2.4 GHz (2400 MHz) — ระยะไกลขึ้น</option>
-      <option value="900">900 MHz — Long-range</option>
-    </select>
+<div class="lab-grid">
 
-    <label>ความไวรับสัญญาณ RX (dBm) เช่น -90</label>
-    <input type="number" id="rxSens" value="-90" min="-110" max="-60">
+  <!-- LEFT -->
+  <div>
+    <!-- Antenna Presets -->
+    <div class="panel" style="margin-bottom:12px">
+      <div class="panel-hd"><div class="panel-title">Antenna Setup</div></div>
+      <div class="panel-body">
+        <div style="font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:#2a5060;margin-bottom:7px">TX ANTENNA</div>
+        <div class="ant-grid" id="antTxGrid"></div>
+        <div style="font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:#2a5060;margin-bottom:7px">RX ANTENNA</div>
+        <div class="ant-grid" id="antRxGrid"></div>
+      </div>
+    </div>
 
-    <label>Antenna gain TX (dBi)</label>
-    <input type="number" id="txGain" value="2" min="0" max="20" step="0.5">
+    <!-- Parameters -->
+    <div class="panel" style="margin-bottom:12px">
+      <div class="panel-hd"><div class="panel-title">Parameters</div></div>
+      <div class="panel-body">
 
-    <label>Antenna gain RX (dBi)</label>
-    <input type="number" id="rxGain" value="2" min="0" max="20" step="0.5">
+        <div class="field">
+          <div class="field-label">VTX Power <span class="live" id="lv_pwr">400 mW</span></div>
+          <input type="range" id="s_pwr" min="25" max="2000" step="25" value="400">
+          <div class="seg-row" style="margin-top:7px" id="seg_pwr">
+            <button class="seg-btn" data-v="25">25mW</button>
+            <button class="seg-btn" data-v="100">100</button>
+            <button class="seg-btn active" data-v="400">400</button>
+            <button class="seg-btn" data-v="800">800</button>
+            <button class="seg-btn" data-v="2000">2W</button>
+          </div>
+        </div>
 
-    <button onclick="calcRange()">คำนวณระยะ</button>
+        <div class="field">
+          <div class="field-label">Frequency</div>
+          <div class="seg-row" id="seg_freq">
+            <button class="seg-btn" data-v="900">900MHz</button>
+            <button class="seg-btn" data-v="2400">2.4GHz</button>
+            <button class="seg-btn active" data-v="5800">5.8GHz</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">RX Sensitivity <span class="live" id="lv_rxs">-90 dBm</span></div>
+          <input type="range" id="s_rxs" min="-110" max="-60" step="1" value="-90">
+          <div style="font-size:11px;color:#2a5060;margin-top:4px">Digital FPV: -90 to -95 · Analog: -85 to -90</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Environment</div>
+          <div class="env-row" id="envRow"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Custom gains (advanced) -->
+    <div class="panel">
+      <div class="panel-hd"><div class="panel-title">Manual Gain</div>
+        <span style="font-family:var(--font-d);font-size:7.5px;color:#2a5060">dBi</span>
+      </div>
+      <div class="panel-body">
+        <div class="field" style="margin-bottom:8px">
+          <div class="field-label">TX Gain <span class="live" id="lv_txg">2.0 dBi</span></div>
+          <input type="range" id="s_txg" min="-3" max="20" step="0.5" value="2">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <div class="field-label">RX Gain <span class="live" id="lv_rxg">2.0 dBi</span></div>
+          <input type="range" id="s_rxg" min="-3" max="20" step="0.5" value="2">
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="result" id="result" style="display:none;">
-    <p>📏 ระยะประมาณ: <span id="rangeOut">—</span></p>
-    <p style="color:#aaa; font-size:0.85em;">
-      * ค่านี้เป็น line-of-sight (ไม่มีสิ่งกีดขวาง)<br>
-      ในสภาพจริง ระยะอาจน้อยกว่า 30–60%
-      เนื่องจากอาคาร ต้นไม้ และสัญญาณแทรก
-    </p>
-  </div>
+  <!-- RIGHT -->
+  <div>
 
-  <a class="back-link" href="/app">← กลับหน้าหลัก</a>
+    <!-- Results -->
+    <div class="panel" style="margin-bottom:12px">
+      <div class="panel-hd">
+        <div class="panel-title">Range Estimate</div>
+        <span style="font-size:9px;color:var(--cyan);font-family:var(--font-m);animation:pa 1.5s ease-in-out infinite;">● LIVE</span>
+      </div>
+      <div style="padding:14px 16px">
+        <div class="result-grid">
+          <div class="res-chip" style="border-top:2px solid var(--cyan)">
+            <div class="rc-val" id="r_los" style="color:var(--cyan)">—</div>
+            <div class="rc-lbl">Line of Sight</div>
+            <div class="rc-sub">ไม่มีสิ่งกีดขวาง</div>
+          </div>
+          <div class="res-chip" style="border-top:2px solid var(--amber)">
+            <div class="rc-val" id="r_env" style="color:var(--amber)">—</div>
+            <div class="rc-lbl">Practical Range</div>
+            <div class="rc-sub" id="envName">Outdoor field</div>
+          </div>
+          <div class="res-chip">
+            <div class="rc-val" id="r_lb" style="color:var(--green)">—</div>
+            <div class="rc-lbl">Link Budget</div>
+            <div class="rc-sub">dB margin</div>
+          </div>
+          <div class="res-chip">
+            <div class="rc-val" id="r_dbm" style="color:var(--text)">—</div>
+            <div class="rc-lbl">TX Power</div>
+            <div class="rc-sub">dBm</div>
+          </div>
+        </div>
+        <div class="field-label" style="margin-bottom:4px">Link Budget Quality</div>
+        <div class="lb-bar-track"><div class="lb-bar-fill" id="lbBar" style="width:0%"></div></div>
+        <div id="warnArea"></div>
+      </div>
+    </div>
+
+    <!-- Ring Visualization -->
+    <div class="panel" style="margin-bottom:12px">
+      <div class="panel-hd">
+        <div class="panel-title">Range Visualization (Top-Down)</div>
+        <span id="ringLabel" style="font-family:var(--font-m);font-size:9px;color:var(--cyan)"></span>
+      </div>
+      <div class="ring-wrap">
+        <svg id="ringSvg" viewBox="0 0 500 500">
+          <defs>
+            <radialGradient id="bgGrad" cx="50%" cy="50%"><stop offset="0%" stop-color="#0a1828"/><stop offset="100%" stop-color="#010507"/></radialGradient>
+            <radialGradient id="safeGrad" cx="50%" cy="50%"><stop offset="0%" stop-color="rgba(0,229,255,.12)"/><stop offset="100%" stop-color="rgba(0,229,255,0)"/></radialGradient>
+            <radialGradient id="warnGrad" cx="50%" cy="50%"><stop offset="0%" stop-color="rgba(255,183,0,.08)"/><stop offset="100%" stop-color="rgba(255,183,0,0)"/></radialGradient>
+          </defs>
+          <!-- Background -->
+          <rect width="500" height="500" fill="url(#bgGrad)" rx="10"/>
+          <!-- Grid rings (static decorative) -->
+          <g id="gridRings" opacity="0.12"></g>
+          <!-- Practical range fill -->
+          <circle id="practRangeFill" cx="250" cy="250" r="0" fill="url(#safeGrad)" opacity="0.6" style="transition:r .6s cubic-bezier(.4,0,.2,1)"/>
+          <!-- LoS range fill -->
+          <circle id="losRangeFill" cx="250" cy="250" r="0" fill="url(#safeGrad)" opacity="0.3" style="transition:r .6s cubic-bezier(.4,0,.2,1)"/>
+          <!-- Range rings with labels -->
+          <g id="rangeRings"></g>
+          <!-- Pulse ring -->
+          <circle class="ring-pulse" id="pulseLine" cx="250" cy="250" r="0" fill="none" stroke="rgba(0,229,255,.4)" stroke-width="2"/>
+          <!-- Drone -->
+          <circle class="ring-drone" id="droneCircle" cx="250" cy="250" r="6" fill="var(--cyan)"/>
+          <!-- North indicator -->
+          <line x1="250" y1="235" x2="250" y2="215" stroke="rgba(255,255,255,.2)" stroke-width="1.5"/>
+          <text x="250" y="210" text-anchor="middle" font-family="Orbitron" font-size="9" fill="rgba(255,255,255,.2)">N</text>
+          <!-- Center label -->
+          <text x="250" y="268" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="rgba(0,229,255,.4)">PILOT</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Multi-frequency comparison -->
+    <div class="panel">
+      <div class="panel-hd"><div class="panel-title">Frequency Comparison</div></div>
+      <div style="overflow-x:auto">
+        <table class="cmp-table">
+          <tr>
+            <th>Frequency</th><th>LoS Range</th><th>Practical</th>
+            <th>Link Budget</th><th>Penetration</th>
+          </tr>
+          <tbody id="freqTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
 </div>
 
 <script>
-function calcRange() {
-  const txPower_mW = parseFloat(document.getElementById('txPower').value) || 400;
-  const freq_MHz   = parseFloat(document.getElementById('freq').value)    || 5800;
-  const rxSens_dBm = parseFloat(document.getElementById('rxSens').value)  || -90;
-  const txGain_dBi = parseFloat(document.getElementById('txGain').value)  || 2;
-  const rxGain_dBi = parseFloat(document.getElementById('rxGain').value)  || 2;
+/* ═══════════════════════════════════════════════════════
+   VTX Signal Range Lab — Brain
+   Physics: Free-Space Path Loss (Friis transmission)
+   FSPL(dB) = 20·log10(d) + 20·log10(f) + 92.45
+   (d in km, f in GHz)
+═══════════════════════════════════════════════════════ */
 
-  const txPower_dBm = 10 * Math.log10(txPower_mW);
-  const linkBudget  = txPower_dBm + txGain_dBi + rxGain_dBi - rxSens_dBm;
-  const exponent    = (linkBudget - 20 * Math.log10(freq_MHz) - 32.44) / 20;
-  const range_km    = Math.pow(10, exponent);
+const ANTENNAS = [
+  { id:'stock',    name:'Stock Whip', gain:0,    icon:'📡' },
+  { id:'clover',   name:'Cloverleaf', gain:1.5,  icon:'🍀' },
+  { id:'pagoda',   name:'Pagoda',     gain:3,    icon:'🗼' },
+  { id:'patch',    name:'Patch/Yagi', gain:8,    icon:'📻' },
+  { id:'helical',  name:'Helical',    gain:10,   icon:'🌀' },
+  { id:'ibcrazy',  name:'IBCrazy Twisty', gain:2, icon:'🌪' },
+];
 
-  const display = range_km >= 1
-    ? range_km.toFixed(2) + ' km'
-    : (range_km * 1000).toFixed(0) + ' m';
+const ENVIRONMENTS = [
+  { id:'los',    name:'Open Field',  factor:1.0, icon:'🌾' },
+  { id:'sub',    name:'Suburban',    factor:0.6, icon:'🏘' },
+  { id:'urban',  name:'Urban',       factor:0.4, icon:'🏙' },
+  { id:'indoor', name:'Indoor',      factor:0.15,icon:'🏠' },
+];
 
-  document.getElementById('rangeOut').innerText = display;
-  document.getElementById('result').style.display = 'block';
+const FREQS = [
+  { mhz:5800, label:'5.8GHz',  color:'#00e5ff',  pen:'Poor' },
+  { mhz:2400, label:'2.4GHz',  color:'#00ff88',  pen:'Good' },
+  { mhz:900,  label:'900MHz',  color:'#cc55ff',   pen:'Excellent' },
+];
+
+let ST = { pwr:400, freq:5800, rxs:-90, txg:2, rxg:2, env:'los', antTx:'clover', antRx:'clover' };
+
+// ── Build antenna grids ───────────────────────────────
+function buildAntennaGrid(id, stateKey) {
+  const g = document.getElementById(id);
+  g.innerHTML = ANTENNAS.map(a => `
+    <button class="ant-btn${ST[stateKey]===a.id?' active':''}" data-id="${a.id}"
+      onclick="setAnt('${stateKey}','${a.id}',this)">
+      <span class="ab-name">${a.icon} ${a.name}</span>
+      <span class="ab-gain">${a.gain>=0?'+':''}${a.gain} dBi</span>
+    </button>`).join('');
 }
+function setAnt(key, id, btn) {
+  ST[key] = id;
+  const slider = key==='antTx'?'s_txg':'s_rxg';
+  const lv     = key==='antTx'?'lv_txg':'lv_rxg';
+  const ant = ANTENNAS.find(a=>a.id===id);
+  document.getElementById(slider).value = ant.gain;
+  document.getElementById(lv).textContent = ant.gain + ' dBi';
+  ST[key==='antTx'?'txg':'rxg'] = ant.gain;
+  btn.closest('.ant-grid').querySelectorAll('.ant-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+// ── Build env buttons ─────────────────────────────────
+function buildEnv() {
+  document.getElementById('envRow').innerHTML = ENVIRONMENTS.map(e => `
+    <button class="env-btn${ST.env===e.id?' active':''}" data-id="${e.id}" onclick="setEnv('${e.id}',this)">
+      <span class="ev-icon">${e.icon}</span>${e.name}
+    </button>`).join('');
+}
+function setEnv(id, btn) {
+  ST.env = id;
+  document.querySelectorAll('.env-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+// ── Physics ────────────────────────────────────────────
+function calcRange(pwr_mW, freq_MHz, rxs_dBm, txg_dBi, rxg_dBi) {
+  const txPow_dBm = 10 * Math.log10(pwr_mW);
+  const linkBudget = txPow_dBm + txg_dBi + rxg_dBi - rxs_dBm;
+  // FSPL(km,GHz) = 92.45 + 20log10(GHz) + 20log10(km)
+  const fGHz = freq_MHz / 1000;
+  const fspl_1m = 92.45 + 20*Math.log10(fGHz) + 20*Math.log10(0.001); // at 1m
+  const exponent = (linkBudget - 92.45 - 20*Math.log10(fGHz)) / 20;
+  const range_km = Math.pow(10, exponent);
+  return { range_km, linkBudget, txPow_dBm };
+}
+
+function fmtRange(km) {
+  if (km >= 1) return km.toFixed(2) + ' km';
+  return (km * 1000).toFixed(0) + ' m';
+}
+
+// ── Render ────────────────────────────────────────────
+function render() {
+  const envObj = ENVIRONMENTS.find(e=>e.id===ST.env);
+  const { range_km, linkBudget, txPow_dBm } = calcRange(ST.pwr, ST.freq, ST.rxs, ST.txg, ST.rxg);
+  const practical = range_km * envObj.factor;
+
+  // Results
+  document.getElementById('r_los').textContent = fmtRange(range_km);
+  document.getElementById('r_env').textContent = fmtRange(practical);
+  document.getElementById('r_lb').textContent  = linkBudget.toFixed(1) + ' dB';
+  document.getElementById('r_dbm').textContent = txPow_dBm.toFixed(1) + ' dBm';
+  document.getElementById('envName').textContent = envObj.name;
+  document.getElementById('ringLabel').textContent = fmtRange(range_km) + ' LoS';
+
+  // Link budget bar
+  const lbPct = Math.min(100, Math.max(0, ((linkBudget - 50) / 80) * 100));
+  document.getElementById('lbBar').style.width = lbPct + '%';
+
+  // Warnings
+  const warns = [];
+  if (ST.freq === 5800 && practical < 0.3) warns.push('⚠ 5.8GHz ระยะสั้นในสภาพแวดล้อมนี้ — พิจารณา 2.4GHz หรือเพิ่ม antenna gain');
+  if (ST.pwr > 800) warns.push('⚠ กำลังส่งสูง — ตรวจสอบกฎหมายท้องถิ่น (ประเทศไทย max 100mW บนความถี่ 5.8GHz)');
+  if (linkBudget < 80) warns.push('⚠ Link budget ต่ำ — ควรมีอย่างน้อย 80-100dB สำหรับ FPV ที่เสถียร');
+  if (ST.antTx === 'stock' && range_km > 1) warns.push('💡 Upgrade antenna เป็น Cloverleaf/Pagoda จะเพิ่มระยะได้ 20-50%');
+  document.getElementById('warnArea').innerHTML = warns.map(w=>`<div class="warn-item">${w}</div>`).join('');
+
+  // SVG Rings
+  renderRings(range_km, practical);
+
+  // Freq comparison table
+  renderFreqTable();
+}
+
+function renderRings(los_km, pract_km) {
+  const SVG_R = 230; // max radius in SVG units
+  const maxKm = Math.max(los_km * 1.2, 0.1);
+
+  // Decorative background rings
+  const gridR = document.getElementById('gridRings');
+  gridR.innerHTML = [50,100,150,200,230].map(r=>`
+    <circle cx="250" cy="250" r="${r}" fill="none" stroke="rgba(0,170,255,.2)" stroke-width=".5" stroke-dasharray="3 4"/>`).join('');
+
+  // Scale km → SVG radius
+  const scale = SVG_R / maxKm;
+
+  const losR    = Math.min(SVG_R, los_km * scale);
+  const practR  = Math.min(SVG_R, pract_km * scale);
+
+  document.getElementById('losRangeFill').setAttribute('r', losR);
+  document.getElementById('practRangeFill').setAttribute('r', practR);
+
+  // Labeled rings
+  const ringsG = document.getElementById('rangeRings');
+  const steps = generateSteps(los_km);
+  ringsG.innerHTML = steps.map(km => {
+    const r = Math.min(SVG_R - 2, km * scale);
+    const isLoS = Math.abs(km - los_km) < los_km * 0.05;
+    const isPract = Math.abs(km - pract_km) < pract_km * 0.05;
+    const color = isLoS ? 'rgba(0,229,255,.6)' : isPract ? 'rgba(255,183,0,.5)' : 'rgba(0,170,255,.2)';
+    const w = isLoS||isPract ? 1.5 : 0.7;
+    const lbl = fmtRange(km);
+    return `
+      <circle cx="250" cy="250" r="${r}" fill="none" stroke="${color}" stroke-width="${w}" ${isLoS||isPract?'':'stroke-dasharray="4 6"'}/>
+      <text x="${250+r}" y="250" font-family="JetBrains Mono" font-size="8" fill="${color}" dy="-3" dx="3">${lbl}</text>`;
+  }).join('') +
+  // LoS label
+  `<text x="250" y="${250 - losR - 8}" text-anchor="middle" font-family="Orbitron" font-size="8" font-weight="700" fill="rgba(0,229,255,.8)">LoS MAX</text>` +
+  (practR > 20 ? `<text x="250" y="${250 - practR - 5}" text-anchor="middle" font-family="Orbitron" font-size="7" fill="rgba(255,183,0,.7)">PRACTICAL</text>` : '');
+}
+
+function generateSteps(maxKm) {
+  const steps = [];
+  const magnitudes = [0.05,0.1,0.2,0.3,0.5,1,1.5,2,3,5,10,15,20];
+  for (const m of magnitudes) {
+    if (m <= maxKm * 1.05) steps.push(m);
+    if (steps.length >= 6) break;
+  }
+  return steps;
+}
+
+function renderFreqTable() {
+  const tbody = document.getElementById('freqTable');
+  tbody.innerHTML = FREQS.map(f => {
+    const { range_km, linkBudget } = calcRange(ST.pwr, f.mhz, ST.rxs, ST.txg, ST.rxg);
+    const env = ENVIRONMENTS.find(e=>e.id===ST.env);
+    const pract = range_km * env.factor;
+    const isActive = f.mhz === ST.freq;
+    return `<tr style="${isActive?'background:rgba(0,170,255,.05)':''}">
+      <td><span class="freq-badge" style="background:${f.color}22;color:${f.color};border:1px solid ${f.color}44">${f.label}</span></td>
+      <td style="color:${f.color};font-weight:600">${fmtRange(range_km)}</td>
+      <td>${fmtRange(pract)}</td>
+      <td>${linkBudget.toFixed(1)} dB</td>
+      <td style="color:var(--text)">${f.pen}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Wire controls ─────────────────────────────────────
+function wireSlider(id, lvId, unit, stateKey, decimals=0) {
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => {
+    const v = parseFloat(el.value);
+    ST[stateKey] = v;
+    document.getElementById(lvId).textContent = v.toFixed(decimals) + ' ' + unit;
+    render();
+  });
+}
+wireSlider('s_pwr','lv_pwr','mW','pwr');
+wireSlider('s_rxs','lv_rxs','dBm','rxs');
+wireSlider('s_txg','lv_txg','dBi','txg',1);
+wireSlider('s_rxg','lv_rxg','dBi','rxg',1);
+
+document.getElementById('seg_pwr').querySelectorAll('.seg-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#seg_pwr .seg-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const v = parseInt(btn.dataset.v);
+    ST.pwr = v;
+    document.getElementById('s_pwr').value = v;
+    document.getElementById('lv_pwr').textContent = v + ' mW';
+    render();
+  });
+});
+document.getElementById('seg_freq').querySelectorAll('.seg-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#seg_freq .seg-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    ST.freq = parseInt(btn.dataset.v);
+    render();
+  });
+});
+
+// ── Init ──────────────────────────────────────────────
+buildAntennaGrid('antTxGrid','antTx');
+buildAntennaGrid('antRxGrid','antRx');
+buildEnv();
+render();
 </script>
 </body>
 </html>
