@@ -55,6 +55,8 @@ _STYLE_MAP = {
     "mini": "freestyle", "heavy": "freestyle", "heavy_5": "freestyle",
     "mid_lr": "longrange", "long_range": "longrange",
     "longrange": "longrange", "racing": "racing", "freestyle": "freestyle",
+    "cinematic": "longrange",  # FIX: ESC checker cinematic style
+    "cinema": "longrange", "sport": "racing",
 }
 
 def _normalize_style(s: str) -> str:
