@@ -3,142 +3,1118 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PID Symptom Advisor — OBIXConfig Doctor</title>
-{% set og_title       = "PID Symptom Advisor — OBIXConfig Doctor" %}
-{% set og_description = "บอกอาการที่พบขณะบิน รับคำแนะนำ PID + CLI command แก้ไขทันที" %}
+<title>PID Diagnostic Lab — OBIXConfig Doctor</title>
+{% set og_title       = "PID Diagnostic Lab — OBIXConfig Doctor" %}
+{% set og_description = "วิเคราะห์อาการโดรน → วินิจฉัย PID + CLI commands พร้อม paste ทันที — OBIX Diagnostic Lab" %}
 {% set og_url         = "https://configdoctor.onrender.com/pid-advisor" %}
+{% set nav_page       = "pid_advisor" %}
 {% include "partials/og_tags.html" %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@400;500;600&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--accent:#FF6B2B;--dark:#0F1117;--panel:#1A1D27;--border:#2E3348;--text:#E2E8F0;--muted:#8A94A6;--danger:#EF4444;--warning:#F59E0B;--ok:#22C55E;}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark);color:var(--text);padding:2rem 1rem;}
-.wrap{max-width:min(900px,100%);margin:0 auto;}
-h1{font-size:1.8rem;font-weight:700;color:var(--accent);margin-bottom:.3rem;}
-.subtitle{color:var(--muted);margin-bottom:1.8rem;font-size:.95rem;}
-h2{font-size:1.05rem;font-weight:600;color:#fff;margin:1.5rem 0 .7rem;}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:1.25rem 1.5rem;margin:.8rem 0;}
-.symptom-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
-@media(max-width:min(600px,100%)){.symptom-grid{grid-template-columns:1fr;}}
-.symptom-btn{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;cursor:pointer;text-align:left;color:var(--text);transition:.15s;font-size:.9rem;line-height:1.4;}
-.symptom-btn:hover{border-color:var(--accent);background:#12151f;}
-.symptom-btn.active{border-color:var(--accent);background:#1a1200;color:#fff;}
-.symptom-btn .cat{font-size:.72rem;color:var(--muted);display:block;margin-top:.2rem;}
-.result-section{margin-top:1.5rem;}
-.diag-box{background:#0d1117;border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin:.8rem 0;}
-.cause-badge{display:inline-block;background:#451a0366;border:1px solid #7c2d12;color:#fdba74;padding:.2rem .7rem;border-radius:5px;font-size:.82rem;font-weight:600;margin:.4rem 0;}
-table{width:100%;border-collapse:collapse;margin:.6rem 0;}
-th{background:#1e2335;padding:.5rem .9rem;font-size:.82rem;text-align:left;color:var(--muted);}
-td{padding:.5rem .9rem;border-bottom:1px solid var(--border);font-size:.85rem;vertical-align:top;}
-td:first-child{font-family:'Courier New',monospace;color:#79c0ff;white-space:nowrap;}
-.dir-up{color:var(--ok);}
-.dir-down{color:var(--danger);}
-.dir-check{color:var(--warning);}
-.cli-box{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:1rem 1.2rem;font-family:'Courier New',monospace;font-size:.83rem;color:#79c0ff;white-space:pre-wrap;}
-.copy-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:.3rem .7rem;border-radius:5px;cursor:pointer;font-size:.8rem;}
-.copy-btn:hover{color:#fff;border-color:var(--accent);}
-.tip-item{padding:.3rem 0;color:var(--muted);font-size:.87rem;}
-.tip-item::before{content:"💡 ";color:var(--warning);}
-.hidden{display:none;}
+/* ═══════════════════════════════════════════════════════
+   OBIX PID DIAGNOSTIC LAB — v2.3
+═══════════════════════════════════════════════════════ */
+:root {
+  --bg:      #020509;
+  --bg2:     #040c16;
+  --panel:   #060e1c;
+  --panel2:  #0a1628;
+  --border:  rgba(0,255,136,.08);
+  --borderB: rgba(0,170,255,.12);
+  --green:   #00ff88;
+  --blue:    #00aaff;
+  --amber:   #ffb700;
+  --red:     #ff4455;
+  --purple:  #cc66ff;
+  --muted:   #3a5568;
+  --muted2:  #1e3040;
+  --text:    #bdd4e4;
+  --font-d:  'Orbitron', sans-serif;
+  --font-m:  'JetBrains Mono', monospace;
+  --font-t:  'Sarabun', sans-serif;
+  --glow-g:  0 0 20px rgba(0,255,136,.3);
+  --glow-r:  0 0 20px rgba(255,68,85,.3);
+  --glow-a:  0 0 20px rgba(255,183,0,.3);
+  --glow-b:  0 0 20px rgba(0,170,255,.3);
+}
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html, body { overflow-x:hidden; }
 
-  /* ── Responsive ── */
-  html,body{overflow-x:hidden}
-  @media(max-width:600px){[style*="1fr 1fr"]{grid-template-columns:1fr!important}}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-t);
+  font-size: 14px;
+  min-height: 100vh;
+}
+
+/* Scanline overlay */
+body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px,
+    rgba(0,255,136,.008) 2px, rgba(0,255,136,.008) 4px);
+}
+/* Ambient glow */
+body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 5%, rgba(0,255,136,.04) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 85% 90%, rgba(255,68,85,.03) 0%, transparent 70%);
+}
+
+/* ── Page wrap ── */
+.page { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:0 16px 60px; }
+
+/* ═══════════════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════════════ */
+.hero {
+  padding: 28px 0 22px;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 16px;
+}
+.hero-eyebrow {
+  font-family: var(--font-d); font-size: 8.5px; font-weight:700;
+  letter-spacing: .2em; color: var(--red); text-transform:uppercase;
+  display:flex; align-items:center; gap:8px; margin-bottom:10px;
+}
+.hero-led {
+  width:7px; height:7px; border-radius:50%; background:var(--red);
+  box-shadow: var(--glow-r);
+  animation: ledBlink 1.4s ease-in-out infinite;
+}
+@keyframes ledBlink { 0%,100%{opacity:1} 50%{opacity:.3} }
+.hero-title {
+  font-family: var(--font-d); font-size: clamp(20px,3vw,36px);
+  font-weight:900; letter-spacing:.04em; color:#fff; line-height:1.1;
+}
+.hero-title .hl { color:var(--red); text-shadow:var(--glow-r); }
+.hero-sub { margin-top:8px; font-size:12.5px; color:var(--muted); line-height:1.65; }
+
+.hero-stat {
+  display:flex; gap:20px; flex-wrap:wrap;
+  font-family: var(--font-d); font-size:9px; letter-spacing:.1em;
+}
+.hs-item { display:flex; flex-direction:column; gap:3px; }
+.hs-num { font-size:20px; font-weight:700; color:#fff; line-height:1; }
+.hs-label { color:var(--muted); }
+
+/* ═══════════════════════════════════════════════════════
+   MAIN GRID
+═══════════════════════════════════════════════════════ */
+.lab-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr 300px;
+  gap: 16px;
+  margin-top: 20px;
+  align-items: start;
+}
+@media(max-width:1080px) {
+  .lab-grid { grid-template-columns: 270px 1fr; }
+  .col-right { grid-column:1/-1; display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+}
+@media(max-width:680px) {
+  .lab-grid { grid-template-columns:1fr; }
+  .col-right { grid-template-columns:1fr; }
+}
+
+/* ── Panel base ── */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+}
+.panel::before {
+  content:''; position:absolute; inset:0; pointer-events:none; border-radius:14px;
+  background: linear-gradient(135deg, rgba(255,68,85,.02) 0%, transparent 60%);
+}
+.panel-hd {
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.panel-title {
+  font-family: var(--font-d); font-size:9px; font-weight:700;
+  letter-spacing:.16em; color:var(--red); text-transform:uppercase;
+  display:flex; align-items:center; gap:7px;
+}
+.panel-body { padding:14px; }
+
+/* ═══════════════════════════════════════════════════════
+   COLUMN LEFT — SYMPTOM SELECTOR
+═══════════════════════════════════════════════════════ */
+
+/* Category Tabs */
+.cat-tabs {
+  display:flex; flex-wrap:wrap; gap:5px; margin-bottom:13px;
+}
+.cat-tab {
+  font-family:var(--font-d); font-size:7.5px; font-weight:700; letter-spacing:.09em;
+  padding:4px 10px; border-radius:100px;
+  border:1px solid var(--border); background:none;
+  color:var(--muted); cursor:pointer; transition:.18s;
+}
+.cat-tab:hover { color:var(--text); border-color:rgba(255,255,255,.15); }
+.cat-tab.active {
+  color:var(--red); border-color:rgba(255,68,85,.35);
+  background:rgba(255,68,85,.08);
+}
+
+/* Severity Selector */
+.severity-row {
+  display:flex; gap:6px; margin-bottom:13px;
+  border-radius:9px; overflow:hidden;
+  border:1px solid var(--border);
+}
+.sev-btn {
+  flex:1; padding:7px 4px;
+  font-family:var(--font-d); font-size:8px; font-weight:700; letter-spacing:.08em;
+  background:none; border:none; cursor:pointer; text-align:center;
+  text-transform:uppercase; transition:.18s;
+}
+.sev-btn:hover { background:rgba(255,255,255,.04); }
+.sev-btn[data-sev="mild"].active   { background:rgba(0,255,136,.1);  color:var(--green); }
+.sev-btn[data-sev="moderate"].active{ background:rgba(255,183,0,.1); color:var(--amber); }
+.sev-btn[data-sev="severe"].active  { background:rgba(255,68,85,.1);  color:var(--red); }
+.sev-btn:not(.active) { color:var(--muted); }
+
+/* Multi-select hint */
+.multi-hint {
+  font-size:10.5px; color:var(--muted); margin-bottom:10px;
+  display:flex; align-items:center; gap:6px;
+}
+.multi-badge {
+  font-family:var(--font-d); font-size:8px; font-weight:700;
+  padding:2px 8px; border-radius:100px;
+  background:rgba(0,170,255,.1); border:1px solid rgba(0,170,255,.2); color:var(--blue);
+  display:none;
+}
+.multi-badge.show { display:inline-block; }
+
+/* Symptom cards */
+.symptom-list { display:flex; flex-direction:column; gap:7px; max-height:580px; overflow-y:auto; }
+.symptom-list::-webkit-scrollbar { width:3px; }
+.symptom-list::-webkit-scrollbar-track { background:var(--muted2); border-radius:2px; }
+.symptom-list::-webkit-scrollbar-thumb { background:var(--red); border-radius:2px; }
+
+.symp-card {
+  padding:11px 13px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--panel2);
+  cursor:pointer;
+  transition:.2s;
+  position:relative; overflow:hidden;
+  display:flex; align-items:center; gap:10px;
+}
+.symp-card:hover { border-color:rgba(255,68,85,.25); background:rgba(255,68,85,.04); }
+.symp-card.active {
+  border-color:var(--red);
+  background: rgba(255,68,85,.08);
+  box-shadow: inset 0 0 20px rgba(255,68,85,.06);
+}
+.symp-card::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+  border-radius:2px 0 0 2px;
+  opacity:0; transition:.2s;
+}
+.symp-card.active::before { opacity:1; }
+
+.symp-icon { font-size:18px; flex-shrink:0; line-height:1; }
+.symp-info { flex:1; min-width:0; }
+.symp-name {
+  font-size:12.5px; color:var(--text); line-height:1.4;
+  font-weight:500;
+}
+.symp-cat {
+  font-family:var(--font-d); font-size:7.5px; letter-spacing:.1em;
+  text-transform:uppercase; margin-top:3px;
+}
+.symp-check {
+  width:16px; height:16px; border-radius:50%;
+  border:1.5px solid var(--muted2);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:.2s;
+  font-size:10px;
+}
+.symp-card.active .symp-check {
+  background:var(--red); border-color:var(--red);
+  box-shadow: var(--glow-r);
+}
+
+/* ═══════════════════════════════════════════════════════
+   COLUMN MIDDLE — DIAGNOSIS
+═══════════════════════════════════════════════════════ */
+
+/* Empty state */
+.empty-state {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:60px 20px; text-align:center; min-height:300px;
+}
+.empty-reticle {
+  width:80px; height:80px; position:relative; margin-bottom:24px;
+}
+.er-ring {
+  position:absolute; border-radius:50%; border:1px solid;
+  animation: erSpin 8s linear infinite;
+}
+.er-ring:nth-child(1){ inset:0; border-color:rgba(255,68,85,.3); }
+.er-ring:nth-child(2){ inset:10px; border-color:rgba(255,68,85,.2); animation-duration:5s; animation-direction:reverse; }
+.er-ring:nth-child(3){ inset:20px; border-color:rgba(255,68,85,.15); animation-duration:3s; }
+.er-dot{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:22px; }
+.er-scan {
+  position:absolute; inset:0; border-radius:50%; overflow:hidden;
+}
+.er-scan::after{
+  content:''; position:absolute; width:50%; height:100%; right:50%; top:0;
+  background:conic-gradient(from 0deg, transparent 0deg, rgba(255,68,85,.15) 90deg, transparent 90deg);
+  transform-origin:right center;
+  animation:erSpin 3s linear infinite;
+}
+@keyframes erSpin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+.empty-title { font-family:var(--font-d); font-size:13px; font-weight:700; letter-spacing:.1em; color:var(--text); margin-bottom:8px; }
+.empty-sub { font-size:12px; color:var(--muted); line-height:1.6; }
+
+/* Diagnosis content */
+.diag-content { display:none; }
+.diag-content.show { display:block; }
+.empty-state.hide { display:none; }
+
+/* Drone axis diagram */
+.axis-wrap {
+  display:flex; justify-content:center; padding:16px 16px 8px;
+  border-bottom:1px solid var(--border);
+}
+.axis-svg { overflow:visible; }
+.ax-body { fill:var(--panel2); stroke:rgba(255,255,255,.1); stroke-width:1; }
+.ax-arm  { fill:none; stroke:var(--muted2); stroke-width:5; stroke-linecap:round; transition:.4s; }
+.ax-prop { fill:none; stroke:var(--muted2); stroke-width:2; transition:.4s; }
+.ax-roll-indicator  { fill:none; stroke:var(--amber); stroke-width:2; stroke-dasharray:5 3; opacity:0; transition:.4s; }
+.ax-pitch-indicator { fill:none; stroke:var(--green); stroke-width:2; stroke-dasharray:5 3; opacity:0; transition:.4s; }
+.ax-yaw-indicator   { fill:none; stroke:var(--purple); stroke-width:2; stroke-dasharray:5 3; opacity:0; transition:.4s; }
+.ax-label { font-family:var(--font-d); font-size:8px; font-weight:700; letter-spacing:.1em; fill:var(--muted); transition:.4s; }
+.ax-active { stroke-width:7!important; }
+.ax-active-label { fill:#fff!important; }
+
+.axis-legend {
+  display:flex; justify-content:center; gap:16px; padding:8px 0 14px;
+  flex-wrap:wrap;
+}
+.ax-leg {
+  font-family:var(--font-d); font-size:8px; letter-spacing:.1em; font-weight:700;
+  padding:3px 10px; border-radius:100px; border:1px solid; transition:.3s;
+  opacity:.3;
+}
+.ax-leg.on { opacity:1; }
+
+/* Diagnosis block */
+.diag-block {
+  margin:0 14px 14px;
+  background:rgba(0,0,0,.3); border:1px solid var(--border);
+  border-radius:11px; padding:14px;
+  position:relative; overflow:hidden;
+}
+.diag-block::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+  background: var(--accent-line, var(--red));
+}
+.diag-label {
+  font-family:var(--font-d); font-size:8px; letter-spacing:.15em; font-weight:700;
+  color:var(--muted); text-transform:uppercase; margin-bottom:8px;
+  display:flex; align-items:center; gap:8px;
+}
+.diag-label::after { content:''; flex:1; height:1px; background:var(--border); }
+.diag-text { font-size:13px; line-height:1.7; color:var(--text); }
+.cause-tag {
+  display:inline-flex; align-items:center; gap:6px;
+  margin-top:10px; padding:5px 12px; border-radius:100px;
+  font-family:var(--font-d); font-size:9px; font-weight:700; letter-spacing:.08em;
+  background:rgba(255,68,85,.1); border:1px solid rgba(255,68,85,.25); color:var(--red);
+}
+
+/* Adjustments table */
+.adj-wrap { margin:0 14px 14px; }
+.adj-title {
+  font-family:var(--font-d); font-size:8.5px; letter-spacing:.14em; font-weight:700;
+  color:var(--muted); text-transform:uppercase;
+  display:flex; align-items:center; gap:8px; margin-bottom:10px;
+}
+.adj-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+.adj-row {
+  display:grid; grid-template-columns:auto 1fr auto auto;
+  gap:0; border-radius:9px; overflow:hidden;
+  border:1px solid var(--border);
+  margin-bottom:7px; background:var(--panel2);
+  transition:.2s;
+}
+.adj-row:hover { border-color:rgba(255,255,255,.12); }
+
+.adj-dir {
+  padding:10px 12px; display:flex; align-items:center; justify-content:center;
+  font-size:18px; min-width:44px;
+  border-right:1px solid var(--border);
+}
+.adj-dir.up   { background:rgba(0,255,136,.08); }
+.adj-dir.down { background:rgba(255,68,85,.08); }
+.adj-dir.check{ background:rgba(255,183,0,.08); }
+
+.adj-body { padding:9px 12px; }
+.adj-param { font-family:var(--font-m); font-size:12px; color:#79c0ff; font-weight:600; }
+.adj-amount {
+  font-family:var(--font-d); font-size:8px; letter-spacing:.08em;
+  padding:2px 8px; border-radius:100px; margin-left:8px;
+  display:inline-block;
+}
+.adj-reason { font-size:11px; color:var(--muted); margin-top:3px; line-height:1.5; }
+.adj-axis-tag {
+  padding:9px 12px; display:flex; align-items:center;
+  font-family:var(--font-d); font-size:8px; letter-spacing:.06em; color:var(--muted);
+}
+
+/* Severity multiplier */
+.sev-note {
+  font-family:var(--font-d); font-size:8.5px; letter-spacing:.1em;
+  padding:6px 12px; border-radius:7px; margin:0 14px 14px;
+  display:flex; align-items:center; gap:8px;
+}
+
+/* Combined CLI for multi-symptom */
+.multi-cli-banner {
+  margin:0 14px 14px; padding:10px 14px;
+  background:rgba(0,170,255,.06); border:1px solid rgba(0,170,255,.2);
+  border-radius:9px;
+  font-family:var(--font-d); font-size:8.5px; letter-spacing:.1em; color:var(--blue);
+  display:none; align-items:center; gap:10px;
+}
+.multi-cli-banner.show { display:flex; }
+
+/* ═══════════════════════════════════════════════════════
+   COLUMN RIGHT — CLI + TIPS
+═══════════════════════════════════════════════════════ */
+
+/* CLI panel */
+.cli-panel {
+  background:rgba(0,0,0,.5);
+  border-radius:11px;
+  overflow:hidden;
+  border:1px solid var(--border);
+  position:relative;
+}
+.cli-topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:9px 12px; border-bottom:1px solid var(--border);
+}
+.cli-dot-row { display:flex; gap:5px; }
+.cli-dot { width:9px; height:9px; border-radius:50%; }
+.cli-dot-r { background:#ff5f57; }
+.cli-dot-a { background:#ffbd2e; }
+.cli-dot-g { background:#28c840; }
+.cli-filename { font-family:var(--font-m); font-size:10px; color:var(--muted); }
+.cli-copy-btn {
+  font-family:var(--font-d); font-size:8px; font-weight:700; letter-spacing:.1em;
+  padding:4px 11px; border-radius:6px;
+  border:1px solid rgba(0,255,136,.25); background:rgba(0,255,136,.07);
+  color:var(--green); cursor:pointer; transition:.18s;
+}
+.cli-copy-btn:hover { background:rgba(0,255,136,.14); border-color:rgba(0,255,136,.4); }
+.cli-copy-btn.copied { color:var(--amber); border-color:rgba(255,183,0,.3); }
+
+.cli-body {
+  padding:14px; font-family:var(--font-m); font-size:11.5px; line-height:1.8;
+  min-height:120px; max-height:280px; overflow-y:auto;
+}
+.cli-body::-webkit-scrollbar { width:3px; }
+.cli-body::-webkit-scrollbar-thumb { background:var(--red); border-radius:2px; }
+.cli-cmt  { color:rgba(0,255,136,.45); }
+.cli-cmd  { color:#c8dce8; }
+.cli-val  { color:var(--amber); }
+.cli-key  { color:#79c0ff; }
+.cli-note { color:var(--muted); font-size:10.5px; }
+.cli-empty-msg {
+  color:var(--muted); font-size:11px; padding:10px 0;
+  display:flex; align-items:center; gap:8px;
+}
+
+/* Confidence gauge */
+.conf-gauge {
+  margin:10px 14px;
+  background:var(--panel2); border:1px solid var(--border);
+  border-radius:9px; padding:12px 14px;
+}
+.conf-hd {
+  font-family:var(--font-d); font-size:8px; letter-spacing:.12em;
+  color:var(--muted); display:flex; justify-content:space-between; margin-bottom:8px;
+}
+.conf-bar-track { height:6px; background:var(--muted2); border-radius:3px; overflow:hidden; }
+.conf-bar {
+  height:100%; border-radius:3px;
+  background: linear-gradient(90deg, var(--amber), var(--green));
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+  position:relative;
+}
+.conf-bar::after {
+  content:''; position:absolute; right:0; top:0; bottom:0; width:3px;
+  background:#fff; opacity:.5; filter:blur(2px);
+}
+
+/* Tips */
+.tips-list { display:flex; flex-direction:column; gap:7px; }
+.tip-card {
+  padding:10px 13px; border-radius:9px;
+  border-left:2px solid var(--amber);
+  background:rgba(255,183,0,.04);
+  font-size:12px; line-height:1.6; color:var(--text);
+}
+.tip-card::before { content:'💡 '; }
+
+/* Quick actions */
+.quick-acts { display:flex; gap:7px; flex-wrap:wrap; margin-top:12px; }
+.qa-btn {
+  flex:1; min-width:100px; padding:9px 10px; border-radius:9px; cursor:pointer;
+  font-family:var(--font-d); font-size:8px; font-weight:700; letter-spacing:.1em;
+  border:1px solid; text-transform:uppercase; transition:.18s; text-align:center;
+}
+.qa-btn.bb {
+  color:var(--blue); border-color:rgba(0,170,255,.25); background:rgba(0,170,255,.06);
+}
+.qa-btn.bb:hover { background:rgba(0,170,255,.12); }
+.qa-btn.gr {
+  color:var(--green); border-color:rgba(0,255,136,.25); background:rgba(0,255,136,.06);
+}
+.qa-btn.gr:hover { background:rgba(0,255,136,.12); }
+.qa-btn.rd {
+  color:var(--red); border-color:rgba(255,68,85,.25); background:rgba(255,68,85,.06);
+}
+.qa-btn.rd:hover { background:rgba(255,68,85,.12); }
+
+/* Active selections count */
+.sel-counter {
+  font-family:var(--font-d); font-size:9px; letter-spacing:.1em; font-weight:700;
+  padding:3px 10px; border-radius:100px;
+  background:rgba(255,68,85,.1); border:1px solid rgba(255,68,85,.25);
+  color:var(--red);
+}
+
+/* ── Scrollbar global ── */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--muted2); border-radius:2px; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>🩺 PID Symptom Advisor</h1>
-  <p class="subtitle">เลือกอาการที่พบขณะบิน — ระบบจะวิเคราะห์สาเหตุและแนะนำ CLI commands ที่ควรปรับ</p>
 
-  <div class="card">
-    <h2 style="margin-top:0">อาการที่พบคืออะไร?</h2>
-    <div class="symptom-grid" id="symptom-grid">
-      {% for s in symptoms %}
-      <button class="symptom-btn" onclick="showAdvice('{{ s.id }}')" id="btn-{{ s.id }}">
-        {{ s.label }}
-        <span class="cat">{{ s.category }}</span>
-      </button>
-      {% endfor %}
-    </div>
-  </div>
+{% set nav_page = "pid_advisor" %}
+{% include "partials/nav.html" %}
 
-  <!-- Result placeholder (shown once user selects) -->
-  <div id="result-area" class="hidden">
-    <div class="card">
-      <h2 style="margin-top:0">🔍 การวินิจฉัย</h2>
-      <div class="diag-box" id="diag-text"></div>
-      <p style="margin:.4rem 0 .2rem;">สาเหตุหลัก: <span class="cause-badge" id="cause-text"></span></p>
-    </div>
+<div class="page">
 
-    <div class="card">
-      <h2 style="margin-top:0">🎛️ ค่าที่ควรปรับ</h2>
-      <table>
-        <tr><th>Parameter</th><th>ทิศทาง</th><th>ปริมาณ</th><th>เหตุผล</th></tr>
-        <tbody id="adj-tbody"></tbody>
-      </table>
-    </div>
-
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;">
-        <h2 style="margin:0">📋 CLI Template</h2>
-        <button class="copy-btn" onclick="copyCLI()">📋 Copy</button>
+  <!-- ── HERO ── -->
+  <div class="hero">
+    <div>
+      <div class="hero-eyebrow">
+        <span class="hero-led"></span>
+        OBIX · PID DIAGNOSTIC LAB · BETAFLIGHT TUNING
       </div>
-      <p style="color:var(--muted);font-size:.82rem;margin-bottom:.6rem;">แทน {ค่าในวงเล็บ} ด้วยค่าปัจจุบันของคุณ (ดูจาก Betaflight → PID tab)</p>
-      <div class="cli-box" id="cli-area"></div>
+      <h1 class="hero-title">PID <span class="hl">Diagnostic</span> Lab</h1>
+      <p class="hero-sub">
+        เลือกอาการที่พบขณะบิน — ระบบวิเคราะห์ root cause แบบ real-time<br>
+        พร้อม CLI commands แก้ไขทันที + Multi-symptom stacking
+      </p>
     </div>
-
-    <div class="card">
-      <h2 style="margin-top:0">💡 Tips เพิ่มเติม</h2>
-      <div id="tips-area"></div>
+    <div class="hero-stat">
+      <div class="hs-item">
+        <span class="hs-num" style="color:var(--red);">13</span>
+        <span class="hs-label">Symptoms</span>
+      </div>
+      <div class="hs-item">
+        <span class="hs-num" style="color:var(--amber);">3</span>
+        <span class="hs-label">Severity</span>
+      </div>
+      <div class="hs-item">
+        <span class="hs-num" style="color:var(--green);">CLI</span>
+        <span class="hs-label">Ready</span>
+      </div>
     </div>
   </div>
 
-  <p style="margin-top:1.5rem;"><a href="/app" style="color:var(--accent)">← กลับหน้าวิเคราะห์หลัก</a></p>
+  <!-- ── MAIN GRID ── -->
+  <div class="lab-grid">
+
+    <!-- ══════ COL LEFT: SYMPTOM SELECTOR ══════ -->
+    <div class="col-left">
+      <div class="panel">
+        <div class="panel-hd">
+          <div class="panel-title">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"/><path d="M8 4v4l2.5 2"/></svg>
+            Select Symptoms
+          </div>
+          <span class="sel-counter" id="selCounter">0 เลือก</span>
+        </div>
+        <div class="panel-body">
+
+          <!-- Severity -->
+          <div style="font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--muted);margin-bottom:6px;">ความรุนแรงของอาการ</div>
+          <div class="severity-row">
+            <button class="sev-btn active" data-sev="mild">เล็กน้อย</button>
+            <button class="sev-btn" data-sev="moderate">ปานกลาง</button>
+            <button class="sev-btn" data-sev="severe">รุนแรง</button>
+          </div>
+
+          <!-- Multi hint -->
+          <div class="multi-hint">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"/><path d="M8 6v2M8 10h.01"/></svg>
+            เลือกได้หลายอาการพร้อมกัน
+            <span class="multi-badge" id="multiBadge">MULTI</span>
+          </div>
+
+          <!-- Category Tabs -->
+          <div class="cat-tabs" id="catTabs">
+            <button class="cat-tab active" data-cat="all">ทั้งหมด</button>
+            <button class="cat-tab" data-cat="oscillation">Oscillation</button>
+            <button class="cat-tab" data-cat="propwash">Propwash</button>
+            <button class="cat-tab" data-cat="yaw">Yaw</button>
+            <button class="cat-tab" data-cat="thermal">Thermal</button>
+            <button class="cat-tab" data-cat="esc">ESC</button>
+            <button class="cat-tab" data-cat="setup">Setup</button>
+            <button class="cat-tab" data-cat="video">Video/VTX</button>
+          </div>
+
+          <!-- Symptom list -->
+          <div class="symptom-list" id="symptomList"></div>
+
+          <!-- Quick actions -->
+          <div class="quick-acts">
+            <button class="qa-btn rd" onclick="clearAll()">✕ ล้างทั้งหมด</button>
+            <button class="qa-btn bb" onclick="selectCommon()">⚡ อาการทั่วไป</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ COL MID: DIAGNOSIS ══════ -->
+    <div class="col-mid">
+      <div class="panel">
+        <div class="panel-hd">
+          <div class="panel-title">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M8 3v10"/><circle cx="8" cy="8" r="5"/></svg>
+            Diagnosis Report
+          </div>
+          <div id="diagStatus" style="font-family:var(--font-m);font-size:9px;color:var(--muted);letter-spacing:.05em;">รอการวินิจฉัย...</div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="empty-state" id="emptyState">
+          <div class="empty-reticle">
+            <div class="er-ring"></div>
+            <div class="er-ring"></div>
+            <div class="er-ring"></div>
+            <div class="er-scan"></div>
+            <div class="er-dot">🩺</div>
+          </div>
+          <div class="empty-title">AWAITING DIAGNOSIS</div>
+          <p class="empty-sub">เลือกอาการจากรายการทางซ้าย<br>ระบบจะวิเคราะห์ root cause ทันที</p>
+        </div>
+
+        <!-- Diagnosis content -->
+        <div class="diag-content" id="diagContent">
+
+          <!-- Drone axis diagram -->
+          <div class="axis-wrap">
+            <svg class="axis-svg" id="axisDiagram" width="220" height="130" viewBox="0 0 220 130">
+              <!-- Arms -->
+              <line class="ax-arm" id="arm-fl" x1="110" y1="65" x2="60"  y2="30"/>
+              <line class="ax-arm" id="arm-fr" x1="110" y1="65" x2="160" y2="30"/>
+              <line class="ax-arm" id="arm-bl" x1="110" y1="65" x2="60"  y2="100"/>
+              <line class="ax-arm" id="arm-br" x1="110" y1="65" x2="160" y2="100"/>
+              <!-- Motor circles -->
+              <circle class="ax-prop" cx="60"  cy="30"  r="18"/>
+              <circle class="ax-prop" cx="160" cy="30"  r="18"/>
+              <circle class="ax-prop" cx="60"  cy="100" r="18"/>
+              <circle class="ax-prop" cx="160" cy="100" r="18"/>
+              <!-- Body -->
+              <rect class="ax-body" x="96" y="51" width="28" height="28" rx="6"/>
+              <!-- Axis indicators -->
+              <line class="ax-roll-indicator"  id="rollInd"  x1="40" y1="65" x2="180" y2="65"/>
+              <line class="ax-pitch-indicator" id="pitchInd" x1="110" y1="15" x2="110" y2="115"/>
+              <circle class="ax-yaw-indicator" id="yawInd" cx="110" cy="65" r="30"/>
+              <!-- Labels -->
+              <text class="ax-label" x="16" y="68">ROLL</text>
+              <text class="ax-label" x="95" y="12">PITCH</text>
+              <text class="ax-label" x="78" y="102">YAW</text>
+            </svg>
+          </div>
+          <div class="axis-legend">
+            <span class="ax-leg" id="leg-roll"  style="color:var(--amber);border-color:rgba(255,183,0,.3);">◉ ROLL</span>
+            <span class="ax-leg" id="leg-pitch" style="color:var(--green);border-color:rgba(0,255,136,.3);">◉ PITCH</span>
+            <span class="ax-leg" id="leg-yaw"   style="color:var(--purple);border-color:rgba(204,102,255,.3);">◉ YAW</span>
+          </div>
+
+          <!-- Diag text -->
+          <div class="diag-block" id="diagBlock">
+            <div class="diag-label">ROOT CAUSE ANALYSIS</div>
+            <p class="diag-text" id="diagText"></p>
+            <div class="cause-tag" id="causeTag"></div>
+          </div>
+
+          <!-- Multi-symptom banner -->
+          <div class="multi-cli-banner" id="multiBanner">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v10M3 8h10"/></svg>
+            <span id="multiBannerText">Combined analysis from multiple symptoms</span>
+          </div>
+
+          <!-- Adjustments -->
+          <div class="adj-wrap">
+            <div class="adj-title">Parameter Adjustments</div>
+            <div id="adjList"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ COL RIGHT: CLI + TIPS ══════ -->
+    <div class="col-right">
+
+      <!-- CLI panel -->
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-hd">
+          <div class="panel-title">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="14" height="10" rx="2"/><path d="M4 7l2 2-2 2M9 11h3"/></svg>
+            CLI Output
+          </div>
+        </div>
+        <div class="cli-panel">
+          <div class="cli-topbar">
+            <div class="cli-dot-row">
+              <div class="cli-dot cli-dot-r"></div>
+              <div class="cli-dot cli-dot-a"></div>
+              <div class="cli-dot cli-dot-g"></div>
+            </div>
+            <span class="cli-filename">betaflight_cli.txt</span>
+            <button class="cli-copy-btn" id="cliCopyBtn" onclick="copyCLI()">📋 COPY</button>
+          </div>
+          <div class="cli-body" id="cliBody">
+            <div class="cli-empty-msg">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"/><path d="M8 5v3M8 11h.01"/></svg>
+              เลือกอาการเพื่อ generate CLI...
+            </div>
+          </div>
+        </div>
+
+        <!-- Confidence -->
+        <div class="conf-gauge" id="confGauge" style="display:none;">
+          <div class="conf-hd">
+            <span>Fix Confidence</span>
+            <span id="confPct" style="color:var(--green);font-weight:700;">—</span>
+          </div>
+          <div class="conf-bar-track">
+            <div class="conf-bar" id="confBar" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Severity note -->
+      <div class="panel" style="margin-bottom:14px;" id="sevPanel">
+        <div class="panel-hd">
+          <div class="panel-title">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3l5 9H3z"/><path d="M8 10h.01M8 7v2"/></svg>
+            Severity Note
+          </div>
+        </div>
+        <div class="panel-body" id="sevNoteArea">
+          <p style="font-size:12px;color:var(--muted);line-height:1.6;">เลือก severity level เพื่อดูคำแนะนำ CLI ที่เหมาะสมกับความรุนแรงของอาการ</p>
+        </div>
+      </div>
+
+      <!-- Tips -->
+      <div class="panel">
+        <div class="panel-hd">
+          <div class="panel-title">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="7" r="4"/><path d="M8 12v2M6 14h4"/></svg>
+            Pro Tips
+          </div>
+          <span id="tipsCount" style="font-family:var(--font-d);font-size:8px;color:var(--muted);">0 tips</span>
+        </div>
+        <div class="panel-body">
+          <div class="tips-list" id="tipsList">
+            <p style="font-size:12px;color:var(--muted);">เลือกอาการเพื่อดู tips...</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
 
 <script>
-const data = {{ advice_json|safe }};
+/* ═══════════════════════════════════════════════════════
+   PID DIAGNOSTIC LAB — Brain
+═══════════════════════════════════════════════════════ */
+const DATA = {{ advice_json|safe }};
 
-function showAdvice(id) {
-  const s = data[id];
+// Symptom metadata (icons + axis + confidence)
+const SYMP_META = {
+  oscillation_after_flip: { icon:'〰️', axes:['roll','pitch'], conf:88, color:'var(--amber)' },
+  propwash:               { icon:'🌀', axes:['roll','pitch'], conf:75, color:'var(--amber)' },
+  bounce_back:            { icon:'↩️', axes:['roll','pitch'], conf:85, color:'var(--red)' },
+  yaw_spin:               { icon:'🔄', axes:['yaw'],          conf:82, color:'var(--purple)' },
+  toilet_bowl:            { icon:'🌊', axes:['roll','pitch','yaw'], conf:70, color:'var(--blue)' },
+  slow_response:          { icon:'🐌', axes:['roll','pitch'], conf:80, color:'var(--green)' },
+  motor_hot:              { icon:'🌡️', axes:['roll','pitch'], conf:90, color:'var(--red)' },
+  jello:                  { icon:'📷', axes:[],               conf:78, color:'var(--amber)' },
+  esc_desync:             { icon:'⚡', axes:['roll','pitch','yaw'], conf:85, color:'var(--red)' },
+  wind_rejection:         { icon:'💨', axes:['roll','pitch','yaw'], conf:72, color:'var(--blue)' },
+  arm_fail:               { icon:'🔴', axes:[],               conf:95, color:'var(--red)' },
+  turtle_fail:            { icon:'🐢', axes:[],               conf:92, color:'var(--amber)' },
+  video_breakup:          { icon:'📡', axes:[],               conf:88, color:'var(--blue)' },
+};
+
+const CAT_COLORS = {
+  oscillation: 'var(--amber)', propwash:'var(--amber)', yaw:'var(--purple)',
+  response:'var(--green)', thermal:'var(--red)', video:'var(--blue)',
+  esc:'var(--red)', pid_advanced:'var(--blue)', gps_or_pid:'var(--purple)',
+  setup:'var(--green)', vtx:'var(--blue)',
+};
+
+const SEV_MULT = { mild:0.5, moderate:1.0, severe:1.5 };
+const SEV_INFO = {
+  mild:     { note:'อาการเล็กน้อย — ปรับค่าทีละ 50% ของที่แนะนำ', color:'var(--green)', label:'MILD' },
+  moderate: { note:'อาการปานกลาง — ปรับตามค่าที่แนะนำ', color:'var(--amber)', label:'MODERATE' },
+  severe:   { note:'อาการรุนแรง — เพิ่มค่า 50% จากที่แนะนำ แต่ระวังอย่าปรับมากเกิน', color:'var(--red)', label:'SEVERE ⚠' },
+};
+
+// ── State ──────────────────────────────────────────────────
+let selectedIds = new Set();
+let currentSev = 'moderate';
+let currentCat = 'all';
+
+// ── Build symptom list ─────────────────────────────────────
+function buildSymptomList() {
+  const list = document.getElementById('symptomList');
+  list.innerHTML = '';
+
+  const entries = Object.entries(DATA);
+  entries.forEach(([id, s]) => {
+    if (currentCat !== 'all' && s.category !== currentCat) return;
+
+    const meta = SYMP_META[id] || { icon:'🔧', axes:[], conf:70, color:'var(--red)' };
+    const catColor = CAT_COLORS[s.category] || 'var(--red)';
+
+    const div = document.createElement('div');
+    div.className = 'symp-card' + (selectedIds.has(id) ? ' active' : '');
+    div.innerHTML = `
+      <div class="symp-icon">${meta.icon}</div>
+      <div class="symp-info">
+        <div class="symp-name">${s.label}</div>
+        <div class="symp-cat" style="color:${catColor}">${s.category}</div>
+      </div>
+      <div class="symp-check">${selectedIds.has(id) ? '✓' : ''}</div>`;
+    div.style.setProperty('--card-accent', meta.color);
+    if (selectedIds.has(id)) {
+      div.querySelector('.symp-card::before');
+      div.style.borderLeftColor = meta.color;
+    }
+    div.addEventListener('click', () => toggleSymptom(id));
+    list.appendChild(div);
+  });
+}
+
+function toggleSymptom(id) {
+  if (selectedIds.has(id)) {
+    selectedIds.delete(id);
+  } else {
+    selectedIds.add(id);
+  }
+  buildSymptomList();
+  updateCounter();
+  render();
+}
+
+function updateCounter() {
+  const n = selectedIds.size;
+  document.getElementById('selCounter').textContent = n + ' เลือก';
+  const mb = document.getElementById('multiBadge');
+  mb.classList.toggle('show', n > 1);
+}
+
+// ── Category tabs ──────────────────────────────────────────
+document.getElementById('catTabs').querySelectorAll('.cat-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentCat = btn.dataset.cat;
+    buildSymptomList();
+  });
+});
+
+// ── Severity ───────────────────────────────────────────────
+document.querySelectorAll('.sev-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.sev-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentSev = btn.dataset.sev;
+    render();
+  });
+});
+
+// ── Render ─────────────────────────────────────────────────
+function render() {
+  const empty = document.getElementById('emptyState');
+  const content = document.getElementById('diagContent');
+
+  if (selectedIds.size === 0) {
+    empty.classList.remove('hide');
+    content.classList.remove('show');
+    clearOutputs();
+    return;
+  }
+
+  empty.classList.add('hide');
+  content.classList.add('show');
+
+  const ids = [...selectedIds];
+  const primary = ids[0];
+  const s = DATA[primary];
   if (!s) return;
 
-  // Update buttons
-  document.querySelectorAll('.symptom-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('btn-' + id).classList.add('active');
+  // Status
+  document.getElementById('diagStatus').textContent =
+    ids.length > 1 ? `MULTI (${ids.length}) · ${currentSev.toUpperCase()}` : `${s.category.toUpperCase()} · ${currentSev.toUpperCase()}`;
 
-  document.getElementById('diag-text').textContent = s.diagnosis;
-  document.getElementById('cause-text').textContent = s.primary_cause;
+  // Axis diagram
+  updateAxisDiagram(ids);
 
-  // Adjustments table
-  const tbody = document.getElementById('adj-tbody');
-  tbody.innerHTML = '';
-  s.adjustments.forEach(a => {
-    const dir = a.direction.includes('เพิ่ม') ? '<span class="dir-up">↑ เพิ่ม</span>'
-              : a.direction.includes('ลด') ? '<span class="dir-down">↓ ลด</span>'
-              : '<span class="dir-check">⚡ ' + a.direction + '</span>';
-    tbody.innerHTML += `<tr>
-      <td>${a.param}</td>
-      <td>${dir}</td>
-      <td>${a.amount}</td>
-      <td style="color:var(--muted)">${a.reason}</td>
-    </tr>`;
+  // Diagnosis text (first symptom)
+  document.getElementById('diagText').textContent = s.diagnosis;
+  document.getElementById('causeTag').textContent = '⚡ ' + s.primary_cause;
+
+  // Multi-symptom banner
+  const mb = document.getElementById('multiBanner');
+  if (ids.length > 1) {
+    mb.classList.add('show');
+    document.getElementById('multiBannerText').textContent =
+      `Combined: ${ids.map(i => DATA[i]?.label.split('/')[0].trim() || i).join(' + ')}`;
+  } else {
+    mb.classList.remove('show');
+  }
+
+  // Adjustments (merge all selected symptoms)
+  const allAdj = [];
+  ids.forEach(id => {
+    const d = DATA[id];
+    if (d) d.adjustments.forEach(a => allAdj.push({...a, _srcLabel: d.label.split('/')[0].trim()}));
   });
+  renderAdjustments(allAdj);
 
   // CLI
-  document.getElementById('cli-area').textContent = s.cli_template.join('\n');
+  const allCLI = [];
+  ids.forEach((id, i) => {
+    const d = DATA[id];
+    if (!d) return;
+    if (i > 0) allCLI.push('');
+    allCLI.push(...d.cli_template);
+  });
+  renderCLI(allCLI, s);
 
-  // Tips
-  const tipsEl = document.getElementById('tips-area');
-  tipsEl.innerHTML = s.tips.map(t => `<p class="tip-item">${t}</p>`).join('');
+  // Tips (all symptoms)
+  const allTips = [];
+  ids.forEach(id => { const d = DATA[id]; if (d) allTips.push(...d.tips); });
+  renderTips([...new Set(allTips)]);
 
-  document.getElementById('result-area').classList.remove('hidden');
-  document.getElementById('result-area').scrollIntoView({behavior:'smooth', block:'start'});
+  // Severity note
+  renderSevNote();
+
+  // Confidence
+  const confs = ids.map(id => (SYMP_META[id]||{conf:70}).conf);
+  const avgConf = Math.round(confs.reduce((a,b)=>a+b,0)/confs.length * (ids.length > 1 ? 0.88 : 1));
+  document.getElementById('confGauge').style.display = 'block';
+  document.getElementById('confPct').textContent = avgConf + '%';
+  setTimeout(() => { document.getElementById('confBar').style.width = avgConf + '%'; }, 50);
+}
+
+function updateAxisDiagram(ids) {
+  const axes = new Set();
+  ids.forEach(id => { (SYMP_META[id]?.axes||[]).forEach(a => axes.add(a)); });
+
+  const armIds = ['arm-fl','arm-fr','arm-bl','arm-br'];
+  armIds.forEach(id => {
+    const el = document.getElementById(id);
+    const isRollAffected = axes.has('roll');
+    const isPitchAffected = axes.has('pitch');
+    const isActive = (id.includes('fl')||id.includes('fr')) ? isPitchAffected : isRollAffected;
+    el.style.stroke = isActive ? 'var(--amber)' : 'var(--muted2)';
+    el.style.strokeWidth = isActive ? '7' : '5';
+    el.style.filter = isActive ? 'drop-shadow(0 0 4px var(--amber))' : 'none';
+  });
+
+  document.getElementById('rollInd').style.opacity  = axes.has('roll')  ? '1' : '0';
+  document.getElementById('pitchInd').style.opacity = axes.has('pitch') ? '1' : '0';
+  document.getElementById('yawInd').style.opacity   = axes.has('yaw')   ? '1' : '0';
+
+  document.getElementById('leg-roll').classList.toggle('on',  axes.has('roll'));
+  document.getElementById('leg-pitch').classList.toggle('on', axes.has('pitch'));
+  document.getElementById('leg-yaw').classList.toggle('on',   axes.has('yaw'));
+}
+
+function renderAdjustments(adjs) {
+  const list = document.getElementById('adjList');
+  list.innerHTML = '';
+  const mult = SEV_MULT[currentSev];
+
+  adjs.forEach(a => {
+    const isUp   = a.direction.includes('เพิ่ม');
+    const isDown = a.direction.includes('ลด');
+    const dirClass = isUp ? 'up' : isDown ? 'down' : 'check';
+    const dirIcon  = isUp ? '↑' : isDown ? '↓' : '⚡';
+    const dirColor = isUp ? 'var(--green)' : isDown ? 'var(--red)' : 'var(--amber)';
+    const amtBg    = isUp ? 'rgba(0,255,136,.1)' : isDown ? 'rgba(255,68,85,.1)' : 'rgba(255,183,0,.1)';
+
+    const row = document.createElement('div');
+    row.className = 'adj-row';
+    row.innerHTML = `
+      <div class="adj-dir ${dirClass}" style="color:${dirColor};font-size:20px;">${dirIcon}</div>
+      <div class="adj-body">
+        <div>
+          <span class="adj-param">${a.param}</span>
+          <span class="adj-amount" style="background:${amtBg};color:${dirColor};">${a.amount}</span>
+        </div>
+        <div class="adj-reason">${a.reason}</div>
+        ${adjs.length > 4 && a._srcLabel ? `<div style="font-size:10px;color:var(--muted);margin-top:3px;">• ${a._srcLabel}</div>` : ''}
+      </div>`;
+    list.appendChild(row);
+  });
+}
+
+function renderCLI(lines, s) {
+  const body = document.getElementById('cliBody');
+  const mult = SEV_MULT[currentSev];
+  const sevLabel = currentSev.toUpperCase();
+
+  body.innerHTML = '';
+
+  // Header
+  const hdr = document.createElement('div');
+  hdr.innerHTML = `<span class="cli-cmt"># OBIX PID Diagnostic Lab · ${sevLabel}</span><br>` +
+    `<span class="cli-cmt"># Severity multiplier: ${mult}x</span><br>` +
+    `<span class="cli-cmt"># ─────────────────────────────</span><br>`;
+  body.appendChild(hdr);
+
+  lines.forEach(line => {
+    const div = document.createElement('div');
+    const l = line.trim();
+    if (l.startsWith('#')) {
+      div.innerHTML = `<span class="cli-cmt">${escHtml(line)}</span>`;
+    } else if (l === '') {
+      div.innerHTML = '<br>';
+    } else if (l.startsWith('set ')) {
+      // Try to parse and apply severity multiplier
+      const m = l.match(/^(set\s+\S+\s*=\s*)(\{[^}]+\}|\d+\.?\d*)(.*)$/);
+      if (m) {
+        const base = m[1];
+        const valRaw = m[2];
+        const rest = m[3]||'';
+        if (!valRaw.startsWith('{')) {
+          const num = parseFloat(valRaw);
+          const adjusted = isNaN(num) ? valRaw : Math.round(num * mult);
+          div.innerHTML = `<span class="cli-cmd">${escHtml(base)}</span><span class="cli-val">${adjusted}</span><span class="cli-note">${escHtml(rest)}</span>`;
+        } else {
+          div.innerHTML = `<span class="cli-cmd">${escHtml(base)}</span><span class="cli-val">${escHtml(valRaw)}</span><span class="cli-note">${escHtml(rest)}</span>`;
+        }
+      } else {
+        const parts = l.match(/^(set\s+)(\S+)(\s*=\s*)(.+)$/);
+        if (parts) {
+          div.innerHTML = `<span class="cli-cmd">set </span><span class="cli-key">${escHtml(parts[2])}</span><span class="cli-cmd">${escHtml(parts[3])}</span><span class="cli-val">${escHtml(parts[4])}</span>`;
+        } else {
+          div.innerHTML = `<span class="cli-cmd">${escHtml(line)}</span>`;
+        }
+      }
+    } else if (l === 'save') {
+      div.innerHTML = `<span class="cli-cmd" style="color:var(--green);font-weight:600;">save</span>`;
+    } else {
+      div.innerHTML = `<span class="cli-note">${escHtml(line)}</span>`;
+    }
+    body.appendChild(div);
+  });
+}
+
+function renderTips(tips) {
+  const list = document.getElementById('tipsList');
+  document.getElementById('tipsCount').textContent = tips.length + ' tips';
+  list.innerHTML = tips.slice(0, 6).map(t =>
+    `<div class="tip-card">${escHtml(t)}</div>`
+  ).join('');
+}
+
+function renderSevNote() {
+  const info = SEV_INFO[currentSev];
+  document.getElementById('sevNoteArea').innerHTML = `
+    <div class="sev-note" style="border:1px solid;color:${info.color};
+      border-color:${info.color}33;background:${info.color}0d;">
+      <span style="font-family:var(--font-d);font-size:10px;font-weight:700;">${info.label}</span>
+      <span style="font-size:11.5px;">${info.note}</span>
+    </div>`;
+}
+
+function clearOutputs() {
+  document.getElementById('cliBody').innerHTML =
+    '<div class="cli-empty-msg"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"/><path d="M8 5v3M8 11h.01"/></svg>เลือกอาการเพื่อ generate CLI...</div>';
+  document.getElementById('tipsList').innerHTML = '<p style="font-size:12px;color:var(--muted);">เลือกอาการเพื่อดู tips...</p>';
+  document.getElementById('tipsCount').textContent = '0 tips';
+  document.getElementById('confGauge').style.display = 'none';
+  document.getElementById('adjList').innerHTML = '';
+  document.getElementById('diagStatus').textContent = 'รอการวินิจฉัย...';
+  document.getElementById('multiBanner').classList.remove('show');
+  document.getElementById('sevNoteArea').innerHTML = '<p style="font-size:12px;color:var(--muted);line-height:1.6;">เลือก severity level เพื่อดูคำแนะนำ CLI ที่เหมาะสมกับความรุนแรงของอาการ</p>';
+  // reset axis
+  ['arm-fl','arm-fr','arm-bl','arm-br'].forEach(id => {
+    const el = document.getElementById(id);
+    el.style.stroke='var(--muted2)'; el.style.strokeWidth='5'; el.style.filter='none';
+  });
+  ['rollInd','pitchInd','yawInd'].forEach(id => document.getElementById(id).style.opacity='0');
+  ['leg-roll','leg-pitch','leg-yaw'].forEach(id => document.getElementById(id).classList.remove('on'));
 }
 
 function copyCLI() {
-  navigator.clipboard.writeText(document.getElementById('cli-area').textContent);
+  const body = document.getElementById('cliBody');
+  const text = body.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('cliCopyBtn');
+    btn.textContent = '✅ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 COPY'; btn.classList.remove('copied'); }, 2000);
+  });
 }
+
+function clearAll() {
+  selectedIds.clear();
+  buildSymptomList();
+  updateCounter();
+  render();
+}
+
+function selectCommon() {
+  clearAll();
+  ['propwash','oscillation_after_flip','bounce_back'].forEach(id => selectedIds.add(id));
+  buildSymptomList();
+  updateCounter();
+  render();
+  // Scroll to diagnosis
+  setTimeout(() => document.querySelector('.col-mid')?.scrollIntoView({behavior:'smooth',block:'start'}), 100);
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Init ───────────────────────────────────────────────────
+buildSymptomList();
+updateCounter();
 </script>
 </body>
 </html>
