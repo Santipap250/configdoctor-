@@ -1481,9 +1481,10 @@ YAW    P {{ analysis.pid_baseline.yaw.p }}  I {{ analysis.pid_baseline.yaw.i }}<
                   <span class="pf-box-title">🔊 Filter Baseline</span>
                   <button class="pf-copy-btn" onclick="copyEl('flt-bl')">Copy</button>
                 </div>
-                <pre class="pf-code" id="flt-bl">Gyro LPF2 : {{ analysis.filter_baseline.gyro_lpf2 }} Hz
-D-Term LPF: {{ analysis.filter_baseline.dterm_lpf1 }} Hz
-Dyn Notch : {{ analysis.filter_baseline.dyn_notch }}</pre>
+                <pre class="pf-code" id="flt-bl">Gyro LPF1 : {{ analysis.filter_baseline.gyro_lpf1 or '—' }} Hz
+Gyro LPF2 : {{ analysis.filter_baseline.gyro_lpf2 or 'ปิด' }}
+D-Term LPF: {{ analysis.filter_baseline.dterm_lpf1 or '—' }} Hz
+Dyn Notch : {{ analysis.filter_baseline.dyn_notch or '—' }} ตัว</pre>
               </div>
             </div>
           </div>
@@ -1512,9 +1513,11 @@ YAW    P {{ analysis.pid.yaw.p }}  I {{ analysis.pid.yaw.i }}</pre>
                   <span class="pf-box-title">🧠 Filter แนะนำ</span>
                   <button class="pf-copy-btn" onclick="copyEl('flt-main')">Copy</button>
                 </div>
-                <pre class="pf-code" id="flt-main">Gyro LPF2 : {{ analysis.filter.gyro_lpf2 }} Hz
-D-Term LPF: {{ analysis.filter.dterm_lpf1 }} Hz
-Dyn Notch : {{ analysis.filter.dyn_notch }}</pre>
+                <pre class="pf-code" id="flt-main">Gyro LPF1 : {{ analysis.filter.gyro_lpf1 or '—' }} Hz
+Gyro LPF2 : {{ analysis.filter.gyro_lpf2 or 'ปิด' }}
+D-Term LPF: {{ analysis.filter.dterm_lpf1 or '—' }} Hz
+Dyn Notch : {{ analysis.filter.dyn_notch or '—' }} ตัว
+Anti-Grav : {{ analysis.filter.anti_gravity or '—' }}</pre>
               </div>
             </div>
           </div>
