@@ -729,6 +729,10 @@ def blackbox_analyze():
 def esc_checker():
     return render_template('esc_checker.html')
 
+@app.route('/fpv-trainer')
+def fpv_trainer():
+    return render_template('fpv_trainer.html')
+
 @app.route('/analyze_cli', methods=['POST'])
 def analyze_cli():
     try:
@@ -882,6 +886,7 @@ def sitemap_xml():
         ("/rates-visualizer", "weekly",  "0.8"),
         ("/cli-comparator",   "weekly",  "0.8"),
         ("/esc-checker",      "weekly",  "0.8"),
+        ("/fpv-trainer",      "weekly",  "0.9"),
         ("/osd",              "weekly",  "0.7"),
         ("/vtx",              "monthly", "0.6"),
         ("/vtx-range",        "monthly", "0.6"),
