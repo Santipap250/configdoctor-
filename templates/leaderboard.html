@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Config Leaderboard — OBIXConfig Doctor</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+{% set og_title = "Config Leaderboard — OBIXConfig Doctor" %}
+{% set og_description = "rank config ของชุมชน FPV ไทย vote ให้คะแนน แชร์ config ที่ดีที่สุด" %}
+{% set og_url = "https://configdoctor.onrender.com/leaderboard" %}
+{% include "partials/og_tags.html" %}
+<link rel="icon" href="{{ url_for('static',filename='favicon.ico') }}">
+{% set nav_page = "leaderboard" %}
+{% include "partials/nav.html" %}
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@400;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#020509;--bg2:#040b14;--surface:#060e1c;--panel:#081428;
+  --border:rgba(0,255,136,.08);--text:#c8d8e8;--muted:#3d5470;--muted2:#7090a8;
+  --green:#00ff88;--green2:#00cc6a;--blue:#00aaff;--amber:#ffb700;--red:#ff4455;
+  --g-dim:rgba(0,255,136,.07);--glow-g:0 0 20px rgba(0,255,136,.25);
+  --font-d:'Orbitron',sans-serif;--font-m:'JetBrains Mono',monospace;--font-t:'Sarabun',sans-serif;--r:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font-t);min-height:100vh;overflow-x:hidden}
+.bg-hex{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.4;
+  background-image:url("data:image/svg+xml,%3Csvg width='60' height='52' viewBox='0 0 60 52' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l30 17.3v17.4L30 52 0 34.7V17.3z' fill='none' stroke='rgba(0,255,136,0.04)' stroke-width='1'/%3E%3C/svg%3E");
+  background-size:60px 52px}
+.wrap{position:relative;z-index:1;max-width:1060px;margin:0 auto;padding:32px 20px 60px}
+
+.hero{text-align:center;padding:38px 0 28px;border-bottom:1px solid var(--border);margin-bottom:32px}
+.hero-tag{font-family:var(--font-d);font-size:9px;letter-spacing:.22em;color:var(--amber);
+  display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px}
+.hero-tag::before,.hero-tag::after{content:'';width:28px;height:1px;background:var(--amber);opacity:.4}
+.hero h1{font-family:var(--font-d);font-size:clamp(20px,4vw,32px);font-weight:900;margin-bottom:8px}
+.hero h1 em{color:var(--amber);font-style:normal}
+.hero p{color:var(--muted2);font-size:13px;max-width:520px;margin:0 auto;line-height:1.7}
+.hero-chips{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:14px}
+.hchip{font-family:var(--font-d);font-size:9px;letter-spacing:.09em;padding:4px 12px;
+  border-radius:100px;border:1px solid var(--border);color:var(--muted2)}
+
+/* Top controls */
+.controls{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin-bottom:24px;flex-wrap:wrap}
+.filter-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.ftab{font-family:var(--font-d);font-size:9px;letter-spacing:.08em;padding:7px 14px;
+  border-radius:100px;border:1px solid var(--border);background:var(--surface);
+  color:var(--muted2);cursor:pointer;transition:all .15s}
+.ftab:hover{border-color:rgba(0,255,136,.3);color:var(--text)}
+.ftab.on{border-color:var(--amber);background:rgba(255,183,0,.1);color:var(--amber)}
+.submit-btn{font-family:var(--font-d);font-size:10px;letter-spacing:.1em;padding:10px 20px;
+  border-radius:100px;background:linear-gradient(135deg,var(--amber),#cc8800);
+  color:#020509;font-weight:700;border:none;cursor:pointer;transition:all .18s;white-space:nowrap}
+.submit-btn:hover{box-shadow:0 0 18px rgba(255,183,0,.3)}
+
+/* Podium */
+.podium{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:12px;margin-bottom:32px;
+  align-items:end;max-width:720px;margin-inline:auto;margin-bottom:32px}
+@media(max-width:640px){.podium{display:none}}
+.pod-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:20px 16px 16px;text-align:center;position:relative;transition:all .2s}
+.pod-card:hover{transform:translateY(-4px)}
+.pod-card.first{border-color:rgba(255,183,0,.35);box-shadow:0 0 30px rgba(255,183,0,.08);
+  background:linear-gradient(160deg,rgba(255,183,0,.06),var(--surface))}
+.pod-card.second{border-color:rgba(200,216,232,.15)}
+.pod-card.third{border-color:rgba(200,100,0,.2)}
+.pod-rank{font-family:var(--font-d);font-size:28px;font-weight:900;margin-bottom:8px}
+.pod-rank.gold{color:var(--amber)}.pod-rank.silver{color:#b0c8d8}.pod-rank.bronze{color:#cd7f32}
+.pod-name{font-family:var(--font-d);font-size:11px;font-weight:700;color:var(--text);
+  margin-bottom:4px;letter-spacing:.05em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pod-pilot{font-size:11px;color:var(--muted2);margin-bottom:10px}
+.pod-score{font-family:var(--font-m);font-size:22px;font-weight:700}
+.pod-score.gold{color:var(--amber)}.pod-score.silver{color:#b0c8d8}.pod-score.bronze{color:#cd7f32}
+.pod-label{font-size:9px;color:var(--muted);font-family:var(--font-d);letter-spacing:.08em}
+.crown{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:24px}
+
+/* Table */
+.lb-table{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.lb-head{display:grid;grid-template-columns:52px 1fr 110px 90px 90px 80px;
+  padding:10px 16px;border-bottom:1px solid var(--border);gap:10px}
+.lb-head span{font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--muted);
+  text-transform:uppercase}
+.lb-row{display:grid;grid-template-columns:52px 1fr 110px 90px 90px 80px;
+  padding:14px 16px;gap:10px;border-bottom:1px solid var(--border);
+  align-items:center;transition:background .15s;cursor:pointer}
+.lb-row:last-child{border-bottom:none}
+.lb-row:hover{background:var(--g-dim)}
+.lb-row.gold{background:rgba(255,183,0,.04)}
+.lb-row.silver{background:rgba(200,216,232,.02)}
+.lb-row.bronze{background:rgba(205,127,50,.03)}
+.rank-badge{font-family:var(--font-d);font-size:13px;font-weight:900;text-align:center}
+.rank-badge.g{color:var(--amber)}.rank-badge.s{color:#b0c8d8}.rank-badge.b{color:#cd7f32}.rank-badge.n{color:var(--muted2)}
+.entry-info{min-width:0}
+.ei-name{font-family:var(--font-d);font-size:11px;font-weight:700;color:var(--text);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px}
+.ei-pilot{font-size:10px;color:var(--muted2);display:flex;align-items:center;gap:8px}
+.ei-tag{font-family:var(--font-d);font-size:8px;padding:2px 7px;border-radius:3px;
+  border:1px solid var(--border);color:var(--muted)}
+.pid-mini{font-family:var(--font-m);font-size:11px;color:var(--green)}
+.pid-mini span{color:var(--muted2);}
+.score-cell{font-family:var(--font-m);font-size:18px;font-weight:700;color:var(--amber);text-align:right}
+.vote-cell{display:flex;flex-direction:column;align-items:center;gap:4px}
+.vote-btn{background:transparent;border:1px solid var(--border);border-radius:6px;
+  color:var(--muted2);font-size:16px;padding:4px 10px;cursor:pointer;transition:all .15s;
+  font-family:var(--font-t)}
+.vote-btn:hover{border-color:rgba(0,255,136,.4);color:var(--green);background:var(--g-dim)}
+.vote-btn.voted{border-color:var(--green);color:var(--green);background:rgba(0,255,136,.1)}
+.vote-count{font-family:var(--font-m);font-size:10px;color:var(--muted2)}
+.style-tag{font-family:var(--font-d);font-size:8px;letter-spacing:.06em;padding:3px 8px;
+  border-radius:4px;white-space:nowrap}
+.st-free{background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.2);color:var(--green)}
+.st-race{background:rgba(255,68,85,.08);border:1px solid rgba(255,68,85,.2);color:var(--red)}
+.st-lr{background:rgba(255,183,0,.08);border:1px solid rgba(255,183,0,.2);color:var(--amber)}
+.st-cine{background:rgba(0,170,255,.08);border:1px solid rgba(0,170,255,.2);color:var(--blue)}
+
+/* Submit Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(2,5,9,.88);z-index:1000;
+  display:none;place-items:center;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:grid}
+.modal{background:var(--surface);border:1px solid rgba(255,183,0,.25);border-radius:16px;
+  padding:28px;width:min(600px,96vw);max-height:90vh;overflow-y:auto;
+  box-shadow:0 0 60px rgba(255,183,0,.06);
+  animation:mIn .25s cubic-bezier(.4,0,.2,1);scrollbar-width:thin;
+  scrollbar-color:rgba(255,183,0,.15) transparent}
+@keyframes mIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-title{font-family:var(--font-d);font-size:13px;font-weight:700;color:var(--amber)}
+.modal-close{background:transparent;border:1px solid var(--border);border-radius:50%;
+  width:30px;height:30px;cursor:pointer;color:var(--muted2);display:grid;place-items:center;
+  transition:all .15s}
+.modal-close:hover{border-color:var(--red);color:var(--red)}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:480px){.mgrid{grid-template-columns:1fr}}
+.mf{margin-bottom:2px}
+.mf label{font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--muted2);
+  display:block;margin-bottom:5px;text-transform:uppercase}
+.mf input,.mf select,.mf textarea{width:100%;background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--r);color:var(--text);font-family:var(--font-t);font-size:13px;
+  padding:8px 11px;outline:none;transition:border-color .15s}
+.mf input:focus,.mf textarea:focus,.mf select:focus{border-color:rgba(255,183,0,.3)}
+.mf textarea{min-height:80px;resize:vertical;font-size:12px;font-family:var(--font-m)}
+.mf-full{grid-column:1/-1}
+.pid-mini-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;grid-column:1/-1}
+.pid-mg-col{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:10px}
+.pid-mg-lbl{font-family:var(--font-d);font-size:8px;letter-spacing:.08em;margin-bottom:7px}
+.pid-mg-lbl.r{color:var(--green)}.pid-mg-lbl.p{color:var(--blue)}.pid-mg-lbl.y{color:var(--amber)}
+.pid-3cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}
+.pid-3cols input{text-align:center;font-family:var(--font-m);font-size:12px;padding:6px 4px}
+.pid-3labels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:4px}
+.pid-3labels span{font-size:8px;color:var(--muted);text-align:center;font-family:var(--font-d)}
+.style-sel{display:flex;gap:6px;flex-wrap:wrap;grid-column:1/-1}
+.ss-btn{font-family:var(--font-d);font-size:9px;letter-spacing:.07em;padding:5px 12px;
+  border-radius:100px;border:1px solid var(--border);background:var(--panel);
+  color:var(--muted2);cursor:pointer;transition:all .14s}
+.ss-btn:hover{border-color:rgba(255,183,0,.3);color:var(--text)}
+.ss-btn.on{border-color:var(--amber);background:rgba(255,183,0,.1);color:var(--amber)}
+.submit-modal-btn{font-family:var(--font-d);font-size:11px;letter-spacing:.1em;padding:11px 28px;
+  border-radius:100px;background:linear-gradient(135deg,var(--amber),#cc8800);
+  color:#020509;font-weight:700;border:none;cursor:pointer;margin-top:16px;
+  width:100%;transition:all .18s}
+.submit-modal-btn:hover{box-shadow:0 0 18px rgba(255,183,0,.3)}
+.notice{font-size:11px;color:var(--muted2);margin-top:8px;text-align:center;line-height:1.5}
+
+/* Detail modal */
+.detail-overlay{position:fixed;inset:0;background:rgba(2,5,9,.88);z-index:1001;
+  display:none;place-items:center;backdrop-filter:blur(4px)}
+.detail-overlay.open{display:grid}
+.detail-modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:28px;width:min(560px,96vw);max-height:90vh;overflow-y:auto;
+  animation:mIn .22s ease;scrollbar-width:thin;scrollbar-color:rgba(0,255,136,.1) transparent}
+.cli-block{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);
+  padding:14px;font-family:var(--font-m);font-size:11px;color:var(--muted2);
+  white-space:pre;max-height:200px;overflow-y:auto;margin:10px 0;line-height:1.8;
+  scrollbar-width:thin;scrollbar-color:rgba(0,255,136,.15) transparent}
+.copy-cli-btn{font-family:var(--font-d);font-size:10px;letter-spacing:.09em;padding:8px 18px;
+  border-radius:var(--r);background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);
+  color:var(--green);cursor:pointer;transition:all .15s;width:100%;margin-top:4px}
+.copy-cli-btn:hover{background:rgba(0,255,136,.18);box-shadow:var(--glow-g)}
+
+@media(max-width:700px){
+  .lb-head,.lb-row{grid-template-columns:40px 1fr 80px 60px;gap:8px}
+  .lb-head span:nth-child(3),.lb-row>*:nth-child(3),
+  .lb-head span:nth-child(6),.lb-row>*:nth-child(6){display:none}
+}
+</style>
+</head>
+<body>
+<div class="bg-hex"></div>
+<div class="wrap">
+
+<div class="hero">
+  <div class="hero-tag">COMMUNITY LEADERBOARD</div>
+  <h1>Config <em>Leaderboard</em></h1>
+  <p>แชร์ config ที่ fly ดี vote ให้เพื่อน copy ไปใช้ได้เลย — ชุมชน FPV ไทยสร้างขึ้นด้วยกัน</p>
+  <div class="hero-chips">
+    <span class="hchip">🏆 Community Ranked</span>
+    <span class="hchip">🗳️ Vote & Rate</span>
+    <span class="hchip">📋 Copy CLI</span>
+    <span class="hchip">🇹🇭 FPV Thailand</span>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="filter-tabs">
+    <span class="ftab on" data-f="all">ทั้งหมด</span>
+    <span class="ftab" data-f="FREESTYLE">Freestyle</span>
+    <span class="ftab" data-f="RACING">Racing</span>
+    <span class="ftab" data-f="LONG RANGE">Long Range</span>
+    <span class="ftab" data-f="CINEMATIC">Cinematic</span>
+  </div>
+  <button class="submit-btn" onclick="openSubmit()">🏅 SUBMIT CONFIG</button>
+</div>
+
+<div class="podium" id="podium"></div>
+<div class="lb-table">
+  <div class="lb-head">
+    <span>#</span><span>Build & Pilot</span><span>PID R/P/Y</span>
+    <span>Style</span><span>Score</span><span>Vote</span>
+  </div>
+  <div id="lbBody"></div>
+</div>
+
+</div>
+
+<!-- SUBMIT MODAL -->
+<div class="modal-overlay" id="subModal">
+<div class="modal">
+  <div class="modal-hd">
+    <div class="modal-title">🏅 SUBMIT CONFIG</div>
+    <button class="modal-close" onclick="closeSubmit()">✕</button>
+  </div>
+  <div class="mgrid">
+    <div class="mf"><label>Build Name</label>
+      <input id="s_name" placeholder='5" Freestyle V2' maxlength="50" type="text"></div>
+    <div class="mf"><label>Pilot / Callsign</label>
+      <input id="s_pilot" placeholder="@thaiflyer" maxlength="30" type="text"></div>
+    <div class="mf"><label>Frame Size</label>
+      <input id="s_size" placeholder='5"' maxlength="10" type="text"></div>
+    <div class="mf"><label>Battery</label>
+      <input id="s_batt" placeholder="4S 1500mAh" maxlength="20" type="text"></div>
+
+    <div class="style-sel">
+      <span class="ss-btn on" data-v="FREESTYLE">Freestyle</span>
+      <span class="ss-btn" data-v="RACING">Racing</span>
+      <span class="ss-btn" data-v="LONG RANGE">Long Range</span>
+      <span class="ss-btn" data-v="CINEMATIC">Cinematic</span>
+      <span class="ss-btn" data-v="MICRO">Micro</span>
+    </div>
+
+    <div class="pid-mini-grid">
+      <div class="pid-mg-col">
+        <div class="pid-mg-lbl r">ROLL</div>
+        <div class="pid-3labels"><span>P</span><span>I</span><span>D</span></div>
+        <div class="pid-3cols">
+          <input type="number" id="s_rp" placeholder="48" min="0" max="200">
+          <input type="number" id="s_ri" placeholder="90" min="0" max="200">
+          <input type="number" id="s_rd" placeholder="38" min="0" max="200">
+        </div>
+      </div>
+      <div class="pid-mg-col">
+        <div class="pid-mg-lbl p">PITCH</div>
+        <div class="pid-3labels"><span>P</span><span>I</span><span>D</span></div>
+        <div class="pid-3cols">
+          <input type="number" id="s_pp" placeholder="52" min="0" max="200">
+          <input type="number" id="s_pi" placeholder="90" min="0" max="200">
+          <input type="number" id="s_pd" placeholder="40" min="0" max="200">
+        </div>
+      </div>
+      <div class="pid-mg-col">
+        <div class="pid-mg-lbl y">YAW</div>
+        <div class="pid-3labels"><span>P</span><span>I</span><span>D</span></div>
+        <div class="pid-3cols">
+          <input type="number" id="s_yp" placeholder="40" min="0" max="200">
+          <input type="number" id="s_yi" placeholder="90" min="0" max="200">
+          <input type="number" id="s_yd" placeholder="0" min="0" max="40">
+        </div>
+      </div>
+    </div>
+
+    <div class="mf mf-full"><label>CLI Config (แปะทั้งหมดเลย)</label>
+      <textarea id="s_cli" placeholder="# paste CLI diff/dump ที่นี่&#10;set rates_type = ACTUAL&#10;set p_roll = 48&#10;...&#10;save" rows="5"></textarea>
+    </div>
+    <div class="mf mf-full"><label>รายละเอียด / เหตุผลที่แชร์</label>
+      <textarea id="s_note" placeholder="tune สำหรับ freestyle กลางคืน ใบ HQ 5x4.3 ลม 10 km/h — lock-in ดีมาก ไม่มี propwash เลย" rows="3"></textarea>
+    </div>
+  </div>
+  <button class="submit-modal-btn" onclick="submitConfig()">🚀 SUBMIT</button>
+  <div class="notice">⚠️ config ที่ submit จะแสดงเป็นตัวอย่างในเครื่องนี้ ยังไม่มี server storage<br>ทีม OBIX กำลังพัฒนา backend อยู่ครับ</div>
+</div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="detail-overlay" id="detailModal">
+<div class="detail-modal">
+  <div class="modal-hd">
+    <div class="modal-title" id="dt_title">Build Detail</div>
+    <button class="modal-close" onclick="closeDetail()">✕</button>
+  </div>
+  <div id="dt_body"></div>
+</div>
+</div>
+
+<script>
+'use strict';
+const VKEY='obix_lb_votes_v1';
+const UKEY='obix_lb_user_v1';
+let filter='all', selectedStyle='FREESTYLE';
+let voted=JSON.parse(localStorage.getItem(VKEY)||'{}');
+
+// Seed data
+const SEED=[
+  {id:1,name:'5" Freestyle Beast',pilot:'@maxxfpv',size:'5"',batt:'4S 1500mAh',style:'FREESTYLE',
+   pid:{rp:48,ri:90,rd:38,pp:52,pi:90,pd:40,yp:40,yi:90,yd:0},
+   note:'tune ใน BF 4.5 ลมน้อย lock-in ดีมาก ไม่มี propwash เลย',votes:127,
+   cli:'set rates_type = ACTUAL\nset roll_rc_rate = 120\nset p_roll = 48\nset i_roll = 90\nset d_roll = 38\nset p_pitch = 52\nset i_pitch = 90\nset d_pitch = 40\nsave'},
+  {id:2,name:'6" LR Champion',pilot:'@skyrange',size:'6"',batt:'6S 3000mAh',style:'LONG RANGE',
+   pid:{rp:38,ri:85,rd:22,pp:40,pi:85,pd:24,yp:32,yi:82,yd:0},
+   note:'LR setup ลม 20 km/h ยังนิ่งดีมาก filter conservative เน้น efficiency',votes:94,
+   cli:'set rates_type = ACTUAL\nset roll_rc_rate = 80\nset p_roll = 38\nset i_roll = 85\nset d_roll = 22\nsave'},
+  {id:3,name:'Race Knife',pilot:'@speedblade',size:'5"',batt:'6S 1300mAh',style:'RACING',
+   pid:{rp:55,ri:83,rd:43,pp:60,pi:83,pd:46,yp:46,yi:83,yd:0},
+   note:'Race setup P สูง D ค่อนข้างหนัก crispy มาก ใส่ใบ Gemfan',votes:88,
+   cli:'set rates_type = ACTUAL\nset roll_rc_rate = 180\nset p_roll = 55\nset i_roll = 83\nset d_roll = 43\nsave'},
+  {id:4,name:'Cine Smooth',pilot:'@cinemafpv',size:'3.5"',batt:'4S 850mAh',style:'CINEMATIC',
+   pid:{rp:46,ri:88,rd:26,pp:49,pi:88,pd:28,yp:36,yi:85,yd:0},
+   note:'Cinewhoop 3.5" เน้นความนิ่ง ไม่สั่น filter หนักหน่อยแต่ video สวยมาก',votes:72,
+   cli:'set rates_type = ACTUAL\nset roll_rc_rate = 70\nset p_roll = 46\nset i_roll = 88\nset d_roll = 26\nsave'},
+  {id:5,name:'Night Ripper',pilot:'@darkninja',size:'5"',batt:'4S 1300mAh',style:'FREESTYLE',
+   pid:{rp:50,ri:92,rd:40,pp:54,pi:92,pd:42,yp:42,yi:92,yd:0},
+   note:'tune สำหรับบินกลางคืน ปรับ I สูงขึ้นเล็กน้อยเพราะ wind กลางคืนไม่สม่ำเสมอ',votes:61,
+   cli:'set rates_type = ACTUAL\nset roll_rc_rate = 130\nset p_roll = 50\nset i_roll = 92\nset d_roll = 40\nsave'},
+];
+
+let configs=[...SEED,...(JSON.parse(localStorage.getItem(UKEY)||'[]'))];
+
+function score(c){return c.votes*10;}
+function sortedFiltered(){
+  return configs
+    .filter(c=>filter==='all'||c.style===filter)
+    .sort((a,b)=>b.votes-a.votes);
+}
+
+function styleCls(s){
+  if(s==='RACING')return'st-race';if(s==='LONG RANGE')return'st-lr';
+  if(s==='CINEMATIC')return'st-cine';return'st-free';
+}
+
+function renderPodium(list){
+  const pod=document.getElementById('podium');
+  if(list.length<3){pod.innerHTML='';return;}
+  const order=[list[1],list[0],list[2]];
+  const ranks=[{cls:'silver',label:'🥈','rc':'s'},{cls:'first gold',label:'👑','rc':'g'},{cls:'third bronze',label:'🥉','rc':'b'}];
+  pod.innerHTML=order.map((c,i)=>`
+    <div class="pod-card ${ranks[i].cls}">
+      ${i===1?'<div class="crown">👑</div>':''}
+      <div class="pod-rank ${ranks[i].rc==='g'?'gold':ranks[i].rc==='s'?'silver':'bronze'}">${i===1?'1':i===0?'2':'3'}</div>
+      <div class="pod-name">${esc(c.name)}</div>
+      <div class="pod-pilot">${esc(c.pilot)}</div>
+      <div class="pod-score ${ranks[i].rc==='g'?'gold':ranks[i].rc==='s'?'silver':'bronze'}">${c.votes}</div>
+      <div class="pod-label">votes</div>
+    </div>`).join('');
+}
+
+function renderTable(){
+  const list=sortedFiltered();
+  renderPodium(list);
+  const body=document.getElementById('lbBody');
+  if(!list.length){body.innerHTML='<div style="padding:40px;text-align:center;color:var(--muted2)">ไม่พบ config ที่ตรงกัน</div>';return;}
+  body.innerHTML=list.map((c,i)=>{
+    const rCls=i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    const rnkCls=i===0?'g':i===1?'s':i===2?'b':'n';
+    const pid=c.pid||{};
+    const isVoted=!!voted[c.id];
+    return `<div class="lb-row ${rCls}" onclick="showDetail(${c.id})">
+      <div class="rank-badge ${rnkCls}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`}</div>
+      <div class="entry-info">
+        <div class="ei-name">${esc(c.name)}</div>
+        <div class="ei-pilot">${esc(c.pilot)} <span class="ei-tag">${esc(c.size||'')}</span> <span class="ei-tag">${esc(c.batt||'')}</span></div>
+      </div>
+      <div class="pid-mini"><span style="color:var(--green)">${pid.rp??'—'}/${pid.ri??'—'}/${pid.rd??'—'}</span><br><span style="color:var(--blue);font-size:10px">${pid.pp??'—'}/${pid.pi??'—'}/${pid.pd??'—'}</span></div>
+      <div><span class="style-tag ${styleCls(c.style)}">${c.style}</span></div>
+      <div class="score-cell">${c.votes}</div>
+      <div class="vote-cell" onclick="event.stopPropagation()">
+        <button class="vote-btn ${isVoted?'voted':''}" onclick="vote(${c.id})">${isVoted?'✅':'👍'}</button>
+        <span class="vote-count">${c.votes}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function vote(id){
+  const c=configs.find(x=>x.id===id);if(!c)return;
+  if(voted[id]){c.votes--;delete voted[id];}
+  else{c.votes++;voted[id]=true;}
+  localStorage.setItem(VKEY,JSON.stringify(voted));
+  renderTable();
+}
+
+function showDetail(id){
+  const c=configs.find(x=>x.id===id);if(!c)return;
+  const pid=c.pid||{};
+  document.getElementById('dt_title').textContent=c.name;
+  document.getElementById('dt_body').innerHTML=`
+    <div style="color:var(--muted2);font-size:12px;margin-bottom:12px">
+      ${esc(c.pilot)} · ${esc(c.style)} · ${esc(c.size||'')} · ${esc(c.batt||'')}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+      ${[['ROLL','r',pid.rp,pid.ri,pid.rd],['PITCH','p',pid.pp,pid.pi,pid.pd],['YAW','y',pid.yp,pid.yi,pid.yd]].map(([n,c2,p,i2,d])=>`
+        <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px">
+          <div style="font-family:var(--font-d);font-size:8px;letter-spacing:.08em;color:var(--${c2==='r'?'green':c2==='p'?'blue':'amber'});margin-bottom:8px">${n}</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            ${[['P',p],['I',i2],['D',d]].map(([k,v])=>`<div style="font-family:var(--font-m);text-align:center"><div style="font-size:9px;color:var(--muted2)">${k}</div><div style="font-size:18px;font-weight:700;color:var(--${c2==='r'?'green':c2==='p'?'blue':'amber'})">${v??'—'}</div></div>`).join('')}
+          </div>
+        </div>`).join('')}
+    </div>
+    ${c.note?`<div style="font-size:12px;color:var(--muted2);border-left:2px solid var(--border);padding-left:10px;margin-bottom:12px;line-height:1.6;font-style:italic">"${esc(c.note)}"</div>`:''}
+    ${c.cli?`<div style="font-family:var(--font-d);font-size:9px;color:var(--green);letter-spacing:.1em;margin-bottom:6px">CLI CONFIG</div><div class="cli-block">${esc(c.cli)}</div><button class="copy-cli-btn" onclick="copyCLI(${c.id})">📋 COPY CLI</button>`:''}
+    <div style="margin-top:12px;display:flex;align-items:center;gap:10px">
+      <button class="vote-btn ${voted[id]?'voted':''}" onclick="vote(${id});closeDetail()" style="padding:7px 18px;font-size:13px">${voted[id]?'✅ Voted':'👍 Vote'}</button>
+      <span style="font-family:var(--font-m);color:var(--amber);font-size:18px;font-weight:700">${c.votes} votes</span>
+    </div>`;
+  document.getElementById('detailModal').classList.add('open');
+}
+function closeDetail(){document.getElementById('detailModal').classList.remove('open');}
+document.getElementById('detailModal').addEventListener('click',e=>{if(e.target===document.getElementById('detailModal'))closeDetail();});
+
+function copyCLI(id){
+  const c=configs.find(x=>x.id===id);if(!c||!c.cli)return;
+  navigator.clipboard.writeText(c.cli).then(()=>{
+    const btn=document.querySelector('.copy-cli-btn');if(btn){btn.textContent='✅ Copied!';setTimeout(()=>btn.textContent='📋 COPY CLI',2000);}
+  });
+}
+
+function openSubmit(){document.getElementById('subModal').classList.add('open');}
+function closeSubmit(){document.getElementById('subModal').classList.remove('open');}
+document.getElementById('subModal').addEventListener('click',e=>{if(e.target===document.getElementById('subModal'))closeSubmit();});
+
+document.querySelectorAll('.ss-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.ss-btn').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');selectedStyle=b.dataset.v;
+  });
+});
+
+function gv(id){return(document.getElementById(id)?.value||'').trim();}
+function gn2(id){const v=parseInt(document.getElementById(id)?.value);return isNaN(v)?null:v;}
+function submitConfig(){
+  const name=gv('s_name');if(!name){alert('กรุณาใส่ Build Name');return;}
+  const entry={
+    id:Date.now(),name,pilot:gv('s_pilot')||'Anonymous',
+    size:gv('s_size'),batt:gv('s_batt'),style:selectedStyle,
+    pid:{rp:gn2('s_rp'),ri:gn2('s_ri'),rd:gn2('s_rd'),
+         pp:gn2('s_pp'),pi:gn2('s_pi'),pd:gn2('s_pd'),
+         yp:gn2('s_yp'),yi:gn2('s_yi'),yd:gn2('s_yd')},
+    note:gv('s_note'),cli:gv('s_cli'),votes:0
+  };
+  const user=JSON.parse(localStorage.getItem(UKEY)||'[]');
+  user.unshift(entry);localStorage.setItem(UKEY,JSON.stringify(user));
+  configs=[...SEED,...user];
+  closeSubmit();renderTable();
+}
+
+document.querySelectorAll('.ftab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.ftab').forEach(x=>x.classList.remove('on'));
+    t.classList.add('on');filter=t.dataset.f;renderTable();
+  });
+});
+
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+renderTable();
+</script>
+</body>
+</html>

@@ -1,138 +1,332 @@
-<!-- templates/changelog.html -->
-<!doctype html>
+<!-- templates/changelog.html — OBIXConfig Doctor v2.3 REDESIGN -->
+<!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Changelog — OBIXConfig Doctor</title>
+<meta charset="UTF-8">
+<title>Changelog — OBIXConfig Doctor</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 {% set og_title       = "Changelog — OBIXConfig Doctor" %}
-{% set og_description = "อัพเดทและการเปลี่ยนแปลงล่าสุดของ OBIXConfig Doctor เครื่องมือ FPV Tuning" %}
+{% set og_description = "อัปเดตและการเปลี่ยนแปลงทุก version ของ OBIXConfig Doctor" %}
 {% set og_url         = "https://configdoctor.onrender.com/changelog" %}
 {% include "partials/og_tags.html" %}
+<link rel="icon" href="{{ url_for('static',filename='favicon.ico') }}">
+{% set nav_page = "changelog" %}
+{% include "partials/nav.html" %}
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@400;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#020509;--bg2:#040b14;--surface:#060e1c;--panel:#081428;
+  --border:rgba(0,255,136,.08);--text:#c8d8e8;--muted:#3d5470;--muted2:#7090a8;
+  --green:#00ff88;--green2:#00cc6a;--blue:#00aaff;--amber:#ffb700;--red:#ff4455;
+  --g-dim:rgba(0,255,136,.07);--b-dim:rgba(0,170,255,.07);
+  --glow-g:0 0 20px rgba(0,255,136,.25);
+  --font-d:'Orbitron',sans-serif;--font-m:'JetBrains Mono',monospace;--font-t:'Sarabun',sans-serif;
+  --r:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font-t);min-height:100vh}
+.scan{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,136,.012) 2px,rgba(0,255,136,.012) 4px)}
+.wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:36px 20px 80px}
 
-  <!-- ถ้าอยากให้ใช้สไตล์เฉพาะหน้า ให้ย้าย CSS นี้ไปไฟล์ static/css/style.css -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  <style>
-    :root{--accent:#3b82f6;--muted:#98a6b8}
-    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;margin:0;background:#071028;color:#e6eef8}
-    .wrap{max-width:920px;margin:28px auto;padding:18px}
-    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .logo{height:36px}
-    .card{background:rgba(255,255,255,0.02);border-radius:10px;padding:14px;margin-top:14px}
-    h1{margin:0 0 6px 0;font-size:1.3rem}
-    .meta{color:var(--muted);font-size:0.95rem}
-    ul{margin:10px 0 0 18px}
-    .foot{color:var(--muted);font-size:0.9rem;margin-top:14px}
-    a{color:var(--accent)}
-    @media (max-width:640px){.wrap{padding:12px}}
-  </style>
+/* Hero */
+.hero{text-align:center;padding:40px 0 32px;border-bottom:1px solid var(--border);margin-bottom:40px}
+.hero-eye{font-family:var(--font-d);font-size:9px;letter-spacing:.22em;color:var(--green);
+  display:inline-flex;align-items:center;gap:8px;margin-bottom:12px}
+.hero-eye::before,.hero-eye::after{content:'';width:28px;height:1px;background:var(--green);opacity:.35}
+.hero h1{font-family:var(--font-d);font-size:clamp(22px,4vw,36px);font-weight:900;
+  letter-spacing:.03em;margin-bottom:8px}
+.hero h1 em{color:var(--green);font-style:normal}
+.hero-meta{font-family:var(--font-m);font-size:11px;color:var(--muted2);
+  display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:10px}
+.hero-meta .dot{width:4px;height:4px;border-radius:50%;background:var(--muted)}
+
+/* Stats strip */
+.stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:40px}
+@media(max-width:600px){.stats-strip{grid-template-columns:1fr 1fr}}
+.stat-tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:16px;text-align:center;position:relative;overflow:hidden}
+.stat-tile::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-tile.g::before{background:var(--green)}
+.stat-tile.b::before{background:var(--blue)}
+.stat-tile.a::before{background:var(--amber)}
+.stat-tile.r::before{background:var(--red)}
+.stat-n{font-family:var(--font-d);font-size:28px;font-weight:900;line-height:1;margin-bottom:4px}
+.stat-tile.g .stat-n{color:var(--green)}.stat-tile.b .stat-n{color:var(--blue)}
+.stat-tile.a .stat-n{color:var(--amber)}.stat-tile.r .stat-n{color:var(--red)}
+.stat-lbl{font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--muted2);text-transform:uppercase}
+
+/* Timeline */
+.tl{position:relative}
+.tl::before{content:'';position:absolute;left:19px;top:0;bottom:0;width:2px;
+  background:linear-gradient(to bottom,var(--green) 0%,rgba(0,255,136,.3) 60%,transparent 100%)}
+
+.ver-block{position:relative;padding-left:56px;margin-bottom:36px}
+.ver-dot{position:absolute;left:11px;top:20px;width:18px;height:18px;border-radius:50%;
+  border:2px solid var(--green);background:var(--bg);
+  box-shadow:0 0 14px rgba(0,255,136,.4);z-index:1;transition:all .2s}
+.ver-block:hover .ver-dot{box-shadow:0 0 20px rgba(0,255,136,.6)}
+.ver-dot.latest{background:var(--green);box-shadow:0 0 18px rgba(0,255,136,.6)}
+.ver-dot.b{border-color:var(--blue);box-shadow:0 0 14px rgba(0,170,255,.3)}
+.ver-dot.b.latest{background:var(--blue)}
+.ver-dot.a{border-color:var(--amber);box-shadow:0 0 14px rgba(255,183,0,.3)}
+
+.ver-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.ver-card:hover{border-color:rgba(0,255,136,.18);box-shadow:0 4px 24px rgba(0,255,136,.05)}
+.ver-card.latest-card{border-color:rgba(0,255,136,.2);box-shadow:0 0 30px rgba(0,255,136,.06)}
+
+.ver-head{padding:20px 22px 16px;display:flex;align-items:flex-start;justify-content:space-between;
+  gap:12px;border-bottom:1px solid var(--border);cursor:pointer}
+.ver-head-l{flex:1;min-width:0}
+.ver-num{font-family:var(--font-d);font-size:18px;font-weight:900;color:var(--text);
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:5px}
+.ver-badge{font-family:var(--font-d);font-size:8px;letter-spacing:.08em;padding:3px 9px;
+  border-radius:100px}
+.badge-latest{background:rgba(0,255,136,.12);border:1px solid rgba(0,255,136,.3);color:var(--green)}
+.badge-feature{background:rgba(0,170,255,.1);border:1px solid rgba(0,170,255,.25);color:var(--blue)}
+.badge-fix{background:rgba(255,183,0,.1);border:1px solid rgba(255,183,0,.25);color:var(--amber)}
+.badge-ux{background:rgba(192,64,255,.1);border:1px solid rgba(192,64,255,.25);color:#c040ff}
+.ver-name{font-size:14px;color:var(--muted2);margin-bottom:3px}
+.ver-date{font-family:var(--font-m);font-size:10px;color:var(--muted)}
+.ver-head-r{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.change-count{font-family:var(--font-d);font-size:9px;letter-spacing:.08em;
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--r);
+  padding:5px 10px;color:var(--muted2)}
+.toggle-icon{font-size:12px;color:var(--muted);transition:transform .2s}
+
+.ver-body{padding:0 22px;max-height:0;overflow:hidden;transition:max-height .35s cubic-bezier(.4,0,.2,1),padding .35s}
+.ver-body.open{max-height:2000px;padding:18px 22px 20px}
+
+.change-cat{margin-bottom:16px}
+.cat-title{font-family:var(--font-d);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+  margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.cat-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.cat-new{color:var(--green)}.cat-fix{color:var(--amber)}.cat-ux{color:var(--blue)}.cat-break{color:var(--red)}
+
+.change-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+.change-item{display:flex;gap:10px;font-size:13px;line-height:1.6;color:var(--text)}
+.ci-icon{font-size:13px;flex-shrink:0;margin-top:1px}
+.ci-body strong{color:var(--text)}
+.ci-body span{color:var(--muted2)}
+.ci-tag{font-family:var(--font-d);font-size:8px;letter-spacing:.07em;padding:2px 7px;
+  border-radius:4px;margin-left:6px;vertical-align:middle}
+.tag-new{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.2);color:var(--green)}
+.tag-fix{background:rgba(255,183,0,.1);border:1px solid rgba(255,183,0,.2);color:var(--amber)}
+.tag-ux{background:rgba(0,170,255,.1);border:1px solid rgba(0,170,255,.2);color:var(--blue)}
+
+/* Footer link */
+.repo-line{text-align:center;margin-top:40px;font-family:var(--font-m);font-size:11px;color:var(--muted);
+  display:flex;align-items:center;justify-content:center;gap:8px}
+.repo-line::before,.repo-line::after{content:'';flex:1;max-width:100px;height:1px;background:var(--border)}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div style="display:flex;align-items:center;gap:12px">
-        <a href="/"><img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="OBIX" class="logo"></a>
-        <div>
-          <div style="font-weight:700">OBIXConfig Doctor</div>
-          <div class="meta">Changelog — v2.2</div>
-        </div>
+<div class="scan"></div>
+<div class="wrap">
+
+<div class="hero">
+  <div class="hero-eye">RELEASE HISTORY</div>
+  <h1><em>Changelog</em> — OBIXConfig</h1>
+  <div class="hero-meta">
+    <span>Branch: <strong style="color:var(--green)">{{ branch or 'main' }}</strong></span>
+    <span class="dot"></span>
+    <span>Snapshot: <strong style="color:var(--green)">{{ repo_snapshot or '2025-03' }}</strong></span>
+    <span class="dot"></span>
+    <span style="color:var(--green)">v2.3 CURRENT</span>
+  </div>
+</div>
+
+<div class="stats-strip">
+  <div class="stat-tile g"><div class="stat-n">15</div><div class="stat-lbl">Tools</div></div>
+  <div class="stat-tile b"><div class="stat-n">23</div><div class="stat-lbl">Routes</div></div>
+  <div class="stat-tile a"><div class="stat-n">8</div><div class="stat-lbl">Releases</div></div>
+  <div class="stat-tile r"><div class="stat-n">100%</div><div class="stat-lbl">Free</div></div>
+</div>
+
+<div class="tl">
+
+<!-- v2.3 -->
+<div class="ver-block">
+  <div class="ver-dot latest"></div>
+  <div class="ver-card latest-card">
+    <div class="ver-head" onclick="toggleVer(this)">
+      <div class="ver-head-l">
+        <div class="ver-num">v2.3 <span class="ver-badge badge-latest">LATEST</span> <span class="ver-badge badge-feature">FEATURE</span></div>
+        <div class="ver-name">Community Edition — Build Card · Tuning Log · Leaderboard</div>
+        <div class="ver-date">📅 มีนาคม 2569 (2026)</div>
       </div>
-      <div class="meta" style="text-align:right">
-        Snapshot: <strong>{{ repo_snapshot or 'n/a' }}</strong><br>
-        Branch: <strong>{{ branch or 'main' }}</strong>
+      <div class="ver-head-r">
+        <span class="change-count">11 changes</span>
+        <span class="toggle-icon">▾</span>
       </div>
-    </header>
-
-    <section class="card" aria-labelledby="latest">
-
-      <!-- ═══════════════════════════════════════════════════════ -->
-      <!-- v2.2 — Blackbox CSV Analyzer (LATEST)                   -->
-      <!-- ═══════════════════════════════════════════════════════ -->
-      <h1 id="latest" style="color:#10c47a;">📊 v2.2 — Blackbox CSV Analyzer</h1>
-      <div class="meta">03/03/2026 · Flagship Feature Release</div>
-      <ul>
-        <li><strong>🆕 Blackbox CSV Analyzer:</strong> Upload ไฟล์ CSV จาก Betaflight Blackbox — วิเคราะห์ PID quality score (เกรด A–D), oscillation ต่อ axis (Roll/Pitch/Yaw), motor imbalance, battery sag, throttle distribution พร้อม CLI fix recommendations</li>
-        <li><strong>🆕 Landing Page:</strong> Redesign ใหม่สมบูรณ์ — Blackbox Flagship card, stats bar 14 tools, hero tags, scroll reveal animations</li>
-        <li><strong>🆕 Responsive Design:</strong> ทุกหน้ารองรับมือถือและแท็บเล็ตครบ — overflow-x fix, iOS zoom fix, 768/480px breakpoints</li>
-        <li><strong>🆕 SEO:</strong> JSON-LD Structured Data, sitemap 18 URLs, robots.txt อัปเดต, unique title tags</li>
-        <li><strong>รองรับ:</strong> Betaflight 4.3 / 4.4 / 4.5</li>
-      </ul>
-
-      <hr style="border:none;border-top:1px solid rgba(255,255,255,0.06);margin:18px 0;">
-
-      <!-- ═══════════════════════════════════════════════════════ -->
-      <!-- v2.1 — Filter Intelligence                              -->
-      <!-- ═══════════════════════════════════════════════════════ -->
-      <h2 style="color:#58a6ff;margin-top:0;">🔧 v2.1 — Filter Intelligence Update</h2>
-      <div class="meta">02/03/2026 · Physics & Parser Accuracy Patch</div>
-      <ul>
-        <li><strong>แก้บัค Critical:</strong> CLI Surgeon ตรวจ <code>gyro_lpf1_static_hz</code> / <code>dterm_lpf1_static_hz</code> ได้ถูกต้องแล้ว (BF4.4+)</li>
-        <li><strong>เพิ่ม:</strong> รองรับ <code>simplified_gyro_filter</code> — คำนวณ effective Hz จาก multiplier อัตโนมัติ</li>
-        <li><strong>เพิ่ม:</strong> ตรวจ Dynamic Filter range (<code>dyn_min_hz</code> / <code>dyn_max_hz</code>)</li>
-        <li><strong>แก้บัค:</strong> แบตเตอรี่เริ่มต้น 7" 6S ปรับเป็น 2200mAh (ค่าจริงจาก community)</li>
-        <li><strong>ปรับปรุง:</strong> Filter warnings ทำงานกับ dump ไฟล์จริงทุกเวอร์ชัน BF4.3-4.5</li>
-      </ul>
-
-      <hr style="border:none;border-top:1px solid rgba(255,255,255,0.06);margin:18px 0;">
-
-      <!-- ═══════════════════════════════════════════════════════ -->
-      <!-- v2.0 — Major Release                                    -->
-      <!-- ═══════════════════════════════════════════════════════ -->
-      <h2 style="color:#f1b65a;margin-top:0;">🚀 v2.0 — Size-Aware Physics Engine</h2>
-      <div class="meta">01/03/2026 · Major Accuracy Overhaul</div>
-      <ul>
-        <li><strong>แก้บัค Critical:</strong> Flight time คำนวณต่างกันตามขนาด prop — 3" whoop 4.8 min ✅, 5" freestyle 6.1 min ✅</li>
-        <li><strong>เพิ่ม Size-Dependent Power Model:</strong> W/g แตกต่างตาม prop size (2.5"=0.50 ถึง 10"=0.09 W/g)</li>
-        <li><strong>เพิ่ม Symptom Advisor:</strong> 13 อาการ รวม ESC Desync, กันลม, ไม่ ARM, Turtle mode, VTX breakup</li>
-        <li><strong>เพิ่ม CLI Surgeon checks:</strong> DSHOT, BiDir DShot, iterm_relax, TPA, vbat_pid_gain, motor_poles, feedforward</li>
-        <li><strong>เพิ่ม Support Section:</strong> PromptPay QR ในหน้า Landing</li>
-      </ul>
-
-      <hr style="border:none;border-top:1px solid rgba(255,255,255,0.06);margin:18px 0;">
-
-      <!-- ═══════════════════════════════════════════════════════ -->
-      <!-- v1.1 — Stable Release                                   -->
-      <!-- ═══════════════════════════════════════════════════════ -->
-      <h2 style="color:#98a6b8;margin-top:0;">v1.1 — Stable Foundation</h2>
-      <div class="meta">28/02/2026</div>
-      <ul>
-        <li><strong>เพิ่ม:</strong> Drawer menu, Quick Links, Preset autofill</li>
-        <li><strong>เพิ่ม:</strong> หน้า Changelog</li>
-        <li><strong>ปรับปรุง:</strong> UI สำหรับมือถือ, dark theme</li>
-        <li><strong>แก้บัค:</strong> ตรวจ input ก่อนวิเคราะห์ (basic validation)</li>
-      </ul>
-
-      <article style="margin-top:16px;">
-        <h3 style="color:#98a6b8;">v1.0.1beta — Initial release</h3>
-        <ul>
-          <li>เริ่มต้นหน้าแอปวิเคราะห์ค่า PID/Filter</li>
-          <li>เพิ่ม Quick Summary, Preset Box, CLI Presets</li>
+    </div>
+    <div class="ver-body open">
+      <div class="change-cat">
+        <div class="cat-title cat-new">🆕 NEW FEATURES</div>
+        <ul class="change-list">
+          <li class="change-item"><span class="ci-icon">🃏</span><div class="ci-body"><strong>Build Card Generator</strong> <span class="ci-tag tag-new">new</span><br><span>สร้างรูปสเปคโดรน 1200×628 px สวยๆ พร้อมแชร์ Facebook · LINE · Instagram ได้ทันที มี 4 theme ให้เลือก</span></div></li>
+          <li class="change-item"><span class="ci-icon">📊</span><div class="ci-body"><strong>Tuning Log</strong> <span class="ci-tag tag-new">new</span><br><span>บันทึกประวัติการ tune ทุก session · แสดง delta ∆PID ระหว่างครั้ง · filter, search, export JSON · เก็บใน localStorage ไม่ต้องล็อกอิน</span></div></li>
+          <li class="change-item"><span class="ci-icon">🏆</span><div class="ci-body"><strong>Community Leaderboard</strong> <span class="ci-tag tag-new">new</span><br><span>rank config ของชุมชน FPV ไทย · vote ให้คะแนน · ดู PID + copy CLI ของ top config · seed data 5 config จาก community</span></div></li>
+          <li class="change-item"><span class="ci-icon">⚡</span><div class="ci-body"><strong>BF Config Wizard</strong> <span class="ci-tag tag-new">new</span><br><span>7 ขั้นตอน กรอกสเปค → ได้ CLI ครบสมบูรณ์ · PID/Rates/Filter/Features · Live preview · Download .txt · BF 4.4/4.5</span></div></li>
+          <li class="change-item"><span class="ci-icon">🎯</span><div class="ci-body"><strong>Flight Style Quiz</strong> <span class="ci-tag tag-new">new</span><br><span>5 คำถาม → แนะนำ rates + preset ที่เหมาะกับสไตล์การบินของคุณ</span></div></li>
         </ul>
-        <small style="color:#999;">12/02/2026</small>
-      </article>
-
-      <p style="margin-top:18px;">ต้องการให้เพิ่ม feature ไหน? แจ้งได้ที่เพจ: <a href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener">OBIXConfig Lab</a></p>
-
-      <p style="margin-top:20px; font-size:0.95rem; color:#999;">
-        OBIXConfig Doctor • v2.2 — พัฒนาโดยชุมชน FPV ไทย ❤️
-      </p>
-    </section>
-  </main>
-
-  <script>
-    function toggleTheme(){
-      document.body.classList.toggle('dark');
-      document.body.classList.toggle('light');
-      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
-    }
-    (function(){
-      const saved = localStorage.getItem('theme') || 'light';
-      document.body.classList.add(saved);
-    })();
-  </script>
-
-<div class="foot">
-        เวอร์ชันนี้เหมาะสำหรับการเผยแพร่เริ่มต้นบนหน้าเว็บ — ถ้าต้องการเพิ่มรายละเอียดเวอร์ชัน (items / notes / dates) ให้บอกผม ผมจะทำให้หน้าแสดงรายการแบบ dynamic จาก `data/changelog.json`.
       </div>
+      <div class="change-cat">
+        <div class="cat-title cat-fix">🔧 BUG FIXES (v2.2)</div>
+        <ul class="change-list">
+          <li class="change-item"><span class="ci-icon">🐛</span><div class="ci-body"><strong>battery_logic.py</strong> — rewrite ใหม่ รองรับ '4S 1500mAh', '4s1500', '6S' ทุกรูปแบบ</div></li>
+          <li class="change-item"><span class="ci-icon">🐛</span><div class="ci-body"><strong>thrust_logic.py</strong> — คืน 0.0 (float) แทน None เมื่อ motor_load=0</div></li>
+          <li class="change-item"><span class="ci-icon">🐛</span><div class="ci-body"><strong>api/symptom</strong> — คืน HTTP 404 สำหรับ symptom ที่ไม่รู้จัก (เคย return 200+error)</div></li>
+        </ul>
+      </div>
+      <div class="change-cat">
+        <div class="cat-title cat-ux">✨ UX / DESIGN</div>
+        <ul class="change-list">
+          <li class="change-item"><span class="ci-icon">🎨</span><div class="ci-body"><strong>Changelog redesign</strong> — ใช้ OBIX HUD theme ครบ · collapsible sections · stats strip · timeline</div></li>
+          <li class="change-item"><span class="ci-icon">🧭</span><div class="ci-body"><strong>Nav drawer</strong> — เพิ่ม BF Config Wizard link + "new" badge</div></li>
+          <li class="change-item"><span class="ci-icon">🗺️</span><div class="ci-body"><strong>Sitemap</strong> — เพิ่ม /bf-wizard, /build-card, /tuning-log, /leaderboard · ครบ 24 URLs</div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- v2.2 -->
+<div class="ver-block">
+  <div class="ver-dot b"></div>
+  <div class="ver-card">
+    <div class="ver-head" onclick="toggleVer(this)">
+      <div class="ver-head-l">
+        <div class="ver-num">v2.2 <span class="ver-badge badge-feature">FEATURE</span></div>
+        <div class="ver-name">Blackbox CSV Analyzer — Flagship Release</div>
+        <div class="ver-date">📅 มีนาคม 2569 · 03/03/2026</div>
+      </div>
+      <div class="ver-head-r">
+        <span class="change-count">8 changes</span>
+        <span class="toggle-icon">▾</span>
+      </div>
+    </div>
+    <div class="ver-body">
+      <div class="change-cat">
+        <div class="cat-title cat-new">🆕 NEW</div>
+        <ul class="change-list">
+          <li class="change-item"><span class="ci-icon">📊</span><div class="ci-body"><strong>Blackbox CSV Analyzer</strong> — Upload CSV จาก BF Blackbox · PID quality score A–D · oscillation ต่อ axis · motor imbalance · battery sag · CLI fix recommendations</div></li>
+          <li class="change-item"><span class="ci-icon">🏠</span><div class="ci-body"><strong>Landing Page Redesign</strong> — Blackbox flagship card · stats bar 14 tools · hero tags · scroll reveal</div></li>
+          <li class="change-item"><span class="ci-icon">📱</span><div class="ci-body"><strong>Responsive Design</strong> — รองรับมือถือ/แท็บเล็ตครบ · overflow-x fix · iOS zoom fix</div></li>
+          <li class="change-item"><span class="ci-icon">🔍</span><div class="ci-body"><strong>SEO</strong> — JSON-LD Structured Data · sitemap 18 URLs · robots.txt · unique title tags</div></li>
+        </ul>
+      </div>
+      <div class="change-cat">
+        <div class="cat-title cat-fix">🔧 FIXES</div>
+        <ul class="change-list">
+          <li class="change-item"><span class="ci-icon">🐛</span><div class="ci-body">battery_logic error handling · thrust_logic None→0.0 · 404 status code ครบ</div></li>
+          <li class="change-item"><span class="ci-icon">🐛</span><div class="ci-body">CLI Surgeon error UX — แสดง message แทน silent fallback</div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- v2.1 -->
+<div class="ver-block">
+  <div class="ver-dot a"></div>
+  <div class="ver-card">
+    <div class="ver-head" onclick="toggleVer(this)">
+      <div class="ver-head-l">
+        <div class="ver-num">v2.1 <span class="ver-badge badge-feature">FEATURE</span></div>
+        <div class="ver-name">14-Tool Suite — ESC · OSD · VTX · PID Advisor</div>
+        <div class="ver-date">📅 กุมภาพันธ์ 2569</div>
+      </div>
+      <div class="ver-head-r">
+        <span class="change-count">7 changes</span>
+        <span class="toggle-icon">▾</span>
+      </div>
+    </div>
+    <div class="ver-body">
+      <ul class="change-list">
+        <li class="change-item"><span class="ci-icon">🆕</span><div class="ci-body"><strong>ESC Compatibility Checker</strong> — ตรวจ motor KV/voltage/protocol</div></li>
+        <li class="change-item"><span class="ci-icon">🆕</span><div class="ci-body"><strong>OSD Designer</strong> — drag-and-drop element layout</div></li>
+        <li class="change-item"><span class="ci-icon">🆕</span><div class="ci-body"><strong>VTX Range Calculator</strong> — คำนวณระยะตาม power/antenna</div></li>
+        <li class="change-item"><span class="ci-icon">🆕</span><div class="ci-body"><strong>SmartAudio CLI Generator</strong> — สร้าง command VTX</div></li>
+        <li class="change-item"><span class="ci-icon">🆕</span><div class="ci-body"><strong>PID Symptom Advisor</strong> — บอกอาการ → รับ set command</div></li>
+        <li class="change-item"><span class="ci-icon">🆕</span><div class="ci-body"><strong>RPM Filter Calculator</strong> — harmonic + dyn_notch</div></li>
+        <li class="change-item"><span class="ci-icon">🆕</span><div class="ci-body"><strong>CLI Diff Comparator</strong> — diff สอง dump ดู diff จริง</div></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- v2.0 -->
+<div class="ver-block">
+  <div class="ver-dot"></div>
+  <div class="ver-card">
+    <div class="ver-head" onclick="toggleVer(this)">
+      <div class="ver-head-l">
+        <div class="ver-num">v2.0 <span class="ver-badge badge-ux">REDESIGN</span></div>
+        <div class="ver-name">OBIX HUD Theme — Dark Military Aesthetic</div>
+        <div class="ver-date">📅 มกราคม 2569</div>
+      </div>
+      <div class="ver-head-r">
+        <span class="change-count">5 changes</span>
+        <span class="toggle-icon">▾</span>
+      </div>
+    </div>
+    <div class="ver-body">
+      <ul class="change-list">
+        <li class="change-item"><span class="ci-icon">🎨</span><div class="ci-body">OBIX HUD dark theme ใหม่ทั้งหมด — Orbitron · JetBrains Mono · green/blue accent</div></li>
+        <li class="change-item"><span class="ci-icon">🔧</span><div class="ci-body">Rates Visualizer — real-time curve canvas ต่อ axis 3 สี</div></li>
+        <li class="change-item"><span class="ci-icon">🧭</span><div class="ci-body">Nav drawer redesign — grouped links · active state · mobile</div></li>
+        <li class="change-item"><span class="ci-icon">⚙️</span><div class="ci-body">Motor × Prop Recommender — แนะนำ combo จากสเปค</div></li>
+        <li class="change-item"><span class="ci-icon">📋</span><div class="ci-body">CLI Surgeon — parse diff_all · highlight ค่าผิดปกติ</div></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- v1.x -->
+<div class="ver-block">
+  <div class="ver-dot" style="border-color:var(--muted);box-shadow:none"></div>
+  <div class="ver-card">
+    <div class="ver-head" onclick="toggleVer(this)">
+      <div class="ver-head-l">
+        <div class="ver-num" style="font-size:14px;color:var(--muted2)">v1.x — Initial Release Series</div>
+        <div class="ver-name" style="color:var(--muted)">Drone Analyzer · Battery/Thrust Logic · Basic UI</div>
+        <div class="ver-date">📅 2025</div>
+      </div>
+      <div class="ver-head-r">
+        <span class="toggle-icon">▾</span>
+      </div>
+    </div>
+    <div class="ver-body">
+      <ul class="change-list">
+        <li class="change-item"><span class="ci-icon">🚁</span><div class="ci-body">Drone Analyzer — วิเคราะห์ PID/Filter จากสเปค</div></li>
+        <li class="change-item"><span class="ci-icon">🔋</span><div class="ci-body">Battery Logic — parse 4S/6S + mAh + voltage calc</div></li>
+        <li class="change-item"><span class="ci-icon">⚡</span><div class="ci-body">Thrust/Weight calculator — TWR พร้อม class classification</div></li>
+        <li class="change-item"><span class="ci-icon">📦</span><div class="ci-body">Downloads page — diff_all templates F4/F7</div></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div><!-- tl -->
+
+<div class="repo-line">configdoctor.onrender.com · OBIXConfig Lab · 🇹🇭</div>
+
+</div><!-- wrap -->
+<script>
+function toggleVer(head){
+  const body=head.nextElementSibling;
+  const icon=head.querySelector('.toggle-icon');
+  const isOpen=body.classList.contains('open');
+  body.classList.toggle('open',!isOpen);
+  if(icon)icon.style.transform=isOpen?'':'rotate(180deg)';
+}
+// collapse all except first on load
+document.querySelectorAll('.ver-body:not(.open)').forEach(b=>{
+  const icon=b.previousElementSibling?.querySelector('.toggle-icon');
+  if(icon)icon.style.transform='rotate(-90deg)';
+});
+</script>
 </body>
 </html>

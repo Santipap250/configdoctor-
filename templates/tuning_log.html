@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Tuning Log — OBIXConfig Doctor</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+{% set og_title = "Tuning Log — OBIXConfig Doctor" %}
+{% set og_description = "บันทึกประวัติการ Tune โดรน เปรียบเทียบ PID ทุก session ดูพัฒนาการ" %}
+{% set og_url = "https://configdoctor.onrender.com/tuning-log" %}
+{% include "partials/og_tags.html" %}
+<link rel="icon" href="{{ url_for('static',filename='favicon.ico') }}">
+{% set nav_page = "tuning_log" %}
+{% include "partials/nav.html" %}
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@400;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#020509;--bg2:#040b14;--surface:#060e1c;--panel:#081428;
+  --border:rgba(0,255,136,.08);--text:#c8d8e8;--muted:#3d5470;--muted2:#7090a8;
+  --green:#00ff88;--green2:#00cc6a;--blue:#00aaff;--amber:#ffb700;--red:#ff4455;
+  --g-dim:rgba(0,255,136,.07);--glow-g:0 0 18px rgba(0,255,136,.25);
+  --font-d:'Orbitron',sans-serif;--font-m:'JetBrains Mono',monospace;--font-t:'Sarabun',sans-serif;--r:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font-t);min-height:100vh}
+.bg-grid{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle,rgba(0,255,136,.05) 1px,transparent 1px);
+  background-size:32px 32px;animation:gd 18s linear infinite}
+@keyframes gd{to{background-position:32px 32px}}
+.wrap{position:relative;z-index:1;max-width:1060px;margin:0 auto;padding:32px 20px 60px}
+
+/* Hero */
+.hero{text-align:center;padding:38px 0 28px;border-bottom:1px solid var(--border);margin-bottom:32px}
+.hero-tag{font-family:var(--font-d);font-size:9px;letter-spacing:.22em;color:var(--amber);
+  display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px}
+.hero-tag::before,.hero-tag::after{content:'';width:28px;height:1px;background:var(--amber);opacity:.35}
+.hero h1{font-family:var(--font-d);font-size:clamp(20px,4vw,32px);font-weight:900;margin-bottom:8px}
+.hero h1 em{color:var(--amber);font-style:normal}
+.hero p{color:var(--muted2);font-size:13px;max-width:480px;margin:0 auto;line-height:1.7}
+
+/* Top bar */
+.top-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin-bottom:24px;flex-wrap:wrap}
+.log-stats{display:flex;gap:20px;flex-wrap:wrap}
+.stat-chip{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  padding:8px 16px;font-family:var(--font-d);font-size:9px;letter-spacing:.1em;color:var(--muted2)}
+.stat-chip span{display:block;font-size:18px;color:var(--green);font-weight:700;margin-bottom:2px}
+.add-btn{font-family:var(--font-d);font-size:10px;letter-spacing:.1em;padding:10px 22px;
+  border-radius:100px;background:linear-gradient(135deg,var(--green),var(--green2));
+  color:#020509;font-weight:700;border:none;cursor:pointer;transition:all .18s;white-space:nowrap}
+.add-btn:hover{box-shadow:var(--glow-g);transform:translateY(-1px)}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(2,5,9,.85);z-index:1000;
+  display:none;place-items:center;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:grid}
+.modal{background:var(--surface);border:1px solid rgba(0,255,136,.2);border-radius:16px;
+  padding:28px;width:min(680px,96vw);max-height:90vh;overflow-y:auto;
+  box-shadow:0 0 60px rgba(0,255,136,.08);scrollbar-width:thin;
+  scrollbar-color:rgba(0,255,136,.15) transparent;
+  animation:mIn .25s cubic-bezier(.4,0,.2,1)}
+@keyframes mIn{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:none}}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.modal-title{font-family:var(--font-d);font-size:14px;font-weight:700;color:var(--text)}
+.modal-close{background:transparent;border:1px solid var(--border);border-radius:50%;
+  width:32px;height:32px;cursor:pointer;color:var(--muted2);font-size:14px;
+  display:grid;place-items:center;transition:all .15s}
+.modal-close:hover{border-color:var(--red);color:var(--red)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:500px){.form-grid{grid-template-columns:1fr}}
+.mfield{margin-bottom:2px}
+.mfield label{font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--muted2);
+  display:block;margin-bottom:5px;text-transform:uppercase}
+.mfield input,.mfield select,.mfield textarea{width:100%;background:var(--panel);
+  border:1px solid var(--border);border-radius:var(--r);color:var(--text);
+  font-family:var(--font-t);font-size:13px;padding:8px 11px;outline:none;transition:border-color .15s}
+.mfield input:focus,.mfield textarea:focus,.mfield select:focus{border-color:rgba(0,255,136,.3)}
+.mfield textarea{min-height:70px;resize:vertical;font-size:12px;line-height:1.5}
+.mfield-full{grid-column:1/-1}
+.pid-section{grid-column:1/-1;background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--r);padding:14px}
+.pid-sec-title{font-family:var(--font-d);font-size:9px;letter-spacing:.1em;color:var(--green);
+  text-transform:uppercase;margin-bottom:12px}
+.pid-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.pid-col-lbl{font-family:var(--font-d);font-size:8px;letter-spacing:.08em;margin-bottom:8px}
+.pid-col-lbl.r{color:var(--green)}.pid-col-lbl.p{color:var(--blue)}.pid-col-lbl.y{color:var(--amber)}
+.pid-row-m{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:6px}
+.pid-row-m input{font-family:var(--font-m);font-size:12px;text-align:center}
+.pid-row-labels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:3px}
+.pid-row-labels span{font-size:9px;color:var(--muted);text-align:center;font-family:var(--font-d)}
+.result-pills{display:flex;gap:6px;flex-wrap:wrap}
+.rpill{font-family:var(--font-d);font-size:9px;letter-spacing:.07em;padding:5px 12px;
+  border-radius:100px;border:1px solid var(--border);background:var(--panel);
+  color:var(--muted2);cursor:pointer;transition:all .14s}
+.rpill:hover{border-color:rgba(0,255,136,.3);color:var(--text)}
+.rpill.on-g{border-color:var(--green);background:rgba(0,255,136,.1);color:var(--green)}
+.rpill.on-a{border-color:var(--amber);background:rgba(255,183,0,.1);color:var(--amber)}
+.rpill.on-r{border-color:var(--red);background:rgba(255,68,85,.1);color:var(--red)}
+.save-btn{font-family:var(--font-d);font-size:11px;letter-spacing:.1em;padding:11px 28px;
+  border-radius:100px;background:linear-gradient(135deg,var(--amber),#cc8800);
+  color:#020509;font-weight:700;border:none;cursor:pointer;margin-top:16px;
+  width:100%;transition:all .18s}
+.save-btn:hover{box-shadow:0 0 18px rgba(255,183,0,.3)}
+
+/* Timeline */
+.timeline{position:relative}
+.timeline::before{content:'';position:absolute;left:22px;top:0;bottom:0;width:2px;
+  background:linear-gradient(to bottom,var(--green),var(--green2),transparent);opacity:.3}
+.tl-entry{position:relative;margin-bottom:20px;padding-left:60px;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+.tl-dot{position:absolute;left:14px;top:18px;width:16px;height:16px;border-radius:50%;
+  border:2px solid var(--green);background:var(--bg);
+  box-shadow:0 0 10px rgba(0,255,136,.3);z-index:1}
+.tl-dot.ok{border-color:var(--green);box-shadow:0 0 10px rgba(0,255,136,.3)}
+.tl-dot.warn{border-color:var(--amber);box-shadow:0 0 10px rgba(255,183,0,.3)}
+.tl-dot.bad{border-color:var(--red);box-shadow:0 0 10px rgba(255,68,85,.3)}
+.entry-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px;transition:border-color .2s,box-shadow .2s}
+.entry-card:hover{border-color:rgba(0,255,136,.2);box-shadow:0 4px 20px rgba(0,255,136,.05)}
+.entry-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:12px}
+.entry-meta{flex:1}
+.entry-title{font-family:var(--font-d);font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.entry-date{font-family:var(--font-m);font-size:10px;color:var(--muted2)}
+.entry-badge{font-family:var(--font-d);font-size:9px;letter-spacing:.07em;padding:4px 10px;
+  border-radius:100px;white-space:nowrap}
+.badge-ok{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);color:var(--green)}
+.badge-warn{background:rgba(255,183,0,.1);border:1px solid rgba(255,183,0,.3);color:var(--amber)}
+.badge-bad{background:rgba(255,68,85,.1);border:1px solid rgba(255,68,85,.3);color:var(--red)}
+.entry-pid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.pid-block{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:10px}
+.pid-block-lbl{font-family:var(--font-d);font-size:8px;letter-spacing:.08em;margin-bottom:6px}
+.pid-vals{display:flex;gap:8px;flex-wrap:wrap}
+.pval{font-family:var(--font-m);font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.pval-k{font-size:8px;color:var(--muted2);font-family:var(--font-d)}
+.pval-v{font-weight:700;font-size:14px}
+.delta{font-size:9px;font-family:var(--font-m);margin-left:2px}
+.delta.up{color:var(--green)}.delta.dn{color:var(--red)}.delta.eq{color:var(--muted2)}
+.entry-note{font-size:12px;color:var(--muted2);line-height:1.6;border-left:2px solid var(--border);
+  padding-left:10px;font-style:italic;margin-bottom:10px}
+.entry-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.etag{font-family:var(--font-d);font-size:8px;letter-spacing:.07em;padding:3px 8px;
+  border-radius:4px;border:1px solid var(--border);color:var(--muted2)}
+.entry-actions{display:flex;gap:7px}
+.ea-btn{font-family:var(--font-d);font-size:8px;letter-spacing:.07em;padding:5px 10px;
+  border-radius:var(--r);cursor:pointer;transition:all .15s}
+.ea-del{background:transparent;border:1px solid rgba(255,68,85,.2);color:var(--red)}
+.ea-del:hover{background:rgba(255,68,85,.1)}
+.ea-export{background:transparent;border:1px solid var(--border);color:var(--muted2)}
+.ea-export:hover{border-color:rgba(0,170,255,.3);color:var(--blue)}
+
+/* Empty state */
+.empty{text-align:center;padding:80px 20px;color:var(--muted2)}
+.empty-ico{font-size:52px;margin-bottom:16px;opacity:.4}
+.empty-title{font-family:var(--font-d);font-size:14px;color:var(--muted2);margin-bottom:8px}
+.empty-sub{font-size:13px;line-height:1.6}
+
+/* Search/Filter bar */
+.filter-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.fbar-input{flex:1;min-width:180px;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);color:var(--text);font-family:var(--font-t);font-size:13px;
+  padding:8px 14px;outline:none;transition:border-color .16s}
+.fbar-input:focus{border-color:rgba(0,255,136,.3)}
+.fbar-sel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  color:var(--text);font-family:var(--font-t);font-size:13px;padding:8px 12px;
+  outline:none;cursor:pointer}
+.fbar-sel option{background:var(--panel)}
+.export-all-btn{font-family:var(--font-d);font-size:9px;letter-spacing:.08em;padding:8px 14px;
+  border-radius:var(--r);background:transparent;border:1px solid var(--border);
+  color:var(--muted2);cursor:pointer;transition:all .15s;white-space:nowrap}
+.export-all-btn:hover{border-color:rgba(0,170,255,.3);color:var(--blue)}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="wrap">
+
+<div class="hero">
+  <div class="hero-tag">TUNING LOG</div>
+  <h1>บันทึก <em>Session</em> การ Tune</h1>
+  <p>จดทุก session · เปรียบเทียบ PID · ดู delta ระหว่างครั้ง · ไม่มี account ไม่มี server — ข้อมูลเก็บในเครื่องคุณ</p>
+</div>
+
+<div class="top-bar">
+  <div class="log-stats">
+    <div class="stat-chip"><span id="totalSessions">0</span>Sessions</div>
+    <div class="stat-chip"><span id="totalOK">0</span>Improved</div>
+    <div class="stat-chip"><span id="totalBad">0</span>Reverted</div>
+  </div>
+  <button class="add-btn" onclick="openModal()">+ NEW SESSION</button>
+</div>
+
+<div class="filter-bar">
+  <input class="fbar-input" id="searchInput" placeholder="ค้นหา build name, note..." oninput="renderLog()">
+  <select class="fbar-sel" id="filterResult" onchange="renderLog()">
+    <option value="">ทุกผล</option>
+    <option value="BETTER">🟢 Better</option>
+    <option value="NEUTRAL">🟡 Neutral</option>
+    <option value="WORSE">🔴 Worse</option>
+  </select>
+  <button class="export-all-btn" onclick="exportAll()">⬇️ Export JSON</button>
+</div>
+
+<div class="timeline" id="timeline"></div>
+
+</div><!-- wrap -->
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title">📋 NEW TUNING SESSION</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="mfield"><label>Build Name</label>
+        <input type="text" id="m_name" placeholder='5" Freestyle Build A' maxlength="50"></div>
+      <div class="mfield"><label>วันที่บิน</label>
+        <input type="date" id="m_date"></div>
+      <div class="mfield"><label>สนาม / สถานที่</label>
+        <input type="text" id="m_loc" placeholder="สนาม X · สวน Y · หน้าบ้าน" maxlength="50"></div>
+      <div class="mfield"><label>อากาศ</label>
+        <select id="m_weather">
+          <option>☀️ แดดจัด ลมน้อย</option><option>⛅ มีเมฆบ้าง</option>
+          <option>💨 ลมแรง</option><option>🌧️ ฝนตก</option><option>🌙 กลางคืน</option>
+        </select>
+      </div>
+
+      <div class="pid-section">
+        <div class="pid-sec-title">PID ที่ใช้ใน session นี้</div>
+        <div class="pid-cols">
+          <div>
+            <div class="pid-col-lbl r">ROLL</div>
+            <div class="pid-row-labels"><span>P</span><span>I</span><span>D</span></div>
+            <div class="pid-row-m">
+              <input type="number" id="m_rp" placeholder="48" min="0" max="200">
+              <input type="number" id="m_ri" placeholder="90" min="0" max="200">
+              <input type="number" id="m_rd" placeholder="38" min="0" max="200">
+            </div>
+          </div>
+          <div>
+            <div class="pid-col-lbl p">PITCH</div>
+            <div class="pid-row-labels"><span>P</span><span>I</span><span>D</span></div>
+            <div class="pid-row-m">
+              <input type="number" id="m_pp" placeholder="52" min="0" max="200">
+              <input type="number" id="m_pi" placeholder="90" min="0" max="200">
+              <input type="number" id="m_pd" placeholder="40" min="0" max="200">
+            </div>
+          </div>
+          <div>
+            <div class="pid-col-lbl y">YAW</div>
+            <div class="pid-row-labels"><span>P</span><span>I</span><span>D</span></div>
+            <div class="pid-row-m">
+              <input type="number" id="m_yp" placeholder="40" min="0" max="200">
+              <input type="number" id="m_yi" placeholder="90" min="0" max="200">
+              <input type="number" id="m_yd" placeholder="0" min="0" max="40">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mfield mfield-full"><label>ผลการบิน</label>
+        <div class="result-pills">
+          <span class="rpill on-g" data-v="BETTER">🟢 ดีขึ้น</span>
+          <span class="rpill" data-v="NEUTRAL">🟡 เหมือนเดิม</span>
+          <span class="rpill" data-v="WORSE">🔴 แย่ลง</span>
+        </div>
+      </div>
+      <div class="mfield mfield-full"><label>สังเกตอาการ (เลือกหลายได้)</label>
+        <div class="result-pills" id="symptomPills">
+          <span class="rpill" data-v="propwash">Propwash</span>
+          <span class="rpill" data-v="oscillation">Oscillation</span>
+          <span class="rpill" data-v="motor_hot">Motor ร้อน</span>
+          <span class="rpill" data-v="yaw_spin">Yaw Spin</span>
+          <span class="rpill" data-v="bounce">Bounce-back</span>
+          <span class="rpill" data-v="sluggish">ตอบสนองช้า</span>
+          <span class="rpill" data-v="crispy">Crispy ✅</span>
+          <span class="rpill" data-v="locked">Locked-in ✅</span>
+        </div>
+      </div>
+      <div class="mfield mfield-full"><label>Note / สิ่งที่เปลี่ยน / สิ่งที่สังเกตได้</label>
+        <textarea id="m_note" placeholder="เพิ่ม D-term 5 จุด, เปลี่ยนใบ HQ 5x4.3x3 → DAL 5x4.3x3, กรองลมแรง 15 km/h..."></textarea>
+      </div>
+    </div>
+    <button class="save-btn" onclick="saveSession()">💾 SAVE SESSION</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+const STORE_KEY='obix_tuning_log_v1';
+let logs=[];
+let selectedResult='BETTER';
+let selectedSymptoms=[];
+
+function load(){
+  try{const d=localStorage.getItem(STORE_KEY);if(d)logs=JSON.parse(d);}catch(e){logs=[];}
+}
+function save(){
+  try{localStorage.setItem(STORE_KEY,JSON.stringify(logs));}catch(e){}
+}
+
+function gv(id){return(document.getElementById(id)?.value||'').trim();}
+function gn(id){const v=parseInt(document.getElementById(id)?.value);return isNaN(v)?null:v;}
+
+function openModal(){
+  document.getElementById('modal').classList.add('open');
+  // Set today's date
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('m_date').value=today;
+  selectedResult='BETTER';selectedSymptoms=[];
+  document.querySelectorAll('.result-pills .rpill').forEach(p=>{
+    p.classList.remove('on-g','on-a','on-r');
+  });
+  document.querySelector('.result-pills .rpill[data-v="BETTER"]').classList.add('on-g');
+  document.querySelectorAll('#symptomPills .rpill').forEach(p=>p.classList.remove('on-a'));
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+document.getElementById('modal').addEventListener('click',e=>{
+  if(e.target===document.getElementById('modal'))closeModal();
+});
+
+// result pills
+document.querySelectorAll('.result-pills:first-of-type .rpill,.modal .result-pills:not(#symptomPills) .rpill').forEach(p=>{
+  p.addEventListener('click',()=>{
+    if(p.closest('#symptomPills'))return;
+    document.querySelectorAll('.modal .result-pills:not(#symptomPills) .rpill').forEach(x=>x.classList.remove('on-g','on-a','on-r'));
+    const cls=p.dataset.v==='BETTER'?'on-g':p.dataset.v==='WORSE'?'on-r':'on-a';
+    p.classList.add(cls);selectedResult=p.dataset.v;
+  });
+});
+document.getElementById('symptomPills').querySelectorAll('.rpill').forEach(p=>{
+  p.addEventListener('click',()=>{
+    p.classList.toggle('on-a');
+    const v=p.dataset.v;
+    if(p.classList.contains('on-a')){if(!selectedSymptoms.includes(v))selectedSymptoms.push(v);}
+    else{selectedSymptoms=selectedSymptoms.filter(x=>x!==v);}
+  });
+});
+
+function saveSession(){
+  const entry={
+    id:Date.now(),
+    date:gv('m_date')||new Date().toISOString().split('T')[0],
+    name:gv('m_name')||'Unnamed Session',
+    loc:gv('m_loc'),
+    weather:gv('m_weather')||'☀️ แดดจัด ลมน้อย',
+    result:selectedResult,
+    symptoms:[...selectedSymptoms],
+    note:gv('m_note'),
+    pid:{
+      rp:gn('m_rp'),ri:gn('m_ri'),rd:gn('m_rd'),
+      pp:gn('m_pp'),pi:gn('m_pi'),pd:gn('m_pd'),
+      yp:gn('m_yp'),yi:gn('m_yi'),yd:gn('m_yd'),
+    }
+  };
+  logs.unshift(entry);save();closeModal();renderLog();
+  // clear form
+  ['m_name','m_loc','m_note','m_rp','m_ri','m_rd','m_pp','m_pi','m_pd','m_yp','m_yi','m_yd']
+    .forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+}
+
+function deltaHtml(cur,prev,cls){
+  if(cur==null||prev==null)return `<span class="pval-v" style="color:var(--${cls})">${cur??'—'}</span>`;
+  const d=cur-prev;
+  const dCls=d>0?'up':d<0?'dn':'eq';
+  const dStr=d>0?`+${d}`:d===0?'':d.toString();
+  return `<span class="pval-v" style="color:var(--${cls})">${cur}<span class="delta ${dCls}">${dStr}</span></span>`;
+}
+
+function renderLog(){
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  const rf=document.getElementById('filterResult').value;
+  let filtered=logs.filter(e=>{
+    const matchQ=!q||(e.name+' '+e.note+' '+e.loc).toLowerCase().includes(q);
+    const matchR=!rf||e.result===rf;
+    return matchQ&&matchR;
+  });
+
+  const ok=logs.filter(e=>e.result==='BETTER').length;
+  const bad=logs.filter(e=>e.result==='WORSE').length;
+  document.getElementById('totalSessions').textContent=logs.length;
+  document.getElementById('totalOK').textContent=ok;
+  document.getElementById('totalBad').textContent=bad;
+
+  const tl=document.getElementById('timeline');
+  if(!filtered.length){
+    tl.innerHTML=`<div class="empty"><div class="empty-ico">📋</div>
+      <div class="empty-title">${logs.length?'ไม่พบ session ที่ตรงกัน':'ยังไม่มี session'}  </div>
+      <div class="empty-sub">${logs.length?'ลองเปลี่ยน filter':'กด "+ NEW SESSION" เพื่อบันทึก session แรก'}</div></div>`;
+    return;
+  }
+
+  tl.innerHTML=filtered.map((e,i)=>{
+    const prev=filtered[i+1];
+    const dotCls=e.result==='BETTER'?'ok':e.result==='WORSE'?'bad':'warn';
+    const badgeCls=e.result==='BETTER'?'badge-ok':e.result==='WORSE'?'badge-bad':'badge-warn';
+    const badgeTxt=e.result==='BETTER'?'🟢 Better':e.result==='WORSE'?'🔴 Worse':'🟡 Neutral';
+    const pid=e.pid||{};
+    const pp=prev?.pid||{};
+
+    const axHtml=(lbl,keys,cls)=>`
+      <div class="pid-block">
+        <div class="pid-block-lbl ${cls}">${lbl}</div>
+        <div class="pid-vals">
+          ${keys.map(([k,pk])=>`<div class="pval"><span class="pval-k">${k.toUpperCase()}</span>
+            ${deltaHtml(pid[pk],pp[pk],cls)}</div>`).join('')}
+        </div>
+      </div>`;
+
+    const tagHtml=e.symptoms?.length?e.symptoms.map(s=>`<span class="etag">${s}</span>`).join(''):'';
+
+    return `<div class="tl-entry">
+      <div class="tl-dot ${dotCls}"></div>
+      <div class="entry-card">
+        <div class="entry-hd">
+          <div class="entry-meta">
+            <div class="entry-title">${e.name}</div>
+            <div class="entry-date">📅 ${e.date}${e.loc?' · 📍 '+e.loc:''} · ${e.weather}</div>
+          </div>
+          <span class="entry-badge ${badgeCls}">${badgeTxt}</span>
+        </div>
+        <div class="entry-pid">
+          ${axHtml('ROLL',[['p','rp'],['i','ri'],['d','rd']],'r')}
+          ${axHtml('PITCH',[['p','pp'],['i','pi'],['d','pd']],'p')}
+          ${axHtml('YAW',[['p','yp'],['i','yi'],['d','yd']],'y')}
+        </div>
+        ${e.note?`<div class="entry-note">${e.note}</div>`:''}
+        ${tagHtml?`<div class="entry-tags">${tagHtml}</div>`:''}
+        <div class="entry-actions">
+          <button class="ea-btn ea-del" onclick="deleteEntry(${e.id})">🗑 ลบ</button>
+          <button class="ea-btn ea-export" onclick="exportEntry(${e.id})">⬇️ Export</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function deleteEntry(id){
+  if(!confirm('ลบ session นี้?'))return;
+  logs=logs.filter(e=>e.id!==id);save();renderLog();
+}
+function exportEntry(id){
+  const e=logs.find(x=>x.id===id);if(!e)return;
+  const a=document.createElement('a');
+  a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(e,null,2));
+  a.download=`tuning_${e.date}_${e.name.replace(/\s+/g,'_')}.json`;a.click();
+}
+function exportAll(){
+  const a=document.createElement('a');
+  a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(logs,null,2));
+  a.download=`obix_tuning_log_${new Date().toISOString().split('T')[0]}.json`;a.click();
+}
+
+load();renderLog();
+</script>
+</body>
+</html>
