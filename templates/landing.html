@@ -137,24 +137,38 @@ body {
 .hero-bg-img {
   position: absolute;
   inset: 0;
-  background-image: url("{{ url_for('static', filename='img/landing-bg.png') }}");
+  /* Desktop default: landscape 1920×1080 */
+  background-image: url("{{ url_for('static', filename='img/landing-bg-desktop.png') }}");
   background-size: cover;
   background-position: center 30%;
   background-repeat: no-repeat;
   opacity: 0.28;
   z-index: 0;
-  /* Subtle parallax via CSS transform — no JS needed */
   transform: scale(1.06);
+  transform-origin: center top;
   transition: transform 0.1s linear;
-  /* Fade out towards bottom so content sections blend cleanly */
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 58%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, black 58%, transparent 100%);
   pointer-events: none;
+  will-change: transform;
 }
 
-/* JS parallax class */
-.hero-bg-img.parallax-active {
-  will-change: transform;
+/* Mobile portrait: switch to 1080×1920 image */
+@media (max-width: 768px) and (orientation: portrait) {
+  .hero-bg-img {
+    background-image: url("{{ url_for('static', filename='img/landing-bg-mobile.png') }}");
+    background-position: center 20%;
+    opacity: 0.32;
+    /* Portrait: centre is higher up so drone is visible above fold */
+  }
+}
+
+/* Landscape mobile / small tablets: use desktop image centred higher */
+@media (max-width: 900px) and (orientation: landscape) {
+  .hero-bg-img {
+    background-position: center 25%;
+    opacity: 0.30;
+  }
 }
 
 /* Animated grid */
