@@ -26,28 +26,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     });
   }
 
-  // optional: progressive enhancement - submit via fetch and update result without full page reload
-  form.addEventListener('submit', async (ev)=>{
-    // allow normal submit for users without JS
-    if(!window.fetch) return;
-    ev.preventDefault();
-    const fd = new FormData(form);
-    try {
-      const res = await fetch(window.location.href, {method:'POST', body:fd});
-      const html = await res.text();
-      // parse returned HTML and extract the result aside (mpResult)
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      const newResult = doc.querySelector('#mpResult');
-      if(newResult){
-        document.querySelector('#mpResult').innerHTML = newResult.innerHTML;
-        window.scrollTo({top: document.querySelector('#mpResult').offsetTop - 80, behavior:'smooth'});
-      } else {
-        alert('เกิดข้อผิดพลาดในการรับผลลัพธ์');
-      }
-    } catch(err){
-      console.error(err);
-      alert('เกิดข้อผิดพลาด (ตรวจดูคอนโซล)');
-    }
-  });
+  // Motor Prop Advisor is JS-driven — calculation handled by inline JS
+  // Server-side POST endpoint exists but template renders client-side only
 });
