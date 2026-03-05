@@ -1,6 +1,7 @@
-# app.py — OBIXConfig Doctor v2.3g
+# app.py — OBIXConfig Doctor v5.0
 # ============================================================
-# v2.2 — Blackbox CSV Analyzer + Full Tool Suite
+# v5.0 — Smart Analysis: Battery Health, Motor Thermal, Loop Analyzer
+# v2.3 — Blackbox CSV Analyzer + Full Tool Suite
 # Tools: PID/Filter · Blackbox · CLI Surgeon · PID Advisor
 #        RPM Filter · ESC Checker · Rates · VTX · OSD · Motor
 # ============================================================
