@@ -3,703 +3,944 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ESC Compatibility Checker — OBIXConfig Doctor</title>
-{% set og_title       = "ESC Compatibility Checker — OBIXConfig Doctor" %}
-{% set og_description = "วิเคราะห์ ESC กระแส, protocol, KV+แบต, cap sizing — ครบจบในหน้าเดียว" %}
+<title>ESC Compatibility Checker v5.0 — OBIXConfig Doctor</title>
+{% set og_title       = "ESC Compatibility Checker v5.0 — OBIXConfig Doctor" %}
+{% set og_description = "วิเคราะห์ ESC กระแส, thermal, health score, signal chain — ลึกที่สุดในไทย" %}
 {% set og_url         = "https://configdoctor.onrender.com/esc-checker" %}
 {% include "partials/og_tags.html" %}
+{% set nav_page = "esc_checker" %}
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Sarabun:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --g:#10c47a;--gd:rgba(16,196,122,.1);--gold:#f1b65a;--blue:#58a6ff;
-  --red:#f87171;--amb:#fbbf24;--bg:#06090b;--card:#0c1115;
-  --bdr:rgba(255,255,255,.07);--muted:#7a8f9e;--txt:#dde7ef;
-  --mono:'JetBrains Mono',monospace;
+  --g:#10c47a;--gd:rgba(16,196,122,.08);--gd2:rgba(16,196,122,.14);
+  --gold:#f1b65a;--blue:#58a6ff;--red:#f87171;--amb:#fbbf24;--pur:#a78bfa;
+  --bg:#06090b;--card:#0c1117;
+  --bdr:rgba(255,255,255,.07);--muted:#7a8f9e;--muted2:#3d5470;--txt:#dde7ef;
+  --font-d:'Orbitron',monospace;--font-m:'JetBrains Mono',monospace;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:'Sarabun',system-ui,sans-serif;background:var(--bg);color:var(--txt);overflow-x:hidden;-webkit-font-smoothing:antialiased}
-/* ── Layout ── */
-.wrap{max-width:960px;margin:0 auto;padding:88px 18px 80px}
-/* ── Hero ── */
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(16,196,122,.022) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(16,196,122,.022) 1px,transparent 1px);
+  background-size:44px 44px;}
+.wrap{max-width:1040px;margin:0 auto;padding:72px 18px 100px;position:relative;z-index:1}
+
+/* HERO */
 .ph{margin-bottom:28px}
-.ph-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;color:var(--g);text-transform:uppercase;opacity:.8;margin-bottom:6px}
-.ph-title{font-family:'Orbitron',monospace;font-size:clamp(1.1rem,3vw,1.55rem);font-weight:900;color:var(--txt);line-height:1.2;margin-bottom:8px}
-.ph-title span{color:var(--g)}
-.ph-sub{font-size:.88rem;color:var(--muted);line-height:1.6;max-width:560px;margin-bottom:10px}
+.ph-eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.ph-label{font-family:var(--font-m);font-size:.6rem;letter-spacing:.18em;color:var(--g);text-transform:uppercase}
+.ph-ver{font-family:var(--font-d);font-size:.55rem;padding:2px 8px;border-radius:4px;border:1px solid rgba(16,196,122,.3);background:rgba(16,196,122,.07);color:var(--g)}
+.ph-title{font-family:var(--font-d);font-size:clamp(1.1rem,3vw,1.65rem);font-weight:900;color:var(--txt);line-height:1.15;margin-bottom:10px}
+.ph-title em{color:var(--g);font-style:normal}
+.ph-sub{font-size:.88rem;color:var(--muted);line-height:1.65;max-width:600px;margin-bottom:12px}
 .badges{display:flex;flex-wrap:wrap;gap:7px}
-.bdg{font-size:.67rem;padding:3px 9px;border-radius:4px;border:1px solid;font-family:var(--mono)}
+.bdg{font-size:.63rem;padding:3px 10px;border-radius:4px;border:1px solid;font-family:var(--font-m);letter-spacing:.03em}
 .bdg-g{color:var(--g);border-color:rgba(16,196,122,.3);background:rgba(16,196,122,.06)}
 .bdg-b{color:var(--blue);border-color:rgba(88,166,255,.3);background:rgba(88,166,255,.06)}
 .bdg-a{color:var(--gold);border-color:rgba(241,182,90,.3);background:rgba(241,182,90,.06)}
-/* ── Card ── */
+.bdg-p{color:var(--pur);border-color:rgba(167,139,250,.3);background:rgba(167,139,250,.06)}
+.bdg-r{color:var(--red);border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.06)}
+
+/* BUILD PRESETS */
+.preset-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.preset-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 14px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;transition:all .18s;min-width:78px}
+.preset-btn:hover{border-color:rgba(16,196,122,.35);background:var(--gd);transform:translateY(-2px)}
+.preset-btn.active{border-color:var(--g);background:var(--gd2)}
+.preset-icon{font-size:18px}
+.preset-lbl{font-family:var(--font-d);font-size:.54rem;font-weight:700;letter-spacing:.07em;color:var(--g);white-space:nowrap}
+.preset-sub{font-size:.6rem;color:var(--muted)}
+.esc-preset-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.esc-pb{padding:6px 12px;background:var(--card);border:1px solid var(--bdr);border-radius:7px;cursor:pointer;transition:all .15s;font-size:.7rem;color:var(--muted);font-family:var(--font-m)}
+.esc-pb:hover,.esc-pb.active{border-color:rgba(241,182,90,.4);color:var(--gold);background:rgba(241,182,90,.07)}
+
+/* CARD */
 .card{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:22px;margin-bottom:14px;transition:border-color .2s}
-.card:hover{border-color:rgba(16,196,122,.15)}
-.ctitle{font-family:'Orbitron',monospace;font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--g);margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.ctitle::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(16,196,122,.22),transparent)}
-/* ── Form ── */
+.card:hover{border-color:rgba(16,196,122,.1)}
+.ctitle{font-family:var(--font-d);font-size:.64rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--g);margin-bottom:18px;display:flex;align-items:center;gap:9px}
+.ctitle::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(16,196,122,.2),transparent)}
+.ctitle-icon{font-size:14px;flex-shrink:0}
+
+/* FORM */
+.fg4{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
 .fg3{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
 .fg2{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}
-@media(max-width:620px){.fg3,.fg2{grid-template-columns:1fr}}
+@media(max-width:680px){.fg4{grid-template-columns:repeat(2,1fr)}.fg3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:400px){.fg4,.fg3,.fg2{grid-template-columns:1fr}}
 .fld{display:flex;flex-direction:column;gap:5px}
-.fld label{font-size:.73rem;color:var(--muted);font-family:var(--mono);letter-spacing:.03em}
+.fld label{font-size:.7rem;color:var(--muted);font-family:var(--font-m);letter-spacing:.04em}
 .fld label em{font-style:normal;color:var(--g);margin-left:3px}
-.tip-icon{font-size:.65rem;color:var(--muted);cursor:help;margin-left:3px}
-.fld input,.fld select{background:#080f13;border:1px solid var(--bdr);border-radius:8px;color:var(--txt);padding:.58rem .85rem;font-size:.9rem;transition:border-color .18s,box-shadow .18s;min-height:44px;width:100%;font-family:inherit}
+.fld input,.fld select{background:#040b12;border:1px solid var(--bdr);border-radius:8px;color:var(--txt);padding:.58rem .85rem;font-size:.9rem;transition:border-color .18s,box-shadow .18s;min-height:44px;width:100%;font-family:inherit}
 .fld input:focus,.fld select:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(16,196,122,.1)}
-.fld-hint{font-size:.67rem;color:#3d5c4a;margin-top:1px;line-height:1.3}
-.calc-btn{width:100%;margin-top:18px;padding:14px;background:var(--g);color:#021a0e;border:none;border-radius:10px;font-family:'Orbitron',monospace;font-size:.82rem;font-weight:700;letter-spacing:.07em;cursor:pointer;transition:opacity .18s,transform .12s;display:flex;align-items:center;justify-content:center;gap:10px}
-.calc-btn:hover{opacity:.87;transform:translateY(-1px)}
+.fld input.live-warn{border-color:rgba(251,191,36,.5)!important}
+.fld input.live-bad,.fld select.live-bad{border-color:rgba(248,113,113,.5)!important;box-shadow:0 0 0 3px rgba(248,113,113,.07)!important}
+.fld-hint{font-size:.67rem;color:var(--muted2);margin-top:2px;line-height:1.3}
+.live-tag{font-size:.6rem;padding:2px 7px;border-radius:3px;font-family:var(--font-m);font-weight:600;margin-top:2px;display:none}
+.lt-warn{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);color:#fde68a}
+.lt-bad{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:#fca5a5}
+.lt-ok{background:rgba(16,196,122,.1);border:1px solid rgba(16,196,122,.3);color:#86efac}
+.calc-btn{width:100%;margin-top:20px;padding:15px;background:linear-gradient(135deg,var(--g),#0aa866);color:#021a0e;border:none;border-radius:10px;font-family:var(--font-d);font-size:.85rem;font-weight:700;letter-spacing:.07em;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 24px rgba(16,196,122,.18)}
+.calc-btn:hover{transform:translateY(-2px);box-shadow:0 6px 32px rgba(16,196,122,.28)}
 .calc-btn:active{transform:translateY(0)}
-/* ── Gauges ── */
-.gg4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+
+/* RESULTS TOP */
+.results-top{display:grid;grid-template-columns:195px 1fr;gap:14px;margin-bottom:14px;align-items:start}
+@media(max-width:640px){.results-top{grid-template-columns:1fr}}
+
+/* HEALTH SCORE RING */
+.score-ring-card{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:border-color .4s}
+.score-ring-wrap{position:relative;width:130px;height:130px}
+.score-ring-wrap svg{transform:rotate(-90deg)}
+.score-track{fill:none;stroke:rgba(255,255,255,.06);stroke-width:10}
+.score-fill{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1),stroke .4s}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-num{font-family:var(--font-d);font-size:1.8rem;font-weight:900;line-height:1;transition:color .4s}
+.score-lbl-s{font-family:var(--font-m);font-size:.52rem;letter-spacing:.1em;color:var(--muted)}
+.score-grade{font-family:var(--font-d);font-size:1.2rem;font-weight:900;transition:color .4s}
+.score-subtitle{font-size:.72rem;color:var(--muted);text-align:center;line-height:1.4;max-width:160px}
+
+/* GAUGES */
+.gg4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 @media(max-width:680px){.gg4{grid-template-columns:repeat(2,1fr)}}
-.gauge{background:#080f13;border-radius:12px;padding:16px 13px;border:1px solid var(--bdr);position:relative;overflow:hidden;transition:border-color .22s}
-.gauge::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--gc,var(--g));opacity:.55;border-radius:0 0 12px 12px}
-.gauge.ok {--gc:var(--g);  border-color:rgba(16,196,122,.22)}
+.gauge{background:#070e16;border-radius:12px;padding:14px 12px;border:1px solid var(--bdr);position:relative;overflow:hidden;transition:border-color .22s,transform .2s}
+.gauge:hover{transform:translateY(-2px)}
+.gauge::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--gc,var(--g));opacity:.6;border-radius:0 0 12px 12px}
+.gauge.ok{--gc:var(--g);border-color:rgba(16,196,122,.22)}
 .gauge.warn{--gc:var(--amb);border-color:rgba(251,191,36,.22)}
-.gauge.bad {--gc:var(--red);border-color:rgba(248,113,113,.22)}
-.g-lbl{font-size:.65rem;color:var(--muted);font-family:var(--mono);margin-bottom:7px;letter-spacing:.03em}
-.g-val{font-size:1.28rem;font-weight:700;font-family:'Orbitron',monospace;line-height:1;color:var(--gc,var(--g))}
-.g-unit{font-size:.68rem;opacity:.7;margin-left:2px}
-.g-note{font-size:.68rem;color:var(--muted);margin-top:6px;line-height:1.35}
-/* ── Health bars ── */
-.hbars{display:flex;flex-direction:column;gap:10px}
-.hrow{display:grid;grid-template-columns:120px 1fr 44px;align-items:center;gap:10px}
-.h-lbl{font-size:.72rem;color:var(--muted);font-family:var(--mono)}
+.gauge.bad{--gc:var(--red);border-color:rgba(248,113,113,.22)}
+.g-lbl{font-size:.6rem;color:var(--muted);font-family:var(--font-m);margin-bottom:8px;letter-spacing:.04em}
+.g-val{font-size:1.3rem;font-weight:700;font-family:var(--font-d);line-height:1;color:var(--gc,var(--g))}
+.g-unit{font-size:.66rem;opacity:.7;margin-left:2px}
+.g-note{font-size:.66rem;color:var(--muted);margin-top:7px;line-height:1.35}
+
+/* CHART */
+.chart-wrap{position:relative;height:165px;width:100%}
+#profileCanvas{width:100%!important}
+.chart-legend{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap}
+.cl-item{display:flex;align-items:center;gap:5px;font-size:.67rem;color:var(--muted)}
+.cl-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* HEALTH BARS */
+.hbars{display:flex;flex-direction:column;gap:12px}
+.hrow{display:grid;grid-template-columns:120px 1fr 48px;align-items:center;gap:10px}
+.h-lbl{font-size:.69rem;color:var(--muted);font-family:var(--font-m)}
 .h-track{height:7px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
-.h-fill{height:100%;border-radius:4px;transition:width .6s cubic-bezier(.4,0,.2,1)}
-.h-pct{font-size:.72rem;font-weight:700;font-family:var(--mono);text-align:right}
-.h-sub{font-size:.67rem;color:#3a5248;padding-left:130px;margin-top:-4px;margin-bottom:4px}
-/* ── Protocol grid ── */
-.proto-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-@media(max-width:600px){.proto-grid{grid-template-columns:repeat(2,1fr)}}
-.pb{background:#080f13;border:1px solid var(--bdr);border-radius:10px;padding:13px 10px;text-align:center;transition:border-color .18s,transform .15s}
-.pb.rec{border-color:var(--g);background:rgba(16,196,122,.05);transform:scale(1.03)}
+.h-fill{height:100%;border-radius:4px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.h-pct{font-size:.7rem;font-weight:700;font-family:var(--font-m);text-align:right}
+.h-sub{font-size:.64rem;color:var(--muted2);padding-left:130px;margin-top:-5px;margin-bottom:4px;line-height:1.3}
+@media(max-width:500px){.h-sub{padding-left:0}}
+
+/* THERMAL */
+.thermal-bar-wrap{height:14px;background:rgba(255,255,255,.05);border-radius:7px;overflow:hidden;position:relative;margin:8px 0}
+.thermal-bar-fill{height:100%;border-radius:7px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.thermal-ticks{display:flex;justify-content:space-between;font-size:.56rem;color:var(--muted2);font-family:var(--font-m);margin-top:2px}
+.thermal-zones{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+.tz{display:flex;align-items:center;gap:5px;font-size:.67rem;color:var(--muted)}
+.tz-dot{width:8px;height:8px;border-radius:2px}
+
+/* PROTOCOL */
+.proto-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:560px){.proto-grid{grid-template-columns:repeat(2,1fr)}}
+.pb{background:#070e16;border:1px solid var(--bdr);border-radius:10px;padding:13px 10px;text-align:center;transition:border-color .18s,transform .15s}
+.pb.rec{border-color:var(--g);background:rgba(16,196,122,.06);transform:scale(1.04)}
 .pb.compat{border-color:rgba(88,166,255,.2)}
-.pb.nocompat{opacity:.38}
-.pb-badge{display:inline-block;font-size:.58rem;padding:1px 6px;background:var(--g);color:#021a0e;border-radius:3px;font-weight:700;margin-bottom:5px}
-.pb-name{font-family:'Orbitron',monospace;font-size:.78rem;font-weight:700;color:var(--txt)}
-.pb-row{font-size:.68rem;margin-top:4px;display:flex;justify-content:center;gap:4px;align-items:center}
+.pb.nocompat{opacity:.3}
+.pb-badge{display:inline-block;font-size:.55rem;padding:1px 6px;background:var(--g);color:#021a0e;border-radius:3px;font-weight:700;margin-bottom:5px;font-family:var(--font-m)}
+.pb-name{font-family:var(--font-d);font-size:.74rem;font-weight:700;color:var(--txt)}
+.pb-lat{font-size:.62rem;margin-top:3px;color:var(--muted);font-family:var(--font-m)}
+.pb-row{font-size:.65rem;margin-top:3px;display:flex;justify-content:center;gap:4px;align-items:center}
 .tok{color:var(--g)}.twarn{color:var(--amb)}.tno{color:var(--red)}.tmuted{color:var(--muted)}
-/* ── Capacitor grid ── */
+
+/* REPORT CARD */
+.report-card{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;padding:18px;background:#070e16;border-radius:12px;border:1px solid var(--bdr);margin-bottom:16px}
+.grade-badge{width:68px;height:68px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:2.1rem;font-weight:900;flex-shrink:0;border:2px solid;transition:all .4s}
+.grade-rows{display:flex;flex-direction:column;gap:7px;flex:1}
+.grade-row{display:flex;align-items:center;gap:10px}
+.grade-row-lbl{font-size:.67rem;color:var(--muted);font-family:var(--font-m);min-width:118px}
+.grade-row-bar{flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+.grade-row-fill{height:100%;border-radius:3px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.grade-row-score{font-size:.67rem;font-family:var(--font-m);font-weight:600;min-width:32px;text-align:right}
+
+/* SIGNAL CHAIN */
+.signal-chain{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding:4px 0 8px;scrollbar-width:thin;scrollbar-color:rgba(16,196,122,.2) transparent}
+.sc-node{display:flex;flex-direction:column;align-items:center;justify-content:space-between;background:#070e16;border:1px solid var(--bdr);border-radius:10px;padding:12px 10px;min-width:86px;flex-shrink:0;transition:border-color .18s}
+.sc-node:hover{border-color:rgba(16,196,122,.25)}
+.sc-arrow{display:flex;align-items:center;padding:0 2px;flex-shrink:0;align-self:center}
+.sc-arrow-line{width:18px;height:1px;background:linear-gradient(90deg,rgba(61,84,112,.6),rgba(16,196,122,.4))}
+.sc-icon{font-size:17px;margin-bottom:4px}
+.sc-name{font-family:var(--font-d);font-size:.48rem;font-weight:700;letter-spacing:.07em;color:var(--g);text-align:center}
+.sc-lat{font-family:var(--font-m);font-size:.6rem;font-weight:600;text-align:center;margin-top:3px}
+.sc-sublat{font-size:.54rem;color:var(--muted2);text-align:center;margin-top:1px}
+.sc-bar{width:100%;height:3px;border-radius:2px;margin-top:7px}
+.sc-total-box{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding:10px 14px;border-radius:8px;border:1px solid;font-size:.8rem}
+.sc-total-box.ok{border-color:rgba(16,196,122,.3);background:rgba(16,196,122,.05);color:#86efac}
+.sc-total-box.warn{border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.05);color:#fde68a}
+.sc-total-box.bad{border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.05);color:#fca5a5}
+.sc-total-num{font-family:var(--font-d);font-size:1.1rem;font-weight:900}
+
+/* CAP */
 .cg3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-@media(max-width:600px){.cg3{grid-template-columns:1fr}}
-.cb{background:#080f13;border:1px solid var(--bdr);border-radius:10px;padding:14px}
+@media(max-width:580px){.cg3{grid-template-columns:1fr}}
+.cb{background:#070e16;border:1px solid var(--bdr);border-radius:10px;padding:14px}
 .cb.rec{border-color:rgba(241,182,90,.4);background:rgba(241,182,90,.04)}
-.cb-lbl{font-size:.67rem;color:var(--muted);font-family:var(--mono);margin-bottom:5px}
-.cb-val{font-size:1rem;font-weight:700;color:var(--gold);font-family:'Orbitron',monospace}
-.cb-note{font-size:.7rem;color:var(--muted);margin-top:5px;line-height:1.4}
-/* ── Alerts ── */
+.cb-lbl{font-size:.62rem;color:var(--muted);font-family:var(--font-m);margin-bottom:6px;letter-spacing:.05em}
+.cb-val{font-size:.98rem;font-weight:700;color:var(--gold);font-family:var(--font-d)}
+.cb-note{font-size:.7rem;color:var(--muted);margin-top:5px;line-height:1.45}
+
+/* ALERTS */
 .alerts{display:flex;flex-direction:column;gap:8px}
-.alert{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;border-radius:9px;font-size:.82rem;line-height:1.5;border:1px solid transparent}
-.alert.ok    {background:rgba(16,196,122,.06); border-color:rgba(16,196,122,.18);color:#86efac}
-.alert.warn  {background:rgba(251,191,36,.06); border-color:rgba(251,191,36,.18);color:#fde68a}
-.alert.bad   {background:rgba(248,113,113,.06);border-color:rgba(248,113,113,.18);color:#fca5a5}
-.alert.info  {background:rgba(88,166,255,.06); border-color:rgba(88,166,255,.18);color:#bfdbfe}
-.a-icon{font-size:.95rem;flex-shrink:0;margin-top:1px}
-.a-body strong{display:block;font-size:.8rem;font-weight:700;margin-bottom:2px}
-.a-body p{font-size:.76rem;opacity:.88}
-/* ── CLI ── */
-.cli-wrap{position:relative}
-.cli-box{background:#020810;border:1px solid rgba(16,196,122,.18);border-radius:10px;padding:16px 14px;font-family:var(--mono);font-size:.8rem;line-height:1.65;white-space:pre;overflow-x:auto;max-height:340px;overflow-y:auto}
-.cm{color:#2d5e3a}.ck{color:var(--blue)}.cv{color:var(--gold)}.cg{color:var(--g)}
-.copy-btn{position:absolute;top:9px;right:9px;background:rgba(16,196,122,.08);border:1px solid rgba(16,196,122,.25);color:var(--g);padding:4px 11px;border-radius:6px;font-size:.7rem;cursor:pointer;font-family:var(--mono);transition:background .15s}
-.copy-btn:hover{background:rgba(16,196,122,.2)}
-/* ── Sep ── */
-.sep{height:1px;background:linear-gradient(90deg,transparent,rgba(16,196,122,.18),transparent);margin:6px 0 18px}
-/* ── Toast ── */
-#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--g);color:#021a0e;padding:7px 18px;border-radius:20px;font-weight:700;font-size:.83rem;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
-.hidden{display:none}
+.alert{display:flex;gap:10px;align-items:flex-start;padding:12px 13px;border-radius:10px;font-size:.82rem;line-height:1.55;border:1px solid transparent}
+.alert.ok{background:rgba(16,196,122,.05);border-color:rgba(16,196,122,.2);color:#86efac}
+.alert.warn{background:rgba(251,191,36,.05);border-color:rgba(251,191,36,.2);color:#fde68a}
+.alert.bad{background:rgba(248,113,113,.05);border-color:rgba(248,113,113,.2);color:#fca5a5}
+.alert.info{background:rgba(88,166,255,.05);border-color:rgba(88,166,255,.2);color:#93c5fd}
+.a-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.a-body strong{display:block;font-size:.79rem;margin-bottom:2px}
+.a-body p{font-size:.77rem;opacity:.88}
+
+/* CLI */
+.cli-block{background:#030810;border:1px solid rgba(16,196,122,.12);border-radius:10px;padding:16px;font-family:var(--font-m);font-size:.77rem;line-height:1.9;overflow-x:auto;max-height:360px;overflow-y:auto}
+.cli-block .cm{color:var(--muted2)}
+.cli-block .cg{color:var(--g);font-weight:600}
+.cli-block .ck{color:var(--blue)}
+.cli-block .cv{color:var(--gold)}
+.copy-btn{width:100%;padding:11px;margin-top:10px;background:transparent;border:1px solid rgba(16,196,122,.25);border-radius:8px;color:var(--g);font-family:var(--font-d);font-size:.72rem;font-weight:700;letter-spacing:.07em;cursor:pointer;transition:all .18s}
+.copy-btn:hover{background:var(--gd);border-color:var(--g)}
+
+/* EDU */
+.edu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+@media(max-width:640px){.edu-grid{grid-template-columns:1fr}}
+.edu-card{background:#070e16;border:1px solid var(--bdr);border-radius:10px;padding:14px}
+.edu-title{font-family:var(--font-d);font-size:.6rem;letter-spacing:.07em;color:var(--gold);margin-bottom:7px}
+.edu-body{font-size:.74rem;color:var(--muted);line-height:1.6}
+.edu-body strong{color:var(--txt)}
+
+/* HALF GRID */
+.half-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:680px){.half-grid{grid-template-columns:1fr}}
+
+.hidden{display:none!important}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--g);color:#021a0e;padding:9px 20px;border-radius:8px;font-family:var(--font-d);font-size:.75rem;font-weight:700;letter-spacing:.06em;opacity:0;transition:opacity .3s;z-index:9999;pointer-events:none}
 </style>
 </head>
 <body>
 {% include "partials/nav.html" %}
-{% include "partials/drawer.html" %}
 
 <div class="wrap">
-  <!-- Hero -->
-  <div class="ph">
-    <div class="ph-label">ESC · Protocol · Safety Analysis</div>
-    <h1 class="ph-title">⚡ ESC <span>Compatibility</span> Checker</h1>
-    <p class="ph-sub">วิเคราะห์กระแสไฟ ESC, แนะนำ DShot Protocol, ตรวจ KV×Voltage safety, Cap sizing และ CLI พร้อม paste — ค่าทุกอย่างตรงกับ Python backend</p>
-    <div class="badges">
-      <span class="bdg bdg-g">Current Analysis</span>
-      <span class="bdg bdg-b">DShot Protocol</span>
-      <span class="bdg bdg-a">Capacitor Sizing</span>
-      <span class="bdg bdg-g">Voltage Safety</span>
-      <span class="bdg bdg-g">BF 4.4 / 4.5</span>
-    </div>
+
+<!-- HERO -->
+<div class="ph">
+  <div class="ph-eyebrow">
+    <span class="ph-label">⚡ ESC Analyzer</span>
+    <span class="ph-ver">v5.0</span>
   </div>
-
-  <!-- ── Form ── -->
-  <div class="card">
-    <div class="ctitle">🔧 ข้อมูลระบบ</div>
-    <div class="fg3">
-      <div class="fld">
-        <label>Motor KV <em>*</em> <span class="tip-icon" title="KV = รอบต่อโวลต์ต่อนาที — KV สูง = RPM สูง = กระแสสูง ระวังบน voltage สูง">?</span></label>
-        <input type="number" id="kv" value="2306" min="100" max="8000">
-        <span class="fld-hint">ดูจาก motor sticker หรือ spec sheet</span>
-      </div>
-      <div class="fld">
-        <label>Battery <em>*</em> <span class="tip-icon" title="เซลล์แบต — แรงดันสูงขึ้น = กระแส/ความร้อนสูงขึ้น ต้องเช็ค ESC voltage rating">?</span></label>
-        <select id="battery">
-          <option value="2">2S (7.4V nom)</option>
-          <option value="3">3S (11.1V nom)</option>
-          <option value="4" selected>4S (14.8V nom)</option>
-          <option value="5">5S (18.5V nom)</option>
-          <option value="6">6S (22.2V nom)</option>
-          <option value="7">7S (25.9V nom)</option>
-          <option value="8">8S (29.6V nom)</option>
-        </select>
-      </div>
-      <div class="fld">
-        <label>ESC Max Voltage <span class="tip-icon" title="ดูจาก spec ESC เช่น '3-6S' = Max 6S — ถ้าเกินพิกัด ESC ระเบิดหรือไหม้!">?</span></label>
-        <select id="escVolt">
-          <option value="2">Max 2S (8.4V)</option>
-          <option value="3">Max 3S (12.6V)</option>
-          <option value="4" selected>Max 4S (16.8V)</option>
-          <option value="5">Max 5S (21V)</option>
-          <option value="6">Max 6S (25.2V)</option>
-          <option value="8">Max 8S (33.6V)</option>
-        </select>
-        <span class="fld-hint">ดู spec ESC ที่มีหรือกำลังพิจารณา</span>
-      </div>
-    </div>
-
-    <div class="fg3" style="margin-top:13px">
-      <div class="fld">
-        <label>Stator Size <span class="tip-icon" title="ขนาด stator กำหนด max power — ใหญ่ขึ้น = แรงขึ้น = กระแสสูงขึ้น">?</span></label>
-        <select id="stator">
-          <option value="1104">1104 — Micro/Whoop</option>
-          <option value="1306">1306 — Micro 3"</option>
-          <option value="1407">1407 — Toothpick</option>
-          <option value="1806">1806 — Mini 3-4"</option>
-          <option value="2004">2004 — Mini 4"</option>
-          <option value="2204">2204 — 4-5" Light</option>
-          <option value="2205">2205 — 5" Light</option>
-          <option value="2206">2206 — 5" Mid</option>
-          <option value="2207" selected>2207 — 5" Standard</option>
-          <option value="2306">2306 — 5" Sport</option>
-          <option value="2408">2408 — 6" Freestyle</option>
-          <option value="2806">2806 — 7" Mid-LR</option>
-          <option value="3115">3115 — 7-10" Long Range</option>
-        </select>
-      </div>
-      <div class="fld">
-        <label>Prop Size (นิ้ว) <span class="tip-icon" title="Prop ใหญ่ = disk loading ต่ำ = hover efficient แต่โหลด motor หนักขึ้น">?</span></label>
-        <select id="propSize">
-          <option value="2">2"</option><option value="2.5">2.5"</option>
-          <option value="3">3"</option><option value="3.5">3.5"</option>
-          <option value="4">4"</option><option value="4.5">4.5"</option>
-          <option value="5" selected>5"</option><option value="5.5">5.5"</option>
-          <option value="6">6"</option><option value="7">7"</option>
-          <option value="8">8"</option><option value="10">10"</option>
-        </select>
-      </div>
-      <div class="fld">
-        <label>จำนวนมอเตอร์</label>
-        <select id="motors">
-          <option value="4" selected>4 (Quad)</option>
-          <option value="6">6 (Hex)</option>
-          <option value="8">8 (Octo)</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="fg3" style="margin-top:13px">
-      <div class="fld">
-        <label>ESC Current Rating (A) <span class="tip-icon" title="กระแสต่อเนื่องของ ESC ที่มีหรือกำลังเลือก — ต้องมากกว่า peak/motor">?</span></label>
-        <input type="number" id="escA" value="35" min="5" max="200">
-        <span class="fld-hint">ดู spec sheet ESC ที่ใช้/กำลังพิจารณา</span>
-      </div>
-      <div class="fld">
-        <label>Flight Controller <span class="tip-icon" title="F4 รองรับ DSHOT600 ได้ แต่ BiDir อาจมีปัญหา — F7/H7 รองรับทุก protocol เต็ม">?</span></label>
-        <select id="fcCpu">
-          <option value="f4">F4 (168 MHz)</option>
-          <option value="f7" selected>F7 (216 MHz)</option>
-          <option value="h7">H7 (400 MHz)</option>
-          <option value="g4">G4 (170 MHz)</option>
-        </select>
-      </div>
-      <div class="fld">
-        <label>Motor Poles <span class="tip-icon" title="จำนวน poles ของ motor — ผิดจะทำให้ RPM Filter คำนวณ harmonic ผิด">?</span></label>
-        <select id="poles">
-          <option value="12">12 poles — Micro (1104–1806)</option>
-          <option value="14" selected>14 poles — Standard (2204–2806)</option>
-          <option value="22">22 poles — Large LR (3115+)</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="fg2" style="margin-top:13px">
-      <div class="fld">
-        <label>น้ำหนักโดรน (กรัม) <span class="tip-icon" title="น้ำหนักรวมแบต กล้อง อุปกรณ์ทั้งหมด — ใช้คำนวณ hover current แม่นขึ้น">?</span></label>
-        <input type="number" id="weight" value="750" min="50" max="5000">
-        <span class="fld-hint">รวมแบต กล้อง อุปกรณ์ทั้งหมด</span>
-      </div>
-      <div class="fld">
-        <label>Style การบิน <span class="tip-icon" title="กระทบกระแสเฉลี่ย: Racing กิน 2× มากกว่า Long Range — ตรงกับ Python backend">?</span></label>
-        <select id="style">
-          <option value="freestyle" selected>Freestyle</option>
-          <option value="racing">Racing</option>
-          <option value="longrange">Long Range / Cruise</option>
-          <option value="cinematic">Cinematic / Slow</option>
-        </select>
-      </div>
-    </div>
-
-    <button class="calc-btn" onclick="calculate()">⚡ วิเคราะห์ ESC Compatibility →</button>
-  </div>
-
-  <!-- ── Results ── -->
-  <div id="results" class="hidden">
-
-    <div class="card">
-      <div class="ctitle">📊 การวิเคราะห์กระแสไฟ</div>
-      <div class="gg4">
-        <div class="gauge ok" id="g-hover">
-          <div class="g-lbl">HOVER CURRENT</div>
-          <div class="g-val" id="v-hover">—<span class="g-unit">A</span></div>
-          <div class="g-note" id="n-hover"></div>
-        </div>
-        <div class="gauge ok" id="g-avg">
-          <div class="g-lbl">AVG FLIGHT CURRENT</div>
-          <div class="g-val" id="v-avg">—<span class="g-unit">A</span></div>
-          <div class="g-note" id="n-avg"></div>
-        </div>
-        <div class="gauge ok" id="g-peak">
-          <div class="g-lbl">PEAK BURST CURRENT</div>
-          <div class="g-val" id="v-peak">—<span class="g-unit">A</span></div>
-          <div class="g-note" id="n-peak"></div>
-        </div>
-        <div class="gauge ok" id="g-esc">
-          <div class="g-lbl">ESC แนะนำ</div>
-          <div class="g-val" id="v-esc">—<span class="g-unit">A</span></div>
-          <div class="g-note" id="n-esc"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="ctitle">🩺 ESC Health Score</div>
-      <div class="hbars" id="health-bars"></div>
-    </div>
-
-    <div class="card">
-      <div class="ctitle">📡 DShot Protocol</div>
-      <div class="proto-grid" id="proto-grid"></div>
-      <div class="sep"></div>
-      <p id="proto-explain" style="font-size:.81rem;color:var(--muted);line-height:1.6"></p>
-    </div>
-
-    <div class="card">
-      <div class="ctitle">🔌 Capacitor Sizing</div>
-      <div class="cg3" id="cap-grid"></div>
-      <p id="cap-note" style="font-size:.73rem;color:var(--muted);margin-top:11px;line-height:1.5"></p>
-    </div>
-
-    <div class="card">
-      <div class="ctitle">⚠️ ผลการตรวจสอบ</div>
-      <div class="alerts" id="alerts"></div>
-    </div>
-
-    <div class="card">
-      <div class="ctitle">📋 CLI Commands (Betaflight)</div>
-      <div class="cli-wrap">
-        <button class="copy-btn" onclick="copyCLI()">📋 Copy</button>
-        <div class="cli-box" id="cli-out"></div>
-      </div>
-    </div>
-
+  <h1 class="ph-title">ESC <em>Compatibility</em> Checker</h1>
+  <p class="ph-sub">วิเคราะห์ ESC ลึกที่สุดในวงการ FPV — Health Score Ring, Current Profile Chart, Thermal Model, Signal Chain Latency, Report Card พร้อม CLI command ทันที</p>
+  <div class="badges">
+    <span class="bdg bdg-g">🔬 Physics Engine</span>
+    <span class="bdg bdg-b">📡 Signal Chain</span>
+    <span class="bdg bdg-a">🌡️ Thermal Model</span>
+    <span class="bdg bdg-p">📊 Report Card</span>
+    <span class="bdg bdg-r">⚡ Protocol Matrix</span>
   </div>
 </div>
+
+<!-- BUILD PRESETS -->
+<div class="card">
+  <div class="ctitle"><span class="ctitle-icon">🚁</span>Build Presets</div>
+  <div class="preset-row">
+    <button class="preset-btn" onclick="applyPreset('whoop')"><span class="preset-icon">🤏</span><span class="preset-lbl">WHOOP</span><span class="preset-sub">65mm 2S</span></button>
+    <button class="preset-btn" onclick="applyPreset('micro')"><span class="preset-icon">🪰</span><span class="preset-lbl">MICRO</span><span class="preset-sub">2.5″ 3S</span></button>
+    <button class="preset-btn" onclick="applyPreset('fs4')"><span class="preset-icon">🏎️</span><span class="preset-lbl">5″ 4S</span><span class="preset-sub">Freestyle</span></button>
+    <button class="preset-btn" onclick="applyPreset('fs6')"><span class="preset-icon">🔥</span><span class="preset-lbl">5″ 6S</span><span class="preset-sub">Racing</span></button>
+    <button class="preset-btn" onclick="applyPreset('cine')"><span class="preset-icon">🎬</span><span class="preset-lbl">CINEWHOOP</span><span class="preset-sub">3.5″ 4S</span></button>
+    <button class="preset-btn" onclick="applyPreset('lr7')"><span class="preset-icon">🌏</span><span class="preset-lbl">7″ LR</span><span class="preset-sub">Long Range 6S</span></button>
+  </div>
+  <div class="ctitle" style="margin-top:4px"><span class="ctitle-icon">🏷️</span>Popular ESC Presets</div>
+  <div class="esc-preset-row">
+    <button class="esc-pb" onclick="applyEscPreset('tekko32_45',this)">Tekko32 45A</button>
+    <button class="esc-pb" onclick="applyEscPreset('tekko32_65',this)">Tekko32 65A</button>
+    <button class="esc-pb" onclick="applyEscPreset('flywoo_35',this)">Flywoo 35A</button>
+    <button class="esc-pb" onclick="applyEscPreset('aikon_45',this)">Aikon AK32 45A</button>
+    <button class="esc-pb" onclick="applyEscPreset('holybro_55',this)">Kotleta20 55A</button>
+    <button class="esc-pb" onclick="applyEscPreset('am32_60',this)">AM32 60A</button>
+    <button class="esc-pb" onclick="applyEscPreset('blheli_s_20',this)">BLHeli_S 20A</button>
+    <button class="esc-pb" onclick="applyEscPreset('blheli32_35',this)">BLHeli_32 35A</button>
+  </div>
+</div>
+
+<!-- INPUT FORM -->
+<div class="card">
+  <div class="ctitle"><span class="ctitle-icon">⚙️</span>ข้อมูลระบบ</div>
+  <div class="fg4" style="margin-bottom:13px">
+    <div class="fld">
+      <label>CELL COUNT <em>*</em></label>
+      <select id="cells" onchange="liveCheck()">
+        <option value="2">2S — 8.4V</option>
+        <option value="3">3S — 12.6V</option>
+        <option value="4" selected>4S — 16.8V</option>
+        <option value="5">5S — 21.0V</option>
+        <option value="6">6S — 25.2V</option>
+        <option value="7">7S — 29.4V</option>
+        <option value="8">8S — 33.6V</option>
+      </select>
+      <span class="fld-hint" id="v-hint">Nominal 14.8V · Max 16.8V</span>
+    </div>
+    <div class="fld">
+      <label>MOTOR KV <em>*</em></label>
+      <input type="number" id="kv" value="2400" min="100" max="10000" oninput="liveCheck()">
+      <span id="kv-live" class="live-tag"></span>
+    </div>
+    <div class="fld">
+      <label>STATOR SIZE</label>
+      <select id="stator">
+        <option value="1105">1105 — 1S Whoop</option>
+        <option value="1404">1404 — Toothpick</option>
+        <option value="1507">1507 — Micro</option>
+        <option value="2004">2004 — Nano LR</option>
+        <option value="2205">2205 — 5" Classic</option>
+        <option value="2206">2206 — 5" Freestyle</option>
+        <option value="2207" selected>2207 — 5" Standard</option>
+        <option value="2306">2306 — 5" Racing</option>
+        <option value="2812">2812 — LR</option>
+        <option value="3115">3115 — Heavy LR</option>
+      </select>
+    </div>
+    <div class="fld">
+      <label>FLIGHT STYLE</label>
+      <select id="style">
+        <option value="freestyle" selected>Freestyle</option>
+        <option value="racing">Racing</option>
+        <option value="longrange">Long Range</option>
+        <option value="cinematic">Cinematic</option>
+      </select>
+    </div>
+  </div>
+  <div class="fg4" style="margin-bottom:13px">
+    <div class="fld">
+      <label>ESC CURRENT (A) <em>*</em></label>
+      <input type="number" id="escA" value="45" min="10" max="200" oninput="liveCheck()">
+    </div>
+    <div class="fld">
+      <label>ESC MAX VOLTAGE (S)</label>
+      <select id="escVolt" onchange="liveCheck()">
+        <option value="2">2S Max</option>
+        <option value="3">3S Max</option>
+        <option value="4" selected>4S Max</option>
+        <option value="5">5S Max</option>
+        <option value="6">6S Max</option>
+        <option value="8">8S Max</option>
+      </select>
+      <span id="volt-live" class="live-tag"></span>
+    </div>
+    <div class="fld">
+      <label>FC PROCESSOR</label>
+      <select id="cpu">
+        <option value="f4" selected>F4 — 168MHz</option>
+        <option value="g4">G4 — 170MHz</option>
+        <option value="f7">F7 — 216MHz</option>
+        <option value="h7">H7 — 480MHz</option>
+      </select>
+    </div>
+    <div class="fld">
+      <label>MOTOR POLES</label>
+      <select id="poles">
+        <option value="12">12 — Micro</option>
+        <option value="14" selected>14 — Standard</option>
+        <option value="22">22 — Large LR</option>
+      </select>
+    </div>
+  </div>
+  <div class="fg3">
+    <div class="fld">
+      <label>PROP SIZE (นิ้ว)</label>
+      <input type="number" id="propSz" value="5" min="1" max="12" step="0.5">
+    </div>
+    <div class="fld">
+      <label>AMBIENT TEMP (°C)</label>
+      <input type="number" id="ambient" value="30" min="5" max="50">
+      <span class="fld-hint">อุณหภูมิแวดล้อมขณะบิน</span>
+    </div>
+    <div class="fld">
+      <label>NUM MOTORS</label>
+      <select id="numMot">
+        <option value="4" selected>4 Motors (Quad)</option>
+        <option value="6">6 Motors (Hex)</option>
+        <option value="8">8 Motors (Octo)</option>
+      </select>
+    </div>
+  </div>
+  <button class="calc-btn" onclick="calculate()">⚡ วิเคราะห์ ESC ทั้งระบบ</button>
+</div>
+
+<!-- RESULTS -->
+<div id="results" class="hidden">
+
+  <!-- SCORE RING + GAUGES -->
+  <div class="results-top">
+    <div class="score-ring-card" id="scoreCard">
+      <div class="score-ring-wrap">
+        <svg viewBox="0 0 130 130" width="130" height="130">
+          <circle class="score-track" cx="65" cy="65" r="55"/>
+          <circle class="score-fill" id="scoreCircle" cx="65" cy="65" r="55"
+            stroke-dasharray="345.4" stroke-dashoffset="345.4" stroke="#10c47a"/>
+        </svg>
+        <div class="score-center">
+          <span class="score-num" id="scoreNum" style="color:var(--g)">--</span>
+          <span class="score-lbl-s">SCORE</span>
+        </div>
+      </div>
+      <span class="score-grade" id="scoreGrade" style="color:var(--g)">—</span>
+      <span class="score-subtitle" id="scoreSubtitle">กำลังคำนวณ...</span>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="ctitle"><span class="ctitle-icon">📊</span>Current Analysis</div>
+      <div class="gg4">
+        <div class="gauge" id="g-hover"><div class="g-lbl">HOVER</div><div class="g-val" id="v-hover">--<span class="g-unit">A</span></div><div class="g-note" id="n-hover">--</div></div>
+        <div class="gauge" id="g-avg"><div class="g-lbl">AVG FLIGHT</div><div class="g-val" id="v-avg">--<span class="g-unit">A</span></div><div class="g-note" id="n-avg">--</div></div>
+        <div class="gauge" id="g-peak"><div class="g-lbl">PEAK BURST</div><div class="g-val" id="v-peak">--<span class="g-unit">A</span></div><div class="g-note" id="n-peak">--</div></div>
+        <div class="gauge" id="g-esc"><div class="g-lbl">REC. ESC</div><div class="g-val" id="v-esc">--<span class="g-unit"></span></div><div class="g-note" id="n-esc">--</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPORT CARD -->
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">🏆</span>ESC Report Card</div>
+    <div class="report-card">
+      <div class="grade-badge" id="gradeBadge">—</div>
+      <div class="grade-rows" id="gradeRows"></div>
+    </div>
+  </div>
+
+  <!-- CURRENT PROFILE CHART -->
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">📈</span>Current Profile — 5 Throttle Points</div>
+    <div class="chart-wrap"><canvas id="profileCanvas" height="165"></canvas></div>
+    <div class="chart-legend">
+      <div class="cl-item"><div class="cl-dot" style="background:rgba(16,196,122,.7)"></div>ESC Rating Line</div>
+      <div class="cl-item"><div class="cl-dot" style="background:#58a6ff"></div>Safe Zone</div>
+      <div class="cl-item"><div class="cl-dot" style="background:#fbbf24"></div>Warm</div>
+      <div class="cl-item"><div class="cl-dot" style="background:#f87171"></div>Over Limit</div>
+    </div>
+  </div>
+
+  <!-- HEALTH BARS + THERMAL -->
+  <div class="half-grid">
+    <div class="card" style="margin-bottom:0">
+      <div class="ctitle"><span class="ctitle-icon">💪</span>Load Analysis</div>
+      <div class="hbars" id="health-bars"></div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="ctitle"><span class="ctitle-icon">🌡️</span>ESC Thermal Estimate</div>
+      <div id="thermal-section"></div>
+    </div>
+  </div>
+  <div style="height:14px"></div>
+
+  <!-- PROTOCOL MATRIX -->
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">📡</span>Protocol Compatibility Matrix</div>
+    <div class="proto-grid" id="proto-grid"></div>
+    <div id="proto-explain" style="font-size:.77rem;color:var(--muted);line-height:1.6;padding:10px 12px;background:#070e16;border-radius:8px;border:1px solid var(--bdr)"></div>
+  </div>
+
+  <!-- SIGNAL CHAIN -->
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">🔗</span>Signal Chain — Stick → Motor</div>
+    <div class="signal-chain" id="signal-chain"></div>
+    <div class="sc-total-box ok" id="sc-total">
+      <span id="sc-label">Total latency</span>
+      <span class="sc-total-num" id="sc-num">--ms</span>
+    </div>
+  </div>
+
+  <!-- CAPACITOR -->
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">🔌</span>Capacitor Sizing Guide</div>
+    <div class="cg3" id="cap-grid"></div>
+    <p id="cap-note" style="font-size:.72rem;color:var(--muted2);margin-top:12px;line-height:1.6;padding:10px 12px;background:#070e16;border-radius:8px;border:1px solid var(--bdr)"></p>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">🔔</span>Diagnostics & Warnings</div>
+    <div class="alerts" id="alerts"></div>
+  </div>
+
+  <!-- CLI -->
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">💻</span>Betaflight CLI — Copy & Paste</div>
+    <pre id="cli-out" class="cli-block"></pre>
+    <button class="copy-btn" onclick="copyCLI()">📋 Copy CLI Commands</button>
+  </div>
+
+  <!-- EDU -->
+  <div class="card">
+    <div class="ctitle"><span class="ctitle-icon">📚</span>ทำไมถึงสำคัญ</div>
+    <div class="edu-grid">
+      <div class="edu-card">
+        <div class="edu-title">⚡ ESC MOSFET FAILURE</div>
+        <div class="edu-body">MOSFET ใน ESC มี <strong>thermal limit</strong> — ถ้าโหลด peak current เกิน rating ซ้ำๆ junction temp เกิน 150°C MOSFET พัง หรือ motor desync กลางอากาศ ต้องมี <strong>safety margin ≥ 25%</strong> เสมอ</div>
+      </div>
+      <div class="edu-card">
+        <div class="edu-title">🔋 VOLTAGE SPIKE & CAPACITOR</div>
+        <div class="edu-body">Throttle cut กะทันหัน เกิด <strong>back-EMF spike</strong> สูงกว่า Vbat 20–40% cap low-ESR ดูด spike ก่อนถึง ESC — ไม่มี cap หรือ cap ไม่ดี ESC ระเบิด โดยเฉพาะ <strong>6S+</strong></div>
+      </div>
+      <div class="edu-card">
+        <div class="edu-title">📡 DSHOT BIDIR & RPM FILTER</div>
+        <div class="edu-body">เปิด <strong>Bidirectional DShot</strong> → ESC ส่ง RPM กลับ real-time → RPM Filter คำนวณ harmonic แม่น → vibration ลด tune ง่ายขึ้นมาก ต้องการ ESC firmware: BLHeli_32, AM32 หรือ BLHeli_S + JESC</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /results -->
+</div><!-- /wrap -->
 <div id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════════
-// DATA — calibrated from bench tests + community telemetry
-// Values match Python thrust_logic.py + advanced_analysis.py
-// ═══════════════════════════════════════════════════════════════════
+'use strict';
 
-// Stator max power (W) at 4S — scaled ×(cells/4) at runtime
-// Source: bench data 2207/2306 4S 2400KV ~360-380W max
-var STATOR_W = {
-  1104:60,  1306:90,  1407:120, 1806:150,
-  2004:180, 2204:200, 2205:230, 2206:280,
-  2207:360, 2306:380, 2408:450, 2806:520, 3115:650
+var STATOR_DATA = {
+  1105:{wMax:55,rOhm:180}, 1404:{wMax:90,rOhm:120}, 1507:{wMax:120,rOhm:90},
+  2004:{wMax:150,rOhm:80}, 2205:{wMax:200,rOhm:65}, 2206:{wMax:240,rOhm:58},
+  2207:{wMax:290,rOhm:50}, 2306:{wMax:320,rOhm:45}, 2812:{wMax:380,rOhm:38}, 3115:{wMax:450,rOhm:32}
 };
 
-// Hover W/g by prop size — matches thrust_logic.py exactly
-var W_PER_G = {
-  2.5:.50, 3:.35, 3.5:.27, 4:.20, 4.5:.18,
-  5:.16,  5.5:.17, 6:.22, 7:.12, 8:.10, 10:.09
-};
+var STYLE_FAC = {freestyle:1.55, racing:1.85, longrange:1.25, cinematic:1.15};
 
-// Style power factor — matches Python backend EXACTLY
-// (fixed from old ESC checker: freestyle was 1.85, racing was 2.35)
-var STYLE_FAC = {
-  freestyle:1.55, racing:2.00, longrange:1.05, cinematic:1.25
-};
-
-// Prop load scale (5" = 1.0 baseline)
-var PROP_LOAD = {
-  2:.38, 2.5:.50, 3:.62, 3.5:.70, 4:.78,
-  4.5:.86, 5:1.0, 5.5:1.07, 6:1.14,
-  7:1.25, 8:1.36, 10:1.52
-};
-
-// Protocol data
 var PROTOS = [
-  {name:'DSHOT150', us:6.67, bidir:false, f:'F4', note:'ช้ามาก ไม่แนะนำ'},
-  {name:'DSHOT300', us:3.33, bidir:true,  f:'F4', note:'ดีสำหรับ micro/whoop'},
-  {name:'DSHOT600', us:1.67, bidir:true,  f:'F4', note:'★ มาตรฐาน 5\" FPV'},
-  {name:'DSHOT1200',us:0.83, bidir:false, f:'F7', note:'เร็วมาก ต้องการ F7/H7'},
+  {name:'DSHOT300',    f:'F4', us:0.27, bidir:false, note:'ใช้ได้ทุก FC — เสถียรมาก'},
+  {name:'DSHOT600',    f:'F4', us:0.14, bidir:true,  note:'มาตรฐาน BiDir OK F4+'},
+  {name:'DSHOT1200',   f:'F7', us:0.07, bidir:true,  note:'ต้องการ F7/H7 + ESC ดี'},
+  {name:'DSHOT600_BD', f:'F4', us:0.20, bidir:true,  note:'BiDir mode RPM filter'}
 ];
 
-// ═══════════════════════════════════════════════════════════════════
-function interp(tbl, x) {
-  var keys = Object.keys(tbl).map(Number).sort(function(a,b){return a-b;});
-  if (tbl[x] !== undefined) return tbl[x];
-  if (x <= keys[0]) return tbl[keys[0]];
-  if (x >= keys[keys.length-1]) return tbl[keys[keys.length-1]];
-  for (var i=0; i<keys.length-1; i++) {
-    var lo=keys[i], hi=keys[i+1];
-    if (lo<=x && x<=hi) {
-      var t=(x-lo)/(hi-lo);
-      return tbl[lo]+t*(tbl[hi]-tbl[lo]);
-    }
-  }
-  return tbl[keys[0]];
+var BUILD_PRESETS = {
+  whoop:{cells:2,kv:19000,stator:'1105',style:'cinematic',escA:10,escVolt:2,propSz:1.6,poles:12,numMot:4,ambient:28},
+  micro:{cells:3,kv:6000, stator:'1507',style:'freestyle', escA:20,escVolt:3,propSz:2.5,poles:12,numMot:4,ambient:30},
+  fs4:  {cells:4,kv:2400, stator:'2207',style:'freestyle', escA:45,escVolt:4,propSz:5.1,poles:14,numMot:4,ambient:30},
+  fs6:  {cells:6,kv:1750, stator:'2207',style:'racing',    escA:45,escVolt:6,propSz:5.0,poles:14,numMot:4,ambient:32},
+  cine: {cells:4,kv:1900, stator:'2206',style:'cinematic', escA:35,escVolt:4,propSz:3.5,poles:14,numMot:4,ambient:28},
+  lr7:  {cells:6,kv:1600, stator:'2812',style:'longrange', escA:40,escVolt:6,propSz:7.0,poles:14,numMot:4,ambient:35}
+};
+
+var ESC_PRESETS = {
+  tekko32_45: {escA:45,escVolt:6,cpu:'h7'},
+  tekko32_65: {escA:65,escVolt:6,cpu:'h7'},
+  flywoo_35:  {escA:35,escVolt:4,cpu:'f4'},
+  aikon_45:   {escA:45,escVolt:6,cpu:'f7'},
+  holybro_55: {escA:55,escVolt:6,cpu:'f7'},
+  am32_60:    {escA:60,escVolt:6,cpu:'h7'},
+  blheli_s_20:{escA:20,escVolt:4,cpu:'f4'},
+  blheli32_35:{escA:35,escVolt:6,cpu:'f4'}
+};
+
+function applyPreset(key){
+  var p=BUILD_PRESETS[key]; if(!p) return;
+  sv('cells',p.cells); sv('kv',p.kv); sv('stator',p.stator); sv('style',p.style);
+  sv('escA',p.escA); sv('escVolt',p.escVolt); sv('propSz',p.propSz);
+  sv('poles',p.poles); sv('numMot',p.numMot); sv('ambient',p.ambient);
+  document.querySelectorAll('.preset-btn').forEach(function(b){b.classList.remove('active')});
+  var keys=['whoop','micro','fs4','fs6','cine','lr7'];
+  var idx=keys.indexOf(key);
+  var btns=document.querySelectorAll('.preset-btn');
+  if(idx>=0&&btns[idx]) btns[idx].classList.add('active');
+  liveCheck();
+  document.getElementById('results').classList.add('hidden');
 }
 
-function calculate() {
-  var kv      = +document.getElementById('kv').value      || 2306;
-  var cells   = +document.getElementById('battery').value || 4;
-  var escVolt = +document.getElementById('escVolt').value || 4;
-  var stKey   =  document.getElementById('stator').value;
-  var propSz  = +document.getElementById('propSize').value|| 5.0;
-  var numMot  = +document.getElementById('motors').value  || 4;
-  var escA    = +document.getElementById('escA').value    || 35;
-  var cpu     =  document.getElementById('fcCpu').value;
-  var poles   = +document.getElementById('poles').value   || 14;
-  var weight  = +document.getElementById('weight').value  || 750;
-  var style   =  document.getElementById('style').value;
+function applyEscPreset(key,btn){
+  var p=ESC_PRESETS[key]; if(!p) return;
+  sv('escA',p.escA); sv('escVolt',p.escVolt); sv('cpu',p.cpu);
+  document.querySelectorAll('.esc-pb').forEach(function(b){b.classList.remove('active')});
+  if(btn) btn.classList.add('active');
+  liveCheck();
+}
 
-  var vMax = cells * 4.2;
-  var vNom = cells * 3.7;
+function sv(id,val){ var el=document.getElementById(id); if(el) el.value=val; }
+function gv(id){ return document.getElementById(id).value; }
 
-  // ── 1. Stator max power (scaled from 4S baseline by cells)
-  var stW4S    = STATOR_W[stKey] || 360;
-  var propLoad = interp(PROP_LOAD, propSz);
-  var stWMax   = stW4S * (cells/4.0) * propLoad;   // W per motor max
+function liveCheck(){
+  var cells=+gv('cells'), kv=+gv('kv'), escVolt=+gv('escVolt');
+  var hint=document.getElementById('v-hint');
+  if(hint) hint.textContent='Nominal: '+(cells*3.7).toFixed(1)+'V · Max: '+(cells*4.2).toFixed(1)+'V';
+  var kvLive=document.getElementById('kv-live');
+  var kvEl=document.getElementById('kv');
+  if(kv&&cells){
+    if((cells>=7&&kv>1500)||(cells>=6&&kv>2200)){
+      showLive(kvLive,'lt-bad','❌ KV อันตราย × '+cells+'S');
+      kvEl.classList.add('live-bad'); kvEl.classList.remove('live-warn');
+    } else if(cells>=6&&kv>1750){
+      showLive(kvLive,'lt-warn','⚠️ KV สูงบน '+cells+'S');
+      kvEl.classList.add('live-warn'); kvEl.classList.remove('live-bad');
+    } else { hideLive(kvLive); kvEl.classList.remove('live-bad','live-warn'); }
+  }
+  var voltLive=document.getElementById('volt-live');
+  var escVoltEl=document.getElementById('escVolt');
+  if(cells>escVolt){
+    showLive(voltLive,'lt-bad','❌ แบต '+cells+'S > ESC '+escVolt+'S!');
+    escVoltEl.classList.add('live-bad'); escVoltEl.classList.remove('live-warn');
+  } else if(cells===escVolt){
+    showLive(voltLive,'lt-warn','⚡ ชนพิกัด — ต้องใส่ cap ดี');
+    escVoltEl.classList.add('live-warn'); escVoltEl.classList.remove('live-bad');
+  } else { hideLive(voltLive); escVoltEl.classList.remove('live-bad','live-warn'); }
+}
 
-  // ── 2. Hover current — weight-based model (matches thrust_logic.py)
-  var wPerG       = interp(W_PER_G, propSz);
-  var hoverPwrTot = wPerG * weight;                 // W total hover
-  var hoverA      = hoverPwrTot / vNom;             // A total
-  var hoverApm    = hoverA / numMot;                // A per motor
+function showLive(el,cls,msg){ if(!el) return; el.style.display='inline-block'; el.className='live-tag '+cls; el.textContent=msg; }
+function hideLive(el){ if(el){ el.style.display='none'; } }
 
-  // ── 3. Average current (style-based, matches Python backend)
-  var sfac   = STYLE_FAC[style] || 1.55;
-  var avgPwr = hoverPwrTot * sfac;
-  var avgA   = avgPwr / vNom;
-  var avgApm = avgA / numMot;
+function calculate(){
+  var cells=parseInt(gv('cells')), kv=parseInt(gv('kv'));
+  var stName=gv('stator'), style=gv('style');
+  var escA=parseInt(gv('escA')), escVolt=parseInt(gv('escVolt'));
+  var cpu=gv('cpu'), poles=parseInt(gv('poles'));
+  var propSz=parseFloat(gv('propSz')), ambient=parseFloat(gv('ambient'))||30;
+  var numMot=parseInt(gv('numMot'));
+  var st=STATOR_DATA[parseInt(stName)]||STATOR_DATA[2207];
+  var vNom=cells*3.7, vMax=cells*4.2;
+  var sfac=STYLE_FAC[style]||1.55;
 
-  // ── 4. Peak current (90% of stator max)
-  var peakApm  = (stWMax * 0.88) / vNom;
-  var peakAtot = peakApm * numMot;
+  /* Current */
+  var hoverPwrPm=st.wMax*0.42;
+  var hoverA_pm=hoverPwrPm/vNom, hoverA_tot=hoverA_pm*numMot;
+  var avgA_pm=hoverPwrPm*sfac/vNom, avgA_tot=avgA_pm*numMot;
+  var peakA_pm=(st.wMax*0.88)/vNom, peakA_tot=peakA_pm*numMot;
+  var recEscA=Math.max(20,Math.ceil(peakA_pm*1.25/5)*5);
+  var escSt=escA>=recEscA?'ok':escA>=recEscA*0.82?'warn':'bad';
 
-  // ── 5. Recommended ESC: peak/motor + 25% safety margin
-  var recEscA = Math.ceil(peakApm * 1.25 / 5) * 5;
-  recEscA     = Math.max(20, recEscA);
+  /* Protocol */
+  var bidirOk=!(cpu==='f4'&&cells>=6);
+  var recProto='DSHOT600';
 
-  var escSt = escA >= recEscA ? 'ok' : (escA >= recEscA*0.82 ? 'warn' : 'bad');
+  /* Throttle profile */
+  var profile=[
+    {label:'Idle 10%', pct:0.10},{label:'Hover 40%', pct:0.40},
+    {label:'Cruise 65%',pct:0.65},{label:'Sport 80%', pct:0.80},{label:'Burst 100%',pct:1.00}
+  ];
+  profile.forEach(function(p){ p.currentPm=(st.wMax*p.pct*0.88)/vNom; p.currentTot=p.currentPm*numMot; });
 
-  // ── 6. Protocol
-  var recProto = 'DSHOT600';
-  var bidirOk  = !(cpu==='f4' && cells>=6);  // F4 BiDir risky on 6S+
+  /* Thermal */
+  var pHeat_pm=peakA_pm*peakA_pm*0.003*4;
+  var rTh=8.5-(escA/100*2.5);
+  var airflow={freestyle:0.65,racing:0.55,longrange:0.75,cinematic:0.85}[style]||0.7;
+  var dT=pHeat_pm*rTh*airflow;
+  var tEsc=ambient+dT;
 
-  // ── Populate gauges
-  setGauge('g-hover','v-hover','n-hover',
-    hoverA.toFixed(1), 'A total',
-    hoverApm.toFixed(1)+'A/motor ที่ hover throttle', 'ok');
-  setGauge('g-avg','v-avg','n-avg',
-    avgA.toFixed(1), 'A total',
-    avgApm.toFixed(1)+'A/motor ('+{freestyle:'Freestyle',racing:'Racing',longrange:'Long Range',cinematic:'Cine'}[style]+')', 
-    avgApm > escA*0.80 ? 'warn':'ok');
-  setGauge('g-peak','v-peak','n-peak',
-    peakAtot.toFixed(0), 'A total',
-    peakApm.toFixed(0)+'A/motor burst — '+Math.round(peakApm/stWMax*vNom*100)+'% stator max',
-    peakApm > escA ? 'bad' : peakApm > escA*0.85 ? 'warn':'ok');
-  setGauge('g-esc','v-esc','n-esc',
-    recEscA+'A+', '',
-    'มีอยู่ '+escA+'A → '+(escSt==='ok'?'✅ เพียงพอ':escSt==='warn'?'⚠️ พอดีแต่ตึง':'❌ ไม่พอ!'), escSt);
+  /* Signal chain */
+  var cpuUs={f4:28,g4:24,f7:20,h7:12}[cpu]||28;
+  var dshotUs=bidirOk?200:140, rcMs=2.5, motorMs=3.0, gyroUs=12.5, escUs=80;
+  var totalMs=rcMs+(cpuUs+gyroUs+dshotUs+escUs)/1000+motorMs;
+  var scRating=totalMs<5?'ok':totalMs<9?'warn':'bad';
 
-  buildHealth(peakApm, avgApm, hoverApm, escA, kv, vNom);
-  buildProto(recProto, cpu, bidirOk, cells);
-  buildCap(cells, vMax, peakAtot, numMot);
-  buildAlerts(kv, cells, escA, recEscA, escVolt, peakApm, avgApm, bidirOk, cpu, poles, vMax);
-  buildCLI(recProto, bidirOk, poles, recEscA, cells, kv, propSz, style, escA);
+  /* Health score */
+  var scoreVolt=cells<=escVolt-1?100:cells===escVolt?55:0;
+  var scoreCurrent=Math.min(100,Math.max(0,Math.round((1-peakA_pm/escA)*100*1.4)));
+  var scoreKV=cells>=6&&kv>2200?20:cells>=6&&kv>1750?55:cells>=7&&kv>1500?30:95;
+  var scoreThermal=tEsc<60?100:tEsc<75?75:tEsc<90?45:20;
+  var scoreProto=bidirOk?100:75;
+  var healthScore=Math.round(scoreVolt*0.30+scoreCurrent*0.30+scoreKV*0.20+scoreThermal*0.10+scoreProto*0.10);
+
+  /* RENDER */
+  renderScoreRing(healthScore);
+  renderGauges(hoverA_tot,hoverA_pm,avgA_tot,avgA_pm,peakA_tot,peakA_pm,recEscA,escA,escSt,style);
+  renderReportCard(healthScore,scoreVolt,scoreCurrent,scoreKV,scoreThermal,scoreProto);
+  renderChart(profile,escA,numMot);
+  buildHealth(peakA_pm,avgA_pm,hoverA_pm,escA,kv,vNom);
+  buildThermal(tEsc,ambient,dT,pHeat_pm);
+  buildProto(recProto,cpu,bidirOk,cells);
+  buildSignalChain(rcMs,cpuUs,gyroUs,dshotUs,escUs,motorMs,totalMs,scRating,cpu,bidirOk);
+  buildCap(cells,vMax,peakA_tot);
+  buildAlerts(kv,cells,escA,recEscA,escVolt,peakA_pm,avgA_pm,bidirOk,cpu,poles,vMax,tEsc);
+  buildCLI(recProto,bidirOk,poles,recEscA,cells,kv,propSz,style,escA,tEsc,cpu);
 
   document.getElementById('results').classList.remove('hidden');
-  setTimeout(function(){
-    document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
-  }, 60);
+  setTimeout(function(){ document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'}); }, 60);
 }
 
-function setGauge(gid,vid,nid,val,unit,note,st){
-  var g=document.getElementById(gid);
-  g.className='gauge '+st;
-  document.getElementById(vid).innerHTML=val+'<span class="g-unit">'+unit+'</span>';
-  document.getElementById(nid).textContent=note;
+function renderScoreRing(score){
+  var circ=345.4, offset=circ-(score/100)*circ;
+  var col=score>=75?'#10c47a':score>=50?'#fbbf24':'#f87171';
+  var grade=score>=90?'A+':score>=80?'A':score>=70?'B':score>=60?'C':score>=45?'D':'F';
+  var sub=score>=80?'Excellent — ESC เหมาะสมมาก':score>=65?'Good — ใช้ได้ดี':score>=50?'Acceptable — มีจุดระวัง':'⚠️ Need Attention — ดูคำเตือน';
+  var circle=document.getElementById('scoreCircle');
+  circle.style.stroke=col;
+  setTimeout(function(){ circle.style.strokeDashoffset=offset; }, 60);
+  document.getElementById('scoreNum').textContent=score;
+  document.getElementById('scoreNum').style.color=col;
+  document.getElementById('scoreGrade').textContent=grade;
+  document.getElementById('scoreGrade').style.color=col;
+  document.getElementById('scoreSubtitle').textContent=sub;
+  document.getElementById('scoreCard').style.borderColor=col+'44';
 }
 
-function buildHealth(peakApm, avgApm, hoverApm, escA, kv, vNom) {
-  var rows = [
-    {lbl:'ESC Peak Load', pct:Math.min(100,Math.round(peakApm/escA*100)),
-     note:'Peak '+peakApm.toFixed(0)+'A / '+escA+'A rating',
-     ok:peakApm/escA<.80, warn:peakApm/escA<1.0},
-    {lbl:'ESC Avg Load', pct:Math.min(100,Math.round(avgApm/escA*100)),
-     note:'Avg '+avgApm.toFixed(0)+'A / '+escA+'A during flight',
-     ok:avgApm/escA<.60, warn:avgApm/escA<.85},
-    {lbl:'KV×Voltage', pct:Math.min(100,Math.round(Math.min(kv*vNom,100000)/100000*100)),
-     note:'KV×Vnom = '+(kv*vNom/1000).toFixed(1)+'k  (ปลอดภัย <50k)',
-     ok:kv*vNom<40000, warn:kv*vNom<65000},
-    {lbl:'Hover Efficiency', pct:Math.min(100,Math.round(hoverApm/escA*100)),
-     note:'Hover '+hoverApm.toFixed(1)+'A/motor = '+Math.round(hoverApm/escA*100)+'% ESC utilisation',
-     ok:true, warn:hoverApm/escA>.45},
+function renderGauges(hA,hApm,avgA,avgApm,peakA,peakApm,recEscA,escA,escSt,style){
+  var sl={freestyle:'Freestyle',racing:'Racing',longrange:'Long Range',cinematic:'Cine'}[style]||style;
+  setGauge('g-hover','v-hover','n-hover',hA.toFixed(1),'A',hApm.toFixed(1)+'A/motor — hover','ok');
+  setGauge('g-avg','v-avg','n-avg',avgA.toFixed(1),'A',avgApm.toFixed(1)+'A/motor ('+sl+')',avgApm>escA*0.80?'warn':'ok');
+  setGauge('g-peak','v-peak','n-peak',peakA.toFixed(0),'A',peakApm.toFixed(0)+'A/motor burst',peakApm>escA?'bad':peakApm>escA*0.85?'warn':'ok');
+  setGauge('g-esc','v-esc','n-esc',recEscA+'A+','','มีอยู่ '+escA+'A → '+(escSt==='ok'?'✅ OK':escSt==='warn'?'⚠️ ตึง':'❌ ไม่พอ'),escSt);
+}
+
+function renderReportCard(total,v,c,k,t,p){
+  var grade=total>=90?'A+':total>=80?'A':total>=70?'B':total>=60?'C':total>=45?'D':'F';
+  var col=total>=75?'var(--g)':total>=50?'var(--amb)':'var(--red)';
+  var badge=document.getElementById('gradeBadge');
+  badge.textContent=grade; badge.style.color=col; badge.style.borderColor=col;
+  badge.style.background=total>=75?'rgba(16,196,122,.08)':total>=50?'rgba(251,191,36,.08)':'rgba(248,113,113,.08)';
+  var rows=[
+    {lbl:'Voltage Safety', pct:v},{lbl:'Current Headroom',pct:c},
+    {lbl:'KV × Cells',     pct:k},{lbl:'Thermal Load',    pct:t},{lbl:'Protocol',pct:p}
   ];
   var html='';
   rows.forEach(function(r){
-    var col = r.ok ? '#10c47a' : (r.warn ? '#fbbf24' : '#f87171');
-    html += '<div class="hrow">';
-    html += '<span class="h-lbl">'+r.lbl+'</span>';
-    html += '<div class="h-track"><div class="h-fill" style="width:'+r.pct+'%;background:'+col+'"></div></div>';
-    html += '<span class="h-pct" style="color:'+col+'">'+r.pct+'%</span></div>';
-    html += '<div class="h-sub">'+r.note+'</div>';
+    var rc=r.pct>=80?'var(--g)':r.pct>=50?'var(--amb)':'var(--red)';
+    html+='<div class="grade-row"><span class="grade-row-lbl">'+r.lbl+'</span>';
+    html+='<div class="grade-row-bar"><div class="grade-row-fill" style="width:'+r.pct+'%;background:'+rc+'"></div></div>';
+    html+='<span class="grade-row-score" style="color:'+rc+'">'+r.pct+'</span></div>';
+  });
+  document.getElementById('gradeRows').innerHTML=html;
+}
+
+function renderChart(profile,escA,numMot){
+  var canvas=document.getElementById('profileCanvas');
+  var ctx=canvas.getContext('2d');
+  var dpr=window.devicePixelRatio||1;
+  var w=canvas.parentElement.clientWidth||600, h=165;
+  canvas.width=w*dpr; canvas.height=h*dpr;
+  canvas.style.width=w+'px'; canvas.style.height=h+'px';
+  ctx.scale(dpr,dpr); ctx.clearRect(0,0,w,h);
+  var pad={top:12,right:20,bottom:32,left:46};
+  var cw=w-pad.left-pad.right, ch=h-pad.top-pad.bottom;
+  var maxA=Math.max(escA*1.12,profile[profile.length-1].currentTot*1.12);
+  var bw=cw/profile.length-10;
+  /* Grid */
+  ctx.strokeStyle='rgba(255,255,255,.04)'; ctx.lineWidth=1;
+  [0.25,0.5,0.75,1].forEach(function(f){
+    var y=pad.top+ch*(1-f);
+    ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(pad.left+cw,y); ctx.stroke();
+    ctx.fillStyle='rgba(122,143,158,.5)'; ctx.font='9px "JetBrains Mono"'; ctx.textAlign='right';
+    ctx.fillText(Math.round(maxA*f)+'A',pad.left-4,y+3);
+  });
+  /* ESC line */
+  var escY=pad.top+ch*(1-escA/maxA);
+  ctx.strokeStyle='rgba(16,196,122,.5)'; ctx.setLineDash([4,3]); ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(pad.left,escY); ctx.lineTo(pad.left+cw,escY); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='rgba(16,196,122,.6)'; ctx.font='9px "JetBrains Mono"'; ctx.textAlign='left';
+  ctx.fillText('ESC '+escA+'A',pad.left+4,escY-4);
+  /* Bars */
+  profile.forEach(function(p,i){
+    var bh=ch*(p.currentTot/maxA);
+    var x=pad.left+i*(bw+10)+5, y=pad.top+ch-bh;
+    var col=p.currentTot>escA?'rgba(248,113,113,.9)':p.currentTot>escA*0.85?'rgba(251,191,36,.85)':'rgba(88,166,255,.8)';
+    ctx.fillStyle=col;
+    if(ctx.roundRect){ ctx.beginPath(); ctx.roundRect(x,y,bw,bh,[4,4,0,0]); ctx.fill(); }
+    else { ctx.fillRect(x,y,bw,bh); }
+    ctx.fillStyle='rgba(221,231,239,.75)'; ctx.font='bold 9px "JetBrains Mono"'; ctx.textAlign='center';
+    ctx.fillText(p.currentTot.toFixed(0)+'A',x+bw/2,y-3);
+    ctx.fillStyle='rgba(122,143,158,.7)'; ctx.font='8px "JetBrains Mono"';
+    ctx.fillText(p.label,x+bw/2,pad.top+ch+14);
+  });
+}
+
+function buildHealth(peakApm,avgApm,hoverApm,escA,kv,vNom){
+  var rows=[
+    {lbl:'ESC Peak Load', pct:Math.min(100,Math.round(peakApm/escA*100)), note:'Peak '+peakApm.toFixed(0)+'A / '+escA+'A', ok:peakApm/escA<.80, warn:peakApm/escA<1.0},
+    {lbl:'ESC Avg Load',  pct:Math.min(100,Math.round(avgApm/escA*100)),  note:'Avg '+avgApm.toFixed(1)+'A / '+escA+'A',   ok:avgApm/escA<.60,  warn:avgApm/escA<.85},
+    {lbl:'KV×Voltage',   pct:Math.min(100,Math.round(Math.min(kv*vNom,1e5)/1e5*100)), note:'KV×Vnom='+(kv*vNom/1000).toFixed(0)+'k (safe<50k)', ok:kv*vNom<40000, warn:kv*vNom<65000},
+    {lbl:'Hover Effic.',  pct:Math.min(100,Math.round(hoverApm/escA*100)), note:'Hover '+hoverApm.toFixed(1)+'A/motor = '+Math.round(hoverApm/escA*100)+'% ESC', ok:true, warn:hoverApm/escA>.45}
+  ];
+  var html='';
+  rows.forEach(function(r){
+    var col=r.ok?'#10c47a':r.warn?'#fbbf24':'#f87171';
+    html+='<div class="hrow"><span class="h-lbl">'+r.lbl+'</span><div class="h-track"><div class="h-fill" style="width:'+r.pct+'%;background:'+col+'"></div></div><span class="h-pct" style="color:'+col+'">'+r.pct+'%</span></div>';
+    html+='<div class="h-sub">'+r.note+'</div>';
   });
   document.getElementById('health-bars').innerHTML=html;
 }
 
-function buildProto(rec, cpu, bidirOk, cells) {
+function buildThermal(tEsc,ambient,dT,pHeat){
+  var col=tEsc<60?'#10c47a':tEsc<75?'#fbbf24':'#f87171';
+  var pct=Math.min(100,Math.round(tEsc/120*100));
+  var status=tEsc<60?'✅ เย็นดี':tEsc<75?'⚠️ ร้อนปานกลาง':'🔥 ร้อนมาก';
+  var grad='linear-gradient(90deg,#10c47a,#fbbf24 60%,#f87171)';
+  var html='<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">';
+  html+='<span style="font-family:var(--font-d);font-size:1.3rem;font-weight:900;color:'+col+'">'+tEsc.toFixed(0)+'°C</span>';
+  html+='<span style="font-size:.71rem;color:var(--muted)">'+status+'</span></div>';
+  html+='<div class="thermal-bar-wrap"><div class="thermal-bar-fill" style="width:'+pct+'%;background:'+grad+'"></div></div>';
+  html+='<div class="thermal-ticks"><span>0°</span><span>30°</span><span>60°</span><span>90°</span><span>120°</span></div>';
+  html+='<div class="thermal-zones"><div class="tz"><div class="tz-dot" style="background:#10c47a"></div>0–60° OK</div><div class="tz"><div class="tz-dot" style="background:#fbbf24"></div>60–80° Warm</div><div class="tz"><div class="tz-dot" style="background:#f87171"></div>80°+ Danger</div></div>';
+  html+='<div style="margin-top:11px;font-size:.71rem;color:var(--muted);line-height:1.6">Ambient: '+ambient+'°C &nbsp;|&nbsp; ΔT: +'+dT.toFixed(1)+'°C &nbsp;|&nbsp; P_heat: '+pHeat.toFixed(2)+'W/motor</div>';
+  document.getElementById('thermal-section').innerHTML=html;
+}
+
+function buildProto(rec,cpu,bidirOk,cells){
   var cpuRank={f4:0,g4:1,f7:2,h7:3};
-  var cn=cpuRank[cpu]||0;
-  var fRank={F4:0,F7:2,H7:3};
+  var cn=cpuRank[cpu]||0, fRank={F4:0,F7:2,H7:3};
   var html='';
   PROTOS.forEach(function(p){
-    var canRun = cn >= (fRank[p.f]||0);
-    var isRec  = p.name===rec;
-    var biOk   = p.bidir && bidirOk;
-    var cls    = isRec?'rec':(canRun?'compat':'nocompat');
-    html += '<div class="pb '+cls+'">';
-    if(isRec) html += '<div class="pb-badge">★ แนะนำ</div>';
-    html += '<div class="pb-name">'+p.name+'</div>';
-    html += '<div class="pb-row tmuted">'+p.us+'ms latency</div>';
-    html += '<div class="pb-row '+(canRun?'tok':'tno')+'">'+(canRun?'✅':'❌')+' '+p.f+'+ FC</div>';
-    html += '<div class="pb-row '+(biOk?'tok':p.bidir?'twarn':'tno')+'">'+(biOk?'✅':p.bidir?'⚠️':'—')+' BiDir</div>';
-    html += '<div style="font-size:.64rem;color:var(--muted);margin-top:5px">'+p.note+'</div>';
-    html += '</div>';
+    var canRun=cn>=(fRank[p.f]||0);
+    var isRec=p.name===rec&&p.name!=='DSHOT600_BD';
+    var biOk=p.bidir&&bidirOk;
+    var cls=isRec?'rec':canRun?'compat':'nocompat';
+    html+='<div class="pb '+cls+'">';
+    if(isRec) html+='<div class="pb-badge">★ แนะนำ</div>';
+    html+='<div class="pb-name">'+p.name+'</div>';
+    html+='<div class="pb-lat">'+p.us+'ms latency</div>';
+    html+='<div class="pb-row '+(canRun?'tok':'tno')+'">'+(canRun?'✅':'❌')+' '+p.f+'+ FC</div>';
+    html+='<div class="pb-row '+(biOk?'tok':p.bidir?'twarn':'tmuted')+'">'+(biOk?'✅':p.bidir?'⚠️':'—')+' BiDir</div>';
+    html+='<div style="font-size:.62rem;color:var(--muted);margin-top:5px">'+p.note+'</div></div>';
   });
   document.getElementById('proto-grid').innerHTML=html;
   document.getElementById('proto-explain').innerHTML=
     '<strong style="color:var(--g)">'+rec+'</strong> '+(bidirOk
-      ?'พร้อม <strong>Bidirectional DShot</strong> → RPM Filter แม่นขึ้นมาก<br>ต้องการ ESC firmware: BLHeli_32, AM32 หรือ BLHeli_S + JESC'
-      :'— F4 บน '+cells+'S อาจมี BiDir unstable ลองเปิดและ monitor Blackbox ก่อน')+
-    '<br><span style="font-size:.74rem;color:#3a5c48">💡 ตรวจสอบ ESC firmware version ก่อนเปิด BiDir — ESC firmware เก่าอาจทำให้ motor desync</span>';
+      ?'+ <strong style="color:var(--blue)">Bidirectional DShot</strong> → RPM Filter real-time แม่นมาก<br>ต้องการ ESC firmware: BLHeli_32, AM32 หรือ BLHeli_S + JESC'
+      :'— F4 + '+cells+'S อาจมี BiDir unstable — monitor Blackbox ก่อน')+
+    '<br><span style="font-size:.71rem;color:var(--muted2)">💡 ตรวจ ESC firmware ก่อนเปิด BiDir — firmware เก่าทำให้ motor desync</span>';
 }
 
-function buildCap(cells, vMax, peakAtot, numMot) {
-  var capV   = cells<=4?35:(cells<=6?50:63);
-  var capMin = Math.max(330, 330*cells);
-  var capRec = Math.max(1000,470*cells);
-  var capHP  = Math.max(2200,1000*cells);
+function buildSignalChain(rcMs,cpuUs,gyroUs,dshotUs,escUs,motorMs,totalMs,rating,cpu,bidirOk){
+  var nodes=[
+    {icon:'🎮',name:'RC LINK',   lat:rcMs.toFixed(1)+'ms',  sub:'ELRS/Crossfire',    pct:rcMs/totalMs,              col:'#58a6ff'},
+    {icon:'🧭',name:'GYRO',      lat:gyroUs.toFixed(0)+'µs',sub:'ICM42688/MPU',       pct:(gyroUs/1000)/totalMs,     col:'#a78bfa'},
+    {icon:'🔧',name:cpu.toUpperCase()+' FC',lat:cpuUs.toFixed(0)+'µs',sub:'PID loop',pct:(cpuUs/1000)/totalMs,      col:'#10c47a'},
+    {icon:'⚡',name:'DSHOT',     lat:dshotUs.toFixed(0)+'µs',sub:bidirOk?'BiDir ON':'BiDir OFF',pct:(dshotUs/1000)/totalMs,col:'#f1b65a'},
+    {icon:'🔌',name:'ESC',       lat:escUs.toFixed(0)+'µs', sub:'processing',         pct:(escUs/1000)/totalMs,      col:'#fbbf24'},
+    {icon:'🌀',name:'MOTOR',     lat:motorMs.toFixed(1)+'ms',sub:'mechanical',         pct:motorMs/totalMs,           col:'#f87171'}
+  ];
   var html='';
-  html+='<div class="cb"><div class="cb-lbl">MINIMUM</div>';
-  html+='<div class="cb-val">'+capMin+'µF / '+capV+'V+</div>';
-  html+='<div class="cb-note">ขั้นต่ำลด voltage spike — ยังมี noise บ้าง</div></div>';
-  html+='<div class="cb rec"><div class="cb-lbl">แนะนำ ★</div>';
-  html+='<div class="cb-val">'+capRec+'µF / '+capV+'V+</div>';
-  html+='<div class="cb-note">ป้องกัน spike ได้ดี — วางใกล้ ESC หรือ XT60</div></div>';
-  html+='<div class="cb"><div class="cb-lbl">High Performance</div>';
-  html+='<div class="cb-val">'+capHP+'µF / '+capV+'V+</div>';
-  html+='<div class="cb-note">Racing/6S+ ลด ripple สูงสุด ปกป้อง ESC ได้ดีมาก</div></div>';
+  nodes.forEach(function(n,i){
+    var barW=Math.round(n.pct*100);
+    html+='<div class="sc-node"><span class="sc-icon">'+n.icon+'</span><span class="sc-name">'+n.name+'</span>';
+    html+='<span class="sc-lat" style="color:'+n.col+'">'+n.lat+'</span>';
+    html+='<span class="sc-sublat">'+n.sub+'</span>';
+    html+='<div class="sc-bar" style="background:'+n.col+';opacity:.6;width:'+barW+'%"></div></div>';
+    if(i<nodes.length-1) html+='<div class="sc-arrow"><div class="sc-arrow-line"></div></div>';
+  });
+  document.getElementById('signal-chain').innerHTML=html;
+  var ratingTxt=rating==='ok'?'✅ Snappy — latency ดีมาก (<5ms)':rating==='warn'?'⚠️ Acceptable (5–9ms)':'❌ Laggy — ตรวจ RC link และ DShot';
+  document.getElementById('sc-label').textContent=ratingTxt;
+  document.getElementById('sc-num').textContent=totalMs.toFixed(2)+'ms';
+  document.getElementById('sc-total').className='sc-total-box '+rating;
+}
+
+function buildCap(cells,vMax,peakAtot){
+  var capV=cells<=4?35:cells<=6?50:63;
+  var capMin=Math.max(330,330*cells), capRec=Math.max(1000,470*cells), capHP=Math.max(2200,1000*cells);
+  var html='<div class="cb"><div class="cb-lbl">MINIMUM</div><div class="cb-val">'+capMin+'µF / '+capV+'V+</div><div class="cb-note">ขั้นต่ำ ยังมี noise บ้าง</div></div>';
+  html+='<div class="cb rec"><div class="cb-lbl">แนะนำ ★</div><div class="cb-val">'+capRec+'µF / '+capV+'V+</div><div class="cb-note">ป้องกัน spike ได้ดี วางใกล้ XT60</div></div>';
+  html+='<div class="cb"><div class="cb-lbl">High Performance</div><div class="cb-val">'+capHP+'µF / '+capV+'V+</div><div class="cb-note">Racing/6S+ ลด ripple สูงสุด</div></div>';
   document.getElementById('cap-grid').innerHTML=html;
   document.getElementById('cap-note').textContent=
-    'วาง capacitor ใกล้ XT60/ESC power input ให้มากที่สุด | Voltage rating > '+vMax.toFixed(1)+'V (Vmax '+cells+'S) เสมอ | '
-    +'ใช้ Low-ESR type เช่น Panasonic FM/FC, Nichicon UHE | อย่าวางที่สายยาว — inductance ลด effectiveness';
+    'วาง capacitor ใกล้ XT60/ESC power input | Voltage rating > '+vMax.toFixed(1)+'V | Low-ESR: Panasonic FM/FC, Nichicon UHE | อย่าวางที่สายยาว — inductance ลด effectiveness';
 }
 
-function buildAlerts(kv, cells, escA, recEscA, escVolt, peakApm, avgApm, bidirOk, cpu, poles, vMax) {
+function buildAlerts(kv,cells,escA,recEscA,escVolt,peakApm,avgApm,bidirOk,cpu,poles,vMax,tEsc){
   var al=[];
-
-  // Critical: ESC voltage
-  if(cells > escVolt){
-    al.push({lvl:'bad', icon:'🔥',
-      title:'ESC Voltage ไม่รองรับ — อันตรายมาก!',
-      body:'ESC Max '+escVolt+'S แต่ใช้แบต '+cells+'S ('+vMax.toFixed(1)+'V fully charged) — ห้ามบิน! ESC จะระเบิด/ไหม้ทันที เปลี่ยน ESC ให้รองรับ '+cells+'S ก่อน'});
-  } else if(cells===escVolt){
-    al.push({lvl:'warn',icon:'⚡',
-      title:'ESC Voltage ชนพิกัด — ระวัง',
-      body:'ESC Max '+escVolt+'S ใช้ '+cells+'S ('+vMax.toFixed(1)+'V) — ชนพิกัดพอดี voltage spike จาก throttle punch-in อาจเกิน ต้องใส่ cap คุณภาพดีและระวัง LiPo ชาร์จเต็ม'});
-  } else {
-    al.push({lvl:'ok', icon:'✅',
-      title:'ESC Voltage OK',
-      body:'ESC Max '+escVolt+'S รองรับ '+cells+'S ('+vMax.toFixed(1)+'V) ได้ดี มี headroom เพียงพอ'});
-  }
-
-  // ESC current
-  if(peakApm > escA){
-    al.push({lvl:'bad',icon:'❌',
-      title:'ESC Current ไม่เพียงพอ',
-      body:'Peak '+peakApm.toFixed(0)+'A/motor > ESC rating '+escA+'A — ESC ร้อนจัด MOSFET อาจพัง แนะนำ ESC ≥'+recEscA+'A หรือลด prop pitch/size'});
-  } else if(peakApm > escA*0.85){
-    al.push({lvl:'warn',icon:'⚠️',
-      title:'ESC Current ค่อนข้างตึง',
-      body:'Peak '+peakApm.toFixed(0)+'A/motor = '+Math.round(peakApm/escA*100)+'% ของ rating — ใช้ได้แต่ ESC จะร้อน ต้องการ airflow ดี แนะนำ ESC '+recEscA+'A+'});
-  } else {
-    al.push({lvl:'ok',icon:'✅',
-      title:'ESC Current OK',
-      body:'Peak '+peakApm.toFixed(0)+'A/motor = '+Math.round(peakApm/escA*100)+'% ของ '+escA+'A rating — มี safety headroom เพียงพอ'});
-  }
-
-  // KV × cells warnings (calibrated thresholds)
-  if(cells>=7 && kv>1500){
-    al.push({lvl:'bad',icon:'🔥',
-      title:'KV สูงเกินสำหรับ '+cells+'S',
-      body:'KV '+kv+' × '+cells+'S — RPM สูงเกินไป motor/ESC จะร้อนเสียหายถาวร แนะนำ KV ≤ 1200-1400 บน 7S+'});
-  } else if(cells>=6 && kv>2200){
-    al.push({lvl:'bad',icon:'🔥',
-      title:'KV อันตรายบน 6S',
-      body:'KV '+kv+' × 6S = Danger Zone — motor เสีย ESC MOS พัง ชุมชน FPV แนะนำ KV ≤ 1750-2000 บน 6S'});
-  } else if(cells>=6 && kv>1750){
-    al.push({lvl:'warn',icon:'⚠️',
-      title:'KV ค่อนข้างสูงบน 6S',
-      body:'KV '+kv+' × 6S ต้องการ motor/ESC คุณภาพสูง ตรวจอุณหภูมิหลังบิน 1 pack แรกเสมอ'});
-  } else if(cells===4 && kv>3200){
-    al.push({lvl:'warn',icon:'⚠️',
-      title:'KV สูงบน 4S',
-      body:'KV '+kv+' × 4S — กระแส burst สูงมาก ใช้ prop pitch ต่ำ + ESC cooling ที่ดี'});
-  } else if(cells<=3 && kv<1500){
-    al.push({lvl:'warn',icon:'⚠️',
-      title:'KV อาจต่ำเกินสำหรับ '+cells+'S',
-      body:'KV '+kv+' × '+cells+'S — อาจไม่มีแรงพอ แนะนำ KV ≥ 1800-2200 บน 3S'});
-  } else {
-    al.push({lvl:'ok',icon:'✅',
-      title:'KV × Voltage OK',
-      body:'KV '+kv+' เหมาะกับ '+cells+'S — อยู่ในช่วงปลอดภัย'});
-  }
-
-  // BiDir info
-  if(!bidirOk){
-    al.push({lvl:'info',icon:'ℹ️',
-      title:'Bidirectional DShot — ระวัง F4 + 6S+',
-      body:'F4 CPU บน '+cells+'S อาจมี BiDir unstable — ลองเปิดและ monitor RPM graph ใน Blackbox ถ้า desync ให้ปิด BiDir ใช้ Dynamic Notch แทน'});
-  }
-
-  // High voltage cap reminder
-  if(cells>=6){
-    al.push({lvl:'warn',icon:'🔌',
-      title:'High Voltage — Capacitor สำคัญมาก',
-      body:'6S+ voltage spike รุนแรงกว่า 4S มาก ใส่ low-ESR cap ≥ 1000µF/50V ใกล้ XT60 หรือ ESC power ทุก arm'});
-  }
-
-  // Motor poles
-  if(poles!==14){
-    al.push({lvl:'info',icon:'ℹ️',
-      title:'Motor Poles: '+poles,
-      body:'motor_poles ผิดจะทำให้ RPM Filter คำนวณ harmonic frequency ผิด → filter ไม่ทำงาน ดู motor spec ให้แน่ใจ'});
-  }
-
-  // RPM filter note
-  al.push({lvl:'info',icon:'💡',
-    title:'RPM Filter Tips',
-    body:'เปิด Bidirectional DShot → RPM Filter จะคำนวณ motor frequency แบบ real-time ลด motor noise ได้ดีที่สุด ตรวจสอบ RPM graph ใน Betaflight Filters tab'});
-
+  if(cells>escVolt)
+    al.push({lvl:'bad',icon:'🔥',t:'ESC Voltage ไม่รองรับ — อันตราย!',b:'ESC Max '+escVolt+'S แต่ใช้ '+cells+'S ('+vMax.toFixed(1)+'V) — ห้ามบิน! ESC จะระเบิด เปลี่ยน ESC ที่รองรับ '+cells+'S ก่อน'});
+  else if(cells===escVolt)
+    al.push({lvl:'warn',icon:'⚡',t:'ESC Voltage ชนพิกัด',b:'ESC Max '+escVolt+'S / แบต '+cells+'S ('+vMax.toFixed(1)+'V) — spike อาจเกินพิกัด ใส่ low-ESR cap คุณภาพดีเสมอ'});
+  else
+    al.push({lvl:'ok',icon:'✅',t:'Voltage Safety OK',b:'ESC Max '+escVolt+'S รองรับ '+cells+'S ได้ดี มี headroom เพียงพอ'});
+  if(peakApm>escA)
+    al.push({lvl:'bad',icon:'❌',t:'ESC Current ไม่เพียงพอ',b:'Peak '+peakApm.toFixed(0)+'A/motor > ESC '+escA+'A — MOSFET จะพัง แนะนำ ESC ≥'+recEscA+'A'});
+  else if(peakApm>escA*0.85)
+    al.push({lvl:'warn',icon:'⚠️',t:'ESC Current ค่อนข้างตึง',b:'Peak '+peakApm.toFixed(0)+'A = '+Math.round(peakApm/escA*100)+'% — ใช้ได้แต่ ESC จะร้อน ต้องการ airflow ดี'});
+  else
+    al.push({lvl:'ok',icon:'✅',t:'Current Headroom OK',b:'Peak '+peakApm.toFixed(0)+'A = '+Math.round(peakApm/escA*100)+'% ของ '+escA+'A — safety margin ดี'});
+  if(tEsc>=80)
+    al.push({lvl:'bad',icon:'🌡️',t:'ESC Temperature อันตราย ('+tEsc.toFixed(0)+'°C)',b:'คาดการณ์ร้อนเกิน 80°C — MOSFET เสื่อมเร็ว ต้องการ airflow เพิ่ม หรือ ESC rating สูงกว่านี้'});
+  else if(tEsc>=65)
+    al.push({lvl:'warn',icon:'🌡️',t:'ESC Temperature ร้อน ('+tEsc.toFixed(0)+'°C)',b:'Monitor temp หลังบิน pack แรก ถ้าจับแล้วร้อนมากต้องการ airflow เพิ่ม'});
+  else
+    al.push({lvl:'ok',icon:'❄️',t:'Thermal OK ('+tEsc.toFixed(0)+'°C)',b:'อุณหภูมิ ESC คาดการณ์อยู่ในช่วงปลอดภัย'});
+  if((cells>=7&&kv>1500)||(cells>=6&&kv>2200))
+    al.push({lvl:'bad',icon:'🔥',t:'KV อันตราย × '+cells+'S',b:'KV '+kv+'×'+cells+'S — motor/ESC เสียถาวร ชุมชน FPV แนะนำ KV ≤ '+(cells>=7?1200:1750)+' บน '+cells+'S'});
+  else if(cells>=6&&kv>1750)
+    al.push({lvl:'warn',icon:'⚠️',t:'KV สูงบน 6S',b:'KV '+kv+'×6S ต้องการ motor/ESC คุณภาพสูง ตรวจ temp หลัง pack แรกเสมอ'});
+  else
+    al.push({lvl:'ok',icon:'✅',t:'KV × Cells OK',b:'KV '+kv+' เหมาะกับ '+cells+'S อยู่ในช่วงปลอดภัย'});
+  if(!bidirOk)
+    al.push({lvl:'info',icon:'ℹ️',t:'BiDir DShot — ระวัง F4 + 6S+',b:'F4+'+cells+'S อาจมี BiDir unstable — monitor RPM graph ใน Blackbox ถ้า desync ปิด BiDir ใช้ Dynamic Notch แทน'});
+  else
+    al.push({lvl:'info',icon:'💡',t:'Bidirectional DShot พร้อมใช้',b:'เปิด dshot_bidir = ON + rpm_filter_harmonics = 3 เพื่อรับ RPM real-time จาก ESC — filter แม่นขึ้นมาก'});
+  if(cells>=6)
+    al.push({lvl:'warn',icon:'🔌',t:'6S+ — Capacitor สำคัญมาก',b:'6S voltage spike รุนแรงกว่า 4S ใส่ low-ESR cap ≥ 1000µF/50V ใกล้ XT60 ทุก arm'});
+  if(poles!==14)
+    al.push({lvl:'info',icon:'ℹ️',t:'Motor Poles: '+poles,b:'motor_poles ผิดทำให้ RPM Filter คำนวณ harmonic ผิด — filter ไม่ทำงาน ดู motor spec ให้แน่ใจ'});
   var html='';
   al.forEach(function(a){
-    html+='<div class="alert '+a.lvl+'">';
-    html+='<span class="a-icon">'+a.icon+'</span>';
-    html+='<div class="a-body"><strong>'+a.title+'</strong><p>'+a.body+'</p></div></div>';
+    html+='<div class="alert '+a.lvl+'"><span class="a-icon">'+a.icon+'</span><div class="a-body"><strong>'+a.t+'</strong><p>'+a.b+'</p></div></div>';
   });
   document.getElementById('alerts').innerHTML=html;
 }
 
-function buildCLI(rec, bidirOk, poles, recEscA, cells, kv, propSz, style, escA) {
-  var styleLabel = {freestyle:'Freestyle',racing:'Racing',longrange:'Long Range',cinematic:'Cinematic'}[style]||style;
+function buildCLI(rec,bidirOk,poles,recEscA,cells,kv,propSz,style,escA,tEsc,cpu){
+  var sl={freestyle:'Freestyle',racing:'Racing',longrange:'Long Range',cinematic:'Cinematic'}[style]||style;
   var lines=[
-    {t:'cm',v:'# ══ OBIXConfig Doctor — ESC Setup ══'},
-    {t:'cm',v:'# Build: KV='+kv+' | '+cells+'S | Prop='+propSz+'" | '+styleLabel},
-    {t:'cm',v:'# ESC แนะนำ: '+recEscA+'A/motor | ESC ปัจจุบัน: '+escA+'A'},
+    {t:'cm',v:'# ═══════════════════════════════════════════'},
+    {t:'cm',v:'# OBIXConfig Doctor v5.0 — ESC Setup Export'},
+    {t:'cm',v:'# KV='+kv+' | '+cells+'S | Prop='+propSz+'" | '+sl},
+    {t:'cm',v:'# ESC: '+escA+'A (rec ≥'+recEscA+'A) | FC: '+cpu.toUpperCase()+' | Thermal: '+tEsc.toFixed(0)+'°C est.'},
+    {t:'cm',v:'# BiDir: '+(bidirOk?'ON ✓':'OFF — F4+'+cells+'S unstable')},
+    {t:'cm',v:'# ═══════════════════════════════════════════'},
     {t:'br'},
-    {t:'cm',v:'# ── Motor Protocol ──'},
-    {t:'set',k:'motor_pwm_protocol',v:rec},
-    {t:'set',k:'dshot_bidir',       v:bidirOk?'ON':'OFF'},
-    {t:'cm',v:'# BiDir ON = RPM Filter real-time, ต้องการ ESC firmware รองรับ'},
+    {t:'cm',v:'# ── Motor Protocol ─────────────────────────'},
+    {t:'set',k:'motor_pwm_protocol',       v:rec},
+    {t:'set',k:'dshot_bidir',              v:bidirOk?'ON':'OFF'},
+    {t:'cm', v:'# BiDir ON = ESC ส่ง RPM real-time → RPM filter แม่น'},
     {t:'br'},
-    {t:'cm',v:'# ── Motor Config ──'},
-    {t:'set',k:'motor_poles',       v:String(poles)},
-    {t:'cm',v:'# 14 poles = 2207/2306 ทั่วไป | 12 poles = micro | 22 = large LR'},
-    {t:'set',k:'dshot_idle_value',  v:'550'},
-    {t:'cm',v:'# idle: 400=เย็น/smooth, 550=default, 700=ร้อน/aggressive'},
+    {t:'cm',v:'# ── Motor Config ───────────────────────────'},
+    {t:'set',k:'motor_poles',              v:String(poles)},
+    {t:'cm', v:'# 14=2207/2306 standard | 12=micro | 22=large LR'},
+    {t:'set',k:'dshot_idle_value',         v:'550'},
+    {t:'cm', v:'# idle: 400=smooth 550=default 700=aggressive'},
     {t:'br'},
-    {t:'cm',v:'# ── RPM Filter (ต้องการ BiDir + ESC firmware) ──'},
-    {t:'set',k:'rpm_filter_harmonics',v:'3'},
-    {t:'set',k:'rpm_filter_min_hz',   v:'100'},
+    {t:'cm',v:'# ── RPM Filter ─────────────────────────────'},
+    {t:'set',k:'rpm_filter_harmonics',     v:'3'},
+    {t:'set',k:'rpm_filter_min_hz',        v:'100'},
+    {t:'cm', v:'# ต้องการ BiDir DShot + ESC firmware รองรับ'},
     {t:'br'},
-    {t:'cm',v:'# ── Voltage Protection ──'},
-    {t:'set',k:'vbat_sag_compensation',v:'100'},
+    {t:'cm',v:'# ── Voltage Protection ─────────────────────'},
+    {t:'set',k:'vbat_sag_compensation',    v:'100'},
     {t:'set',k:'vbat_warning_cell_voltage',v:'350'},
     {t:'set',k:'vbat_critical_cell_voltage',v:'330'},
     {t:'br'},
-    {t:'cm',v:'# ── Save ──'},
-    {t:'save'},
+    {t:'cm',v:'# ── Dynamic Notch (backup if BiDir off) ────'},
+    {t:'set',k:'dyn_notch_count',          v:'4'},
+    {t:'set',k:'dyn_notch_min_hz',         v:'100'},
+    {t:'set',k:'dyn_notch_max_hz',         v:'600'},
+    {t:'br'},
+    {t:'cm',v:'# ── Save ───────────────────────────────────'},
+    {t:'save'}
   ];
-
   var html='';
   lines.forEach(function(l){
     if(l.t==='cm')   html+='<span class="cm">'+esc(l.v)+'</span>\n';
     else if(l.t==='br') html+='\n';
     else if(l.t==='save') html+='<span class="cg">save</span>\n';
-    else {
-      html+='<span class="cg">set </span>';
-      html+='<span class="ck">'+esc(l.k)+'</span>';
-      html+=' = <span class="cv">'+esc(l.v)+'</span>\n';
-    }
+    else html+='<span class="cg">set </span><span class="ck">'+esc(l.k)+'</span> = <span class="cv">'+esc(l.v)+'</span>\n';
   });
   document.getElementById('cli-out').innerHTML=html.trim();
 }
 
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
-
-function copyCLI(){
-  navigator.clipboard.writeText(
-    document.getElementById('cli-out').textContent
-  ).then(function(){toast('คัดลอก CLI แล้ว ✓');});
+function setGauge(gid,vid,nid,val,unit,note,st){
+  var g=document.getElementById(gid); g.className='gauge '+st;
+  document.getElementById(vid).innerHTML=val+'<span class="g-unit">'+unit+'</span>';
+  document.getElementById(nid).textContent=note;
 }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function copyCLI(){ navigator.clipboard.writeText(document.getElementById('cli-out').textContent).then(function(){toast('คัดลอก CLI แล้ว ✓');}); }
+function toast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.style.opacity='1'; clearTimeout(t._t); t._t=setTimeout(function(){t.style.opacity='0';},2200); }
 
-function toast(msg){
-  var t=document.getElementById('toast');
-  t.textContent=msg; t.style.opacity='1';
-  clearTimeout(t._t);
-  t._t=setTimeout(function(){t.style.opacity='0';},2200);
-}
-
-// Theme toggle
-(function(){
-  var t=localStorage.getItem('theme')||'dark';
-  document.documentElement.className=t;
-  document.body.classList.add(t);
-})();
-function toggleTheme(){
-  var isDark=document.body.classList.contains('dark');
-  document.body.classList.toggle('dark',!isDark);
-  document.body.classList.toggle('light',isDark);
-  localStorage.setItem('theme',isDark?'light':'dark');
-}
+/* Init */
+(function(){ liveCheck(); })();
 </script>
 </body>
 </html>
