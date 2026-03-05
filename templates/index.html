@@ -408,6 +408,7 @@ body::after {
 .dl-icon-wrap.blue  { background:var(--b-dim); border-color:rgba(0,170,255,0.2); }
 .dl-icon-wrap.gold  { background:var(--a-dim); border-color:rgba(255,183,0,0.2); }
 .dl-icon-wrap.purple{ background:rgba(160,80,255,0.08); border-color:rgba(160,80,255,0.2); }
+.dl-icon-wrap.red   { background:rgba(255,68,85,0.08);  border-color:rgba(255,68,85,0.2); }
 
 .dl-body { flex:1; min-width:0; }
 .dl-title { font-size:12px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -981,6 +982,7 @@ input[type=number]::placeholder { color: var(--muted); font-size: 12px; }
   .hero-title{font-size:clamp(22px,6vw,38px)!important}
   .hero-chips{gap:6px}
   .chip{font-size:10px;padding:4px 8px}
+  .v5-physics-grid{grid-template-columns:1fr!important}
   .content-grid{grid-template-columns:1fr!important}
   .mission-card{padding:18px 14px}
   .result-panel{padding:16px 14px}
@@ -1028,7 +1030,7 @@ input[type=number]::placeholder { color: var(--muted); font-size: 12px; }
     </a>
   </div>
   <div class="tb-right">
-    <span class="tb-version">v2.3 LIVE</span>
+    <span class="tb-version">v5.0 LIVE</span>
     <button class="toggle-theme" onclick="toggleTheme()" title="สลับธีม">🌗</button>
   </div>
 </div>
@@ -1043,7 +1045,7 @@ input[type=number]::placeholder { color: var(--muted); font-size: 12px; }
       <div class="drawer-brand-icon">🚁</div>
       <div>
         <div class="drawer-brand-name" id="drawerTitle">OBIX Config Doctor</div>
-        <div class="drawer-brand-sub">FPV Tuning Toolkit · v2.3</div>
+        <div class="drawer-brand-sub">FPV Tuning Toolkit · v5.0</div>
       </div>
     </div>
     <button id="closeDrawer" class="drawer-close" aria-label="ปิดเมนู">✕</button>
@@ -1108,6 +1110,25 @@ input[type=number]::placeholder { color: var(--muted); font-size: 12px; }
       <span class="dl-icon-wrap purple">🖥️</span>
       <span class="dl-body"><span class="dl-title">OSD Designer</span><span class="dl-meta">ออกแบบ layout OSD + export</span></span>
       <span class="dl-pill">tool</span>
+    </a>
+
+    <div class="drawer-divider"></div>
+    <div class="drawer-group-label">🔬 v5.0 Physics Tools</div>
+
+    <a class="drawer-link" href="/battery-health">
+      <span class="dl-icon-wrap gold">🔋</span>
+      <span class="dl-body"><span class="dl-title">Battery Health Advisor</span><span class="dl-meta">IR · Sag · Health Score · อายุที่เหลือ</span></span>
+      <span class="dl-pill new">v5</span>
+    </a>
+    <a class="drawer-link" href="/motor-thermal">
+      <span class="dl-icon-wrap red">🌡️</span>
+      <span class="dl-body"><span class="dl-title">Motor Thermal Estimator</span><span class="dl-meta">ประมาณ winding temp · safe zone</span></span>
+      <span class="dl-pill new">v5</span>
+    </a>
+    <a class="drawer-link" href="/loop-analyzer">
+      <span class="dl-icon-wrap purple">📡</span>
+      <span class="dl-body"><span class="dl-title">Control Loop Analyzer</span><span class="dl-meta">Stick→Prop latency · bottleneck map</span></span>
+      <span class="dl-pill new">v5</span>
     </a>
 
     <div class="drawer-divider"></div>
@@ -1183,13 +1204,13 @@ input[type=number]::placeholder { color: var(--muted); font-size: 12px; }
     <a class="drawer-link" href="{{ url_for('changelog') }}">
       <span class="dl-icon-wrap green">📝</span>
       <span class="dl-body"><span class="dl-title">Changelog</span><span class="dl-meta">บันทึกการอัปเดต</span></span>
-      <span class="dl-pill">v2.3</span>
+      <span class="dl-pill">v5.0</span>
     </a>
   </nav>
 
   <div class="drawer-footer">
     <div class="drawer-footer-text">
-      OBIXConfig Doctor &nbsp;·&nbsp; <span class="drawer-footer-ver">v2.3</span>
+      OBIXConfig Doctor &nbsp;·&nbsp; <span class="drawer-footer-ver">v5.0</span>
       <br>Developed for FPV community 🇹🇭
     </div>
   </div>
@@ -1213,10 +1234,47 @@ input[type=number]::placeholder { color: var(--muted); font-size: 12px; }
     </h1>
     <p class="hero-sub">กรอกสเปคโดรน รับค่า PID · Filter · Motor ที่เหมาะสมทันที ฟรี 100% — เพื่อนักบิน FPV Thailand🇹🇭</p>
     <div class="hero-chips">
-      <span class="chip g">19 Tools</span>
+      <span class="chip g">22 Tools</span>
       <span class="chip b">Betaflight 4.3–4.5</span>
       <span class="chip a">Blackbox Analyzer</span>
       <span class="chip g">Community Free</span>
+    </div>
+  </div>
+
+  <!-- ── v5.0 PHYSICS TOOLS — always visible ─────────────────── -->
+  <div style="max-width:900px;margin:0 auto 18px;padding:0 16px;">
+    <div style="
+      background:rgba(0,255,136,0.03);
+      border:1px solid rgba(0,255,136,0.12);
+      border-radius:14px;
+      padding:14px 16px;
+    ">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:11px;">
+        <span style="font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#00ff88;">🔬 v5.0 Physics Tools</span>
+        <span style="font-family:'Orbitron',sans-serif;font-size:8px;font-weight:600;padding:2px 7px;border-radius:100px;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);color:#00ff88;">NEW</span>
+        <span style="margin-left:auto;font-size:10px;color:var(--muted2);">เครื่องมือวิเคราะห์เชิงฟิสิกส์ — คลิกเพื่อใช้งานได้เลย</span>
+      </div>
+      <div class="v5-physics-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+
+        <a href="/battery-health" style="display:flex;flex-direction:column;gap:5px;padding:12px;background:rgba(255,183,0,0.05);border:1px solid rgba(255,183,0,0.18);border-radius:10px;text-decoration:none;transition:all .2s;" onmouseover="this.style.background='rgba(255,183,0,0.1)';this.style.borderColor='rgba(255,183,0,0.4)'" onmouseout="this.style.background='rgba(255,183,0,0.05)';this.style.borderColor='rgba(255,183,0,0.18)'">
+          <span style="font-size:22px;line-height:1;">🔋</span>
+          <span style="font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:.05em;color:#ffb700;">Battery Health</span>
+          <span style="font-size:10px;color:var(--muted2);line-height:1.5;">IR · Sag · Health Score<br>วิเคราะห์สุขภาพแบต</span>
+        </a>
+
+        <a href="/motor-thermal" style="display:flex;flex-direction:column;gap:5px;padding:12px;background:rgba(255,68,85,0.05);border:1px solid rgba(255,68,85,0.18);border-radius:10px;text-decoration:none;transition:all .2s;" onmouseover="this.style.background='rgba(255,68,85,0.1)';this.style.borderColor='rgba(255,68,85,0.4)'" onmouseout="this.style.background='rgba(255,68,85,0.05)';this.style.borderColor='rgba(255,68,85,0.18)'">
+          <span style="font-size:22px;line-height:1;">🌡️</span>
+          <span style="font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:.05em;color:#ff4455;">Motor Thermal</span>
+          <span style="font-size:10px;color:var(--muted2);line-height:1.5;">Winding Temp · Safe Zone<br>ประมาณอุณหภูมิมอเตอร์</span>
+        </a>
+
+        <a href="/loop-analyzer" style="display:flex;flex-direction:column;gap:5px;padding:12px;background:rgba(160,80,255,0.05);border:1px solid rgba(160,80,255,0.18);border-radius:10px;text-decoration:none;transition:all .2s;" onmouseover="this.style.background='rgba(160,80,255,0.1)';this.style.borderColor='rgba(160,80,255,0.4)'" onmouseout="this.style.background='rgba(160,80,255,0.05)';this.style.borderColor='rgba(160,80,255,0.18)'">
+          <span style="font-size:22px;line-height:1;">📡</span>
+          <span style="font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:.05em;color:#a050ff;">Loop Analyzer</span>
+          <span style="font-size:10px;color:var(--muted2);line-height:1.5;">Stick→Prop Latency<br>วิเคราะห์ความหน่วง loop</span>
+        </a>
+
+      </div>
     </div>
   </div>
 
@@ -1970,6 +2028,35 @@ save</pre>
       </div><!-- end tele-grid -->
       {% endif %}
 
+      <!-- ── v5.0 NEW TOOLS BANNER ──────────── -->
+      <div style="margin-top:16px;padding:16px;background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.15);border-radius:14px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+          <span style="font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#00ff88;">🔬 v5.0 Physics Tools</span>
+          <span style="font-family:var(--font-d);font-size:8px;font-weight:600;padding:2px 7px;border-radius:100px;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);color:#00ff88;">NEW</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+
+          <a href="/battery-health" style="display:flex;flex-direction:column;gap:5px;padding:11px 12px;background:rgba(255,183,0,0.05);border:1px solid rgba(255,183,0,0.2);border-radius:10px;text-decoration:none;transition:all .2s;" onmouseover="this.style.background='rgba(255,183,0,0.1)'" onmouseout="this.style.background='rgba(255,183,0,0.05)'">
+            <span style="font-size:20px;">🔋</span>
+            <span style="font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.06em;color:#ffb700;">Battery Health</span>
+            <span style="font-size:10px;color:var(--muted2);line-height:1.4;">IR · Sag · Health Score</span>
+          </a>
+
+          <a href="/motor-thermal" style="display:flex;flex-direction:column;gap:5px;padding:11px 12px;background:rgba(255,68,85,0.05);border:1px solid rgba(255,68,85,0.2);border-radius:10px;text-decoration:none;transition:all .2s;" onmouseover="this.style.background='rgba(255,68,85,0.1)'" onmouseout="this.style.background='rgba(255,68,85,0.05)'">
+            <span style="font-size:20px;">🌡️</span>
+            <span style="font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.06em;color:#ff4455;">Motor Thermal</span>
+            <span style="font-size:10px;color:var(--muted2);line-height:1.4;">Winding Temp · Safe Zone</span>
+          </a>
+
+          <a href="/loop-analyzer" style="display:flex;flex-direction:column;gap:5px;padding:11px 12px;background:rgba(160,80,255,0.05);border:1px solid rgba(160,80,255,0.2);border-radius:10px;text-decoration:none;transition:all .2s;" onmouseover="this.style.background='rgba(160,80,255,0.1)'" onmouseout="this.style.background='rgba(160,80,255,0.05)'">
+            <span style="font-size:20px;">📡</span>
+            <span style="font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.06em;color:#a050ff;">Loop Analyzer</span>
+            <span style="font-size:10px;color:var(--muted2);line-height:1.4;">Stick→Prop Latency</span>
+          </a>
+
+        </div>
+      </div>
+
       <!-- ── DONATE SECTION ──────────────── -->
       <div class="donate-panel" style="margin-top:16px;">
         <div class="donate-head">
@@ -1992,7 +2079,7 @@ save</pre>
               <div style="text-align:center;margin-top:8px;font-family:var(--font-d);font-size:9px;color:var(--muted2);letter-spacing:.06em;">QR Code — นาย สันติภาพ สงฆรักษ์</div>
             </div>
             <div class="donate-info">
-              <p>เว็บนี้พัฒนาและดูแลโดย <strong>ชุมชน FPV ไทย</strong> ใช้เวลาหลายเดือนในการพัฒนา รองรับ 14 เครื่องมือ ฟรี 100% ไม่มีโฆษณา</p>
+              <p>เว็บนี้พัฒนาและดูแลโดย <strong>ชุมชน FPV ไทย</strong> ใช้เวลาหลายเดือนในการพัฒนา รองรับ 22 เครื่องมือ ฟรี 100% ไม่มีโฆษณา</p>
               <p>ถ้าอยากสนับสนุนการพัฒนาต่อ สแกน QR หรือโอนผ่าน PromptPay ได้เลยครับ <span class="highlight">ทุกบาทมีความหมาย</span> 🙏</p>
               <div class="donate-amounts">
                 <button class="amt-btn">☕ ฿29</button>
@@ -2020,7 +2107,7 @@ save</pre>
         </a>
       </div>
 
-      <div class="version-note">OBIXCONFIG DOCTOR &nbsp;·&nbsp; v2.3 &nbsp;·&nbsp; FPV COMMUNITY 🇹🇭</div>
+      <div class="version-note">OBIXCONFIG DOCTOR &nbsp;·&nbsp; v5.0 &nbsp;·&nbsp; FPV COMMUNITY 🇹🇭</div>
 
     </div><!-- end results-col -->
   </div><!-- end content-grid -->
