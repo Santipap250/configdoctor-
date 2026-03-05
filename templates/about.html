@@ -56,17 +56,6 @@
     </article>
   </main>
 
-  <script>
-    // same small theme helper used in index.html — ใส่เพื่อให้ toggle ทำงานบนหน้านี้ด้วย
-    function toggleTheme(){
-      document.body.classList.toggle('dark');
-      document.body.classList.toggle('light');
-      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
-    }
-    (function(){
-      const saved = localStorage.getItem('theme') || 'light';
-      document.body.classList.add(saved);
-    })();
-  </script>
+  
 </body>
 </html>

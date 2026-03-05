@@ -26,7 +26,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-t);min-height
   background-image:radial-gradient(circle,rgba(0,255,136,.05) 1px,transparent 1px);
   background-size:32px 32px;animation:gd 18s linear infinite}
 @keyframes gd{to{background-position:32px 32px}}
-.wrap{position:relative;z-index:1;max-width:1060px;margin:0 auto;padding:32px 20px 60px}
+.wrap{position:relative;z-index:1;max-width:1060px;margin:0 auto;padding:84px 20px 60px}
 
 /* Hero */
 .hero{text-align:center;padding:38px 0 28px;border-bottom:1px solid var(--border);margin-bottom:32px}
@@ -38,7 +38,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-t);min-height
 .hero p{color:var(--muted2);font-size:13px;max-width:480px;margin:0 auto;line-height:1.7}
 
 /* Top bar */
-.top-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;
+.tl-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;
   margin-bottom:24px;flex-wrap:wrap}
 .log-stats{display:flex;gap:20px;flex-wrap:wrap}
 .stat-chip{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
@@ -176,7 +176,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-t);min-height
   .entry-pid{grid-template-columns:1fr!important}
   .form-grid{grid-template-columns:1fr!important}
   .modal{padding:18px 14px}
-  .top-bar{flex-direction:column;align-items:flex-start}
+  .tl-toolbar{flex-direction:column;align-items:flex-start}
   .log-stats{gap:10px}
   .filter-bar{flex-wrap:wrap}
   .fbar-input{min-width:100%}
@@ -201,7 +201,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-t);min-height
   <p>จดทุก session · เปรียบเทียบ PID · ดู delta ระหว่างครั้ง · ไม่มี account ไม่มี server — ข้อมูลเก็บในเครื่องคุณ</p>
 </div>
 
-<div class="top-bar">
+<div class="tl-toolbar">
   <div class="log-stats">
     <div class="stat-chip"><span id="totalSessions">0</span>Sessions</div>
     <div class="stat-chip"><span id="totalOK">0</span>Improved</div>
