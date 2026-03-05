@@ -1,88 +1,70 @@
 {#
   templates/partials/drawer.html
   ──────────────────────────────────────────────────────────────
-  Stand-alone drawer link block (ใช้ใน vtx.html และหน้าที่ต้องการ
-  include เฉพาะ links โดยไม่ต้องการทั้ง nav system)
-
-  สำหรับ nav system ครบ (topbar + drawer + overlay + JS)
-  ให้ใช้ partials/nav.html แทน
+  Stand-alone drawer link block
+  สำหรับ nav system ครบ ให้ใช้ partials/nav.html แทน
   ──────────────────────────────────────────────────────────────
 #}
 
-<!-- หน้าหลัก -->
-<div class="drawer-group-label">หน้าหลัก</div>
+<!-- ── หน้าหลัก ── -->
+<div class="drawer-group-label">🏠 หน้าหลัก</div>
 <a class="drawer-link {% if nav_page=='home' %}active{% endif %}" href="/app" onclick="closeDrawer && closeDrawer();">
-  <span class="dl-icon-wrap green">🏠</span>
+  <span class="dl-icon-wrap green">🔬</span>
   <span class="dl-body">
     <span class="dl-title">Drone Analyzer</span>
-    <span class="dl-meta">วิเคราะห์ PID · Filter · Motor</span>
+    <span class="dl-meta">วิเคราะห์ PID · Filter · Motor · Flight time</span>
   </span>
   <span class="dl-pill">main</span>
 </a>
 
+<!-- ── เครื่องมือหลัก ── -->
 <div class="drawer-divider"></div>
-<div class="drawer-group-label">🔧 เครื่องมือ</div>
+<div class="drawer-group-label">🔧 เครื่องมือหลัก</div>
 
 <a class="drawer-link {% if nav_page=='motor_prop' %}active{% endif %}" href="/motor-prop" onclick="closeDrawer && closeDrawer();">
   <span class="dl-icon-wrap blue">🧭</span>
   <span class="dl-body">
     <span class="dl-title">Motor × Prop Recommender</span>
-    <span class="dl-meta">แนะนำมอเตอร์/ใบพัดตามสเปค</span>
+    <span class="dl-meta">แนะนำมอเตอร์ + ใบพัดตามสเปค</span>
   </span>
-  <span class="dl-pill">tool</span>
 </a>
+
 <a class="drawer-link {% if nav_page=='cli_surgeon' %}active{% endif %}" href="/cli_surgeon" onclick="closeDrawer && closeDrawer();">
   <span class="dl-icon-wrap gold">🩺</span>
   <span class="dl-body">
     <span class="dl-title">CLI Surgeon</span>
     <span class="dl-meta">วิเคราะห์ diff all / dump</span>
   </span>
-  <span class="dl-pill">tool</span>
 </a>
+
 <a class="drawer-link {% if nav_page=='pid_advisor' %}active{% endif %}" href="/pid-advisor" onclick="closeDrawer && closeDrawer();">
   <span class="dl-icon-wrap purple">💊</span>
   <span class="dl-body">
     <span class="dl-title">PID Symptom Advisor</span>
     <span class="dl-meta">บอกอาการ → รับคำแนะนำ PID</span>
   </span>
-  <span class="dl-pill new">new</span>
 </a>
+
 <a class="drawer-link {% if nav_page=='rpm_filter' %}active{% endif %}" href="/rpm-filter" onclick="closeDrawer && closeDrawer();">
   <span class="dl-icon-wrap green">⚙️</span>
   <span class="dl-body">
     <span class="dl-title">RPM Filter Calculator</span>
     <span class="dl-meta">คำนวณ harmonic + dyn_notch</span>
   </span>
-  <span class="dl-pill new">new</span>
 </a>
+
 <a class="drawer-link {% if nav_page=='rates' %}active{% endif %}" href="/rates-visualizer" onclick="closeDrawer && closeDrawer();">
   <span class="dl-icon-wrap blue">📈</span>
   <span class="dl-body">
     <span class="dl-title">Rates Visualizer</span>
-    <span class="dl-meta">curve real-time · per-axis</span>
+    <span class="dl-meta">Curve real-time · per-axis</span>
   </span>
-  <span class="dl-pill new">new</span>
 </a>
 
+<!-- ── วิเคราะห์ขั้นสูง ── -->
 <div class="drawer-divider"></div>
-<div class="drawer-group-label">⚡ ขั้นสูง</div>
+<div class="drawer-group-label">⚡ วิเคราะห์ขั้นสูง</div>
 
-<a class="drawer-link {% if nav_page=='comparator' %}active{% endif %}" href="/cli-comparator" onclick="closeDrawer && closeDrawer();">
-  <span class="dl-icon-wrap gold">⚖️</span>
-  <span class="dl-body">
-    <span class="dl-title">CLI Diff Comparator</span>
-    <span class="dl-meta">วาง 2 config → เห็นทุกค่าที่เปลี่ยน</span>
-  </span>
-  <span class="dl-pill new">new</span>
-</a>
-<a class="drawer-link {% if nav_page=='esc_checker' %}active{% endif %}" href="/esc-checker" onclick="closeDrawer && closeDrawer();">
-  <span class="dl-icon-wrap gold">⚡</span>
-  <span class="dl-body">
-    <span class="dl-title">ESC Compatibility Checker</span>
-    <span class="dl-meta">ตรวจ ESC amps, protocol, KV</span>
-  </span>
-  <span class="dl-pill new">new</span>
-</a>
 <a class="drawer-link {% if nav_page=='blackbox' %}active{% endif %}" href="/blackbox" onclick="closeDrawer && closeDrawer();">
   <span class="dl-icon-wrap blue">📊</span>
   <span class="dl-body">
@@ -91,15 +73,59 @@
   </span>
   <span class="dl-pill hot">HOT</span>
 </a>
+
+<a class="drawer-link {% if nav_page=='esc_checker' %}active{% endif %}" href="/esc-checker" onclick="closeDrawer && closeDrawer();">
+  <span class="dl-icon-wrap gold">⚡</span>
+  <span class="dl-body">
+    <span class="dl-title">ESC Compatibility Checker</span>
+    <span class="dl-meta">ตรวจ ESC amps · protocol · KV+แบต</span>
+  </span>
+</a>
+
+<a class="drawer-link {% if nav_page=='battery_health' %}active{% endif %}" href="/battery-health" onclick="closeDrawer && closeDrawer();">
+  <span class="dl-icon-wrap green">🔋</span>
+  <span class="dl-body">
+    <span class="dl-title">Battery Health Advisor</span>
+    <span class="dl-meta">วิเคราะห์ IR · capacity · อายุแบต</span>
+  </span>
+  <span class="dl-pill new">v5</span>
+</a>
+
+<a class="drawer-link {% if nav_page=='motor_thermal' %}active{% endif %}" href="/motor-thermal" onclick="closeDrawer && closeDrawer();">
+  <span class="dl-icon-wrap red">🌡️</span>
+  <span class="dl-body">
+    <span class="dl-title">Motor Thermal Estimator</span>
+    <span class="dl-meta">อุณหภูมิ motor · thermal margin</span>
+  </span>
+  <span class="dl-pill new">v5</span>
+</a>
+
+<a class="drawer-link {% if nav_page=='loop_analyzer' %}active{% endif %}" href="/loop-analyzer" onclick="closeDrawer && closeDrawer();">
+  <span class="dl-icon-wrap purple">🔄</span>
+  <span class="dl-body">
+    <span class="dl-title">Control Loop Analyzer</span>
+    <span class="dl-meta">Looptime · scheduler · CPU load</span>
+  </span>
+  <span class="dl-pill new">v5</span>
+</a>
+
+<a class="drawer-link {% if nav_page=='comparator' %}active{% endif %}" href="/cli-comparator" onclick="closeDrawer && closeDrawer();">
+  <span class="dl-icon-wrap gold">⚖️</span>
+  <span class="dl-body">
+    <span class="dl-title">CLI Diff Comparator</span>
+    <span class="dl-meta">วาง 2 config → เห็นทุกค่าที่เปลี่ยน</span>
+  </span>
+</a>
+
 <a class="drawer-link {% if nav_page=='osd' %}active{% endif %}" href="/osd" onclick="closeDrawer && closeDrawer();">
   <span class="dl-icon-wrap purple">🖥️</span>
   <span class="dl-body">
     <span class="dl-title">OSD Designer</span>
-    <span class="dl-meta">ออกแบบ layout OSD + export</span>
+    <span class="dl-meta">ออกแบบ layout OSD + export CLI</span>
   </span>
-  <span class="dl-pill">tool</span>
 </a>
 
+<!-- ── VTX & Signal ── -->
 <div class="drawer-divider"></div>
 <div class="drawer-group-label">📡 VTX & Signal</div>
 
@@ -109,79 +135,82 @@
     <span class="dl-title">VTX Bands & Channels</span>
     <span class="dl-meta">ตาราง Band/Channel + CLI</span>
   </span>
-  <span class="dl-pill">tool</span>
 </a>
+
 <a class="drawer-link {% if nav_page=='vtx_range' %}active{% endif %}" href="/vtx-range" onclick="closeDrawer && closeDrawer();">
   <span class="dl-icon-wrap blue">🏞️</span>
   <span class="dl-body">
     <span class="dl-title">VTX Range Calculator</span>
     <span class="dl-meta">ประมาณระยะสัญญาณ + กราฟ</span>
   </span>
-  <span class="dl-pill">tool</span>
 </a>
+
 <a class="drawer-link {% if nav_page=='vtx_smartaudio' %}active{% endif %}" href="/vtx-smartaudio" onclick="closeDrawer && closeDrawer();">
   <span class="dl-icon-wrap gold">🎙️</span>
   <span class="dl-body">
-    <span class="dl-title">VTX SmartAudio</span>
+    <span class="dl-title">VTX SmartAudio Guide</span>
     <span class="dl-meta">SmartAudio / Tramp commands</span>
   </span>
-  <span class="dl-pill">tool</span>
 </a>
 
+<!-- ── Simulator & Wizard ── -->
 <div class="drawer-divider"></div>
-<div class="drawer-group-label">🚀 Wizard & ฟีเจอร์ใหม่</div>
+<div class="drawer-group-label">🚀 Simulator & Wizard</div>
+
 <a class="drawer-link {% if nav_page=='fpv_trainer' %}active{% endif %}" href="/fpv-trainer" onclick="closeDrawer && closeDrawer();">
   <span class="dl-icon-wrap green">🕹️</span>
   <span class="dl-body">
     <span class="dl-title">FPV Training Simulator</span>
-    <span class="dl-meta">ฝึกบิน 3D · 4 โหมด · Gamepad รองรับ</span>
+    <span class="dl-meta">ฝึกบิน 3D · 4 โหมด · Gamepad</span>
   </span>
-  <span class="dl-pill new">NEW</span>
+  <span class="dl-pill hot">FUN</span>
 </a>
+
 <a class="drawer-link {% if nav_page=='flight_quiz' %}active{% endif %}" href="/flight-quiz" onclick="closeDrawer && closeDrawer();">
-  <span class="dl-icon-wrap green">🎯</span>
+  <span class="dl-icon-wrap gold">🎯</span>
   <span class="dl-body">
     <span class="dl-title">Flight Style Quiz</span>
     <span class="dl-meta">5 คำถาม → rates + preset แนะนำ</span>
   </span>
-  <span class="dl-pill new">new</span>
 </a>
+
 <a class="drawer-link {% if nav_page=='bf_wizard' %}active{% endif %}" href="/bf-wizard" onclick="closeDrawer && closeDrawer();">
   <span class="dl-icon-wrap green">⚡</span>
   <span class="dl-body">
     <span class="dl-title">BF Config Wizard</span>
     <span class="dl-meta">7 ขั้นตอน → CLI พร้อม paste</span>
   </span>
-  <span class="dl-pill new">new</span>
 </a>
 
+<!-- ── Community ── -->
 <div class="drawer-divider"></div>
 <div class="drawer-group-label">🌐 Community</div>
+
 <a class="drawer-link {% if nav_page=='build_card' %}active{% endif %}" href="/build-card" onclick="closeDrawer && closeDrawer();">
   <span class="dl-icon-wrap gold">🃏</span>
   <span class="dl-body">
     <span class="dl-title">Build Card Generator</span>
     <span class="dl-meta">สร้างรูปสเปคโดรนแชร์ Social</span>
   </span>
-  <span class="dl-pill new">new</span>
 </a>
+
 <a class="drawer-link {% if nav_page=='tuning_log' %}active{% endif %}" href="/tuning-log" onclick="closeDrawer && closeDrawer();">
-  <span class="dl-icon-wrap blue">📊</span>
+  <span class="dl-icon-wrap blue">📋</span>
   <span class="dl-body">
     <span class="dl-title">Tuning Log</span>
     <span class="dl-meta">บันทึก session · เปรียบเทียบ PID</span>
   </span>
-  <span class="dl-pill new">new</span>
 </a>
+
 <a class="drawer-link {% if nav_page=='leaderboard' %}active{% endif %}" href="/leaderboard" onclick="closeDrawer && closeDrawer();">
   <span class="dl-icon-wrap gold">🏆</span>
   <span class="dl-body">
     <span class="dl-title">Config Leaderboard</span>
-    <span class="dl-meta">vote · rank · copy config ชุมชน</span>
+    <span class="dl-meta">Vote · rank · copy config ชุมชน</span>
   </span>
-  <span class="dl-pill new">new</span>
 </a>
 
+<!-- ── แหล่งข้อมูล ── -->
 <div class="drawer-divider"></div>
 <div class="drawer-group-label">📚 แหล่งข้อมูล</div>
 
@@ -191,29 +220,30 @@
     <span class="dl-title">ไฟล์ DIFF และ DUMP</span>
     <span class="dl-meta">รวม CLI config สำเร็จรูป</span>
   </span>
-  <span class="dl-pill">files</span>
 </a>
+
 <a class="drawer-link" href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener">
   <span class="dl-icon-wrap blue">📘</span>
   <span class="dl-body">
     <span class="dl-title">เพจ OBIXConfig Lab</span>
-    <span class="dl-meta">ถาม-แนะนำ & ตัวอย่าง</span>
+    <span class="dl-meta">ถาม-แนะนำ & ตัวอย่างการตั้งค่า</span>
   </span>
   <span class="dl-pill">↗</span>
 </a>
+
 <a class="drawer-link {% if nav_page=='about' %}active{% endif %}" href="/about" onclick="closeDrawer && closeDrawer();">
   <span class="dl-icon-wrap">ℹ️</span>
   <span class="dl-body">
     <span class="dl-title">เกี่ยวกับ</span>
-    <span class="dl-meta">ที่มา & วิธีใช้งาน</span>
+    <span class="dl-meta">ที่มา · วิธีใช้งาน · ทีมงาน</span>
   </span>
-  <span class="dl-pill">info</span>
 </a>
+
 <a class="drawer-link {% if nav_page=='changelog' %}active{% endif %}" href="/changelog" onclick="closeDrawer && closeDrawer();">
   <span class="dl-icon-wrap green">📝</span>
   <span class="dl-body">
     <span class="dl-title">Changelog</span>
     <span class="dl-meta">บันทึกการอัปเดต</span>
   </span>
-  <span class="dl-pill">v2.3</span>
+  <span class="dl-pill">v5.0</span>
 </a>
