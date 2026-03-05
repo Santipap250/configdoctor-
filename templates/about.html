@@ -11,23 +11,12 @@
 
   <!-- ใช้ไฟล์ CSS เดิมของโปรเจค -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% set nav_page = "about" %}
 </head>
 <body>
-  <header class="top-bar center-logo" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-    <div style="display:flex; align-items:center; gap:10px;">
-      <a class="back-btn" href="/app">← black</a>
-        <!-- small back icon -->
-        <span style="display:inline-block; width:36px; height:36px; border-radius:8px; background:rgba(255,255,255,0.02); display:grid; place-items:center; font-weight:700;">←</span>
-      </a>
-      <img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="OBIXConfig" class="logo" style="height:34px;">
-    </div>
+{% include "partials/nav.html" %}
 
-    <div style="display:flex; align-items:center; gap:8px;">
-      <button class="toggle-theme" onclick="toggleTheme()">🌗</button>
-    </div>
-  </header>
-
-  <main class="container" role="main" style="padding-top:18px;">
+  <main class="container" role="main" style="padding-top:76px;">
     <article class="short-section" style="max-width:900px; margin: 12px auto;">
       <h1 style="margin-top:0;">เกี่ยวกับ OBIXConfig Doctor</h1>
 

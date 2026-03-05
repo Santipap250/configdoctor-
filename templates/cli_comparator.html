@@ -63,14 +63,10 @@ a.back{color:var(--green,#10c47a);font-size:.85rem;text-decoration:none;}
 </style>
 </head>
 <body>
-<div class="top-bar">
-  <div class="top-left">
-    <a href="/landing"><img src="{{ url_for('static', filename='img/obix-logo.png') }}" class="logo" alt="OBIXConfig Doctor"></a>
-  </div>
-  <button class="toggle-theme" onclick="toggleTheme()" title="สลับธีม">🌗</button>
-</div>
+{% set nav_page = "comparator" %}
+{% include "partials/nav.html" %}
 
-<div class="cmp-wrap">
+<div class="cmp-wrap" style="padding-top:72px;">
   <div style="margin-bottom:16px;">
     <a class="back" href="/app">← กลับหน้าหลัก</a>
     <h2 style="color:var(--green);font-size:1.1rem;margin:6px 0 2px;">⚖️ CLI Diff Comparator</h2>

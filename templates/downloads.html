@@ -24,9 +24,11 @@
   html,body{overflow-x:hidden}
   input,select,button{font-size:16px;min-height:44px}
 </style>
+{% set nav_page = "downloads" %}
 </head>
 <body>
-  <div class="container">
+{% include "partials/nav.html" %}
+  <div class="container" style="padding-top:76px;">
     <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
       <h1 style="margin:0;">ค้นหาไฟล์ Diff และ Dump</h1>
 
@@ -84,7 +86,7 @@
   <div id="obixToast">Copied</div>
 
 <script>
-const grid = document.getElementById('dlGrid');
+const grid = document.querySelector('.dl-grid');
 const cards = Array.from(document.querySelectorAll('.dl-card'));
 const searchInput = document.getElementById('dlSearch');
 const filterSelect = document.getElementById('dlFilterFC');
