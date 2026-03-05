@@ -1581,7 +1581,7 @@ input[type=number]::placeholder { color: var(--muted); font-size: 12px; }
         {# Score components — each 0-100 #}
         {% set s_twr = [100, [0, (twr - 0.5) / 3.5 * 100] | max] | min | int if twr > 0 else 30 %}
         {% set s_ft  = [100, [0, ft / 12 * 100] | max] | min | int if ft > 0 else 30 %}
-        {% set s_noise = [(100 - noise / 6 * 100), 0] | max | int %}
+        {% set s_noise = [[(100 - noise / 6 * 100), 0] | max, 100] | min | int %}
         {% set s_tip = [100, [0, (1 - (tip - 150) / 150) * 100] | max] | min | int if tip > 0 else 70 %}
         {% set s_motor = 85 if '✅' in mh else (55 if '⚡' in mh else 30) %}
         {% set s_eff = 85 if eff_cls == 'efficient' else (65 if eff_cls == 'nominal' else 40) %}
@@ -1700,8 +1700,8 @@ input[type=number]::placeholder { color: var(--muted); font-size: 12px; }
                 <div class="ic-val" style="color:{% if twr2 >= 2.5 %}var(--green){% elif twr2 >= 1.5 %}var(--amber){% else %}var(--red){% endif %}">{{ twr2 }}:1</div>
                 <div class="ic-label">Thrust-to-Weight Ratio</div>
                 <div class="ic-explain">
-                  {% if twr2 >= 4.0 %}กำลังสูงมาก — ที่ hover ใช้ throttle เพียง ~{{ (100/twr2/twr2*100)|int }}% เหลือ {% if analysis.advanced.hover_throttle_pct %}{{ (100 - analysis.advanced.hover_throttle_pct) | int }}%{% else %}ส่วนมาก{% endif %} สำหรับ maneuver
-                  {% elif twr2 >= 2.5 %}สมดุลดี — hover อยู่ที่ ~{{ analysis.advanced.hover_throttle_pct | int if analysis.advanced.hover_throttle_pct else '~35' }}% throttle มี headroom เพียงพอ
+                  {% if twr2 >= 4.0 %}กำลังสูงมาก — hover throttle ~{{ analysis.advanced.hover_throttle_pct | int if analysis.advanced.hover_throttle_pct else (100/twr2**0.5)|int }}% เหลือ headroom {% if analysis.advanced.hover_throttle_pct %}{{ (100 - analysis.advanced.hover_throttle_pct) | int }}%{% else %}&gt;60%{% endif %} สำหรับ maneuver
+                  {% elif twr2 >= 2.5 %}สมดุลดี — hover อยู่ที่ ~{{ analysis.advanced.hover_throttle_pct | int if analysis.advanced.hover_throttle_pct else (100/twr2**0.5)|int }}% throttle มี headroom เพียงพอ
                   {% elif twr2 >= 1.5 %}TWR ปานกลาง — hover ใช้ throttle สูง เหลือกำลังสำรองน้อย แนะนำ motor ที่แรงกว่าหรือลดน้ำหนัก
                   {% else %}TWR ต่ำเกินไป — โดรนจะบินได้ยากและไม่ responsive ควรเพิ่มกำลังหรือลดน้ำหนักทันที{% endif %}
                 </div>
@@ -1743,8 +1743,8 @@ input[type=number]::placeholder { color: var(--muted); font-size: 12px; }
 
               <!-- Hover Throttle Card -->
               {% set hov_thr = analysis.advanced.hover_throttle_pct | default(0) | float %}
-              <div class="insight-card {% if hov_thr > 65 %}r{% elif hov_thr > 50 %}a{% else %}g{% endif %}">
-                <div class="ic-val" style="color:{% if hov_thr>65 %}var(--red){% elif hov_thr>50 %}var(--amber){% else %}var(--green){% endif %}">{{ hov_thr | int }}%</div>
+              <div class="insight-card {% if hov_thr > 65 %}r{% elif hov_thr > 50 %}a{% elif hov_thr > 0 %}g{% else %}{% endif %}">
+                <div class="ic-val" style="color:{% if hov_thr>65 %}var(--red){% elif hov_thr>50 %}var(--amber){% else %}var(--green){% endif %}">{% if hov_thr > 0 %}{{ hov_thr | int }}%{% else %}—{% endif %}</div>
                 <div class="ic-label">Hover Throttle</div>
                 <div class="ic-explain">
                   throttle ที่ใช้รักษาความสูง (hover)
@@ -2101,7 +2101,7 @@ set dyn_notch_count      = {{ analysis.filter.dyn_notch or 1 }}
 set motor_pwm_protocol   = DSHOT600
 set dshot_bidir          = {{ 'ON' if analysis.filter.rpm_filter else 'OFF' }}
 set rpm_filter_harmonics = 3
-set rpm_filter_min_hz    = 100
+set rpm_filter_min_hz    = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [100, (analysis.advanced.rpm_estimated / 60 * 0.3) | int] | max }}{% else %}100{% endif %}
 set anti_gravity_gain    = {{ analysis.filter.anti_gravity or 3 }}</pre>
                 </div>
               </div>
@@ -2212,10 +2212,10 @@ save</pre>
                   <span class="metric-sub">Peak ≈ {{ analysis.advanced.peak_current_a }}A</span>
                 </div>
                 <div class="metric-card">
-                  <span class="metric-val {% if analysis.advanced.c_required and analysis.advanced.c_required > 60 %}red{% elif analysis.advanced.c_required and analysis.advanced.c_required > 40 %}amber{% else %}{% endif %}">
-                    {% if analysis.advanced.c_required %}{{ analysis.advanced.c_required }}C{% else %}—{% endif %}
+                  <span class="metric-val {% if analysis.advanced.c_burst and analysis.advanced.c_burst > 60 %}red{% elif analysis.advanced.c_burst and analysis.advanced.c_burst > 40 %}amber{% else %}{% endif %}">
+                    {% if analysis.advanced.c_burst %}{{ analysis.advanced.c_burst }}C burst{% else %}—{% endif %}
                   </span>
-                  <span class="metric-lbl">C-Required</span>
+                  <span class="metric-lbl">C-Rate (Burst)</span>
                   <span class="metric-sub">{{ analysis.advanced.battery_mAh_used }}mAh pack</span>
                 </div>
                 <div class="metric-card">
@@ -2367,7 +2367,7 @@ save</pre>
               <div id="radarData" style="display:none;"
                 data-power="{{ [100,(twr3/5*100)|int]|min }}"
                 data-flight="{{ [100,(ft3/12*100)|int]|min }}"
-                data-noise="{{ [(100-no3/6*100)|int,0]|max }}"
+                data-noise="{{ [[(100-no3/6*100)|int,0]|max,100]|min }}"
                 data-tip="{{ [100,((1-(tp3-150)/150)*100)|int]|min if tp3>0 else 80 }}"
                 data-motor="{{ 85 if '✅' in mh3 else (55 if '⚡' in mh3 else 30) }}"
                 data-eff="{{ 85 if ef3=='efficient' else (65 if ef3=='nominal' else 40) }}"
@@ -2666,8 +2666,10 @@ var presetBuilders = {
       'set gyro_lpf1_hz        = '+_r(_gLpf1*0.85),
       'set dterm_lpf1_hz       = '+_r(_dLpf1*0.85),
       'set dyn_notch_count     = '+_notch,
-      'set motor_pwm_protocol  = DSHOT300',
+      'set motor_pwm_protocol  = DSHOT600',
       'set dshot_bidir         = ON',
+      'set motor_poles         = 14',
+      'set rpm_filter_harmonics = 3',
       'set anti_gravity_gain   = '+Math.max(2,_ag-2),
       'set throttle_limit_percent = 80',
       'set throttle_limit_type = SCALE',
@@ -2682,7 +2684,7 @@ var presetBuilders = {
       'set gyro_lpf1_hz        = '+_gLpf1,
       'set dterm_lpf1_hz       = '+_dLpf1,
       'set dyn_notch_count     = '+_notch,
-      'set motor_pwm_protocol  = DSHOT300',
+      'set motor_pwm_protocol  = DSHOT600',
       'set dshot_bidir         = ON',
       'set anti_gravity_gain   = '+_ag,
       'set iterm_relax         = RP',
@@ -2699,8 +2701,10 @@ var presetBuilders = {
       'set gyro_lpf1_hz        = '+_r(_gLpf1*0.88),
       'set dterm_lpf1_hz       = '+_r(_dLpf1*0.88),
       'set dyn_notch_count     = 1',
-      'set motor_pwm_protocol  = DSHOT300',
+      'set motor_pwm_protocol  = DSHOT600',
       'set dshot_bidir         = ON',
+      'set motor_poles         = 14',
+      'set rpm_filter_harmonics = 3',
       'set anti_gravity_gain   = '+Math.max(2,_ag-2),
       'set throttle_limit_percent = 85',
       'set iterm_relax         = OFF',
