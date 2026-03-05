@@ -2207,7 +2207,7 @@ save</pre>
                   <span class="metric-sub">per pack total</span>
                 </div>
                 <div class="metric-card">
-                  <span class="metric-val">{{ analysis.advanced.current_draw_a }}A</span>
+                  <span class="metric-val">{{ analysis.advanced.hover_current_a | default("—") }}A</span>
                   <span class="metric-lbl">Hover Current</span>
                   <span class="metric-sub">Peak ≈ {{ analysis.advanced.peak_current_a }}A</span>
                 </div>

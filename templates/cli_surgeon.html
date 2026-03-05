@@ -420,7 +420,6 @@ body::after {
 </head>
 <body>
 
-{% set nav_page = "cli_surgeon" %}
 {% include "partials/nav.html" %}
 
 <div class="page">
@@ -672,8 +671,8 @@ function pipeError(step) {
 // ── Server check ─────────────────────────────────────
 async function checkServer() {
   try {
-    const r = await fetch('/analyze_cli', { method: 'OPTIONS' });
-    setStatus(true);
+    const r = await fetch('/ping', { cache: 'no-store' });
+    setStatus(r.ok);
   } catch { setStatus(false); }
 }
 function setStatus(on) {

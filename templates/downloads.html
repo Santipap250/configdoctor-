@@ -141,10 +141,11 @@ function applyFilter(){
     downloadAllBtn.textContent = '📦 ดาวน์โหลดทั้งหมด';
     downloadAllBtn.style.opacity = 0.6;
   } else {
-    downloadAllBtn.href = `/static/downloads/diff_all/${sel}/${sel}-diff_all.zip`;
-    downloadAllBtn.removeAttribute('disabled');
-    downloadAllBtn.textContent = `📦 ดาวน์โหลดทั้งหมด: ${sel}`;
-    downloadAllBtn.style.opacity = 1;
+    // ZIP bundles are not pre-packaged — download files individually
+    downloadAllBtn.setAttribute('disabled', 'disabled');
+    downloadAllBtn.textContent = `📥 คลิกไฟล์แต่ละไฟล์เพื่อดาวน์โหลด (${sel})`;
+    downloadAllBtn.style.opacity = 0.5;
+    downloadAllBtn.title = 'ดาวน์โหลดทีละไฟล์จากรายการด้านล่าง';
   }
 }
 
