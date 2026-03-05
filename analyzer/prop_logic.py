@@ -1,177 +1,194 @@
 # analyzer/prop_logic.py — OBIXConfig Doctor
 # ============================================================
-# IMPROVED v3:
-# - ประมาณ thrust (กรัม) จาก prop area + momentum theory
-# - คำนวณ disk loading (g/cm²)
-# - คำนวณ efficiency (g/W) estimate
-# - แยก recommendation ตาม style + size
-# - เพิ่ม pitch-to-chord ratio warning
+# v4.0 — SMART UPGRADE
+# ใหม่:
+# - RPM คำนวณจาก KV × V จริง (motor_kv + cells)
+# - g/W ปรับตาม cells/voltage
+# - Tip speed (m/s) + warning > 265/290 m/s
+# - Max thrust per motor (g) + max power per motor (W)
+# - Blade chord efficiency correction
 # ============================================================
 import math
+from typing import Optional
 
-# ─────────────────────────────────────────────────────────────
-# Prop efficiency lookup (g/W) — empirical from bench tests
-# Source: typical 5" 2306 2400KV 4S community data
-# ─────────────────────────────────────────────────────────────
-# pitch index: pitch < 3.5 → low, 3.5-4.5 → med, > 4.5 → high
-# blade index: 2-blade, 3-blade, 4-blade
-_G_PER_W = {
-    "low_pitch":  {2: 6.5, 3: 5.8, 4: 5.0},   # pitch < 3.5
-    "med_pitch":  {2: 5.8, 3: 5.0, 4: 4.2},   # 3.5 <= pitch <= 4.5
-    "high_pitch": {2: 5.0, 3: 4.2, 4: 3.5},   # pitch > 4.5
+_G_PER_W_BASE = {
+    "low_pitch":  {2: 6.8, 3: 6.0, 4: 5.2},
+    "med_pitch":  {2: 6.0, 3: 5.2, 4: 4.4},
+    "high_pitch": {2: 5.2, 3: 4.4, 4: 3.7},
 }
-# Scale factor per prop size (5" baseline = 1.0)
 _SIZE_EFF_SCALE = {
-    2.5: 0.70, 3.0: 0.78, 3.5: 0.83, 4.0: 0.88,
-    4.5: 0.93, 5.0: 1.00, 5.5: 1.04, 6.0: 1.08,
-    7.0: 1.14, 7.5: 1.18, 8.0: 1.22, 10.0: 1.30,
+    # Calibrated from bench data (5" = 1.0). LR props gain less than theory at flight throttle.
+    2.5: 0.70, 3.0: 0.77, 3.5: 0.82, 4.0: 0.88,
+    4.5: 0.94, 5.0: 1.00, 5.5: 1.03, 6.0: 1.06,
+    7.0: 1.08, 7.5: 1.09, 8.0: 1.11, 10.0: 1.14,
 }
+_REF_POWER_5IN_4S   = 350.0
+_LOADED_RPM_FACTOR  = 0.82
+_TIP_SPEED_WARN     = 265.0
+_TIP_SPEED_DANGER   = 290.0
 
+def _interp(val, table):
+    keys = sorted(table.keys())
+    if val <= keys[0]:  return table[keys[0]]
+    if val >= keys[-1]: return table[keys[-1]]
+    for i in range(len(keys)-1):
+        lo, hi = keys[i], keys[i+1]
+        if lo <= val <= hi:
+            t = (val-lo)/(hi-lo)
+            return table[lo] + t*(table[hi]-table[lo])
+    return list(table.values())[len(table)//2]
 
-def _nearest_size_scale(prop_size: float) -> float:
-    sizes = sorted(_SIZE_EFF_SCALE.keys())
-    nearest = min(sizes, key=lambda s: abs(s - prop_size))
-    return _SIZE_EFF_SCALE[nearest]
-
-
-def _pitch_bucket(pitch: float) -> str:
-    if pitch < 3.5:   return "low_pitch"
-    if pitch <= 4.5:  return "med_pitch"
+def _pitch_bucket(p):
+    if p < 3.5:  return "low_pitch"
+    if p <= 4.5: return "med_pitch"
     return "high_pitch"
 
+def _blade_clamp(b):
+    return max(2, min(b, 4)) if b in (2,3,4) else 3
 
-def _blade_nearest(blades: int) -> int:
-    return max(2, min(blades, 4)) if blades in (2, 3, 4) else 3
+def _cells_eff_factor(cells):
+    """Higher voltage → better motor efficiency. ~2% per cell above 4S."""
+    return 1.0 + (cells - 4) * 0.015  # 1.5%/cell above 4S (empirically calibrated)
 
+# Empirical max power per motor at 4S reference (W)
+# 7"+ uses LR-optimized motors (lower max power, higher hover efficiency)
+_MAX_PWR_BY_SIZE = {
+    2.5:35, 3.0:75, 3.5:110, 4.0:190, 4.5:260,
+    5.0:350, 5.5:410, 6.0:440, 7.0:320, 8.0:380, 10.0:450,
+}
+# Efficiency at max throttle vs reference (drops at high RPM, more for LR props)
+_EFF_AT_MAX_THROTTLE = {
+    2.5:0.72, 3.0:0.70, 4.0:0.67, 5.0:0.65,
+    6.0:0.60, 7.0:0.55, 8.0:0.50, 10.0:0.45,
+}
 
-def analyze_propeller(prop_size: float, prop_pitch: float, blade_count: int, style: str) -> dict:
+def _max_power_per_motor(prop_size, cells):
+    """Max continuous power per motor (W). Empirical lookup + cell scaling.
+    Ref: 5\"/4S = 350W. 7\"+ uses LR motor specs (lower peak, better efficiency).
     """
-    Analyze propeller characteristics.
-    Returns dict with:
-      summary, recommendation, effect: {
-        noise, motor_load, efficiency, grip,
-        est_thrust_g, est_efficiency_g_per_w,
-        disk_loading_g_cm2, pitch_speed_kmh
-      }
-    """
-    result = {}
+    base  = _interp(prop_size, _MAX_PWR_BY_SIZE)
+    scale = 1.0 + (cells - 4) / 4.0 * 0.22   # +22% per 4 cells above 4S
+    return round(min(base * scale, 1000.0), 1)
 
-    # ── Base scores (0–6 scale) ────────────────────────────────
-    noise_score = 0
-    motor_load  = 0
+def _calc_rpm(motor_kv, cells, prop_size):
+    if motor_kv and motor_kv > 0:
+        return motor_kv * cells * 4.0 * _LOADED_RPM_FACTOR
+    _rpm_table = {
+        2.5:32000, 3.0:26000, 3.5:22000, 4.0:18000, 4.5:15500,
+        5.0:13500, 5.5:12500, 6.0:11500, 7.0:9800, 8.0:8200, 10.0:6800
+    }
+    return _interp(prop_size, _rpm_table) * _LOADED_RPM_FACTOR
 
-    if prop_pitch >= 4.5:
-        noise_score += 3;  motor_load += 3;  eff_label = "แรงจัด กินไฟสูง"
-    elif prop_pitch >= 3.5:
-        noise_score += 2;  motor_load += 2;  eff_label = "สมดุล"
+def analyze_propeller(prop_size, prop_pitch, blade_count, style,
+                      motor_kv=None, cells=4):
+    p_in    = float(prop_size)
+    p_pitch = float(prop_pitch)
+    blades  = _blade_clamp(int(blade_count))
+    cells_i = max(1, min(int(cells), 12))
+
+    noise_score = 0; motor_load = 0
+    if p_pitch >= 4.5:
+        noise_score += 3; motor_load += 3; eff_label = "แรงจัด กินไฟสูง"
+    elif p_pitch >= 3.5:
+        noise_score += 2; motor_load += 2; eff_label = "สมดุล"
     else:
-        noise_score += 1;  motor_load += 1;  eff_label = "ประหยัด นุ่ม"
-
-    if blade_count >= 4:
-        noise_score += 3;  motor_load += 3;  grip = "หนึบมาก (4+ ใบ)"
-    elif blade_count == 3:
-        noise_score += 2;  motor_load += 2;  grip = "หนึบดี (3 ใบ)"
+        noise_score += 1; motor_load += 1; eff_label = "ประหยัด นุ่ม"
+    if blades >= 4:
+        noise_score += 3; motor_load += 3; grip = "หนึบมาก (4+ ใบ)"
+    elif blades == 3:
+        noise_score += 2; motor_load += 2; grip = "หนึบดี (3 ใบ)"
     else:
-        noise_score += 1;  motor_load += 1;  grip = "นุ่ม ลอย (2 ใบ)"
+        noise_score += 1; motor_load += 1; grip = "นุ่ม ลอย (2 ใบ)"
 
-    # ── Physics estimates ──────────────────────────────────────
     try:
-        p_in = float(prop_size)
-        p_cm = p_in * 2.54
-        # Disk area (cm²) — full circle, blade overlap ~0.7 chord fraction
-        disk_area_cm2 = math.pi * (p_cm / 2.0) ** 2
-
-        # Pitch speed (km/h) estimate at typical 70% RPM max
-        # RPM max rough: 4S 2306 2400KV → 14.8V * 2400 = 35520 RPM unloaded, ~60% = 21312
-        # Generic: map size to typical RPM
-        rpm_map = {2.5:28000, 3.0:24000, 3.5:20000, 4.0:17000, 4.5:15000,
-                   5.0:13000, 5.5:12000, 6.0:11000, 7.0:9500, 8.0:8000, 10.0:6500}
-        sizes = sorted(rpm_map.keys())
-        nearest_s = min(sizes, key=lambda s: abs(s - p_in))
-        rpm_est = rpm_map[nearest_s] * 0.70   # 70% of max (typical flight average)
-
-        # Pitch speed: V = (RPM * Pitch_in * 2.54cm/in) / (100cm/m * 60s/min) * 3.6 km/h
-        pitch_speed_ms = (rpm_est * float(prop_pitch) * 2.54) / (100 * 60)
+        p_cm  = p_in * 2.54; p_m = p_in * 0.0254
+        disk_area = math.pi * (p_cm/2.0)**2
+        rpm_est = _calc_rpm(motor_kv, cells_i, p_in)
+        pitch_speed_ms  = (rpm_est * p_pitch * 0.0254) / 60.0
         pitch_speed_kmh = round(pitch_speed_ms * 3.6, 1)
-
-        # Disk loading (g/cm²) — assume hover thrust = weight/motors, estimate total prop thrust
-        # We can't know weight here, so express as est_thrust per 100W (reference)
-        g_per_w_base = _G_PER_W[_pitch_bucket(float(prop_pitch))][_blade_nearest(blade_count)]
-        size_scale    = _nearest_size_scale(p_in)
-        est_g_per_w   = round(g_per_w_base * size_scale, 2)
-
-        # Estimated thrust at 100W per motor → multiply by motor count elsewhere
-        est_thrust_100w = round(est_g_per_w * 100, 0)
-
-        # Disk loading (qualitative) — g/cm² at 100W
-        disk_loading  = round(est_thrust_100w / max(disk_area_cm2, 1), 2)
-
+        tip_speed_mps   = round(math.pi * p_m * rpm_est / 60.0, 1)
+        g_per_w_base  = _G_PER_W_BASE[_pitch_bucket(p_pitch)][blades]
+        size_scale    = _interp(p_in, _SIZE_EFF_SCALE)
+        volt_factor   = _cells_eff_factor(cells_i)
+        est_g_per_w   = round(g_per_w_base * size_scale * volt_factor, 2)
+        max_pwr_motor = _max_power_per_motor(p_in, cells_i)
+        eff_at_max = _interp(p_in, _EFF_AT_MAX_THROTTLE)
+        max_thrust_per_motor = round(est_g_per_w * eff_at_max * max_pwr_motor, 0)
+        est_thrust_100w = round(est_g_per_w * 100.0, 0)
+        disk_loading    = round(est_thrust_100w / max(disk_area, 1.0), 2)
     except Exception:
-        pitch_speed_kmh = None
-        est_g_per_w     = None
-        est_thrust_100w = None
-        disk_loading    = None
+        rpm_est = pitch_speed_kmh = tip_speed_mps = None
+        est_g_per_w = max_pwr_motor = max_thrust_per_motor = None
+        est_thrust_100w = disk_loading = None
 
-    # ── Style-based recommendation ─────────────────────────────
-    size_label = f"{prop_size}\""
+    notes = []
+    try:
+        ratio = p_pitch / p_in
+        if ratio > 0.9:
+            notes.append(f"Pitch/Size ratio {ratio:.2f} สูง — โหลดมอเตอร์หนัก เสียงดัง")
+        if p_in > 5.5 and p_pitch > 4.5:
+            notes.append("ใบพัดใหญ่ + pitch สูง — ตรวจสอบกำลังมอเตอร์")
+        if tip_speed_mps:
+            if tip_speed_mps >= _TIP_SPEED_DANGER:
+                notes.append(
+                    f"⚠️ Tip speed {tip_speed_mps} m/s เกิน {_TIP_SPEED_DANGER} m/s! "
+                    f"เกิด compressibility loss เสียงดังมาก — ลด KV หรือ props เล็กลง")
+            elif tip_speed_mps >= _TIP_SPEED_WARN:
+                notes.append(
+                    f"⚡ Tip speed {tip_speed_mps} m/s ใกล้ขีดจำกัด ({_TIP_SPEED_WARN} m/s) "
+                    f"— efficiency drop ที่ full throttle")
+        if motor_kv and cells_i:
+            if p_in >= 7 and motor_kv > 1800:
+                notes.append(f"Prop ≥7\" + KV {motor_kv} สูงเกินไป — แนะนำ KV ≤ 1500 สำหรับ LR")
+            if p_in <= 3 and motor_kv < 2000:
+                notes.append(f"Prop ≤3\" + KV {motor_kv} ต่ำ — อาจแรงไม่พอ")
+    except Exception:
+        pass
+
     if style == "racing":
-        if blade_count >= 3 and prop_pitch >= 4.0:
-            rec = f"เหมาะ Racing — {size_label} pitch สูง grip ดี ตอบสนองไว"
-        else:
-            rec = f"Racing ควรใช้ pitch 4.0+ และ 3+ ใบเพื่อ acceleration"
+        rec = ("เหมาะ Racing — pitch สูง grip ดี ตอบสนองไว" if blades>=3 and p_pitch>=4.0
+               else "Racing ควรใช้ pitch 4.0+ และ 3+ ใบ")
     elif style == "longrange":
-        if blade_count <= 2 and prop_pitch <= 4.0:
-            rec = f"เหมาะ Long Range — 2 ใบ pitch ต่ำ-กลาง ประหยัดไฟดี"
+        rec = ("เหมาะ LR — 2 ใบ pitch ต่ำ ประหยัดไฟดีที่สุด" if blades<=2 and p_pitch<=4.0
+               else "LR แนะนำ 2 ใบ pitch 3.0–4.0 เพื่อ efficiency สูงสุด")
+    else:
+        if 3.5 <= p_pitch <= 4.5 and blades == 3:
+            rec = "เหมาะ Freestyle — 3 ใบ pitch กลาง สมดุลดีที่สุด"
+        elif p_pitch > 4.5:
+            rec = "Freestyle pitch สูงมาก — อาจสั่นหรือร้อนในเที่ยวบินนาน"
         else:
-            rec = f"LR แนะนำ 2 ใบ pitch 3.0-4.0 เพื่อ efficiency สูงสุด"
-    else:  # freestyle
-        if 3.5 <= prop_pitch <= 4.5 and blade_count == 3:
-            rec = f"เหมาะ Freestyle — 3 ใบ pitch กลาง สมดุลดีที่สุด"
-        elif prop_pitch > 4.5:
-            rec = f"Freestyle pitch สูงมาก — อาจสั่นหรือร้อนในเที่ยวบินนาน"
-        else:
-            rec = f"Freestyle ได้ แต่ pitch ต่ำอาจทำให้ grip ลด"
+            rec = "Freestyle ได้ แต่ pitch ต่ำ grip ลด"
 
-    # ── Efficiency rating (label) ──────────────────────────────
     if est_g_per_w:
-        if est_g_per_w >= 5.5:    eff_rating = "สูง (ประหยัดไฟดี)"
-        elif est_g_per_w >= 4.5:  eff_rating = "กลาง"
+        if est_g_per_w >= 6.0:    eff_rating = "สูงมาก (ประหยัดไฟดีเยี่ยม)"
+        elif est_g_per_w >= 5.0:  eff_rating = "สูง (ประหยัดไฟดี)"
+        elif est_g_per_w >= 4.0:  eff_rating = "กลาง"
         else:                      eff_rating = "ต่ำ (กินไฟสูง)"
     else:
         eff_rating = eff_label
 
-    # ── Pitch-to-size warning ──────────────────────────────────
-    notes = []
-    try:
-        ratio = float(prop_pitch) / float(prop_size)
-        if ratio > 0.9:
-            notes.append(f"Pitch/Size ratio {ratio:.2f} สูง — เสี่ยงเสียงดังและ motor โหลดหนัก")
-        if float(prop_size) > 5.5 and float(prop_pitch) > 4.5:
-            notes.append("ใบพัดใหญ่ + pitch สูง — ตรวจสอบกำลัง motor ให้เพียงพอ")
-    except Exception:
-        pass
+    summary = (f"ใบพัด {p_in}\" {blades} ใบ Pitch {p_pitch} | Grip: {grip} | Efficiency: {eff_rating}")
+    if pitch_speed_kmh: summary += f" | ~{pitch_speed_kmh} km/h"
+    if tip_speed_mps:   summary += f" | tip {tip_speed_mps} m/s"
 
-    # ── Assemble result ────────────────────────────────────────
-    result["summary"] = (
-        f"ใบพัด {prop_size}\" {blade_count} ใบ Pitch {prop_pitch} | "
-        f"Grip: {grip} | Efficiency: {eff_rating}"
-    )
-    if pitch_speed_kmh:
-        result["summary"] += f" | ~{pitch_speed_kmh} km/h pitch speed"
-
-    result["recommendation"] = rec
-
-    result["effect"] = {
-        "noise":               noise_score,
-        "motor_load":          motor_load,
-        "efficiency":          eff_rating,
-        "grip":                grip,
-        "est_g_per_w":         est_g_per_w,        # g/W at reference power
-        "est_thrust_100w":     est_thrust_100w,    # grams thrust per motor @ 100W
-        "disk_loading":        disk_loading,       # g/cm² (relative)
-        "pitch_speed_kmh":     pitch_speed_kmh,    # km/h pitch speed estimate
-        "pitch_size_ratio":    round(float(prop_pitch)/float(prop_size), 2) if prop_size else None,
-        "notes":               notes,
+    return {
+        "summary":        summary,
+        "recommendation": rec,
+        "effect": {
+            "noise":                  noise_score,
+            "motor_load":             motor_load,
+            "efficiency":             eff_rating,
+            "grip":                   grip,
+            "est_g_per_w":            est_g_per_w,
+            "est_thrust_100w":        est_thrust_100w,
+            "max_thrust_per_motor_g": max_thrust_per_motor,
+            "max_power_per_motor_w":  max_pwr_motor,
+            "disk_loading":           disk_loading,
+            "pitch_speed_kmh":        pitch_speed_kmh,
+            "tip_speed_mps":          tip_speed_mps,
+            "rpm_estimated":          round(rpm_est) if rpm_est else None,
+            "pitch_size_ratio":       round(p_pitch/p_in, 2) if p_in else None,
+            "cells_used":             cells_i,
+            "notes":                  notes,
+        }
     }
-
-    return result
