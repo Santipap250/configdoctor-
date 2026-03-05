@@ -2,752 +2,1104 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>OSD Studio — OBIXConfig Doctor</title>
-{% set og_title       = "OSD Studio — OBIXConfig Doctor" %}
-{% set og_description = "ออกแบบ Betaflight OSD แบบ real 30×13 char grid พร้อม export CLI commands จริงทันที" %}
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>OSD Studio v3 — OBIXConfig Doctor</title>
+{% set og_title       = "OSD Studio v3 — OBIXConfig Doctor" %}
+{% set og_description = "ออกแบบ Betaflight OSD real-time · drag-drop · 35+ elements · 6 presets · export CLI" %}
 {% set og_url         = "https://configdoctor.onrender.com/osd" %}
 {% set nav_page       = "osd" %}
 {% include "partials/og_tags.html" %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@400;500;600&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@300;400;600;700&family=Sarabun:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#010408; --panel:#04080f; --panel2:#060c1a; --border:rgba(0,255,136,.07);
-  --green:#00ff88; --blue:#00aaff; --amber:#ffb700; --red:#ff4455; --purple:#cc55ff;
-  --muted:#1e3a28; --text:#a8d4bc; --font-d:'Orbitron',sans-serif;
-  --font-m:'JetBrains Mono',monospace; --font-t:'Sarabun',sans-serif;
-  --glow:0 0 20px rgba(0,255,136,.25);
+  --bg:#010307;--bg2:#020509;--panel:#04080f;--panel2:#060c18;
+  --border:rgba(0,255,136,.07);--borderB:rgba(0,170,255,.1);
+  --green:#00ff88;--green2:#00cc6a;--blue:#00aaff;--cyan:#00e5ff;
+  --amber:#ffb700;--red:#ff4455;--purple:#bb55ff;--pink:#ff66bb;
+  --muted:#1e3a28;--muted2:#2a4c3a;--text:#9ac8b2;
+  --font-d:'Orbitron',sans-serif;
+  --font-m:'JetBrains Mono',monospace;
+  --font-osd:'Share Tech Mono',monospace;
+  --font-t:'Sarabun',sans-serif;
+  --glow-g:0 0 20px rgba(0,255,136,.3);
+  --glow-b:0 0 20px rgba(0,170,255,.3);
+  --glow-a:0 0 20px rgba(255,183,0,.3);
+  --glow-r:0 0 20px rgba(255,68,85,.3);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{overflow-x:hidden;height:100%}
+html,body{overflow-x:hidden}
 body{background:var(--bg);color:var(--text);font-family:var(--font-t);font-size:13px;min-height:100vh}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,136,.004) 2px,rgba(0,255,136,.004) 4px)}
+  background-image:radial-gradient(circle at 1px 1px,rgba(0,255,136,.055) 1px,transparent 0);
+  background-size:22px 22px;animation:bgd 60s linear infinite}
+@keyframes bgd{to{background-position:22px 22px}}
 body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background:radial-gradient(ellipse 70% 40% at 10% 5%,rgba(0,255,136,.04) 0%,transparent 70%)}
+  background:radial-gradient(ellipse 80% 50% at 0% 0%,rgba(0,255,136,.035) 0%,transparent 60%),
+             radial-gradient(ellipse 60% 50% at 100% 100%,rgba(0,170,255,.03) 0%,transparent 60%)}
 ::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-thumb{background:rgba(0,255,136,.2);border-radius:2px}
+::-webkit-scrollbar-thumb{background:rgba(0,255,136,.15);border-radius:2px}
 
-.page{position:relative;z-index:1;max-width:1600px;margin:0 auto;padding:0 12px 40px}
+/* ══ LAYOUT ══ */
+.page{position:relative;z-index:1;max-width:1900px;margin:0 auto;padding:8px 10px 40px}
+.studio-wrap{display:grid;grid-template-columns:210px 1fr 268px;gap:8px;align-items:start}
+@media(max-width:1180px){.studio-wrap{grid-template-columns:190px 1fr 250px}}
+@media(max-width:900px){.studio-wrap{grid-template-columns:1fr}}
 
-/* ── Hero ── */
-.hero{padding:20px 0 16px;border-bottom:1px solid var(--border);
-  display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.hero-eye{font-family:var(--font-d);font-size:8px;font-weight:700;letter-spacing:.2em;
-  color:var(--green);text-transform:uppercase;display:flex;align-items:center;gap:7px;margin-bottom:8px}
-.hero-led{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:var(--glow);
-  animation:ledB 1.2s ease-in-out infinite}
-@keyframes ledB{0%,100%{opacity:1}50%{opacity:.25}}
-.hero-title{font-family:var(--font-d);font-size:clamp(18px,2.5vw,30px);font-weight:900;
+/* ══ PANEL BASE ══ */
+.pcard{background:var(--panel);border:1px solid var(--border);border-radius:11px;overflow:hidden}
+.pcard-head{
+  display:flex;align-items:center;gap:8px;padding:9px 12px;
+  border-bottom:1px solid var(--border);background:rgba(255,255,255,.012);flex-shrink:0
+}
+.ph-icon{width:26px;height:26px;border-radius:6px;background:rgba(0,255,136,.06);
+  border:1px solid rgba(0,255,136,.18);display:grid;place-items:center;font-size:12px;flex-shrink:0}
+.ph-icon.b{background:rgba(0,170,255,.06);border-color:rgba(0,170,255,.18)}
+.ph-icon.a{background:rgba(255,183,0,.06);border-color:rgba(255,183,0,.18)}
+.ph-icon.p{background:rgba(187,85,255,.06);border-color:rgba(187,85,255,.18)}
+.ph-title{font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--text)}
+.ph-sub{font-size:8.5px;color:var(--muted2);margin-top:1px;letter-spacing:.04em}
+
+/* ══ HERO ══ */
+.hero{padding:14px 0 12px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+.hero-eye{font-family:var(--font-d);font-size:8px;font-weight:700;letter-spacing:.22em;
+  color:var(--green);text-transform:uppercase;display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.hero-led{width:7px;height:7px;border-radius:50%;background:var(--green);
+  box-shadow:var(--glow-g);animation:ledb 1.3s ease-in-out infinite}
+@keyframes ledb{0%,100%{opacity:1}50%{opacity:.15}}
+.hero-title{font-family:var(--font-d);font-size:clamp(20px,3vw,36px);font-weight:900;
   letter-spacing:.04em;color:#fff;line-height:1.1}
-.hero-title span{color:var(--green);text-shadow:var(--glow)}
-.hero-sub{margin-top:6px;font-size:12px;color:#3a6050;line-height:1.6}
+.hero-title .acc{color:var(--green);text-shadow:var(--glow-g)}
+.hero-title .acc2{color:var(--blue)}
+.hero-sub{margin-top:7px;font-size:12px;color:var(--muted2);line-height:1.65;max-width:480px}
+.hero-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.hchip{font-family:var(--font-d);font-size:8px;font-weight:700;letter-spacing:.1em;
+  padding:3px 10px;border-radius:100px;border:1px solid;text-transform:uppercase}
+.hchip.g{color:var(--green);border-color:rgba(0,255,136,.3);background:rgba(0,255,136,.06)}
+.hchip.b{color:var(--blue);border-color:rgba(0,170,255,.3);background:rgba(0,170,255,.06)}
+.hchip.a{color:var(--amber);border-color:rgba(255,183,0,.3);background:rgba(255,183,0,.06)}
+.hchip.p{color:var(--purple);border-color:rgba(187,85,255,.3);background:rgba(187,85,255,.06)}
 
-/* ── Toolbar ── */
-.toolbar{display:flex;align-items:center;gap:8px;padding:10px 0;
-  border-bottom:1px solid var(--border);flex-wrap:wrap}
-.tb-btn{font-family:var(--font-d);font-size:8px;font-weight:700;letter-spacing:.1em;
-  padding:7px 13px;border-radius:8px;border:1px solid;cursor:pointer;transition:.18s;text-transform:uppercase}
-.tb-btn.primary{background:rgba(0,255,136,.1);border-color:rgba(0,255,136,.3);color:var(--green)}
-.tb-btn.primary:hover{background:rgba(0,255,136,.2);border-color:rgba(0,255,136,.5)}
-.tb-btn.ghost{background:none;border-color:var(--border);color:#3a6050}
-.tb-btn.ghost:hover{color:var(--text);border-color:rgba(255,255,255,.1)}
-.tb-btn.danger{background:rgba(255,68,85,.08);border-color:rgba(255,68,85,.25);color:var(--red)}
-.tb-sep{width:1px;height:24px;background:var(--border);flex-shrink:0}
-.tb-mode{display:flex;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
-.tb-mode-btn{font-family:var(--font-d);font-size:7.5px;font-weight:700;letter-spacing:.1em;
-  padding:7px 12px;background:none;border:none;color:#3a6050;cursor:pointer;transition:.18s;text-transform:uppercase}
-.tb-mode-btn.active{background:rgba(0,255,136,.12);color:var(--green)}
+/* ══ LEFT: PALETTE ══ */
+.palette-col{position:sticky;top:64px;max-height:calc(100vh - 80px);display:flex;flex-direction:column}
+.pal-search{display:flex;align-items:center;gap:7px;padding:8px 10px;
+  border-bottom:1px solid var(--border);background:rgba(0,255,136,.02)}
+.pal-search-ico{font-size:11px;color:var(--muted2);flex-shrink:0}
+.pal-search input{flex:1;background:none;border:none;outline:none;
+  font-family:var(--font-m);font-size:11px;color:var(--text);caret-color:var(--green)}
+.pal-search input::placeholder{color:var(--muted2)}
+.pal-list{flex:1;overflow-y:auto;padding:4px 0}
+.pal-group-label{font-family:var(--font-d);font-size:7.5px;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--muted);padding:10px 12px 3px}
+.pal-item{display:flex;align-items:center;gap:8px;padding:6px 12px;
+  cursor:grab;transition:.13s;border-left:2px solid transparent;position:relative}
+.pal-item:hover{background:rgba(0,255,136,.04);border-left-color:rgba(0,255,136,.35)}
+.pal-item.active{background:rgba(0,255,136,.07);border-left-color:var(--green)}
+.pal-item:active{cursor:grabbing}
+.pi-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:.15s}
+.pi-body{flex:1;min-width:0}
+.pi-name{font-size:11px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pi-cli{font-family:var(--font-m);font-size:8px;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pi-add{width:20px;height:20px;border-radius:5px;flex-shrink:0;border:1px solid rgba(0,255,136,.18);
+  display:grid;place-items:center;font-size:13px;color:var(--green);cursor:pointer;
+  opacity:0;transition:.13s;background:rgba(0,255,136,.06)}
+.pal-item:hover .pi-add{opacity:1}
+.pi-added-badge{position:absolute;right:10px;font-family:var(--font-d);font-size:7px;
+  color:var(--green);letter-spacing:.06em;opacity:.6}
 
-/* ── Studio layout ── */
-.studio{display:grid;grid-template-columns:200px 1fr 220px;gap:12px;margin-top:14px;align-items:start}
-@media(max-width:1100px){.studio{grid-template-columns:180px 1fr}}
-@media(max-width:700px){.studio{grid-template-columns:1fr}}
+/* ══ CENTER ══ */
+.center-col{display:flex;flex-direction:column;gap:8px}
 
-/* ── Panel ── */
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.panel-hd{padding:10px 14px 8px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;gap:8px}
-.panel-title{font-family:var(--font-d);font-size:8.5px;font-weight:700;letter-spacing:.15em;
-  color:var(--green);text-transform:uppercase;display:flex;align-items:center;gap:6px}
-.panel-body{padding:12px}
+/* Toolbar */
+.toolbar{display:flex;align-items:center;gap:5px;flex-wrap:wrap;
+  background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:8px 10px}
+.tbtn{font-family:var(--font-d);font-size:7.5px;font-weight:700;letter-spacing:.1em;
+  padding:6px 11px;border-radius:7px;border:1px solid;cursor:pointer;
+  transition:.14s;text-transform:uppercase;white-space:nowrap;line-height:1}
+.tbtn.g{background:rgba(0,255,136,.08);border-color:rgba(0,255,136,.25);color:var(--green)}
+.tbtn.g:hover{background:rgba(0,255,136,.18);border-color:var(--green);box-shadow:var(--glow-g)}
+.tbtn.b{background:rgba(0,170,255,.08);border-color:rgba(0,170,255,.25);color:var(--blue)}
+.tbtn.b:hover{background:rgba(0,170,255,.18);border-color:var(--blue)}
+.tbtn.a{background:rgba(255,183,0,.08);border-color:rgba(255,183,0,.25);color:var(--amber)}
+.tbtn.a:hover{background:rgba(255,183,0,.18)}
+.tbtn.r{background:rgba(255,68,85,.07);border-color:rgba(255,68,85,.22);color:var(--red)}
+.tbtn.r:hover{background:rgba(255,68,85,.18)}
+.tbtn.ghost{background:none;border-color:var(--border);color:var(--muted2)}
+.tbtn.ghost:hover{color:var(--text);border-color:rgba(255,255,255,.12)}
+.tbtn.live-on{background:rgba(255,68,85,.15);border-color:rgba(255,68,85,.5);color:var(--red);
+  animation:livepulse 1s ease-in-out infinite}
+@keyframes livepulse{0%,100%{box-shadow:none}50%{box-shadow:var(--glow-r)}}
+.tsep{width:1px;height:22px;background:var(--border);flex-shrink:0;margin:0 2px}
 
-/* ── Palette ── */
-.pal-group-title{font-family:var(--font-d);font-size:7px;letter-spacing:.12em;font-weight:700;
-  color:#3a6050;text-transform:uppercase;margin:10px 0 5px}
-.pal-group-title:first-child{margin-top:0}
-.pal-item{display:flex;align-items:center;gap:7px;width:100%;padding:7px 9px;
-  border-radius:7px;border:1px solid var(--border);background:var(--panel2);
-  cursor:grab;margin-bottom:4px;transition:.18s;font-size:11.5px;color:var(--text)}
-.pal-item:hover{border-color:rgba(0,255,136,.25);background:rgba(0,255,136,.05);color:var(--green)}
-.pal-item .pi-icon{font-size:13px;flex-shrink:0;width:18px;text-align:center}
-.pal-item .pi-name{flex:1;font-size:11px;line-height:1.3}
-.pal-item .pi-cli{font-family:var(--font-m);font-size:8px;color:#3a6050;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px}
+/* Mode toggle */
+.mode-row{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.mdbtn{font-family:var(--font-d);font-size:8px;font-weight:700;letter-spacing:.08em;
+  padding:6px 12px;background:none;border:none;cursor:pointer;color:var(--muted2);
+  transition:.14s;white-space:nowrap}
+.mdbtn.active{background:rgba(0,255,136,.12);color:var(--green)}
 
-/* ── Canvas ── */
-.canvas-outer{position:relative;border-radius:10px;overflow:hidden;
-  background:#000;border:1px solid var(--border)}
-.canvas-bg{position:absolute;inset:0;
-  background:radial-gradient(ellipse at 30% 40%,rgba(30,60,30,.5) 0%,#000 70%);
-  pointer-events:none}
+/* Preset bar */
+.pbar{display:flex;align-items:center;gap:5px;flex-wrap:wrap;
+  background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:7px 10px}
+.pbar-lbl{font-family:var(--font-d);font-size:7.5px;font-weight:700;letter-spacing:.16em;
+  color:var(--muted);text-transform:uppercase;white-space:nowrap}
+.ppill{font-family:var(--font-d);font-size:7.5px;font-weight:700;letter-spacing:.08em;
+  padding:5px 12px;border-radius:100px;border:1px solid;cursor:pointer;transition:.14s;white-space:nowrap}
+.ppill:hover{filter:brightness(1.25)}
+.ppill.active{filter:brightness(1.4);box-shadow:0 0 10px rgba(255,255,255,.1)}
+.pp-r{border-color:rgba(255,68,85,.3);color:var(--red);background:rgba(255,68,85,.06)}
+.pp-f{border-color:rgba(0,255,136,.3);color:var(--green);background:rgba(0,255,136,.06)}
+.pp-l{border-color:rgba(0,170,255,.3);color:var(--blue);background:rgba(0,170,255,.06)}
+.pp-c{border-color:rgba(187,85,255,.3);color:var(--purple);background:rgba(187,85,255,.06)}
+.pp-m{border-color:rgba(255,183,0,.3);color:var(--amber);background:rgba(255,183,0,.06)}
+.pp-w{border-color:rgba(0,229,255,.3);color:var(--cyan);background:rgba(0,229,255,.06)}
+
+/* FPV Screen */
+.fpv-wrap{
+  background:var(--panel);border:1px solid var(--border);border-radius:11px;
+  padding:12px;overflow:auto
+}
+.fpv-infobar{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.fib{font-family:var(--font-d);font-size:7.5px;letter-spacing:.1em;color:var(--muted2)}
+.fib-v{color:var(--green);font-weight:700}
+.fib-cursor{margin-left:auto;font-family:var(--font-m);font-size:10px;color:var(--muted2)}
+
+.fpv-screen{
+  position:relative;display:inline-block;border-radius:8px;overflow:hidden;
+  box-shadow:0 0 50px rgba(0,255,136,.06),0 0 0 1px rgba(0,255,136,.1),
+             inset 0 0 30px rgba(0,0,0,.4);
+  flex-shrink:0;
+}
+/* Background layers */
+.fpv-bg{position:absolute;inset:0;pointer-events:none;transition:opacity .4s}
+#fbg0{background:radial-gradient(ellipse at 35% 45%,#0d2010 0%,#050d07 40%,#000 100%)}
+#fbg1{background:radial-gradient(ellipse at 50% 65%,#0f2a10 0%,#071507 55%,#000 100%);opacity:0}
+#fbg2{background:radial-gradient(ellipse at 50% 25%,#0a1230 0%,#050820 55%,#000 100%);opacity:0}
 /* Scanlines */
-.canvas-bg::after{content:'';position:absolute;inset:0;
-  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.3) 3px,rgba(0,0,0,.3) 4px);
-  pointer-events:none;z-index:1}
-#osdCanvas{position:relative;z-index:2;display:grid;cursor:crosshair;user-select:none}
-.cell{position:relative}
-.cell.hover-hint{background:rgba(0,255,136,.08)!important}
+.fpv-scan{position:absolute;inset:0;pointer-events:none;z-index:3;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.13) 2px,rgba(0,0,0,.13) 3px)}
+/* Vignette */
+.fpv-vig{position:absolute;inset:0;pointer-events:none;z-index:4;
+  background:radial-gradient(ellipse at 50% 50%,transparent 45%,rgba(0,0,0,.7) 100%)}
+/* Chroma aberration */
+.fpv-chr{position:absolute;top:0;left:0;right:0;height:2px;pointer-events:none;z-index:5;
+  background:linear-gradient(90deg,transparent,rgba(255,20,20,.4),rgba(0,255,136,.4),transparent);
+  animation:chrshift 4s ease-in-out infinite}
+@keyframes chrshift{0%,100%{opacity:.4}50%{opacity:.8}}
+/* Grid canvas */
+.fpv-grid{position:absolute;inset:0;z-index:6;pointer-events:none}
+/* OSD layer */
+.osd-layer{position:absolute;inset:0;z-index:10;touch-action:none}
 
-/* OSD Elements on canvas */
-.osd-el{position:absolute;z-index:10;cursor:grab;white-space:nowrap;
-  font-family:var(--font-m);font-weight:600;
-  text-shadow:1px 1px 0 #000,-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,0 0 8px currentColor;
-  border:1px solid transparent;border-radius:2px;padding:1px 2px;
-  transition:border-color .15s,box-shadow .15s;pointer-events:all}
-.osd-el:hover{border-color:rgba(0,255,136,.4);box-shadow:0 0 10px rgba(0,255,136,.2)}
-.osd-el.selected{border-color:var(--green)!important;box-shadow:0 0 14px rgba(0,255,136,.4)!important}
-.osd-el.disabled{opacity:.3}
-.osd-el .el-handle{display:none}
-.osd-el.selected .el-handle{display:flex;position:absolute;top:-20px;left:0;
-  background:var(--green);color:#000;font-family:var(--font-d);font-size:7px;font-weight:700;
-  padding:2px 7px;border-radius:3px;white-space:nowrap;gap:6px;align-items:center}
+/* OSD Elements */
+.osd-el{
+  position:absolute;font-family:var(--font-osd);font-size:13px;line-height:1;
+  white-space:nowrap;cursor:grab;user-select:none;
+  text-shadow:1px 1px 0 rgba(0,0,0,.9),0 0 8px currentColor;
+  padding:1px 2px;border-radius:2px;
+  display:flex;align-items:center;
+}
+.osd-el:active{cursor:grabbing}
+.osd-el.sel{
+  outline:1px dashed rgba(0,255,136,.85);
+  background:rgba(0,255,136,.07);
+  animation:ssel 1.4s ease-in-out infinite;
+}
+@keyframes ssel{0%,100%{box-shadow:0 0 6px rgba(0,255,136,.3)}50%{box-shadow:0 0 14px rgba(0,255,136,.65)}}
+.osd-el.hid{opacity:.28;text-decoration:line-through}
 
-/* Grid overlay */
-.grid-overlay{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:.08}
-.grid-overlay.off{display:none}
+/* Drag ghost zone (drop indicator) */
+.drop-hint{
+  position:absolute;pointer-events:none;z-index:20;
+  border:1px dashed rgba(0,255,136,.5);background:rgba(0,255,136,.04);
+  border-radius:2px;display:none;
+}
 
-/* Canvas footer */
-.canvas-footer{display:flex;align-items:center;justify-content:space-between;
-  padding:7px 12px;border-top:1px solid var(--border);font-family:var(--font-m);font-size:10px}
-.canvas-pos{color:var(--green);display:flex;gap:12px}
-.canvas-pos span{color:#3a6050}
+/* ══ RIGHT: PROPS + CLI ══ */
+.right-col{display:flex;flex-direction:column;gap:8px;position:sticky;top:64px}
 
-/* ── Properties ── */
-.prop-label{font-family:var(--font-d);font-size:7.5px;letter-spacing:.1em;
-  color:#3a6050;text-transform:uppercase;display:block;margin-bottom:4px}
-.prop-input{width:100%;background:var(--panel2);border:1px solid var(--border);
-  border-radius:7px;color:var(--text);font-family:var(--font-m);font-size:11.5px;
-  padding:6px 10px;outline:none;margin-bottom:10px;transition:.18s}
-.prop-input:focus{border-color:rgba(0,255,136,.3)}
-.prop-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.toggle-row{display:flex;align-items:center;justify-content:space-between;
-  padding:7px 10px;border-radius:8px;background:var(--panel2);border:1px solid var(--border);
-  margin-bottom:8px;cursor:pointer;transition:.18s}
-.toggle-row:hover{border-color:rgba(0,255,136,.2)}
-.toggle-row .tr-label{font-size:11.5px;color:var(--text)}
-.toggle-pill{width:32px;height:18px;border-radius:9px;background:var(--muted);
-  position:relative;transition:.25s;flex-shrink:0}
-.toggle-pill.on{background:var(--green)}
-.toggle-pill::after{content:'';position:absolute;top:3px;left:3px;width:12px;height:12px;
-  border-radius:50%;background:#000;transition:.25s}
-.toggle-pill.on::after{left:17px}
+/* Props */
+.no-sel{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;padding:26px 16px;text-align:center}
+.no-sel-ring{width:50px;height:50px;border-radius:50%;border:2px solid rgba(0,255,136,.12);
+  display:grid;place-items:center;font-size:22px;box-shadow:0 0 20px rgba(0,255,136,.04)}
+.prop-body{padding:12px}
+.psec-title{font-family:var(--font-d);font-size:7.5px;font-weight:700;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--blue);margin-bottom:7px;
+  display:flex;align-items:center;gap:6px}
+.psec-title::after{content:'';flex:1;height:1px;background:var(--borderB)}
+.plabel{font-family:var(--font-d);font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted2);margin-bottom:3px;display:block}
+.pinput{width:100%;padding:7px 10px;background:var(--bg2);border:1px solid var(--border);
+  border-radius:6px;color:var(--text);font-family:var(--font-m);font-size:16px;
+  outline:none;transition:.14s}
+.pinput:focus{border-color:rgba(0,255,136,.35);box-shadow:0 0 0 2px rgba(0,255,136,.06)}
+.prow{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px}
+.pval{font-family:var(--font-m);font-size:13px;font-weight:700;color:var(--amber);
+  padding:7px 10px;background:rgba(255,183,0,.05);border:1px solid rgba(255,183,0,.18);
+  border-radius:6px;letter-spacing:.06em;display:flex;align-items:center;justify-content:space-between}
 
 /* Color swatches */
-.color-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
-.swatch{width:22px;height:22px;border-radius:5px;cursor:pointer;border:2px solid transparent;
-  transition:.15s;flex-shrink:0}
-.swatch:hover{transform:scale(1.15)}
-.swatch.active{border-color:#fff}
+.swatch-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.sw{width:22px;height:22px;border-radius:5px;cursor:pointer;
+  border:2px solid transparent;transition:.13s;flex-shrink:0}
+.sw:hover{transform:scale(1.22)}
+.sw.on{border-color:#fff;box-shadow:0 0 8px currentColor}
+.sw-custom{width:22px;height:22px;border-radius:5px;border:1px dashed rgba(255,255,255,.2);
+  cursor:pointer;overflow:hidden;padding:0}
 
-/* Preset buttons */
-.preset-row{display:flex;flex-direction:column;gap:5px}
-.preset-btn{padding:8px 10px;border-radius:8px;border:1px solid var(--border);
-  background:none;color:#3a6050;cursor:pointer;font-family:var(--font-d);font-size:7.5px;
-  font-weight:700;letter-spacing:.09em;text-align:left;transition:.18s;display:flex;align-items:center;gap:8px}
-.preset-btn:hover{border-color:rgba(0,255,136,.25);color:var(--green);background:rgba(0,255,136,.05)}
-.preset-btn.active{border-color:rgba(0,255,136,.4);color:var(--green);background:rgba(0,255,136,.08)}
+/* Toggle */
+.tog{display:flex;align-items:center;justify-content:space-between;
+  padding:7px 10px;background:var(--bg2);border:1px solid var(--border);
+  border-radius:7px;cursor:pointer;transition:.14s;margin-bottom:6px}
+.tog:hover{border-color:rgba(0,255,136,.25)}
+.tog-lbl{font-size:11px;color:var(--text)}
+.tog-pill{width:34px;height:18px;border-radius:9px;background:var(--muted);
+  position:relative;transition:.22s;flex-shrink:0}
+.tog-pill::after{content:'';position:absolute;width:14px;height:14px;
+  border-radius:7px;background:#fff;top:2px;left:2px;transition:.22s}
+.tog-pill.on{background:var(--green);box-shadow:var(--glow-g)}
+.tog-pill.on::after{left:18px}
 
-/* CLI panel */
-.cli-out{background:rgba(0,0,0,.6);border:1px solid var(--border);border-radius:9px;
-  padding:12px;font-family:var(--font-m);font-size:10.5px;line-height:1.8;
-  max-height:320px;overflow-y:auto;margin-bottom:8px;position:relative}
-.co-cmt{color:rgba(0,255,136,.35)}
-.co-key{color:#79c0ff}
-.co-val{color:var(--amber)}
-.co-cmd{color:#c8dce8}
+/* Preview mock */
+.mock-preview{background:#000;border-radius:6px;padding:10px 14px;
+  border:1px solid rgba(0,255,136,.08);font-family:var(--font-osd);
+  font-size:16px;text-shadow:0 0 8px currentColor;margin-bottom:8px}
 
-.no-sel{text-align:center;padding:24px 10px;color:#2a5040}
-.no-sel-icon{font-size:28px;margin-bottom:10px}
+/* Prop action btns */
+.pbtns{display:flex;gap:6px}
+.pbtn{flex:1;padding:7px 8px;border-radius:6px;border:1px solid;cursor:pointer;
+  font-family:var(--font-d);font-size:7.5px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;transition:.14s;text-align:center}
 
-@media(max-width:700px){.studio{grid-template-columns:1fr}
-  .col-right{grid-column:1}.canvas-outer{touch-action:none}}
+/* ══ CLI PANEL ══ */
+.cli-head{display:flex;align-items:center;justify-content:space-between;
+  padding:9px 12px;border-bottom:1px solid var(--border);background:rgba(0,170,255,.025)}
+.cli-title{font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--blue)}
+.cli-acts{display:flex;gap:5px}
+.cbtn{font-family:var(--font-d);font-size:7.5px;font-weight:700;letter-spacing:.08em;
+  padding:5px 10px;border-radius:6px;border:1px solid;cursor:pointer;transition:.14s}
+.cbtn.cp{background:rgba(0,255,136,.08);border-color:rgba(0,255,136,.25);color:var(--green)}
+.cbtn.cp:hover{background:rgba(0,255,136,.2)}
+.cbtn.dl{background:rgba(0,170,255,.08);border-color:rgba(0,170,255,.25);color:var(--blue)}
+.cbtn.dl:hover{background:rgba(0,170,255,.2)}
+.cli-body{padding:10px 12px;font-family:var(--font-m);font-size:10px;line-height:1.9;
+  min-height:130px;max-height:300px;overflow-y:auto}
+.cc{color:#2e5240;font-style:italic}
+.ck{color:var(--cyan)}
+.cv{color:var(--amber);font-weight:700}
+.cs{color:var(--green);font-weight:700}
+.cmd{color:#79c0ff}
+
+/* ══ STATS STRIP ══ */
+.sstrip{display:flex;gap:8px;flex-wrap:wrap;
+  background:var(--panel);border:1px solid var(--border);border-radius:8px;
+  padding:7px 12px;margin-top:2px}
+.ssc{font-family:var(--font-d);font-size:7.5px;letter-spacing:.08em;
+  display:flex;align-items:center;gap:5px;color:var(--muted2)}
+.ssv{color:var(--green);font-weight:700}
+
+/* ══ REFERENCE PANEL ══ */
+.ref-row{display:grid;grid-template-columns:50px 80px 55px 1fr;gap:4px;
+  padding:5px 10px;border-bottom:1px solid rgba(0,200,255,.03);
+  font-family:var(--font-m);font-size:10px}
+.ref-head{background:rgba(0,255,136,.04);font-family:var(--font-d);
+  font-size:7px;letter-spacing:.12em;color:var(--muted);padding:5px 10px}
+
+/* ══ KEYBOARD HINTS ══ */
+.krow{display:flex;gap:10px;flex-wrap:wrap;padding:5px 0 2px}
+.kh{font-family:var(--font-m);font-size:9px;color:var(--muted2)}
+.kh kbd{background:var(--panel2);border:1px solid var(--border);border-radius:3px;
+  padding:1px 5px;font-size:8.5px;color:var(--text)}
+
+/* ══ TOAST ══ */
+#toast{position:fixed;bottom:22px;left:50%;
+  transform:translateX(-50%) translateY(10px);opacity:0;pointer-events:none;z-index:9999;
+  background:var(--green);color:#001a09;padding:8px 20px;border-radius:20px;
+  font-family:var(--font-d);font-weight:700;font-size:10px;letter-spacing:.08em;
+  box-shadow:0 4px 20px rgba(0,255,136,.4);transition:opacity .22s,transform .22s}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
 {% set nav_page = "osd" %}
 {% include "partials/nav.html" %}
+
 <div class="page">
 
-<!-- Hero -->
+<!-- HERO -->
 <div class="hero">
   <div>
-    <div class="hero-eye"><span class="hero-led"></span>OBIX · OSD STUDIO · BETAFLIGHT 4.x</div>
-    <h1 class="hero-title">OSD <span>Studio</span></h1>
-    <p class="hero-sub">Drag-drop บน real 30×13 grid · Export Betaflight CLI ของจริง · 5 Preset layouts</p>
-  </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-    <div class="tb-mode" id="modeSwitch">
-      <button class="tb-mode-btn active" data-mode="analog">ANALOG 30×13</button>
-      <button class="tb-mode-btn" data-mode="hd">HD 53×20</button>
+    <div class="hero-eye"><span class="hero-led"></span>OBIX · OSD STUDIO · v3.0</div>
+    <h1 class="hero-title">OSD <span class="acc">Studio</span> <span class="acc2">Pro</span></h1>
+    <p class="hero-sub">ออกแบบ Betaflight OSD แบบ real-time FPV preview · drag-drop · 35 elements · CLI export ทันที</p>
+    <div class="hero-chips">
+      <span class="hchip g">35 Elements</span>
+      <span class="hchip b">Analog 30×13 / HD 53×20</span>
+      <span class="hchip a">6 Presets</span>
+      <span class="hchip p">Live Sim Mode</span>
+      <span class="hchip g">BF 4.3–4.5</span>
     </div>
-    <a href="/app" style="font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.12em;
-      color:#3a6050;text-decoration:none;border:1px solid var(--border);border-radius:7px;
-      padding:7px 12px;transition:.18s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='#3a6050'">← กลับ</a>
   </div>
-</div>
-
-<!-- Toolbar -->
-<div class="toolbar">
-  <button class="tb-btn primary" onclick="exportCLI()">📋 EXPORT CLI</button>
-  <button class="tb-btn ghost" onclick="exportJSON()">💾 SAVE JSON</button>
-  <button class="tb-btn ghost" onclick="loadJSON()">📂 LOAD</button>
-  <input type="file" id="jsonFileIn" accept=".json" style="display:none" onchange="onLoadFile(event)">
-  <div class="tb-sep"></div>
-  <button class="tb-btn ghost" onclick="toggleGrid()">⊞ GRID</button>
-  <button class="tb-btn ghost" onclick="centerAll()">⊕ CENTER</button>
-  <button class="tb-btn ghost" onclick="toggleBg()">🎥 BG</button>
-  <div class="tb-sep"></div>
-  <button class="tb-btn danger" onclick="clearCanvas()">🧹 CLEAR</button>
-  <div style="margin-left:auto;font-family:var(--font-m);font-size:10px;color:#3a6050">
-    Elements: <span id="elCount" style="color:var(--green)">0</span>
-    &nbsp;· Col: <span id="curCol" style="color:var(--green)">—</span>
-    &nbsp;Row: <span id="curRow" style="color:var(--green)">—</span>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+    <a href="/app" class="tbtn ghost" style="text-decoration:none">← Analyzer</a>
+    <a href="/vtx" class="tbtn ghost" style="text-decoration:none">📡 VTX</a>
   </div>
 </div>
 
-<!-- Studio -->
-<div class="studio">
+<div class="studio-wrap">
 
-  <!-- LEFT: Palette -->
-  <div>
-    <div class="panel" style="margin-bottom:10px">
-      <div class="panel-hd"><div class="panel-title">Elements</div></div>
-      <div class="panel-body" style="max-height:calc(100vh - 280px);overflow-y:auto">
-        <div class="pal-group-title">Flight Data</div>
-        <div id="paletteList"></div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-hd"><div class="panel-title">Presets</div></div>
-      <div class="panel-body">
-        <div class="preset-row" id="presetRow"></div>
-      </div>
+<!-- ══════════ LEFT: PALETTE ══════════ -->
+<div class="pcard palette-col">
+  <div class="pcard-head">
+    <div class="ph-icon">🎛️</div>
+    <div>
+      <div class="ph-title">Elements</div>
+      <div class="ph-sub" id="palCount">35 items · drag หรือ double-click</div>
     </div>
   </div>
-
-  <!-- CENTER: Canvas -->
-  <div>
-    <div class="canvas-outer" id="canvasOuter">
-      <div class="canvas-bg"></div>
-      <canvas class="grid-overlay" id="gridCanvas"></canvas>
-      <div id="osdCanvas"></div>
-    </div>
-    <div class="canvas-footer">
-      <div class="canvas-pos">
-        <span>COL <b id="fCol">—</b></span>
-        <span>ROW <b id="fRow">—</b></span>
-        <span>POS <b id="fPos">—</b></span>
-      </div>
-      <div style="font-family:var(--font-d);font-size:8px;color:#3a6050">
-        BETAFLIGHT OSD · <span id="gridLabel">30×13</span>
-      </div>
-    </div>
+  <div class="pal-search">
+    <span class="pal-search-ico">🔍</span>
+    <input id="palSearch" type="search" placeholder="Search elements..." oninput="filterPal(this.value)">
   </div>
-
-  <!-- RIGHT: Properties + CLI -->
-  <div class="col-right">
-    <div class="panel" style="margin-bottom:10px">
-      <div class="panel-hd">
-        <div class="panel-title">Properties</div>
-        <span id="selName" style="font-family:var(--font-m);font-size:9px;color:var(--green)"></span>
-      </div>
-      <div class="panel-body" id="propsBody">
-        <div class="no-sel">
-          <div class="no-sel-icon">🖱️</div>
-          <div style="font-family:var(--font-d);font-size:9px;letter-spacing:.1em;color:#3a6050">SELECT ELEMENT</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-hd">
-        <div class="panel-title">Betaflight CLI</div>
-        <button class="tb-btn primary" style="font-size:7px;padding:4px 10px" onclick="copyCLI()">COPY</button>
-      </div>
-      <div class="panel-body">
-        <div class="cli-out" id="cliOut"><span class="co-cmt"># Add elements to generate CLI...</span></div>
-        <div style="font-size:10px;color:#3a6050;line-height:1.6;margin-top:4px">
-          💡 วาง command เหล่านี้ใน Betaflight CLI เพื่อตั้งตำแหน่ง OSD
-        </div>
-      </div>
-    </div>
-  </div>
+  <div class="pal-list" id="palList"></div>
 </div>
-</div>
+
+<!-- ══════════ CENTER ══════════ -->
+<div class="center-col">
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="mode-row" id="modeRow">
+      <button class="mdbtn active" data-mode="analog" onclick="switchMode(this)">ANALOG 30×13</button>
+      <button class="mdbtn" data-mode="hd" onclick="switchMode(this)">HD 53×20</button>
+    </div>
+    <span class="tsep"></span>
+    <button class="tbtn ghost" id="btnGrid" onclick="toggleGrid()">⊞ Grid</button>
+    <button class="tbtn ghost" id="btnBg" onclick="cycleBg()">🌅 BG</button>
+    <button class="tbtn ghost" id="btnLive" onclick="toggleLive()">● Live</button>
+    <span class="tsep"></span>
+    <button class="tbtn ghost" onclick="undoAct()" title="Ctrl+Z">↩ Undo</button>
+    <button class="tbtn ghost" onclick="centerAll()">⊡ Center</button>
+    <button class="tbtn ghost" onclick="snapToGrid()">⌗ Snap</button>
+    <button class="tbtn r" onclick="clearCanvas()">🗑 Clear</button>
+    <span class="tsep"></span>
+    <button class="tbtn a" onclick="exportCLI()">💾 Export CLI</button>
+    <button class="tbtn b" onclick="exportJSON()">📤 JSON</button>
+    <label class="tbtn ghost" style="cursor:pointer">📂 Load JSON<input type="file" accept=".json" style="display:none" onchange="loadJSON(event)"></label>
+  </div>
+
+  <!-- Preset bar -->
+  <div class="pbar">
+    <span class="pbar-lbl">Presets:</span>
+    <button class="ppill pp-r" onclick="applyPreset('Racing',this)">🏁 Racing</button>
+    <button class="ppill pp-f" onclick="applyPreset('Freestyle',this)">🎮 Freestyle</button>
+    <button class="ppill pp-l" onclick="applyPreset('LongRange',this)">🌍 Long Range</button>
+    <button class="ppill pp-c" onclick="applyPreset('Cine',this)">🎥 Cine</button>
+    <button class="ppill pp-m" onclick="applyPreset('Minimal',this)">⬡ Minimal</button>
+    <button class="ppill pp-w" onclick="applyPreset('Whoop',this)">🐝 Whoop</button>
+  </div>
+
+  <!-- FPV Screen -->
+  <div class="fpv-wrap">
+    <div class="fpv-infobar">
+      <div class="fib">GRID <span class="fib-v" id="lbGrid">30×13</span></div>
+      <div class="fib">EL <span class="fib-v" id="lbEl">0</span></div>
+      <div class="fib">BG <span class="fib-v" id="lbBg">DARK</span></div>
+      <div class="fib">LIVE <span class="fib-v" id="lbLive" style="color:var(--muted2)">OFF</span></div>
+      <div class="fib-cursor">Col:<span id="cCol">—</span> Row:<span id="cRow">—</span> Pos:<span id="cPos" style="color:var(--amber)">—</span></div>
+    </div>
+    <div class="fpv-screen" id="fpvScreen">
+      <div class="fpv-bg" id="fbg0"></div>
+      <div class="fpv-bg" id="fbg1"></div>
+      <div class="fpv-bg" id="fbg2"></div>
+      <div class="fpv-vig"></div>
+      <div class="fpv-scan"></div>
+      <div class="fpv-chr"></div>
+      <canvas class="fpv-grid" id="gridCv"></canvas>
+      <div class="osd-layer" id="osdLayer"></div>
+      <div class="drop-hint" id="dropHint"></div>
+    </div>
+    <div class="krow" style="margin-top:8px">
+      <span class="kh"><kbd>Del</kbd> ลบที่เลือก</span>
+      <span class="kh"><kbd>Ctrl+Z</kbd> Undo</span>
+      <span class="kh"><kbd>↑↓←→</kbd> เลื่อน 1 cell</span>
+      <span class="kh"><kbd>Esc</kbd> ยกเลิกเลือก</span>
+      <span class="kh"><kbd>Shift+↑↓←→</kbd> เลื่อน 5 cells</span>
+    </div>
+  </div>
+
+  <!-- Stats strip -->
+  <div class="sstrip">
+    <div class="ssc">ANALOG <span class="ssv">30×13 = 390</span> cells</div>
+    <div class="ssc">HD <span class="ssv">53×20 = 1060</span> cells</div>
+    <div class="ssc">POS = <span class="ssv">0x800 | (row×cols+col)</span></div>
+    <div class="ssc">BF VER <span class="ssv">4.3 / 4.4 / 4.5</span></div>
+    <div class="ssc">OSD PROFILE <span class="ssv">1</span></div>
+  </div>
+
+</div><!-- end center -->
+
+<!-- ══════════ RIGHT: PROPS + CLI ══════════ -->
+<div class="right-col">
+
+  <!-- Props card -->
+  <div class="pcard" id="propsCard">
+    <div class="pcard-head">
+      <div class="ph-icon">⚙️</div>
+      <div>
+        <div class="ph-title">Properties</div>
+        <div class="ph-sub" id="selName">ไม่มี element ที่เลือก</div>
+      </div>
+    </div>
+    <div id="propsBody">
+      <div class="no-sel">
+        <div class="no-sel-ring">🖱️</div>
+        <div style="font-family:var(--font-d);font-size:8.5px;letter-spacing:.12em;color:var(--muted2)">SELECT AN ELEMENT</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:5px;line-height:1.6">คลิก element บน FPV screen<br>หรือ double-click ใน palette</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLI Output -->
+  <div class="pcard">
+    <div class="cli-head">
+      <span class="cli-title">📋 Betaflight CLI Output</span>
+      <div class="cli-acts">
+        <button class="cbtn cp" onclick="copyCLI()">⎘ Copy</button>
+        <button class="cbtn dl" onclick="exportCLI()">💾 Save</button>
+      </div>
+    </div>
+    <div class="cli-body" id="cliOut">
+      <span class="cc"># เลือก preset หรือเพิ่ม element เพื่อ generate CLI...</span>
+    </div>
+  </div>
+
+  <!-- OSD Reference -->
+  <div class="pcard">
+    <div class="pcard-head">
+      <div class="ph-icon b">📚</div>
+      <div>
+        <div class="ph-title">OSD Reference</div>
+        <div class="ph-sub">BF4.4/4.5 encoding</div>
+      </div>
+    </div>
+    <div style="padding:0">
+      <div class="ref-head" style="display:grid;grid-template-columns:50px 80px 55px 1fr;gap:4px">
+        <span>S (V)</span><span>KV Range</span><span>Size</span><span>Type</span>
+      </div>
+      <div class="ref-row"><span style="color:var(--amber)">3S</span><span style="color:var(--blue)">2300–2800</span><span style="color:var(--green)">2.5–4"</span><span style="color:var(--muted2)">Micro</span></div>
+      <div class="ref-row"><span style="color:var(--amber)">4S</span><span style="color:var(--blue)">1800–2500</span><span style="color:var(--green)">5–6"</span><span style="color:var(--muted2)">Freestyle</span></div>
+      <div class="ref-row"><span style="color:var(--amber)">6S</span><span style="color:var(--blue)">1300–2000</span><span style="color:var(--green)">5–6"</span><span style="color:var(--muted2)">Performance</span></div>
+      <div class="ref-row"><span style="color:var(--amber)">6S</span><span style="color:var(--blue)">900–1500</span><span style="color:var(--green)">7–10"</span><span style="color:var(--muted2)">Long Range</span></div>
+    </div>
+    <div style="padding:10px 12px;font-size:10.5px;line-height:1.7;color:var(--muted2)">
+      <div style="font-family:var(--font-d);font-size:7.5px;letter-spacing:.14em;color:var(--muted);margin-bottom:5px">POSITION FORMULA</div>
+      <div style="font-family:var(--font-m);font-size:10px;color:var(--cyan);background:rgba(0,229,255,.04);padding:7px 9px;border-radius:6px;border:1px solid rgba(0,229,255,.1)">pos = 0x800 | (row × cols + col)</div>
+      <div style="margin-top:8px;font-family:var(--font-d);font-size:7.5px;letter-spacing:.14em;color:var(--muted)">EXAMPLES (ANALOG)</div>
+      <div style="font-family:var(--font-m);font-size:9.5px;color:var(--text);margin-top:4px;line-height:2">
+        Col=0,Row=0 → <span style="color:var(--amber)">2048 (0x800)</span><br>
+        Col=0,Row=12 → <span style="color:var(--amber)">2408 (0x968)</span><br>
+        Col=14,Row=6 → <span style="color:var(--amber)">2234 (0x8BA)</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end right -->
+</div><!-- end studio-wrap -->
+</div><!-- end page -->
+<div id="toast"></div>
 
 <script>
-/* ═══════════════════════════════════════════════════════
-   OBIX OSD STUDIO — Brain
-   Real Betaflight 30×13 (analog) / 53×20 (HD) OSD
-   CLI encoding: pos = 0x800 | (row * cols + col)
-═══════════════════════════════════════════════════════ */
-
-// ── Element definitions ────────────────────────────────
-const ELEMENTS = [
-  // Group: Flight
-  { id:'rssi',         cli:'osd_rssi_pos',              icon:'📶', name:'RSSI',          mock:'96',       color:'#00ff88', group:'Flight Data' },
-  { id:'battery',      cli:'osd_battery_voltage_pos',   icon:'🔋', name:'Voltage',        mock:'15.8V',    color:'#ffb700', group:'Flight Data' },
-  { id:'avg_cell',     cli:'osd_avg_cell_voltage_pos',  icon:'⚡', name:'Avg Cell',       mock:'3.95V',    color:'#ffb700', group:'Flight Data' },
-  { id:'current',      cli:'osd_current_draw_pos',      icon:'🔌', name:'Current',        mock:'28.5A',    color:'#ff8844', group:'Flight Data' },
-  { id:'mah',          cli:'osd_mah_drawn_pos',         icon:'🔶', name:'mAh Used',       mock:'650mAh',   color:'#ffb700', group:'Flight Data' },
-  { id:'power',        cli:'osd_power_pos',             icon:'💥', name:'Power',          mock:'400W',     color:'#ff4455', group:'Flight Data' },
-  // Group: Navigation
-  { id:'altitude',     cli:'osd_altitude_pos',          icon:'📏', name:'Altitude',       mock:'38m',      color:'#00aaff', group:'Navigation' },
-  { id:'gps_speed',    cli:'osd_gps_speed_pos',         icon:'💨', name:'GPS Speed',      mock:'82 km/h',  color:'#00aaff', group:'Navigation' },
-  { id:'gps_sats',     cli:'osd_gps_sats_pos',         icon:'🛰️', name:'GPS Sats',       mock:'12',       color:'#00e5ff', group:'Navigation' },
-  { id:'home_dist',    cli:'osd_home_dist_pos',         icon:'📍', name:'Home Dist',      mock:'420m',     color:'#cc55ff', group:'Navigation' },
-  { id:'home_dir',     cli:'osd_home_dir_pos',          icon:'🧭', name:'Home Dir',       mock:'↗',        color:'#cc55ff', group:'Navigation' },
-  // Group: Time & Throttle
-  { id:'flight_time',  cli:'osd_flight_time_spent_pos', icon:'⏱', name:'Flight Time',    mock:'03:42',    color:'#00ff88', group:'Time & Control' },
-  { id:'throttle',     cli:'osd_throttle_pos',          icon:'🎚', name:'Throttle',       mock:'62%',      color:'#aaaaaa', group:'Time & Control' },
-  // Group: Status
-  { id:'craft_name',   cli:'osd_craft_name_pos',        icon:'✈️', name:'Craft Name',     mock:'OBIX-5',   color:'#ffffff', group:'Status' },
-  { id:'warnings',     cli:'osd_warnings_pos',          icon:'⚠️', name:'Warnings',       mock:'WARNINGS', color:'#ff4455', group:'Status' },
-  { id:'disarmed',     cli:'osd_disarmed_pos',          icon:'🔒', name:'Disarmed',       mock:'DISARMED', color:'#888888', group:'Status' },
-  { id:'vtx_channel',  cli:'osd_vtx_channel_pos',       icon:'📡', name:'VTX Channel',    mock:'R:5 5806', color:'#00e5ff', group:'Status' },
-  { id:'link_quality', cli:'osd_link_quality_pos',      icon:'📶', name:'Link Quality',   mock:'LQ: 97',   color:'#00ff88', group:'Status' },
-  { id:'log_status',   cli:'osd_log_status_pos',        icon:'💾', name:'Log Status',     mock:'●REC',     color:'#ff4455', group:'Status' },
-  // Group: Visual
-  { id:'crosshairs',   cli:'osd_crosshairs_pos',        icon:'⊕', name:'Crosshairs',     mock:'(+)',       color:'#ffffff', group:'Visual' },
-  { id:'horizon',      cli:'osd_artificial_horizon_pos',icon:'🌅', name:'Artificial Horiz',mock:'——+——',   color:'#00ff88', group:'Visual' },
-  { id:'flip_arrow',   cli:'osd_flip_arrow_pos',        icon:'↺', name:'Flip Arrow',     mock:'↺',        color:'#aaaaaa', group:'Visual' },
-  // Group: PID / Tuning
-  { id:'pid_roll',     cli:'osd_roll_pids_pos',         icon:'↔', name:'Roll PIDs',      mock:'P:45 I:90 D:38', color:'#cc55ff', group:'PID / Tuning' },
-  { id:'pid_pitch',    cli:'osd_pitch_pids_pos',        icon:'↕', name:'Pitch PIDs',     mock:'P:47 I:90 D:42', color:'#cc55ff', group:'PID / Tuning' },
-  { id:'pid_yaw',      cli:'osd_yaw_pids_pos',          icon:'↻', name:'Yaw PIDs',       mock:'P:35 I:45 D:0',  color:'#cc55ff', group:'PID / Tuning' },
-  // Group: Motor/ESC
-  { id:'esc_temp',     cli:'osd_esc_tmp_pos',           icon:'🌡', name:'ESC Temp',       mock:'42°C',     color:'#ff8844', group:'Motor / ESC' },
-  { id:'esc_rpm',      cli:'osd_esc_rpm_pos',           icon:'🔄', name:'ESC RPM',        mock:'24500',    color:'#ff8844', group:'Motor / ESC' },
+'use strict';
+/* ═══════════════════════════════════════════════════
+   ELEMENT DEFINITIONS — 35 elements · 7 groups
+   All BF4.3/4.4/4.5 verified CLI keys
+═══════════════════════════════════════════════════ */
+const EL = [
+  /* ── ⚡ Flight Data ─────────────────────────── */
+  {id:'rssi',        cli:'osd_rssi_pos',              n:'RSSI',            mock:'R 96',        color:'#00ff88',grp:'⚡ Flight Data',  desc:'RC signal strength %'},
+  {id:'battery',     cli:'osd_battery_voltage_pos',   n:'Pack Voltage',    mock:'15.8V',       color:'#ffb700',grp:'⚡ Flight Data',  desc:'แรงดัน pack รวม',live:'v'},
+  {id:'avg_cell',    cli:'osd_avg_cell_voltage_pos',  n:'Avg Cell Voltage',mock:'3.95V',       color:'#ffb700',grp:'⚡ Flight Data',  desc:'แรงดันเฉลี่ยต่อ cell',live:'vc'},
+  {id:'current',     cli:'osd_current_draw_pos',      n:'Current Draw',    mock:'28.5A',       color:'#ff8844',grp:'⚡ Flight Data',  desc:'กระแสทันที (A)'},
+  {id:'mah',         cli:'osd_mah_drawn_pos',         n:'mAh Used',        mock:'412mAh',      color:'#ffb700',grp:'⚡ Flight Data',  desc:'พลังงานใช้ไป',live:'mah'},
+  {id:'power',       cli:'osd_power_pos',             n:'Motor Power',     mock:'387W',        color:'#ff4455',grp:'⚡ Flight Data',  desc:'กำลังวัตต์รวม'},
+  {id:'wh',          cli:'osd_watt_hours_drawn_pos',  n:'Watt Hours',      mock:'1.52Wh',      color:'#ff8844',grp:'⚡ Flight Data',  desc:'พลังงานสะสม Wh'},
+  /* ── 🛰️ Navigation ──────────────────────────── */
+  {id:'altitude',    cli:'osd_altitude_pos',          n:'Altitude',        mock:'38.4m',       color:'#00aaff',grp:'🛰️ Navigation',   desc:'ความสูง baro/GPS',live:'alt'},
+  {id:'gps_spd',     cli:'osd_gps_speed_pos',         n:'GPS Speed',       mock:'82km/h',      color:'#00aaff',grp:'🛰️ Navigation',   desc:'ความเร็วตามพื้น',live:'spd'},
+  {id:'gps_sat',     cli:'osd_gps_sats_pos',          n:'GPS Satellites',  mock:'STS 12',      color:'#00e5ff',grp:'🛰️ Navigation',   desc:'จำนวนดาวเทียม GPS'},
+  {id:'home_dist',   cli:'osd_home_dist_pos',         n:'Home Distance',   mock:'420m',        color:'#bb55ff',grp:'🛰️ Navigation',   desc:'ระยะจากจุด Home'},
+  {id:'home_dir',    cli:'osd_home_dir_pos',          n:'Home Direction',  mock:'↗ HOME',      color:'#bb55ff',grp:'🛰️ Navigation',   desc:'ทิศทางกลับบ้าน'},
+  {id:'trip',        cli:'osd_trip_dist_pos',         n:'Trip Distance',   mock:'1.23km',      color:'#00aaff',grp:'🛰️ Navigation',   desc:'ระยะทางสะสม'},
+  {id:'vario',       cli:'osd_numeric_vario_pos',     n:'Vario (m/s)',     mock:'▲2.3m/s',     color:'#00e5ff',grp:'🛰️ Navigation',   desc:'อัตราไต่/ร่วง'},
+  /* ── ⏱️ Time & Control ───────────────────────── */
+  {id:'timer',       cli:'osd_flight_time_spent_pos', n:'Flight Timer',    mock:'03:42',       color:'#00ff88',grp:'⏱️ Time & Control',desc:'เวลาบินทั้งหมด',live:'t'},
+  {id:'throttle',    cli:'osd_throttle_pos',          n:'Throttle %',      mock:'TH 62%',      color:'#aaaaaa',grp:'⏱️ Time & Control',desc:'throttle position',live:'thr'},
+  {id:'remain',      cli:'osd_remaining_time_estimate_pos',n:'Remaining Time',mock:'ET 4:18',  color:'#ffb700',grp:'⏱️ Time & Control',desc:'เวลาบินที่เหลือ (estimate)'},
+  /* ── 📊 Status & Info ────────────────────────── */
+  {id:'craft',       cli:'osd_craft_name_pos',        n:'Craft Name',      mock:'OBIX-5R',     color:'#ffffff',grp:'📊 Status & Info', desc:'ชื่อโดรน'},
+  {id:'warnings',    cli:'osd_warnings_pos',          n:'Warnings',        mock:'! WARN !',    color:'#ff4455',grp:'📊 Status & Info', desc:'คำเตือนระบบ'},
+  {id:'disarmed',    cli:'osd_disarmed_pos',          n:'Disarmed',        mock:'DISARMD',     color:'#888888',grp:'📊 Status & Info', desc:'แสดงเมื่อ disarm'},
+  {id:'vtx_ch',      cli:'osd_vtx_channel_pos',       n:'VTX Channel',     mock:'R:5 5806',    color:'#00e5ff',grp:'📊 Status & Info', desc:'Band/Ch VTX'},
+  {id:'lq',          cli:'osd_link_quality_pos',      n:'Link Quality',    mock:'LQ:97:1',     color:'#00ff88',grp:'📊 Status & Info', desc:'ELRS LQ + SNR'},
+  {id:'log',         cli:'osd_log_status_pos',        n:'Log Status',      mock:'●REC',        color:'#ff4455',grp:'📊 Status & Info', desc:'Blackbox recording'},
+  {id:'eff',         cli:'osd_efficiency_pos',        n:'Efficiency',      mock:'12mAh/km',    color:'#00ff88',grp:'📊 Status & Info', desc:'ประสิทธิภาพ mAh/km'},
+  /* ── 🎯 Visual ───────────────────────────────── */
+  {id:'cross',       cli:'osd_crosshairs_pos',        n:'Crosshairs',      mock:'  [+]',       color:'#ffffff',grp:'🎯 Visual',        desc:'Crosshair กลางจอ'},
+  {id:'horizon',     cli:'osd_artificial_horizon_pos',n:'Artificial Horizon',mock:'──┼──',    color:'#00ff88',grp:'🎯 Visual',        desc:'เส้นขอบฟ้า artificial'},
+  {id:'horiz_sb',    cli:'osd_horizon_sidebars_pos',  n:'Horizon Sidebars',mock:'|  |',       color:'#00ff88',grp:'🎯 Visual',        desc:'แถบข้าง horizon'},
+  {id:'flip',        cli:'osd_flip_arrow_pos',        n:'Flip Arrow',      mock:'↺ FLIP',      color:'#aaaaaa',grp:'🎯 Visual',        desc:'ทิศทาง flip over crash'},
+  /* ── 🔧 PID / Tuning ─────────────────────────── */
+  {id:'pid_r',       cli:'osd_roll_pids_pos',         n:'Roll PIDs',       mock:'R 48|90|38',  color:'#bb55ff',grp:'🔧 PID/Tuning',    desc:'P I D Roll axis'},
+  {id:'pid_p',       cli:'osd_pitch_pids_pos',        n:'Pitch PIDs',      mock:'P 52|90|40',  color:'#bb55ff',grp:'🔧 PID/Tuning',    desc:'P I D Pitch axis'},
+  {id:'pid_y',       cli:'osd_yaw_pids_pos',          n:'Yaw PIDs',        mock:'Y 40|90| 0',  color:'#bb55ff',grp:'🔧 PID/Tuning',    desc:'P I D Yaw axis'},
+  {id:'rate_p',      cli:'osd_rate_profile_name_pos', n:'Rate Profile',    mock:'1:RACE',      color:'#bb55ff',grp:'🔧 PID/Tuning',    desc:'Rate profile ที่ใช้'},
+  /* ── 🔩 Motor / ESC ─────────────────────────── */
+  {id:'esc_t',       cli:'osd_esc_tmp_pos',           n:'ESC Temperature', mock:'ESC 43°',     color:'#ff8844',grp:'🔩 Motor/ESC',     desc:'อุณหภูมิ ESC สูงสุด',live:'esc'},
+  {id:'esc_rpm',     cli:'osd_esc_rpm_pos',           n:'ESC RPM',         mock:'24.5k RPM',   color:'#ff8844',grp:'🔩 Motor/ESC',     desc:'รอบ motor เฉลี่ย',live:'rpm'},
+  {id:'mot_d',       cli:'osd_motor_diag_pos',        n:'Motor Diagnostic',mock:'M 100%',      color:'#ff4455',grp:'🔩 Motor/ESC',     desc:'Motor diagnostic'},
 ];
 
-// ── Preset layouts ─────────────────────────────────────
+/* ═══ PRESETS ═══ */
 const PRESETS = {
-  'Racing': [
-    {id:'rssi',row:0,col:0},{id:'battery',row:12,col:0},
-    {id:'throttle',row:12,col:7},{id:'avg_cell',row:0,col:22},
-    {id:'flight_time',row:0,col:12},{id:'warnings',row:11,col:10},
-    {id:'crosshairs',row:6,col:14},{id:'link_quality',row:0,col:26},
+  Racing:[
+    {id:'rssi',c:0,r:0},{id:'battery',c:20,r:0},{id:'avg_cell',c:20,r:1},
+    {id:'throttle',c:0,r:12},{id:'current',c:0,r:1},
+    {id:'timer',c:13,r:0},{id:'warnings',c:8,r:11},
+    {id:'cross',c:14,r:6},{id:'lq',c:21,r:12},
+    {id:'esc_rpm',c:20,r:2},{id:'vtx_ch',c:20,r:3},{id:'craft',c:11,r:0},
   ],
-  'Freestyle': [
-    {id:'battery',row:0,col:0},{id:'mah',row:1,col:0},
-    {id:'rssi',row:0,col:22},{id:'link_quality',row:1,col:22},
-    {id:'flight_time',row:12,col:13},{id:'altitude',row:12,col:0},
-    {id:'crosshairs',row:6,col:14},{id:'warnings',row:11,col:10},
-    {id:'craft_name',row:0,col:11},{id:'disarmed',row:6,col:11},
+  Freestyle:[
+    {id:'battery',c:0,r:0},{id:'avg_cell',c:0,r:1},{id:'mah',c:0,r:2},
+    {id:'rssi',c:22,r:0},{id:'lq',c:22,r:1},{id:'vtx_ch',c:22,r:2},
+    {id:'timer',c:12,r:12},{id:'altitude',c:0,r:12},
+    {id:'cross',c:14,r:6},{id:'warnings',c:9,r:11},
+    {id:'craft',c:11,r:0},{id:'disarmed',c:12,r:6},
+    {id:'current',c:0,r:3},{id:'throttle',c:22,r:12},
   ],
-  'Long Range': [
-    {id:'battery',row:0,col:0},{id:'avg_cell',row:1,col:0},
-    {id:'gps_speed',row:2,col:0},{id:'altitude',row:3,col:0},
-    {id:'home_dist',row:4,col:0},{id:'home_dir',row:5,col:0},
-    {id:'rssi',row:0,col:22},{id:'link_quality',row:1,col:22},
-    {id:'gps_sats',row:2,col:23},{id:'flight_time',row:12,col:0},
-    {id:'mah',row:12,col:10},{id:'warnings',row:11,col:10},
-    {id:'craft_name',row:0,col:11},
+  LongRange:[
+    {id:'battery',c:0,r:0},{id:'avg_cell',c:0,r:1},
+    {id:'gps_spd',c:0,r:2},{id:'altitude',c:0,r:3},
+    {id:'home_dist',c:0,r:4},{id:'home_dir',c:0,r:5},
+    {id:'trip',c:0,r:6},{id:'remain',c:0,r:7},
+    {id:'rssi',c:22,r:0},{id:'lq',c:22,r:1},
+    {id:'gps_sat',c:22,r:2},{id:'timer',c:22,r:3},
+    {id:'eff',c:22,r:4},{id:'vario',c:22,r:5},
+    {id:'mah',c:10,r:12},{id:'warnings',c:9,r:11},
+    {id:'craft',c:11,r:0},
   ],
-  'Cine': [
-    {id:'battery',row:0,col:1},{id:'flight_time',row:0,col:25},
-    {id:'crosshairs',row:6,col:14},{id:'warnings',row:11,col:10},
-    {id:'disarmed',row:6,col:11},{id:'craft_name',row:12,col:11},
+  Cine:[
+    {id:'battery',c:1,r:0},{id:'timer',c:22,r:0},
+    {id:'cross',c:14,r:6},{id:'warnings',c:9,r:11},
+    {id:'disarmed',c:12,r:6},{id:'craft',c:10,r:12},
+    {id:'avg_cell',c:1,r:1},{id:'altitude',c:22,r:1},
+    {id:'log',c:13,r:1},{id:'mah',c:1,r:2},
   ],
-  'Minimal': [
-    {id:'battery',row:0,col:0},{id:'rssi',row:0,col:26},
-    {id:'warnings',row:11,col:10},{id:'flight_time',row:12,col:13},
+  Minimal:[
+    {id:'battery',c:0,r:0},{id:'rssi',c:25,r:0},
+    {id:'warnings',c:9,r:11},{id:'timer',c:13,r:12},
+  ],
+  Whoop:[
+    {id:'battery',c:0,r:0},{id:'rssi',c:22,r:0},
+    {id:'timer',c:11,r:0},{id:'throttle',c:0,r:12},
+    {id:'warnings',c:9,r:11},{id:'lq',c:20,r:12},
+    {id:'esc_t',c:0,r:1},{id:'avg_cell',c:0,r:2},
   ],
 };
 
-// ── Grid config ────────────────────────────────────────
-let GRID = { cols: 30, rows: 13 };
-let CELL_W = 18, CELL_H = 24;
+/* ═══ GRID CONFIG ═══ */
+let GRID={cols:30,rows:13};
+let CW=20,CH=26;
 
-// ── State ──────────────────────────────────────────────
-let elements = [];   // { id, defId, col, row, visible, color, customLabel }
-let selectedId = null;
-let showGrid = true;
-let bgMode = 0; // 0=dark, 1=outdoor, 2=sky
-let isDragging = false;
+/* ═══ STATE ═══ */
+let els=[];
+let selId=null;
+let showGrid=true;
+let bgIdx=0;
+let liveOn=false;
+let liveTmr=null;
+let undo=[];
+let drag=null;
 
-// ── Build palette ──────────────────────────────────────
-function buildPalette() {
-  const container = document.getElementById('paletteList');
-  const groups = {};
-  ELEMENTS.forEach(e => {
-    if (!groups[e.group]) groups[e.group] = [];
-    groups[e.group].push(e);
+const BG_NAMES=['DARK','OUTDOOR','SKY'];
+const BG_CSS=[
+  'radial-gradient(ellipse at 35% 45%,#0d2010 0%,#040b06 40%,#000 100%)',
+  'radial-gradient(ellipse at 50% 65%,#102a0e 0%,#071207 55%,#000 100%)',
+  'radial-gradient(ellipse at 50% 25%,#0a1432 0%,#050920 55%,#000 100%)',
+];
+const COLORS=['#00ff88','#ffb700','#ff4455','#00aaff','#bb55ff','#ff8844','#00e5ff','#ffffff','#aaaaaa','#ff66bb'];
+
+/* ═══ LIVE SIMULATION DATA ═══ */
+let LD={rssi:96,v:15.84,mah:0,t:0,thr:62,alt:38,spd:82,esc:43,rpm:24500};
+function liveGet(id,def){
+  if(!liveOn) return def.mock;
+  const mm=String(Math.floor(LD.t/60)).padStart(2,'0');
+  const ss=String(LD.t%60).padStart(2,'0');
+  switch(id){
+    case 'rssi':    return 'R '+Math.round(LD.rssi);
+    case 'battery': return LD.v.toFixed(2)+'V';
+    case 'avg_cell':return (LD.v/4).toFixed(2)+'V';
+    case 'mah':     return Math.round(LD.mah)+'mAh';
+    case 'timer':   return mm+':'+ss;
+    case 'throttle':return 'TH '+Math.round(LD.thr)+'%';
+    case 'altitude':return LD.alt.toFixed(1)+'m';
+    case 'gps_spd': return Math.round(LD.spd)+'km/h';
+    case 'esc_t':   return 'ESC '+Math.round(LD.esc)+'°';
+    case 'esc_rpm': return (LD.rpm/1000).toFixed(1)+'k RPM';
+    default: return def.mock;
+  }
+}
+function liveTick(){
+  LD.t++;
+  LD.mah=Math.min(1100,LD.mah+1.4+Math.random()*.6);
+  LD.v=Math.max(12.0,LD.v-.007-Math.random()*.003);
+  LD.rssi=Math.max(55,Math.min(99,LD.rssi+(Math.random()-.52)*3));
+  LD.alt+=( Math.random()-.48)*2.5;
+  LD.spd=Math.max(0,Math.min(140,LD.spd+(Math.random()-.5)*9));
+  LD.thr=Math.max(15,Math.min(100,LD.thr+(Math.random()-.5)*10));
+  LD.esc=Math.min(85,LD.esc+(Math.random()-.46)*.7);
+  LD.rpm=Math.max(8000,Math.min(44000,LD.rpm+(Math.random()-.5)*1800));
+  renderEls();
+}
+
+/* ═══ PALETTE ═══ */
+function buildPal(filter){
+  filter=(filter||'').toLowerCase();
+  const container=document.getElementById('palList');
+  const onC=new Set(els.map(e=>e.defId));
+  const groups={};
+  EL.forEach(e=>{
+    if(filter&&!e.n.toLowerCase().includes(filter)&&!e.cli.toLowerCase().includes(filter)&&!e.grp.toLowerCase().includes(filter)) return;
+    if(!groups[e.grp]) groups[e.grp]=[];
+    groups[e.grp].push(e);
   });
-  let html = '';
-  Object.entries(groups).forEach(([g, els]) => {
-    html += `<div class="pal-group-title">${g}</div>`;
-    els.forEach(e => {
-      html += `<div class="pal-item" draggable="true" data-defid="${e.id}"
-        ondragstart="palDragStart(event,'${e.id}')" ondblclick="addElement('${e.id}')">
-        <span class="pi-icon">${e.icon}</span>
-        <div>
-          <div class="pi-name">${e.name}</div>
+  let h='';
+  Object.entries(groups).forEach(([g,items])=>{
+    h+=`<div class="pal-group-label">${g}</div>`;
+    items.forEach(e=>{
+      const on=onC.has(e.id);
+      h+=`<div class="pal-item${on?' active':''}" draggable="true" data-id="${e.id}"
+        ondragstart="palDrag(event,'${e.id}')" ondblclick="addEl('${e.id}')"
+        title="${e.desc||e.n}">
+        <div class="pi-dot" style="background:${e.color};box-shadow:0 0 5px ${e.color}50"></div>
+        <div class="pi-body">
+          <div class="pi-name">${e.n}</div>
           <div class="pi-cli">${e.cli}</div>
         </div>
+        ${on?'<span class="pi-added-badge">ON</span>':'<div class="pi-add" onclick="event.stopPropagation();addEl(\''+e.id+'\')">＋</div>'}
       </div>`;
     });
   });
-  container.innerHTML = html;
+  container.innerHTML=h||'<div style="padding:20px;text-align:center;color:var(--muted2);font-size:11px">ไม่พบ element</div>';
 }
+function filterPal(v){buildPal(v);}
+function palDrag(e,id){e.dataTransfer.setData('defId',id);}
 
-function buildPresets() {
-  const row = document.getElementById('presetRow');
-  const names = Object.keys(PRESETS);
-  const icons = { 'Racing':'🏁', 'Freestyle':'🎮', 'Long Range':'🌍', 'Cine':'🎥', 'Minimal':'⬡' };
-  row.innerHTML = names.map(n => `
-    <button class="preset-btn" onclick="applyPreset('${n}')">
-      <span>${icons[n]||'✦'}</span>${n}
-    </button>`).join('');
-}
-
-// ── Canvas ─────────────────────────────────────────────
-function initCanvas() {
-  const canvas = document.getElementById('osdCanvas');
-  canvas.style.width = (GRID.cols * CELL_W) + 'px';
-  canvas.style.height = (GRID.rows * CELL_H) + 'px';
-  canvas.style.position = 'relative';
-  document.getElementById('gridLabel').textContent = `${GRID.cols}×${GRID.rows}`;
-
-  // Drop zone
-  canvas.ondragover = e => { e.preventDefault(); };
-  canvas.ondrop = e => {
+/* ═══ CANVAS ═══ */
+function initCanvas(){
+  const scr=document.getElementById('fpvScreen');
+  const W=GRID.cols*CW, H=GRID.rows*CH;
+  scr.style.width=W+'px';scr.style.height=H+'px';
+  document.getElementById('lbGrid').textContent=GRID.cols+'×'+GRID.rows;
+  const layer=document.getElementById('osdLayer');
+  layer.style.width=W+'px';layer.style.height=H+'px';
+  // Set BG
+  document.getElementById('fbg0').style.cssText=`position:absolute;inset:0;pointer-events:none;background:${BG_CSS[0]}`;
+  document.getElementById('fbg1').style.cssText=`position:absolute;inset:0;pointer-events:none;background:${BG_CSS[1]};opacity:0`;
+  document.getElementById('fbg2').style.cssText=`position:absolute;inset:0;pointer-events:none;background:${BG_CSS[2]};opacity:0`;
+  // Drop
+  layer.ondragover=e=>{
     e.preventDefault();
-    const defId = e.dataTransfer.getData('defId');
-    if (!defId) return;
-    const rect = canvas.getBoundingClientRect();
-    const col = Math.floor((e.clientX - rect.left) / CELL_W);
-    const row = Math.floor((e.clientY - rect.top) / CELL_H);
-    addElement(defId, Math.max(0, Math.min(GRID.cols-1, col)), Math.max(0, Math.min(GRID.rows-1, row)));
+    const rect=layer.getBoundingClientRect();
+    const col=clamp(Math.floor((e.clientX-rect.left)/CW),0,GRID.cols-1);
+    const row=clamp(Math.floor((e.clientY-rect.top)/CH),0,GRID.rows-1);
+    const hint=document.getElementById('dropHint');
+    hint.style.display='block';
+    hint.style.left=col*CW+'px';hint.style.top=row*CH+'px';
+    hint.style.width=CW*5+'px';hint.style.height=CH+'px';
   };
-  canvas.onmousemove = e => {
-    const rect = canvas.getBoundingClientRect();
-    const col = Math.floor((e.clientX - rect.left) / CELL_W);
-    const row = Math.floor((e.clientY - rect.top) / CELL_H);
-    document.getElementById('fCol').textContent = col;
-    document.getElementById('fRow').textContent = row;
-    document.getElementById('fPos').textContent = encodePos(row, col, true);
-    document.getElementById('curCol').textContent = col;
-    document.getElementById('curRow').textContent = row;
+  layer.ondragleave=()=>{document.getElementById('dropHint').style.display='none'};
+  layer.ondrop=e=>{
+    e.preventDefault();
+    document.getElementById('dropHint').style.display='none';
+    const defId=e.dataTransfer.getData('defId');if(!defId) return;
+    const rect=layer.getBoundingClientRect();
+    const col=clamp(Math.floor((e.clientX-rect.left)/CW),0,GRID.cols-1);
+    const row=clamp(Math.floor((e.clientY-rect.top)/CH),0,GRID.rows-1);
+    addEl(defId,col,row);
   };
+  layer.onmousemove=e=>{
+    const rect=layer.getBoundingClientRect();
+    const col=clamp(Math.floor((e.clientX-rect.left)/CW),0,GRID.cols-1);
+    const row=clamp(Math.floor((e.clientY-rect.top)/CH),0,GRID.rows-1);
+    document.getElementById('cCol').textContent=col;
+    document.getElementById('cRow').textContent=row;
+    document.getElementById('cPos').textContent=epos(row,col,true);
+  };
+  layer.onclick=e=>{if(e.target===layer){selId=null;renderEls();renderProps();}};
   drawGrid();
 }
-
-function drawGrid() {
-  const gc = document.getElementById('gridCanvas');
-  const outer = document.getElementById('canvasOuter');
-  const W = GRID.cols * CELL_W, H = GRID.rows * CELL_H;
-  gc.width = W; gc.height = H;
-  gc.style.width = W + 'px'; gc.style.height = H + 'px';
-  const ctx = gc.getContext('2d');
-  ctx.clearRect(0, 0, W, H);
-  if (!showGrid) return;
-  ctx.strokeStyle = 'rgba(0,255,136,1)';
-  ctx.lineWidth = 0.5;
-  for (let c = 0; c <= GRID.cols; c++) {
-    ctx.beginPath(); ctx.moveTo(c*CELL_W, 0); ctx.lineTo(c*CELL_W, H); ctx.stroke();
-  }
-  for (let r = 0; r <= GRID.rows; r++) {
-    ctx.beginPath(); ctx.moveTo(0, r*CELL_H); ctx.lineTo(W, r*CELL_H); ctx.stroke();
-  }
+function drawGrid(){
+  const cv=document.getElementById('gridCv');
+  const W=GRID.cols*CW,H=GRID.rows*CH;
+  cv.width=W;cv.height=H;
+  const ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  if(!showGrid) return;
+  ctx.strokeStyle='rgba(0,255,136,.8)';ctx.lineWidth=.35;
+  for(let c=0;c<=GRID.cols;c++){ctx.beginPath();ctx.moveTo(c*CW,0);ctx.lineTo(c*CW,H);ctx.stroke();}
+  for(let r=0;r<=GRID.rows;r++){ctx.beginPath();ctx.moveTo(0,r*CH);ctx.lineTo(W,r*CH);ctx.stroke();}
+  // Center marker
+  ctx.strokeStyle='rgba(0,255,136,.5)';ctx.lineWidth=.7;
+  const cx=Math.floor(GRID.cols/2)*CW,cy=Math.floor(GRID.rows/2)*CH;
+  ctx.beginPath();ctx.moveTo(cx-14,cy+CH/2);ctx.lineTo(cx+14,cy+CH/2);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cx+CW/2,cy-10);ctx.lineTo(cx+CW/2,cy+CH+10);ctx.stroke();
 }
-
-function toggleGrid() { showGrid = !showGrid; drawGrid(); }
-
-function toggleBg() {
-  bgMode = (bgMode + 1) % 3;
-  const bgs = [
-    'radial-gradient(ellipse at 30% 40%,rgba(30,60,30,.5) 0%,#000 70%)',
-    'radial-gradient(ellipse at 50% 60%,rgba(20,80,20,.8) 0%,rgba(10,30,10,.9) 60%,#000 100%)',
-    'radial-gradient(ellipse at 50% 30%,rgba(10,30,80,.8) 0%,rgba(5,10,40,.9) 60%,#000 100%)',
-  ];
-  document.querySelector('.canvas-bg').style.background = bgs[bgMode];
+function toggleGrid(){
+  showGrid=!showGrid;drawGrid();
+  document.getElementById('btnGrid').style.color=showGrid?'var(--green)':'';
 }
-
-// ── Elements ───────────────────────────────────────────
-function encodePos(row, col, visible) {
-  return (visible ? 0x800 : 0) + (row * GRID.cols + col);
-}
-
-function palDragStart(e, defId) {
-  e.dataTransfer.setData('defId', defId);
-}
-
-function addElement(defId, col, row) {
-  const def = ELEMENTS.find(e => e.id === defId);
-  if (!def) return;
-  // Avoid duplicates
-  if (elements.find(e => e.defId === defId)) {
-    // move to new pos if provided
-    const ex = elements.find(e => e.defId === defId);
-    if (col !== undefined) { ex.col = col; ex.row = row; }
-    renderElements(); updateCLI(); selectEl(ex.id); return;
-  }
-  const id = defId + '_' + Date.now();
-  const c = col !== undefined ? col : Math.floor(GRID.cols/2 - 3);
-  const r = row !== undefined ? row : Math.floor(GRID.rows/2);
-  elements.push({ id, defId, col: Math.max(0,Math.min(GRID.cols-1,c)), row: Math.max(0,Math.min(GRID.rows-1,r)), visible: true, color: def.color });
-  renderElements(); updateCLI(); selectEl(id);
-  document.getElementById('elCount').textContent = elements.length;
-}
-
-function renderElements() {
-  const canvas = document.getElementById('osdCanvas');
-  canvas.innerHTML = '';
-  elements.forEach(el => {
-    const def = ELEMENTS.find(d => d.id === el.defId);
-    if (!def) return;
-    const div = document.createElement('div');
-    div.className = 'osd-el' + (el.id === selectedId ? ' selected' : '') + (el.visible ? '' : ' disabled');
-    div.style.left = (el.col * CELL_W) + 'px';
-    div.style.top  = (el.row * CELL_H) + 'px';
-    div.style.color = el.color || def.color;
-    div.style.fontSize = '13px';
-    div.dataset.id = el.id;
-    div.innerHTML = `<span class="el-handle">${def.icon} ${def.name} (${el.col},${el.row})</span>${def.mock}`;
-    div.addEventListener('pointerdown', startDrag);
-    div.addEventListener('click', e => { e.stopPropagation(); selectEl(el.id); });
-    canvas.appendChild(div);
+function cycleBg(){
+  bgIdx=(bgIdx+1)%3;
+  ['fbg0','fbg1','fbg2'].forEach((id,i)=>{
+    document.getElementById(id).style.opacity=i===bgIdx?'1':'0';
   });
-  document.getElementById('elCount').textContent = elements.length;
+  document.getElementById('lbBg').textContent=BG_NAMES[bgIdx];
+}
+function toggleLive(){
+  liveOn=!liveOn;
+  const btn=document.getElementById('btnLive');
+  const lbl=document.getElementById('lbLive');
+  if(liveOn){
+    btn.className='tbtn live-on';btn.textContent='⏹ Live';
+    lbl.textContent='ON';lbl.style.color='var(--red)';
+    LD={rssi:96,v:15.84,mah:0,t:0,thr:62,alt:38,spd:82,esc:43,rpm:24500};
+    liveTmr=setInterval(liveTick,1000);
+    toast('▶ Live Simulation ON');
+  }else{
+    btn.className='tbtn ghost';btn.textContent='● Live';
+    lbl.textContent='OFF';lbl.style.color='var(--muted2)';
+    clearInterval(liveTmr);renderEls();
+    toast('⏹ Live Simulation OFF');
+  }
 }
 
-function selectEl(id) {
-  selectedId = id;
-  renderElements();
-  updateCLI();
-  renderProps();
+/* ═══ ELEMENTS ═══ */
+function epos(row,col,vis){return vis?(0x800|(row*GRID.cols+col)):0;}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function pushU(){undo.push(JSON.stringify(els));if(undo.length>40)undo.shift();}
+function undoAct(){
+  if(!undo.length){toast('Nothing to undo');return;}
+  els=JSON.parse(undo.pop());
+  selId=null;renderEls();renderProps();updateCLI();buildPal(document.getElementById('palSearch').value);
+  toast('↩ Undone');
+}
+function addEl(defId,col,row){
+  const def=EL.find(e=>e.id===defId);if(!def) return;
+  const ex=els.find(e=>e.defId===defId);
+  pushU();
+  if(ex){
+    if(col!==undefined){ex.col=col;ex.row=row;}
+    renderEls();updateCLI();selEl(ex.id);return;
+  }
+  const id=defId+'_'+Date.now();
+  const c=col!==undefined?col:clamp(Math.floor(GRID.cols/2-4),0,GRID.cols-1);
+  const r=row!==undefined?row:clamp(Math.floor(GRID.rows/2),0,GRID.rows-1);
+  els.push({id,defId,col:c,row:r,vis:true,color:def.color});
+  renderEls();updateCLI();selEl(id);
+  document.getElementById('lbEl').textContent=els.length;
+  buildPal(document.getElementById('palSearch').value);
+}
+function renderEls(){
+  const layer=document.getElementById('osdLayer');
+  layer.innerHTML='';
+  els.forEach(el=>{
+    const def=EL.find(d=>d.id===el.defId);if(!def) return;
+    const mock=liveGet(el.defId,def);
+    // Live color warning
+    let col=el.color;
+    if(liveOn){
+      if(el.defId==='battery'&&LD.v<13.5) col='#ff4455';
+      else if(el.defId==='avg_cell'&&(LD.v/4)<3.5) col='#ff4455';
+      else if(el.defId==='rssi'&&LD.rssi<70) col='#ffb700';
+      else if(el.defId==='esc_t'&&LD.esc>70) col='#ff4455';
+    }
+    const div=document.createElement('div');
+    div.className='osd-el'+(el.id===selId?' sel':'')+(el.vis?'':' hid');
+    div.style.cssText=`left:${el.col*CW}px;top:${el.row*CH}px;color:${col};`;
+    div.dataset.id=el.id;
+    div.textContent=mock;
+    div.addEventListener('pointerdown',startDrag);
+    div.addEventListener('click',e=>{e.stopPropagation();selEl(el.id);});
+    layer.appendChild(div);
+  });
+  document.getElementById('lbEl').textContent=els.length;
+}
+function selEl(id){selId=id;renderEls();renderProps();updateCLI();}
+function delEl(id){
+  pushU();
+  els=els.filter(x=>x.id!==id);
+  if(selId===id)selId=null;
+  renderEls();updateCLI();renderProps();
+  buildPal(document.getElementById('palSearch').value);
+}
+function cloneEl(id){
+  const el=els.find(x=>x.id===id);if(!el) return;pushU();
+  const n={...el,id:el.defId+'_c'+Date.now(),col:clamp(el.col+1,0,GRID.cols-1),row:clamp(el.row+1,0,GRID.rows-1)};
+  els.push(n);renderEls();updateCLI();selEl(n.id);
 }
 
-document.getElementById('osdCanvas').addEventListener('click', e => {
-  if (e.target === e.currentTarget) { selectedId = null; renderProps(); renderElements(); }
+/* ═══ DRAG ═══ */
+function startDrag(e){
+  e.stopPropagation();
+  const id=e.currentTarget.dataset.id;
+  const el=els.find(x=>x.id===id);if(!el) return;
+  pushU();
+  e.currentTarget.setPointerCapture(e.pointerId);
+  const rect=document.getElementById('osdLayer').getBoundingClientRect();
+  drag={id,sx:e.clientX,sy:e.clientY,oc:el.col,or:el.row,rect};
+  e.currentTarget.addEventListener('pointermove',onDrag);
+  e.currentTarget.addEventListener('pointerup',endDrag,{once:true});
+}
+function onDrag(e){
+  if(!drag) return;
+  const el=els.find(x=>x.id===drag.id);if(!el) return;
+  el.col=clamp(drag.oc+Math.round((e.clientX-drag.sx)/CW),0,GRID.cols-1);
+  el.row=clamp(drag.or+Math.round((e.clientY-drag.sy)/CH),0,GRID.rows-1);
+  renderEls();updateCLI();renderProps();
+  document.getElementById('cCol').textContent=el.col;
+  document.getElementById('cRow').textContent=el.row;
+  document.getElementById('cPos').textContent=epos(el.row,el.col,el.vis);
+}
+function endDrag(e){e.currentTarget.removeEventListener('pointermove',onDrag);drag=null;}
+
+/* ═══ KEYBOARD ═══ */
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT') return;
+  if(e.key==='Escape'){selId=null;renderEls();renderProps();return;}
+  if((e.key==='Delete'||e.key==='Backspace')&&selId){delEl(selId);return;}
+  if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();undoAct();return;}
+  if(!selId) return;
+  const el=els.find(x=>x.id===selId);if(!el) return;
+  const step=e.shiftKey?5:1;let mv=false;
+  if(e.key==='ArrowLeft'){el.col=clamp(el.col-step,0,GRID.cols-1);mv=true;}
+  if(e.key==='ArrowRight'){el.col=clamp(el.col+step,0,GRID.cols-1);mv=true;}
+  if(e.key==='ArrowUp'){el.row=clamp(el.row-step,0,GRID.rows-1);mv=true;}
+  if(e.key==='ArrowDown'){el.row=clamp(el.row+step,0,GRID.rows-1);mv=true;}
+  if(mv){e.preventDefault();renderEls();updateCLI();renderProps();}
 });
 
-// ── Drag ──────────────────────────────────────────────
-let dragData = null;
-function startDrag(e) {
-  e.stopPropagation();
-  const elDiv = e.currentTarget;
-  const id = elDiv.dataset.id;
-  const el = elements.find(x => x.id === id);
-  if (!el) return;
-  elDiv.setPointerCapture(e.pointerId);
-  const canvas = document.getElementById('osdCanvas');
-  const rect = canvas.getBoundingClientRect();
-  dragData = { id, startX: e.clientX, startY: e.clientY, origCol: el.col, origRow: el.row, rect };
-  elDiv.addEventListener('pointermove', onDrag);
-  elDiv.addEventListener('pointerup', endDrag, { once: true });
-  isDragging = true;
-}
-function onDrag(e) {
-  if (!dragData) return;
-  const dx = Math.round((e.clientX - dragData.startX) / CELL_W);
-  const dy = Math.round((e.clientY - dragData.startY) / CELL_H);
-  const el = elements.find(x => x.id === dragData.id);
-  if (!el) return;
-  el.col = Math.max(0, Math.min(GRID.cols-1, dragData.origCol + dx));
-  el.row = Math.max(0, Math.min(GRID.rows-1, dragData.origRow + dy));
-  renderElements(); updateCLI(); renderProps();
-  document.getElementById('fCol').textContent = el.col;
-  document.getElementById('fRow').textContent = el.row;
-  document.getElementById('fPos').textContent = encodePos(el.row, el.col, el.visible);
-}
-function endDrag(e) {
-  e.currentTarget.removeEventListener('pointermove', onDrag);
-  dragData = null; isDragging = false;
-}
-
-// ── Properties panel ──────────────────────────────────
-const COLORS = ['#00ff88','#ffb700','#ff4455','#00aaff','#cc55ff','#ff8844','#00e5ff','#ffffff','#aaaaaa'];
-
-function renderProps() {
-  const body = document.getElementById('propsBody');
-  const nameEl = document.getElementById('selName');
-  if (!selectedId) {
-    nameEl.textContent = '';
-    body.innerHTML = `<div class="no-sel"><div class="no-sel-icon">🖱️</div>
-      <div style="font-family:var(--font-d);font-size:9px;letter-spacing:.1em;color:#3a6050">SELECT ELEMENT</div>
-      <div style="font-size:11px;color:#2a5040;margin-top:6px">คลิกที่ element หรือ double-click palette เพื่อเพิ่ม</div></div>`;
-    return;
+/* ═══ PROPERTIES ═══ */
+function renderProps(){
+  const body=document.getElementById('propsBody');
+  const sel=document.getElementById('selName');
+  if(!selId){
+    sel.textContent='ไม่มี element ที่เลือก';
+    body.innerHTML=`<div class="no-sel">
+      <div class="no-sel-ring">🖱️</div>
+      <div style="font-family:var(--font-d);font-size:8.5px;letter-spacing:.12em;color:var(--muted2)">SELECT AN ELEMENT</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:5px;line-height:1.6">คลิก element บน FPV screen<br>หรือ double-click ใน palette</div>
+    </div>`;return;
   }
-  const el = elements.find(x => x.id === selectedId);
-  if (!el) return;
-  const def = ELEMENTS.find(d => d.id === el.defId);
-  nameEl.textContent = def.name;
-
-  body.innerHTML = `
-    <label class="prop-label">Position (Col / Row)</label>
-    <div class="prop-row">
-      <div><input class="prop-input" id="pCol" type="number" min="0" max="${GRID.cols-1}" value="${el.col}" oninput="setProp('col',+this.value)"></div>
-      <div><input class="prop-input" id="pRow" type="number" min="0" max="${GRID.rows-1}" value="${el.row}" oninput="setProp('row',+this.value)"></div>
+  const el=els.find(x=>x.id===selId);if(!el) return;
+  const def=EL.find(d=>d.id===el.defId);
+  sel.textContent=def.n;
+  const pos=epos(el.row,el.col,el.vis);
+  body.innerHTML=`
+  <div class="prop-body">
+    <!-- Name & info -->
+    <div style="display:flex;align-items:center;gap:9px;padding-bottom:11px;border-bottom:1px solid var(--border);margin-bottom:12px">
+      <div style="width:11px;height:11px;border-radius:50%;background:${el.color};box-shadow:0 0 8px ${el.color}60;flex-shrink:0"></div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--text)">${def.n}</div>
+        <div style="font-family:var(--font-m);font-size:8.5px;color:var(--muted2)">${def.cli}</div>
+        ${def.desc?`<div style="font-size:10px;color:var(--muted);margin-top:2px">${def.desc}</div>`:''}
+      </div>
     </div>
-    <label class="prop-label">CLI Position Value</label>
-    <input class="prop-input" readonly value="${encodePos(el.row, el.col, el.visible)}" style="color:var(--amber)">
-    <label class="prop-label">Color</label>
-    <div class="color-row">
-      ${COLORS.map(c => `<div class="swatch${el.color===c?' active':''}" style="background:${c}" onclick="setProp('color','${c}')"></div>`).join('')}
+    <!-- Position -->
+    <div class="psec-title">Position</div>
+    <div class="prow">
+      <div>
+        <label class="plabel">Col (0–${GRID.cols-1})</label>
+        <input class="pinput" type="number" min="0" max="${GRID.cols-1}" value="${el.col}" oninput="setP('col',+this.value)">
+      </div>
+      <div>
+        <label class="plabel">Row (0–${GRID.rows-1})</label>
+        <input class="pinput" type="number" min="0" max="${GRID.rows-1}" value="${el.row}" oninput="setP('row',+this.value)">
+      </div>
     </div>
-    <div class="toggle-row" onclick="setProp('visible',${!el.visible})">
-      <span class="tr-label">${def.icon} Visible</span>
-      <div class="toggle-pill${el.visible?' on':''}"></div>
+    <label class="plabel">CLI Position Value</label>
+    <div class="pval">
+      <span>${pos} <span style="color:var(--muted2);font-size:9px">(0x${pos.toString(16).toUpperCase()})</span></span>
+      <button onclick="navigator.clipboard.writeText('${pos}').then(()=>toast('✓ Copied ${pos}'))"
+        style="background:none;border:1px solid var(--border);border-radius:4px;color:var(--muted2);font-size:10px;cursor:pointer;padding:2px 7px">⎘</button>
     </div>
-    <div style="display:flex;gap:6px;margin-top:4px">
-      <button class="tb-btn danger" style="flex:1;font-size:7.5px" onclick="deleteEl('${el.id}')">🗑 DELETE</button>
-      <button class="tb-btn ghost" style="flex:1;font-size:7.5px" onclick="cloneEl('${el.id}')">⎘ CLONE</button>
+    <!-- Color -->
+    <div class="psec-title" style="margin-top:12px">Color</div>
+    <div class="swatch-row">
+      ${COLORS.map(c=>`<div class="sw${el.color===c?' on':''}" style="background:${c}" onclick="setP('color','${c}')"></div>`).join('')}
+      <input type="color" class="sw-custom" value="${el.color}" oninput="setP('color',this.value)" title="Custom color">
     </div>
-    <div style="margin-top:10px;font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:#3a6050">CLI KEY</div>
-    <div style="font-family:var(--font-m);font-size:10px;color:#79c0ff;margin-top:4px;word-break:break-all">${def.cli}</div>`;
+    <!-- Visibility -->
+    <div class="psec-title" style="margin-top:12px">Visibility</div>
+    <div class="tog" onclick="setP('vis',${!el.vis})">
+      <span class="tog-lbl">${def.n} — ${el.vis?'✅ Visible':'❌ Hidden'}</span>
+      <div class="tog-pill${el.vis?' on':''}"></div>
+    </div>
+    <!-- Preview -->
+    <div class="psec-title" style="margin-top:4px">FPV Preview</div>
+    <div class="mock-preview" style="color:${el.color}">${def.mock}</div>
+    <!-- Actions -->
+    <div class="pbtns">
+      <button class="pbtn" style="background:rgba(255,68,85,.07);border-color:rgba(255,68,85,.22);color:var(--red)" onclick="delEl('${el.id}')">🗑 Delete</button>
+      <button class="pbtn" style="background:rgba(0,255,136,.07);border-color:rgba(0,255,136,.22);color:var(--green)" onclick="cloneEl('${el.id}')">⎘ Clone</button>
+    </div>
+  </div>`;
+}
+function setP(k,v){
+  const el=els.find(x=>x.id===selId);if(!el) return;
+  if(k==='col') el.col=clamp(Math.round(v),0,GRID.cols-1);
+  else if(k==='row') el.row=clamp(Math.round(v),0,GRID.rows-1);
+  else el[k]=v;
+  renderEls();updateCLI();renderProps();
 }
 
-function setProp(key, val) {
-  const el = elements.find(x => x.id === selectedId); if (!el) return;
-  if (key === 'col') el.col = Math.max(0, Math.min(GRID.cols-1, Math.round(val)));
-  else if (key === 'row') el.row = Math.max(0, Math.min(GRID.rows-1, Math.round(val)));
-  else el[key] = val;
-  renderElements(); updateCLI(); renderProps();
-}
-
-function deleteEl(id) {
-  elements = elements.filter(x => x.id !== id);
-  selectedId = null; renderElements(); updateCLI(); renderProps();
-  document.getElementById('elCount').textContent = elements.length;
-}
-function cloneEl(id) {
-  const el = elements.find(x => x.id === id); if (!el) return;
-  const newEl = { ...el, id: el.defId + '_' + Date.now(), col: Math.min(GRID.cols-1, el.col+1), row: Math.min(GRID.rows-1, el.row+1) };
-  elements.push(newEl); renderElements(); updateCLI(); selectEl(newEl.id);
-}
-
-// ── CLI Generator ──────────────────────────────────────
-function updateCLI() {
-  const out = document.getElementById('cliOut');
-  if (elements.length === 0) {
-    out.innerHTML = '<span class="co-cmt"># Add elements to generate CLI...</span>'; return;
-  }
-  let html = `<span class="co-cmt"># OBIX OSD Studio — Betaflight CLI</span><br>
-<span class="co-cmt"># Mode: ${document.querySelector('.tb-mode-btn.active').dataset.mode.toUpperCase()} Grid ${GRID.cols}×${GRID.rows}</span><br>
-<span class="co-cmt"># ─────────────────────────────────</span><br>`;
-  elements.forEach(el => {
-    const def = ELEMENTS.find(d => d.id === el.defId); if (!def) return;
-    const pos = encodePos(el.row, el.col, el.visible);
-    html += `<div><span class="co-cmt"># ${def.name} (${el.col},${el.row})</span></div>
-<div><span class="co-cmd">set </span><span class="co-key">${def.cli}</span><span class="co-cmd"> = </span><span class="co-val">${pos}</span></div>`;
+/* ═══ CLI GENERATOR ═══ */
+function updateCLI(){
+  const out=document.getElementById('cliOut');
+  if(!els.length){out.innerHTML='<span class="cc"># เพิ่ม element เพื่อ generate CLI commands...</span>';return;}
+  const mode=document.querySelector('.mdbtn.active')?.dataset.mode==='hd'?'HD':'ANALOG';
+  const byG={};
+  els.forEach(el=>{
+    const def=EL.find(d=>d.id===el.defId);if(!def) return;
+    if(!byG[def.grp]) byG[def.grp]=[];
+    byG[def.grp].push({el,def});
   });
-  html += `<br><span class="co-cmd" style="color:var(--green);font-weight:600;">save</span>`;
-  out.innerHTML = html;
+  let h=`<span class="cc"># ═══════════════════════════════════════</span><br>
+<span class="cc"># OBIXConfig Doctor — OSD Studio v3</span><br>
+<span class="cc"># Mode: ${mode} Grid ${GRID.cols}×${GRID.rows} | ${els.length} elements</span><br>
+<span class="cc"># ═══════════════════════════════════════</span><br><br>
+<span class="cs">osd_profile 1</span><br><br>`;
+  Object.entries(byG).forEach(([g,items])=>{
+    h+=`<span class="cc"># ${g}</span><br>`;
+    items.forEach(({el,def})=>{
+      const pos=epos(el.row,el.col,el.vis);
+      h+=`<span class="cmd">set </span><span class="ck">${def.cli}</span><span class="cmd"> = </span><span class="cv">${pos}</span><span class="cc">  # col=${el.col} row=${el.row}${el.vis?'':' [HIDDEN]'}</span><br>`;
+    });
+    h+=`<br>`;
+  });
+  h+=`<span class="cs">save</span>`;
+  out.innerHTML=h;
 }
-
-function getCLIText() {
-  let lines = [`# OBIX OSD Studio — Betaflight CLI`, `# Grid ${GRID.cols}×${GRID.rows}`, `# ─────────────────────────────────`];
-  elements.forEach(el => {
-    const def = ELEMENTS.find(d => d.id === el.defId); if (!def) return;
-    lines.push(`set ${def.cli} = ${encodePos(el.row, el.col, el.visible)}`);
+function getCLIText(){
+  const mode=document.querySelector('.mdbtn.active')?.dataset.mode==='hd'?'HD':'ANALOG';
+  const lines=[
+    '# ═══════════════════════════════════════',
+    '# OBIXConfig Doctor — OSD Studio v3',
+    `# Mode: ${mode} Grid ${GRID.cols}×${GRID.rows} | ${els.length} elements`,
+    `# Generated: ${new Date().toLocaleString('th-TH')}`,
+    '# ═══════════════════════════════════════',
+    '','osd_profile 1',''
+  ];
+  const byG={};
+  els.forEach(el=>{
+    const def=EL.find(d=>d.id===el.defId);if(!def) return;
+    if(!byG[def.grp]) byG[def.grp]=[];
+    byG[def.grp].push({el,def});
+  });
+  Object.entries(byG).forEach(([g,items])=>{
+    lines.push(`# ${g}`);
+    items.forEach(({el,def})=>lines.push(`set ${def.cli} = ${epos(el.row,el.col,el.vis)}`));
+    lines.push('');
   });
   lines.push('save');
   return lines.join('\n');
 }
-
-function copyCLI() {
-  navigator.clipboard.writeText(getCLIText()).then(() => {
-    const btn = event.target; const orig = btn.textContent;
-    btn.textContent = '✅ OK'; setTimeout(() => btn.textContent = orig, 1800);
-  });
+function copyCLI(){navigator.clipboard.writeText(getCLIText()).then(()=>toast('✅ คัดลอก CLI แล้ว'));}
+function exportCLI(){dl('betaflight_osd.txt',getCLIText());toast('💾 บันทึก betaflight_osd.txt');}
+function exportJSON(){
+  const d={version:3,grid:GRID,mode:document.querySelector('.mdbtn.active')?.dataset.mode,
+    created:new Date().toISOString(),
+    elements:els.map(el=>{const def=EL.find(d=>d.id===el.defId);
+      return{defId:el.defId,cliKey:def?.cli,name:def?.n,col:el.col,row:el.row,vis:el.vis,color:el.color};})};
+  dl('osd_layout.json',JSON.stringify(d,null,2));toast('📤 บันทึก osd_layout.json');
 }
-function exportCLI() {
-  download('betaflight_osd.txt', getCLIText());
-}
-function exportJSON() {
-  const data = { grid: GRID, elements: elements.map(el => {
-    const def = ELEMENTS.find(d=>d.id===el.defId);
-    return { defId: el.defId, cliKey: def?.cli, col: el.col, row: el.row, visible: el.visible, color: el.color };
-  })};
-  download('osd_layout.json', JSON.stringify(data, null, 2));
-}
-function loadJSON() { document.getElementById('jsonFileIn').click(); }
-function onLoadFile(e) {
-  const f = e.target.files[0]; if (!f) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    try {
-      const data = JSON.parse(ev.target.result);
-      if (data.elements) {
-        elements = data.elements.map(el => ({ ...el, id: el.defId + '_' + Date.now() + Math.random() }));
-        renderElements(); updateCLI(); renderProps();
+function loadJSON(e){
+  const f=e.target.files[0];if(!f) return;
+  const rd=new FileReader();
+  rd.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(d.elements){
+        pushU();
+        els=d.elements.map(el=>({...el,id:el.defId+'_'+Date.now()+Math.random()}));
+        renderEls();updateCLI();renderProps();buildPal();
+        toast('📂 โหลด JSON — '+els.length+' elements');
       }
-    } catch { alert('ไม่สามารถโหลดไฟล์ JSON ได้'); }
-  };
-  reader.readAsText(f);
+    }catch{toast('❌ JSON format ไม่ถูกต้อง');}
+    e.target.value='';
+  };rd.readAsText(f);
 }
-function download(name, text) {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([text], {type:'text/plain'}));
-  a.download = name; a.click(); URL.revokeObjectURL(a.href);
+function dl(name,text){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([text],{type:'text/plain'}));
+  a.download=name;a.click();URL.revokeObjectURL(a.href);
 }
 
-// ── Presets ────────────────────────────────────────────
-function applyPreset(name) {
-  if (!PRESETS[name]) return;
-  if (elements.length > 0 && !confirm(`ล้าง layout ปัจจุบันแล้วโหลด "${name}" preset?`)) return;
-  elements = [];
-  PRESETS[name].forEach(item => {
-    const def = ELEMENTS.find(d => d.id === item.id); if (!def) return;
-    elements.push({ id: item.id+'_'+Date.now()+Math.random(), defId: item.id, col: item.col, row: item.row, visible: true, color: def.color });
+/* ═══ PRESETS ═══ */
+function applyPreset(name,btn){
+  const pd=PRESETS[name];if(!pd) return;
+  if(els.length>0&&!confirm(`ล้าง layout ปัจจุบันแล้วโหลด "${name}" preset?`)) return;
+  pushU();els=[];
+  pd.forEach(item=>{
+    const def=EL.find(d=>d.id===item.id);if(!def) return;
+    els.push({id:item.id+'_'+Date.now()+Math.random(),defId:item.id,
+      col:item.c,row:item.r,vis:true,color:def.color});
   });
-  selectedId = null; renderElements(); updateCLI(); renderProps();
-  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-  event.currentTarget.classList.add('active');
+  selId=null;renderEls();updateCLI();renderProps();
+  buildPal(document.getElementById('palSearch').value);
+  document.querySelectorAll('.ppill').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  toast('✅ โหลด preset: '+name);
 }
 
-function clearCanvas() {
-  if (elements.length > 0 && !confirm('ล้าง elements ทั้งหมด?')) return;
-  elements = []; selectedId = null; renderElements(); updateCLI(); renderProps();
+/* ═══ UTILS ═══ */
+function clearCanvas(){
+  if(els.length>0&&!confirm('ล้าง elements ทั้งหมด?')) return;
+  pushU();els=[];selId=null;renderEls();updateCLI();renderProps();buildPal();toast('🗑 Cleared');
 }
-function centerAll() {
-  elements.forEach(el => {
-    const def = ELEMENTS.find(d => d.id === el.defId);
-    const approxW = Math.ceil((def?.mock||'').length * 0.8);
-    el.col = Math.max(0, Math.floor(GRID.cols/2 - approxW/2));
-    el.row = Math.floor(GRID.rows/2);
-  });
-  renderElements(); updateCLI(); renderProps();
+function centerAll(){
+  els.forEach(el=>{el.col=clamp(Math.floor(GRID.cols/2-3),0,GRID.cols-1);
+    el.row=clamp(Math.floor(GRID.rows/2),0,GRID.rows-1);});
+  renderEls();updateCLI();renderProps();
+}
+function snapToGrid(){
+  els.forEach(el=>{el.col=clamp(Math.round(el.col),0,GRID.cols-1);
+    el.row=clamp(Math.round(el.row),0,GRID.rows-1);});
+  renderEls();updateCLI();toast('⌗ Snapped to grid');
+}
+function switchMode(btn){
+  document.querySelectorAll('.mdbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(btn.dataset.mode==='hd'){GRID={cols:53,rows:20};CW=14;CH=20;}
+  else{GRID={cols:30,rows:13};CW=20;CH=26;}
+  els.forEach(el=>{el.col=clamp(el.col,0,GRID.cols-1);el.row=clamp(el.row,0,GRID.rows-1);});
+  initCanvas();renderEls();updateCLI();
+}
+let toastTmr=null;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTmr);toastTmr=setTimeout(()=>t.classList.remove('show'),2100);
 }
 
-// ── Mode switch ────────────────────────────────────────
-document.querySelectorAll('.tb-mode-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tb-mode-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    if (btn.dataset.mode === 'hd') {
-      GRID = { cols: 53, rows: 20 }; CELL_W = 14; CELL_H = 20;
-    } else {
-      GRID = { cols: 30, rows: 13 }; CELL_W = 18; CELL_H = 24;
-    }
-    elements.forEach(el => {
-      el.col = Math.min(el.col, GRID.cols-1);
-      el.row = Math.min(el.row, GRID.rows-1);
-    });
-    initCanvas(); renderElements(); updateCLI();
-  });
-});
-
-// ── Init ───────────────────────────────────────────────
-buildPalette();
-buildPresets();
+/* ═══ INIT ═══ */
+buildPal();
 initCanvas();
-// Load default Freestyle preset
-applyPreset('Freestyle');
+const fBtn=document.querySelector('.ppill.pp-f');
+applyPreset('Freestyle',fBtn);
 </script>
 </body>
 </html>
