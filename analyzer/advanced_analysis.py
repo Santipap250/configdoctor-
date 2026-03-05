@@ -381,7 +381,7 @@ def make_advanced_report(
             "micro":     1.45,  # FIX: add micro style factor (consistent with thrust_logic.py)
             "whoop":     1.45,
         }
-        _usable_wh = battery_wh  # already calculated above with 0.85 factor
+        _usable_wh = battery_wh * 0.85  # FIX-02: usable capacity (85% discharge efficiency)
         _style_factor = _STYLE_FACTORS.get(str(style).lower(), 1.55)
         if total_power_w > 0:
             est_flight_time_min = int(max(0, round((_usable_wh / (total_power_w * _style_factor)) * 60.0)))
@@ -390,22 +390,32 @@ def make_advanced_report(
             est_flight_time_min = 0
             est_flight_time_min_aggressive = 0
 
-        # thrust ratio: try to take from analysis if present else compute from thrust estimate
+        # ─── FIX-01: TWR calculation (was always 2.0 — circular formula) ───────
+        # Priority: measured_thrust > prop g/W estimate > fallback power-based
         thrust_ratio = None
-        if "thrust_ratio" in analysis:
-            try:
-                thrust_ratio = analysis["thrust_ratio"]
-            except Exception:
-                thrust_ratio = None
-        else:
-            # compute if we have estimated thrust per motor in diagnostics
-            est_thrust_per_motor = diag.get("estimated_hover_thrust_per_motor_g") or input_block.get("thrust_per_motor_g")
-            if est_thrust_per_motor:
-                try:
-                    total_thrust_g = float(est_thrust_per_motor) * int(input_block.get("motors", motor_count))
-                    thrust_ratio = round(total_thrust_g / (total_weight_g or 1.0), 2)
-                except Exception:
-                    thrust_ratio = None
+        try:
+            if measured_thrust_per_motor_g is not None:
+                # Real bench data: highest accuracy
+                total_thrust_g = float(measured_thrust_per_motor_g) * int(motor_count or 4)
+                thrust_ratio = round(total_thrust_g / (total_weight_g or 1.0), 2)
+            else:
+                # Use prop_result.effect.est_g_per_w × power for realistic estimate
+                _gpw = None
+                if isinstance(prop_result, dict):
+                    _gpw = prop_result.get("effect", {}).get("est_g_per_w")
+                if _gpw and total_power_w > 0:
+                    # FIX: W_PER_GRAM table represents HOVER power (at ~50% throttle)
+                    # Full throttle thrust ≈ hover_thrust × 2 (empirical FPV quad)
+                    # thrust at hover = g_per_w × hover_power; max = × 2 for TWR
+                    _total_thrust_g = float(_gpw) * total_power_w * 2.0
+                    thrust_ratio = round(_total_thrust_g / (total_weight_g or 1.0), 2)
+                else:
+                    # Last resort: use flight-style TWR heuristics
+                    _style_twr = {"freestyle": 2.0, "racing": 2.5, "longrange": 1.4,
+                                  "cine": 1.2, "micro": 2.2, "whoop": 2.0}
+                    thrust_ratio = _style_twr.get(str(style).lower(), 2.0)
+        except Exception:
+            thrust_ratio = None
 
         # BUG FIX: warnings เดิมถูก flatten เป็น list of strings
         # แต่ template ใช้ w.level / w.msg → ต้องเก็บเป็น list of dicts

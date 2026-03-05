@@ -186,6 +186,25 @@ def evaluate_rules(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
             "เพิ่มค่า D-term filter หรือลด D ถ้ายังเกิดอาการสั่น",
             ["pid.roll.d", "filter.dterm_lpf1"])
 
+    # 7b) RPM filter check — ควรเปิดเมื่อใช้ DSHOT Bidir
+    rpm_filter = _get(analysis, "filter.rpm_filter", _get(analysis, "filter_baseline.rpm_filter", None))
+    try:
+        # rpm_filter เป็น bool หรือ string "on"/"off" หรือ 1/0
+        if rpm_filter is None:
+            rpm_filter_on = None
+        elif isinstance(rpm_filter, bool):
+            rpm_filter_on = rpm_filter
+        else:
+            rpm_filter_on = str(rpm_filter).strip().lower() not in ("false", "0", "off", "none", "")
+    except Exception:
+        rpm_filter_on = None
+
+    if rpm_filter_on is False:
+        add("rpm_filter_off", "warning",
+            "RPM Filter ปิดอยู่ — แนะนำเปิดถ้า ESC รองรับ DSHOT Bidir",
+            "ตั้งค่า dshot_bidir = ON และ rpm_notch_harmonics = 3 ใน BF CLI",
+            ["filter.rpm_filter"])
+
     # 8) Battery capacity sanity against size
     # FIX: battery_est คือ "นาที" ไม่ใช่ mAh — ต้องอ่านจาก advanced.power.battery_mAh_used เท่านั้น
     batt_mAh = _get(analysis, "advanced.power.battery_mAh_used",
