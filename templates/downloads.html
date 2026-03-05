@@ -63,7 +63,7 @@
           </div>
           <div style="flex:1;">
             <div style="font-weight:700;">{{ it.fc }} — {{ it.filename }}</div>
-            <div class="dl-meta">ขนาด: {{ (it.size/1024)|round(1) }} KB • sha256: {{ it.sha }} • อัปเดต: {{ it.mtime|timestamp_to_datetime }}</div>
+            <div class="dl-meta">ขนาด: {{ (it.size/1024)|round(1) }} KB • sha256: {{ it.sha }} • อัปเดต: {% if it.mtime %}{{ it.mtime|timestamp_to_datetime }}{% else %}—{% endif %}</div>
           </div>
         </div>
 
