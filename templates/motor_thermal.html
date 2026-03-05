@@ -81,34 +81,17 @@ select option{background:#1a2030}
 .edu-card-icon{font-size:1.4rem;margin-bottom:8px}
 .edu-card-title{font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:5px}
 .edu-card-body{font-size:.78rem;color:var(--muted);line-height:1.6}
-.nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;background:rgba(6,9,11,0.88);backdrop-filter:blur(22px);border-bottom:1px solid rgba(251,146,60,0.08)}
-.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.nav-logo img{height:30px;filter:drop-shadow(0 0 8px rgba(16,196,122,0.5))}
-.nav-logo-text{font-family:var(--font-en);font-size:.72rem;font-weight:700;color:var(--green);letter-spacing:.12em}
-.nav-logo-sub{font-size:.62rem;color:var(--muted)}
-.nav-right{display:flex;gap:8px;align-items:center}
-.nav-btn{padding:7px 16px;font-size:.8rem;border-radius:8px;text-decoration:none;transition:all .2s;font-weight:600}
-.nav-btn-ghost{color:var(--muted);border:1px solid var(--border)}
-.nav-btn-ghost:hover{color:var(--text);background:rgba(255,255,255,.05)}
-.nav-btn-primary{background:var(--green);color:#021a0e;font-weight:800}
-.nav-btn-primary:hover{filter:brightness(1.1)}
+
 </style>
+{% set og_title = "Motor Thermal Estimator — OBIXConfig Doctor" %}
+{% set og_description = "ประมาณอุณหภูมิมอเตอร์ · thermal margin · cooling tips" %}
+{% set og_url = "https://configdoctor.onrender.com/motor-thermal" %}
+{% set nav_page = "motor_thermal" %}
+{% include "partials/og_tags.html" %}
 </head>
 <body>
 
-<nav class="nav">
-  <a class="nav-logo" href="/landing">
-    <img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="OBIX">
-    <div>
-      <div class="nav-logo-text">OBIX CONFIG DOCTOR</div>
-      <div class="nav-logo-sub">v5.0 Smart Analysis</div>
-    </div>
-  </a>
-  <div class="nav-right">
-    <a class="nav-btn nav-btn-ghost" href="/landing">← Landing</a>
-    <a class="nav-btn nav-btn-primary" href="/app">วิเคราะห์โดรน</a>
-  </div>
-</nav>
+{% include "partials/nav.html" %}
 
 <div class="page-wrap">
 

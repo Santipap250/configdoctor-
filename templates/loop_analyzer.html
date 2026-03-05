@@ -118,22 +118,15 @@ select option{background:#1a2030}
 .nav-btn-ghost:hover{color:var(--text);background:rgba(255,255,255,.05)}
 .nav-btn-primary{background:var(--green);color:#021a0e;font-weight:800}
 </style>
+{% set og_title = "Control Loop Analyzer — OBIXConfig Doctor" %}
+{% set og_description = "วิเคราะห์ looptime · scheduler load · CPU performance" %}
+{% set og_url = "https://configdoctor.onrender.com/loop-analyzer" %}
+{% set nav_page = "loop_analyzer" %}
+{% include "partials/og_tags.html" %}
 </head>
 <body>
 
-<nav class="nav">
-  <a class="nav-logo" href="/landing">
-    <img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="OBIX">
-    <div>
-      <div class="nav-logo-text">OBIX CONFIG DOCTOR</div>
-      <div class="nav-logo-sub">v5.0 Smart Analysis</div>
-    </div>
-  </a>
-  <div class="nav-right">
-    <a class="nav-btn nav-btn-ghost" href="/landing">← Landing</a>
-    <a class="nav-btn nav-btn-primary" href="/app">วิเคราะห์โดรน</a>
-  </div>
-</nav>
+{% include "partials/nav.html" %}
 
 <div class="page-wrap">
 
