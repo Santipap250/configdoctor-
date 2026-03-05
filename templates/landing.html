@@ -49,7 +49,27 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Scroll reveal ── */
+/* ── Language Toggle Button ── */
+.lang-toggle {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 12px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text); font-size: .78rem; font-weight: 700;
+  cursor: pointer; font-family: var(--font-en); letter-spacing: .06em;
+  transition: all .2s;
+}
+.lang-toggle:hover { background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.18); }
+.lang-toggle.lang-en { color: var(--blue); border-color: rgba(88,166,255,.3); background: rgba(88,166,255,.07); }
+
+/* ── i18n hidden ── */
+.i18n-th, .i18n-en { transition: opacity .25s; }
+body.lang-en .i18n-th { display: none !important; }
+body.lang-en .i18n-en { display: inline !important; }
+body:not(.lang-en) .i18n-en { display: none !important; }
+body:not(.lang-en) .i18n-th { display: inline !important; }
+
 [data-reveal] {
   opacity: 0;
   transform: translateY(28px);
@@ -423,8 +443,6 @@ section { padding: 90px 24px; }
 .card-teal:hover   { border-color: rgba(45,212,191,.38);  box-shadow: 0 24px 64px rgba(45,212,191,.07); }
 .card-purple:hover { border-color: rgba(167,139,250,.38); box-shadow: 0 24px 64px rgba(167,139,250,.07); }
 .card-red:hover    { border-color: rgba(248,113,113,.38); box-shadow: 0 24px 64px rgba(248,113,113,.07); }
-
-/* Corner glow */
 .new-card::before {
   content:''; position:absolute; top:0; right:0;
   width:260px; height:260px; border-radius:50%;
@@ -645,7 +663,7 @@ footer {
     <img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="OBIX">
     <div>
       <div class="nav-logo-text">OBIX CONFIG DOCTOR</div>
-      <div class="nav-logo-sub">FPV Tuning Platform 🇹🇭 · v2.3</div>
+      <div class="nav-logo-sub">FPV Tuning Platform 🇹🇭 · v5.0</div>
     </div>
   </a>
   <div class="nav-links">
@@ -653,8 +671,12 @@ footer {
     <a class="nav-link" href="/bf-wizard">⚡ Wizard</a>
     <a class="nav-link" href="/leaderboard">🏆 Rank</a>
     <a class="nav-link" href="/pid-advisor">PID</a>
-    <a class="nav-link" href="{{ url_for('about') }}">About</a>
-    <a class="nav-cta" href="/app">เริ่มวิเคราะห์ →</a>
+    <a class="nav-link" href="{{ url_for('about') }}" data-th="เกี่ยวกับ" data-en="About">About</a>
+    <!-- Language Toggle -->
+    <button class="lang-toggle" onclick="toggleLang()" id="langBtn" title="Switch Language">
+      <span id="langIcon">🇹🇭</span><span id="langLabel">TH</span>
+    </button>
+    <a class="nav-cta" href="/app" data-th="เริ่มวิเคราะห์ →" data-en="Analyze →">เริ่มวิเคราะห์ →</a>
   </div>
 </nav>
 
@@ -671,7 +693,8 @@ footer {
   <div class="hero-inner">
     <div class="hero-badge">
       <span class="badge-dot"></span>
-      🇹🇭 สำหรับชุมชน FPV ไทย — v2.3
+      <span class="i18n-th">🇹🇭 สำหรับชุมชน FPV ไทย — v5.0 Smart Analysis</span>
+      <span class="i18n-en">🇹🇭 For FPV Thailand Community — v5.0 Smart Analysis</span>
     </div>
 
     <img src="{{ url_for('static', filename='img/obix-logo.png') }}"
@@ -680,27 +703,33 @@ footer {
     <div class="hero-label">OBIXCONFIG DOCTOR</div>
 
     <h1 class="hero-title">
-      วิเคราะห์โดรน <span class="accent">FPV</span><br>
-      ของคุณ • ลึกที่สุดในไทย
-      <span class="hero-title-en">TUNE SMARTER. FLY BETTER. v2.3</span>
+      <span class="i18n-th">วิเคราะห์โดรน <span class="accent">FPV</span><br>ของคุณ • ลึกที่สุดในไทย</span>
+      <span class="i18n-en">Analyze your <span class="accent">FPV</span> Drone<br>Deepest tools in Thailand</span>
+      <span class="hero-title-en">TUNE SMARTER. FLY BETTER. v5.0</span>
     </h1>
 
     <p class="hero-desc">
-      วิเคราะห์ <strong>PID · Filter · Motor · ESC · Rates · RPM · Blackbox</strong><br>
-      จากข้อมูลโดรนของคุณ — ได้ค่าพร้อมใช้ + CLI command ทันที ฟรี 100%
+      <span class="i18n-th">วิเคราะห์ <strong>PID · Filter · Motor · ESC · Rates · RPM · Blackbox · Battery · Thermal · Loop</strong><br>จากข้อมูลโดรนของคุณ — ได้ค่าพร้อมใช้ + CLI command ทันที ฟรี 100%</span>
+      <span class="i18n-en">Analyze <strong>PID · Filter · Motor · ESC · Rates · RPM · Blackbox · Battery · Thermal · Loop</strong><br>from your drone specs — instant results + CLI commands. 100% Free.</span>
     </p>
 
     <div class="hero-actions">
-      <a href="/app" class="btn-primary">🚀 เริ่มวิเคราะห์โดรน</a>
-      <a href="#new-features" class="btn-secondary">ดู Features ใหม่ ↓</a>
+      <a href="/app" class="btn-primary">
+        <span class="i18n-th">🚀 เริ่มวิเคราะห์โดรน</span>
+        <span class="i18n-en">🚀 Analyze My Drone</span>
+      </a>
+      <a href="#new-features" class="btn-secondary">
+        <span class="i18n-th">ดู Features ใหม่ ↓</span>
+        <span class="i18n-en">See New Features ↓</span>
+      </a>
     </div>
 
     <div class="hero-tags">
-      <span class="hero-tag hot">🆕 BF Wizard + Community</span>
-      <span class="hero-tag">19 Tools</span>
+      <span class="hero-tag hot">🆕 v5.0 Smart Analysis + Physics Engine</span>
+      <span class="hero-tag">22 Tools</span>
       <span class="hero-tag">BF 4.3 · 4.4 · 4.5</span>
       <span class="hero-tag">2.5&quot;–10&quot;</span>
-      <span class="hero-tag">ฟรี · ไม่ต้อง login</span>
+      <span class="hero-tag"><span class="i18n-th">ฟรี · ไม่ต้อง login</span><span class="i18n-en">Free · No login</span></span>
     </div>
   </div>
 
@@ -713,20 +742,20 @@ footer {
 <!-- ── STATS BAR ──────────────────────────────────────────── -->
 <div class="stats-bar">
   <div class="stat-item">
-    <span class="stat-num">19</span>
-    <div class="stat-lbl">Tools &amp; Features</div>
+    <span class="stat-num">22</span>
+    <div class="stat-lbl"><span class="i18n-th">Tools &amp; Features</span><span class="i18n-en">Tools &amp; Features</span></div>
   </div>
   <div class="stat-item">
     <span class="stat-num">8</span>
-    <div class="stat-lbl">Build Sizes</div>
+    <div class="stat-lbl"><span class="i18n-th">Build Sizes</span><span class="i18n-en">Build Sizes</span></div>
   </div>
   <div class="stat-item">
     <span class="stat-num">13</span>
-    <div class="stat-lbl">PID Symptoms</div>
+    <div class="stat-lbl"><span class="i18n-th">PID Symptoms</span><span class="i18n-en">PID Symptoms</span></div>
   </div>
   <div class="stat-item">
     <span class="stat-num">🇹🇭</span>
-    <div class="stat-lbl">Community Thai</div>
+    <div class="stat-lbl"><span class="i18n-th">Community Thai</span><span class="i18n-en">Thai Community</span></div>
   </div>
 </div>
 
@@ -736,9 +765,15 @@ footer {
 <section id="new-features">
   <div class="section-inner">
     <div data-reveal>
-      <div class="section-badge badge-new">✦ &nbsp;Features ใหม่ v2.3</div>
-      <h2 class="section-title">เครื่องมือที่<br><span class="hl-gold">ไม่มีที่ไหนในโลก FPV</span></h2>
-      <p class="section-sub">สร้างขึ้นจากความรู้ community จริงๆ — ไม่ต้องเดา ไม่ต้องลองผิดลองถูก รวม BF Wizard, Build Card, Leaderboard เครื่องมือล่าสุด v2.3</p>
+      <div class="section-badge badge-new">✦ &nbsp;Features ใหม่ v5.0</div>
+      <h2 class="section-title">
+        <span class="i18n-th">เครื่องมือที่<br><span class="hl-gold">ไม่มีที่ไหนในโลก FPV</span></span>
+        <span class="i18n-en">Tools that<br><span class="hl-gold">don't exist anywhere else</span></span>
+      </h2>
+      <p class="section-sub">
+        <span class="i18n-th">สร้างขึ้นจากความรู้ community จริงๆ — ไม่ต้องเดา ไม่ต้องลองผิดลองถูก รวม v5.0 Smart Analysis: Battery Health, Motor Thermal, Control Loop Analyzer และ Smart Physics Engine</span>
+        <span class="i18n-en">Built from real community knowledge — no guessing, no trial-and-error. v5.0 adds Battery Health Advisor, Motor Thermal Estimator, Control Loop Analyzer, and a full Smart Physics Engine.</span>
+      </p>
     </div>
 
     <div class="new-grid">
@@ -939,7 +974,7 @@ footer {
         <div class="new-card-arrow">→</div>
       </a>
 
-      <!-- ═══ v2.3: Tuning Log + Leaderboard ═══ -->
+      <!-- ═══ v5.0: Tuning Log + Leaderboard ═══ -->
       <a href="/tuning-log" class="new-card card-teal" data-reveal>
         <div class="new-card-new-pill pill-new">✦ ใหม่</div>
         <span class="new-card-icon">📋</span>
@@ -948,13 +983,94 @@ footer {
           Tuning Log &amp; Leaderboard
         </div>
         <p class="new-card-desc">
-          บันทึกทุก session การ tune — ดู PID delta ระหว่างครั้ง — แชร์ config เข้า Leaderboard ชุมชน vote ให้คะแนน copy CLI ของ top config ได้เลย
+          <span class="i18n-th">บันทึกทุก session การ tune — ดู PID delta ระหว่างครั้ง — แชร์ config เข้า Leaderboard ชุมชน vote ให้คะแนน copy CLI ของ top config ได้เลย</span>
+          <span class="i18n-en">Log every tuning session — see PID deltas — share to community Leaderboard, vote, copy top configs instantly.</span>
         </p>
         <div class="new-card-tags">
           <span class="tag">PID Delta</span>
           <span class="tag">Timeline</span>
           <span class="tag">Community Vote</span>
           <span class="tag"><a href="/leaderboard" style="color:inherit">🏆 Rank</a></span>
+        </div>
+        <div class="new-card-arrow">→</div>
+      </a>
+
+      <!-- ═══ v5.0 NEW: Battery Health Advisor ═══ -->
+      <a href="/battery-health" class="new-card card-gold" data-reveal>
+        <div class="new-card-new-pill pill-flagship">⚡ v5.0 NEW</div>
+        <span class="new-card-icon">🔋</span>
+        <div class="new-card-title">
+          <span class="en">BATTERY HEALTH ADVISOR</span>
+          Battery Health Advisor
+        </div>
+        <p class="new-card-desc">
+          <span class="i18n-th">ใส่ IR, Voltage Sag, Cycle Count → ได้ Health Score + ประมาณอายุใช้งานที่เหลือ + voltage sag จริง ด้วย physics model — ไม่มีใครทำแบบนี้มาก่อน</span>
+          <span class="i18n-en">Input IR, voltage sag, cycles → get Health Score + remaining life estimate + real sag calculation using physics model. No tool does this.</span>
+        </p>
+        <div class="new-card-tags">
+          <span class="tag">IR Analysis</span>
+          <span class="tag">Health Score</span>
+          <span class="tag">Sag Physics</span>
+          <span class="tag">Retire Advice</span>
+        </div>
+        <div class="new-card-arrow">→</div>
+      </a>
+
+      <!-- ═══ v5.0 NEW: Motor Thermal Estimator ═══ -->
+      <a href="/motor-thermal" class="new-card card-red" data-reveal>
+        <div class="new-card-new-pill pill-flagship">⚡ v5.0 NEW</div>
+        <span class="new-card-icon">🌡️</span>
+        <div class="new-card-title">
+          <span class="en">MOTOR THERMAL ESTIMATOR</span>
+          Motor Thermal Estimator
+        </div>
+        <p class="new-card-desc">
+          <span class="i18n-th">ประมาณอุณหภูมิ winding จาก stator size, KV, กระแส, style บิน — บอก safe zone / danger zone และ max duration ก่อน motor จะเกิน 70°C</span>
+          <span class="i18n-en">Estimate winding temperature from stator size, KV, current, flight style — shows safe/danger zones and time before exceeding 70°C.</span>
+        </p>
+        <div class="new-card-tags">
+          <span class="tag">Thermal Model</span>
+          <span class="tag">Winding Temp</span>
+          <span class="tag">Safe Zone</span>
+          <span class="tag">Physics Engine</span>
+        </div>
+        <div class="new-card-arrow">→</div>
+      </a>
+
+      <!-- ═══ v5.0 NEW: Control Loop Analyzer ═══ -->
+      <a href="/loop-analyzer" class="new-card card-purple" data-reveal style="grid-column:1/-1">
+        <div class="new-card-new-pill pill-flagship">⚡ v5.0 NEW · WORLD FIRST</div>
+        <div class="flagship-inner">
+          <div>
+            <span class="new-card-icon">📡</span>
+            <div class="new-card-title">
+              <span class="en">CONTROL LOOP LATENCY ANALYZER</span>
+              Control Loop Latency Analyzer
+            </div>
+            <p class="new-card-desc">
+              <span class="i18n-th">วิเคราะห์ latency ทุก stage: RC Link → FC Processing → DShot → ESC → Motor — หา bottleneck, คำนวณ CPU load, jitter และ effective loop rate จาก configuration จริงๆ ของคุณ เข้าใจครั้งแรกว่าทำไม F7 "รู้สึก" ดีกว่า F4</span>
+              <span class="i18n-en">Analyze every stage of signal latency: RC Link → FC Processing → DShot → ESC → Motor — find bottlenecks, calculate CPU load, jitter and effective loop rate. Finally understand why F7 "feels" better than F4.</span>
+            </p>
+            <div class="new-card-tags" style="margin-top:16px">
+              <span class="tag">RC Link</span>
+              <span class="tag">DShot Timing</span>
+              <span class="tag">CPU Budget</span>
+              <span class="tag">Bottleneck Map</span>
+              <span class="tag">F4/F7/H7</span>
+              <span class="tag">ELRS / Crossfire</span>
+            </div>
+          </div>
+          <div class="flagship-visual" style="border-color:rgba(167,139,250,.15)">
+<span class="mu">🎮 RC Link (ELRS 500Hz)   </span><span class="hi">████████████</span><span class="go"> 2.0ms</span>
+<span class="mu">📥 RC Decode (FC)         </span><span class="hi">██           </span><span class="go"> 0.05ms</span>
+<span class="mu">🧭 Gyro Read (ICM42688)   </span><span class="hi">█            </span><span class="go"> 0.01ms</span>
+<span class="mu">🔧 FC Processing (F7)     </span><span class="hi">████         </span><span class="go"> 0.02ms</span>
+<span class="mu">⚡ DShot600               </span><span class="hi">██           </span><span class="go"> 0.06ms</span>
+<span class="mu">🔌 ESC Processing         </span><span class="hi">████         </span><span class="go"> 0.08ms</span>
+<span class="mu">🌀 Motor Response         </span><span class="hi">████████████████████████</span><span class="go"> 3.0ms</span>
+<span class="mu">──────────────────────────────────</span>
+<span class="mu">Total:</span>                       <span class="hi" style="font-size:1rem;font-weight:900">5.21ms ✅</span>
+          </div>
         </div>
         <div class="new-card-arrow">→</div>
       </a>
@@ -972,8 +1088,14 @@ footer {
   <div class="section-inner">
     <div data-reveal>
       <div class="section-badge badge-core">⚙️ &nbsp;Core Features</div>
-      <h2 class="section-title">ฟีเจอร์หลักที่<br><span class="hl-green">ครบทุก workflow</span></h2>
-      <p class="section-sub">ตั้งแต่วิเคราะห์ config ไปจนถึง download ไฟล์ตัวอย่าง — ทุกอย่างอยู่ที่นี่</p>
+      <h2 class="section-title">
+        <span class="i18n-th">ฟีเจอร์หลักที่<br><span class="hl-green">ครบทุก workflow</span></span>
+        <span class="i18n-en">Core features for<br><span class="hl-green">every workflow</span></span>
+      </h2>
+      <p class="section-sub">
+        <span class="i18n-th">ตั้งแต่วิเคราะห์ config ไปจนถึง download ไฟล์ตัวอย่าง — ทุกอย่างอยู่ที่นี่</span>
+        <span class="i18n-en">From config analysis to downloading sample files — everything is here.</span>
+      </p>
     </div>
 
     <div class="core-grid" data-reveal>
@@ -1169,8 +1291,29 @@ footer {
       <a class="tool-card" href="/leaderboard">
         <div class="tool-icon">🏆</div>
         <div class="tool-name">Config Leaderboard</div>
-        <div class="tool-hint">vote · rank · copy config</div>
+        <div class="tool-hint"><span class="i18n-th">vote · rank · copy config</span><span class="i18n-en">vote · rank · copy config</span></div>
         <span class="tool-badge tb-new">NEW</span>
+      </a>
+
+      <a class="tool-card" href="/battery-health">
+        <div class="tool-icon">🔋</div>
+        <div class="tool-name">Battery Health</div>
+        <div class="tool-hint"><span class="i18n-th">IR · Sag · Health Score</span><span class="i18n-en">IR · Sag · Health Score</span></div>
+        <span class="tool-badge tb-new">v5.0</span>
+      </a>
+
+      <a class="tool-card" href="/motor-thermal">
+        <div class="tool-icon">🌡️</div>
+        <div class="tool-name">Motor Thermal</div>
+        <div class="tool-hint"><span class="i18n-th">ประมาณอุณหภูมิ winding</span><span class="i18n-en">Winding temp estimator</span></div>
+        <span class="tool-badge tb-new">v5.0</span>
+      </a>
+
+      <a class="tool-card" href="/loop-analyzer">
+        <div class="tool-icon">📡</div>
+        <div class="tool-name">Loop Analyzer</div>
+        <div class="tool-hint"><span class="i18n-th">Stick→Prop latency</span><span class="i18n-en">Stick→Prop latency</span></div>
+        <span class="tool-badge tb-new">v5.0</span>
       </a>
 
     </div>
@@ -1183,13 +1326,16 @@ footer {
 <section class="community-section">
   <div class="community-inner" data-reveal>
     <div class="community-tag">OPEN SOURCE COMMUNITY</div>
-    <h2 class="community-title">ทำเพื่อชุมชน FPV ไทย ❤️</h2>
+    <h2 class="community-title">
+      <span class="i18n-th">ทำเพื่อชุมชน FPV ไทย ❤️</span>
+      <span class="i18n-en">Built for Thai FPV Community ❤️</span>
+    </h2>
     <p class="community-desc">
-      ยังพัฒนาต่อเนื่อง — อยากให้เพิ่ม feature อะไร มี bug หรืออยากแชร์ config?
-      แนะนำได้ที่เพจ <strong>OBIXConfig Lab</strong>
+      <span class="i18n-th">ยังพัฒนาต่อเนื่อง — อยากให้เพิ่ม feature อะไร มี bug หรืออยากแชร์ config? แนะนำได้ที่เพจ <strong>OBIXConfig Lab</strong></span>
+      <span class="i18n-en">Continuously improving — want a new feature, found a bug, or want to share your config? Drop by <strong>OBIXConfig Lab</strong></span>
     </p>
     <a href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener" class="community-btn">
-      💬 ไปที่เพจ OBIXConfig Lab
+      💬 <span class="i18n-th">ไปที่เพจ OBIXConfig Lab</span><span class="i18n-en">Visit OBIXConfig Lab</span>
     </a>
   </div>
 </section>
@@ -1774,10 +1920,10 @@ footer {
 <footer>
   <div class="footer-left">
     <strong>OBIXCONFIG DOCTOR</strong> &nbsp;•&nbsp;
-    v2.3 &nbsp;•&nbsp; FPV Community 🇹🇭
+    v5.0 Smart Analysis &nbsp;•&nbsp; FPV Community 🇹🇭
   </div>
   <div class="footer-right">
-    <a class="footer-link" href="/app">Analyzer</a>
+    <a class="footer-link" href="/app"><span class="i18n-th">วิเคราะห์</span><span class="i18n-en">Analyzer</span></a>
     <a class="footer-link" href="/about">About</a>
     <a class="footer-link" href="{{ url_for('downloads_index') }}">Downloads</a>
   </div>
@@ -1859,5 +2005,42 @@ if (statsBar) statsObs.observe(statsBar);
   }, { passive: true });
 })();
 </script>
+<!-- ── Language Toggle Script ── -->
+<script>
+(function(){
+  'use strict';
+
+  // Restore saved language preference
+  var saved = localStorage.getItem('obix_lang') || 'th';
+  if (saved === 'en') applyLang('en');
+
+  window.toggleLang = function() {
+    var isEn = document.body.classList.contains('lang-en');
+    applyLang(isEn ? 'th' : 'en');
+  };
+
+  function applyLang(lang) {
+    var btn   = document.getElementById('langBtn');
+    var icon  = document.getElementById('langIcon');
+    var label = document.getElementById('langLabel');
+    if (lang === 'en') {
+      document.body.classList.add('lang-en');
+      document.documentElement.lang = 'en';
+      if (icon)  icon.textContent  = '🇬🇧';
+      if (label) label.textContent = 'EN';
+      if (btn)   btn.classList.add('lang-en');
+      localStorage.setItem('obix_lang','en');
+    } else {
+      document.body.classList.remove('lang-en');
+      document.documentElement.lang = 'th';
+      if (icon)  icon.textContent  = '🇹🇭';
+      if (label) label.textContent = 'TH';
+      if (btn)   btn.classList.remove('lang-en');
+      localStorage.setItem('obix_lang','th');
+    }
+  }
+})();
+</script>
+
 </body>
 </html>
