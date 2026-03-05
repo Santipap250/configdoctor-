@@ -1,4 +1,4 @@
-# app.py — OBIXConfig Doctor v2.2
+# app.py — OBIXConfig Doctor v2.3g
 # ============================================================
 # v2.2 — Blackbox CSV Analyzer + Full Tool Suite
 # Tools: PID/Filter · Blackbox · CLI Surgeon · PID Advisor
@@ -746,6 +746,18 @@ def analyze_cli():
         if len(dump.encode('utf-8')) > 512_000:
             return jsonify({"error": "ไฟล์ใหญ่เกิน 512KB"}), 413
         result = cli_analyze_dump(dump)
+        # FIX-04b: extract PID dict from params for easier template/JS consumption
+        try:
+            params = result.get("params", {})
+            result["pid"] = {
+                "roll":  {"p": params.get("p_roll"),  "i": params.get("i_roll"),  "d": params.get("d_roll")},
+                "pitch": {"p": params.get("p_pitch"), "i": params.get("i_pitch"), "d": params.get("d_pitch")},
+                "yaw":   {"p": params.get("p_yaw"),   "i": params.get("i_yaw"),   "d": params.get("d_yaw", 0)},
+            }
+            result["motor_protocol"] = params.get("motor_pwm_protocol")
+            result["dshot_bidir"]    = params.get("dshot_bidir")
+        except Exception:
+            pass
         # Enrich with firmware version detection
         try:
             from analyzer.cli_surgeon import detect_firmware_version
