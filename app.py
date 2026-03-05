@@ -324,7 +324,9 @@ def index():
 
         # ── Prop analysis ─────────────────────────────────────────────
         try:
-            prop_result = analyze_propeller(prop_size, prop_pitch, blade_count, style)
+            _cells_int = int(str(battery).upper().replace('S','').strip()) if battery else 4
+            prop_result = analyze_propeller(prop_size, prop_pitch, blade_count, style,
+                                            motor_kv=motor_kv, cells=_cells_int)
         except Exception:
             prop_result = {
                 "summary": "prop analysis not available",
@@ -370,7 +372,19 @@ def index():
         }
         analysis["baseline_notes"] = baseline_ctrl.get("notes", "")
 
-        analysis["preset_used"]      = preset_key or "custom"
+        # ── Expose new v5 fields ─────────────────────────────
+        adv_block = analysis.get("advanced", {})
+        analysis["esc_recommended_a"]   = adv_block.get("esc_recommended_a")
+        analysis["hover_throttle_pct"]  = adv_block.get("hover_throttle_pct")
+        analysis["tip_speed_mps"]       = (adv_block.get("tip_speed_mps") or
+                                            prop_result.get("effect",{}).get("tip_speed_mps"))
+        analysis["rpm_estimated"]       = adv_block.get("rpm_estimated")
+        analysis["c_burst"]             = adv_block.get("c_burst")
+        analysis["c_continuous"]        = adv_block.get("c_continuous")
+        analysis["c_recommended"]       = adv_block.get("c_recommended")
+        analysis["peak_per_motor_a"]    = adv_block.get("peak_per_motor_a")
+        analysis["max_power_total_w"]   = adv_block.get("max_power_total_w")
+        analysis["preset_used"]         = preset_key or "custom"
         analysis["detected_class"]   = detected_class
         analysis["class_meta"]       = class_meta
         analysis["baseline_control"] = baseline_ctrl
