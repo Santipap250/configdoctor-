@@ -939,6 +939,22 @@ def sitemap_xml():
 </urlset>"""
     return Response(xml, mimetype="application/xml")
 
+# ── v5.0 New Feature Routes ─────────────────────────────────
+
+@app.route('/battery-health')
+def battery_health():
+    return render_template('battery_health.html')
+
+@app.route('/motor-thermal')
+def motor_thermal():
+    return render_template('motor_thermal.html')
+
+@app.route('/loop-analyzer')
+def loop_analyzer():
+    return render_template('loop_analyzer.html')
+
+# ────────────────────────────────────────────────────────────
+
 if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
