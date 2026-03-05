@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <title>OBIXConfig Doctor — วิเคราะห์ PID · Filter · Blackbox โดรน FPV ภาษาไทย</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-{% set og_title       = "OBIXConfig Doctor — FPV Drone Tuning Tool" %}
-{% set og_description = "เครื่องมือวิเคราะห์ PID · Filter · Motor · ESC · Blackbox สำหรับโดรน FPV ทุกขนาด — ชุมชนคนรัก FPVThailand🇹🇭" %}
+{% set og_title       = "OBIXConfig Doctor v5.0 — FPV Drone Tuning Tool" %}
+{% set og_description = "เครื่องมือวิเคราะห์ PID · Filter · Motor · ESC · Blackbox · Battery Health · Motor Thermal · Loop Latency สำหรับโดรน FPV — v5.0 Smart Analysis 🇹🇭" %}
 {% set og_url         = "https://configdoctor.onrender.com/landing" %}
 {% set og_image       = "https://configdoctor.onrender.com/static/img/og-default.jpg" %}
 {% include "partials/og_tags.html" %}
@@ -16,7 +16,7 @@
 
 <style>
 /* ═══════════════════════════════════════════════════
-   LANDING — OBIXConfig Doctor v2.3
+   LANDING — OBIXConfig Doctor v5.0
    Aesthetic: Precision Aerospace · Deep Signal Dark
    ═══════════════════════════════════════════════════ */
 
@@ -136,6 +136,18 @@ body:not(.lang-en) .i18n-th { display: inline !important; }
 @media(max-width:680px) {
   .nav { padding: 12px 18px; }
   .nav-links { display: none; }
+  .nav-mobile-right { display: flex !important; }
+}
+
+/* Mobile-visible right side (lang + CTA) */
+.nav-mobile-right {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin-left: 6px;
+}
+@media(min-width:681px) {
+  .nav-mobile-right { display: none !important; }
 }
 
 /* ══════════════════════════════════════════
@@ -411,7 +423,7 @@ section { padding: 90px 24px; }
 }
 
 /* ══════════════════════════════════════════
-   NEW FEATURES SECTION v2.3
+   NEW FEATURES SECTION v5.0
    ══════════════════════════════════════════ */
 .new-grid {
   display: grid;
@@ -672,11 +684,21 @@ footer {
     <a class="nav-link" href="/leaderboard">🏆 Rank</a>
     <a class="nav-link" href="/pid-advisor">PID</a>
     <a class="nav-link" href="{{ url_for('about') }}" data-th="เกี่ยวกับ" data-en="About">About</a>
-    <!-- Language Toggle -->
+    <!-- Language Toggle (desktop) -->
     <button class="lang-toggle" onclick="toggleLang()" id="langBtn" title="Switch Language">
       <span id="langIcon">🇹🇭</span><span id="langLabel">TH</span>
     </button>
     <a class="nav-cta" href="/app" data-th="เริ่มวิเคราะห์ →" data-en="Analyze →">เริ่มวิเคราะห์ →</a>
+  </div>
+  <!-- Mobile: lang toggle + CTA always visible -->
+  <div class="nav-mobile-right">
+    <button class="lang-toggle" onclick="toggleLang()" id="langBtnMobile" title="Switch Language" style="padding:5px 9px;font-size:.72rem">
+      <span id="langIconMobile">🇹🇭</span><span id="langLabelMobile">TH</span>
+    </button>
+    <a class="nav-cta" href="/app" style="padding:7px 14px;font-size:.78rem">
+      <span class="i18n-th">วิเคราะห์ →</span>
+      <span class="i18n-en">Analyze →</span>
+    </a>
   </div>
 </nav>
 
@@ -734,7 +756,8 @@ footer {
   </div>
 
   <div class="scroll-hint">
-    <span>เลื่อนลง</span>
+    <span class="i18n-th">เลื่อนลง</span>
+    <span class="i18n-en">Scroll</span>
     <div class="scroll-arrow"></div>
   </div>
 </section>
@@ -916,7 +939,7 @@ footer {
         <div class="new-card-arrow">→</div>
       </a>
 
-      <!-- ═══ v2.3: BF Config Wizard ═══ -->
+      <!-- ═══ BF Config Wizard (added v2.3) ═══ -->
       <a href="/bf-wizard" class="new-card card-green" data-reveal>
         <div class="new-card-new-pill pill-flagship">⚡ v2.3 NEW</div>
         <span class="new-card-icon">⚡</span>
@@ -936,7 +959,7 @@ footer {
         <div class="new-card-arrow">→</div>
       </a>
 
-      <!-- ═══ v2.3: Flight Style Quiz ═══ -->
+      <!-- ═══ Flight Style Quiz (added v2.3) ═══ -->
       <a href="/flight-quiz" class="new-card card-gold" data-reveal>
         <div class="new-card-new-pill pill-new">✦ ใหม่</div>
         <span class="new-card-icon">🎯</span>
@@ -955,7 +978,7 @@ footer {
         <div class="new-card-arrow">→</div>
       </a>
 
-      <!-- ═══ v2.3: Build Card Generator ═══ -->
+      <!-- ═══ Build Card Generator (added v2.3) ═══ -->
       <a href="/build-card" class="new-card card-blue" data-reveal>
         <div class="new-card-new-pill pill-new">✦ ใหม่</div>
         <span class="new-card-icon">🃏</span>
@@ -1102,32 +1125,50 @@ footer {
       <div class="core-card">
         <div class="core-icon">⚙️</div>
         <div class="core-title">PID &amp; Filter Baseline</div>
-        <p class="core-desc">ค่า PID และ Filter ที่ปลอดภัยตาม class โดรน พร้อม CLI copy ได้เลย</p>
+        <p class="core-desc">
+          <span class="i18n-th">ค่า PID และ Filter ที่ปลอดภัยตาม class โดรน พร้อม CLI copy ได้เลย</span>
+          <span class="i18n-en">Safe PID &amp; Filter baselines per drone class — CLI-ready to paste</span>
+        </p>
       </div>
       <div class="core-card">
         <div class="core-icon">🔬</div>
-        <div class="core-title">Advanced Physics Engine</div>
-        <p class="core-desc">ประมาณ TWR, กระแสไฟ, C-rating, เวลาบิน size-dependent (2.5"–10")</p>
+        <div class="core-title">Advanced Physics Engine v5</div>
+        <p class="core-desc">
+          <span class="i18n-th">ประมาณ TWR, กระแสไฟ, C-rating, tip speed, winding temp (2.5"–10")</span>
+          <span class="i18n-en">Estimate TWR, current, C-rating, tip speed, winding temp (2.5"–10")</span>
+        </p>
       </div>
       <div class="core-card">
         <div class="core-icon">🧭</div>
         <div class="core-title">Motor × Prop Recommender</div>
-        <p class="core-desc">แนะนำ KV, stator size และประมาณกระแสตามน้ำหนัก + battery + style</p>
+        <p class="core-desc">
+          <span class="i18n-th">แนะนำ KV, stator size และประมาณกระแสตามน้ำหนัก + battery + style</span>
+          <span class="i18n-en">Recommends KV, stator size and estimates current based on weight + battery + style</span>
+        </p>
       </div>
       <div class="core-card">
         <div class="core-icon">🛠️</div>
         <div class="core-title">Smart Rule Checks</div>
-        <p class="core-desc">ตรวจ warning อัตโนมัติ เช่น TWR ต่ำ, C-rating สูง, KV ไม่เหมาะ cell count</p>
+        <p class="core-desc">
+          <span class="i18n-th">ตรวจ warning อัตโนมัติ เช่น TWR ต่ำ, C-rating สูง, KV ไม่เหมาะ cell count, tip speed</span>
+          <span class="i18n-en">Auto-checks: low TWR, high C-rating, KV mismatched with cell count, tip speed danger</span>
+        </p>
       </div>
       <div class="core-card">
         <div class="core-icon">🩻</div>
-        <div class="core-title">CLI Surgeon v2.3</div>
-        <p class="core-desc">วาง diff all หรือ dump — ตรวจ gyro_lpf1_static_hz, simplified filter, motor_poles พร้อม fix</p>
+        <div class="core-title">CLI Surgeon v5.0</div>
+        <p class="core-desc">
+          <span class="i18n-th">วาง diff all หรือ dump — ตรวจ gyro_lpf1, simplified filter, motor_poles พร้อม fix</span>
+          <span class="i18n-en">Paste diff all or dump — checks gyro_lpf1, simplified filter, motor_poles and fixes</span>
+        </p>
       </div>
       <div class="core-card">
         <div class="core-icon">📁</div>
         <div class="core-title">DIFF / DUMP Library</div>
-        <p class="core-desc">รวมไฟล์จากโดรนหลายรุ่น — F4/F7, 5"/7", หลาย build แยก ดาวน์โหลดได้ทันที</p>
+        <p class="core-desc">
+          <span class="i18n-th">รวมไฟล์จากโดรนหลายรุ่น — F4/F7, 5"/7", หลาย build แยก ดาวน์โหลดได้ทันที</span>
+          <span class="i18n-en">Collection of CLI configs from many drones — F4/F7, 5"/7", multiple builds</span>
+        </p>
       </div>
     </div>
   </div>
@@ -1138,8 +1179,14 @@ footer {
      ══════════════════════════════════════════════════════════ -->
 <section class="builds-section">
   <div class="builds-wrap" data-reveal>
-    <h2 class="builds-title">รองรับทุกขนาด — ตั้งแต่ Whoop ถึง Long Range</h2>
-    <p class="builds-sub">ค่าที่แนะนำ tuned ตาม class โดรนจริงๆ ไม่ใช่ค่ากลางที่ใช้ได้ทุกอย่าง</p>
+    <h2 class="builds-title">
+      <span class="i18n-th">รองรับทุกขนาด — ตั้งแต่ Whoop ถึง Long Range</span>
+      <span class="i18n-en">All Sizes Supported — Whoop to Long Range</span>
+    </h2>
+    <p class="builds-sub">
+      <span class="i18n-th">ค่าที่แนะนำ tuned ตาม class โดรนจริงๆ ไม่ใช่ค่ากลางที่ใช้ได้ทุกอย่าง</span>
+      <span class="i18n-en">Recommendations tuned per drone class — not generic one-size-fits-all values</span>
+    </p>
     <div class="builds-row">
       {% for b in [
         ('2.5"','Micro / Whoop','🤏'),
@@ -1169,8 +1216,14 @@ footer {
   <div class="section-inner">
     <div data-reveal>
       <div class="section-badge badge-tools">🔗 &nbsp;Quick Access</div>
-      <h2 class="section-title">เครื่องมือ<span class="hl-blue">ทั้งหมด</span></h2>
-      <p class="section-sub">คลิกได้เลย — ทุก tool ฟรีและไม่ต้อง login</p>
+      <h2 class="section-title">
+        <span class="i18n-th">เครื่องมือ<span class="hl-blue">ทั้งหมด</span></span>
+        <span class="i18n-en">All <span class="hl-blue">Tools</span></span>
+      </h2>
+      <p class="section-sub">
+        <span class="i18n-th">คลิกได้เลย — ทุก tool ฟรีและไม่ต้อง login</span>
+        <span class="i18n-en">Click directly — every tool is free and requires no login</span>
+      </p>
     </div>
     <div class="tools-grid" data-reveal>
 
@@ -1357,9 +1410,13 @@ footer {
 
   <!-- Headline -->
   <h2 class="sup-h2" data-sup-reveal>
-    <span class="sup-h2-white">เครื่องมือนี้ฟรีตลอด</span>
+    <span class="sup-h2-white">
+      <span class="i18n-th">เครื่องมือนี้ฟรีตลอด</span>
+      <span class="i18n-en">This tool is always free</span>
+    </span>
     <span class="sup-h2-grad">
-      ทำเพื่อชุมชน FPV ไทย
+      <span class="i18n-th">ทำเพื่อชุมชน FPV ไทย</span>
+      <span class="i18n-en">Built for Thai FPV Community</span>
       <span class="sup-heart-pulse" aria-hidden="true">❤️</span>
     </span>
   </h2>
@@ -2020,24 +2077,28 @@ if (statsBar) statsObs.observe(statsBar);
   };
 
   function applyLang(lang) {
-    var btn   = document.getElementById('langBtn');
-    var icon  = document.getElementById('langIcon');
-    var label = document.getElementById('langLabel');
     if (lang === 'en') {
       document.body.classList.add('lang-en');
       document.documentElement.lang = 'en';
-      if (icon)  icon.textContent  = '🇬🇧';
-      if (label) label.textContent = 'EN';
-      if (btn)   btn.classList.add('lang-en');
+      _setBtn('langBtn',       'langIcon',       'langLabel',       '🇬🇧', 'EN', true);
+      _setBtn('langBtnMobile', 'langIconMobile', 'langLabelMobile', '🇬🇧', 'EN', true);
       localStorage.setItem('obix_lang','en');
     } else {
       document.body.classList.remove('lang-en');
       document.documentElement.lang = 'th';
-      if (icon)  icon.textContent  = '🇹🇭';
-      if (label) label.textContent = 'TH';
-      if (btn)   btn.classList.remove('lang-en');
+      _setBtn('langBtn',       'langIcon',       'langLabel',       '🇹🇭', 'TH', false);
+      _setBtn('langBtnMobile', 'langIconMobile', 'langLabelMobile', '🇹🇭', 'TH', false);
       localStorage.setItem('obix_lang','th');
     }
+  }
+
+  function _setBtn(btnId, iconId, labelId, icon, label, isEn) {
+    var btn   = document.getElementById(btnId);
+    var iEl   = document.getElementById(iconId);
+    var lEl   = document.getElementById(labelId);
+    if (iEl)  iEl.textContent  = icon;
+    if (lEl)  lEl.textContent  = label;
+    if (btn)  btn.classList.toggle('lang-en', isEn);
   }
 })();
 </script>
