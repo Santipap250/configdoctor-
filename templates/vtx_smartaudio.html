@@ -102,6 +102,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .cli-copy-btn.ok{color:var(--green);border-color:rgba(0,255,136,.3)}
 @media(max-width:600px){.ch-matrix{grid-template-columns:repeat(4,1fr)}.pwr-grid{grid-template-columns:repeat(3,1fr)}.country-grid{grid-template-columns:1fr}}
 </style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
 </head>
 <body>
 {% include "partials/nav.html" %}
