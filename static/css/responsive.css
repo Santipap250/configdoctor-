@@ -1,0 +1,296 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   ConfigDoctor — responsive.css  v5.1
+   Global mobile/tablet fixes for ALL pages
+   Target: 320px – 1440px+
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Overflow guard: every container */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: hidden; max-width: 100vw; }
+
+/* ── 2. Every <table> scrollable on mobile */
+.table-wrap, table {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+table { display: table; min-width: 100%; }
+.table-wrap { display: block; }
+
+/* ── 3. Kill fixed widths on mobile */
+@media (max-width: 768px) {
+  /* Any inline-style or class-based wide fixed widths */
+  [style*="width:1400"],[style*="width: 1400"],
+  [style*="width:1300"],[style*="width: 1300"],
+  [style*="width:1200"],[style*="width: 1200"],
+  [style*="width:1180"],[style*="width: 1180"],
+  [style*="width:1100"],[style*="width: 1100"],
+  [style*="width:1060"],[style*="width: 1060"],
+  [style*="width:1040"],[style*="width: 1040"],
+  [style*="width:960"], [style*="width: 960"],
+  [style*="width:900"], [style*="width: 900"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+@media (max-width: 600px) {
+  [style*="width:860"],[style*="width: 860"],
+  [style*="width:820"],[style*="width: 820"],
+  [style*="width:800"],[style*="width: 800"],
+  [style*="width:768"],[style*="width: 768"],
+  [style*="width:760"],[style*="width: 760"],
+  [style*="width:740"],[style*="width: 740"],
+  [style*="width:720"],[style*="width: 720"],
+  [style*="width:700"],[style*="width: 700"],
+  [style*="width:680"],[style*="width: 680"],
+  [style*="width:681"],[style*="width: 681"],
+  [style*="width:640"],[style*="width: 640"],
+  [style*="width:620"],[style*="width: 620"],
+  [style*="width:600"],[style*="width: 600"],
+  [style*="width:580"],[style*="width: 580"],
+  [style*="width:560"],[style*="width: 560"],
+  [style*="width:540"],[style*="width: 540"],
+  [style*="width:520"],[style*="width: 520"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+/* ── 4. Responsive font sizes — clamp tiny labels */
+@media (max-width: 480px) {
+  /* Prevent sub-9px fonts from becoming unreadable */
+  [style*="font-size:7px"],[style*="font-size: 7px"],
+  [style*="font-size:6.5px"],[style*="font-size: 6.5px"],
+  [style*="font-size:6px"],[style*="font-size: 6px"] {
+    font-size: 9px !important;
+  }
+  [style*="font-size:7.5px"],[style*="font-size: 7.5px"],
+  [style*="font-size:8px"],[style*="font-size: 8px"],
+  [style*="font-size:8.5px"],[style*="font-size: 8.5px"] {
+    font-size: 10px !important;
+  }
+}
+
+/* ── 5. Grid collapses */
+@media (max-width: 768px) {
+  /* 2-col grids → 1-col */
+  .g2, [style*="grid-template-columns:1fr 1fr"],
+  [style*="grid-template-columns: 1fr 1fr"],
+  [style*="grid-template-columns:repeat(2"],
+  [style*="grid-template-columns: repeat(2"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 600px) {
+  /* 3-col grids → 2-col */
+  .g3, [style*="grid-template-columns:repeat(3"],
+  [style*="grid-template-columns: repeat(3"],
+  [style*="grid-template-columns:1fr 1fr 1fr"],
+  [style*="grid-template-columns: 1fr 1fr 1fr"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  /* 4-col grids → 2-col */
+  [style*="grid-template-columns:repeat(4"],
+  [style*="grid-template-columns: repeat(4"],
+  [style*="grid-template-columns:1fr 1fr 1fr 1fr"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .g3, [style*="grid-template-columns:repeat(3"],
+  [style*="grid-template-columns: repeat(3"],
+  [style*="grid-template-columns:1fr 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── 6. Images */
+img, video, canvas, iframe, svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── 7. Pre/code blocks */
+pre, code {
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* ── 8. Flex wraps on small screens */
+@media (max-width: 600px) {
+  .flex-row, [style*="display:flex"][style*="gap"],
+  [style*="display: flex"][style*="gap"] {
+    flex-wrap: wrap !important;
+  }
+}
+
+/* ── 9. Touch targets ≥ 44px */
+@media (max-width: 768px) {
+  button, .btn-primary, .btn-ghost, .btn-small,
+  a.drawer-link, input[type="submit"],
+  .tab-btn, .preset-apply-btn {
+    min-height: 44px;
+  }
+  input[type="number"], input[type="text"],
+  input[type="email"], select, textarea {
+    min-height: 44px;
+    font-size: 16px !important; /* prevent iOS zoom */
+  }
+}
+
+/* ── 10. Page-specific fixes ── */
+
+/* bf_wizard */
+@media (max-width: 768px) {
+  .wizard-steps { flex-direction: column !important; }
+  .wizard-step  { width: 100% !important; }
+  .bf-form-row  { flex-direction: column !important; }
+  .bf-form-row > * { width: 100% !important; }
+}
+
+/* blackbox */
+@media (max-width: 768px) {
+  .bb-layout    { flex-direction: column !important; }
+  .bb-sidebar   { width: 100% !important; max-width: 100% !important; }
+  .bb-results   { width: 100% !important; }
+}
+
+/* cli_comparator */
+@media (max-width: 768px) {
+  .compare-grid { grid-template-columns: 1fr !important; }
+  .diff-panel   { width: 100% !important; }
+}
+
+/* cli_surgeon */
+@media (max-width: 768px) {
+  .surgeon-layout { flex-direction: column !important; }
+  .surgeon-panel  { width: 100% !important; min-width: 0 !important; }
+}
+
+/* motor_prop / motor_thermal / battery_health */
+@media (max-width: 768px) {
+  .mp-result-grid { grid-template-columns: 1fr 1fr !important; }
+  .thermal-grid   { grid-template-columns: 1fr !important; }
+  .bh-grid        { grid-template-columns: 1fr !important; }
+}
+
+/* vtx / vtx_range / vtx_smartaudio */
+@media (max-width: 600px) {
+  .vtx-table th, .vtx-table td { padding: 6px 8px !important; font-size: 11px !important; }
+  .vtx-ch-row { flex-wrap: wrap !important; }
+}
+
+/* leaderboard */
+@media (max-width: 600px) {
+  .lb-row { grid-template-columns: auto 1fr auto !important; }
+  .lb-score-col { display: none; }
+}
+
+/* OSD tool — canvas based, allow scroll */
+@media (max-width: 768px) {
+  .osd-canvas-wrap { overflow-x: auto !important; }
+  #osdCanvas       { min-width: 320px; }
+}
+
+/* changelog */
+@media (max-width: 600px) {
+  .cl-version-row { flex-direction: column !important; gap: 6px !important; }
+  .cl-badge       { align-self: flex-start; }
+}
+
+/* build_card */
+@media (max-width: 768px) {
+  .build-card-preview { width: 100% !important; overflow-x: auto; }
+  .build-card-inner   { transform: none !important; }
+}
+
+/* tuning_log */
+@media (max-width: 600px) {
+  .log-filter-row { flex-direction: column !important; }
+  .log-table td, .log-table th { padding: 6px !important; font-size: 11px !important; }
+}
+
+/* rpm_filter */
+@media (max-width: 600px) {
+  .rpm-result-cols { grid-template-columns: 1fr !important; }
+}
+
+/* flight_quiz */
+@media (max-width: 600px) {
+  .quiz-options { grid-template-columns: 1fr !important; }
+  .quiz-progress-bar { height: 4px !important; }
+}
+
+/* landing page hero */
+@media (max-width: 768px) {
+  .landing-hero { padding: 40px 16px !important; }
+  .landing-hero-title { font-size: clamp(1.6rem, 6vw, 2.4rem) !important; }
+  .landing-features { grid-template-columns: 1fr 1fr !important; }
+}
+@media (max-width: 480px) {
+  .landing-features { grid-template-columns: 1fr !important; }
+  .hero-cta-row { flex-direction: column !important; width: 100% !important; }
+  .hero-cta-row > * { width: 100% !important; text-align: center !important; }
+}
+
+/* ── 11. index.html specific responsive fixes ── */
+@media (max-width: 900px) {
+  .content-grid { grid-template-columns: 1fr !important; }
+  .mission-card { position: static !important; }
+}
+@media (max-width: 600px) {
+  .qs-stats   { grid-template-columns: 1fr 1fr !important; }
+  .qs-stats-6 { grid-template-columns: repeat(3,1fr) !important; }
+  .biq-wrap   { flex-direction: column !important; align-items: center !important; }
+  .pf-grid    { grid-template-columns: 1fr !important; }
+  .preset-tabs { grid-template-columns: repeat(3,1fr) !important; }
+  .chart-grid { grid-template-columns: 1fr !important; }
+  .radar-wrap { grid-template-columns: 1fr !important; }
+  .ft-grid    { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 420px) {
+  .qs-stats   { grid-template-columns: 1fr 1fr !important; }
+  .qs-stats-6 { grid-template-columns: repeat(2,1fr) !important; }
+  .tpanel-body { padding: 10px !important; }
+  .preset-tabs { grid-template-columns: repeat(2,1fr) !important; }
+  .pic-stats  { grid-template-columns: 1fr 1fr !important; }
+  .hero-chips { gap: 4px !important; }
+  .chip       { font-size: 8px !important; padding: 2px 7px !important; }
+}
+
+/* ── 12. Misc utilities for all pages ── */
+.overflow-auto   { overflow: auto; }
+.overflow-x-auto { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.w-full          { width: 100% !important; }
+.max-w-full      { max-width: 100% !important; }
+.text-wrap        { word-break: break-word; overflow-wrap: break-word; }
+
+/* Prevent content from bleeding past screen */
+.page-wrap, .container, main, .content-grid {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Scrollable code boxes on all pages */
+.cli-output-box, #cliOutput, .diff-box, .code-box, .mono-box {
+  overflow-x: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+  white-space: pre;
+  word-break: normal;
+}
+
+@media (max-width: 480px) {
+  .cli-output-box, #cliOutput {
+    font-size: 10px !important;
+    line-height: 1.6 !important;
+  }
+}
