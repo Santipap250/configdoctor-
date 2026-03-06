@@ -85,9 +85,11 @@ def analyze(size_inch=5.0, cell_input=4, batt_mAh=None, motor_kv=None,
     if batt_mAh is None: batt_mAh = _guess_batt_mAh(size_inch, cells)
     pack_voltage_nominal = round(cells * NOMINAL_CELL_V, 2)
     pack_voltage_max     = round(cells * MAX_CELL_V, 2)
+    # FIX v5.1: guard motors ≤ 0 to prevent ZeroDivisionError
+    safe_motors = max(1, int(motors or DEFAULT_MOTORS))
     if thrust_per_motor_g is None:
         hover_thrust_total_g = weight_g * 2.0
-        thrust_per_motor_g   = hover_thrust_total_g / float(motors)
+        thrust_per_motor_g   = hover_thrust_total_g / float(safe_motors)
     sizes = sorted(_W_PER_G_TABLE.keys())
     _s = float(size_inch or 5.0)
     if _s <= sizes[0]:  W_PER_GRAM = _W_PER_G_TABLE[sizes[0]]
@@ -101,7 +103,7 @@ def analyze(size_inch=5.0, cell_input=4, batt_mAh=None, motor_kv=None,
                 W_PER_GRAM = _W_PER_G_TABLE[_lo] + _t*(_W_PER_G_TABLE[_hi]-_W_PER_G_TABLE[_lo])
                 break
     total_power_w = W_PER_GRAM * weight_g
-    power_per_motor_w = total_power_w / float(motors)
+    power_per_motor_w = total_power_w / float(safe_motors)
     current_a = total_power_w / pack_voltage_nominal if pack_voltage_nominal > 0 else 0.0
     c_rating  = (current_a * 1000.0) / batt_mAh if batt_mAh > 0 else float('inf')
     warnings  = []

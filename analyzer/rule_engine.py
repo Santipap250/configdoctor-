@@ -27,7 +27,7 @@ def evaluate_rules(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
     # ── 1) TWR ────────────────────────────────────────────────
     twr = _get(analysis,"advanced.thrust_ratio", _get(analysis,"thrust_ratio"))
     try: twr_f = float(twr) if twr is not None else None
-    except: twr_f = None
+    except Exception: twr_f = None
     # Realistic TWR ranges: (min_ok, max_ok, absolute_max_warn)
     # FPV quads are naturally overpowered — freestyle/racing 6-9 TWR is NORMAL
     style_targets = {
@@ -56,7 +56,7 @@ def evaluate_rules(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
     est_time = _get(analysis,"advanced.power.est_flight_time_min",
                     _get(analysis,"battery_est"))
     try: est_time_f = float(est_time) if est_time is not None else None
-    except: est_time_f = None
+    except Exception: est_time_f = None
     if est_time_f is not None:
         if est_time_f < 2:
             add("short_flight","danger",
@@ -70,7 +70,7 @@ def evaluate_rules(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
     # ── 3) Motor load / prop ──────────────────────────────────
     ml = _get(analysis,"prop_result.effect.motor_load", 0)
     try: ml = float(ml)
-    except: ml = 0
+    except Exception: ml = 0
     if ml >= 6:
         add("motor_overload","danger",
             f"โหลดมอเตอร์สูงสุด ({ml}/6) — ใบพัดหนัก pitch สูง + 4 ใบ เสี่ยงมอเตอร์ร้อน",
@@ -84,7 +84,7 @@ def evaluate_rules(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
     # ── 4) Noise / vibration ──────────────────────────────────
     noise = _get(analysis,"prop_result.effect.noise", 0)
     try: noise = float(noise)
-    except: noise = 0
+    except Exception: noise = 0
     if noise >= 5:
         add("noise_high","warning",
             "ระดับเสียง/สัญญาณสั่นสูง — เสี่ยงแบนด์สปริง",
@@ -94,7 +94,7 @@ def evaluate_rules(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
     tip_speed = _get(analysis,"advanced.tip_speed_mps",
                      _get(analysis,"prop_result.effect.tip_speed_mps"))
     try: tip_f = float(tip_speed) if tip_speed else None
-    except: tip_f = None
+    except Exception: tip_f = None
     if tip_f:
         if tip_f >= 290:
             add("tip_speed_danger","danger",
@@ -114,9 +114,9 @@ def evaluate_rules(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
     esc_recommended = _get(analysis,"advanced.esc_recommended_a",
                            _get(analysis,"advanced.power.esc_recommended_a"))
     try: peak_m_f = float(peak_per_motor) if peak_per_motor else None
-    except: peak_m_f = None
+    except Exception: peak_m_f = None
     try: esc_lim_f = float(esc_limit) if esc_limit else None
-    except: esc_lim_f = None
+    except Exception: esc_lim_f = None
     if peak_m_f and esc_lim_f and peak_m_f > esc_lim_f:
         add("esc_undersized","danger",
             f"Peak current/motor {peak_m_f:.1f}A เกิน ESC limit {esc_lim_f:.0f}A — เสี่ยง ESC ไหม้!",
@@ -135,7 +135,7 @@ def evaluate_rules(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
     c_rec   = _get(analysis,"advanced.c_recommended",
                    _get(analysis,"advanced.power.c_recommended"))
     try: c_burst_f = float(c_burst) if c_burst else None
-    except: c_burst_f = None
+    except Exception: c_burst_f = None
     if c_burst_f:
         if c_burst_f > 80:
             add("c_rating_extreme","danger",
@@ -152,7 +152,7 @@ def evaluate_rules(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
     hover_pct = _get(analysis,"advanced.hover_throttle_pct",
                      _get(analysis,"advanced.power.hover_throttle_pct"))
     try: hover_pct_f = float(hover_pct) if hover_pct else None
-    except: hover_pct_f = None
+    except Exception: hover_pct_f = None
     if hover_pct_f:
         if hover_pct_f > 60 and style not in ("longrange","cine"):
             add("hover_throttle_high","warning",
@@ -171,7 +171,7 @@ def evaluate_rules(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
     try:
         kv_f    = float(kv) if kv and str(kv).replace('.','').isdigit() else None
         cells_f = float(cells) if cells else None
-    except: kv_f=cells_f=None
+    except Exception: kv_f=cells_f=None
     if kv_f and cells_f:
         kv_v = kv_f * cells_f * 4.2  # eRPM × pole → RPM rough
         if cells_f >= 7 and kv_f > 1600:
@@ -190,7 +190,7 @@ def evaluate_rules(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
         frame_size = float(_get(analysis,"size",0))
         prop_size  = _get(analysis,"prop_size")
         if prop_size: prop_size = float(prop_size)
-    except: frame_size=0; prop_size=None
+    except Exception: frame_size=0; prop_size=None
     if prop_size and frame_size and prop_size > frame_size + 0.5:
         add("prop_too_big","info",
             f"ใบพัด {prop_size}\" ใหญ่กว่าเฟรม {frame_size}\" — อาจติดเฟรม",
@@ -200,7 +200,7 @@ def evaluate_rules(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
     # ── 11) Pitch × KV ───────────────────────────────────────
     pitch = _get(analysis,"pitch")
     try: pitch_f = float(pitch) if pitch else None
-    except: pitch_f = None
+    except Exception: pitch_f = None
     if pitch_f and kv_f and pitch_f >= 4.5 and kv_f > 2600:
         add("amp_risk","warning",
             f"Pitch {pitch_f} + KV {kv_f:.0f} — เสี่ยงกระแสสูง voltage sag",
@@ -213,7 +213,7 @@ def evaluate_rules(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
     try:
         d_v  = float(d_roll) if d_roll else None
         dt_v = float(dterm_lpf) if dterm_lpf else None
-    except: d_v=dt_v=None
+    except Exception: d_v=dt_v=None
     if d_v and d_v > 60 and dt_v and dt_v < 100:
         add("dterm_filter","warning",
             "D-term สูง แต่ D-term lowpass ต่ำ — เสี่ยง oscillation",
@@ -226,7 +226,7 @@ def evaluate_rules(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
         rpm_on = None if rpm_filter is None else (
             rpm_filter if isinstance(rpm_filter,bool)
             else str(rpm_filter).strip().lower() not in ("false","0","off","none",""))
-    except: rpm_on = None
+    except Exception: rpm_on = None
     if rpm_on is False:
         add("rpm_filter_off","warning",
             "RPM Filter ปิดอยู่ — แนะนำเปิดถ้า ESC รองรับ DSHOT Bidir",
@@ -237,7 +237,7 @@ def evaluate_rules(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
     batt_mAh = _get(analysis,"advanced.power.battery_mAh_used",
                     _get(analysis,"advanced.battery_mAh_used"))
     try: batt_mAh_v = int(batt_mAh) if batt_mAh else None
-    except: batt_mAh_v = None
+    except Exception: batt_mAh_v = None
     if batt_mAh_v and frame_size:
         if frame_size >= 6 and batt_mAh_v < 1500:
             add("batt_small","warning",
