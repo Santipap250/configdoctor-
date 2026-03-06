@@ -795,6 +795,9 @@ def compare_cli():
         dump_b = data.get('dump_b', '')
         if not dump_a or not dump_b:
             return jsonify({"error": "ต้องการ dump_a และ dump_b"}), 400
+        # Size limit: each dump max 512KB
+        if len(dump_a.encode('utf-8')) > 512_000 or len(dump_b.encode('utf-8')) > 512_000:
+            return jsonify({"error": "ไฟล์ใหญ่เกิน 512KB ต่อ dump"}), 413
         from analyzer.cli_surgeon import compare_dumps
         result = compare_dumps(dump_a, dump_b)
         return jsonify(result)
