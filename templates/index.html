@@ -1057,43 +1057,16 @@ input[type=number]::placeholder { color: var(--muted); font-size: 12px; }
    ║  Particle canvas · Holo panels · Neon stats · Aurora effects
    ╚══════════════════════════════════════════════════════════════════ */
 
-/* ── Particle Canvas Layer ───────────────────────────────────────── */
-#particleCanvas {
-  position: fixed; inset: 0; z-index: 0;
-  pointer-events: none; opacity: .55;
-}
 
 /* ── Aurora background pulse ─────────────────────────────────────── */
-@keyframes auroraShift {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-body::before {
-  background-image:
-    radial-gradient(circle at 1px 1px, rgba(0,255,136,0.07) 1px, transparent 0);
-  background-size: 28px 28px;
-  animation: gridDrift 40s linear infinite;
-}
+/* lightweight aurora — no JS, GPU-only */
 body::after {
   background:
     radial-gradient(ellipse 70% 50% at 10% 15%, rgba(0,255,136,0.055) 0%, transparent 60%),
     radial-gradient(ellipse 60% 45% at 90% 85%, rgba(0,170,255,0.055) 0%, transparent 60%),
     radial-gradient(ellipse 50% 35% at 50% 50%, rgba(160,80,255,0.025) 0%, transparent 70%);
-  animation: auroraShift 18s ease infinite;
-  background-size: 200% 200%;
 }
 
-/* ── Mouse-glow orb (JS-driven) ─────────────────────────────────── */
-#mouseGlow {
-  position: fixed; pointer-events: none; z-index: 0;
-  width: 500px; height: 500px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(0,255,136,0.04) 0%, transparent 70%);
-  transform: translate(-50%,-50%);
-  transition: left .12s ease, top .12s ease;
-  mix-blend-mode: screen;
-}
 
 /* ── HERO GLITCH + SCAN ─────────────────────────────────────────── */
 .hero-title {
@@ -1633,6 +1606,198 @@ select option { background: #020a14; }
   transition: all .2s;
 }
 
+
+/* ════ PRESET TABS ════════════════════════════════════════════════ */
+.preset-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+@media(max-width:600px){ .preset-tabs{ grid-template-columns:repeat(3,1fr); } }
+
+.ptab {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 8px 4px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all .2s;
+  position: relative;
+}
+.ptab:hover {
+  border-color: rgba(0,255,136,0.3);
+  background: rgba(0,255,136,0.05);
+}
+.ptab.active {
+  border-color: rgba(0,255,136,0.5);
+  background: rgba(0,255,136,0.08);
+  box-shadow: 0 0 16px rgba(0,255,136,0.12);
+}
+.ptab.active-racing   { border-color:rgba(255,68,85,0.5);  background:rgba(255,68,85,0.06);  box-shadow:0 0 16px rgba(255,68,85,0.12); }
+.ptab.active-longrange{ border-color:rgba(160,80,255,0.5); background:rgba(160,80,255,0.06); box-shadow:0 0 16px rgba(160,80,255,0.12); }
+.ptab.active-cinematic{ border-color:rgba(255,183,0,0.5);  background:rgba(255,183,0,0.06);  box-shadow:0 0 16px rgba(255,183,0,0.12); }
+.ptab-icon { font-size: 16px; line-height: 1; }
+.ptab-name {
+  font-family: var(--font-d); font-size: 9px; font-weight: 700;
+  letter-spacing: .04em; color: var(--text);
+}
+.ptab-sub { font-size: 9px; color: var(--muted2); }
+
+/* ════ PRESET INFO CARD ══════════════════════════════════════════ */
+.preset-info-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+  transition: border-color .2s;
+}
+.pic-header {
+  display: flex; gap: 10px; align-items: flex-start;
+  margin-bottom: 10px;
+}
+.pic-badge {
+  font-family: var(--font-d); font-size: 10px; font-weight: 800;
+  letter-spacing: .06em;
+  padding: 3px 10px; border-radius: 100px;
+  background: var(--g-dim); border: 1px solid rgba(0,255,136,0.3);
+  color: var(--green); white-space: nowrap; flex-shrink: 0;
+}
+.pic-title {
+  font-family: var(--font-d); font-size: 12px; font-weight: 700;
+  letter-spacing: .06em; color: var(--text); margin-bottom: 3px;
+}
+.pic-desc { font-size: 12px; color: var(--muted2); line-height: 1.5; }
+
+.pic-stats {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 6px;
+  margin-bottom: 10px;
+}
+@media(max-width:500px){ .pic-stats{ grid-template-columns:repeat(2,1fr); } }
+.pstat {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 7px; padding: 7px 6px; text-align: center;
+}
+.pstat-val {
+  font-family: var(--font-m); font-size: 14px; font-weight: 700;
+  color: var(--green); display: block; line-height: 1.1;
+}
+.pstat-val.blue  { color: var(--blue); }
+.pstat-val.amber { color: var(--amber); }
+.pstat-val.red   { color: var(--red); }
+.pstat-val.purple{ color: #a050ff; }
+.pstat-lbl {
+  font-family: var(--font-d); font-size: 7px; color: var(--muted);
+  letter-spacing: .08em; margin-top: 2px; display: block;
+}
+
+.pic-tips {
+  display: flex; flex-direction: column; gap: 4px;
+}
+.ptip {
+  display: flex; align-items: flex-start; gap: 7px;
+  font-size: 11px; color: var(--muted2); line-height: 1.5;
+}
+.ptip-icon { flex-shrink: 0; font-size: 13px; }
+.ptip b { color: var(--text); }
+
+
+/* ════ ANALYSIS EXPLAIN TOOLTIPS + CARDS ══════════════════════════ */
+.metric-explain {
+  font-size: 10px; color: var(--muted2);
+  line-height: 1.5; margin-top: 5px;
+  padding: 6px 9px;
+  background: rgba(0,255,136,0.03);
+  border-left: 2px solid rgba(0,255,136,0.2);
+  border-radius: 0 6px 6px 0;
+}
+.metric-explain.b { border-left-color: rgba(0,170,255,0.3); background: rgba(0,170,255,0.03); }
+.metric-explain.a { border-left-color: rgba(255,183,0,0.3); background: rgba(255,183,0,0.03); }
+.metric-explain.r { border-left-color: rgba(255,68,85,0.3); background: rgba(255,68,85,0.03); }
+
+.explain-tag {
+  display: inline-block;
+  font-family: var(--font-d); font-size: 7px; font-weight: 700;
+  letter-spacing: .08em; padding: 1px 6px; border-radius: 100px;
+  margin-right: 5px; vertical-align: middle;
+}
+.explain-tag.g { background:rgba(0,255,136,0.12); color:var(--green); }
+.explain-tag.b { background:rgba(0,170,255,0.12); color:var(--blue); }
+.explain-tag.a { background:rgba(255,183,0,0.12); color:var(--amber); }
+.explain-tag.r { background:rgba(255,68,85,0.12); color:var(--red); }
+
+/* Collapsible insight rows */
+.insight-expand-btn {
+  background: none; border: none; cursor: pointer;
+  font-family: var(--font-d); font-size: 8px; font-weight: 600;
+  letter-spacing: .1em; color: var(--muted); padding: 0;
+  transition: color .18s;
+}
+.insight-expand-btn:hover { color: var(--green); }
+
+/* ════ ENHANCED STAT GRID (4→6 metrics) ════════════════════════════ */
+.qs-stats-6 {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+@media(max-width:700px){ .qs-stats-6{ grid-template-columns:repeat(3,1fr); } }
+@media(max-width:420px){ .qs-stats-6{ grid-template-columns:repeat(2,1fr); } }
+
+/* ════ ANALYSIS CONTEXT BANNER ═════════════════════════════════════ */
+.analysis-context {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+@media(max-width:520px){ .analysis-context{ grid-template-columns:1fr; } }
+
+.ctx-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 10px;
+  position: relative; overflow: hidden;
+}
+.ctx-card::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  border-radius: 3px 0 0 3px;
+}
+.ctx-card.g::before { background: var(--green); box-shadow: 0 0 8px rgba(0,255,136,0.4); }
+.ctx-card.b::before { background: var(--blue);  box-shadow: 0 0 8px rgba(0,170,255,0.4); }
+.ctx-card.a::before { background: var(--amber); box-shadow: 0 0 8px rgba(255,183,0,0.4); }
+.ctx-card.r::before { background: var(--red);   box-shadow: 0 0 8px rgba(255,68,85,0.4); }
+
+.ctx-title { font-family:var(--font-d); font-size:8px; font-weight:700; letter-spacing:.1em; color:var(--muted2); margin-bottom:3px; }
+.ctx-val   { font-family:var(--font-m); font-size:14px; font-weight:700; color:var(--text); }
+.ctx-desc  { font-size:10px; color:var(--muted2); margin-top:3px; line-height:1.4; }
+
+/* ════ WHAT-THIS-MEANS CALLOUT ══════════════════════════════════════ */
+.wtm-box {
+  background: linear-gradient(135deg, rgba(0,255,136,0.04), rgba(0,170,255,0.02));
+  border: 1px solid rgba(0,255,136,0.1);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--muted2);
+  line-height: 1.6;
+}
+.wtm-box .wtm-head {
+  font-family: var(--font-d); font-size: 8px; font-weight: 700;
+  letter-spacing: .12em; color: var(--green);
+  margin-bottom: 5px;
+}
+.wtm-box b { color: var(--text); }
+.wtm-box .ok   { color: var(--green); }
+.wtm-box .warn { color: var(--amber); }
+.wtm-box .bad  { color: var(--red); }
+
 </style>
 </head>
 <body>
@@ -2085,6 +2250,58 @@ select option { background: #020a14; }
               </div>
             </div>
 
+            <!-- ══ Extended Stats Row ══ -->
+            {% if analysis.advanced %}
+            <div class="qs-stats-6" style="margin:10px 0 4px;">
+              <div class="qs-stat">
+                <span class="qs-stat-val {% if analysis.advanced.peak_current_a and analysis.advanced.peak_current_a > 100 %}red{% elif analysis.advanced.peak_current_a and analysis.advanced.peak_current_a > 70 %}amber{% else %}green{% endif %}">
+                  {% if analysis.advanced.peak_current_a %}{{ analysis.advanced.peak_current_a | int }}A{% else %}—{% endif %}
+                </span>
+                <span class="qs-stat-lbl">Peak Current</span>
+              </div>
+              <div class="qs-stat">
+                <span class="qs-stat-val {% if analysis.advanced.tip_speed_mps and analysis.advanced.tip_speed_mps > 300 %}red{% elif analysis.advanced.tip_speed_mps and analysis.advanced.tip_speed_mps > 220 %}amber{% else %}green{% endif %}">
+                  {% if analysis.advanced.tip_speed_mps %}{{ analysis.advanced.tip_speed_mps | int }}m/s{% else %}—{% endif %}
+                </span>
+                <span class="qs-stat-lbl">Tip Speed</span>
+              </div>
+              <div class="qs-stat">
+                <span class="qs-stat-val amber">
+                  {% if analysis.advanced.hover_throttle_pct %}{{ analysis.advanced.hover_throttle_pct | int }}%{% else %}—{% endif %}
+                </span>
+                <span class="qs-stat-lbl">Hover Thr</span>
+              </div>
+              <div class="qs-stat">
+                <span class="qs-stat-val {% if analysis.advanced.c_burst and analysis.advanced.c_burst > 60 %}amber{% else %}green{% endif %}">
+                  {% if analysis.advanced.c_burst %}{{ analysis.advanced.c_burst | int }}C{% else %}—{% endif %}
+                </span>
+                <span class="qs-stat-lbl">C-Rate</span>
+              </div>
+              <div class="qs-stat">
+                <span class="qs-stat-val blue">
+                  {% if analysis.advanced.rpm_estimated %}{{ (analysis.advanced.rpm_estimated / 1000) | round(1) }}k{% else %}—{% endif %}
+                </span>
+                <span class="qs-stat-lbl">RPM Est</span>
+              </div>
+              <div class="qs-stat">
+                <span class="qs-stat-val {% if analysis.advanced.efficiency_class == 'efficient' %}green{% elif analysis.advanced.efficiency_class == 'nominal' %}blue{% else %}amber{% endif %}">
+                  {{ analysis.advanced.efficiency_class | default('—') | upper | truncate(6, true, '') }}
+                </span>
+                <span class="qs-stat-lbl">Efficiency</span>
+              </div>
+            </div>
+            <!-- WTM analysis context -->
+            <div class="wtm-box">
+              <div class="wtm-head">💡 WHAT THIS MEANS FOR YOUR BUILD</div>
+              {% set twr_v = analysis.advanced.thrust_ratio | default(0) | float %}
+              {% set tip_v = analysis.advanced.tip_speed_mps | default(0) | float %}
+              {% set cur_v = analysis.advanced.peak_current_a | default(0) | float %}
+              {% if twr_v >= 3.5 %}<span class="ok">✅ TWR {{ twr_v }} — power เยอะ freestyle ทำ trick ได้ดี</span>{% elif twr_v >= 2.0 %}<span class="ok">✅ TWR {{ twr_v }} — สมดุลดี บินได้ทุก style</span>{% elif twr_v > 0 %}<span class="warn">⚠️ TWR {{ twr_v }} — power น้อย แนะนำ motor KV สูงขึ้นหรือลดน้ำหนัก</span>{% endif %}
+              {% if tip_v > 300 %} · <span class="bad">⛔ Tip speed {{ tip_v | int }}m/s — เกิน 300 m/s อันตราย เปลี่ยน prop เล็กลงหรือลด KV</span>{% elif tip_v > 220 %} · <span class="warn">⚠️ Tip speed {{ tip_v | int }}m/s — ใกล้ขีดจำกัด ควรตรวจ prop balance</span>{% elif tip_v > 0 %} · <span class="ok">✅ Tip speed {{ tip_v | int }}m/s — ปลอดภัย</span>{% endif %}
+              {% if cur_v > 100 %} · <span class="bad">⛔ Peak {{ cur_v | int }}A — ต้องการ ESC {{ (cur_v * 1.3) | int }}A+ และ C-rate แบตสูงมาก</span>{% elif cur_v > 70 %} · <span class="warn">⚠️ Peak {{ cur_v | int }}A — ใช้ ESC {{ (cur_v * 1.2) | int }}A ขึ้นไป</span>{% elif cur_v > 0 %} · <span class="ok">✅ Peak {{ cur_v | int }}A — ESC ขนาดปกติรับได้</span>{% endif %}
+            </div>
+            {% endif %}
+
             <!-- Overview bar -->
             {% if analysis.advanced %}
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0;">
@@ -2112,7 +2329,14 @@ select option { background: #020a14; }
             {% if analysis.baseline_notes %}
             <div style="margin-top:8px;font-size:.78rem;color:var(--muted);font-style:italic;">📝 {{ analysis.baseline_notes }}</div>
             {% endif %}
-            <div style="margin-top:6px;font-size:.75rem;color:var(--muted);">⚠️ ค่านี้คือจุดเริ่มต้น — ทดสอบบินจริงก่อนปรับ</div>
+            <!-- PID explanation context -->
+            <div class="wtm-box" style="margin-top:8px;">
+              <div class="wtm-head">📐 อ่านค่า PID นี้อย่างไร</div>
+              <b>P (Proportional)</b> — ความแข็งแรงของการตอบสนอง ค่าสูง=ตอบสนองไว แต่อาจสั่น (oscillate) <br>
+              <b>I (Integral)</b> — ต้านแรงลม/drift ให้โดรนบินตรง ค่าสูงเกิน=bounce หลัง flip<br>
+              <b>D (Derivative)</b> — เบรก damping ค่าสูง=นิ่งขึ้น แต่ motor ร้อนขึ้น<br>
+              <span style="color:var(--muted);font-size:10px;">⚠️ ค่านี้คือจุดเริ่มต้น — ทดสอบบินจริงก่อนปรับ · ปรับทีละ 5 หน่วย</span>
+            </div>
           </div>
         </div>
 
@@ -2225,6 +2449,18 @@ select option { background: #020a14; }
               </div>
             </div>
           </div>
+        </div>
+        {% endif %}
+
+        <!-- Build Score Explain -->
+        {% if analysis.advanced %}
+        <div class="wtm-box" style="margin:0 0 14px;">
+          <div class="wtm-head">⚡ BUILD SCORE — วิธีอ่านคะแนน</div>
+          <b>90–100 (S)</b> <span class="ok">— build ดีมาก สมดุลทุกด้าน</span> ·
+          <b>78–89 (A+/A)</b> <span class="ok">— ดี บินสบาย</span> ·
+          <b>60–77 (B+/B)</b> <span class="warn">— ปานกลาง มีจุดปรับได้</span> ·
+          <b>&lt;60 (C/D)</b> <span class="bad">— ต้องแก้ hardware</span><br>
+          <span style="font-size:9px;color:var(--muted);">คำนวณจาก: TWR 25% · Flight Time 20% · Noise 15% · Tip Speed 20% · Motor 10% · Efficiency 10%</span>
         </div>
         {% endif %}
 
@@ -2657,6 +2893,13 @@ set anti_gravity_gain    = {{ analysis.filter.anti_gravity or 3 }}</pre>
                 {% if analysis.filter.dyn_notch and analysis.filter.gyro_lpf1 %}
                 <br>📐 Dyn Notch {{ analysis.filter.dyn_notch }} ตัว + Gyro LPF1 {{ analysis.filter.gyro_lpf1 }}Hz เหมาะกับ {{ analysis.detected_class | default('') }} build
                 {% endif %}
+                <div class="wtm-box" style="margin-top:8px;font-size:10px;">
+                  <div class="wtm-head">🔊 ทำไม Filter สำคัญ</div>
+                  <b>Gyro LPF1</b> — กรอง noise จาก gyro sensor ค่าต่ำ=นิ่ม latency สูง / ค่าสูง=เร็ว noise มากขึ้น<br>
+                  <b>D-term LPF</b> — กรอง noise เฉพาะ D term ช่วยลด motor ร้อน ถ้า motor ร้อน→ลด Hz ลง<br>
+                  <b>Dyn Notch</b> — กรอง resonance ความถี่เฉพาะจุด ตาม RPM จริง (ต้องการ BiDir DSHOT)<br>
+                  <b>RPM Filter</b> — แม่นยำที่สุด กรอง motor harmonic ทุก RPM แต่ต้องการ DSHOT600 + BiDir
+                </div>
               </div>
             </div>
 
@@ -2926,52 +3169,67 @@ save</pre>
         {% endif %}
 
         <!-- ══ 8. CLI Style Presets (Real Commands) ══ -->
-        <div class="tpanel">
+        <div class="tpanel" id="cliPresetsPanel">
           <div class="tpanel-head">
-            <div class="tpanel-head-icon" style="background:var(--b-dim);border-color:rgba(0,170,255,0.2);">🎮</div>
-            <div><div class="tpanel-title">CLI Style Presets</div><div class="tpanel-sub">Betaflight CLI commands — paste ได้เลย</div></div>
+            <div class="tpanel-head-icon" style="background:rgba(0,200,255,0.08);border-color:rgba(0,200,255,0.25);">🎮</div>
+            <div>
+              <div class="tpanel-title">CLI Tuning Presets</div>
+              <div class="tpanel-sub">5 สไตล์ · คำนวณจากการวิเคราะห์จริง · paste ลง Betaflight CLI ได้เลย</div>
+            </div>
           </div>
           <div class="tpanel-body">
-            <div class="preset-grid">
-              <div class="preset-card">
-                <div class="preset-letter g">B</div>
-                <div class="preset-name">Beginner</div>
-                <div class="preset-desc">มือใหม่ บินนิ่ง ปลอดภัย</div>
-                <ul class="preset-list">
-                  <li>Throttle limit 80%</li>
-                  <li>P ลด 10%, D ลด 15%</li>
-                  <li>Filter นุ่มขึ้น</li>
-                </ul>
-                <button class="preset-apply-btn g" onclick="showPreset('beginner')">แสดง CLI</button>
-              </div>
-              <div class="preset-card">
-                <div class="preset-letter b">F</div>
-                <div class="preset-name">Freestyle</div>
-                <div class="preset-desc">ตอบสนองไว สมดุล</div>
-                <ul class="preset-list">
-                  <li>ค่าตามการวิเคราะห์</li>
-                  <li>iterm_relax = RP</li>
-                  <li>RPM Filter ON</li>
-                </ul>
-                <button class="preset-apply-btn b" onclick="showPreset('freestyle')">แสดง CLI</button>
-              </div>
-              <div class="preset-card">
-                <div class="preset-letter p">L</div>
-                <div class="preset-name">Long Range</div>
-                <div class="preset-desc">นิ่ง ประหยัดไฟ ลอยนาน</div>
-                <ul class="preset-list">
-                  <li>P/D ลด 12%</li>
-                  <li>iterm_relax = OFF</li>
-                  <li>Throttle limit 85%</li>
-                </ul>
-                <button class="preset-apply-btn p" onclick="showPreset('longrange')">แสดง CLI</button>
-              </div>
+
+            <!-- Preset selector tabs -->
+            <div class="preset-tabs" id="presetTabs">
+              <button class="ptab" data-preset="beginner" onclick="selectPreset('beginner',this)">
+                <span class="ptab-icon">🟢</span>
+                <span class="ptab-name">Beginner</span>
+                <span class="ptab-sub">มือใหม่</span>
+              </button>
+              <button class="ptab" data-preset="freestyle" onclick="selectPreset('freestyle',this)">
+                <span class="ptab-icon">🔵</span>
+                <span class="ptab-name">Freestyle</span>
+                <span class="ptab-sub">ทริกส์</span>
+              </button>
+              <button class="ptab" data-preset="racing" onclick="selectPreset('racing',this)">
+                <span class="ptab-icon">🔴</span>
+                <span class="ptab-name">Racing</span>
+                <span class="ptab-sub">เร็วสุด</span>
+              </button>
+              <button class="ptab" data-preset="longrange" onclick="selectPreset('longrange',this)">
+                <span class="ptab-icon">🟣</span>
+                <span class="ptab-name">Long Range</span>
+                <span class="ptab-sub">ลอยนาน</span>
+              </button>
+              <button class="ptab" data-preset="cinematic" onclick="selectPreset('cinematic',this)">
+                <span class="ptab-icon">🟡</span>
+                <span class="ptab-name">Cinematic</span>
+                <span class="ptab-sub">ถ่ายวิดีโอ</span>
+              </button>
             </div>
-            <pre class="cli-output-box" id="cliOutput"># เลือก preset ด้านบนเพื่อแสดง CLI commands</pre>
-            <div style="display:flex;gap:8px;margin-top:8px;">
+
+            <!-- Preset info card -->
+            <div class="preset-info-card" id="presetInfoCard">
+              <div class="pic-header">
+                <span class="pic-badge" id="picBadge">—</span>
+                <div>
+                  <div class="pic-title" id="picTitle">เลือก preset ด้านบน</div>
+                  <div class="pic-desc" id="picDesc">กด preset ด้านบนเพื่อดูรายละเอียดและ CLI commands</div>
+                </div>
+              </div>
+              <div class="pic-stats" id="picStats"></div>
+              <div class="pic-tips" id="picTips"></div>
+            </div>
+
+            <!-- CLI output -->
+            <pre class="cli-output-box" id="cliOutput"># ← เลือก preset ด้านบนเพื่อแสดง CLI commands</pre>
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
               <button class="btn-small" onclick="copyEl('cliOutput')">📋 Copy CLI</button>
+              <button class="btn-small" onclick="copyEl('cliOutput');showToast('✓ copied!')">⚡ Copy &amp; Done</button>
+              <span style="margin-left:auto;font-size:10px;color:var(--muted2);align-self:center;">
+                ⚠️ ทดสอบบินจริงก่อนปรับ
+              </span>
             </div>
-            <p class="preset-note">* Preset ปรับค่าจาก class+style ที่วิเคราะห์แล้ว — ไม่ใช่ค่าสำเร็จรูปทั่วไป</p>
           </div>
         </div>
 
@@ -3174,67 +3432,421 @@ var _pRoll=48,_iRoll=90,_dRoll=38,_pPitch=52,_iPitch=90,_dPitch=40,_pYaw=40,_iYa
 var _gLpf1=200,_dLpf1=110,_notch=2,_ag=5;
 {% endif %}
 function _r(v){ return Math.max(1, Math.round(v)); }
-var presetBuilders = {
-  beginner: function(){
-    return ['# OBIXConfig Doctor — Beginner Safe',
-      '# P-10% D-15% filter นุ่มขึ้น throttle 80%',
-      'set p_roll  = '+_r(_pRoll*0.90), 'set i_roll  = '+_r(_iRoll*0.95), 'set d_roll  = '+_r(_dRoll*0.85),
-      'set p_pitch = '+_r(_pPitch*0.90),'set i_pitch = '+_r(_iPitch*0.95),'set d_pitch = '+_r(_dPitch*0.85),
-      'set p_yaw   = '+_r(_pYaw*0.88),  'set i_yaw   = '+_r(_iYaw),
-      'set gyro_lpf1_hz        = '+_r(_gLpf1*0.85),
-      'set dterm_lpf1_hz       = '+_r(_dLpf1*0.85),
-      'set dyn_notch_count     = '+_notch,
-      'set motor_pwm_protocol  = DSHOT600',
-      'set dshot_bidir         = ON',
-      'set motor_poles         = 14',
-      'set rpm_filter_harmonics = 3',
-      'set anti_gravity_gain   = '+Math.max(2,_ag-2),
-      'set throttle_limit_percent = 80',
-      'set throttle_limit_type = SCALE',
-      'set iterm_relax         = RP',
-      'set feedforward_averaging = 2_POINT', 'save'].join('\n');},
-  freestyle: function(){
-    return ['# OBIXConfig Doctor — Freestyle',
-      '# ค่าตามการวิเคราะห์ class+style',
-      'set p_roll  = '+_pRoll, 'set i_roll  = '+_iRoll, 'set d_roll  = '+_dRoll,
-      'set p_pitch = '+_pPitch,'set i_pitch = '+_iPitch,'set d_pitch = '+_dPitch,
-      'set p_yaw   = '+_pYaw,  'set i_yaw   = '+_iYaw,  'set d_yaw   = 0',
-      'set gyro_lpf1_hz        = '+_gLpf1,
-      'set dterm_lpf1_hz       = '+_dLpf1,
-      'set dyn_notch_count     = '+_notch,
-      'set motor_pwm_protocol  = DSHOT600',
-      'set dshot_bidir         = ON',
-      'set anti_gravity_gain   = '+_ag,
-      'set iterm_relax         = RP',
-      'set iterm_relax_type    = SETPOINT',
-      'set feedforward_averaging = 2_POINT',
-      'set tpa_rate            = 10',
-      'set tpa_breakpoint      = 1650', 'save'].join('\n');},
-  longrange: function(){
-    return ['# OBIXConfig Doctor — Long Range',
-      '# P/D-12% iterm_relax OFF throttle 85%',
-      'set p_roll  = '+_r(_pRoll*0.88), 'set i_roll  = '+_r(_iRoll), 'set d_roll  = '+_r(_dRoll*0.88),
-      'set p_pitch = '+_r(_pPitch*0.88),'set i_pitch = '+_r(_iPitch),'set d_pitch = '+_r(_dPitch*0.88),
-      'set p_yaw   = '+_r(_pYaw*0.85),  'set i_yaw   = '+_r(_iYaw),
-      'set gyro_lpf1_hz        = '+_r(_gLpf1*0.88),
-      'set dterm_lpf1_hz       = '+_r(_dLpf1*0.88),
-      'set dyn_notch_count     = 1',
-      'set motor_pwm_protocol  = DSHOT600',
-      'set dshot_bidir         = ON',
-      'set motor_poles         = 14',
-      'set rpm_filter_harmonics = 3',
-      'set anti_gravity_gain   = '+Math.max(2,_ag-2),
-      'set throttle_limit_percent = 85',
-      'set iterm_relax         = OFF',
-      'set feedforward_averaging = 2_POINT',
-      'set tpa_rate            = 8',
-      'set tpa_breakpoint      = 1700', 'save'].join('\n');}
+/* ══ PRESET DATA + BUILDER ══════════════════════════════════════ */
+var PRESETS = {
+  beginner: {
+    label:'BEGINNER', color:'var(--green)',
+    title:'Beginner — ปลอดภัย เหมาะสำหรับมือใหม่',
+    desc:'ลด P 10% · D 15% · Throttle cap 80% · Filter นุ่มกว่าปกติ — บินนิ่ง ควบคุมง่าย ไม่แดง',
+    stats:[
+      {v:'×0.90 P',c:'blue',  l:'P GAIN'},
+      {v:'×0.85 D',c:'blue',  l:'D GAIN'},
+      {v:'80%',    c:'amber', l:'THROTTLE'},
+      {v:'Soft',   c:'green', l:'FILTER'},
+    ],
+    tips:[
+      {i:'🟢',t:'<b>Throttle limit 80%</b> — ป้องกันพลิกคว่ำกะทันหัน เหมาะฝึก hover และ line ตรง'},
+      {i:'🔵',t:'<b>Filter นุ่มขึ้น 15%</b> — ลด noise รับโทษด้าน response เล็กน้อย ดีสำหรับ motor ใหม่'},
+      {i:'🟡',t:'<b>iterm_relax = RP</b> — ป้องกัน I-term windup ตอน flip/roll ลด bounce-back'},
+      {i:'⚡',t:'<b>RPM Filter ON</b> — เปิด bidirectional dshot ต้องการ ESC รองรับ DSHOT600'},
+      {i:'⚠️',t:'ทดสอบ hover ก่อนทำ trick — ถ้า oscillate ให้ลด P เพิ่ม 5% อีกรอบ'},
+    ],
+    cli: function(){
+      return [
+        '# ═══════════════════════════════════════════════════════════',
+        '# OBIXConfig Doctor v5 — BEGINNER SAFE PRESET',
+        '# สำหรับมือใหม่ · Throttle 80% · Filter นุ่ม · RPM Filter ON',
+        '# ═══════════════════════════════════════════════════════════',
+        '',
+        '# ── PID (P-10% D-15% I-5%) ──',
+        'set p_roll            = '+_r(_pRoll*0.90),
+        'set i_roll            = '+_r(_iRoll*0.95),
+        'set d_roll            = '+_r(_dRoll*0.85),
+        'set f_roll            = 0',
+        'set p_pitch           = '+_r(_pPitch*0.90),
+        'set i_pitch           = '+_r(_iPitch*0.95),
+        'set d_pitch           = '+_r(_dPitch*0.85),
+        'set f_pitch           = 0',
+        'set p_yaw             = '+_r(_pYaw*0.88),
+        'set i_yaw             = '+_r(_iYaw),
+        'set d_yaw             = 0',
+        '',
+        '# ── Filter (soft) ──',
+        'set gyro_lpf1_static_hz    = '+_r(_gLpf1*0.80),
+        'set gyro_lpf2_static_hz    = '+_r(_gLpf1*1.6),
+        'set dterm_lpf1_static_hz   = '+_r(_dLpf1*0.80),
+        'set dterm_lpf2_static_hz   = '+_r(_dLpf1*1.4),
+        'set dyn_notch_count        = '+Math.max(1,_notch),
+        'set dyn_notch_min_hz       = 80',
+        'set dyn_notch_max_hz       = 350',
+        '',
+        '# ── RPM Filter ──',
+        'set motor_pwm_protocol     = DSHOT600',
+        'set dshot_bidir            = ON',
+        'set motor_poles            = 14',
+        'set rpm_filter_harmonics   = 3',
+        'set rpm_filter_min_hz      = 100',
+        '',
+        '# ── Throttle & Safety ──',
+        'set throttle_limit_percent = 80',
+        'set throttle_limit_type    = SCALE',
+        'set tpa_rate               = 15',
+        'set tpa_breakpoint         = 1500',
+        '',
+        '# ── Iterm & Feedforward ──',
+        'set iterm_relax            = RP',
+        'set iterm_relax_type       = SETPOINT',
+        'set anti_gravity_gain      = '+Math.max(2,_ag-2),
+        'set feedforward_averaging  = 4_POINT',
+        'set feedforward_smooth_factor = 35',
+        '',
+        'save'
+      ].join('\n');
+    }
+  },
+
+  freestyle: {
+    label:'FREESTYLE', color:'var(--blue)',
+    title:'Freestyle — ค่าวิเคราะห์ full, response ดี, RPM filter',
+    desc:'ค่าจากการวิเคราะห์เต็มรูปแบบ — iterm_relax, FF averaging, TPA คำนวณตาม TWR',
+    stats:[
+      {v:'Full',c:'blue',  l:'PID'},
+      {v:'DSHOT600',c:'green',l:'PROTOCOL'},
+      {v:'BiDir',c:'green',l:'RPM FILTER'},
+      {v:'2_POINT',c:'blue',l:'FF AVG'},
+    ],
+    tips:[
+      {i:'🔵',t:'<b>ค่า PID เต็ม</b> — ได้จากการวิเคราะห์ class+style จริงๆ ไม่ใช่ค่า generic'},
+      {i:'⚡',t:'<b>DSHOT600 + BiDir</b> — RPM Filter ทำงาน motor noise filter แม่นขึ้นมาก'},
+      {i:'🎯',t:'<b>FF averaging 2_POINT</b> — ลด spike ของ feedforward ตอนขยับ stick เร็ว'},
+      {i:'📐',t:'<b>TPA rate 10%</b> — ลด P gain ที่ throttle สูง ป้องกัน propwash ตอน dive'},
+      {i:'💡',t:'ถ้า bounce-back หลัง flip: เพิ่ม <b>iterm_relax_cutoff</b> จาก 15 → 20'},
+    ],
+    cli: function(){
+      return [
+        '# ═══════════════════════════════════════════════════════════',
+        '# OBIXConfig Doctor v5 — FREESTYLE PRESET',
+        '# ค่าจากการวิเคราะห์ · DSHOT600 BiDir · RPM Filter ON',
+        '# ═══════════════════════════════════════════════════════════',
+        '',
+        '# ── PID (ค่าวิเคราะห์) ──',
+        'set p_roll            = '+_pRoll,
+        'set i_roll            = '+_iRoll,
+        'set d_roll            = '+_dRoll,
+        'set f_roll            = '+_r(_pRoll*0.55),
+        'set p_pitch           = '+_pPitch,
+        'set i_pitch           = '+_iPitch,
+        'set d_pitch           = '+_dPitch,
+        'set f_pitch           = '+_r(_pPitch*0.55),
+        'set p_yaw             = '+_pYaw,
+        'set i_yaw             = '+_iYaw,
+        'set d_yaw             = 0',
+        'set f_yaw             = 0',
+        '',
+        '# ── Filter (balanced) ──',
+        'set gyro_lpf1_static_hz    = '+_gLpf1,
+        'set gyro_lpf2_static_hz    = 0',
+        'set dterm_lpf1_static_hz   = '+_dLpf1,
+        'set dterm_lpf2_static_hz   = '+_r(_dLpf1*1.5),
+        'set dyn_notch_count        = '+_notch,
+        'set dyn_notch_min_hz       = 100',
+        'set dyn_notch_max_hz       = 600',
+        '',
+        '# ── RPM Filter ──',
+        'set motor_pwm_protocol     = DSHOT600',
+        'set dshot_bidir            = ON',
+        'set motor_poles            = 14',
+        'set rpm_filter_harmonics   = 3',
+        'set rpm_filter_min_hz      = 100',
+        '',
+        '# ── TPA ──',
+        'set tpa_rate               = 10',
+        'set tpa_breakpoint         = 1650',
+        '',
+        '# ── Iterm & Feedforward ──',
+        'set iterm_relax            = RP',
+        'set iterm_relax_type       = SETPOINT',
+        'set iterm_relax_cutoff     = 15',
+        'set anti_gravity_gain      = '+_ag,
+        'set feedforward_averaging  = 2_POINT',
+        'set feedforward_smooth_factor = 25',
+        'set feedforward_jitter_factor = 4',
+        '',
+        '# ── vbat sag compensation ──',
+        'set vbat_sag_compensation  = 100',
+        '',
+        'save'
+      ].join('\n');
+    }
+  },
+
+  racing: {
+    label:'RACING', color:'var(--red)',
+    title:'Racing — response สูงสุด, TPA เข้มข้น, filter light',
+    desc:'P+15% D+10% · Filter เบา · TPA aggressive · iterm_relax OFF · ต้องการ tune ถี่กว่าปกติ',
+    stats:[
+      {v:'×1.15 P',c:'red',  l:'P GAIN'},
+      {v:'×1.10 D',c:'amber',l:'D GAIN'},
+      {v:'Light',  c:'amber',l:'FILTER'},
+      {v:'TPA 20%',c:'red',  l:'THROTTLE'},
+    ],
+    tips:[
+      {i:'🔴',t:'<b>P gain +15%</b> — response ไวขึ้น ต้องการ motor ดีและ ESC response ต่ำ'},
+      {i:'🌡️',t:'<b>Filter เบา</b> — motor จะร้อนขึ้น ตรวจสอบ motor temp หลังบิน 2 แบต'},
+      {i:'📐',t:'<b>TPA 20% at 1550</b> — ลด P ตาม throttle เพื่อลด propwash ความเร็วสูง'},
+      {i:'⚡',t:'<b>Motor poles = 14</b> — ตรวจสอบ motor spec ให้ตรง RPM Filter จะผิดถ้าเปลี่ยน'},
+      {i:'⚠️',t:'ค่านี้สำหรับผู้มีประสบการณ์ — ถ้า motor ร้อนมากให้กลับมาใช้ Freestyle preset'},
+    ],
+    cli: function(){
+      return [
+        '# ═══════════════════════════════════════════════════════════',
+        '# OBIXConfig Doctor v5 — RACING PRESET',
+        '# P+15% D+10% · Filter เบา · TPA aggressive · ต้องการ tune',
+        '# ═══════════════════════════════════════════════════════════',
+        '',
+        '# ── PID (aggressive) ──',
+        'set p_roll            = '+_r(_pRoll*1.15),
+        'set i_roll            = '+_iRoll,
+        'set d_roll            = '+_r(_dRoll*1.10),
+        'set f_roll            = '+_r(_pRoll*0.65),
+        'set p_pitch           = '+_r(_pPitch*1.15),
+        'set i_pitch           = '+_iPitch,
+        'set d_pitch           = '+_r(_dPitch*1.10),
+        'set f_pitch           = '+_r(_pPitch*0.65),
+        'set p_yaw             = '+_r(_pYaw*1.05),
+        'set i_yaw             = '+_iYaw,
+        'set d_yaw             = 0',
+        'set f_yaw             = 0',
+        '',
+        '# ── Filter (light — fast response) ──',
+        'set gyro_lpf1_static_hz    = '+_r(_gLpf1*1.15),
+        'set gyro_lpf2_static_hz    = 0',
+        'set dterm_lpf1_static_hz   = '+_r(_dLpf1*1.10),
+        'set dterm_lpf2_static_hz   = 0',
+        'set dyn_notch_count        = 1',
+        'set dyn_notch_min_hz       = 150',
+        'set dyn_notch_max_hz       = 700',
+        '',
+        '# ── RPM Filter ──',
+        'set motor_pwm_protocol     = DSHOT600',
+        'set dshot_bidir            = ON',
+        'set motor_poles            = 14',
+        'set rpm_filter_harmonics   = 3',
+        'set rpm_filter_min_hz      = 100',
+        '',
+        '# ── TPA (aggressive) ──',
+        'set tpa_rate               = 20',
+        'set tpa_breakpoint         = 1550',
+        '',
+        '# ── Iterm & Feedforward ──',
+        'set iterm_relax            = RP',
+        'set iterm_relax_type       = SETPOINT',
+        'set iterm_relax_cutoff     = 20',
+        'set anti_gravity_gain      = '+Math.max(3,_ag-1),
+        'set feedforward_averaging  = 2_POINT',
+        'set feedforward_smooth_factor = 15',
+        'set feedforward_jitter_factor = 2',
+        '',
+        'save'
+      ].join('\n');
+    }
+  },
+
+  longrange: {
+    label:'LONG RANGE', color:'#a050ff',
+    title:'Long Range — นิ่ง ประหยัดไฟ ลอยนาน',
+    desc:'P/D ลด 12% · iterm_relax OFF · Filter medium · Throttle 85% · dyn_notch=1 ประหยัด CPU',
+    stats:[
+      {v:'×0.88',  c:'purple',l:'P GAIN'},
+      {v:'85%',    c:'amber', l:'THROTTLE'},
+      {v:'OFF',    c:'purple',l:'ITERM_RLX'},
+      {v:'1 notch',c:'green', l:'DYN NOTCH'},
+    ],
+    tips:[
+      {i:'🟣',t:'<b>iterm_relax = OFF</b> — โดรน LR บินตรงส่วนใหญ่ ไม่ค่อย flip จึงไม่จำเป็น'},
+      {i:'🔋',t:'<b>Throttle limit 85%</b> — ช่วยยืดอายุแบตและ motor ให้บินได้นานขึ้น ~10%'},
+      {i:'📡',t:'<b>dyn_notch = 1</b> — ลด CPU load เหมาะ F4 FC ที่มี CPU ไม่เยอะ'},
+      {i:'💡',t:'<b>vbat_sag_compensation</b> ช่วยให้ response คงที่ตลอด flight ไม่ sluggish ตอนแบตตก'},
+      {i:'✈️',t:'ถ้า oscillate ที่ cruise: ลด P_yaw 5% เพิ่ม · ถ้าสั่นที่ full throttle: เพิ่ม D เล็กน้อย'},
+    ],
+    cli: function(){
+      return [
+        '# ═══════════════════════════════════════════════════════════',
+        '# OBIXConfig Doctor v5 — LONG RANGE PRESET',
+        '# P/D-12% · iterm_relax OFF · Filter medium · Throttle 85%',
+        '# ═══════════════════════════════════════════════════════════',
+        '',
+        '# ── PID (smooth, -12%) ──',
+        'set p_roll            = '+_r(_pRoll*0.88),
+        'set i_roll            = '+_iRoll,
+        'set d_roll            = '+_r(_dRoll*0.88),
+        'set f_roll            = '+_r(_pRoll*0.30),
+        'set p_pitch           = '+_r(_pPitch*0.88),
+        'set i_pitch           = '+_iPitch,
+        'set d_pitch           = '+_r(_dPitch*0.88),
+        'set f_pitch           = '+_r(_pPitch*0.30),
+        'set p_yaw             = '+_r(_pYaw*0.85),
+        'set i_yaw             = '+_iYaw,
+        'set d_yaw             = 0',
+        '',
+        '# ── Filter (medium) ──',
+        'set gyro_lpf1_static_hz    = '+_r(_gLpf1*0.90),
+        'set gyro_lpf2_static_hz    = 0',
+        'set dterm_lpf1_static_hz   = '+_r(_dLpf1*0.90),
+        'set dterm_lpf2_static_hz   = 0',
+        'set dyn_notch_count        = 1',
+        'set dyn_notch_min_hz       = 80',
+        'set dyn_notch_max_hz       = 350',
+        '',
+        '# ── RPM Filter ──',
+        'set motor_pwm_protocol     = DSHOT600',
+        'set dshot_bidir            = ON',
+        'set motor_poles            = 14',
+        'set rpm_filter_harmonics   = 3',
+        'set rpm_filter_min_hz      = 100',
+        '',
+        '# ── Throttle (fuel saving) ──',
+        'set throttle_limit_percent = 85',
+        'set throttle_limit_type    = CLIP',
+        'set tpa_rate               = 8',
+        'set tpa_breakpoint         = 1700',
+        '',
+        '# ── Iterm & stability ──',
+        'set iterm_relax            = OFF',
+        'set anti_gravity_gain      = '+Math.max(2,_ag-2),
+        'set feedforward_averaging  = 2_POINT',
+        'set feedforward_smooth_factor = 30',
+        'set vbat_sag_compensation  = 100',
+        'set vbat_warning_cell_voltage = 350',
+        'set vbat_critical_cell_voltage = 330',
+        '',
+        'save'
+      ].join('\n');
+    }
+  },
+
+  cinematic: {
+    label:'CINEMATIC', color:'var(--amber)',
+    title:'Cinematic — นุ่มที่สุด ไม่สั่น เหมาะถ่ายวิดีโอ',
+    desc:'P ลด 20% D ลด 25% · Filter นุ่มมาก · Throttle limit 70% · RC Smoothing สูง · ไม่มี bounce',
+    stats:[
+      {v:'×0.80 P',c:'amber',l:'P GAIN'},
+      {v:'×0.75 D',c:'amber',l:'D GAIN'},
+      {v:'70%',    c:'red',  l:'THROTTLE'},
+      {v:'High',   c:'amber',l:'RC SMOOTH'},
+    ],
+    tips:[
+      {i:'🟡',t:'<b>RC smoothing factor 60</b> — ทำให้ movement นุ่มมาก เหมาะ cine whoop / cinelifter'},
+      {i:'🎬',t:'<b>Throttle 70%</b> — บังคับให้ขยับ stick ช้า ลด jerky movement ในวิดีโอ'},
+      {i:'📷',t:'<b>Filter นุ่มมาก</b> — ลด vibration ส่งต่อกล้อง แต่ response ช้ากว่าปกติมาก'},
+      {i:'💡',t:'ใช้ร่วมกับ <b>stabilizer/gimbal</b> จะได้ผลดีที่สุด'},
+      {i:'⚠️',t:'ไม่แนะนำบินในพื้นที่แคบ — response ช้ากว่าปกติ อาจชนได้'},
+    ],
+    cli: function(){
+      return [
+        '# ═══════════════════════════════════════════════════════════',
+        '# OBIXConfig Doctor v5 — CINEMATIC PRESET',
+        '# Ultra smooth · No bounce · P-20% D-25% · RC smooth HIGH',
+        '# ═══════════════════════════════════════════════════════════',
+        '',
+        '# ── PID (very smooth) ──',
+        'set p_roll            = '+_r(_pRoll*0.80),
+        'set i_roll            = '+_r(_iRoll*0.95),
+        'set d_roll            = '+_r(_dRoll*0.75),
+        'set f_roll            = 0',
+        'set p_pitch           = '+_r(_pPitch*0.80),
+        'set i_pitch           = '+_r(_iPitch*0.95),
+        'set d_pitch           = '+_r(_dPitch*0.75),
+        'set f_pitch           = 0',
+        'set p_yaw             = '+_r(_pYaw*0.78),
+        'set i_yaw             = '+_r(_iYaw*0.95),
+        'set d_yaw             = 0',
+        '',
+        '# ── Filter (very soft for smooth video) ──',
+        'set gyro_lpf1_static_hz    = '+_r(_gLpf1*0.75),
+        'set gyro_lpf2_static_hz    = '+_r(_gLpf1*1.3),
+        'set dterm_lpf1_static_hz   = '+_r(_dLpf1*0.72),
+        'set dterm_lpf2_static_hz   = '+_r(_dLpf1*1.2),
+        'set dyn_notch_count        = '+Math.max(2,_notch),
+        'set dyn_notch_min_hz       = 60',
+        'set dyn_notch_max_hz       = 300',
+        '',
+        '# ── RPM Filter ──',
+        'set motor_pwm_protocol     = DSHOT600',
+        'set dshot_bidir            = ON',
+        'set motor_poles            = 14',
+        'set rpm_filter_harmonics   = 3',
+        'set rpm_filter_min_hz      = 100',
+        '',
+        '# ── Throttle (very gentle) ──',
+        'set throttle_limit_percent = 70',
+        'set throttle_limit_type    = SCALE',
+        'set tpa_rate               = 5',
+        'set tpa_breakpoint         = 1800',
+        '',
+        '# ── RC Smoothing (cinematic) ──',
+        'set rc_smoothing           = ON',
+        'set rc_smoothing_auto_factor = 60',
+        'set rc_smoothing_feedforward_cutoff = 25',
+        '',
+        '# ── Iterm (no snap) ──',
+        'set iterm_relax            = RP',
+        'set iterm_relax_type       = GYRO',
+        'set iterm_relax_cutoff     = 8',
+        'set anti_gravity_gain      = 2',
+        'set feedforward_averaging  = 4_POINT',
+        'set feedforward_smooth_factor = 60',
+        'set feedforward_jitter_factor = 8',
+        '',
+        'save'
+      ].join('\n');
+    }
+  }
 };
+
+/* Preset metadata */
+var PRESET_INFO = {
+  beginner:   {badge:'🟢 SAFE',    bStyle:'background:rgba(0,255,136,0.1);border-color:rgba(0,255,136,0.4);color:var(--green)'},
+  freestyle:  {badge:'🔵 BALANCED',bStyle:'background:rgba(0,170,255,0.1);border-color:rgba(0,170,255,0.4);color:var(--blue)'},
+  racing:     {badge:'🔴 AGGRESSIVE',bStyle:'background:rgba(255,68,85,0.1);border-color:rgba(255,68,85,0.4);color:var(--red)'},
+  longrange:  {badge:'🟣 EFFICIENT',bStyle:'background:rgba(160,80,255,0.1);border-color:rgba(160,80,255,0.4);color:#a050ff'},
+  cinematic:  {badge:'🟡 SMOOTH',  bStyle:'background:rgba(255,183,0,0.1);border-color:rgba(255,183,0,0.4);color:var(--amber)'},
+};
+
+function selectPreset(type, btn) {
+  /* Tab active state */
+  document.querySelectorAll('.ptab').forEach(function(t){ t.className='ptab'; });
+  btn.className = 'ptab active';
+
+  var p = PRESETS[type];
+  var info = PRESET_INFO[type];
+  if (!p) return;
+
+  /* Info card */
+  document.getElementById('picBadge').textContent = info.badge;
+  document.getElementById('picBadge').setAttribute('style', info.bStyle);
+  document.getElementById('picTitle').textContent = p.title;
+  document.getElementById('picDesc').textContent  = p.desc;
+
+  /* Stats */
+  var statsHtml = p.stats.map(function(s){
+    return '<div class="pstat"><span class="pstat-val '+s.c+'">'+s.v+'</span><span class="pstat-lbl">'+s.l+'</span></div>';
+  }).join('');
+  document.getElementById('picStats').innerHTML = statsHtml;
+
+  /* Tips */
+  var tipsHtml = p.tips.map(function(t){
+    return '<div class="ptip"><span class="ptip-icon">'+t.i+'</span><span>'+t.t+'</span></div>';
+  }).join('');
+  document.getElementById('picTips').innerHTML = tipsHtml;
+
+  /* CLI */
+  document.getElementById('cliOutput').textContent = p.cli();
+}
+
 function showPreset(type){
-  var el=document.getElementById('cliOutput');
-  if(!el) return;
-  var b=presetBuilders[type];
-  el.textContent = b ? b() : '# preset not found';
+  var btn = document.querySelector('.ptab[data-preset="'+type+'"]');
+  if(btn) selectPreset(type,btn);
 }
 
 /* ── Donate amount buttons ── */
@@ -3414,174 +4026,8 @@ function renderRadar() {
 <!-- ╔══════════════════════════════════════════════════════════════
      ║  CONFIGDOCTOR v5 — Visual Excellence JS
      ╚══════════════════════════════════════════════════════════════ -->
-<canvas id="particleCanvas"></canvas>
-<div id="mouseGlow"></div>
 
 <script>
-/* ── Particle Field ─────────────────────────────────────────────── */
-(function(){
-  var c = document.getElementById('particleCanvas');
-  if (!c) return;
-  var ctx = c.getContext('2d');
-  var W, H, particles = [];
-  
-  function resize() {
-    W = c.width  = window.innerWidth;
-    H = c.height = window.innerHeight;
-  }
-  window.addEventListener('resize', resize);
-  resize();
-
-  var COLORS = ['rgba(0,255,136,', 'rgba(0,170,255,', 'rgba(160,80,255,', 'rgba(0,230,255,'];
-  
-  function mkParticle() {
-    return {
-      x: Math.random() * W,
-      y: Math.random() * H,
-      r: Math.random() * 1.4 + .3,
-      vx: (Math.random() - .5) * .3,
-      vy: (Math.random() - .5) * .3 - .1,
-      col: COLORS[Math.floor(Math.random() * COLORS.length)],
-      a: Math.random() * .5 + .1,
-      life: Math.random() * 200 + 100,
-      age: 0,
-      pulse: Math.random() * Math.PI * 2
-    };
-  }
-  
-  for (var i = 0; i < 90; i++) particles.push(mkParticle());
-
-  function draw() {
-    ctx.clearRect(0, 0, W, H);
-    
-    var now = Date.now() * .001;
-    
-    particles.forEach(function(p, i) {
-      p.age++;
-      p.x += p.vx;
-      p.y += p.vy;
-      p.pulse += .02;
-      
-      var t = p.age / p.life;
-      var alpha = p.a * Math.sin(Math.PI * t) * (.6 + .4 * Math.sin(p.pulse));
-      
-      // Glow
-      var grd = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
-      grd.addColorStop(0, p.col + (alpha * .8).toFixed(2) + ')');
-      grd.addColorStop(1, p.col + '0)');
-      ctx.fillStyle = grd;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2);
-      ctx.fill();
-      
-      // Core
-      ctx.fillStyle = p.col + alpha.toFixed(2) + ')';
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fill();
-      
-      // Connect nearby particles
-      for (var j = i + 1; j < particles.length; j++) {
-        var q = particles[j];
-        var dx = p.x - q.x, dy = p.y - q.y;
-        var dist = Math.sqrt(dx*dx + dy*dy);
-        if (dist < 100) {
-          ctx.strokeStyle = p.col + (0.06 * (1 - dist/100)).toFixed(3) + ')';
-          ctx.lineWidth = .5;
-          ctx.beginPath();
-          ctx.moveTo(p.x, p.y);
-          ctx.lineTo(q.x, q.y);
-          ctx.stroke();
-        }
-      }
-      
-      if (p.age > p.life || p.x < -20 || p.x > W+20 || p.y < -20 || p.y > H+20) {
-        particles[i] = mkParticle();
-        particles[i].x = Math.random() * W;
-        particles[i].y = H + 10;
-      }
-    });
-    
-    requestAnimationFrame(draw);
-  }
-  draw();
-})();
-
-/* ── Mouse Glow ──────────────────────────────────────────────────── */
-(function(){
-  var glow = document.getElementById('mouseGlow');
-  if (!glow) return;
-  var mx = -1000, my = -1000;
-  document.addEventListener('mousemove', function(e) {
-    mx = e.clientX; my = e.clientY;
-    glow.style.left = mx + 'px';
-    glow.style.top  = my + 'px';
-  });
-})();
-
-/* ── Counter animation for stat values ───────────────────────────── */
-(function(){
-  function animateCounter(el) {
-    var text = el.textContent.trim();
-    var match = text.match(/^([\d.]+)/);
-    if (!match) return;
-    var target = parseFloat(match[1]);
-    var suffix = text.replace(match[1], '');
-    var start = 0, dur = 1200, startTime = null;
-    var isFloat = match[1].includes('.');
-    function step(ts) {
-      if (!startTime) startTime = ts;
-      var prog = Math.min((ts - startTime) / dur, 1);
-      var ease = 1 - Math.pow(1 - prog, 3);
-      var val = start + (target - start) * ease;
-      el.textContent = (isFloat ? val.toFixed(1) : Math.round(val)) + suffix;
-      if (prog < 1) requestAnimationFrame(step);
-      else el.textContent = text;
-    }
-    requestAnimationFrame(step);
-  }
-
-  var ob = new IntersectionObserver(function(entries) {
-    entries.forEach(function(e) {
-      if (e.isIntersecting) {
-        animateCounter(e.target);
-        ob.unobserve(e.target);
-      }
-    });
-  }, { threshold: .5 });
-
-  document.querySelectorAll('.qs-stat-val').forEach(function(el) {
-    ob.observe(el);
-  });
-})();
-
-/* ── Typewriter for CLI output ───────────────────────────────────── */
-(function(){
-  var box = document.getElementById('cliOutput');
-  if (!box || !box.textContent.trim()) return;
-  var full = box.textContent;
-  box.textContent = '';
-  var i = 0;
-  function type() {
-    if (i < full.length) {
-      box.textContent += full[i++];
-      setTimeout(type, i < 60 ? 12 : 2);
-    }
-  }
-  setTimeout(type, 400);
-})();
-
-/* ── Tpanel hover depth ──────────────────────────────────────────── */
-document.querySelectorAll('.tpanel').forEach(function(panel) {
-  panel.addEventListener('mousemove', function(e) {
-    var rect = panel.getBoundingClientRect();
-    var x = (e.clientX - rect.left) / rect.width - .5;
-    var y = (e.clientY - rect.top) / rect.height - .5;
-    panel.style.transform = 'translateY(-1px) perspective(600px) rotateX(' + (-y*2).toFixed(1) + 'deg) rotateY(' + (x*2).toFixed(1) + 'deg)';
-  });
-  panel.addEventListener('mouseleave', function() {
-    panel.style.transform = '';
-  });
 });
 
 /* ── Score ring re-animate on first view ─────────────────────────── */
