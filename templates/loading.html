@@ -2,116 +2,398 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>OBIXConfig Doctor</title>
+<title>OBIXConfig Doctor — Initializing</title>
 {% set og_title       = "OBIXConfig Doctor" %}
 {% set og_description = "กำลังโหลด OBIXConfig Doctor — FPV Tuning Tool" %}
 {% set og_url         = "https://configdoctor.onrender.com" %}
 {% include "partials/og_tags.html" %}
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
-:root{
-  --bg:#0b0f14;
-  --card:#121821;
-  --primary:#7c8cff;
-  --text:#eaeaff;
-  --muted:#9aa4b2;
+:root {
+  --green:  #00ff88;
+  --blue:   #00aaff;
+  --cyan:   #00e5ff;
+  --amber:  #ffb700;
+  --bg:     #010407;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; background: var(--bg); }
+
+/* Grid BG */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(0,255,136,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,136,0.035) 1px, transparent 1px);
+  background-size: 44px 44px;
+  animation: gridScroll 14s linear infinite;
+  pointer-events: none;
+}
+@keyframes gridScroll { to { background-position: 44px 44px; } }
+
+/* Ambient orbs */
+.orb { position: fixed; border-radius: 50%; pointer-events: none; filter: blur(100px); z-index: 0; }
+.orb-g { width: 600px; height: 600px; top: -200px; left: -200px;
+  background: radial-gradient(circle, rgba(0,255,136,0.14) 0%, transparent 70%);
+  animation: of1 22s ease-in-out infinite; }
+.orb-b { width: 700px; height: 700px; bottom: -250px; right: -200px;
+  background: radial-gradient(circle, rgba(0,170,255,0.11) 0%, transparent 70%);
+  animation: of2 28s ease-in-out infinite; }
+@keyframes of1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(60px,40px)} }
+@keyframes of2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-50px,-60px)} }
+
+/* Scanline */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px,
+    rgba(0,0,0,0.015) 2px, rgba(0,0,0,0.015) 4px);
 }
 
-*{box-sizing:border-box;font-family:system-ui,Segoe UI,sans-serif;}
+/* HUD corners */
+.hc { position: fixed; width: 56px; height: 56px; border-color: rgba(0,255,136,0.22); border-style: solid; z-index: 3;
+  animation: hcp 3s ease-in-out infinite; }
+.hc-tl { top:18px; left:18px; border-width: 2px 0 0 2px; }
+.hc-tr { top:18px; right:18px; border-width: 2px 2px 0 0; }
+.hc-bl { bottom:18px; left:18px; border-width: 0 0 2px 2px; }
+.hc-br { bottom:18px; right:18px; border-width: 0 2px 2px 0; }
+@keyframes hcp { 0%,100%{ border-color:rgba(0,255,136,0.22); } 50%{ border-color:rgba(0,255,136,0.5); } }
 
-body{
-  margin:0;
-  height:100vh;
-  background:radial-gradient(circle at top,var(--card),var(--bg));
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:var(--text);
+.hud-tl { position:fixed; top:26px; left:82px; z-index:4;
+  font-family:'Orbitron',sans-serif; font-size:7.5px; letter-spacing:.2em; color:rgba(0,255,136,0.45); }
+.hud-tr { position:fixed; top:26px; right:82px; z-index:4; text-align:right;
+  font-family:'Orbitron',sans-serif; font-size:7.5px; letter-spacing:.2em; color:rgba(0,170,255,0.45); }
+.hud-bl { position:fixed; bottom:26px; left:82px; z-index:4;
+  font-family:'JetBrains Mono',monospace; font-size:7.5px; letter-spacing:.1em; color:rgba(0,255,136,0.3); }
+.hud-br { position:fixed; bottom:26px; right:82px; z-index:4; text-align:right;
+  font-family:'Orbitron',sans-serif; font-size:7px; letter-spacing:.16em; color:rgba(255,255,255,0.12); }
+
+/* Main layout */
+.main {
+  position: relative; z-index: 10;
+  width: 100vw; height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
 }
 
-.card{
-  background:rgba(18,24,33,.9);
-  border-radius:20px;
-  padding:40px 30px;
-  width:90%;
-  max-width:380px;
-  text-align:center;
-  box-shadow:0 0 40px rgba(0,0,0,.6);
+/* DRONE RADAR */
+.drone-wrap {
+  position: relative;
+  width: 210px; height: 210px;
+  margin-bottom: 28px;
 }
 
-.logo{
-  font-size:22px;
-  font-weight:700;
-  letter-spacing:1px;
-  margin-bottom:25px;
-  color:var(--primary);
+.ring-outer {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 1px solid rgba(0,255,136,0.1);
+  animation: rot 10s linear infinite;
+}
+.ring-outer::before {
+  content: ''; position: absolute;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 14px var(--green), 0 0 28px rgba(0,255,136,0.5);
+  top: -4.5px; left: calc(50% - 4.5px);
+}
+.ring-outer::after {
+  content: ''; position: absolute;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--blue);
+  box-shadow: 0 0 12px var(--blue);
+  bottom: -3.5px; left: calc(50% - 3.5px);
+}
+@keyframes rot { to { transform: rotate(360deg); } }
+
+.ring-mid {
+  position: absolute; inset: 22px; border-radius: 50%;
+  border: 1px dashed rgba(0,170,255,0.18);
+  animation: rot 6s linear infinite reverse;
 }
 
-.spinner{
-  width:64px;
-  height:64px;
-  border:4px solid rgba(255,255,255,.15);
-  border-top-color:var(--primary);
-  border-radius:50%;
-  animation:spin 1s linear infinite;
-  margin:0 auto 25px;
+/* RADAR SWEEP */
+.radar {
+  position: absolute; inset: 32px; border-radius: 50%; overflow: hidden;
+}
+.radar::before {
+  content: ''; position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg, transparent 280deg,
+    rgba(0,255,136,0.08) 300deg,
+    rgba(0,255,136,0.35) 340deg,
+    rgba(0,255,136,0.55) 360deg
+  );
+  animation: radarSpin 2.4s linear infinite;
+}
+.radar::after {
+  content: ''; position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(circle, transparent 30%, rgba(0,255,136,0.03) 100%);
+  border: 1px solid rgba(0,255,136,0.12);
+}
+@keyframes radarSpin { to { transform: rotate(360deg); } }
+
+/* Blips */
+.blip {
+  position: absolute; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--green); box-shadow: 0 0 8px var(--green);
+  animation: blipFade 2.6s ease-out infinite;
+}
+.b1 { top: 28%; left: 62%; animation-delay: 0s; }
+.b2 { top: 62%; left: 28%; animation-delay: 0.9s; }
+.b3 { top: 38%; left: 72%; animation-delay: 1.8s; }
+@keyframes blipFade {
+  0%{ opacity:1; transform:scale(1); }
+  50%{ opacity:0.6; transform:scale(1.6); }
+  100%{ opacity:0; transform:scale(2.4); }
 }
 
-@keyframes spin{
-  to{transform:rotate(360deg);}
+/* DRONE CENTER */
+.dc { position: absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+.dsv {
+  filter: drop-shadow(0 0 9px rgba(0,255,136,0.5)) drop-shadow(0 0 22px rgba(0,255,136,0.18));
+  animation: dp 2.2s ease-in-out infinite;
+}
+@keyframes dp {
+  0%,100%{ filter: drop-shadow(0 0 9px rgba(0,255,136,0.5)) drop-shadow(0 0 22px rgba(0,255,136,0.18)); }
+  50%{ filter: drop-shadow(0 0 16px rgba(0,255,136,0.85)) drop-shadow(0 0 38px rgba(0,255,136,0.3)); }
+}
+.pt1 { transform-origin:36px 36px; animation:rot .22s linear infinite; }
+.pt2 { transform-origin:124px 36px; animation:rot .22s linear infinite reverse; }
+.pt3 { transform-origin:36px 124px; animation:rot .22s linear infinite reverse; }
+.pt4 { transform-origin:124px 124px; animation:rot .22s linear infinite; }
+
+/* LOGO */
+.logo-wrap { text-align:center; margin-bottom:18px; }
+.logo-main {
+  font-family:'Orbitron',sans-serif; font-weight:900;
+  font-size: clamp(16px,3.5vw,26px); letter-spacing:.16em;
+  color: var(--green);
+  text-shadow: 0 0 30px rgba(0,255,136,0.55), 0 0 70px rgba(0,255,136,0.15);
+  animation: lg 3s ease-in-out infinite;
+}
+@keyframes lg {
+  0%,100%{ text-shadow:0 0 30px rgba(0,255,136,0.55), 0 0 70px rgba(0,255,136,0.15); }
+  50%{ text-shadow:0 0 50px rgba(0,255,136,0.9), 0 0 110px rgba(0,255,136,0.28); }
+}
+.logo-sub {
+  font-family:'Orbitron',sans-serif; font-size:7.5px; letter-spacing:.38em;
+  color: rgba(0,170,255,0.65); display:block; margin-top:7px;
 }
 
-.status{
-  font-size:15px;
-  color:var(--muted);
-  min-height:22px;
+/* STATUS */
+.status-wrap { text-align:center; width:330px; max-width:92vw; }
+.status-text {
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px; letter-spacing:.1em;
+  color: rgba(0,255,136,0.72); min-height:18px;
+  margin-bottom:14px;
 }
 
-.footer{
-  margin-top:20px;
-  font-size:12px;
-  opacity:.6;
+/* PROGRESS */
+.prog-outer {
+  width:100%; height:3px; background:rgba(255,255,255,0.04);
+  border-radius:3px; overflow:visible; position:relative; margin-bottom:10px;
 }
+.prog-fill {
+  height:100%; width:0%; border-radius:3px;
+  background: linear-gradient(90deg, var(--green), var(--cyan), var(--blue));
+  background-size:200% 100%;
+  animation: progShimmer 2s linear infinite;
+  transition: width .45s cubic-bezier(.4,0,.2,1);
+  position:relative;
+}
+.prog-fill::after {
+  content:''; position:absolute; right:-10px; top:-4px; bottom:-4px; width:20px;
+  background: linear-gradient(90deg, transparent, rgba(0,255,136,0.9));
+  border-radius:3px; filter:blur(4px);
+}
+@keyframes progShimmer { 0%{background-position:0%} 100%{background-position:200%} }
+
+/* BOOT LOG */
+.boot-log {
+  width:100%; font-family:'JetBrains Mono',monospace;
+  font-size:8.5px; letter-spacing:.04em;
+  color:rgba(0,255,136,0.28); text-align:left;
+  height:44px; overflow:hidden; position:relative; margin-top:6px;
+}
+.boot-log::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:16px;
+  background:linear-gradient(180deg, var(--bg), transparent); z-index:1;
+}
+.log-line { display:block; line-height:1.85; animation:la .18s ease both; }
+.log-line.ok   { color:rgba(0,255,136,0.5); }
+.log-line.info { color:rgba(0,170,255,0.4); }
+.log-line.warn { color:rgba(255,183,0,0.4); }
+@keyframes la { from{opacity:0;transform:translateX(-5px)} to{opacity:1;transform:none} }
+
+/* METRICS */
+.metrics-row {
+  display:flex; gap:16px; margin-top:22px;
+}
+.metric {
+  text-align:center; padding:8px 16px;
+  border:1px solid rgba(0,255,136,0.1); border-radius:6px;
+  background:rgba(0,255,136,0.025);
+  transition: border-color .3s;
+}
+.metric:hover { border-color:rgba(0,255,136,0.25); }
+.mv { display:block; font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700;
+  color:var(--green); line-height:1; }
+.ml { display:block; font-family:'Orbitron',sans-serif; font-size:6px; letter-spacing:.2em;
+  color:rgba(0,255,136,0.38); margin-top:4px; }
 </style>
 </head>
-
 <body>
-<div class="card">
-  <div class="logo">OBIXConfig Lab</div>
-  <div class="spinner"></div>
-  <div class="status" id="status">กำลังปลุกระบบ...</div>
-  <div class="footer">Powered by Render</div>
+
+<div class="orb orb-g"></div>
+<div class="orb orb-b"></div>
+
+<!-- HUD corners -->
+<div class="hc hc-tl"></div>
+<div class="hc hc-tr"></div>
+<div class="hc hc-bl"></div>
+<div class="hc hc-br"></div>
+<div class="hud-tl" id="hudTL">SYS · BOOT</div>
+<div class="hud-tr" id="hudTR">RENDER.COM · COLD START</div>
+<div class="hud-bl" id="hudBL">FPVCTL v5.0 ▶ INIT</div>
+<div class="hud-br">POWERED BY RENDER · OBIX LAB 🇹🇭</div>
+
+<div class="main">
+
+  <div class="logo-wrap">
+    <div class="logo-main">OBIX<span style="color:var(--blue);">CONFIG</span> DOCTOR</div>
+    <span class="logo-sub">FPV TUNING TOOLKIT · v5.0 FULL</span>
+  </div>
+
+  <!-- Drone radar spinner -->
+  <div class="drone-wrap">
+    <div class="ring-outer"></div>
+    <div class="ring-mid"></div>
+    <div class="radar"></div>
+    <div class="blip b1"></div>
+    <div class="blip b2"></div>
+    <div class="blip b3"></div>
+    <div class="dc">
+      <svg class="dsv" width="145" height="145" viewBox="0 0 160 160">
+        <!-- Arms -->
+        <line x1="80" y1="80" x2="36" y2="36" stroke="rgba(0,170,255,0.5)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="80" y1="80" x2="124" y2="36" stroke="rgba(0,170,255,0.5)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="80" y1="80" x2="36" y2="124" stroke="rgba(0,170,255,0.5)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="80" y1="80" x2="124" y2="124" stroke="rgba(0,170,255,0.5)" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- FC body -->
+        <rect x="65" y="65" width="30" height="30" rx="5" fill="rgba(0,170,255,0.1)" stroke="rgba(0,170,255,0.5)" stroke-width="1.5"/>
+        <text x="80" y="84" text-anchor="middle" font-family="Orbitron" font-size="6.5" fill="rgba(0,255,136,0.9)">FC</text>
+        <!-- Motors + spinning props -->
+        <circle cx="36" cy="36" r="16" fill="rgba(0,255,136,0.04)" stroke="rgba(0,255,136,0.45)" stroke-width="1.5"/>
+        <g class="pt1">
+          <ellipse cx="36" cy="36" rx="13" ry="3.5" fill="none" stroke="rgba(0,255,136,0.65)" stroke-width="2" stroke-linecap="round"/>
+        </g>
+        <circle cx="124" cy="36" r="16" fill="rgba(0,255,136,0.04)" stroke="rgba(0,255,136,0.45)" stroke-width="1.5"/>
+        <g class="pt2">
+          <ellipse cx="124" cy="36" rx="13" ry="3.5" fill="none" stroke="rgba(0,255,136,0.65)" stroke-width="2" stroke-linecap="round"/>
+        </g>
+        <circle cx="36" cy="124" r="16" fill="rgba(0,255,136,0.04)" stroke="rgba(0,255,136,0.45)" stroke-width="1.5"/>
+        <g class="pt3">
+          <ellipse cx="36" cy="124" rx="13" ry="3.5" fill="none" stroke="rgba(0,255,136,0.65)" stroke-width="2" stroke-linecap="round"/>
+        </g>
+        <circle cx="124" cy="124" r="16" fill="rgba(0,255,136,0.04)" stroke="rgba(0,255,136,0.45)" stroke-width="1.5"/>
+        <g class="pt4">
+          <ellipse cx="124" cy="124" rx="13" ry="3.5" fill="none" stroke="rgba(0,255,136,0.65)" stroke-width="2" stroke-linecap="round"/>
+        </g>
+        <!-- Center pulse -->
+        <circle cx="80" cy="80" r="3.5" fill="var(--green)" opacity="0.85">
+          <animate attributeName="r" values="3.5;5.5;3.5" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.85;0.35;0.85" dur="2s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+    </div>
+  </div>
+
+  <div class="status-wrap">
+    <div class="status-text" id="statusText">กำลังปลุกระบบ...</div>
+    <div class="prog-outer">
+      <div class="prog-fill" id="progFill"></div>
+    </div>
+    <div class="boot-log" id="bootLog"></div>
+  </div>
+
+  <div class="metrics-row">
+    <div class="metric"><span class="mv" id="pingMs">—</span><span class="ml">PING</span></div>
+    <div class="metric"><span class="mv" id="attNum">1</span><span class="ml">ATTEMPT</span></div>
+    <div class="metric"><span class="mv" id="elapsed">0s</span><span class="ml">ELAPSED</span></div>
+  </div>
+
 </div>
 
 <script>
 const steps = [
-  "กำลังเชื่อมต่อเซิร์ฟเวอร์...",
-  "กำลังโหลดระบบวิเคราะห์...",
-  "กำลังเตรียมอินเทอร์เฟซ...",
-  "ใกล้เสร็จแล้ว..."
+  { text:"กำลังปลุก Physics Engine v5...",      pct:8,  cls:"info", log:"[INIT] Physics engine v5.0 loading..." },
+  { text:"กำลังเชื่อมต่อเซิร์ฟเวอร์...",         pct:18, cls:"info", log:"[NET]  Connecting to Render.com..." },
+  { text:"กำลังโหลด Rule Engine...",               pct:30, cls:"ok",   log:"[OK]   Rule engine: 47 rules loaded" },
+  { text:"กำลังโหลด Preset Library...",            pct:43, cls:"ok",   log:"[OK]   Presets: 10 classes · 5 styles" },
+  { text:"กำลังตรวจสอบ PID Database...",           pct:55, cls:"ok",   log:"[OK]   PID DB: BF4.3/4.4/4.5" },
+  { text:"กำลังเตรียม Filter Calculator...",       pct:67, cls:"ok",   log:"[OK]   RPM filter calc active" },
+  { text:"กำลังเตรียม Analyzer Tools...",          pct:79, cls:"info", log:"[INIT] 22 tools · CLI · Blackbox" },
+  { text:"กำลัง handshake backend...",             pct:90, cls:"warn", log:"[WAIT] Awaiting server response..." },
+  { text:"ใกล้เสร็จแล้ว...",                       pct:96, cls:"ok",   log:"[PING] Server check in progress..." },
 ];
 
-let stepIndex = 0;
-setInterval(() => {
-  document.getElementById("status").innerText =
-    steps[stepIndex % steps.length];
-  stepIndex++;
-}, 1200);
+let si = 0, att = 1;
+const t0 = Date.now();
+const logEl = document.getElementById('bootLog');
+const logLines = [];
 
-// 🔥 สำคัญ: เช็ค backend แบบวนซ้ำ (แก้ cold start)
-function checkBackend(){
-  fetch("/ping", { cache: "no-store" })
-    .then(res => {
-      if (res.ok) {
-        window.location.replace("/app");
-      }
-    })
-    .catch(() => {});
+function addLog(text, cls) {
+  const el = document.createElement('span');
+  el.className = 'log-line ' + (cls||'');
+  el.textContent = text;
+  logEl.appendChild(el);
+  logLines.push(el);
+  if (logLines.length > 4) { logLines[0].remove(); logLines.shift(); }
 }
 
-// เช็คทุก 1.5 วิ
+function setProg(pct) {
+  document.getElementById('progFill').style.width = pct + '%';
+}
+
+const stepTimer = setInterval(() => {
+  if (si >= steps.length) { si = steps.length - 1; return; }
+  const s = steps[si++];
+  document.getElementById('statusText').textContent = s.text;
+  setProg(s.pct);
+  addLog(s.log, s.cls);
+}, 1000);
+
+setInterval(() => {
+  const elapsed = Math.round((Date.now() - t0) / 1000);
+  document.getElementById('elapsed').textContent = elapsed + 's';
+  document.getElementById('attNum').textContent = att;
+  document.getElementById('hudBL').textContent = 'FPVCTL v5.0 ▶ ATTEMPT #' + att + ' · ' + elapsed + 's';
+}, 500);
+
+function checkBackend() {
+  const pt = Date.now();
+  fetch("/ping", { cache:"no-store" })
+    .then(res => {
+      const ping = Date.now() - pt;
+      document.getElementById('pingMs').textContent = ping + 'ms';
+      if (res.ok) {
+        addLog('[OK]   Server alive · ping ' + ping + 'ms · redirecting...', 'ok');
+        setProg(100);
+        document.getElementById('statusText').textContent = '✓ พร้อมแล้ว — เข้าสู่ระบบ...';
+        clearInterval(stepTimer);
+        setTimeout(() => window.location.replace("/app"), 600);
+      } else { att++; addLog('[ERR]  HTTP ' + res.status + ' · retry #' + att, 'warn'); }
+    })
+    .catch(() => { att++; addLog('[WAIT] No response · retry #' + att, 'warn'); });
+}
+
 setInterval(checkBackend, 1500);
+checkBackend();
 </script>
 </body>
 </html>
