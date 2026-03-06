@@ -263,7 +263,6 @@ def index():
         def safe_int(x, default=0):
             try: return int(x)
             except Exception: return default
-
         # ── Read inputs ───────────────────────────────────────────────
         preset_key  = request.form.get("preset", "").strip()
         size        = safe_float(request.form.get("size"), 5.0)
@@ -277,6 +276,10 @@ def index():
         battery_mAh       = safe_int(request.form.get("battery_mAh"), None)
         motor_count       = safe_int(request.form.get("motor_count"), 4)
         motor_kv          = safe_int(request.form.get("motor_kv"), None)
+
+        # FIX v5.1: clamp values to prevent div/0 or illegal physics
+        weight      = max(10.0, weight)
+        motor_count = max(1, motor_count)
 
         payload_g = None
         try:
@@ -526,6 +529,9 @@ def _recommend_motor_prop(form):
         pitch       = float(form.get('pitch')      or 4.0)
         motor_count = int(form.get('motor_count')  or 4)
         style       = _normalize_style(form.get('style') or 'freestyle')
+        # FIX v5.1: clamp weight_g and motor_count to safe minimums
+        weight_g    = max(10.0, weight_g)
+        motor_count = max(1, motor_count)
     except Exception:
         size = 5.0; weight_g = 900; battery = "4S"; battery_mAh = 1500
         prop_size = 5.0; blades = 3; pitch = 4.0; motor_count = 4; style = 'freestyle'
