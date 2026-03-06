@@ -10,6 +10,7 @@
 {% include "partials/og_tags.html" %}
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=JetBrains+Mono:wght@300;400;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -942,7 +943,13 @@ label { font-family:var(--font-d); font-size:8px; letter-spacing:.1em; color:var
 .radar-leg-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
 
 /* Preset selector tabs */
-.ptab-row { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:10px; }
+.ptab-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px; margin-bottom: 10px;
+}
+@media(max-width:500px){ .ptab-row{ grid-template-columns:repeat(3,1fr); } }
+@media(max-width:360px){ .ptab-row{ grid-template-columns:repeat(2,1fr); } }
 .ptab {
   font-family:var(--font-d); font-size:8px; letter-spacing:.08em;
   padding:6px 12px; border-radius:5px;
@@ -970,7 +977,12 @@ label { font-family:var(--font-d); font-size:8px; letter-spacing:.1em; color:var
 .ptip { display:flex; gap:8px; padding:5px 0; border-bottom:1px solid var(--border); font-size:11px; color:var(--muted2); line-height:1.5; }
 .ptip:last-child { border:none; }
 .ptip-icon { flex-shrink:0; }
-.pic-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:8px 0; }
+.pic-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px; margin-bottom: 10px;
+}
+@media(max-width:480px){ .pic-stats{ grid-template-columns:repeat(2,1fr); } }
 .pf-grid2c { display:grid; grid-template-columns:1fr; gap:8px; }
 #cliOutput {
   font-family:var(--font-m); font-size:9.5px; color:var(--green);
@@ -1192,6 +1204,181 @@ input[type=number]:focus, input[type=text]:focus, select:focus {
   box-shadow:0 8px 32px rgba(0,255,136,0.4), 0 0 0 1px rgba(0,255,136,0.3);
 }
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ════════════════════════════════════════════════════════════════
+   v5.1 VISUAL ENHANCEMENTS — lightweight, GPU-only
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── HERO GRADIENT TEXT ──────────────────────────────────────── */
+.hero-title .accent {
+  background: linear-gradient(135deg, #00ff88, #00e5ff);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 10px rgba(0,255,136,0.5));
+}
+.hero-title .accent-b {
+  background: linear-gradient(135deg, #00aaff, #7060ff);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 10px rgba(0,170,255,0.4));
+}
+
+/* ── MISSION CARD — HOLO ANIMATED BORDER ────────────────────── */
+.mission-card {
+  background: linear-gradient(160deg, rgba(8,18,32,0.97), rgba(6,14,28,0.99));
+  border: 1px solid rgba(0,255,136,0.15);
+  box-shadow: 0 0 0 1px rgba(0,255,136,0.04),
+              0 20px 60px rgba(0,0,0,0.5),
+              inset 0 1px 0 rgba(0,255,136,0.10);
+}
+.mission-card::before {
+  content: '';
+  position: absolute; inset: 0; border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg,
+    rgba(0,255,136,0.45) 0%, rgba(0,170,255,0.2) 33%,
+    rgba(160,80,255,0.2) 66%, rgba(0,255,136,0.45) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  background-size: 300% 300%;
+  animation: holoBorder 6s linear infinite;
+  pointer-events: none;
+}
+@keyframes holoBorder {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ── SCAN LINE on mc-header ──────────────────────────────────── */
+.mc-header {
+  background: linear-gradient(90deg, rgba(0,255,136,0.08), rgba(0,170,255,0.03), transparent);
+  position: relative; overflow: hidden;
+}
+.mc-header::after {
+  content: ''; position: absolute; bottom: 0; left: -100%; width: 55%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,255,136,0.8), transparent);
+  animation: scanH 4s ease-in-out infinite;
+}
+@keyframes scanH { 0%{left:-55%} 100%{left:160%} }
+
+/* ── NEON STAT VALUES ────────────────────────────────────────── */
+.qs-stat-val.green { text-shadow: 0 0 18px rgba(0,255,136,0.7), 0 0 36px rgba(0,255,136,0.25); }
+.qs-stat-val.blue  { text-shadow: 0 0 18px rgba(0,170,255,0.7), 0 0 36px rgba(0,170,255,0.25); }
+.qs-stat-val.amber { text-shadow: 0 0 18px rgba(255,183,0,0.7),  0 0 36px rgba(255,183,0,0.25); }
+.qs-stat-val.red   { text-shadow: 0 0 18px rgba(255,68,85,0.7),  0 0 36px rgba(255,68,85,0.25); }
+.qs-stat-val       { text-shadow: 0 0 12px rgba(0,255,136,0.4); }
+
+/* ── TPANEL GLOWING TOP LINE ─────────────────────────────────── */
+.tpanel::before {
+  background: linear-gradient(90deg,
+    transparent 0%, rgba(0,255,136,0.55) 30%,
+    rgba(0,170,255,0.55) 70%, transparent 100%) !important;
+}
+
+/* ── BAR SHIMMER ─────────────────────────────────────────────── */
+.biq-bar-fill, .ic-bar-fill, .ft-bar-fill {
+  position: relative; overflow: hidden;
+}
+.biq-bar-fill::after, .ic-bar-fill::after, .ft-bar-fill::after {
+  content: '';
+  position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent);
+  animation: barShimmer 2.8s ease-in-out infinite;
+}
+@keyframes barShimmer { 0%{left:-60%} 100%{left:160%} }
+.biq-bar-fill { box-shadow: 2px 0 8px rgba(0,255,136,0.3); }
+
+/* ── COUNT-UP ENTRANCE ───────────────────────────────────────── */
+@keyframes countUp {
+  from { opacity:0; transform:translateY(8px); filter:blur(3px); }
+  to   { opacity:1; transform:none; filter:none; }
+}
+.tpanel .qs-stat-val,
+.tpanel .ic-val,
+.biq-score-num {
+  animation: countUp .55s cubic-bezier(.2,.8,.3,1) both;
+}
+
+/* ── SCAN LINE ENHANCED ──────────────────────────────────────── */
+.scan-line {
+  box-shadow: 0 0 18px rgba(0,255,136,0.75), 0 0 50px rgba(0,255,136,0.25) !important;
+  height: 3px !important;
+}
+
+/* ── SCORE RING GLOW ─────────────────────────────────────────── */
+.biq-ring-wrap {
+  filter: drop-shadow(0 0 14px rgba(0,255,136,0.25));
+}
+.biq-score-num {
+  text-shadow: 0 0 28px currentColor, 0 0 56px currentColor;
+}
+
+/* ── INSIGHT CARD TOP GLOW STRIPE ────────────────────────────── */
+.insight-card::before { height: 2px !important; opacity: 1 !important; }
+.insight-card.g::before { background: linear-gradient(90deg,transparent,#00ff88,rgba(0,229,255,0.6),transparent); }
+.insight-card.b::before { background: linear-gradient(90deg,transparent,#00aaff,rgba(100,60,255,0.6),transparent); }
+.insight-card.a::before { background: linear-gradient(90deg,transparent,#ffb700,rgba(255,100,0,0.5),transparent); }
+.insight-card.r::before { background: linear-gradient(90deg,transparent,#ff4455,rgba(255,100,0,0.5),transparent); }
+
+/* ── ANALYZE BUTTON ──────────────────────────────────────────── */
+.btn-analyze {
+  box-shadow: 0 4px 24px rgba(0,255,136,0.32), 0 0 0 1px rgba(0,255,136,0.18),
+              inset 0 1px 0 rgba(255,255,255,0.22) !important;
+  transition: all .25s cubic-bezier(.2,.8,.3,1) !important;
+}
+.btn-analyze:hover {
+  transform: translateY(-2px) scale(1.01) !important;
+  box-shadow: 0 8px 40px rgba(0,255,136,0.52), 0 0 0 1px rgba(0,255,136,0.38),
+              0 0 60px rgba(0,255,136,0.15) !important;
+}
+
+/* ── PRESET TABS UPGRADE ─────────────────────────────────────── */
+.ptab-row { gap: 6px !important; margin-bottom: 12px !important; }
+.ptab {
+  flex: 1; min-width: 0;
+  padding: 8px 6px !important;
+  border-radius: 8px !important;
+  transition: all .2s cubic-bezier(.2,.8,.3,1) !important;
+  position: relative;
+}
+.ptab.active {
+  box-shadow: 0 0 16px rgba(0,255,136,0.18), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+}
+.ptab.active::after {
+  content: ''; position: absolute; bottom: 0; left: 20%; right: 20%; height: 2px;
+  background: var(--green); border-radius: 2px 2px 0 0;
+  box-shadow: 0 0 8px var(--green);
+}
+.ptab:hover:not(.active) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* ── AURORA SUBTLE BG ────────────────────────────────────────── */
+body::after {
+  background:
+    radial-gradient(ellipse 70% 50% at 10% 15%, rgba(0,255,136,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 45% at 90% 85%, rgba(0,170,255,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 35% at 50% 50%, rgba(160,80,255,0.02) 0%, transparent 70%);
+}
+
+/* ── WTM BOX VISUAL ──────────────────────────────────────────── */
+.wtm-box {
+  background: linear-gradient(135deg, rgba(0,255,136,0.04), rgba(0,170,255,0.02));
+  border-left: 3px solid rgba(0,255,136,0.35) !important;
+  box-shadow: inset 0 0 20px rgba(0,255,136,0.02);
+}
+.wtm-box .ok   { text-shadow: 0 0 12px rgba(0,255,136,0.5); }
+.wtm-box .warn { text-shadow: 0 0 12px rgba(255,183,0,0.5); }
+.wtm-box .bad  { text-shadow: 0 0 12px rgba(255,68,85,0.5); }
+
+/* ── PARTICLE BURST for analyze button (CSS keyframes only) ─── */
+@keyframes sparkOut {
+  0%   { transform: translate(0,0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+}
+
 </style>
 </head>
 <body>
@@ -3627,5 +3814,80 @@ function toggleTheme(){
   });
 })();
 </script>
+
+<script>
+/* ── v5.1 JS enhancements — lightweight ── */
+
+/* Counter animation for stat values */
+(function(){
+  var ob = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (!e.isIntersecting) return;
+      var el = e.target;
+      var text = el.textContent.trim();
+      var match = text.match(/^([\d.]+)/);
+      if (!match) return;
+      var target = parseFloat(match[1]);
+      var suffix = text.replace(match[1], '');
+      var isFloat = match[1].includes('.');
+      var start = Date.now(), dur = 900;
+      function step() {
+        var prog = Math.min((Date.now()-start)/dur, 1);
+        var ease = 1 - Math.pow(1 - prog, 3);
+        var val = target * ease;
+        el.textContent = (isFloat ? val.toFixed(1) : Math.round(val)) + suffix;
+        if (prog < 1) requestAnimationFrame(step);
+        else el.textContent = text;
+      }
+      requestAnimationFrame(step);
+      ob.unobserve(el);
+    });
+  }, { threshold: 0.6 });
+  document.querySelectorAll('.qs-stat-val').forEach(function(el){ ob.observe(el); });
+})();
+
+/* Score ring re-animate on load */
+(function(){
+  var ring = document.getElementById('score-ring-circle');
+  if (!ring) return;
+  var finalOffset = ring.getAttribute('stroke-dashoffset');
+  ring.style.strokeDashoffset = '339.3';
+  ring.style.transition = 'none';
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      ring.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(.2,.8,.2,1)';
+      ring.style.strokeDashoffset = finalOffset;
+    });
+  });
+})();
+
+/* Particle burst on ANALYZE button click */
+(function(){
+  var btn = document.querySelector('.btn-analyze');
+  if (!btn) return;
+  btn.addEventListener('click', function(e) {
+    var rect = btn.getBoundingClientRect();
+    var cx = rect.left + rect.width/2, cy = rect.top + rect.height/2;
+    for (var i = 0; i < 10; i++) {
+      var s = document.createElement('div');
+      var angle = (i/10)*Math.PI*2;
+      var dist = 35 + Math.random()*30;
+      var tx = Math.round(Math.cos(angle)*dist);
+      var ty = Math.round(Math.sin(angle)*dist);
+      s.setAttribute('style', [
+        'position:fixed','left:'+cx+'px','top:'+cy+'px',
+        'width:5px','height:5px','border-radius:50%',
+        'background:#00ff88','pointer-events:none','z-index:9999',
+        'box-shadow:0 0 6px #00ff88,0 0 12px rgba(0,255,136,0.6)',
+        '--tx:'+tx+'px','--ty:'+ty+'px',
+        'animation:sparkOut '+(400+Math.random()*200)+'ms ease-out forwards'
+      ].join(';'));
+      document.body.appendChild(s);
+      setTimeout(function(el){ el.remove(); }, 700, s);
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
