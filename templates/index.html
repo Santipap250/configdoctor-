@@ -16,44 +16,67 @@
 
 <style>
 /* ═══════════════════════════════════════════════════════════════
-   MISSION CONTROL v5.0 FULL — APEX DESIGN SYSTEM
-   "Built for pilots who demand precision."
+   OBIX CONFIG DOCTOR v5.0 — COMMAND CONSOLE THEME
+   Deep Space · Neon Accent · High Contrast
 ═══════════════════════════════════════════════════════════════ */
 :root {
-  --bg:       #010407;
-  --bg2:      #020b14;
-  --surface:  #040d1c;
-  --panel:    #061220;
-  --panel2:   #081628;
-  --border:   rgba(0,255,136,0.08);
-  --borderB:  rgba(0,170,255,0.10);
-  --borderA:  rgba(255,183,0,0.10);
-  --text:     #ccdae8;
-  --muted:    #2e4258;
-  --muted2:   #5878a0;
+  /* ── Backgrounds ── */
+  --bg:       #010308;
+  --bg2:      #010b15;
+  --surface:  #030b16;
+  --panel:    #04101e;
+  --panel2:   #061422;
+  --panel3:   #081828;
+
+  /* ── Borders ── */
+  --border:   rgba(0,230,120,0.11);
+  --borderB:  rgba(0,180,255,0.12);
+  --borderA:  rgba(255,185,0,0.12);
+  --borderS:  rgba(255,255,255,0.05);
+
+  /* ── Text ── */
+  --text:     #d6e8f6;
+  --text2:    #9ab8d4;
+  --muted:    #2a3f58;
+  --muted2:   #4e7296;
+
+  /* ── Brand Accents ── */
   --green:    #00ff88;
-  --green2:   #00d46e;
+  --green2:   #00cc6e;
+  --teal:     #00e8d0;
   --blue:     #00aaff;
-  --blue2:    #007acc;
-  --cyan:     #00e5ff;
-  --amber:    #ffb700;
+  --blue2:    #0077cc;
+  --cyan:     #00d4ff;
+  --amber:    #ffbb00;
+  --amber2:   #e09800;
   --red:      #ff3344;
-  --purple:   #a855f7;
+  --purple:   #b060ff;
+  --pink:     #f040a0;
+
+  /* ── Dim fills ── */
   --g-dim:    rgba(0,255,136,0.06);
   --b-dim:    rgba(0,170,255,0.06);
-  --a-dim:    rgba(255,183,0,0.06);
+  --a-dim:    rgba(255,185,0,0.06);
   --r-dim:    rgba(255,51,68,0.06);
-  --glow-g:   0 0 24px rgba(0,255,136,0.35), 0 0 60px rgba(0,255,136,0.10);
-  --glow-b:   0 0 24px rgba(0,170,255,0.35), 0 0 60px rgba(0,170,255,0.10);
-  --glow-a:   0 0 24px rgba(255,183,0,0.35);
-  --glow-r:   0 0 24px rgba(255,51,68,0.35);
-  --glass:    rgba(4,13,28,0.85);
-  --glass2:   rgba(1,4,7,0.92);
+  --p-dim:    rgba(176,96,255,0.06);
+
+  /* ── Glows ── */
+  --glow-g:   0 0 20px rgba(0,255,136,0.4), 0 0 60px rgba(0,255,136,0.12);
+  --glow-b:   0 0 20px rgba(0,170,255,0.4), 0 0 60px rgba(0,170,255,0.12);
+  --glow-a:   0 0 20px rgba(255,185,0,0.38);
+  --glow-r:   0 0 20px rgba(255,51,68,0.38);
+  --glow-p:   0 0 20px rgba(176,96,255,0.35);
+
+  /* ── Misc ── */
+  --glass:    rgba(3,10,22,0.88);
+  --glass2:   rgba(1,3,8,0.94);
   --font-d:   'Orbitron', sans-serif;
   --font-m:   'JetBrains Mono', monospace;
   --font-t:   'Sarabun', sans-serif;
   --r:        10px;
-  --nav-h:    54px;
+  --r2:       14px;
+  --nav-h:    56px;
+  --dock-h:   82px;
 }
 
 /* ─── RESET ──────────────────────────────────────────────────── */
@@ -130,44 +153,67 @@ body::after {
 .top-bar {
   position:fixed; top:0; left:0; right:0;
   height:var(--nav-h); z-index:200;
-  background:rgba(1,4,7,0.92);
-  backdrop-filter:blur(24px) saturate(1.5);
-  border-bottom:1px solid rgba(0,255,136,0.08);
-  display:flex; align-items:center; padding:0 16px; gap:12px;
+  background:rgba(1,3,8,0.96);
+  backdrop-filter:blur(24px) saturate(1.6);
+  border-bottom:1.5px solid rgba(0,255,136,0.09);
+  display:flex; align-items:center; padding:0 18px; gap:0;
 }
 .top-bar::after {
   content:'';
   position:absolute; bottom:0; left:0; right:0; height:1px;
   background:linear-gradient(90deg,
     transparent 0%,
-    rgba(0,255,136,0.5) 20%,
-    rgba(0,170,255,0.4) 50%,
-    rgba(0,255,136,0.5) 80%,
+    rgba(0,255,136,0.55) 20%,
+    rgba(0,212,255,0.45) 50%,
+    rgba(0,255,136,0.55) 80%,
     transparent 100%
   );
   background-size:200% 100%;
-  animation:topBarShimmer 6s linear infinite;
+  animation:topBarShimmer 7s linear infinite;
 }
 @keyframes topBarShimmer { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
-.top-left  { display:flex; align-items:center; gap:10px; }
-.tb-right  { margin-left:auto; display:flex; align-items:center; gap:10px; }
+.top-left  { display:flex; align-items:center; gap:0; flex:1; }
+.tb-logo-link { display:flex; align-items:center; flex-shrink:0; }
+.tb-sep {
+  width:1.5px; height:22px; background:rgba(0,255,136,0.12);
+  margin:0 16px; flex-shrink:0;
+}
+/* Inline nav links */
+.tb-nav { display:flex; align-items:center; gap:2px; overflow-x:auto; }
+.tb-nav::-webkit-scrollbar { display:none; }
+.tb-nav-link {
+  font-family:var(--font-d); font-size:8px; letter-spacing:.1em;
+  color:var(--muted2); padding:6px 12px; border-radius:7px;
+  text-decoration:none; white-space:nowrap;
+  border:1.5px solid transparent;
+  transition:all .18s; display:flex; align-items:center; gap:5px;
+}
+.tb-nav-link:hover {
+  color:var(--text2); background:rgba(0,255,136,0.04);
+  border-color:rgba(0,255,136,0.1);
+}
+.tb-nav-link.active {
+  color:var(--green); background:rgba(0,255,136,0.07);
+  border-color:rgba(0,255,136,0.2);
+}
+.tb-right  { margin-left:auto; display:flex; align-items:center; gap:9px; flex-shrink:0; }
 .tb-version {
   font-family:var(--font-d); font-size:8px; letter-spacing:.18em;
-  color:var(--green); padding:4px 12px; border-radius:4px;
-  border:1px solid rgba(0,255,136,0.25); background:rgba(0,255,136,0.06);
-  position:relative; overflow:hidden;
+  color:var(--green); padding:5px 13px; border-radius:5px;
+  border:1.5px solid rgba(0,255,136,0.25); background:rgba(0,255,136,0.06);
+  position:relative; overflow:hidden; flex-shrink:0;
 }
 .tb-version::before {
   content:'';
   position:absolute; top:0; left:-100%; width:60%; height:100%;
   background:linear-gradient(90deg,transparent,rgba(0,255,136,0.2),transparent);
-  animation:versionShimmer 3.5s ease-in-out infinite;
+  animation:versionShimmer 4s ease-in-out infinite;
 }
 @keyframes versionShimmer { 0%,100%{left:-100%} 50%{left:150%} }
-.logo { height:32px; display:block; filter:drop-shadow(0 0 10px rgba(0,255,136,0.3)); transition:filter .3s; }
-.logo:hover { filter:drop-shadow(0 0 18px rgba(0,255,136,0.55)); }
+.logo { height:30px; display:block; filter:drop-shadow(0 0 8px rgba(0,255,136,0.3)); transition:filter .3s; }
+.logo:hover { filter:drop-shadow(0 0 16px rgba(0,255,136,0.55)); }
 .toggle-theme {
-  background:none; border:1px solid rgba(0,255,136,0.15); border-radius:6px;
+  background:none; border:1.5px solid rgba(0,255,136,0.15); border-radius:7px;
   color:var(--text); padding:5px 9px; cursor:pointer; font-size:14px;
   transition:all .2s;
 }
@@ -194,71 +240,6 @@ body::after {
 .nav-trigger[aria-expanded="true"] .nt-lbl-menu { display:none; }
 .nav-trigger[aria-expanded="true"] .nt-lbl-close { display:inline; }
 
-/* ─── OVERLAY & DRAWER (keep from style.css) ─────────────────── */
-.overlay {
-  position:fixed; inset:0; z-index:300;
-  background:rgba(2,5,9,0.75); opacity:0; pointer-events:none;
-  transition:opacity .3s;
-}
-.overlay.open { opacity:1; pointer-events:auto; }
-.drawer {
-  position:fixed; top:0; left:0; bottom:0; z-index:400;
-  width:min(320px, 92vw);
-  background:rgba(4,11,22,0.97); backdrop-filter:blur(24px);
-  border-right:1px solid var(--border);
-  transform:translateX(-100%); transition:transform .3s cubic-bezier(.4,0,.2,1);
-  display:flex; flex-direction:column; overflow-y:auto;
-}
-.drawer.open { transform:translateX(0); }
-.drawer-header {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:14px 16px; border-bottom:1px solid var(--border);
-  flex-shrink:0;
-}
-.drawer-brand { display:flex; align-items:center; gap:10px; }
-.drawer-brand-icon {
-  width:34px; height:34px; border-radius:8px;
-  background:linear-gradient(135deg, var(--green), var(--blue));
-  display:flex; align-items:center; justify-content:center; font-size:16px;
-}
-.drawer-brand-name { font-family:var(--font-d); font-size:11px; font-weight:700; color:var(--green); }
-.drawer-brand-sub  { font-family:var(--font-m); font-size:9px; color:var(--muted2); margin-top:1px; }
-.drawer-close {
-  background:none; border:1px solid rgba(255,68,85,0.15); border-radius:6px;
-  color:var(--muted2); padding:6px 10px; cursor:pointer; font-size:12px; transition:all .2s;
-}
-.drawer-close:hover { color:var(--red); border-color:rgba(255,68,85,0.4); }
-.drawer-nav { flex:1; padding:10px 10px; }
-.drawer-group-label {
-  font-family:var(--font-d); font-size:8px; letter-spacing:.18em; color:var(--muted);
-  padding:10px 8px 6px; text-transform:uppercase;
-}
-.drawer-divider { height:1px; background:var(--border); margin:6px 8px; }
-.drawer-link {
-  display:flex; align-items:center; gap:10px;
-  padding:9px 10px; border-radius:7px; text-decoration:none;
-  color:var(--muted2); transition:all .18s; margin-bottom:2px;
-}
-.drawer-link:hover { background:rgba(0,255,136,0.05); color:var(--text); }
-.drawer-link.active { background:rgba(0,255,136,0.08); color:var(--green); border:1px solid rgba(0,255,136,0.15); }
-.dl-icon-wrap { width:26px; height:26px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:13px; background:rgba(255,255,255,0.04); flex-shrink:0; }
-.dl-icon-wrap.green { background:rgba(0,255,136,0.1); }
-.dl-icon-wrap.blue  { background:rgba(0,170,255,0.1); }
-.dl-icon-wrap.gold  { background:rgba(255,183,0,0.1); }
-.dl-body { flex:1; }
-.dl-title { font-size:12px; font-weight:600; display:block; }
-.dl-meta  { font-size:10px; color:var(--muted2); display:block; }
-.dl-pill {
-  font-family:var(--font-d); font-size:7px; letter-spacing:.08em;
-  padding:2px 7px; border-radius:10px; background:rgba(0,255,136,0.08);
-  color:var(--muted2); border:1px solid rgba(0,255,136,0.1); white-space:nowrap;
-}
-.dl-pill.new { background:rgba(0,255,136,0.12); color:var(--green); border-color:rgba(0,255,136,0.25); }
-.drawer-footer {
-  padding:14px 16px; border-top:1px solid var(--border);
-  font-family:var(--font-m); font-size:9px; color:var(--muted); flex-shrink:0;
-}
-.drawer-footer-ver { color:var(--green); }
 
 /* ─── PAGE STRUCTURE ─────────────────────────────────────────── */
 .page-wrap {
@@ -386,11 +367,11 @@ body::after {
 }
 @media(min-width:900px){ .live-hud-bar::before { display:block; } }
 .hud-cell {
-  padding:14px 18px; border-right:1px solid rgba(0,255,136,0.04);
-  display:flex; flex-direction:column; gap:2px;
+  padding:16px 20px; border-right:1.5px solid rgba(0,255,136,0.05);
+  display:flex; flex-direction:column; gap:3px;
   position:relative; overflow:hidden; transition:background .3s;
 }
-.hud-cell:hover { background:rgba(0,255,136,0.018); }
+.hud-cell:hover { background:rgba(0,255,136,0.02); }
 .hud-cell:last-child { border-right:none; }
 /* Top accent line per cell */
 .hud-cell::before {
@@ -444,8 +425,8 @@ body::after {
 .mission-card {
   position:sticky; top:var(--nav-h);
   max-height:calc(100vh - var(--nav-h));
-  overflow-y:auto; border-right:1px solid var(--border);
-  background:rgba(4,10,22,0.85);
+  overflow-y:auto; border-right:1.5px solid var(--border);
+  background:rgba(3,9,20,0.88);
 }
 .mission-card::-webkit-scrollbar { width:3px; }
 .mission-card::-webkit-scrollbar-thumb { background:rgba(0,255,136,0.15); border-radius:3px; }
@@ -769,7 +750,7 @@ label { font-family:var(--font-d); font-size:8px; letter-spacing:.1em; color:var
 
 /* TPANEL — result panels */
 .tpanel {
-  background:rgba(4,11,22,0.92); border:1px solid rgba(0,255,136,0.08);
+  background:rgba(3,10,20,0.94); border:1.5px solid rgba(0,255,136,0.08);
   border-radius:12px; overflow:hidden;
   animation:fadeUp .45s ease both;
   position:relative; transition:border-color .3s, box-shadow .3s;
@@ -779,8 +760,8 @@ label { font-family:var(--font-d); font-size:8px; letter-spacing:.1em; color:var
   background:linear-gradient(90deg, var(--green), var(--blue));
   opacity:0; transition:opacity .3s;
 }
-.tpanel:hover { border-color:rgba(0,255,136,0.16); box-shadow:0 8px 40px rgba(0,0,0,0.5); }
-.tpanel:hover::before { opacity:.5; }
+.tpanel:hover { border-color:rgba(0,255,136,0.18); box-shadow:0 8px 40px rgba(0,0,0,0.55); }
+.tpanel:hover::before { opacity:.55; }
 @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
 .tpanel:nth-child(2){animation-delay:.07s}
 .tpanel:nth-child(3){animation-delay:.13s}
@@ -1065,24 +1046,139 @@ label { font-family:var(--font-d); font-size:8px; letter-spacing:.1em; color:var
   border-radius:2px; box-shadow:0 0 8px rgba(255,255,255,0.7);
 }
 
-/* ─── V5 STATUS RIBBON ────────────────────────────────────────── */
-.v5-status-ribbon {
-  display:flex; align-items:center; gap:12px; overflow:hidden;
-  padding:8px 20px;
-  background:rgba(0,255,136,0.02);
-  border-bottom:1px solid rgba(0,255,136,0.06);
-  white-space:nowrap;
+/* ─── TOOL DOCK — replaces drawer & status ribbon ────────────── */
+.tool-dock {
+  background:rgba(1,6,14,0.97);
+  border-bottom:1.5px solid rgba(0,255,136,0.1);
+  position:relative;
 }
-.vsrib-item { display:flex; align-items:center; gap:6px; flex-shrink:0; }
-.vsrib-dot {
-  width:5px; height:5px; border-radius:50%; flex-shrink:0;
-  animation:pulse 2s ease-in-out infinite;
+.tool-dock::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,
+    transparent 0%,
+    rgba(0,255,136,0.5) 20%,
+    rgba(0,212,255,0.4) 50%,
+    rgba(0,255,136,0.5) 80%,
+    transparent 100%
+  );
+  background-size:200% 100%;
+  animation:dockTopLine 8s linear infinite;
 }
-.vsrib-dot.g { background:var(--green); box-shadow:0 0 6px var(--green); }
-.vsrib-dot.b { background:var(--blue);  box-shadow:0 0 6px var(--blue);  animation-delay:.4s; }
-.vsrib-dot.a { background:var(--amber); box-shadow:0 0 6px var(--amber); animation-delay:.8s; }
-.vsrib-lbl { font-family:var(--font-d); font-size:7px; letter-spacing:.16em; color:var(--muted2); }
-.vsrib-sep { color:var(--muted); font-size:10px; flex-shrink:0; }
+@keyframes dockTopLine { 0%{background-position:100%} 100%{background-position:-100%} }
+
+/* Category tab bar */
+.dock-tabs {
+  display:flex; align-items:center; gap:2px;
+  padding:8px 16px 0;
+  overflow-x:auto;
+}
+.dock-tabs::-webkit-scrollbar { display:none; }
+
+.dock-tab {
+  font-family:var(--font-d); font-size:7.5px; letter-spacing:.15em;
+  color:var(--muted2); padding:5px 13px 7px; border-radius:6px 6px 0 0;
+  cursor:pointer; white-space:nowrap;
+  border:1.5px solid transparent; border-bottom:none;
+  background:transparent; transition:all .18s;
+  position:relative;
+}
+.dock-tab:hover { color:var(--text2); background:rgba(0,255,136,0.03); }
+.dock-tab.active {
+  color:var(--green); background:rgba(0,255,136,0.06);
+  border-color:rgba(0,255,136,0.18);
+}
+.dock-tab.active::after {
+  content:''; position:absolute; bottom:-1px; left:0; right:0; height:1.5px;
+  background:var(--bg);
+}
+.dock-tab-dot {
+  display:inline-block; width:5px; height:5px; border-radius:50%;
+  margin-right:5px; vertical-align:middle; margin-top:-1px;
+}
+.dock-tab-dot.g { background:var(--green); box-shadow:0 0 6px var(--green); }
+.dock-tab-dot.b { background:var(--blue);  box-shadow:0 0 6px var(--blue); }
+.dock-tab-dot.a { background:var(--amber); box-shadow:0 0 6px var(--amber); }
+.dock-tab-dot.p { background:var(--purple);box-shadow:0 0 6px var(--purple); }
+.dock-tab-dot.r { background:var(--red);   box-shadow:0 0 6px var(--red); }
+.dock-tab-dot.t { background:var(--teal);  box-shadow:0 0 6px var(--teal); }
+
+/* Tool chips row */
+.dock-tools {
+  display:flex; gap:7px;
+  padding:7px 16px 10px;
+  overflow-x:auto;
+  align-items:center;
+  min-height:50px;
+}
+.dock-tools::-webkit-scrollbar { height:2px; }
+.dock-tools::-webkit-scrollbar-thumb { background:rgba(0,255,136,0.15); border-radius:2px; }
+
+/* Each tool chip */
+.dtool {
+  display:flex; align-items:center; gap:6px;
+  padding:6px 12px 6px 9px;
+  background:rgba(4,14,28,0.9);
+  border:1.5px solid rgba(255,255,255,0.06);
+  border-radius:8px; cursor:pointer; text-decoration:none;
+  white-space:nowrap; flex-shrink:0;
+  transition:all .18s cubic-bezier(.4,0,.2,1);
+  position:relative; overflow:hidden;
+}
+.dtool::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  opacity:0; transition:opacity .18s;
+}
+.dtool:hover {
+  transform:translateY(-2px);
+  border-color:rgba(0,255,136,0.3);
+  background:rgba(0,255,136,0.04);
+  box-shadow:0 6px 20px rgba(0,0,0,0.5), 0 0 14px rgba(0,255,136,0.08);
+}
+.dtool:hover::before { opacity:1; }
+
+/* Color variants */
+.dtool.g::before { background:linear-gradient(90deg,var(--green),var(--teal)); }
+.dtool.b::before { background:linear-gradient(90deg,var(--blue),var(--cyan)); }
+.dtool.a::before { background:linear-gradient(90deg,var(--amber),var(--red)); }
+.dtool.p::before { background:linear-gradient(90deg,var(--purple),var(--blue)); }
+.dtool.r::before { background:linear-gradient(90deg,var(--red),var(--pink)); }
+.dtool.t::before { background:linear-gradient(90deg,var(--teal),var(--green)); }
+.dtool.g:hover { border-color:rgba(0,255,136,0.32); background:rgba(0,255,136,0.05); }
+.dtool.b:hover { border-color:rgba(0,170,255,0.32); background:rgba(0,170,255,0.05); }
+.dtool.a:hover { border-color:rgba(255,185,0,0.32);  background:rgba(255,185,0,0.05); }
+.dtool.p:hover { border-color:rgba(176,96,255,0.32); background:rgba(176,96,255,0.05); box-shadow:0 6px 20px rgba(0,0,0,0.5), 0 0 14px rgba(176,96,255,0.1); }
+.dtool.r:hover { border-color:rgba(255,51,68,0.32);  background:rgba(255,51,68,0.05); }
+.dtool.t:hover { border-color:rgba(0,232,208,0.32);  background:rgba(0,232,208,0.05); }
+
+.dtool-icon {
+  font-size:14px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  width:22px; height:22px;
+}
+.dtool-label {
+  font-family:var(--font-d); font-size:8px; letter-spacing:.07em;
+  color:var(--text2); transition:color .18s; line-height:1;
+}
+.dtool:hover .dtool-label { color:var(--text); }
+.dtool.g:hover .dtool-label { color:var(--green); }
+.dtool.b:hover .dtool-label { color:var(--blue); }
+.dtool.a:hover .dtool-label { color:var(--amber); }
+.dtool.p:hover .dtool-label { color:var(--purple); }
+.dtool.r:hover .dtool-label { color:var(--red); }
+.dtool.t:hover .dtool-label { color:var(--teal); }
+
+.dtool-badge {
+  font-family:var(--font-d); font-size:6px; letter-spacing:.06em;
+  padding:2px 6px; border-radius:4px;
+  background:rgba(0,255,136,0.1); color:var(--green);
+  border:1px solid rgba(0,255,136,0.2); flex-shrink:0; line-height:1.4;
+}
+.dtool-badge.hot { background:rgba(255,51,68,0.12); color:var(--red); border-color:rgba(255,51,68,0.25); }
+.dtool-badge.v5  { background:rgba(176,96,255,0.12); color:var(--purple); border-color:rgba(176,96,255,0.25); }
+
+/* hidden state for filter */
+.dtool[data-cat].hidden { display:none; }
 
 /* ─── INSIGHT CARDS – UPGRADED ───────────────────────────────── */
 .insight-card {
@@ -1243,702 +1339,24 @@ input[type=number]:focus, input[type=text]:focus, select:focus {
 <!-- ── TOP BAR ────────────────────────────────── -->
 <div class="top-bar">
   <div class="top-left">
-    <button id="hamburgerBtn" class="nav-trigger" aria-label="เปิดเมนู" aria-expanded="false">
-      <!-- Scan sweep -->
-      <span class="nt-scan" aria-hidden="true"></span>
-
-      <!-- Reticle icon -->
-      <span class="nt-icon" aria-hidden="true">
-        <svg class="nt-svg" viewBox="0 0 22 22" fill="none">
-          <!-- Corner L-brackets -->
-          <path class="nt-tl" d="M3 8 L3 3 L8 3"/>
-          <path class="nt-tr" d="M14 3 L19 3 L19 8"/>
-          <path class="nt-bl" d="M3 14 L3 19 L8 19"/>
-          <path class="nt-br" d="M14 19 L19 19 L19 14"/>
-          <!-- Hamburger lines -->
-          <line class="nt-l1" x1="5.5" y1="8"  x2="16.5" y2="8"/>
-          <line class="nt-l2" x1="5.5" y1="11" x2="16.5" y2="11"/>
-          <line class="nt-l3" x1="5.5" y1="14" x2="16.5" y2="14"/>
-          <!-- X lines -->
-          <line class="nt-x1" x1="6" y1="6"  x2="16" y2="16"/>
-          <line class="nt-x2" x1="16" y1="6" x2="6"  y2="16"/>
-        </svg>
-      </span>
-
-      <!-- Label: MENU ↔ CLOSE -->
-      <span class="nt-label" aria-hidden="true">
-        <span class="nt-lbl-menu">MENU</span>
-        <span class="nt-lbl-close">CLOSE</span>
-      </span>
-    </button>
-    <a href="/landing">
+    <a href="/landing" class="tb-logo-link">
       <img src="{{ url_for('static', filename='img/obix-logo.png') }}" class="logo" alt="OBIXConfig Doctor">
     </a>
+    <span class="tb-sep"></span>
+    <nav class="tb-nav" aria-label="Quick nav">
+      <a class="tb-nav-link active" href="/app">🏠 Analyzer</a>
+      <a class="tb-nav-link" href="/cli_surgeon">🩺 CLI</a>
+      <a class="tb-nav-link" href="/blackbox">📊 Blackbox</a>
+      <a class="tb-nav-link" href="/bf-wizard">⚡ Wizard</a>
+    </nav>
   </div>
   <div class="tb-right">
-    <button class="tb-qa-btn" onclick="openQA()" title="เปิด Quick Access Tools">
-      <span style="font-size:14px;">⚡</span>
-      <span style="font-family:var(--font-d);font-size:8px;letter-spacing:.12em;">TOOLS</span>
-    </button>
-    <span class="tb-version">v5.0 FULL</span>
+    <span class="tb-version">v5.0</span>
     <button class="toggle-theme" onclick="toggleTheme()" title="สลับธีม">🌗</button>
   </div>
 </div>
 
-<!-- ── OVERLAY ────────────────────────────────── -->
-<div id="overlay" class="overlay" tabindex="-1" aria-hidden="true"></div>
 
-<!-- ════════════════════════════════════════════════════════════
-     QUICK ACCESS TOOLS PANEL — FPV Style Popup
-════════════════════════════════════════════════════════════ -->
-
-<style>
-/* ── QUICK ACCESS BUTTON (floating bottom-right) ── */
-.qa-fab {
-  position: fixed; bottom: 28px; right: 28px; z-index: 500;
-  width: 54px; height: 54px; border-radius: 14px;
-  background: linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,170,255,0.10));
-  border: 1px solid rgba(0,255,136,0.4);
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  font-size: 22px;
-  box-shadow: 0 0 30px rgba(0,255,136,0.2), 0 8px 32px rgba(0,0,0,0.5);
-  transition: all .25s cubic-bezier(.4,0,.2,1);
-  animation: fabPulse 3s ease-in-out infinite;
-}
-.qa-fab:hover {
-  transform: translateY(-3px) scale(1.06);
-  border-color: rgba(0,255,136,0.7);
-  box-shadow: 0 0 50px rgba(0,255,136,0.35), 0 12px 40px rgba(0,0,0,0.6);
-}
-@keyframes fabPulse {
-  0%,100%{ box-shadow: 0 0 30px rgba(0,255,136,0.2), 0 8px 32px rgba(0,0,0,0.5); }
-  50%{ box-shadow: 0 0 50px rgba(0,255,136,0.35), 0 8px 32px rgba(0,0,0,0.5); }
-}
-.qa-fab-label {
-  position: absolute; bottom: calc(100% + 8px); right: 0;
-  font-family: var(--font-d); font-size: 7.5px; letter-spacing: .14em;
-  color: var(--green); white-space: nowrap;
-  background: rgba(1,4,7,0.9); border: 1px solid rgba(0,255,136,0.2);
-  padding: 4px 10px; border-radius: 5px;
-  opacity: 0; transition: opacity .2s; pointer-events: none;
-}
-.qa-fab:hover .qa-fab-label { opacity: 1; }
-
-/* ── QUICK ACCESS OVERLAY ── */
-.qa-overlay {
-  position: fixed; inset: 0; z-index: 600;
-  background: rgba(1,3,7,0.82);
-  backdrop-filter: blur(16px) saturate(1.4);
-  opacity: 0; pointer-events: none;
-  transition: opacity .35s cubic-bezier(.4,0,.2,1);
-}
-.qa-overlay.open { opacity: 1; pointer-events: auto; }
-
-/* ── QUICK ACCESS PANEL ── */
-.qa-panel {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 700;
-  background: rgba(3,9,20,0.98);
-  border-top: 1px solid rgba(0,255,136,0.12);
-  border-radius: 20px 20px 0 0;
-  box-shadow: 0 -20px 80px rgba(0,0,0,0.7), 0 -4px 24px rgba(0,255,136,0.08);
-  transform: translateY(100%);
-  transition: transform .4s cubic-bezier(.4,0,.2,1);
-  max-height: 82vh; overflow-y: auto;
-}
-.qa-panel::-webkit-scrollbar { width: 3px; }
-.qa-panel::-webkit-scrollbar-thumb { background: rgba(0,255,136,0.15); }
-.qa-panel.open { transform: translateY(0); }
-
-/* Top accent bar */
-.qa-panel::before {
-  content: '';
-  position: sticky; top: 0; left: 0; right: 0; height: 2px; display: block;
-  background: linear-gradient(90deg, transparent 0%, var(--green) 25%, var(--blue) 50%, var(--cyan) 75%, transparent 100%);
-  background-size: 300% 100%;
-  animation: qaPanelBar 5s linear infinite;
-}
-@keyframes qaPanelBar { 0%{background-position:0%} 100%{background-position:300%} }
-
-/* Panel drag handle */
-.qa-handle {
-  width: 40px; height: 4px; border-radius: 2px;
-  background: rgba(255,255,255,0.1);
-  margin: 14px auto 0;
-}
-
-/* ── PANEL HEADER ── */
-.qa-header {
-  display: flex; align-items: center; gap: 14px;
-  padding: 16px 20px 12px;
-  border-bottom: 1px solid rgba(0,255,136,0.07);
-}
-.qa-header-icon {
-  width: 40px; height: 40px; border-radius: 10px;
-  background: linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,170,255,0.10));
-  border: 1px solid rgba(0,255,136,0.25);
-  display: flex; align-items: center; justify-content: center; font-size: 18px;
-  flex-shrink: 0;
-}
-.qa-header-title {
-  font-family: var(--font-d); font-size: 13px; font-weight: 700;
-  letter-spacing: .12em; color: var(--green);
-}
-.qa-header-sub {
-  font-family: var(--font-m); font-size: 9px; color: var(--muted2); margin-top: 2px;
-}
-.qa-close {
-  margin-left: auto;
-  background: none; border: 1px solid rgba(255,68,85,0.18);
-  border-radius: 8px; color: var(--muted2);
-  padding: 7px 12px; cursor: pointer; font-size: 12px;
-  font-family: var(--font-d); letter-spacing: .06em;
-  transition: all .2s;
-}
-.qa-close:hover { color: var(--red); border-color: rgba(255,68,85,0.4); background: rgba(255,68,85,0.05); }
-
-/* ── SECTION LABELS ── */
-.qa-section-label {
-  font-family: var(--font-d); font-size: 8px; letter-spacing: .22em;
-  color: var(--muted); padding: 14px 20px 8px;
-  display: flex; align-items: center; gap: 10px;
-}
-.qa-section-label::after {
-  content: ''; flex: 1; height: 1px; background: rgba(0,255,136,0.07);
-}
-
-/* ── TOOL GRID ── */
-.qa-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 10px;
-  padding: 0 16px 16px;
-}
-
-/* ── TOOL CARD ── */
-.qa-card {
-  position: relative; overflow: hidden;
-  background: rgba(4,11,24,0.92);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 12px; padding: 14px 14px 12px;
-  cursor: pointer; text-decoration: none; color: inherit;
-  transition: all .22s cubic-bezier(.4,0,.2,1);
-  display: flex; flex-direction: column; gap: 8px;
-  animation: cardReveal .5s ease both;
-}
-.qa-card::before {
-  content: ''; position: absolute;
-  top: 0; left: 0; right: 0; height: 2px;
-  opacity: 0; transition: opacity .2s;
-}
-.qa-card:hover {
-  border-color: rgba(0,255,136,0.22);
-  transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 30px rgba(0,255,136,0.06);
-  background: rgba(0,255,136,0.025);
-}
-.qa-card:hover::before { opacity: 1; }
-
-/* Color variants */
-.qa-card.g::before { background: linear-gradient(90deg, var(--green), var(--cyan)); }
-.qa-card.b::before { background: linear-gradient(90deg, var(--blue), var(--cyan)); }
-.qa-card.a::before { background: linear-gradient(90deg, var(--amber), var(--red)); }
-.qa-card.p::before { background: linear-gradient(90deg, var(--purple), var(--blue)); }
-.qa-card.r::before { background: linear-gradient(90deg, var(--red), var(--amber)); }
-.qa-card.g:hover { border-color: rgba(0,255,136,0.22); }
-.qa-card.b:hover { border-color: rgba(0,170,255,0.22); background: rgba(0,170,255,0.025); }
-.qa-card.a:hover { border-color: rgba(255,183,0,0.22); background: rgba(255,183,0,0.025); }
-.qa-card.p:hover { border-color: rgba(168,85,247,0.22); background: rgba(168,85,247,0.025); }
-.qa-card.r:hover { border-color: rgba(255,51,68,0.22); background: rgba(255,51,68,0.025); }
-
-/* Staggered entrance animation */
-.qa-card:nth-child(1)  { animation-delay: .03s; }
-.qa-card:nth-child(2)  { animation-delay: .06s; }
-.qa-card:nth-child(3)  { animation-delay: .09s; }
-.qa-card:nth-child(4)  { animation-delay: .12s; }
-.qa-card:nth-child(5)  { animation-delay: .15s; }
-.qa-card:nth-child(6)  { animation-delay: .18s; }
-.qa-card:nth-child(7)  { animation-delay: .21s; }
-.qa-card:nth-child(8)  { animation-delay: .24s; }
-.qa-card:nth-child(9)  { animation-delay: .27s; }
-.qa-card:nth-child(10) { animation-delay: .30s; }
-.qa-card:nth-child(11) { animation-delay: .33s; }
-.qa-card:nth-child(12) { animation-delay: .36s; }
-@keyframes cardReveal {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.qa-card-icon {
-  width: 36px; height: 36px; border-radius: 9px;
-  display: flex; align-items: center; justify-content: center; font-size: 16px;
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
-  transition: all .2s; flex-shrink: 0;
-}
-.qa-card:hover .qa-card-icon { transform: scale(1.08); }
-.qa-card.g .qa-card-icon { background: rgba(0,255,136,0.08); border-color: rgba(0,255,136,0.15); }
-.qa-card.b .qa-card-icon { background: rgba(0,170,255,0.08); border-color: rgba(0,170,255,0.15); }
-.qa-card.a .qa-card-icon { background: rgba(255,183,0,0.08); border-color: rgba(255,183,0,0.15); }
-.qa-card.p .qa-card-icon { background: rgba(168,85,247,0.08); border-color: rgba(168,85,247,0.15); }
-.qa-card.r .qa-card-icon { background: rgba(255,51,68,0.08);  border-color: rgba(255,51,68,0.15); }
-
-.qa-card-title {
-  font-family: var(--font-d); font-size: 9.5px; font-weight: 700;
-  letter-spacing: .07em; line-height: 1.3;
-  transition: color .2s;
-}
-.qa-card.g .qa-card-title { color: var(--text); }
-.qa-card:hover .qa-card-title { color: var(--green); }
-.qa-card.b:hover .qa-card-title { color: var(--blue); }
-.qa-card.a:hover .qa-card-title { color: var(--amber); }
-.qa-card.p:hover .qa-card-title { color: var(--purple); }
-.qa-card.r:hover .qa-card-title { color: var(--red); }
-
-.qa-card-desc {
-  font-size: 10px; color: var(--muted2); line-height: 1.5;
-}
-.qa-card-badge {
-  position: absolute; top: 10px; right: 10px;
-  font-family: var(--font-d); font-size: 6.5px; letter-spacing: .08em;
-  padding: 2px 7px; border-radius: 8px;
-  background: rgba(0,255,136,0.08); color: var(--muted2);
-  border: 1px solid rgba(0,255,136,0.1);
-}
-.qa-card-badge.new { background: rgba(0,255,136,0.12); color: var(--green); border-color: rgba(0,255,136,0.25); }
-.qa-card-badge.hot { background: rgba(255,51,68,0.12); color: var(--red); border-color: rgba(255,51,68,0.25); }
-.qa-card-badge.v5  { background: rgba(168,85,247,0.12); color: var(--purple); border-color: rgba(168,85,247,0.25); }
-
-.qa-card-arrow {
-  position: absolute; bottom: 11px; right: 12px;
-  font-size: 10px; color: var(--muted);
-  opacity: 0; transform: translateX(-4px);
-  transition: all .2s;
-}
-.qa-card:hover .qa-card-arrow { opacity: 1; transform: translateX(0); }
-
-/* ── BOTTOM SAFE AREA ── */
-.qa-safe { height: 20px; }
-</style>
-
-<!-- Floating Access Button -->
-<button class="qa-fab" id="qaFabBtn" aria-label="Quick Access Tools" onclick="openQA()">
-  ⚡
-  <span class="qa-fab-label">QUICK ACCESS</span>
-</button>
-
-<!-- Background overlay -->
-<div class="qa-overlay" id="qaOverlay" onclick="closeQA()"></div>
-
-<!-- Slide-up panel -->
-<div class="qa-panel" id="qaPanel" role="dialog" aria-modal="true" aria-label="Quick Access Tools">
-  <div class="qa-handle"></div>
-
-  <div class="qa-header">
-    <div class="qa-header-icon">⚡</div>
-    <div>
-      <div class="qa-header-title">QUICK ACCESS — FPV TOOLKIT</div>
-      <div class="qa-header-sub">22 Tools · เลือกเครื่องมือที่ต้องการ · คลิกเพื่อเปิด</div>
-    </div>
-    <button class="qa-close" onclick="closeQA()">✕ CLOSE</button>
-  </div>
-
-  <!-- Section: Core Tools -->
-  <div class="qa-section-label">🔧 เครื่องมือหลัก</div>
-  <div class="qa-grid">
-
-    <a href="/motor-prop" class="qa-card g">
-      <span class="qa-card-badge">tool</span>
-      <div class="qa-card-icon">🧭</div>
-      <div class="qa-card-title">Motor × Prop Recommender</div>
-      <div class="qa-card-desc">แนะนำมอเตอร์และใบพัดตามสเปค size/battery/style</div>
-      <span class="qa-card-arrow">→</span>
-    </a>
-
-    <a href="/cli_surgeon" class="qa-card a">
-      <span class="qa-card-badge">tool</span>
-      <div class="qa-card-icon">🩺</div>
-      <div class="qa-card-title">CLI Surgeon</div>
-      <div class="qa-card-desc">วิเคราะห์ diff all / dump · ตรวจ config ทั้งไฟล์</div>
-      <span class="qa-card-arrow">→</span>
-    </a>
-
-    <a href="/pid-advisor" class="qa-card p">
-      <span class="qa-card-badge new">new</span>
-      <div class="qa-card-icon">💊</div>
-      <div class="qa-card-title">PID Symptom Advisor</div>
-      <div class="qa-card-desc">บอกอาการโดรน → รับคำแนะนำปรับ PID ทันที</div>
-      <span class="qa-card-arrow">→</span>
-    </a>
-
-    <a href="/rpm-filter" class="qa-card g">
-      <span class="qa-card-badge new">new</span>
-      <div class="qa-card-icon">⚙️</div>
-      <div class="qa-card-title">RPM Filter Calculator</div>
-      <div class="qa-card-desc">คำนวณ harmonic + dyn_notch ตาม KV และ pole count</div>
-      <span class="qa-card-arrow">→</span>
-    </a>
-
-    <a href="/rates-visualizer" class="qa-card b">
-      <span class="qa-card-badge new">new</span>
-      <div class="qa-card-icon">📈</div>
-      <div class="qa-card-title">Rates Visualizer</div>
-      <div class="qa-card-desc">กราฟ rates curve real-time · per-axis tuning</div>
-      <span class="qa-card-arrow">→</span>
-    </a>
-
-    <a href="/blackbox" class="qa-card b">
-      <span class="qa-card-badge hot">HOT</span>
-      <div class="qa-card-icon">📊</div>
-      <div class="qa-card-title">Blackbox CSV Analyzer</div>
-      <div class="qa-card-desc">อัพโหลด log · วิเคราะห์ PID score · oscillation</div>
-      <span class="qa-card-arrow">→</span>
-    </a>
-
-  </div>
-
-  <!-- Section: Advanced -->
-  <div class="qa-section-label">⚡ เครื่องมือขั้นสูง</div>
-  <div class="qa-grid">
-
-    <a href="/cli-comparator" class="qa-card a">
-      <span class="qa-card-badge new">new</span>
-      <div class="qa-card-icon">⚖️</div>
-      <div class="qa-card-title">CLI Diff Comparator</div>
-      <div class="qa-card-desc">วาง 2 config เทียบกัน เห็นทุกค่าที่เปลี่ยนแปลง</div>
-      <span class="qa-card-arrow">→</span>
-    </a>
-
-    <a href="/esc-checker" class="qa-card a">
-      <span class="qa-card-badge new">new</span>
-      <div class="qa-card-icon">⚡</div>
-      <div class="qa-card-title">ESC Compatibility Checker</div>
-      <div class="qa-card-desc">ตรวจ ESC amps, protocol, KV compatibility</div>
-      <span class="qa-card-arrow">→</span>
-    </a>
-
-    <a href="/osd" class="qa-card p">
-      <span class="qa-card-badge">tool</span>
-      <div class="qa-card-icon">🖥️</div>
-      <div class="qa-card-title">OSD Designer</div>
-      <div class="qa-card-desc">ออกแบบ OSD layout · export CLI command</div>
-      <span class="qa-card-arrow">→</span>
-    </a>
-
-  </div>
-
-  <!-- Section: v5 Physics Tools -->
-  <div class="qa-section-label">🔬 v5.0 Physics Engine</div>
-  <div class="qa-grid">
-
-    <a href="/battery-health" class="qa-card a">
-      <span class="qa-card-badge v5">v5</span>
-      <div class="qa-card-icon">🔋</div>
-      <div class="qa-card-title">Battery Health Advisor</div>
-      <div class="qa-card-desc">IR · Voltage Sag · Health Score · อายุที่เหลือ</div>
-      <span class="qa-card-arrow">→</span>
-    </a>
-
-    <a href="/motor-thermal" class="qa-card r">
-      <span class="qa-card-badge v5">v5</span>
-      <div class="qa-card-icon">🌡️</div>
-      <div class="qa-card-title">Motor Thermal Estimator</div>
-      <div class="qa-card-desc">ประมาณ winding temperature · safe operating zone</div>
-      <span class="qa-card-arrow">→</span>
-    </a>
-
-    <a href="/loop-analyzer" class="qa-card p">
-      <span class="qa-card-badge v5">v5</span>
-      <div class="qa-card-icon">📡</div>
-      <div class="qa-card-title">Control Loop Analyzer</div>
-      <div class="qa-card-desc">Stick→Prop latency · bottleneck map · loop timing</div>
-      <span class="qa-card-arrow">→</span>
-    </a>
-
-  </div>
-
-  <!-- Section: VTX & Signal -->
-  <div class="qa-section-label">📡 VTX & Signal</div>
-  <div class="qa-grid">
-
-    <a href="/vtx" class="qa-card g">
-      <span class="qa-card-badge">tool</span>
-      <div class="qa-card-icon">📡</div>
-      <div class="qa-card-title">VTX Bands & Channels</div>
-      <div class="qa-card-desc">ตาราง Band/Channel · CLI command สำเร็จรูป</div>
-      <span class="qa-card-arrow">→</span>
-    </a>
-
-    <a href="/vtx-range" class="qa-card b">
-      <span class="qa-card-badge">tool</span>
-      <div class="qa-card-icon">🏞️</div>
-      <div class="qa-card-title">VTX Range Calculator</div>
-      <div class="qa-card-desc">ประมาณระยะสัญญาณ + กราฟ antenna gain</div>
-      <span class="qa-card-arrow">→</span>
-    </a>
-
-    <a href="/vtx-smartaudio" class="qa-card a">
-      <span class="qa-card-badge">tool</span>
-      <div class="qa-card-icon">🎙️</div>
-      <div class="qa-card-title">VTX SmartAudio</div>
-      <div class="qa-card-desc">SmartAudio / Tramp CLI commands · channel switcher</div>
-      <span class="qa-card-arrow">→</span>
-    </a>
-
-  </div>
-
-  <!-- Section: Community & Wizard -->
-  <div class="qa-section-label">🚀 Wizard & Community</div>
-  <div class="qa-grid">
-
-    <a href="/flight-quiz" class="qa-card g">
-      <span class="qa-card-badge new">new</span>
-      <div class="qa-card-icon">🎯</div>
-      <div class="qa-card-title">Flight Style Quiz</div>
-      <div class="qa-card-desc">5 คำถาม → สไตล์การบิน + rates preset แนะนำ</div>
-      <span class="qa-card-arrow">→</span>
-    </a>
-
-    <a href="/bf-wizard" class="qa-card g">
-      <span class="qa-card-badge new">new</span>
-      <div class="qa-card-icon">⚡</div>
-      <div class="qa-card-title">BF Config Wizard</div>
-      <div class="qa-card-desc">7 ขั้นตอน setup → CLI พร้อม paste ทันที</div>
-      <span class="qa-card-arrow">→</span>
-    </a>
-
-    <a href="/build-card" class="qa-card a">
-      <span class="qa-card-badge new">new</span>
-      <div class="qa-card-icon">🃏</div>
-      <div class="qa-card-title">Build Card Generator</div>
-      <div class="qa-card-desc">สร้างรูปสเปคโดรนสวยๆ สำหรับแชร์ Social</div>
-      <span class="qa-card-arrow">→</span>
-    </a>
-
-    <a href="/tuning-log" class="qa-card b">
-      <span class="qa-card-badge new">new</span>
-      <div class="qa-card-icon">📊</div>
-      <div class="qa-card-title">Tuning Log</div>
-      <div class="qa-card-desc">บันทึก session · เปรียบเทียบ PID ระหว่าง session</div>
-      <span class="qa-card-arrow">→</span>
-    </a>
-
-    <a href="/leaderboard" class="qa-card a">
-      <span class="qa-card-badge new">new</span>
-      <div class="qa-card-icon">🏆</div>
-      <div class="qa-card-title">Config Leaderboard</div>
-      <div class="qa-card-desc">vote · rank · copy config จากชุมชน FPV</div>
-      <span class="qa-card-arrow">→</span>
-    </a>
-
-    <a href="/downloads" class="qa-card g">
-      <span class="qa-card-badge">files</span>
-      <div class="qa-card-icon">📁</div>
-      <div class="qa-card-title">DIFF & DUMP Files</div>
-      <div class="qa-card-desc">รวม CLI config สำเร็จรูปสำหรับโดรนหลากหลาย</div>
-      <span class="qa-card-arrow">→</span>
-    </a>
-
-  </div>
-
-  <div class="qa-safe"></div>
-</div>
-
-<script>
-/* ── Quick Access Panel ── */
-function openQA() {
-  document.getElementById('qaOverlay').classList.add('open');
-  document.getElementById('qaPanel').classList.add('open');
-  document.body.style.overflow = 'hidden';
-  document.addEventListener('keydown', qaEscHandler);
-}
-function closeQA() {
-  document.getElementById('qaOverlay').classList.remove('open');
-  document.getElementById('qaPanel').classList.remove('open');
-  document.body.style.overflow = '';
-  document.removeEventListener('keydown', qaEscHandler);
-}
-function qaEscHandler(e) { if (e.key === 'Escape') closeQA(); }
-</script>
-
-<!-- ── DRAWER ────────────────────────────────── -->
-<aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
-  <div class="drawer-header">
-    <div class="drawer-brand">
-      <div class="drawer-brand-icon">🚁</div>
-      <div>
-        <div class="drawer-brand-name" id="drawerTitle">OBIX Config Doctor</div>
-        <div class="drawer-brand-sub">FPV Tuning Toolkit · v5.0</div>
-      </div>
-    </div>
-    <button id="closeDrawer" class="drawer-close" aria-label="ปิดเมนู">✕</button>
-  </div>
-
-  <nav class="drawer-nav" aria-label="เมนูหลัก">
-    <div class="drawer-group-label">หน้าหลัก</div>
-    <a class="drawer-link active" href="/app">
-      <span class="dl-icon-wrap green">🏠</span>
-      <span class="dl-body"><span class="dl-title">Drone Analyzer</span><span class="dl-meta">วิเคราะห์ PID · Filter · Motor</span></span>
-      <span class="dl-pill">main</span>
-    </a>
-
-    <div class="drawer-divider"></div>
-    <div class="drawer-group-label">🔧 เครื่องมือ</div>
-
-    <a class="drawer-link" href="/motor-prop">
-      <span class="dl-icon-wrap blue">🧭</span>
-      <span class="dl-body"><span class="dl-title">Motor × Prop Recommender</span><span class="dl-meta">แนะนำมอเตอร์/ใบพัดตามสเปค</span></span>
-      <span class="dl-pill">tool</span>
-    </a>
-    <a class="drawer-link" href="/cli_surgeon">
-      <span class="dl-icon-wrap gold">🩺</span>
-      <span class="dl-body"><span class="dl-title">CLI Surgeon</span><span class="dl-meta">วิเคราะห์ diff all / dump</span></span>
-      <span class="dl-pill">tool</span>
-    </a>
-    <a class="drawer-link" href="/pid-advisor">
-      <span class="dl-icon-wrap purple">💊</span>
-      <span class="dl-body"><span class="dl-title">PID Symptom Advisor</span><span class="dl-meta">บอกอาการ → รับคำแนะนำ PID</span></span>
-      <span class="dl-pill new">new</span>
-    </a>
-    <a class="drawer-link" href="/rpm-filter">
-      <span class="dl-icon-wrap green">⚙️</span>
-      <span class="dl-body"><span class="dl-title">RPM Filter Calculator</span><span class="dl-meta">คำนวณ harmonic + dyn_notch</span></span>
-      <span class="dl-pill new">new</span>
-    </a>
-    <a class="drawer-link" href="/rates-visualizer">
-      <span class="dl-icon-wrap blue">📈</span>
-      <span class="dl-body"><span class="dl-title">Rates Visualizer</span><span class="dl-meta">curve real-time + per-axis</span></span>
-      <span class="dl-pill new">new</span>
-    </a>
-
-    <div class="drawer-divider"></div>
-    <div class="drawer-group-label">⚡ ขั้นสูง</div>
-
-    <a class="drawer-link" href="/cli-comparator">
-      <span class="dl-icon-wrap gold">⚖️</span>
-      <span class="dl-body"><span class="dl-title">CLI Diff Comparator</span><span class="dl-meta">วาง 2 config → เห็นทุกค่าที่เปลี่ยน</span></span>
-      <span class="dl-pill new">new</span>
-    </a>
-    <a class="drawer-link" href="/esc-checker">
-      <span class="dl-icon-wrap gold">⚡</span>
-      <span class="dl-body"><span class="dl-title">ESC Compatibility Checker</span><span class="dl-meta">ตรวจ ESC amps, protocol, KV</span></span>
-      <span class="dl-pill new">new</span>
-    </a>
-    <a class="drawer-link" href="/blackbox">
-      <span class="dl-icon-wrap blue">📊</span>
-      <span class="dl-body"><span class="dl-title">Blackbox CSV Analyzer</span><span class="dl-meta">วิเคราะห์ flight log · PID score</span></span>
-      <span class="dl-pill hot">HOT</span>
-    </a>
-    <a class="drawer-link" href="/osd">
-      <span class="dl-icon-wrap purple">🖥️</span>
-      <span class="dl-body"><span class="dl-title">OSD Designer</span><span class="dl-meta">ออกแบบ layout OSD + export</span></span>
-      <span class="dl-pill">tool</span>
-    </a>
-
-    <div class="drawer-divider"></div>
-    <div class="drawer-group-label">🔬 v5.0 Physics Tools</div>
-
-    <a class="drawer-link" href="/battery-health">
-      <span class="dl-icon-wrap gold">🔋</span>
-      <span class="dl-body"><span class="dl-title">Battery Health Advisor</span><span class="dl-meta">IR · Sag · Health Score · อายุที่เหลือ</span></span>
-      <span class="dl-pill new">v5</span>
-    </a>
-    <a class="drawer-link" href="/motor-thermal">
-      <span class="dl-icon-wrap red">🌡️</span>
-      <span class="dl-body"><span class="dl-title">Motor Thermal Estimator</span><span class="dl-meta">ประมาณ winding temp · safe zone</span></span>
-      <span class="dl-pill new">v5</span>
-    </a>
-    <a class="drawer-link" href="/loop-analyzer">
-      <span class="dl-icon-wrap purple">📡</span>
-      <span class="dl-body"><span class="dl-title">Control Loop Analyzer</span><span class="dl-meta">Stick→Prop latency · bottleneck map</span></span>
-      <span class="dl-pill new">v5</span>
-    </a>
-
-    <div class="drawer-divider"></div>
-    <div class="drawer-group-label">📡 VTX & Signal</div>
-
-    <a class="drawer-link" href="/vtx">
-      <span class="dl-icon-wrap green">📡</span>
-      <span class="dl-body"><span class="dl-title">VTX Bands & Channels</span><span class="dl-meta">ตาราง Band/Channel + CLI</span></span>
-      <span class="dl-pill">tool</span>
-    </a>
-    <a class="drawer-link" href="/vtx-range">
-      <span class="dl-icon-wrap blue">🏞️</span>
-      <span class="dl-body"><span class="dl-title">VTX Range Calculator</span><span class="dl-meta">ประมาณระยะสัญญาณ + กราฟ</span></span>
-      <span class="dl-pill">tool</span>
-    </a>
-    <a class="drawer-link" href="/vtx-smartaudio">
-      <span class="dl-icon-wrap gold">🎙️</span>
-      <span class="dl-body"><span class="dl-title">VTX SmartAudio</span><span class="dl-meta">SmartAudio / Tramp commands</span></span>
-      <span class="dl-pill">tool</span>
-    </a>
-
-    <div class="drawer-divider"></div>
-    <div class="drawer-group-label">🚀 Wizard & ฟีเจอร์ใหม่</div>
-
-    <a class="drawer-link" href="/flight-quiz">
-      <span class="dl-icon-wrap green">🎯</span>
-      <span class="dl-body"><span class="dl-title">Flight Style Quiz</span><span class="dl-meta">5 คำถาม → rates + preset แนะนำ</span></span>
-      <span class="dl-pill new">new</span>
-    </a>
-
-    <a class="drawer-link" href="/fpv-trainer">
-      <span>🎮</span><span>FPV Trainer</span>
-    </a>    <a class="drawer-link" href="/bf-wizard">
-      <span class="dl-icon-wrap green">⚡</span>
-      <span class="dl-body"><span class="dl-title">BF Config Wizard</span><span class="dl-meta">7 ขั้นตอน → CLI พร้อม paste</span></span>
-      <span class="dl-pill new">new</span>
-    </a>
-
-    <div class="drawer-divider"></div>
-    <div class="drawer-group-label">🌐 Community</div>
-
-    <a class="drawer-link" href="/build-card">
-      <span class="dl-icon-wrap gold">🃏</span>
-      <span class="dl-body"><span class="dl-title">Build Card Generator</span><span class="dl-meta">สร้างรูปสเปคโดรนแชร์ Social</span></span>
-      <span class="dl-pill new">new</span>
-    </a>
-    <a class="drawer-link" href="/tuning-log">
-      <span class="dl-icon-wrap blue">📊</span>
-      <span class="dl-body"><span class="dl-title">Tuning Log</span><span class="dl-meta">บันทึก session · เปรียบเทียบ PID</span></span>
-      <span class="dl-pill new">new</span>
-    </a>
-    <a class="drawer-link" href="/leaderboard">
-      <span class="dl-icon-wrap gold">🏆</span>
-      <span class="dl-body"><span class="dl-title">Config Leaderboard</span><span class="dl-meta">vote · rank · copy config ชุมชน</span></span>
-      <span class="dl-pill new">new</span>
-    </a>
-
-    <div class="drawer-divider"></div>
-    <div class="drawer-group-label">📚 แหล่งข้อมูล</div>
-
-    <a class="drawer-link" href="/downloads">
-      <span class="dl-icon-wrap">📁</span>
-      <span class="dl-body"><span class="dl-title">ไฟล์ DIFF และ DUMP</span><span class="dl-meta">รวม CLI config สำเร็จรูป</span></span>
-      <span class="dl-pill">files</span>
-    </a>
-    <a class="drawer-link" href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener">
-      <span class="dl-icon-wrap blue">📘</span>
-      <span class="dl-body"><span class="dl-title">เพจ OBIXConfig Lab</span><span class="dl-meta">ถาม-แนะนำ & ตัวอย่าง</span></span>
-      <span class="dl-pill">open</span>
-    </a>
-    <a class="drawer-link" href="{{ url_for('about') }}">
-      <span class="dl-icon-wrap">ℹ️</span>
-      <span class="dl-body"><span class="dl-title">เกี่ยวกับ</span><span class="dl-meta">ที่มา & วิธีใช้งาน</span></span>
-      <span class="dl-pill">info</span>
-    </a>
-    <a class="drawer-link" href="{{ url_for('changelog') }}">
-      <span class="dl-icon-wrap green">📝</span>
-      <span class="dl-body"><span class="dl-title">Changelog</span><span class="dl-meta">บันทึกการอัปเดต</span></span>
-      <span class="dl-pill">v5.0</span>
-    </a>
-  </nav>
-
-  <div class="drawer-footer">
-    <div class="drawer-footer-text">
-      OBIXConfig Doctor &nbsp;·&nbsp; <span class="drawer-footer-ver">v5.0</span>
-      <br>Developed for FPV community 🇹🇭
-    </div>
-  </div>
-</aside>
 <!-- ══════════════════════════════════════════════════════════
      PAGE CONTENT — MISSION CONTROL LAYOUT
 ══════════════════════════════════════════════════════════ -->
@@ -2015,38 +1433,42 @@ function qaEscHandler(e) { if (e.key === 'Escape') closeQA(); }
     </div>
   </div>
 
-  <!-- ─── 3-COLUMN GRID ──────────────────────────────────── -->
-  <div class="v5-status-ribbon" aria-label="System status">
-    <div class="vsrib-item">
-      <span class="vsrib-dot g"></span>
-      <span class="vsrib-lbl">PHYSICS ENGINE v5</span>
+  <!-- ─── TOOL DOCK ──────────────────────────────────────────── -->
+  <div class="tool-dock" id="toolDock">
+    <div class="dock-tabs" role="tablist">
+      <button class="dock-tab active" data-cat="all" onclick="dockFilter(this,'all')"><span class="dock-tab-dot g"></span>ALL TOOLS</button>
+      <button class="dock-tab" data-cat="core" onclick="dockFilter(this,'core')"><span class="dock-tab-dot g"></span>🔧 TOOLS</button>
+      <button class="dock-tab" data-cat="adv" onclick="dockFilter(this,'adv')"><span class="dock-tab-dot a"></span>⚡ ADVANCED</button>
+      <button class="dock-tab" data-cat="phys" onclick="dockFilter(this,'phys')"><span class="dock-tab-dot p"></span>🔬 PHYSICS</button>
+      <button class="dock-tab" data-cat="vtx" onclick="dockFilter(this,'vtx')"><span class="dock-tab-dot b"></span>📡 VTX</button>
+      <button class="dock-tab" data-cat="wiz" onclick="dockFilter(this,'wiz')"><span class="dock-tab-dot t"></span>🚀 WIZARD</button>
     </div>
-    <div class="vsrib-sep">·</div>
-    <div class="vsrib-item">
-      <span class="vsrib-dot b"></span>
-      <span class="vsrib-lbl">BF 4.3 / 4.4 / 4.5</span>
-    </div>
-    <div class="vsrib-sep">·</div>
-    <div class="vsrib-item">
-      <span class="vsrib-dot a"></span>
-      <span class="vsrib-lbl">22 TOOLS ONLINE</span>
-    </div>
-    <div class="vsrib-sep">·</div>
-    <div class="vsrib-item">
-      <span class="vsrib-dot g"></span>
-      <span class="vsrib-lbl">RPM FILTER CALC</span>
-    </div>
-    <div class="vsrib-sep">·</div>
-    <div class="vsrib-item">
-      <span class="vsrib-dot b"></span>
-      <span class="vsrib-lbl">BLACKBOX ANALYZER</span>
-    </div>
-    <div class="vsrib-sep">·</div>
-    <div class="vsrib-item">
-      <span class="vsrib-dot a"></span>
-      <span class="vsrib-lbl">AI RULE ENGINE ACTIVE</span>
+    <div class="dock-tools" id="dockToolsRow">
+      <a href="/motor-prop"       class="dtool g" data-cat="core"><div class="dtool-icon">🧭</div><span class="dtool-label">Motor×Prop</span></a>
+      <a href="/cli_surgeon"      class="dtool a" data-cat="core"><div class="dtool-icon">🩺</div><span class="dtool-label">CLI Surgeon</span></a>
+      <a href="/pid-advisor"      class="dtool p" data-cat="core"><div class="dtool-icon">💊</div><span class="dtool-label">PID Advisor</span><span class="dtool-badge">new</span></a>
+      <a href="/rpm-filter"       class="dtool g" data-cat="core"><div class="dtool-icon">⚙️</div><span class="dtool-label">RPM Filter</span><span class="dtool-badge">new</span></a>
+      <a href="/rates-visualizer" class="dtool b" data-cat="core"><div class="dtool-icon">📈</div><span class="dtool-label">Rates Viz</span><span class="dtool-badge">new</span></a>
+      <a href="/blackbox"         class="dtool b" data-cat="core"><div class="dtool-icon">📊</div><span class="dtool-label">Blackbox</span><span class="dtool-badge hot">HOT</span></a>
+      <a href="/cli-comparator"   class="dtool a" data-cat="adv"><div class="dtool-icon">⚖️</div><span class="dtool-label">CLI Diff</span><span class="dtool-badge">new</span></a>
+      <a href="/esc-checker"      class="dtool a" data-cat="adv"><div class="dtool-icon">⚡</div><span class="dtool-label">ESC Checker</span><span class="dtool-badge">new</span></a>
+      <a href="/osd"              class="dtool p" data-cat="adv"><div class="dtool-icon">🖥️</div><span class="dtool-label">OSD Design</span></a>
+      <a href="/battery-health"   class="dtool a" data-cat="phys"><div class="dtool-icon">🔋</div><span class="dtool-label">Battery Health</span><span class="dtool-badge v5">v5</span></a>
+      <a href="/motor-thermal"    class="dtool r" data-cat="phys"><div class="dtool-icon">🌡️</div><span class="dtool-label">Motor Thermal</span><span class="dtool-badge v5">v5</span></a>
+      <a href="/loop-analyzer"    class="dtool p" data-cat="phys"><div class="dtool-icon">📡</div><span class="dtool-label">Loop Analyzer</span><span class="dtool-badge v5">v5</span></a>
+      <a href="/vtx"              class="dtool g" data-cat="vtx"><div class="dtool-icon">📡</div><span class="dtool-label">VTX Bands</span></a>
+      <a href="/vtx-range"        class="dtool b" data-cat="vtx"><div class="dtool-icon">🏞️</div><span class="dtool-label">VTX Range</span></a>
+      <a href="/vtx-smartaudio"   class="dtool a" data-cat="vtx"><div class="dtool-icon">🎙️</div><span class="dtool-label">SmartAudio</span></a>
+      <a href="/flight-quiz"      class="dtool g" data-cat="wiz"><div class="dtool-icon">🎯</div><span class="dtool-label">Flight Quiz</span><span class="dtool-badge">new</span></a>
+      <a href="/bf-wizard"        class="dtool t" data-cat="wiz"><div class="dtool-icon">⚡</div><span class="dtool-label">BF Wizard</span><span class="dtool-badge">new</span></a>
+      <a href="/build-card"       class="dtool a" data-cat="wiz"><div class="dtool-icon">🃏</div><span class="dtool-label">Build Card</span><span class="dtool-badge">new</span></a>
+      <a href="/tuning-log"       class="dtool b" data-cat="wiz"><div class="dtool-icon">📓</div><span class="dtool-label">Tuning Log</span><span class="dtool-badge">new</span></a>
+      <a href="/leaderboard"      class="dtool a" data-cat="wiz"><div class="dtool-icon">🏆</div><span class="dtool-label">Leaderboard</span></a>
+      <a href="/downloads"        class="dtool g" data-cat="wiz"><div class="dtool-icon">📁</div><span class="dtool-label">Downloads</span></a>
     </div>
   </div>
+
+  <!-- ─── 3-COLUMN GRID ──────────────────────────────────── -->
   <div class="content-grid">
     <!-- ══ COL 1: MISSION CONFIG FORM ══════════════════════ -->
     <div class="mission-card">
@@ -3249,212 +2671,7 @@ save</pre>
 
 </div><!-- /page-wrap -->
 
-<div class="toast" id="toast">✓ copied!</div>
 
-<script>
-/* ═══════════════════════════════════════════════════════════
-   LIVE PHYSICS ENGINE — updates HUD + Danger Zone + Checklist
-   instantly as user types, no page reload needed
-═══════════════════════════════════════════════════════════ */
-(function(){
-  var STYLE_PID = {
-    freestyle: { roll:{p:48,i:90,d:38}, pitch:{p:52,i:90,d:40}, yaw:{p:40,i:90} },
-    racing:    { roll:{p:55,i:85,d:42}, pitch:{p:60,i:85,d:44}, yaw:{p:45,i:80} },
-    longrange: { roll:{p:38,i:95,d:28}, pitch:{p:42,i:95,d:30}, yaw:{p:32,i:100} },
-  };
-
-  var SIZE_CLASSES = {
-    2.5:'2.5" Micro', 3:'3" Whoop', 3.5:'3.5" Cinewhoop', 4:'4" Mini',
-    5:'5" Freestyle', 6:'6" Heavy', 7:'7" Mid-LR', 7.5:'7.5" Mid-LR', 8:'8" LR', 10:'10" Long Range'
-  };
-
-  function g(id){ return document.getElementById(id); }
-  function sv(id,v){ var e=g(id); if(e) e.textContent=v; }
-  function sc(el,cls){ el.classList.remove('green','amber','red','blue','ok','warn','bad'); if(cls) el.classList.add(cls); }
-
-  window.liveCalc = function(){
-    var size   = parseFloat((g('f_size')||{}).value)   || 5.0;
-    var weight = parseFloat((g('f_weight')||{}).value)  || 750;
-    var prop   = parseFloat((g('f_prop')||{}).value)    || 5.0;
-    var pitch  = parseFloat((g('f_pitch')||{}).value)   || 4.0;
-    var cells  = parseInt((g('battery-select')||{}).value) || 4;
-    var mah    = parseFloat((g('f_mah')||{}).value)     || 1500;
-    var kv     = parseFloat((g('f_kv')||{}).value)      || 0;
-    var style  = (g('f_style')||{}).value || 'freestyle';
-
-    var volt   = cells * 3.7;
-    var maxRPM = kv > 0 ? kv * volt : 0;
-    var tipSpeed = kv > 0 ? (Math.PI * prop * 0.0254 * maxRPM) / 60 : 0;
-
-    /* TWR heuristic */
-    var propPower = prop * pitch * 12 * cells;
-    var totalThrust = propPower * 4 * 0.9;
-    var twr = weight > 0 ? Math.min(totalThrust / weight, 9.0) : 0;
-
-    /* Flight time */
-    var peakW = kv > 0 ? Math.min(cells * 4.2 * kv / 220, 750) * 4 : cells * 35 * 4;
-    var hoverThrottle = twr > 0 ? Math.sqrt(1/(2*twr)) : 0.5;
-    var hoverCurrent = (peakW / (volt + 0.001)) * hoverThrottle * hoverThrottle;
-    var ftMin = hoverCurrent > 0 ? Math.min(30, (mah / 1000 * 0.8) / (hoverCurrent * 0.75 + 0.5) * 60) : 0;
-    var ftSafe = Math.max(0, ftMin);
-
-    /* C-rate */
-    var peakCurrentTotal = peakW / (volt + 0.001);
-    var cBurst = mah > 0 ? Math.min(200, peakCurrentTotal / (mah/1000)) : 0;
-
-    /* ESC */
-    var escA = Math.max(20, Math.ceil((peakCurrentTotal / 4) * 1.3 / 5) * 5);
-
-    /* ── HUD ── */
-    var twrDisp = twr > 0 ? twr.toFixed(2)+':1' : '—';
-    var twrColor = twr >= 3.5 ? 'green' : twr >= 2.0 ? 'amber' : twr > 0 ? 'red' : '';
-    sv('h_twr', twrDisp);
-    var twrEl = g('h_twr'); if(twrEl){ sc(twrEl,''); twrEl.classList.add(twrColor||'blue'); }
-    var hbTwr = g('hb_twr');
-    if(hbTwr){ hbTwr.style.width = Math.min(100,twr/6*100)+'%'; hbTwr.style.background = twrColor=='green'?'var(--green)':twrColor=='amber'?'var(--amber)':'var(--red)'; }
-
-    var tipDisp = tipSpeed > 0 ? Math.round(tipSpeed)+' m/s' : '— m/s';
-    var tipColor = tipSpeed > 300 ? 'red' : tipSpeed > 250 ? 'amber' : tipSpeed > 0 ? 'green' : '';
-    sv('h_tip', tipDisp);
-    var tipEl = g('h_tip'); if(tipEl){ sc(tipEl,''); if(tipColor) tipEl.classList.add(tipColor); }
-    var hbTip = g('hb_tip');
-    if(hbTip){ hbTip.style.width = Math.min(100,tipSpeed/350*100)+'%'; hbTip.style.background = tipColor=='green'?'var(--green)':tipColor=='amber'?'var(--amber)':'var(--red)'; }
-
-    var rpmDisp = maxRPM > 0 ? Math.round(maxRPM/1000*10)/10+'k RPM' : '— RPM';
-    sv('h_rpm', rpmDisp);
-    var hbRpm = g('hb_rpm');
-    if(hbRpm){ hbRpm.style.width = Math.min(100,maxRPM/80000*100)+'%'; }
-
-    var ftDisp = ftSafe > 0 ? ftSafe.toFixed(1)+' min' : '— min';
-    var ftColor = ftSafe > 6 ? 'green' : ftSafe > 3 ? 'amber' : ftSafe > 0 ? 'red' : '';
-    sv('h_ft', ftDisp);
-    var ftEl = g('h_ft'); if(ftEl){ sc(ftEl,''); if(ftColor) ftEl.classList.add(ftColor); }
-    var hbFt = g('hb_ft');
-    if(hbFt){ hbFt.style.width = Math.min(100,ftSafe/15*100)+'%'; hbFt.style.background = ftColor=='green'?'var(--green)':ftColor=='amber'?'var(--amber)':'var(--red)'; }
-
-    /* ── DANGER ZONE NEEDLE ── */
-    var needle = g('dzNeedle');
-    if(needle){
-      var pct = tipSpeed > 0 ? Math.min(95, Math.max(3, tipSpeed/350*100)) : 15;
-      needle.style.left = pct+'%';
-      needle.setAttribute('data-val', tipSpeed > 0 ? Math.round(tipSpeed)+' m/s' : 'N/A');
-    }
-    var dzStatus = g('dzStatus');
-    if(dzStatus && tipSpeed > 0){
-      if(tipSpeed > 300){
-        dzStatus.innerHTML = '<strong style="color:var(--red);">⛔ DANGER: '+Math.round(tipSpeed)+'m/s — เกิน 300 m/s เสี่ยงใบพัดแตก</strong><br><span style="font-size:10px;color:var(--muted2);">ลด KV หรือเปลี่ยน prop เล็กลง / pitch ต่ำลง</span>';
-      } else if(tipSpeed > 250){
-        dzStatus.innerHTML = '<strong style="color:var(--amber);">⚠️ WARNING: '+Math.round(tipSpeed)+'m/s — ใกล้ขีดจำกัด</strong><br><span style="font-size:10px;color:var(--muted2);">ควร balance prop ให้ดี · ตรวจ prop condition</span>';
-      } else {
-        dzStatus.innerHTML = '<strong style="color:var(--green);">✅ SAFE: '+Math.round(tipSpeed)+'m/s — ปลอดภัย (&lt;250 m/s)</strong><br><span style="font-size:10px;color:var(--muted2);">Tip speed อยู่ในเกณฑ์ subsonic เต็มที่</span>';
-      }
-    }
-
-    /* ── DRONE SVG ── */
-    var motorColor = tipSpeed > 300 ? 'rgba(255,68,85,0.7)' : tipSpeed > 250 ? 'rgba(255,183,0,0.7)' : 'rgba(0,255,136,0.5)';
-    ['dv_m1','dv_m2','dv_m3','dv_m4'].forEach(function(id){
-      var el = g(id); if(el) el.setAttribute('stroke', motorColor);
-    });
-    var classKey = [2.5,3,3.5,4,5,6,7,7.5,8,10].find(function(k){ return Math.abs(size-k) < 0.26; }) || size;
-    sv('dv_class', SIZE_CLASSES[classKey] || size+'" Custom');
-    sv('dv_volt', volt.toFixed(1)+'V');
-    sv('dv_kvv', kv > 0 ? Math.round(maxRPM).toLocaleString()+' RPM max' : 'กรอก KV');
-    sv('dv_wclass', weight<250?'Ultra-Light':weight<500?'Light':weight<800?'Medium':weight<1500?'Heavy':'X-Heavy');
-    sv('dv_esc', escA+'A recommended');
-    var sizeLbl = g('dv_sizelbl'); if(sizeLbl) sizeLbl.textContent = size+'" · '+(style||'').toUpperCase();
-
-    /* ── PRE-FLIGHT CHECKS ── */
-    function setChk(idx, status, val){
-      var item = g('chk'+idx); var valEl = g('chk'+idx+'v');
-      if(!item) return;
-      item.className = 'chk-item ' + status;
-      if(valEl){
-        valEl.textContent = val;
-        valEl.className = 'chk-val ' + (status==='ok'?'green':status==='warn'?'amber':'red');
-      }
-    }
-    if(kv > 0 && tipSpeed > 0) setChk(0, tipSpeed>300?'bad':tipSpeed>250?'warn':'ok', Math.round(tipSpeed)+' m/s');
-    else setChk(0, 'ok', 'กรอก KV');
-    setChk(1, cBurst>80?'bad':cBurst>50?'warn':'ok', mah>0?Math.round(cBurst)+'C req':'—');
-    setChk(2, twr<1.2?'bad':twr<2.0?'warn':'ok', twr>0?twr.toFixed(2)+':1':'—');
-    setChk(3, ftSafe<2?'bad':ftSafe<4?'warn':'ok', ftSafe>0?ftSafe.toFixed(1)+' min':'—');
-    setChk(4, escA>80?'warn':'ok', escA+'A+');
-
-    /* ── LIVE BUILD SCORE ── */
-    var s_twr  = twr > 0 ? Math.min(100, Math.max(0, (twr-0.5)/5*100)) : 0;
-    var s_ft   = ftSafe > 0 ? Math.min(100, ftSafe/12*100) : 0;
-    var s_tip  = tipSpeed > 0 ? Math.min(100, Math.max(0, (1-(tipSpeed-100)/250)*100)) : 70;
-    var s_c    = cBurst > 0 ? Math.min(100, Math.max(0, (1-cBurst/120)*100)) : 70;
-    var s_eff  = twr > 3 ? 85 : twr > 2 ? 70 : twr > 0 ? 45 : 50;
-    var s_safe = (tipSpeed<280||tipSpeed===0) && twr>1.5 ? 88 : twr>1.2 ? 55 : 30;
-    var scores = [s_twr, s_ft, s_tip, s_c, s_eff, s_safe];
-    var weights = [0.25,0.20,0.20,0.15,0.10,0.10];
-    var total = Math.round(scores.reduce(function(a,s,i){ return a+s*weights[i]; }, 0));
-    var grade = total>=92?'S':total>=85?'A+':total>=78?'A':total>=70?'B+':total>=60?'B':'C';
-    var gColor = total>=78?'var(--green)':total>=55?'var(--amber)':'var(--red)';
-
-    var sn = g('liveScoreNum'); if(sn){ sn.textContent = total>0?total:'—'; sn.style.color = gColor; }
-    var sg = g('liveScoreGrade'); if(sg){ sg.textContent = total>0?grade:'—'; sg.style.color = gColor; }
-    var ring = g('liveScoreRing');
-    if(ring && total>0){
-      var circ = 326.7;
-      ring.style.strokeDashoffset = circ - (total/100*circ);
-      ring.style.stroke = gColor;
-    }
-    var scoreColors = scores.map(function(s){ return s>=70?'var(--green)':s>=45?'var(--amber)':'var(--red)'; });
-    scores.forEach(function(s,i){
-      var bar = g('lsb'+i); var pct = g('lsp'+i);
-      if(bar){ bar.style.width = s.toFixed(0)+'%'; bar.style.background = scoreColors[i]; }
-      if(pct) pct.textContent = total>0 ? s.toFixed(0)+'%' : '—';
-    });
-    if(total > 0) setChk(5, total<55?'bad':total<70?'warn':'ok', grade+' ('+total+')');
-    else setChk(5, 'ok', '—');
-  };
-
-  /* applyPreset — fills form fields */
-  var PRESETS_LIVE = {
-    '2.5_micro':   {size:2.5,  weight:80,   battery:'3S', prop_size:2.5, pitch:2.0, blades:'2', style:'freestyle', motor_kv:10000, battery_mAh:300},
-    '3_whoop':     {size:3.0,  weight:120,  battery:'3S', prop_size:3.0, pitch:2.0, blades:'2', style:'freestyle', motor_kv:8000,  battery_mAh:450},
-    '3.5_cine':    {size:3.5,  weight:350,  battery:'4S', prop_size:3.5, pitch:2.5, blades:'2', style:'longrange', motor_kv:3500,  battery_mAh:850},
-    '4_mini':      {size:4.0,  weight:420,  battery:'4S', prop_size:4.0, pitch:3.0, blades:'2', style:'freestyle', motor_kv:2800,  battery_mAh:850},
-    '5_freestyle': {size:5.0,  weight:750,  battery:'4S', prop_size:5.1, pitch:4.1, blades:'3', style:'freestyle', motor_kv:2306,  battery_mAh:1500},
-    '6_heavy5':    {size:6.0,  weight:1000, battery:'6S', prop_size:6.0, pitch:4.0, blades:'3', style:'freestyle', motor_kv:1750,  battery_mAh:2200},
-    '7_midlr':     {size:7.0,  weight:1100, battery:'6S', prop_size:7.0, pitch:3.5, blades:'2', style:'longrange', motor_kv:1750,  battery_mAh:3000},
-    '7.5_midlr':   {size:7.5,  weight:1200, battery:'6S', prop_size:7.5, pitch:3.0, blades:'2', style:'longrange', motor_kv:1500,  battery_mAh:3500},
-    '8_lr':        {size:8.0,  weight:1500, battery:'6S', prop_size:8.0, pitch:3.5, blades:'2', style:'longrange', motor_kv:1200,  battery_mAh:4000},
-    '10_lr':       {size:10.0, weight:2200, battery:'6S', prop_size:10.0,pitch:4.5, blades:'2', style:'longrange', motor_kv:900,   battery_mAh:5000}
-  };
-
-  window.applyPreset = function(key, chip){
-    document.querySelectorAll('.pmini').forEach(function(c){ c.classList.remove('active'); });
-    if(chip) chip.classList.add('active');
-    var p = PRESETS_LIVE[key]; if(!p) return;
-    var ps = document.getElementById('preset-select');
-    if(ps) ps.value = key;
-    function sf(sel,v){ var el=document.querySelector(sel); if(el) el.value=v; }
-    sf('input[name="size"]', p.size);
-    sf('input[name="weight"]', p.weight);
-    sf('select[name="battery"]', p.battery);
-    sf('input[name="prop_size"]', p.prop_size);
-    sf('input[name="pitch"]', p.pitch);
-    sf('select[name="blades"]', p.blades);
-    sf('select[name="style"]', p.style);
-    if(p.motor_kv){ sf('input[name="motor_kv"]', p.motor_kv); }
-    if(p.battery_mAh){ sf('input[name="battery_mAh"]', p.battery_mAh); }
-    liveCalc();
-    showToast('✓ โหลด preset '+key+' แล้ว');
-  };
-
-  /* attach liveCalc to all inputs */
-  var inputs = document.querySelectorAll('input[type=number], select');
-  inputs.forEach(function(el){
-    el.addEventListener('input', liveCalc);
-    el.addEventListener('change', liveCalc);
-  });
-
-  /* initial run */
-  liveCalc();
-})();
 
 /* ─── UI HELPERS ─────────────────────────────────────────────── */
 function toggleConcept(){
@@ -3498,31 +2715,6 @@ function copyAdvJSON(){
   var el = document.getElementById('advJSON');
   if(el){ navigator.clipboard.writeText(el.textContent).then(function(){ showToast('✓ JSON copied'); }); }
 }
-
-/* ─── DRAWER ─────────────────────────────────────────────────── */
-(function(){
-  var btn = document.getElementById('hamburgerBtn');
-  var drawer = document.getElementById('drawer');
-  var overlay = document.getElementById('overlay');
-  var closeBtn = document.getElementById('closeDrawer');
-  function openDrawer(){
-    btn && btn.setAttribute('aria-expanded','true');
-    drawer && drawer.classList.add('open');
-    overlay && overlay.classList.add('open');
-    document.addEventListener('keydown', onEsc);
-  }
-  function closeDrawer(){
-    btn && btn.setAttribute('aria-expanded','false');
-    drawer && drawer.classList.remove('open');
-    overlay && overlay.classList.remove('open');
-    document.removeEventListener('keydown', onEsc);
-    btn && btn.focus();
-  }
-  function onEsc(e){ if(e.key==='Escape') closeDrawer(); }
-  btn && btn.addEventListener('click', function(){ btn.getAttribute('aria-expanded')==='true' ? closeDrawer() : openDrawer(); });
-  overlay && overlay.addEventListener('click', closeDrawer);
-  closeBtn && closeBtn.addEventListener('click', closeDrawer);
-})();
 
 /* ─── PRESET SELECT (dropdown sync) ─────────────────────────── */
 var presetMap = {
@@ -4148,6 +3340,653 @@ function toggleTheme(){
     obs.observe(el);
   });
 })();
+</script>
+</body>
+</htmlvar presetMap = {
+  "2.5_micro":   {size:2.5,  weight:80,   battery:"3S", prop_size:2.5, pitch:2.0, blades:"2", style:"freestyle"},
+  "3_whoop":     {size:3.0,  weight:120,  battery:"3S", prop_size:3.0, pitch:2.0, blades:"2", style:"freestyle"},
+  "3.5_cine":    {size:3.5,  weight:350,  battery:"4S", prop_size:3.5, pitch:2.5, blades:"2", style:"longrange"},
+  "4_mini":      {size:4.0,  weight:420,  battery:"4S", prop_size:4.0, pitch:3.0, blades:"2", style:"freestyle"},
+  "5_freestyle": {size:5.0,  weight:750,  battery:"4S", prop_size:5.0, pitch:4.0, blades:"3", style:"freestyle"},
+  "6_heavy5":    {size:6.0,  weight:1000, battery:"6S", prop_size:6.0, pitch:4.0, blades:"3", style:"freestyle"},
+  "7_midlr":     {size:7.0,  weight:1100, battery:"6S", prop_size:7.0, pitch:3.5, blades:"2", style:"longrange"},
+  "7.5_midlr":   {size:7.5,  weight:1200, battery:"6S", prop_size:7.5, pitch:3.0, blades:"2", style:"longrange"},
+  "8_lr":        {size:8.0,  weight:1500, battery:"6S", prop_size:8.0, pitch:3.5, blades:"2", style:"longrange"},
+  "10_lr":       {size:10.0, weight:2200, battery:"6S", prop_size:10.0,pitch:4.5, blades:"2", style:"longrange"}
+};
+function sf(sel,v){ var el=document.querySelector(sel); if(el) el.value=v; }
+var ps = document.getElementById('preset-select');
+if(ps) ps.addEventListener('change', function(){
+  var p = presetMap[this.value]; if(!p) return;
+  sf('input[name="size"]',p.size); sf('input[name="weight"]',p.weight);
+  sf('select[name="battery"]',p.battery); sf('input[name="prop_size"]',p.prop_size);
+  sf('input[name="pitch"]',p.pitch); sf('select[name="blades"]',p.blades);
+  sf('select[name="style"]',p.style);
+  liveCalc();
+  showToast('✓ โหลด preset แล้ว');
+});
+
+/* ─── DYNAMIC PID VALUES (from backend if analysis present) ────── */
+{% if analysis %}
+var _pRoll=  {{ analysis.pid.roll.p }}, _iRoll=  {{ analysis.pid.roll.i }}, _dRoll=  {{ analysis.pid.roll.d }};
+var _pPitch= {{ analysis.pid.pitch.p }},_iPitch= {{ analysis.pid.pitch.i }},_dPitch= {{ analysis.pid.pitch.d }};
+var _pYaw=   {{ analysis.pid.yaw.p }},  _iYaw=   {{ analysis.pid.yaw.i }};
+var _gLpf1=  {{ analysis.filter.gyro_lpf1 or 200 }};
+var _dLpf1=  {{ analysis.filter.dterm_lpf1 or 110 }};
+var _notch=  {{ analysis.filter.dyn_notch or 2 }};
+var _ag=     {{ analysis.filter.anti_gravity or 5 }};
+{% else %}
+var _pRoll=48,_iRoll=90,_dRoll=38,_pPitch=52,_iPitch=90,_dPitch=40,_pYaw=40,_iYaw=90;
+var _gLpf1=200,_dLpf1=110,_notch=2,_ag=5;
+{% endif %}
+function _r(v){ return Math.max(1, Math.round(v)); }
+
+/* ═══════════════════════════════════════════════════════════
+   PRESET CLI PROFILES
+═══════════════════════════════════════════════════════════ */
+var PRESETS = {
+  beginner: {
+    label:'BEGINNER', color:'var(--green)',
+    title:'Beginner — ปลอดภัย เหมาะสำหรับมือใหม่',
+    desc:'ลด P 10% · D 15% · Throttle cap 80% · Filter นุ่มกว่าปกติ — บินนิ่ง ควบคุมง่าย ไม่แดง',
+    stats:[
+      {v:'×0.90 P',c:'blue',l:'P GAIN'},
+      {v:'×0.85 D',c:'blue',l:'D GAIN'},
+      {v:'80%',c:'amber',l:'THROTTLE'},
+      {v:'Soft',c:'green',l:'FILTER'},
+    ],
+    tips:[
+      {i:'🟢',t:'<b>Throttle limit 80%</b> — ป้องกันพลิกคว่ำกะทันหัน เหมาะฝึก hover และ line ตรง'},
+      {i:'🔵',t:'<b>Filter นุ่มขึ้น 15%</b> — ลด noise รับโทษด้าน response เล็กน้อย ดีสำหรับ motor ใหม่'},
+      {i:'🟡',t:'<b>iterm_relax = RP</b> — ป้องกัน I-term windup ตอน flip/roll ลด bounce-back'},
+      {i:'⚡',t:'<b>RPM Filter ON</b> — เปิด bidirectional dshot ต้องการ ESC รองรับ DSHOT600'},
+      {i:'⚠️',t:'ทดสอบ hover ก่อนทำ trick — ถ้า oscillate ให้ลด P เพิ่ม 5% อีกรอบ'},
+    ],
+    cli: function(){
+      return [
+        '# OBIXConfig Doctor v5 — BEGINNER SAFE PRESET',
+        '# สำหรับมือใหม่ · Throttle 80% · Filter นุ่ม · RPM Filter ON',
+        '',
+        '# ── PID ──',
+        'set p_roll            = '+_r(_pRoll*0.90),
+        'set i_roll            = '+_r(_iRoll*0.95),
+        'set d_roll            = '+_r(_dRoll*0.85),
+        'set f_roll            = 0',
+        'set p_pitch           = '+_r(_pPitch*0.90),
+        'set i_pitch           = '+_r(_iPitch*0.95),
+        'set d_pitch           = '+_r(_dPitch*0.85),
+        'set f_pitch           = 0',
+        'set p_yaw             = '+_r(_pYaw*0.88),
+        'set i_yaw             = '+_r(_iYaw),
+        '',
+        '# ── Filter (soft) ──',
+        'set gyro_lpf1_static_hz    = '+_r(_gLpf1*0.80),
+        'set gyro_lpf2_static_hz    = '+_r(_gLpf1*1.6),
+        'set dterm_lpf1_static_hz   = '+_r(_dLpf1*0.80),
+        'set dterm_lpf2_static_hz   = '+_r(_dLpf1*1.4),
+        'set dyn_notch_count        = '+Math.max(1,_notch),
+        'set dyn_notch_min_hz       = 80',
+        'set dyn_notch_max_hz       = 350',
+        '',
+        '# ── RPM Filter ──',
+        'set motor_pwm_protocol     = DSHOT600',
+        'set dshot_bidir            = ON',
+        'set motor_poles            = 14',
+        'set rpm_filter_harmonics   = 3',
+        'set rpm_filter_min_hz      = 100',
+        '',
+        '# ── Throttle & Safety ──',
+        'set throttle_limit_percent = 80',
+        'set throttle_limit_type    = SCALE',
+        'set tpa_rate               = 15',
+        'set tpa_breakpoint         = 1500',
+        '',
+        '# ── Iterm & Feedforward ──',
+        'set iterm_relax            = RP',
+        'set iterm_relax_type       = SETPOINT',
+        'set anti_gravity_gain      = '+Math.max(2,_ag-2),
+        'set feedforward_averaging  = 4_POINT',
+        'set feedforward_smooth_factor = 35',
+        '',
+        'save'
+      ].join('\n');
+    }
+  },
+  freestyle: {
+    label:'FREESTYLE', color:'var(--blue)',
+    title:'Freestyle — ค่าวิเคราะห์ full, response ดี, RPM filter',
+    desc:'ค่าจากการวิเคราะห์เต็มรูปแบบ — iterm_relax, FF averaging, TPA คำนวณตาม TWR',
+    stats:[
+      {v:'Full',c:'blue',l:'PID'},
+      {v:'DSHOT600',c:'green',l:'PROTOCOL'},
+      {v:'BiDir',c:'green',l:'RPM FILTER'},
+      {v:'2_POINT',c:'blue',l:'FF AVG'},
+    ],
+    tips:[
+      {i:'🎯',t:'<b>PID ครบชุด</b> — ใช้ค่าจากการวิเคราะห์ size/weight/battery เต็มรูปแบบ'},
+      {i:'⚡',t:'<b>DSHOT600 + BiDir</b> — RPM Filter แม่นยำ ลด noise ได้สูงสุด'},
+      {i:'🔵',t:'<b>TPA (Throttle PID Attenuation)</b> — ลด P/D ที่ throttle สูง ป้องกัน oscillate ตอน punch'},
+      {i:'🟢',t:'<b>FF 2_POINT averaging</b> — ลด noise จาก RC stick feedforward ดีกับ RC ทุกแบรนด์'},
+      {i:'⚠️',t:'ปรับ TPA breakpoint ตาม hover throttle ของคุณ ถ้า hover ~40% → breakpoint 1450'},
+    ],
+    cli: function(){
+      return [
+        '# OBIXConfig Doctor v5 — FREESTYLE FULL TUNE',
+        '# ค่าวิเคราะห์จาก size/weight/battery/style',
+        '',
+        '# ── PID ──',
+        'set p_roll            = '+_pRoll,
+        'set i_roll            = '+_iRoll,
+        'set d_roll            = '+_dRoll,
+        'set f_roll            = 80',
+        'set p_pitch           = '+_pPitch,
+        'set i_pitch           = '+_iPitch,
+        'set d_pitch           = '+_dPitch,
+        'set f_pitch           = 85',
+        'set p_yaw             = '+_pYaw,
+        'set i_yaw             = '+_iYaw,
+        '',
+        '# ── Filter (balanced) ──',
+        'set gyro_lpf1_static_hz    = '+_gLpf1,
+        'set gyro_lpf2_static_hz    = '+_r(_gLpf1*2),
+        'set dterm_lpf1_static_hz   = '+_dLpf1,
+        'set dterm_lpf2_static_hz   = '+_r(_dLpf1*1.6),
+        'set dyn_notch_count        = '+_notch,
+        'set dyn_notch_min_hz       = 100',
+        'set dyn_notch_max_hz       = 500',
+        '',
+        '# ── RPM Filter ──',
+        'set motor_pwm_protocol     = DSHOT600',
+        'set dshot_bidir            = ON',
+        'set motor_poles            = 14',
+        'set rpm_filter_harmonics   = 3',
+        'set rpm_filter_min_hz      = 100',
+        '',
+        '# ── TPA ──',
+        'set tpa_rate               = 12',
+        'set tpa_breakpoint         = 1450',
+        '',
+        '# ── Iterm & FF ──',
+        'set iterm_relax            = RP',
+        'set iterm_relax_type       = SETPOINT',
+        'set anti_gravity_gain      = '+_ag,
+        'set feedforward_averaging  = 2_POINT',
+        'set feedforward_smooth_factor = 25',
+        '',
+        'save'
+      ].join('\n');
+    }
+  },
+  racing: {
+    label:'RACING', color:'var(--red)',
+    title:'Racing — P/D สูง, Response ไว, Filter เร็ว',
+    desc:'P สูง 15% · D สูง 12% · Filter เร็วขึ้น — สำหรับ racing gate/track ที่ต้องการ response ทันที',
+    stats:[
+      {v:'+15% P',c:'red',l:'P GAIN'},
+      {v:'+12% D',c:'red',l:'D GAIN'},
+      {v:'Fast',c:'amber',l:'FILTER'},
+      {v:'Race',c:'red',l:'MODE'},
+    ],
+    tips:[
+      {i:'🏁',t:'<b>P สูงขึ้น 15%</b> — ตอบสนองทันทีตาม stick input เหมาะ gate racing ที่ต้องการ precision'},
+      {i:'🔴',t:'<b>Filter เร็วขึ้น 20%</b> — latency ต่ำลง แต่ motor อาจร้อนขึ้น ตรวจ motor temp หลังบิน'},
+      {i:'⚠️',t:'<b>ห้ามใช้กับมือใหม่</b> — oscillate ง่ายถ้า motor เก่าหรือ prop ไม่สมดุล'},
+      {i:'🟡',t:'<b>TPA 20%</b> — ลด P ที่ throttle สูง ป้องกัน punch oscillation'},
+      {i:'💡',t:'แนะนำ balance prop ทุกครั้งก่อนบิน racing tune'},
+    ],
+    cli: function(){
+      return [
+        '# OBIXConfig Doctor v5 — RACING TUNE',
+        '# High P/D · Fast filter · Low latency',
+        '',
+        '# ── PID ──',
+        'set p_roll            = '+_r(_pRoll*1.15),
+        'set i_roll            = '+_r(_iRoll*0.90),
+        'set d_roll            = '+_r(_dRoll*1.12),
+        'set f_roll            = 100',
+        'set p_pitch           = '+_r(_pPitch*1.15),
+        'set i_pitch           = '+_r(_iPitch*0.90),
+        'set d_pitch           = '+_r(_dPitch*1.12),
+        'set f_pitch           = 105',
+        'set p_yaw             = '+_r(_pYaw*1.10),
+        'set i_yaw             = '+_r(_iYaw*0.88),
+        '',
+        '# ── Filter (fast) ──',
+        'set gyro_lpf1_static_hz    = '+_r(_gLpf1*1.25),
+        'set gyro_lpf2_static_hz    = '+_r(_gLpf1*2.5),
+        'set dterm_lpf1_static_hz   = '+_r(_dLpf1*1.20),
+        'set dterm_lpf2_static_hz   = '+_r(_dLpf1*2.0),
+        'set dyn_notch_count        = 2',
+        'set dyn_notch_min_hz       = 150',
+        'set dyn_notch_max_hz       = 700',
+        '',
+        '# ── RPM Filter ──',
+        'set motor_pwm_protocol     = DSHOT600',
+        'set dshot_bidir            = ON',
+        'set motor_poles            = 14',
+        'set rpm_filter_harmonics   = 3',
+        'set rpm_filter_min_hz      = 150',
+        '',
+        '# ── TPA ──',
+        'set tpa_rate               = 20',
+        'set tpa_breakpoint         = 1400',
+        '',
+        'set feedforward_averaging  = 2_POINT',
+        'set iterm_relax            = RP',
+        '',
+        'save'
+      ].join('\n');
+    }
+  },
+  longrange: {
+    label:'LONG RANGE', color:'#a050ff',
+    title:'Long Range — นิ่ง, ประหยัดแบต, Wind rejection สูง',
+    desc:'P/D ต่ำ 20% · I สูง 15% · Filter นุ่ม — บินตรง wind rejection ดี ประหยัด current',
+    stats:[
+      {v:'–20% P/D',c:'blue',l:'PID'},
+      {v:'+15% I',c:'green',l:'I GAIN'},
+      {v:'Smooth',c:'green',l:'FILTER'},
+      {v:'LR',c:'blue',l:'MODE'},
+    ],
+    tips:[
+      {i:'🗺️',t:'<b>I สูงขึ้น</b> — ต้านลมได้ดี โดรนบินตรงแม้มีลมแรง เหมาะ 7"-10" frame'},
+      {i:'🔋',t:'<b>Filter นุ่มลง</b> — ลด motor noise ช่วยประหยัด current เพิ่ม flight time'},
+      {i:'🟢',t:'<b>P/D ต่ำลง</b> — บินนิ่ง ไม่ jitter ลด motor temp สำหรับ long range'},
+      {i:'💡',t:'Anti-gravity gain สูงขึ้น — ช่วย I term ตอบสนองเร็วเมื่อเปลี่ยน throttle'},
+      {i:'⚠️',t:'ไม่เหมาะกับ freestyle trick — response ช้าเจตนา เพื่อ LR efficiency'},
+    ],
+    cli: function(){
+      return [
+        '# OBIXConfig Doctor v5 — LONG RANGE TUNE',
+        '# Low P/D · High I · Soft filter · Wind rejection',
+        '',
+        '# ── PID ──',
+        'set p_roll            = '+_r(_pRoll*0.80),
+        'set i_roll            = '+_r(_iRoll*1.15),
+        'set d_roll            = '+_r(_dRoll*0.80),
+        'set f_roll            = 40',
+        'set p_pitch           = '+_r(_pPitch*0.80),
+        'set i_pitch           = '+_r(_iPitch*1.15),
+        'set d_pitch           = '+_r(_dPitch*0.80),
+        'set f_pitch           = 45',
+        'set p_yaw             = '+_r(_pYaw*0.85),
+        'set i_yaw             = '+_r(_iYaw*1.10),
+        '',
+        '# ── Filter (smooth) ──',
+        'set gyro_lpf1_static_hz    = '+_r(_gLpf1*0.75),
+        'set gyro_lpf2_static_hz    = '+_r(_gLpf1*1.4),
+        'set dterm_lpf1_static_hz   = '+_r(_dLpf1*0.75),
+        'set dterm_lpf2_static_hz   = '+_r(_dLpf1*1.3),
+        'set dyn_notch_count        = '+Math.max(2,_notch),
+        'set dyn_notch_min_hz       = 70',
+        'set dyn_notch_max_hz       = 400',
+        '',
+        '# ── RPM Filter ──',
+        'set motor_pwm_protocol     = DSHOT600',
+        'set dshot_bidir            = ON',
+        'set motor_poles            = 14',
+        'set rpm_filter_harmonics   = 3',
+        'set rpm_filter_min_hz      = 80',
+        '',
+        '# ── LR specific ──',
+        'set anti_gravity_gain      = '+_r(_ag*1.4),
+        'set iterm_relax            = RPY',
+        'set tpa_rate               = 8',
+        'set tpa_breakpoint         = 1600',
+        '',
+        'save'
+      ].join('\n');
+    }
+  },
+  cinematic: {
+    label:'CINEMATIC', color:'var(--amber)',
+    title:'Cinematic — เรียบนิ่งที่สุด สำหรับ film/photo',
+    desc:'P/D ต่ำมาก 35% · Filter นุ่มมาก · Expo สูง — ภาพนิ่ง ไม่มี jitter สำหรับถ่ายทำ',
+    stats:[
+      {v:'–35% P',c:'amber',l:'P GAIN'},
+      {v:'Max',c:'amber',l:'FILTER'},
+      {v:'Slow',c:'green',l:'RESPONSE'},
+      {v:'Film',c:'amber',l:'MODE'},
+    ],
+    tips:[
+      {i:'🎬',t:'<b>PID ต่ำมาก</b> — โดรนเคลื่อนไหวเนียน ไม่มี oscillation ที่กล้องจะจับได้'},
+      {i:'🟡',t:'<b>Filter นุ่มสุดขีด</b> — latency สูงขึ้นแต่ไม่ใช่ปัญหาสำหรับ cinematic ที่ไม่ต้องการ agility'},
+      {i:'⚠️',t:'ไม่เหมาะบินใกล้สิ่งกีดขวาง — response ช้า ต้องการพื้นที่โล่ง'},
+      {i:'🎯',t:'แนะนำ RC rates ต่ำ + expo สูง (0.7+) เพื่อ smooth input ที่สุด'},
+      {i:'💡',t:'ใส่ND filter บนกล้อง + ใช้ shutter rule 180° เพื่อภาพ cinematic ที่สมบูรณ์'},
+    ],
+    cli: function(){
+      return [
+        '# OBIXConfig Doctor v5 — CINEMATIC TUNE',
+        '# Ultra smooth · Low PID · Max filter · Film production',
+        '',
+        '# ── PID ──',
+        'set p_roll            = '+_r(_pRoll*0.65),
+        'set i_roll            = '+_r(_iRoll*1.10),
+        'set d_roll            = '+_r(_dRoll*0.65),
+        'set f_roll            = 20',
+        'set p_pitch           = '+_r(_pPitch*0.65),
+        'set i_pitch           = '+_r(_iPitch*1.10),
+        'set d_pitch           = '+_r(_dPitch*0.65),
+        'set f_pitch           = 25',
+        'set p_yaw             = '+_r(_pYaw*0.70),
+        'set i_yaw             = '+_r(_iYaw*1.10),
+        '',
+        '# ── Filter (max smooth) ──',
+        'set gyro_lpf1_static_hz    = '+_r(_gLpf1*0.60),
+        'set gyro_lpf2_static_hz    = '+_r(_gLpf1*1.2),
+        'set dterm_lpf1_static_hz   = '+_r(_dLpf1*0.60),
+        'set dterm_lpf2_static_hz   = '+_r(_dLpf1*1.1),
+        'set dyn_notch_count        = '+Math.max(3,_notch),
+        'set dyn_notch_min_hz       = 60',
+        'set dyn_notch_max_hz       = 350',
+        '',
+        '# ── RPM Filter ──',
+        'set motor_pwm_protocol     = DSHOT600',
+        'set dshot_bidir            = ON',
+        'set rpm_filter_harmonics   = 3',
+        'set rpm_filter_min_hz      = 70',
+        '',
+        '# ── Cinematic settings ──',
+        'set anti_gravity_gain      = '+_r(_ag*1.5),
+        'set iterm_relax            = RPY',
+        'set tpa_rate               = 5',
+        'set tpa_breakpoint         = 1700',
+        '',
+        'save'
+      ].join('\n');
+    }
+  }
+};
+
+var PRESET_INFO = {
+  beginner:   {badge:'🟢 SAFE',      bStyle:'background:rgba(0,255,136,0.1);border-color:rgba(0,255,136,0.4);color:var(--green)'},
+  freestyle:  {badge:'🔵 BALANCED',  bStyle:'background:rgba(0,170,255,0.1);border-color:rgba(0,170,255,0.4);color:var(--blue)'},
+  racing:     {badge:'🔴 AGGRESSIVE',bStyle:'background:rgba(255,68,85,0.1);border-color:rgba(255,68,85,0.4);color:var(--red)'},
+  longrange:  {badge:'🟣 EFFICIENT', bStyle:'background:rgba(160,80,255,0.1);border-color:rgba(160,80,255,0.4);color:#a050ff'},
+  cinematic:  {badge:'🟡 SMOOTH',    bStyle:'background:rgba(255,183,0,0.1);border-color:rgba(255,183,0,0.4);color:var(--amber)'},
+};
+
+function selectPreset(type, btn) {
+  document.querySelectorAll('.ptab').forEach(function(t){ t.className='ptab'; });
+  btn.className = 'ptab active';
+  var p = PRESETS[type]; var info = PRESET_INFO[type]; if(!p) return;
+  document.getElementById('picBadge').textContent = info.badge;
+  document.getElementById('picBadge').setAttribute('style', info.bStyle+';display:inline-block;font-family:var(--font-d);font-size:8px;letter-spacing:.1em;padding:3px 10px;border-radius:4px;margin-bottom:8px;border:1px solid;');
+  document.getElementById('picTitle').textContent = p.title;
+  document.getElementById('picDesc').textContent  = p.desc;
+  var statsHtml = p.stats.map(function(s){ return '<div class="pstat"><span class="pstat-val '+s.c+'">'+s.v+'</span><span class="pstat-lbl">'+s.l+'</span></div>'; }).join('');
+  document.getElementById('picStats').innerHTML = statsHtml;
+  var tipsHtml = p.tips.map(function(t){ return '<div class="ptip"><span class="ptip-icon">'+t.i+'</span><span>'+t.t+'</span></div>'; }).join('');
+  document.getElementById('picTips').innerHTML = tipsHtml;
+  document.getElementById('cliOutput').textContent = p.cli();
+}
+function showPreset(type){ var btn = document.querySelector('.ptab[data-preset="'+type+'"]'); if(btn) selectPreset(type,btn); }
+
+/* ─── DONATE AMOUNT BUTTONS ─────────────────────────────────── */
+document.querySelectorAll('.amt-btn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.amt-btn').forEach(function(b){ b.classList.remove('selected'); });
+    this.classList.add('selected');
+  });
+});
+
+/* ─── CHARTS (analysis only) ─────────────────────────────────── */
+{% if analysis %}
+(function(){
+  var tEl = document.getElementById('thrustChart');
+  if(tEl){
+    {% if analysis.advanced %}
+    var _hoverW  = {{ analysis.advanced.avg_power_w | int }};
+    {% else %}
+    var _hoverW = 0;
+    {% endif %}
+    var _aggrW   = Math.round(_hoverW * 1.8);
+    var _peakW   = Math.round(_hoverW * 4.5);
+    new Chart(tEl, {
+      type: 'bar',
+      data: {
+        labels: ['Hover', 'Aggressive', 'Peak'],
+        datasets: [{
+          label: 'Power (W)',
+          data: [_hoverW, _aggrW, _peakW],
+          backgroundColor: ['rgba(0,255,136,0.35)', 'rgba(255,183,0,0.35)', 'rgba(255,68,85,0.35)'],
+          borderColor: ['#00ff88','#ffb700','#ff4455'],
+          borderWidth: 1, borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display:false }, tooltip:{ callbacks:{ label:function(c){ return c.raw+'W'; }}}},
+        scales: {
+          y: { beginAtZero:true, grid:{ color:'rgba(255,255,255,0.04)' }, ticks:{ color:'#3d5470', font:{family:'JetBrains Mono'}, callback:function(v){ return v+'W'; }}},
+          x: { grid:{ display:false }, ticks:{ color:'#3d5470', font:{family:'JetBrains Mono'} }}
+        }
+      }
+    });
+  }
+
+  {% if analysis.prop_result %}
+  var nEl = document.getElementById('noiseChart');
+  if(nEl){
+    new Chart(nEl, {
+      type: 'radar',
+      data: {
+        labels: ['Motor Load', 'Noise', 'Grip', 'Efficiency', 'Speed'],
+        datasets: [{
+          label: 'Prop Profile',
+          data: [
+            {{ analysis.prop_result.effect.motor_load }},
+            {{ analysis.prop_result.effect.noise }},
+            {% if 'หนึบมาก' in (analysis.prop_result.effect.grip or '') %}6{% elif 'หนึบดี' in (analysis.prop_result.effect.grip or '') %}4{% else %}2{% endif %},
+            {% if 'สูง' in (analysis.prop_result.effect.efficiency or '') %}5{% elif 'กลาง' in (analysis.prop_result.effect.efficiency or '') %}3{% else %}2{% endif %},
+            {% if analysis.prop_result.effect.pitch_speed_kmh %}{{ [(analysis.prop_result.effect.pitch_speed_kmh / 20) | int, 6] | min }}{% else %}3{% endif %}
+          ],
+          backgroundColor: 'rgba(0,170,255,0.12)',
+          borderColor: '#00aaff',
+          pointBackgroundColor: '#00aaff',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend:{ display:false } },
+        scales: { r: { beginAtZero:true, max:8, grid:{ color:'rgba(255,255,255,0.05)' }, ticks:{ display:false }, pointLabels:{ color:'#3d5470', font:{ size:10, family:'JetBrains Mono' } }}}
+      }
+    });
+  }
+  {% endif %}
+
+  /* Counter animation */
+  document.querySelectorAll('.qs-stat-val.counter').forEach(function(el){
+    var target = parseFloat(el.textContent);
+    if(isNaN(target)) return;
+    var startTime = null; var dur = 800;
+    function step(ts){
+      if(!startTime) startTime = ts;
+      var prog = Math.min((ts-startTime)/dur, 1);
+      var eased = 1 - Math.pow(1-prog, 3);
+      el.textContent = (target * eased).toFixed(target%1===0?0:2);
+      if(prog<1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  });
+})();
+{% endif %}
+
+/* ─── RADAR CHART ────────────────────────────────────────────── */
+var radarChartInst = null;
+function renderRadar(){
+  var d = document.getElementById('radarData');
+  if(!d || radarChartInst) return;
+  var vals = [
+    parseInt(d.dataset.power||0),
+    parseInt(d.dataset.flight||0),
+    parseInt(d.dataset.noise||0),
+    parseInt(d.dataset.tip||0),
+    parseInt(d.dataset.motor||0),
+    parseInt(d.dataset.eff||0),
+  ];
+  var ctx2 = document.getElementById('radarChart');
+  if(!ctx2) return;
+  radarChartInst = new Chart(ctx2, {
+    type: 'radar',
+    data: {
+      labels: ['Power','Flight Time','Low Noise','Tip Safety','Motor Health','Efficiency'],
+      datasets: [{
+        data: vals,
+        backgroundColor: 'rgba(0,255,136,.10)',
+        borderColor: '#00ff88', borderWidth: 2,
+        pointBackgroundColor: ['#00ff88','#58a6ff','#a78bfa','#f1b65a','#f87171','#2dd4bf'],
+        pointRadius: 4, pointHoverRadius: 6,
+      }]
+    },
+    options: {
+      scales: { r: { min:0, max:100, ticks:{ stepSize:25, display:false }, grid:{ color:'rgba(255,255,255,.07)' }, pointLabels:{ color:'rgba(200,215,225,.7)', font:{ size:10, family:"'Sarabun', sans-serif" }}, angleLines:{ color:'rgba(255,255,255,.07)' }}},
+      plugins: { legend:{ display:false }, tooltip:{ callbacks:{ label:function(c){ return c.raw+'%'; }}}},
+      animation: { duration:900 }
+    }
+  });
+}
+
+/* ─── SCORE RING ANIMATE ON LOAD ────────────────────────────── */
+(function(){
+  var ring = document.getElementById('score-ring-circle');
+  if(!ring) return;
+  var final = parseFloat(ring.getAttribute('stroke-dashoffset'));
+  var circ = 339.3;
+  ring.setAttribute('stroke-dashoffset', circ);
+  setTimeout(function(){
+    ring.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(.2,.8,.3,1)';
+    ring.setAttribute('stroke-dashoffset', final);
+  }, 350);
+})();
+
+/* ─── PARTICLE BURST ON ANALYZE — UPGRADED ──────────────────── */
+(function(){
+  var btn = document.querySelector('.btn-analyze');
+  if(!btn) return;
+  btn.addEventListener('click', function(e){
+    var colors = ['#00ff88','#00aaff','#00e5ff','#00cc6a','#ffffff'];
+    for(var i=0; i<22; i++){
+      var spark = document.createElement('div');
+      var color = colors[Math.floor(Math.random()*colors.length)];
+      var size = 3 + Math.random()*4;
+      spark.style.cssText = [
+        'position:fixed',
+        'left:'+e.clientX+'px',
+        'top:'+e.clientY+'px',
+        'width:'+size+'px',
+        'height:'+size+'px',
+        'border-radius:50%',
+        'background:'+color,
+        'pointer-events:none',
+        'z-index:9999',
+        'box-shadow:0 0 '+(size*2)+'px '+color
+      ].join(';');
+      document.body.appendChild(spark);
+      var angle = (i/22)*Math.PI*2 + Math.random()*0.3;
+      var dist = 50 + Math.random()*80;
+      var tx = Math.cos(angle)*dist;
+      var ty = Math.sin(angle)*dist;
+      var dur = 500+Math.random()*400;
+      spark.animate(
+        [{transform:'translate(0,0) scale(1)',opacity:1},
+         {transform:'translate('+tx+'px,'+ty+'px) scale(0)',opacity:0}],
+        {duration:dur, easing:'cubic-bezier(0,.9,.57,1)'}
+      ).onfinish = function(){ this.effect.target.remove(); };
+    }
+    /* also animate the button border */
+    btn.style.boxShadow = '0 0 40px rgba(0,255,136,0.6)';
+    setTimeout(function(){ btn.style.boxShadow = ''; }, 700);
+  });
+})();
+
+/* ─── INIT PRESET VIEW ──────────────────────────────────────── */
+(function(){
+  var initBtn = document.querySelector('.ptab[data-preset="beginner"]');
+  if(initBtn) selectPreset('beginner', initBtn);
+})();
+
+/* ─── THEME TOGGLE ──────────────────────────────────────────── */
+function toggleTheme(){
+  var b = document.body;
+  var isDark = !b.classList.contains('light');
+  b.classList.toggle('light', isDark);
+  localStorage.setItem('obix-theme', isDark ? 'light' : 'dark');
+}
+(function(){
+  var t = localStorage.getItem('obix-theme');
+  if(t === 'light') document.body.classList.add('light');
+})();
+
+/* ─── HUD VALUE FLASH on change ─────────────────────────────── */
+(function(){
+  var prev = {};
+  var flash = function(id, newVal){
+    if(prev[id] === newVal) return;
+    prev[id] = newVal;
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.style.transition = 'none';
+    el.style.transform = 'scale(1.12)';
+    el.style.filter = 'brightness(1.4)';
+    setTimeout(function(){
+      el.style.transition = 'transform .3s ease, filter .3s ease';
+      el.style.transform = '';
+      el.style.filter = '';
+    }, 120);
+  };
+  var origLiveCalc = window.liveCalc;
+  if(origLiveCalc) {
+    window.liveCalc = function(){
+      origLiveCalc();
+      ['h_twr','h_tip','h_rpm','h_ft'].forEach(function(id){
+        var el = document.getElementById(id);
+        if(el) flash(id, el.textContent);
+      });
+    };
+  }
+})();
+
+/* ─── PANEL SCROLL REVEAL ────────────────────────────────────── */
+(function(){
+  if(!('IntersectionObserver' in window)) return;
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'none';
+        obs.unobserve(e.target);
+      }
+    });
+  }, {threshold:0.08});
+  document.querySelectorAll('.tpanel, .inst-panel').forEach(function(el){
+    obs.observe(el);
+  });
+})();
+
+/* ─── TOOL DOCK FILTER ───────────────────────────────────────── */
+function dockFilter(btn, cat) {
+  // Update active tab
+  document.querySelectorAll('.dock-tab').forEach(function(t){ t.classList.remove('active'); });
+  btn.classList.add('active');
+  // Show/hide tools
+  document.querySelectorAll('.dtool[data-cat]').forEach(function(el){
+    var elCat = el.getAttribute('data-cat');
+    if (cat === 'all' || elCat === cat) {
+      el.classList.remove('hidden');
+    } else {
+      el.classList.add('hidden');
+    }
+  });
+}
+// Keyboard accessibility for dock tabs
+document.querySelectorAll('.dock-tab').forEach(function(tab){
+  tab.addEventListener('keydown', function(e){
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tab.click(); }
+  });
+});
 </script>
 </body>
 </html>
