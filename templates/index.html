@@ -326,6 +326,25 @@ body::after {
 .chip.a { color:var(--amber); border-color:rgba(255,183,0,0.28);  background:rgba(255,183,0,0.05); }
 .chip.p { color:var(--purple);border-color:rgba(168,85,247,0.28); background:rgba(168,85,247,0.05); }
 
+/* ─── HERO QUICK TOOL BUTTONS ─────────────────────────────────── */
+.hero-quick-tools {
+  display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px;
+}
+.hqt-btn {
+  font-family: var(--font-d); font-size: 8px; letter-spacing: .1em;
+  padding: 7px 14px; border-radius: 7px;
+  border: 1px solid; text-decoration: none; cursor: pointer;
+  background: none; transition: all .2s; position: relative; overflow: hidden;
+}
+.hqt-btn:hover { transform: translateY(-2px); }
+.hqt-btn.g { color: var(--green); border-color: rgba(0,255,136,0.28); background: rgba(0,255,136,0.04); }
+.hqt-btn.g:hover { border-color: rgba(0,255,136,0.6); box-shadow: 0 4px 18px rgba(0,255,136,0.15); }
+.hqt-btn.b { color: var(--blue); border-color: rgba(0,170,255,0.28); background: rgba(0,170,255,0.04); }
+.hqt-btn.b:hover { border-color: rgba(0,170,255,0.6); box-shadow: 0 4px 18px rgba(0,170,255,0.15); }
+.hqt-btn.a { color: var(--amber); border-color: rgba(255,183,0,0.35); background: linear-gradient(135deg, rgba(255,183,0,0.08), rgba(255,51,68,0.05)); font-weight: 700; letter-spacing: .14em; }
+.hqt-btn.a:hover { border-color: rgba(255,183,0,0.6); box-shadow: 0 4px 20px rgba(255,183,0,0.2); }
+@media(max-width:600px) { .hero-quick-tools { gap:5px; } .hqt-btn { font-size:7.5px; padding:6px 10px; } }
+
 /* Hero stats (right side) */
 .hero-stats {
   display:flex; gap:12px; flex-shrink:0;
@@ -1192,6 +1211,26 @@ input[type=number]:focus, input[type=text]:focus, select:focus {
   box-shadow:0 8px 32px rgba(0,255,136,0.4), 0 0 0 1px rgba(0,255,136,0.3);
 }
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ─── TOP BAR QUICK ACCESS BTN ───────────────────────────────── */
+.tb-qa-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: linear-gradient(135deg, rgba(0,255,136,0.10), rgba(0,170,255,0.06));
+  border: 1px solid rgba(0,255,136,0.30); border-radius: 7px;
+  color: var(--green); padding: 6px 12px; cursor: pointer;
+  transition: all .22s; position: relative; overflow: hidden;
+}
+.tb-qa-btn::before {
+  content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0,255,136,0.18), transparent);
+  animation: tbQaShimmer 3s ease-in-out infinite;
+}
+@keyframes tbQaShimmer { 0%,100%{left:-100%} 50%{left:150%} }
+.tb-qa-btn:hover {
+  border-color: rgba(0,255,136,0.6);
+  box-shadow: 0 0 18px rgba(0,255,136,0.25);
+  transform: translateY(-1px);
+}
 </style>
 </head>
 <body>
@@ -1237,6 +1276,10 @@ input[type=number]:focus, input[type=text]:focus, select:focus {
     </a>
   </div>
   <div class="tb-right">
+    <button class="tb-qa-btn" onclick="openQA()" title="เปิด Quick Access Tools">
+      <span style="font-size:14px;">⚡</span>
+      <span style="font-family:var(--font-d);font-size:8px;letter-spacing:.12em;">TOOLS</span>
+    </button>
     <span class="tb-version">v5.0 FULL</span>
     <button class="toggle-theme" onclick="toggleTheme()" title="สลับธีม">🌗</button>
   </div>
@@ -1244,6 +1287,477 @@ input[type=number]:focus, input[type=text]:focus, select:focus {
 
 <!-- ── OVERLAY ────────────────────────────────── -->
 <div id="overlay" class="overlay" tabindex="-1" aria-hidden="true"></div>
+
+<!-- ════════════════════════════════════════════════════════════
+     QUICK ACCESS TOOLS PANEL — FPV Style Popup
+════════════════════════════════════════════════════════════ -->
+
+<style>
+/* ── QUICK ACCESS BUTTON (floating bottom-right) ── */
+.qa-fab {
+  position: fixed; bottom: 28px; right: 28px; z-index: 500;
+  width: 54px; height: 54px; border-radius: 14px;
+  background: linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,170,255,0.10));
+  border: 1px solid rgba(0,255,136,0.4);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 0 30px rgba(0,255,136,0.2), 0 8px 32px rgba(0,0,0,0.5);
+  transition: all .25s cubic-bezier(.4,0,.2,1);
+  animation: fabPulse 3s ease-in-out infinite;
+}
+.qa-fab:hover {
+  transform: translateY(-3px) scale(1.06);
+  border-color: rgba(0,255,136,0.7);
+  box-shadow: 0 0 50px rgba(0,255,136,0.35), 0 12px 40px rgba(0,0,0,0.6);
+}
+@keyframes fabPulse {
+  0%,100%{ box-shadow: 0 0 30px rgba(0,255,136,0.2), 0 8px 32px rgba(0,0,0,0.5); }
+  50%{ box-shadow: 0 0 50px rgba(0,255,136,0.35), 0 8px 32px rgba(0,0,0,0.5); }
+}
+.qa-fab-label {
+  position: absolute; bottom: calc(100% + 8px); right: 0;
+  font-family: var(--font-d); font-size: 7.5px; letter-spacing: .14em;
+  color: var(--green); white-space: nowrap;
+  background: rgba(1,4,7,0.9); border: 1px solid rgba(0,255,136,0.2);
+  padding: 4px 10px; border-radius: 5px;
+  opacity: 0; transition: opacity .2s; pointer-events: none;
+}
+.qa-fab:hover .qa-fab-label { opacity: 1; }
+
+/* ── QUICK ACCESS OVERLAY ── */
+.qa-overlay {
+  position: fixed; inset: 0; z-index: 600;
+  background: rgba(1,3,7,0.82);
+  backdrop-filter: blur(16px) saturate(1.4);
+  opacity: 0; pointer-events: none;
+  transition: opacity .35s cubic-bezier(.4,0,.2,1);
+}
+.qa-overlay.open { opacity: 1; pointer-events: auto; }
+
+/* ── QUICK ACCESS PANEL ── */
+.qa-panel {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 700;
+  background: rgba(3,9,20,0.98);
+  border-top: 1px solid rgba(0,255,136,0.12);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -20px 80px rgba(0,0,0,0.7), 0 -4px 24px rgba(0,255,136,0.08);
+  transform: translateY(100%);
+  transition: transform .4s cubic-bezier(.4,0,.2,1);
+  max-height: 82vh; overflow-y: auto;
+}
+.qa-panel::-webkit-scrollbar { width: 3px; }
+.qa-panel::-webkit-scrollbar-thumb { background: rgba(0,255,136,0.15); }
+.qa-panel.open { transform: translateY(0); }
+
+/* Top accent bar */
+.qa-panel::before {
+  content: '';
+  position: sticky; top: 0; left: 0; right: 0; height: 2px; display: block;
+  background: linear-gradient(90deg, transparent 0%, var(--green) 25%, var(--blue) 50%, var(--cyan) 75%, transparent 100%);
+  background-size: 300% 100%;
+  animation: qaPanelBar 5s linear infinite;
+}
+@keyframes qaPanelBar { 0%{background-position:0%} 100%{background-position:300%} }
+
+/* Panel drag handle */
+.qa-handle {
+  width: 40px; height: 4px; border-radius: 2px;
+  background: rgba(255,255,255,0.1);
+  margin: 14px auto 0;
+}
+
+/* ── PANEL HEADER ── */
+.qa-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid rgba(0,255,136,0.07);
+}
+.qa-header-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,170,255,0.10));
+  border: 1px solid rgba(0,255,136,0.25);
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+  flex-shrink: 0;
+}
+.qa-header-title {
+  font-family: var(--font-d); font-size: 13px; font-weight: 700;
+  letter-spacing: .12em; color: var(--green);
+}
+.qa-header-sub {
+  font-family: var(--font-m); font-size: 9px; color: var(--muted2); margin-top: 2px;
+}
+.qa-close {
+  margin-left: auto;
+  background: none; border: 1px solid rgba(255,68,85,0.18);
+  border-radius: 8px; color: var(--muted2);
+  padding: 7px 12px; cursor: pointer; font-size: 12px;
+  font-family: var(--font-d); letter-spacing: .06em;
+  transition: all .2s;
+}
+.qa-close:hover { color: var(--red); border-color: rgba(255,68,85,0.4); background: rgba(255,68,85,0.05); }
+
+/* ── SECTION LABELS ── */
+.qa-section-label {
+  font-family: var(--font-d); font-size: 8px; letter-spacing: .22em;
+  color: var(--muted); padding: 14px 20px 8px;
+  display: flex; align-items: center; gap: 10px;
+}
+.qa-section-label::after {
+  content: ''; flex: 1; height: 1px; background: rgba(0,255,136,0.07);
+}
+
+/* ── TOOL GRID ── */
+.qa-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+  padding: 0 16px 16px;
+}
+
+/* ── TOOL CARD ── */
+.qa-card {
+  position: relative; overflow: hidden;
+  background: rgba(4,11,24,0.92);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px; padding: 14px 14px 12px;
+  cursor: pointer; text-decoration: none; color: inherit;
+  transition: all .22s cubic-bezier(.4,0,.2,1);
+  display: flex; flex-direction: column; gap: 8px;
+  animation: cardReveal .5s ease both;
+}
+.qa-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  opacity: 0; transition: opacity .2s;
+}
+.qa-card:hover {
+  border-color: rgba(0,255,136,0.22);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 30px rgba(0,255,136,0.06);
+  background: rgba(0,255,136,0.025);
+}
+.qa-card:hover::before { opacity: 1; }
+
+/* Color variants */
+.qa-card.g::before { background: linear-gradient(90deg, var(--green), var(--cyan)); }
+.qa-card.b::before { background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+.qa-card.a::before { background: linear-gradient(90deg, var(--amber), var(--red)); }
+.qa-card.p::before { background: linear-gradient(90deg, var(--purple), var(--blue)); }
+.qa-card.r::before { background: linear-gradient(90deg, var(--red), var(--amber)); }
+.qa-card.g:hover { border-color: rgba(0,255,136,0.22); }
+.qa-card.b:hover { border-color: rgba(0,170,255,0.22); background: rgba(0,170,255,0.025); }
+.qa-card.a:hover { border-color: rgba(255,183,0,0.22); background: rgba(255,183,0,0.025); }
+.qa-card.p:hover { border-color: rgba(168,85,247,0.22); background: rgba(168,85,247,0.025); }
+.qa-card.r:hover { border-color: rgba(255,51,68,0.22); background: rgba(255,51,68,0.025); }
+
+/* Staggered entrance animation */
+.qa-card:nth-child(1)  { animation-delay: .03s; }
+.qa-card:nth-child(2)  { animation-delay: .06s; }
+.qa-card:nth-child(3)  { animation-delay: .09s; }
+.qa-card:nth-child(4)  { animation-delay: .12s; }
+.qa-card:nth-child(5)  { animation-delay: .15s; }
+.qa-card:nth-child(6)  { animation-delay: .18s; }
+.qa-card:nth-child(7)  { animation-delay: .21s; }
+.qa-card:nth-child(8)  { animation-delay: .24s; }
+.qa-card:nth-child(9)  { animation-delay: .27s; }
+.qa-card:nth-child(10) { animation-delay: .30s; }
+.qa-card:nth-child(11) { animation-delay: .33s; }
+.qa-card:nth-child(12) { animation-delay: .36s; }
+@keyframes cardReveal {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.qa-card-icon {
+  width: 36px; height: 36px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+  transition: all .2s; flex-shrink: 0;
+}
+.qa-card:hover .qa-card-icon { transform: scale(1.08); }
+.qa-card.g .qa-card-icon { background: rgba(0,255,136,0.08); border-color: rgba(0,255,136,0.15); }
+.qa-card.b .qa-card-icon { background: rgba(0,170,255,0.08); border-color: rgba(0,170,255,0.15); }
+.qa-card.a .qa-card-icon { background: rgba(255,183,0,0.08); border-color: rgba(255,183,0,0.15); }
+.qa-card.p .qa-card-icon { background: rgba(168,85,247,0.08); border-color: rgba(168,85,247,0.15); }
+.qa-card.r .qa-card-icon { background: rgba(255,51,68,0.08);  border-color: rgba(255,51,68,0.15); }
+
+.qa-card-title {
+  font-family: var(--font-d); font-size: 9.5px; font-weight: 700;
+  letter-spacing: .07em; line-height: 1.3;
+  transition: color .2s;
+}
+.qa-card.g .qa-card-title { color: var(--text); }
+.qa-card:hover .qa-card-title { color: var(--green); }
+.qa-card.b:hover .qa-card-title { color: var(--blue); }
+.qa-card.a:hover .qa-card-title { color: var(--amber); }
+.qa-card.p:hover .qa-card-title { color: var(--purple); }
+.qa-card.r:hover .qa-card-title { color: var(--red); }
+
+.qa-card-desc {
+  font-size: 10px; color: var(--muted2); line-height: 1.5;
+}
+.qa-card-badge {
+  position: absolute; top: 10px; right: 10px;
+  font-family: var(--font-d); font-size: 6.5px; letter-spacing: .08em;
+  padding: 2px 7px; border-radius: 8px;
+  background: rgba(0,255,136,0.08); color: var(--muted2);
+  border: 1px solid rgba(0,255,136,0.1);
+}
+.qa-card-badge.new { background: rgba(0,255,136,0.12); color: var(--green); border-color: rgba(0,255,136,0.25); }
+.qa-card-badge.hot { background: rgba(255,51,68,0.12); color: var(--red); border-color: rgba(255,51,68,0.25); }
+.qa-card-badge.v5  { background: rgba(168,85,247,0.12); color: var(--purple); border-color: rgba(168,85,247,0.25); }
+
+.qa-card-arrow {
+  position: absolute; bottom: 11px; right: 12px;
+  font-size: 10px; color: var(--muted);
+  opacity: 0; transform: translateX(-4px);
+  transition: all .2s;
+}
+.qa-card:hover .qa-card-arrow { opacity: 1; transform: translateX(0); }
+
+/* ── BOTTOM SAFE AREA ── */
+.qa-safe { height: 20px; }
+</style>
+
+<!-- Floating Access Button -->
+<button class="qa-fab" id="qaFabBtn" aria-label="Quick Access Tools" onclick="openQA()">
+  ⚡
+  <span class="qa-fab-label">QUICK ACCESS</span>
+</button>
+
+<!-- Background overlay -->
+<div class="qa-overlay" id="qaOverlay" onclick="closeQA()"></div>
+
+<!-- Slide-up panel -->
+<div class="qa-panel" id="qaPanel" role="dialog" aria-modal="true" aria-label="Quick Access Tools">
+  <div class="qa-handle"></div>
+
+  <div class="qa-header">
+    <div class="qa-header-icon">⚡</div>
+    <div>
+      <div class="qa-header-title">QUICK ACCESS — FPV TOOLKIT</div>
+      <div class="qa-header-sub">22 Tools · เลือกเครื่องมือที่ต้องการ · คลิกเพื่อเปิด</div>
+    </div>
+    <button class="qa-close" onclick="closeQA()">✕ CLOSE</button>
+  </div>
+
+  <!-- Section: Core Tools -->
+  <div class="qa-section-label">🔧 เครื่องมือหลัก</div>
+  <div class="qa-grid">
+
+    <a href="/motor-prop" class="qa-card g">
+      <span class="qa-card-badge">tool</span>
+      <div class="qa-card-icon">🧭</div>
+      <div class="qa-card-title">Motor × Prop Recommender</div>
+      <div class="qa-card-desc">แนะนำมอเตอร์และใบพัดตามสเปค size/battery/style</div>
+      <span class="qa-card-arrow">→</span>
+    </a>
+
+    <a href="/cli_surgeon" class="qa-card a">
+      <span class="qa-card-badge">tool</span>
+      <div class="qa-card-icon">🩺</div>
+      <div class="qa-card-title">CLI Surgeon</div>
+      <div class="qa-card-desc">วิเคราะห์ diff all / dump · ตรวจ config ทั้งไฟล์</div>
+      <span class="qa-card-arrow">→</span>
+    </a>
+
+    <a href="/pid-advisor" class="qa-card p">
+      <span class="qa-card-badge new">new</span>
+      <div class="qa-card-icon">💊</div>
+      <div class="qa-card-title">PID Symptom Advisor</div>
+      <div class="qa-card-desc">บอกอาการโดรน → รับคำแนะนำปรับ PID ทันที</div>
+      <span class="qa-card-arrow">→</span>
+    </a>
+
+    <a href="/rpm-filter" class="qa-card g">
+      <span class="qa-card-badge new">new</span>
+      <div class="qa-card-icon">⚙️</div>
+      <div class="qa-card-title">RPM Filter Calculator</div>
+      <div class="qa-card-desc">คำนวณ harmonic + dyn_notch ตาม KV และ pole count</div>
+      <span class="qa-card-arrow">→</span>
+    </a>
+
+    <a href="/rates-visualizer" class="qa-card b">
+      <span class="qa-card-badge new">new</span>
+      <div class="qa-card-icon">📈</div>
+      <div class="qa-card-title">Rates Visualizer</div>
+      <div class="qa-card-desc">กราฟ rates curve real-time · per-axis tuning</div>
+      <span class="qa-card-arrow">→</span>
+    </a>
+
+    <a href="/blackbox" class="qa-card b">
+      <span class="qa-card-badge hot">HOT</span>
+      <div class="qa-card-icon">📊</div>
+      <div class="qa-card-title">Blackbox CSV Analyzer</div>
+      <div class="qa-card-desc">อัพโหลด log · วิเคราะห์ PID score · oscillation</div>
+      <span class="qa-card-arrow">→</span>
+    </a>
+
+  </div>
+
+  <!-- Section: Advanced -->
+  <div class="qa-section-label">⚡ เครื่องมือขั้นสูง</div>
+  <div class="qa-grid">
+
+    <a href="/cli-comparator" class="qa-card a">
+      <span class="qa-card-badge new">new</span>
+      <div class="qa-card-icon">⚖️</div>
+      <div class="qa-card-title">CLI Diff Comparator</div>
+      <div class="qa-card-desc">วาง 2 config เทียบกัน เห็นทุกค่าที่เปลี่ยนแปลง</div>
+      <span class="qa-card-arrow">→</span>
+    </a>
+
+    <a href="/esc-checker" class="qa-card a">
+      <span class="qa-card-badge new">new</span>
+      <div class="qa-card-icon">⚡</div>
+      <div class="qa-card-title">ESC Compatibility Checker</div>
+      <div class="qa-card-desc">ตรวจ ESC amps, protocol, KV compatibility</div>
+      <span class="qa-card-arrow">→</span>
+    </a>
+
+    <a href="/osd" class="qa-card p">
+      <span class="qa-card-badge">tool</span>
+      <div class="qa-card-icon">🖥️</div>
+      <div class="qa-card-title">OSD Designer</div>
+      <div class="qa-card-desc">ออกแบบ OSD layout · export CLI command</div>
+      <span class="qa-card-arrow">→</span>
+    </a>
+
+  </div>
+
+  <!-- Section: v5 Physics Tools -->
+  <div class="qa-section-label">🔬 v5.0 Physics Engine</div>
+  <div class="qa-grid">
+
+    <a href="/battery-health" class="qa-card a">
+      <span class="qa-card-badge v5">v5</span>
+      <div class="qa-card-icon">🔋</div>
+      <div class="qa-card-title">Battery Health Advisor</div>
+      <div class="qa-card-desc">IR · Voltage Sag · Health Score · อายุที่เหลือ</div>
+      <span class="qa-card-arrow">→</span>
+    </a>
+
+    <a href="/motor-thermal" class="qa-card r">
+      <span class="qa-card-badge v5">v5</span>
+      <div class="qa-card-icon">🌡️</div>
+      <div class="qa-card-title">Motor Thermal Estimator</div>
+      <div class="qa-card-desc">ประมาณ winding temperature · safe operating zone</div>
+      <span class="qa-card-arrow">→</span>
+    </a>
+
+    <a href="/loop-analyzer" class="qa-card p">
+      <span class="qa-card-badge v5">v5</span>
+      <div class="qa-card-icon">📡</div>
+      <div class="qa-card-title">Control Loop Analyzer</div>
+      <div class="qa-card-desc">Stick→Prop latency · bottleneck map · loop timing</div>
+      <span class="qa-card-arrow">→</span>
+    </a>
+
+  </div>
+
+  <!-- Section: VTX & Signal -->
+  <div class="qa-section-label">📡 VTX & Signal</div>
+  <div class="qa-grid">
+
+    <a href="/vtx" class="qa-card g">
+      <span class="qa-card-badge">tool</span>
+      <div class="qa-card-icon">📡</div>
+      <div class="qa-card-title">VTX Bands & Channels</div>
+      <div class="qa-card-desc">ตาราง Band/Channel · CLI command สำเร็จรูป</div>
+      <span class="qa-card-arrow">→</span>
+    </a>
+
+    <a href="/vtx-range" class="qa-card b">
+      <span class="qa-card-badge">tool</span>
+      <div class="qa-card-icon">🏞️</div>
+      <div class="qa-card-title">VTX Range Calculator</div>
+      <div class="qa-card-desc">ประมาณระยะสัญญาณ + กราฟ antenna gain</div>
+      <span class="qa-card-arrow">→</span>
+    </a>
+
+    <a href="/vtx-smartaudio" class="qa-card a">
+      <span class="qa-card-badge">tool</span>
+      <div class="qa-card-icon">🎙️</div>
+      <div class="qa-card-title">VTX SmartAudio</div>
+      <div class="qa-card-desc">SmartAudio / Tramp CLI commands · channel switcher</div>
+      <span class="qa-card-arrow">→</span>
+    </a>
+
+  </div>
+
+  <!-- Section: Community & Wizard -->
+  <div class="qa-section-label">🚀 Wizard & Community</div>
+  <div class="qa-grid">
+
+    <a href="/flight-quiz" class="qa-card g">
+      <span class="qa-card-badge new">new</span>
+      <div class="qa-card-icon">🎯</div>
+      <div class="qa-card-title">Flight Style Quiz</div>
+      <div class="qa-card-desc">5 คำถาม → สไตล์การบิน + rates preset แนะนำ</div>
+      <span class="qa-card-arrow">→</span>
+    </a>
+
+    <a href="/bf-wizard" class="qa-card g">
+      <span class="qa-card-badge new">new</span>
+      <div class="qa-card-icon">⚡</div>
+      <div class="qa-card-title">BF Config Wizard</div>
+      <div class="qa-card-desc">7 ขั้นตอน setup → CLI พร้อม paste ทันที</div>
+      <span class="qa-card-arrow">→</span>
+    </a>
+
+    <a href="/build-card" class="qa-card a">
+      <span class="qa-card-badge new">new</span>
+      <div class="qa-card-icon">🃏</div>
+      <div class="qa-card-title">Build Card Generator</div>
+      <div class="qa-card-desc">สร้างรูปสเปคโดรนสวยๆ สำหรับแชร์ Social</div>
+      <span class="qa-card-arrow">→</span>
+    </a>
+
+    <a href="/tuning-log" class="qa-card b">
+      <span class="qa-card-badge new">new</span>
+      <div class="qa-card-icon">📊</div>
+      <div class="qa-card-title">Tuning Log</div>
+      <div class="qa-card-desc">บันทึก session · เปรียบเทียบ PID ระหว่าง session</div>
+      <span class="qa-card-arrow">→</span>
+    </a>
+
+    <a href="/leaderboard" class="qa-card a">
+      <span class="qa-card-badge new">new</span>
+      <div class="qa-card-icon">🏆</div>
+      <div class="qa-card-title">Config Leaderboard</div>
+      <div class="qa-card-desc">vote · rank · copy config จากชุมชน FPV</div>
+      <span class="qa-card-arrow">→</span>
+    </a>
+
+    <a href="/downloads" class="qa-card g">
+      <span class="qa-card-badge">files</span>
+      <div class="qa-card-icon">📁</div>
+      <div class="qa-card-title">DIFF & DUMP Files</div>
+      <div class="qa-card-desc">รวม CLI config สำเร็จรูปสำหรับโดรนหลากหลาย</div>
+      <span class="qa-card-arrow">→</span>
+    </a>
+
+  </div>
+
+  <div class="qa-safe"></div>
+</div>
+
+<script>
+/* ── Quick Access Panel ── */
+function openQA() {
+  document.getElementById('qaOverlay').classList.add('open');
+  document.getElementById('qaPanel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.addEventListener('keydown', qaEscHandler);
+}
+function closeQA() {
+  document.getElementById('qaOverlay').classList.remove('open');
+  document.getElementById('qaPanel').classList.remove('open');
+  document.body.style.overflow = '';
+  document.removeEventListener('keydown', qaEscHandler);
+}
+function qaEscHandler(e) { if (e.key === 'Escape') closeQA(); }
+</script>
 
 <!-- ── DRAWER ────────────────────────────────── -->
 <aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
@@ -1451,6 +1965,14 @@ input[type=number]:focus, input[type=text]:focus, select:focus {
         <span class="chip a">Real-time Physics</span>
         <span class="chip p">AI Rule Engine</span>
         <span class="chip g">Pre-flight Check</span>
+      </div>
+      <!-- Quick tool shortcut buttons -->
+      <div class="hero-quick-tools">
+        <a href="/cli_surgeon"   class="hqt-btn g">🩺 CLI Surgeon</a>
+        <a href="/blackbox"      class="hqt-btn b">📊 Blackbox</a>
+        <a href="/rpm-filter"    class="hqt-btn g">⚙️ RPM Filter</a>
+        <a href="/motor-prop"    class="hqt-btn b">🧭 Motor×Prop</a>
+        <button onclick="openQA()" class="hqt-btn a">⚡ ALL TOOLS</button>
       </div>
     </div>
     <div class="hero-stats">
