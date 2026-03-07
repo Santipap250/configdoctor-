@@ -828,7 +828,7 @@ set dyn_notch_count      = {{ analysis.filter.dyn_notch or 1 }}
 set motor_pwm_protocol   = DSHOT600
 set dshot_bidir          = {{ 'ON' if analysis.filter.rpm_filter else 'OFF' }}
 set rpm_filter_harmonics = 3
-set rpm_filter_min_hz    = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [100, (analysis.advanced.rpm_estimated / 60 * 0.3) | int] | max }}{% else %}100{% endif %}
+set rpm_filter_min_hz    = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [100, (analysis.advanced.rpm_estimated / 60 * 0.20) | int] | max }}{% else %}100{% endif %}
 
 set anti_gravity_gain    = {{ analysis.filter.anti_gravity or 3 }}
 save</div>
@@ -859,7 +859,7 @@ save</div>
               <span class="qs-stat-val
                 {% if analysis.advanced and analysis.advanced.thrust_ratio %}
                   {% set twr_v = analysis.advanced.thrust_ratio %}
-                  {% if twr_v < 1.2 %}red{% elif twr_v > 3.5 %}amber{% else %}green{% endif %}
+                  {% if twr_v < 1.5 %}red{% elif twr_v > 8.0 %}amber{% else %}green{% endif %}
                 {% endif %}">
                 {% if analysis.advanced and analysis.advanced.thrust_ratio %}{{ analysis.advanced.thrust_ratio }}:1{% else %}—{% endif %}
               </span>
@@ -871,14 +871,14 @@ save</div>
                 {% elif analysis.battery_est %}{{ analysis.battery_est }} min
                 {% else %}—{% endif %}
               </span>
-              <span class="qs-stat-lbl">Hover Flight</span>
+              <span class="qs-stat-lbl">Flight Time (avg)</span>
             </div>
             <div class="qs-stat">
               <span class="qs-stat-val
-                {% if analysis.advanced and analysis.advanced.avg_power_w %}
-                  {% if analysis.advanced.avg_power_w > 300 %}red{% elif analysis.advanced.avg_power_w > 150 %}amber{% endif %}
+                {% if analysis.advanced and analysis.advanced.hover_power_w %}
+                  {% if analysis.advanced.hover_power_w > 300 %}red{% elif analysis.advanced.hover_power_w > 150 %}amber{% endif %}
                 {% endif %}">
-                {% if analysis.advanced and analysis.advanced.avg_power_w %}{{ analysis.advanced.avg_power_w | int }}W{% else %}—{% endif %}
+                {% if analysis.advanced and analysis.advanced.hover_power_w %}{{ analysis.advanced.hover_power_w | int }}W{% else %}—{% endif %}
               </span>
               <span class="qs-stat-lbl">Hover Power</span>
             </div>
@@ -925,7 +925,7 @@ save</div>
             {% set tip_v = analysis.advanced.tip_speed_mps | default(0) | float %}
             {% set cur_v = analysis.advanced.peak_current_a | default(0) | float %}
             {% if twr_v >= 3.5 %}<span class="ok">✅ TWR {{ twr_v }} — power เยอะ freestyle ทำ trick ได้ดี</span>{% elif twr_v >= 2.0 %}<span class="ok">✅ TWR {{ twr_v }} — สมดุลดี บินได้ทุก style</span>{% elif twr_v > 0 %}<span class="warn">⚠️ TWR {{ twr_v }} — power น้อย แนะนำ motor KV สูงขึ้นหรือลดน้ำหนัก</span>{% endif %}
-            {% if tip_v > 300 %} · <span class="bad">⛔ Tip speed {{ tip_v | int }}m/s — เกิน 300 m/s อันตราย เปลี่ยน prop เล็กลงหรือลด KV</span>{% elif tip_v > 220 %} · <span class="warn">⚠️ Tip speed {{ tip_v | int }}m/s — ใกล้ขีดจำกัด ควรตรวจ prop balance</span>{% elif tip_v > 0 %} · <span class="ok">✅ Tip speed {{ tip_v | int }}m/s — ปลอดภัย</span>{% endif %}
+            {% if tip_v > 290 %} · <span class="bad">⛔ Tip speed {{ tip_v | int }}m/s — เกิน 290 m/s compressibility loss รุนแรง เปลี่ยน prop เล็กลงหรือลด KV</span>{% elif tip_v > 265 %} · <span class="warn">⚠️ Tip speed {{ tip_v | int }}m/s — ใกล้ขีดจำกัด (265 m/s) efficiency ลดที่ full throttle</span>{% elif tip_v > 0 %} · <span class="ok">✅ Tip speed {{ tip_v | int }}m/s — ปลอดภัย (&lt;265 m/s)</span>{% endif %}
             {% if cur_v > 100 %} · <span class="bad">⛔ Peak {{ cur_v | int }}A — ต้องการ ESC {{ (cur_v * 1.3) | int }}A+</span>{% elif cur_v > 70 %} · <span class="warn">⚠️ Peak {{ cur_v | int }}A — ใช้ ESC {{ (cur_v * 1.2) | int }}A ขึ้นไป</span>{% elif cur_v > 0 %} · <span class="ok">✅ Peak {{ cur_v | int }}A — ESC ขนาดปกติรับได้</span>{% endif %}
           </div>
 
@@ -957,8 +957,8 @@ save</div>
           <div class="wtm-box" style="margin-top:8px;">
             <div class="wtm-head">📐 อ่านค่า PID นี้อย่างไร</div>
             <b>P (Proportional)</b> — ความแรงของการตอบสนอง ค่าสูง=ตอบสนองไว แต่อาจสั่น (oscillate)<br>
-            <b>I (Integral)</b> — ต้านแรงลม/drift ให้โดรนบินตรง ค่าสูงเกิน=bounce หลัง flip<br>
-            <b>D (Derivative)</b> — เบรก/damping ค่าสูง=นิ่งขึ้น แต่ motor ร้อนขึ้น<br>
+            <b>I (Integral)</b> — ต้านแรงลม/drift ให้โดรนบินตรง · ค่าสูงเกิน = bounce/porpoise หลัง flip · BF4.4+: ค่าแนะนำ 80-100 (เดิม BF3.x ใช้แค่ 30-50)<br>
+            <b>D (Derivative)</b> — เบรก/damping · ลด overshoot หลัง input · ค่าสูง = นิ่งขึ้น prop wash ลด แต่ motor ร้อนและ noise sensitivity สูงขึ้น · ค่าแนะนำ 5" = 28-42<br>
             <span style="color:var(--muted);font-size:10px;">⚠️ ค่านี้คือจุดเริ่มต้น — ทดสอบบินจริงก่อนปรับ · ปรับทีละ 5 หน่วย</span>
           </div>
         </div>
@@ -1219,7 +1219,7 @@ set dyn_notch_count      = {{ analysis.filter.dyn_notch or 1 }}
 set motor_pwm_protocol   = DSHOT600
 set dshot_bidir          = {{ 'ON' if analysis.filter.rpm_filter else 'OFF' }}
 set rpm_filter_harmonics = 3
-set rpm_filter_min_hz    = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [100, (analysis.advanced.rpm_estimated / 60 * 0.3) | int] | max }}{% else %}100{% endif %}
+set rpm_filter_min_hz    = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [100, (analysis.advanced.rpm_estimated / 60 * 0.20) | int] | max }}{% else %}100{% endif %}
 
 set anti_gravity_gain    = {{ analysis.filter.anti_gravity or 3 }}</pre>
               </div>
@@ -1231,10 +1231,10 @@ set anti_gravity_gain    = {{ analysis.filter.anti_gravity or 3 }}</pre>
               {% endif %}
               <div class="wtm-box" style="margin-top:8px;font-size:10px;">
                 <div class="wtm-head">🔊 ทำไม Filter สำคัญ</div>
-                <b>Gyro LPF1</b> — กรอง noise จาก gyro sensor ค่าต่ำ=นิ่ม latency สูง / ค่าสูง=เร็ว noise มากขึ้น<br>
+                <b>Gyro LPF1</b> — กรอง noise จาก gyro sensor · ค่าต่ำ=กรองแรง latency สูง (ช้า) / ค่าสูง=response เร็ว noise มากขึ้น · ค่าแนะนำ freestyle 200-250Hz, LR 120-150Hz<br>
                 <b>D-term LPF</b> — กรอง noise เฉพาะ D term ช่วยลด motor ร้อน<br>
-                <b>Dyn Notch</b> — กรอง resonance ความถี่เฉพาะจุด ตาม RPM จริง<br>
-                <b>RPM Filter</b> — แม่นยำที่สุด กรอง motor harmonic ทุก RPM แต่ต้องการ DSHOT600 + BiDir
+                <b>Dyn Notch</b> — กรอง resonance ความถี่เฉพาะจุด · ติดตาม RPM จริง auto · ลด motor/frame vibration โดยไม่เพิ่ม latency มาก · ใช้ 1-3 notch ตาม noise ของ build<br>
+                <b>RPM Filter</b> — แม่นยำที่สุด · กรอง motor harmonic ตาม RPM จริงทุก moment · ต้องการ BLHeli_32/AM32 + DSHOT300/600 + BiDir · ช่วยให้ D-term สูงขึ้นได้โดยไม่ motor ร้อน
               </div>
             </div>
           </div>
@@ -1268,7 +1268,7 @@ set dyn_notch_count      = {{ analysis.filter.dyn_notch or 1 }}
 set motor_pwm_protocol   = DSHOT600
 set dshot_bidir          = {{ 'ON' if analysis.filter.rpm_filter else 'OFF' }}
 set rpm_filter_harmonics = 3
-set rpm_filter_min_hz    = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [100, (analysis.advanced.rpm_estimated / 60 * 0.3) | int] | max }}{% else %}100{% endif %}
+set rpm_filter_min_hz    = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [100, (analysis.advanced.rpm_estimated / 60 * 0.20) | int] | max }}{% else %}100{% endif %}
 
 set anti_gravity_gain    = {{ analysis.filter.anti_gravity or 3 }}
 save</pre>
@@ -1292,14 +1292,14 @@ save</pre>
 
             <!-- TWR -->
             {% set twr2 = analysis.advanced.thrust_ratio | default(0) | float %}
-            <div class="insight-card {% if twr2 >= 2.5 %}g{% elif twr2 >= 1.5 %}a{% else %}r{% endif %}">
-              <div class="ic-val" style="color:{% if twr2 >= 2.5 %}var(--green){% elif twr2 >= 1.5 %}var(--amber){% else %}var(--red){% endif %}">{{ twr2 }}:1</div>
+            <div class="insight-card {% if twr2 >= 3.5 %}g{% elif twr2 >= 1.8 %}a{% else %}r{% endif %}">
+              <div class="ic-val" style="color:{% if twr2 >= 3.5 %}var(--green){% elif twr2 >= 1.8 %}var(--amber){% else %}var(--red){% endif %}">{{ twr2 }}:1</div>
               <div class="ic-label">Thrust-to-Weight Ratio</div>
               <div class="ic-explain">
-                {% if twr2 >= 4.0 %}กำลังสูงมาก — hover throttle ~{{ analysis.advanced.hover_throttle_pct | int if analysis.advanced.hover_throttle_pct else (100/twr2**0.5)|int }}% เหลือ headroom สำหรับ maneuver
-                {% elif twr2 >= 2.5 %}สมดุลดี — hover อยู่ที่ ~{{ analysis.advanced.hover_throttle_pct | int if analysis.advanced.hover_throttle_pct else (100/twr2**0.5)|int }}% throttle
-                {% elif twr2 >= 1.5 %}TWR ปานกลาง — hover ใช้ throttle สูง เหลือกำลังสำรองน้อย
-                {% else %}TWR ต่ำเกินไป — โดรนจะบินได้ยาก ควรเพิ่มกำลังหรือลดน้ำหนัก{% endif %}
+                {% if twr2 >= 6.0 %}⚡ กำลังสูงมาก — hover ~{{ analysis.advanced.hover_throttle_pct | int if analysis.advanced.hover_throttle_pct else (100/twr2**0.5)|int }}% เหมาะ racing/aggressive freestyle
+                {% elif twr2 >= 3.5 %}✅ ดีมาก — hover ~{{ analysis.advanced.hover_throttle_pct | int if analysis.advanced.hover_throttle_pct else (100/twr2**0.5)|int }}% throttle มี headroom เพียงพอ
+                {% elif twr2 >= 1.8 %}⚡ ปานกลาง — hover throttle สูง เหลือกำลังสำรองน้อย ควรเพิ่ม motor หรือลดน้ำหนัก
+                {% else %}⛔ ต่ำเกินไป — โดรนบินได้ยาก TWR ควรอยู่ที่ 2.0 ขึ้นไปอย่างน้อย{% endif %}
               </div>
               {% set twr_pct = [100, (twr2 / 5.0 * 100) | int] | min %}
               <div class="ic-bar"><div class="ic-bar-fill" style="width:{{ twr_pct }}%;background:{% if twr2>=2.5 %}var(--green){% elif twr2>=1.5 %}var(--amber){% else %}var(--red){% endif %};"></div></div>
@@ -1312,9 +1312,9 @@ save</pre>
               <div class="ic-val" style="color:var(--blue)">{{ peak_a }}A</div>
               <div class="ic-label">Peak Current (Total)</div>
               <div class="ic-explain">
-                กระแสสูงสุดเมื่อ full throttle ทั้ง {{ analysis.advanced.cells }}S pack
+                กระแสสูงสุดเมื่อ full throttle รวม 4 มอเตอร์ ({{ analysis.advanced.cells }}S pack)
                 {% if analysis.peak_per_motor_a %}· ต่อมอเตอร์ {{ analysis.peak_per_motor_a }}A{% endif %}
-                {% if esc_a > 0 %}— แนะนำ ESC ≥ {{ esc_a }}A/motor{% endif %}
+                {% if esc_a > 0 %}— แนะนำ ESC ≥ {{ esc_a }}A/motor (safety margin 1.5×){% endif %}
               </div>
               {% set cur_pct = [100, (peak_a / 200 * 100) | int] | min %}
               <div class="ic-bar"><div class="ic-bar-fill" style="width:{{ cur_pct }}%;background:var(--blue);"></div></div>
@@ -1322,15 +1322,15 @@ save</pre>
 
             <!-- Tip Speed -->
             {% set tip2 = analysis.advanced.tip_speed_mps | default(0) | float %}
-            <div class="insight-card {% if tip2 > 280 %}r{% elif tip2 > 250 %}a{% else %}g{% endif %}">
-              <div class="ic-val" style="color:{% if tip2>280 %}var(--red){% elif tip2>250 %}var(--amber){% else %}var(--green){% endif %}">{{ tip2 | int }} m/s</div>
+            <div class="insight-card {% if tip2 > 290 %}r{% elif tip2 > 265 %}a{% else %}g{% endif %}">
+              <div class="ic-val" style="color:{% if tip2>290 %}var(--red){% elif tip2>265 %}var(--amber){% else %}var(--green){% endif %}">{{ tip2 | int }} m/s</div>
               <div class="ic-label">Prop Tip Speed</div>
               <div class="ic-explain">
                 ปลายใบพัดวิ่งด้วยความเร็ว {{ tip2 | int }} m/s
                 ({{ (tip2/343*100)|int }}% ความเร็วเสียง)
-                {% if tip2 > 280 %}⚠️ เข้าโซน compressibility — noise สูงมาก ลอง pitch ต่ำลง
-                {% elif tip2 > 250 %}ใกล้ขีดจำกัด — ใบพัดต้องสมดุลดี
-                {% else %}อยู่ในเกณฑ์ปลอดภัย — subsonic อย่างเต็มที่{% endif %}
+                {% if tip2 > 290 %}⚠️ เกิน 290 m/s — compressibility loss รุนแรง เสียงดังมาก ลด KV หรือเลือก prop เล็กลง
+                {% elif tip2 > 265 %}⚡ ใกล้ขีดจำกัด (265 m/s) — efficiency ลดที่ full throttle ควร balance prop ให้ดี
+                {% else %}✅ ปลอดภัย — subsonic เต็มที่ (&lt;265 m/s){% endif %}
               </div>
               {% set tip_pct = [100, (tip2 / 350 * 100) | int] | min %}
               <div class="ic-bar"><div class="ic-bar-fill" style="width:{{ tip_pct }}%;background:{% if tip2>280 %}var(--red){% elif tip2>250 %}var(--amber){% else %}var(--green){% endif %};"></div></div>
@@ -1342,10 +1342,10 @@ save</pre>
               <div class="ic-val" style="color:{% if hov_thr>65 %}var(--red){% elif hov_thr>50 %}var(--amber){% else %}var(--green){% endif %}">{% if hov_thr > 0 %}{{ hov_thr | int }}%{% else %}—{% endif %}</div>
               <div class="ic-label">Hover Throttle</div>
               <div class="ic-explain">
-                {% if hov_thr > 65 %}สูงเกิน — เหลือกำลังสำรองน้อย
-                {% elif hov_thr > 50 %}ค่อนข้างสูง — ยังบินได้แต่ไม่มีกำลังสำรองมาก
-                {% elif hov_thr > 30 %}ดี — มี headroom เพียงพอสำหรับ maneuver
-                {% else %}ต่ำมาก — มีกำลังสูงเกินจำเป็น{% endif %}
+                {% if hov_thr > 65 %}⛔ สูงเกิน — เหลือกำลังสำรองน้อย แนะนำ motor KV สูงขึ้น
+                {% elif hov_thr > 50 %}⚠️ ค่อนข้างสูง — headroom น้อย เหมาะ LR/cine เท่านั้น
+                {% elif hov_thr > 25 %}✅ ดี — hover ที่ {{ hov_thr | int }}% เหลือ headroom สำหรับ maneuver · freestyle ดีที่สุดที่ 35-50%
+                {% else %}⚡ ต่ำมาก — racing/ultra-power build หรือน้ำหนักเบากว่า spec{% endif %}
                 · RC stick ~{{ hov_thr | int }}% สำหรับ level flight
               </div>
               <div class="ic-bar"><div class="ic-bar-fill" style="width:{{ [100, hov_thr|int]|min }}%;background:{% if hov_thr>65 %}var(--red){% elif hov_thr>50 %}var(--amber){% else %}var(--green){% endif %};"></div></div>
@@ -1361,7 +1361,7 @@ save</pre>
                 แบตต้องรองรับ {{ cb | int }}C burst / {{ cc | int }}C continuous
                 {% if cb > 80 %}⚠️ C สูงมาก — ควรใช้แบต HV quality หรือเพิ่ม mAh
                 {% elif cb > 50 %}ต้องการแบตคุณภาพดี
-                {% else %}C-rate ปกติ — แบต 30-50C รองรับได้{% endif %}
+                {% else %}C-rate ปกติ — แบต 50-80C burst / 30-50C continuous รองรับได้{% endif %}
               </div>
               {% set c_pct = [100, (cb / 120 * 100) | int] | min %}
               <div class="ic-bar"><div class="ic-bar-fill" style="width:{{ c_pct }}%;background:{% if cb>80 %}var(--red){% elif cb>50 %}var(--amber){% else %}var(--green){% endif %};"></div></div>
@@ -1375,7 +1375,7 @@ save</pre>
               <div class="ic-explain">
                 {% if rpm > 0 %}
                 รอบมอเตอร์ at full throttle ≈ KV × voltage
-                ใช้ตั้ง RPM Filter: min_hz ≈ {{ (rpm/60/14)|int }} Hz (14 poles)
+                fundamental freq @100% throttle ≈ {{ (rpm/60)|int }} Hz · แนะนำ min_hz = {{ [100,(rpm/60*0.20)|int]|max }} Hz (ที่ 20% throttle)
                 {% else %}กรุณากรอก Motor KV เพื่อคำนวณ RPM{% endif %}
               </div>
               {% if rpm > 0 %}
@@ -1390,7 +1390,7 @@ save</pre>
           {% if analysis.motor_kv and analysis.advanced %}
           <div style="margin-top:12px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <span style="font-family:var(--font-d);font-size:8px;letter-spacing:.12em;color:var(--muted2);">KV × VOLTAGE INDEX (no-load RPM)</span>
+              <span style="font-family:var(--font-d);font-size:8px;letter-spacing:.12em;color:var(--muted2);">KV × VOLTAGE INDEX (loaded RPM estimate)</span>
               <span style="font-family:var(--font-m);font-size:13px;font-weight:700;color:var(--blue);">
                 {{ analysis.advanced.rpm_estimated | default(0) | int | string | replace(',', ',') }} RPM
               </span>
@@ -1434,12 +1434,12 @@ save</pre>
           <div id="t-power" class="tab-pane active">
             <div class="metric-grid">
               <div class="metric-card">
-                <span class="metric-val green">{{ analysis.advanced.avg_power_w | int if analysis.advanced.avg_power_w else '—' }}W</span>
+                <span class="metric-val green">{{ analysis.advanced.hover_power_w | int if analysis.advanced.hover_power_w else '—' }}W</span>
                 <span class="metric-lbl">Hover Power</span>
               </div>
               <div class="metric-card">
-                <span class="metric-val amber">{{ (analysis.advanced.avg_power_w * 1.8) | int if analysis.advanced.avg_power_w else '—' }}W</span>
-                <span class="metric-lbl">Aggressive</span>
+                <span class="metric-val amber">{{ analysis.advanced.avg_power_w | int if analysis.advanced.avg_power_w else '—' }}W</span>
+                <span class="metric-lbl">Avg Power (style)</span>
               </div>
               <div class="metric-card">
                 <span class="metric-val red">{{ analysis.advanced.max_power_total_w | int if analysis.advanced.max_power_total_w else '—' }}W</span>
@@ -1463,7 +1463,7 @@ save</pre>
 
             <!-- TWR gauge bar -->
             {% if analysis.advanced.thrust_ratio %}
-            {% set twr_pct = [(analysis.advanced.thrust_ratio / 4.0 * 100) | int, 100] | min %}
+            {% set twr_pct = [(analysis.advanced.thrust_ratio / 8.0 * 100) | int, 100] | min %}
             <div style="margin-top:12px;">
               <div style="display:flex;justify-content:space-between;font-family:var(--font-d);font-size:8px;letter-spacing:.08em;color:var(--muted);margin-bottom:5px;">
                 <span>Thrust-to-Weight Ratio</span><span>{{ analysis.advanced.thrust_ratio }}:1</span>
@@ -1471,10 +1471,10 @@ save</pre>
               <div style="height:8px;background:rgba(255,255,255,0.04);border-radius:4px;overflow:hidden;position:relative;">
                 <div style="position:absolute;top:0;bottom:0;left:45%;width:1px;background:rgba(255,255,255,.12);"></div>
                 <div style="position:absolute;top:0;bottom:0;left:62.5%;width:1px;background:rgba(255,255,255,.12);"></div>
-                <div style="height:100%;border-radius:4px;width:{{ twr_pct }}%;background:{% if analysis.advanced.thrust_ratio < 1.2 %}var(--red){% elif analysis.advanced.thrust_ratio > 3.0 %}var(--amber){% else %}var(--green){% endif %};"></div>
+                <div style="height:100%;border-radius:4px;width:{{ twr_pct }}%;background:{% if analysis.advanced.thrust_ratio < 1.5 %}var(--red){% elif analysis.advanced.thrust_ratio > 8.0 %}var(--amber){% else %}var(--green){% endif %};"></div>
               </div>
               <div style="display:flex;justify-content:space-between;font-family:var(--font-m);font-size:8px;color:var(--muted);margin-top:3px;">
-                <span>1.0</span><span style="color:var(--muted2);">1.8 LR</span><span style="color:var(--muted2);">2.5 Free</span><span>4.0+</span>
+                <span>1.0</span><span style="color:var(--muted2);">2.0 LR</span><span style="color:var(--muted2);">4.0 Free</span><span>8.0+</span>
               </div>
             </div>
             {% endif %}
@@ -1681,7 +1681,7 @@ save</pre>
   var STYLE_PID = {
     freestyle: { roll:{p:48,i:90,d:38}, pitch:{p:52,i:90,d:40}, yaw:{p:40,i:90} },
     racing:    { roll:{p:55,i:85,d:42}, pitch:{p:60,i:85,d:44}, yaw:{p:45,i:80} },
-    longrange: { roll:{p:38,i:95,d:28}, pitch:{p:42,i:95,d:30}, yaw:{p:32,i:100} },
+    longrange: { roll:{p:38,i:85,d:22}, pitch:{p:40,i:85,d:24}, yaw:{p:32,i:82} },  // FIX: match presets.py
   };
 
   var SIZE_CLASSES = {
@@ -1704,17 +1704,22 @@ save</pre>
     var style  = (g('f_style')||{}).value || 'freestyle';
 
     var volt   = cells * 3.7;
-    var maxRPM = kv > 0 ? kv * volt : 0;
+    // FIX: use avg flight voltage 3.85V x load 0.80 (matches backend)
+    var maxRPM = kv > 0 ? kv * cells * 3.85 * 0.80 : 0;
     var tipSpeed = kv > 0 ? (Math.PI * prop * 0.0254 * maxRPM) / 60 : 0;
 
-    /* TWR heuristic */
-    var propPower = prop * pitch * 12 * cells;
-    var totalThrust = propPower * 4 * 0.9;
+    /* TWR heuristic -- lookup table calibrated from bench data
+       FIX: old prop*pitch*12*cells formula gave 7"/10" TWR 2x too high
+       New: empirical thrust/motor at 4S + non-linear cell scaling */
+    var _THRUST_4S = {2.5:130,3:170,3.5:280,4:400,4.5:540,5:730,5.5:760,6:720,7:640,7.5:620,8:680,10:700};
+    function _interpT(v,t){var ks=Object.keys(t).map(Number).sort(function(a,b){return a-b;});if(v<=ks[0])return t[ks[0]];if(v>=ks[ks.length-1])return t[ks[ks.length-1]];for(var i=0;i<ks.length-1;i++){if(v>=ks[i]&&v<=ks[i+1]){var r=(v-ks[i])/(ks[i+1]-ks[i]);return t[ks[i]]*(1-r)+t[ks[i+1]]*r;}}return t[ks[Math.floor(ks.length/2)]];}
+    var cellScale = cells<=4 ? (0.55+cells*0.1125) : (1.0+(cells-4)*0.18);
+    var totalThrust = _interpT(prop,_THRUST_4S) * cellScale * 4;
     var twr = weight > 0 ? Math.min(totalThrust / weight, 9.0) : 0;
 
     /* Flight time */
     var peakW = kv > 0 ? Math.min(cells * 4.2 * kv / 220, 750) * 4 : cells * 35 * 4;
-    var hoverThrottle = twr > 0 ? Math.sqrt(1/(2*twr)) : 0.5;
+    var hoverThrottle = twr > 0 ? Math.sqrt(1/twr) : 0.5;  // FIX: thrust∝stick² → hover_stick=sqrt(1/TWR)
     var hoverCurrent = (peakW / (volt + 0.001)) * hoverThrottle * hoverThrottle;
     var ftMin = hoverCurrent > 0 ? Math.min(30, (mah / 1000 * 0.8) / (hoverCurrent * 0.75 + 0.5) * 60) : 0;
     var ftSafe = Math.max(0, ftMin);
@@ -1724,7 +1729,8 @@ save</pre>
     var cBurst = mah > 0 ? Math.min(200, peakCurrentTotal / (mah/1000)) : 0;
 
     /* ESC */
-    var escA = Math.max(20, Math.ceil((peakCurrentTotal / 4) * 1.3 / 5) * 5);
+    var motorCount = 4;  // default quad
+    var escA = Math.max(20, Math.ceil((peakCurrentTotal / motorCount) * 1.5 / 5) * 5);  // FIX: 1.5× safety factor
 
     /* ── HUD ── */
     var twrDisp = twr > 0 ? twr.toFixed(2)+':1' : '—';
@@ -1735,7 +1741,7 @@ save</pre>
     if(hbTwr){ hbTwr.style.width = Math.min(100,twr/6*100)+'%'; hbTwr.style.background = twrColor=='green'?'var(--green)':twrColor=='amber'?'var(--amber)':'var(--red)'; }
 
     var tipDisp = tipSpeed > 0 ? Math.round(tipSpeed)+' m/s' : '— m/s';
-    var tipColor = tipSpeed > 300 ? 'red' : tipSpeed > 250 ? 'amber' : tipSpeed > 0 ? 'green' : '';
+    var tipColor = tipSpeed > 290 ? 'red' : tipSpeed > 265 ? 'amber' : tipSpeed > 0 ? 'green' : '';
     sv('h_tip', tipDisp);
     var tipEl = g('h_tip'); if(tipEl){ sc(tipEl,''); if(tipColor) tipEl.classList.add(tipColor); }
     var hbTip = g('hb_tip');
@@ -1762,24 +1768,24 @@ save</pre>
     }
     var dzStatus = g('dzStatus');
     if(dzStatus && tipSpeed > 0){
-      if(tipSpeed > 300){
-        dzStatus.innerHTML = '<strong style="color:var(--red);">⛔ DANGER: '+Math.round(tipSpeed)+'m/s — เกิน 300 m/s เสี่ยงใบพัดแตก</strong><br><span style="font-size:10px;color:var(--muted2);">ลด KV หรือเปลี่ยน prop เล็กลง / pitch ต่ำลง</span>';
-      } else if(tipSpeed > 250){
-        dzStatus.innerHTML = '<strong style="color:var(--amber);">⚠️ WARNING: '+Math.round(tipSpeed)+'m/s — ใกล้ขีดจำกัด</strong><br><span style="font-size:10px;color:var(--muted2);">ควร balance prop ให้ดี · ตรวจ prop condition</span>';
+      if(tipSpeed > 290){
+        dzStatus.innerHTML = '<strong style="color:var(--red);">⛔ DANGER: '+Math.round(tipSpeed)+'m/s — เกิน 290 m/s compressibility loss รุนแรง</strong><br><span style="font-size:10px;color:var(--muted2);">ลด KV หรือเปลี่ยน prop เล็กลง / pitch ต่ำลง</span>';
+      } else if(tipSpeed > 265){
+        dzStatus.innerHTML = '<strong style="color:var(--amber);">⚠️ WARNING: '+Math.round(tipSpeed)+'m/s — ใกล้ขีดจำกัด (265 m/s)</strong><br><span style="font-size:10px;color:var(--muted2);">efficiency ลดที่ full throttle · balance prop ให้ดี</span>';
       } else {
-        dzStatus.innerHTML = '<strong style="color:var(--green);">✅ SAFE: '+Math.round(tipSpeed)+'m/s — ปลอดภัย (&lt;250 m/s)</strong><br><span style="font-size:10px;color:var(--muted2);">Tip speed อยู่ในเกณฑ์ subsonic เต็มที่</span>';
+        dzStatus.innerHTML = '<strong style="color:var(--green);">✅ SAFE: '+Math.round(tipSpeed)+'m/s — ปลอดภัย (&lt;265 m/s)</strong><br><span style="font-size:10px;color:var(--muted2);">Tip speed อยู่ในเกณฑ์ subsonic เต็มที่</span>';
       }
     }
 
     /* ── DRONE SVG ── */
-    var motorColor = tipSpeed > 300 ? 'rgba(255,68,85,0.7)' : tipSpeed > 250 ? 'rgba(255,183,0,0.7)' : 'rgba(0,255,136,0.5)';
+    var motorColor = tipSpeed > 290 ? 'rgba(255,68,85,0.7)' : tipSpeed > 265 ? 'rgba(255,183,0,0.7)' : 'rgba(0,255,136,0.5)';
     ['dv_m1','dv_m2','dv_m3','dv_m4'].forEach(function(id){
       var el = g(id); if(el) el.setAttribute('stroke', motorColor);
     });
     var classKey = [2.5,3,3.5,4,5,6,7,7.5,8,10].find(function(k){ return Math.abs(size-k) < 0.26; }) || size;
     sv('dv_class', SIZE_CLASSES[classKey] || size+'" Custom');
     sv('dv_volt', volt.toFixed(1)+'V');
-    sv('dv_kvv', kv > 0 ? Math.round(maxRPM).toLocaleString()+' RPM max' : 'กรอก KV');
+    sv('dv_kvv', kv > 0 ? Math.round(maxRPM).toLocaleString()+' RPM (loaded)' : 'กรอก KV');
     sv('dv_wclass', weight<250?'Ultra-Light':weight<500?'Light':weight<800?'Medium':weight<1500?'Heavy':'X-Heavy');
     sv('dv_esc', escA+'A recommended');
     var sizeLbl = g('dv_sizelbl'); if(sizeLbl) sizeLbl.textContent = size+'" · '+(style||'').toUpperCase();
@@ -1807,7 +1813,7 @@ save</pre>
     var s_tip  = tipSpeed > 0 ? Math.min(100, Math.max(0, (1-(tipSpeed-100)/250)*100)) : 70;
     var s_c    = cBurst > 0 ? Math.min(100, Math.max(0, (1-cBurst/120)*100)) : 70;
     var s_eff  = twr > 3 ? 85 : twr > 2 ? 70 : twr > 0 ? 45 : 50;
-    var s_safe = (tipSpeed<280||tipSpeed===0) && twr>1.5 ? 88 : twr>1.2 ? 55 : 30;
+    var s_safe = (tipSpeed<265||tipSpeed===0) && twr>1.5 ? 88 : twr>1.2 ? 55 : 30;
     var scores = [s_twr, s_ft, s_tip, s_c, s_eff, s_safe];
     var weights = [0.25,0.20,0.20,0.15,0.10,0.10];
     var total = Math.round(scores.reduce(function(a,s,i){ return a+s*weights[i]; }, 0));
@@ -1834,16 +1840,16 @@ save</pre>
 
   /* applyPreset — fills form fields */
   var PRESETS_LIVE = {
-    '2.5_micro':   {size:2.5,  weight:80,   battery:'3S', prop_size:2.5, pitch:2.0, blades:'2', style:'freestyle', motor_kv:10000, battery_mAh:300},
-    '3_whoop':     {size:3.0,  weight:120,  battery:'3S', prop_size:3.0, pitch:2.0, blades:'2', style:'freestyle', motor_kv:8000,  battery_mAh:450},
+    '2.5_micro':   {size:2.5,  weight:80,   battery:'3S', prop_size:2.5, pitch:2.0, blades:'2', style:'freestyle', motor_kv:3500,  battery_mAh:300},
+    '3_whoop':     {size:3.0,  weight:120,  battery:'3S', prop_size:3.0, pitch:2.0, blades:'2', style:'freestyle', motor_kv:2500,  battery_mAh:450},
     '3.5_cine':    {size:3.5,  weight:350,  battery:'4S', prop_size:3.5, pitch:2.5, blades:'2', style:'longrange', motor_kv:3500,  battery_mAh:850},
     '4_mini':      {size:4.0,  weight:420,  battery:'4S', prop_size:4.0, pitch:3.0, blades:'2', style:'freestyle', motor_kv:2800,  battery_mAh:850},
     '5_freestyle': {size:5.0,  weight:750,  battery:'4S', prop_size:5.1, pitch:4.1, blades:'3', style:'freestyle', motor_kv:2306,  battery_mAh:1500},
-    '6_heavy5':    {size:6.0,  weight:1000, battery:'6S', prop_size:6.0, pitch:4.0, blades:'3', style:'freestyle', motor_kv:1750,  battery_mAh:2200},
+    '6_heavy5':    {size:6.0,  weight:850,  battery:'6S', prop_size:6.0, pitch:4.0, blades:'3', style:'freestyle', motor_kv:1750,  battery_mAh:1800},
     '7_midlr':     {size:7.0,  weight:1100, battery:'6S', prop_size:7.0, pitch:3.5, blades:'2', style:'longrange', motor_kv:1750,  battery_mAh:3000},
     '7.5_midlr':   {size:7.5,  weight:1200, battery:'6S', prop_size:7.5, pitch:3.0, blades:'2', style:'longrange', motor_kv:1500,  battery_mAh:3500},
     '8_lr':        {size:8.0,  weight:1500, battery:'6S', prop_size:8.0, pitch:3.5, blades:'2', style:'longrange', motor_kv:1200,  battery_mAh:4000},
-    '10_lr':       {size:10.0, weight:2200, battery:'6S', prop_size:10.0,pitch:4.5, blades:'2', style:'longrange', motor_kv:900,   battery_mAh:5000}
+    '10_lr':       {size:10.0, weight:1500, battery:'6S', prop_size:10.0,pitch:4.5, blades:'2', style:'longrange', motor_kv:900,   battery_mAh:3000}
   };
 
   window.applyPreset = function(key, chip){
@@ -1952,11 +1958,11 @@ var presetMap = {
   "3.5_cine":    {size:3.5,  weight:350,  battery:"4S", prop_size:3.5, pitch:2.5, blades:"2", style:"longrange"},
   "4_mini":      {size:4.0,  weight:420,  battery:"4S", prop_size:4.0, pitch:3.0, blades:"2", style:"freestyle"},
   "5_freestyle": {size:5.0,  weight:750,  battery:"4S", prop_size:5.0, pitch:4.0, blades:"3", style:"freestyle"},
-  "6_heavy5":    {size:6.0,  weight:1000, battery:"6S", prop_size:6.0, pitch:4.0, blades:"3", style:"freestyle"},
+  "6_heavy5":    {size:6.0,  weight:850,  battery:"6S", prop_size:6.0, pitch:4.0, blades:"3", style:"freestyle"},
   "7_midlr":     {size:7.0,  weight:1100, battery:"6S", prop_size:7.0, pitch:3.5, blades:"2", style:"longrange"},
   "7.5_midlr":   {size:7.5,  weight:1200, battery:"6S", prop_size:7.5, pitch:3.0, blades:"2", style:"longrange"},
   "8_lr":        {size:8.0,  weight:1500, battery:"6S", prop_size:8.0, pitch:3.5, blades:"2", style:"longrange"},
-  "10_lr":       {size:10.0, weight:2200, battery:"6S", prop_size:10.0,pitch:4.5, blades:"2", style:"longrange"}
+  "10_lr":       {size:10.0, weight:1500, battery:"6S", prop_size:10.0,pitch:4.5, blades:"2", style:"longrange"}
 };
 function sf(sel,v){ var el=document.querySelector(sel); if(el) el.value=v; }
 var ps = document.getElementById('preset-select');
@@ -2341,12 +2347,12 @@ document.querySelectorAll('.amt-btn').forEach(function(btn){
   var tEl = document.getElementById('thrustChart');
   if(tEl){
     {% if analysis.advanced %}
-    var _hoverW  = {{ analysis.advanced.avg_power_w | int }};
+    var _hoverW  = {{ analysis.advanced.hover_power_w | int if analysis.advanced.hover_power_w else 0 }};
+    var _aggrW   = {{ analysis.advanced.avg_power_w | int if analysis.advanced.avg_power_w else 0 }};
+    var _peakW   = {{ analysis.advanced.max_power_total_w | int if analysis.advanced.max_power_total_w else 0 }};
     {% else %}
-    var _hoverW = 0;
+    var _hoverW = 0; var _aggrW = 0; var _peakW = 0;
     {% endif %}
-    var _aggrW   = Math.round(_hoverW * 1.8);
-    var _peakW   = Math.round(_hoverW * 4.5);
     new Chart(tEl, {
       type: 'bar',
       data: {
