@@ -12,18 +12,30 @@ import math
 from typing import Optional
 
 _G_PER_W_BASE = {
-    "low_pitch":  {2: 6.8, 3: 6.0, 4: 5.2},
-    "med_pitch":  {2: 6.0, 3: 5.2, 4: 4.4},
-    "high_pitch": {2: 5.2, 3: 4.4, 4: 3.7},
+    # FIX v5.1: ปรับลงจาก bench data จริง (Nazgul5/Tyro129/T-motor/RCBenchmark)
+    # เดิม med_pitch 3-blade = 5.2 g/W → thrust ต่อ motor ออกมา ~1183g (สูงกว่าจริง 40%)
+    # แก้เป็น 4.3 g/W → thrust ~960g (ยังสูงกว่า conservative bench แต่ reasonable average)
+    # low_pitch: efficient props (Gemfan 51433 / HQProp 5030)
+    # med_pitch: standard freestyle (Gemfan 51466, HQProp 5040)
+    # high_pitch: race/aggressive (Gemfan 6045 / 51477)
+    "low_pitch":  {2: 5.8, 3: 5.0, 4: 4.3},
+    "med_pitch":  {2: 5.0, 3: 4.3, 4: 3.6},
+    "high_pitch": {2: 4.3, 3: 3.6, 4: 3.0},
 }
 _SIZE_EFF_SCALE = {
     # Calibrated from bench data (5" = 1.0). LR props gain less than theory at flight throttle.
+    # FIX v5.1: เพิ่ม 6.5" breakpoint เพื่อ smooth ช่องว่าง 6"→7" (0.22→0.12 W/g กระโดด)
     2.5: 0.70, 3.0: 0.77, 3.5: 0.82, 4.0: 0.88,
     4.5: 0.94, 5.0: 1.00, 5.5: 1.03, 6.0: 1.06,
-    7.0: 1.08, 7.5: 1.09, 8.0: 1.11, 10.0: 1.14,
+    6.5: 1.07, 7.0: 1.08, 7.5: 1.09, 8.0: 1.11, 10.0: 1.14,
 }
 _REF_POWER_5IN_4S   = 350.0
-_LOADED_RPM_FACTOR  = 0.82
+# FIX v5.1: เปลี่ยนจาก cells×4.0V×0.82 → cells×3.85V×0.80
+# เหตุผล: 3.85V = realistic average flight voltage (ไม่ใช่ fully charged 4.2 หรือ nominal 3.7)
+#         0.80 = realistic load factor (มาตรฐาน FPV community, เดิม 0.82 สูงเกิน)
+# ผล: สอดคล้องกับ rpm_filter_calc.py ซึ่งใช้ 4.2V×0.75 ≈ 3.15 effective → ค่าใกล้กันมากขึ้น
+_FLIGHT_VOLTAGE_PER_CELL = 3.85  # V/cell (avg flight, ไม่ใช่ full charge หรือ nominal)
+_LOADED_RPM_FACTOR  = 0.80       # FIX v5.1: 0.82 → 0.80
 _TIP_SPEED_WARN     = 265.0
 _TIP_SPEED_DANGER   = 290.0
 
@@ -57,9 +69,10 @@ _MAX_PWR_BY_SIZE = {
     5.0:350, 5.5:410, 6.0:440, 7.0:320, 8.0:380, 10.0:450,
 }
 # Efficiency at max throttle vs reference (drops at high RPM, more for LR props)
+# FIX v5.1: ปรับลงเพื่อ compensate กับ g/W base ที่ยังสูงกว่า min bench
 _EFF_AT_MAX_THROTTLE = {
-    2.5:0.72, 3.0:0.70, 4.0:0.67, 5.0:0.65,
-    6.0:0.60, 7.0:0.55, 8.0:0.50, 10.0:0.45,
+    2.5:0.62, 3.0:0.60, 4.0:0.57, 5.0:0.55,
+    6.0:0.50, 7.0:0.46, 8.0:0.42, 10.0:0.38,
 }
 
 def _max_power_per_motor(prop_size, cells):
@@ -72,7 +85,8 @@ def _max_power_per_motor(prop_size, cells):
 
 def _calc_rpm(motor_kv, cells, prop_size):
     if motor_kv and motor_kv > 0:
-        return motor_kv * cells * 4.0 * _LOADED_RPM_FACTOR
+        # FIX v5.1: ใช้ _FLIGHT_VOLTAGE_PER_CELL (3.85V) แทน 4.0V
+        return motor_kv * cells * _FLIGHT_VOLTAGE_PER_CELL * _LOADED_RPM_FACTOR
     _rpm_table = {
         2.5:32000, 3.0:26000, 3.5:22000, 4.0:18000, 4.5:15500,
         5.0:13500, 5.5:12500, 6.0:11500, 7.0:9800, 8.0:8200, 10.0:6800

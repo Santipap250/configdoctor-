@@ -21,7 +21,11 @@ from typing import Dict, Any, List
 
 _NOMINAL_CELL_V = 3.7    # V (nominal for energy calcs)
 _MAX_CELL_V     = 4.2    # V (fully charged)
-_LOAD_FACTOR    = 0.75   # RPM under load vs unloaded (typical FPV)
+# FIX v5.1: เปลี่ยนจาก 4.2V × 0.75 → 3.85V × 0.80 ให้ตรงกับ prop_logic.py
+# เดิม: kv × 4.2V × 0.75 = kv × 3.15V  (ต่ำกว่า prop_logic ~4%)
+# ใหม่: kv × 3.85V × 0.80 = kv × 3.08V  (ใกล้กันมาก, consistent)
+_FLIGHT_VOLTAGE_PER_CELL = 3.85  # avg flight voltage (ตรงกับ prop_logic.py)
+_LOAD_FACTOR    = 0.80   # FIX v5.1: 0.75 → 0.80 (ตรงกับ prop_logic.py)
 
 # Throttle → fraction of max loaded RPM
 _THROTTLE_LEVELS = {
@@ -59,7 +63,7 @@ def calculate_rpm_filter(kv: int, battery: str, prop_size: float = 5.0) -> Dict[
         notes:          contextual notes
     """
     cells = _cells_from_str(battery)
-    v_max = cells * _MAX_CELL_V
+    v_max = cells * _FLIGHT_VOLTAGE_PER_CELL  # FIX v5.1: ใช้ avg flight voltage
 
     # Max unloaded RPM and loaded RPM
     rpm_unloaded_max = kv * v_max
