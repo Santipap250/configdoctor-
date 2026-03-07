@@ -427,10 +427,14 @@ def index():
                 )
                 if isinstance(adv, dict):
                     analysis.update(adv)
-                    adv_power = adv.get("advanced", {}).get("power", {})
-                    analysis["thrust_ratio"]          = adv.get("advanced", {}).get("thrust_ratio", analysis.get("thrust_ratio", 0))
+                    _adv_inner = adv.get("advanced", {})
+                    adv_power = _adv_inner.get("power", {})
+                    analysis["thrust_ratio"]          = _adv_inner.get("thrust_ratio", analysis.get("thrust_ratio", 0))
                     analysis["est_flight_time_min"]   = adv_power.get("est_flight_time_min", analysis.get("battery_est"))
                     analysis["est_flight_time_min_aggr"] = adv_power.get("est_flight_time_min_aggressive")
+                    # FIX v5.1: expose keys that template uses at top level
+                    analysis["esc_recommended_a"]     = _adv_inner.get("esc_recommended_a") or adv_power.get("esc_recommended_a")
+                    analysis["peak_per_motor_a"]      = _adv_inner.get("peak_per_motor_a")
             except Exception:
                 logger.exception("Advanced analysis error")
 
