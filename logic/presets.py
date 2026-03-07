@@ -157,8 +157,8 @@ BASELINE_CTRL: Dict[str, Dict[str, Any]] = {
             "dterm_lpf1":      90,
             "dterm_lpf2":      None,
             "dyn_notch_count": 1,
-            "dyn_notch_min":   60,
-            "dyn_notch_max":   300,
+            "dyn_notch_min":   100,  # FIX v5.1: 60→100 (LR motor fundamental ~200-300Hz)
+            "dyn_notch_max":   350,  # FIX v5.1: 300→350
             "rpm_filter":      True,
             "anti_gravity":    3,
         },
@@ -176,8 +176,8 @@ BASELINE_CTRL: Dict[str, Dict[str, Any]] = {
             "dterm_lpf1":      80,
             "dterm_lpf2":      None,
             "dyn_notch_count": 1,
-            "dyn_notch_min":   50,
-            "dyn_notch_max":   250,
+            "dyn_notch_min":   100,  # FIX v5.1: 50→100 (LR motor fundamental ~200-300Hz)
+            "dyn_notch_max":   320,  # FIX v5.1: 250→320
             "rpm_filter":      True,
             "anti_gravity":    3,
         },
