@@ -66,7 +66,7 @@ def _normalize_style(s: str) -> str:
 def _cells_from_str(s):
     try:
         c = int(str(s).upper().replace("S", "").strip())
-        return max(3, min(c, 8))
+        return max(1, min(c, 8))  # FIX v5.1: min=3→1 (รองรับ 1S-2S builds)
     except Exception:
         return None
 
