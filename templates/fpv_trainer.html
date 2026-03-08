@@ -2,10 +2,10 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>FPV Training Simulator — OBIXConfig Doctor</title>
-{% set og_title       = "FPV Training Simulator — OBIXConfig Doctor" %}
-{% set og_description = "ฝึกควบคุมโดรน FPV ด้วย Simulator 3D แบบ real-time ฟรี ในเบราว์เซอร์" %}
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>FPV Simulator 3D — OBIXConfig Doctor</title>
+{% set og_title       = "FPV Simulator 3D — OBIXConfig Doctor" %}
+{% set og_description = "เกมส์ฝึกบินโดรน FPV แบบ 3D Real-time ฟรี รองรับมือถือ — Tutorial, Gate Runner, Race Circuit" %}
 {% set og_url         = "https://configdoctor.onrender.com/fpv-trainer" %}
 {% include "partials/og_tags.html" %}
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
@@ -15,1375 +15,1246 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --g:#10c47a;--g2:rgba(16,196,122,.18);--gold:#f1b65a;--bl:#58a6ff;
-  --red:#f87171;--bg:#02060a;--card:rgba(8,15,20,.92);
-  --hud:rgba(16,196,122,.85);--mono:'JetBrains Mono',monospace;
+  --red:#f87171;--bg:#02060a;--card:rgba(8,15,20,.95);
+  --mono:'JetBrains Mono',monospace;
 }
 html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Sarabun',sans-serif;color:var(--g)}
-/* ── Game wrap ── */
-#gw{position:relative;width:100vw;height:calc(100vh - 52px);overflow:hidden}
-#cv{display:block;width:100%;height:100%;image-rendering:crisp-edges}
-/* ── Scanline overlay ── */
+
+/* ── Game Wrapper ── */
+#gw{position:relative;width:100vw;height:calc(100vh - 52px);overflow:hidden;touch-action:none}
+#gw canvas{display:block;width:100%!important;height:100%!important}
+
+/* ── Scanline CRT effect ── */
 #gw::after{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 4px);
-  z-index:5
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:4;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.04) 3px,rgba(0,0,0,.04) 4px);
 }
+/* Vignette */
+#gw::before{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:3;
+  background:radial-gradient(ellipse 80% 80% at 50% 50%,transparent 50%,rgba(0,0,0,.45) 100%);
+}
+
 /* ── HUD ── */
 #hud{position:absolute;inset:0;pointer-events:none;z-index:10;display:none;font-family:var(--mono)}
-/* Corner frames */
-.hud-corner{position:absolute;width:40px;height:40px;border-color:rgba(16,196,122,.45);border-style:solid}
-.hud-corner.tl{top:14px;left:14px;border-width:2px 0 0 2px}
-.hud-corner.tr{top:14px;right:14px;border-width:2px 2px 0 0}
-.hud-corner.bl{bottom:14px;left:14px;border-width:0 0 2px 2px}
-.hud-corner.br{bottom:14px;right:14px;border-width:0 2px 2px 0}
-/* Top bar */
-#hud-top{position:absolute;top:18px;left:55px;right:55px;display:flex;justify-content:space-between;align-items:flex-start}
-.hud-badge{font-size:.6rem;letter-spacing:.1em;padding:3px 10px;border:1px solid var(--g);border-radius:3px;color:var(--g);background:rgba(2,6,10,.7)}
-#hud-mode-label{font-size:.62rem;letter-spacing:.12em;color:var(--g);text-transform:uppercase}
-#hud-score{font-size:1.1rem;font-weight:700;font-family:'Orbitron',monospace;color:var(--g);text-align:center}
-#hud-timer{font-size:.9rem;font-family:'Orbitron',monospace;color:var(--gold);text-align:right}
-/* Left panel */
-#hud-left{position:absolute;left:16px;top:70px;bottom:70px;width:55px;display:flex;flex-direction:column;align-items:flex-start;gap:14px}
-.vert-gauge{display:flex;flex-direction:column;align-items:center;gap:4px}
-.vert-label{font-size:.52rem;letter-spacing:.08em;color:rgba(16,196,122,.6)}
-.vert-bar{width:10px;height:90px;background:rgba(16,196,122,.08);border:1px solid rgba(16,196,122,.2);border-radius:3px;position:relative;overflow:hidden}
-.vert-fill{position:absolute;bottom:0;left:0;right:0;background:var(--g);border-radius:2px;transition:height .1s}
-.vert-val{font-size:.58rem;color:var(--g)}
-/* Right panel */
-#hud-right{position:absolute;right:16px;top:70px;bottom:70px;width:55px;display:flex;flex-direction:column;align-items:flex-end;gap:14px}
-/* Artificial horizon center */
-#hud-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
-.ah-ring{width:80px;height:80px;border:1.5px solid rgba(16,196,122,.35);border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center}
-.ah-cross-h{position:absolute;width:24px;height:1px;background:var(--g);opacity:.5}
-.ah-cross-v{position:absolute;width:1px;height:24px;background:var(--g);opacity:.5}
-.ah-dot{width:5px;height:5px;border-radius:50%;background:var(--g)}
-/* Sticks display */
-#hud-sticks{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:24px;align-items:center}
-.stick-box{width:52px;height:52px;background:rgba(2,6,10,.7);border:1px solid rgba(16,196,122,.25);border-radius:8px;position:relative}
-.stick-label{position:absolute;top:-15px;width:100%;text-align:center;font-size:.5rem;letter-spacing:.08em;color:rgba(16,196,122,.5)}
-.stick-dot{position:absolute;width:8px;height:8px;border-radius:50%;background:var(--g);transform:translate(-50%,-50%);box-shadow:0 0 6px var(--g);transition:left .05s,top .05s}
-.stick-line-h,.stick-line-v{position:absolute;background:rgba(16,196,122,.15)}
-.stick-line-h{left:0;right:0;height:1px;top:50%}
-.stick-line-v{top:0;bottom:0;width:1px;left:50%}
-.sep-label{font-size:.55rem;color:rgba(16,196,122,.35);letter-spacing:.06em}
-/* Objective bar */
-#hud-obj{position:absolute;top:22px;left:50%;transform:translateX(-50%);font-size:.58rem;letter-spacing:.08em;color:var(--gold);text-align:center;text-transform:uppercase}
-/* Speed / altitude readouts */
-.hud-readout{font-size:.68rem;font-family:'Orbitron',monospace;text-align:right;color:var(--g)}
-.hud-readout span{font-size:.5rem;opacity:.6}
-/* Combo display */
-#hud-combo{position:absolute;top:50%;right:60px;transform:translateY(-50%);font-size:1.4rem;font-weight:900;font-family:'Orbitron',monospace;color:var(--gold);text-shadow:0 0 20px var(--gold);opacity:0;transition:opacity .3s}
-/* Lives / status */
-#hud-lives{position:absolute;bottom:20px;left:16px;display:flex;gap:6px;align-items:center;font-size:.6rem}
-.life-dot{width:8px;height:8px;border-radius:50%;background:var(--g);box-shadow:0 0 4px var(--g)}
-.life-dot.dead{background:rgba(16,196,122,.15)}
-/* Armed badge */
-#hud-armed{position:absolute;bottom:20px;right:16px;font-size:.58rem;letter-spacing:.1em;padding:3px 8px;border-radius:3px;border:1px solid var(--g);color:var(--g)}
-/* ── Menu ── */
-#menu,#mode-sel,#gameover,#pause,#countdown{
-  position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  background:radial-gradient(ellipse at center,rgba(2,8,14,.92) 0%,rgba(1,3,5,.97) 100%);
-}
-#menu.hidden,#mode-sel.hidden,#gameover.hidden,#pause.hidden,#countdown.hidden{display:none}
-/* Menu grid bg */
-.menu-grid{position:absolute;inset:0;
-  background-image:linear-gradient(rgba(16,196,122,.04)1px,transparent 1px),linear-gradient(90deg,rgba(16,196,122,.04)1px,transparent 1px);
-  background-size:48px 48px;
-  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 100%)}
-.menu-inner{position:relative;z-index:2;text-align:center;max-width:700px;padding:24px}
-.menu-logo{font-family:'Orbitron',monospace;font-size:clamp(.9rem,2vw,1.1rem);letter-spacing:.2em;color:rgba(16,196,122,.5);text-transform:uppercase;margin-bottom:16px}
-.menu-title{font-family:'Orbitron',monospace;font-size:clamp(1.8rem,5vw,3rem);font-weight:900;color:var(--g);text-shadow:0 0 40px rgba(16,196,122,.5);line-height:1.1;margin-bottom:8px}
-.menu-title .sub{font-size:clamp(.9rem,2vw,1.2rem);color:rgba(16,196,122,.6);font-weight:400;display:block;margin-top:4px}
-.menu-desc{font-size:.88rem;color:rgba(16,196,122,.55);margin:16px 0 28px;line-height:1.6}
+.hud-corner{position:absolute;width:44px;height:44px;border-color:rgba(16,196,122,.5);border-style:solid}
+.hud-corner.tl{top:12px;left:12px;border-width:2px 0 0 2px}
+.hud-corner.tr{top:12px;right:12px;border-width:2px 2px 0 0}
+.hud-corner.bl{bottom:12px;left:12px;border-width:0 0 2px 2px}
+.hud-corner.br{bottom:12px;right:12px;border-width:0 2px 2px 0}
+#hud-top{position:absolute;top:16px;left:58px;right:58px;display:flex;justify-content:space-between;align-items:flex-start}
+.hud-badge{font-size:.58rem;letter-spacing:.1em;padding:3px 10px;border:1px solid rgba(16,196,122,.4);border-radius:3px;color:var(--g);background:rgba(2,6,10,.7)}
+#hud-mode-lbl{font-size:.6rem;letter-spacing:.12em;color:rgba(16,196,122,.7);text-transform:uppercase}
+#hud-score{font-size:1.2rem;font-weight:700;font-family:'Orbitron',monospace;color:var(--g);text-align:center;text-shadow:0 0 12px var(--g)}
+#hud-timer{font-size:.95rem;font-family:'Orbitron',monospace;color:var(--gold);text-align:right;text-shadow:0 0 10px var(--gold)}
+#hud-obj{position:absolute;top:20px;left:50%;transform:translateX(-50%);font-size:.6rem;letter-spacing:.1em;color:var(--gold);text-align:center;text-transform:uppercase;white-space:nowrap}
+#hud-left{position:absolute;left:14px;top:65px;bottom:80px;width:48px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.vg{display:flex;flex-direction:column;align-items:center;gap:3px}
+.vg-lbl{font-size:.5rem;letter-spacing:.08em;color:rgba(16,196,122,.55)}
+.vg-bar{width:9px;height:80px;background:rgba(16,196,122,.07);border:1px solid rgba(16,196,122,.2);border-radius:3px;position:relative;overflow:hidden}
+.vg-fill{position:absolute;bottom:0;left:0;right:0;background:var(--g);border-radius:2px;transition:height .08s}
+.vg-val{font-size:.55rem;color:var(--g)}
+#hud-right{position:absolute;right:14px;top:65px;width:60px;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.hud-ro{font-size:.65rem;font-family:'Orbitron',monospace;text-align:right;color:var(--g)}
+.hud-ro span{font-size:.48rem;opacity:.6}
+#hud-ah{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+.ah-ring{width:72px;height:72px;border:1.5px solid rgba(16,196,122,.3);border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center}
+.ah-ch{position:absolute;width:20px;height:1px;background:var(--g);opacity:.45}
+.ah-cv{position:absolute;width:1px;height:20px;background:var(--g);opacity:.45}
+.ah-dot{width:4px;height:4px;border-radius:50%;background:var(--g)}
+#hud-combo{position:absolute;top:50%;right:68px;transform:translateY(-50%);font-size:1.6rem;font-weight:900;font-family:'Orbitron',monospace;color:var(--gold);text-shadow:0 0 20px var(--gold);opacity:0;transition:opacity .3s}
+#hud-lives{position:absolute;bottom:16px;left:16px;display:flex;gap:5px;align-items:center}
+.life{width:7px;height:7px;border-radius:50%;background:var(--g);box-shadow:0 0 4px var(--g)}
+.life.dead{background:rgba(16,196,122,.15);box-shadow:none}
+#hud-armed{position:absolute;bottom:16px;right:16px;font-size:.56rem;letter-spacing:.1em;padding:2px 7px;border-radius:3px;border:1px solid var(--g);color:var(--g)}
+#hud-fps{position:absolute;top:70px;left:16px;font-size:.5rem;color:rgba(16,196,122,.35)}
+/* Lap time display */
+#hud-lap{position:absolute;top:50%;left:50%;transform:translate(-50%,-180%);font-size:.7rem;font-family:'Orbitron',monospace;color:var(--gold);text-align:center;opacity:0;transition:opacity .3s}
+/* Tutorial instruction */
+#tut-step{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(2,6,10,.9);border:1px solid rgba(16,196,122,.4);border-radius:10px;padding:14px 22px;max-width:340px;text-align:center;display:none;pointer-events:none}
+#tut-step .ts-title{font-size:.85rem;font-weight:700;color:var(--g);margin-bottom:6px;font-family:'Orbitron',monospace}
+#tut-step .ts-body{font-size:.8rem;color:rgba(16,196,122,.75);line-height:1.5}
+#tut-step .ts-prog{margin-top:8px;height:3px;background:rgba(16,196,122,.15);border-radius:2px}
+#tut-step .ts-prog-fill{height:100%;background:var(--g);border-radius:2px;transition:width .5s}
+/* Zone progress bar */
+#zone-bar{display:none;position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(2,6,10,.8);border:1px solid rgba(88,166,255,.3);border-radius:8px;padding:8px 16px;text-align:center;font-size:.6rem;color:var(--bl);min-width:200px}
+#zone-fill-bg{height:4px;background:rgba(88,166,255,.15);border-radius:2px;margin-top:5px;overflow:hidden}
+#zone-fill{height:100%;background:var(--bl);border-radius:2px;transition:width .3s}
+
+/* ── Mobile Joysticks ── */
+.joy-zone{position:absolute;bottom:0;width:48%;height:200px;display:none;align-items:center;justify-content:center;touch-action:none;z-index:20}
+#joy-L{left:0;bottom:0}
+#joy-R{right:0;bottom:0}
+.joy-base{width:130px;height:130px;border-radius:50%;background:rgba(16,196,122,.06);border:2px solid rgba(16,196,122,.25);position:relative;touch-action:none}
+.joy-knob{position:absolute;width:52px;height:52px;border-radius:50%;background:rgba(16,196,122,.25);border:2px solid rgba(16,196,122,.6);top:50%;left:50%;transform:translate(-50%,-50%);transition:background .1s;touch-action:none}
+.joy-label{position:absolute;bottom:-22px;width:100%;text-align:center;font-size:.52rem;letter-spacing:.08em;color:rgba(16,196,122,.45)}
+@media(max-width:600px){.joy-zone{height:170px}.joy-base{width:115px;height:115px}.joy-knob{width:46px;height:46px}}
+
+/* ── Camera toggle button (mobile) ── */
+#cam-btn{position:absolute;top:14px;right:14px;z-index:22;display:none;background:rgba(2,6,10,.8);border:1px solid rgba(16,196,122,.3);border-radius:8px;color:var(--g);font-size:.65rem;letter-spacing:.08em;padding:7px 12px;font-family:var(--mono);touch-action:manipulation}
+#pause-btn{position:absolute;top:14px;left:14px;z-index:22;display:none;background:rgba(2,6,10,.8);border:1px solid rgba(16,196,122,.3);border-radius:8px;color:var(--g);font-size:.65rem;padding:7px 10px;touch-action:manipulation}
+
+/* ── Menus ── */
+.screen{position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,rgba(2,8,14,.93) 0%,rgba(1,3,5,.98) 100%)}
+.screen.hidden{display:none}
+.menu-grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(16,196,122,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(16,196,122,.035) 1px,transparent 1px);background-size:52px 52px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 20%,transparent 100%)}
+.menu-inner{position:relative;z-index:2;text-align:center;width:100%;max-width:720px;padding:20px 24px}
+.menu-logo{font-family:'Orbitron',monospace;font-size:clamp(.8rem,2vw,1rem);letter-spacing:.2em;color:rgba(16,196,122,.45);text-transform:uppercase;margin-bottom:12px}
+.menu-title{font-family:'Orbitron',monospace;font-size:clamp(1.8rem,5vw,3.2rem);font-weight:900;color:var(--g);text-shadow:0 0 50px rgba(16,196,122,.5);line-height:1.1;margin-bottom:6px}
+.menu-title .sub{font-size:clamp(.85rem,2vw,1.1rem);color:rgba(16,196,122,.5);font-weight:400;display:block;margin-top:6px}
+.menu-desc{font-size:.9rem;color:rgba(16,196,122,.5);margin:14px 0 24px;line-height:1.6}
 /* Mode cards */
-.mode-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;width:100%;max-width:620px}
-@media(max-width:500px){.mode-grid{grid-template-columns:1fr}}
-.mode-card{
-  background:rgba(8,18,12,.9);border:1px solid rgba(16,196,122,.2);border-radius:12px;
-  padding:18px 16px;cursor:pointer;text-align:left;
-  transition:border-color .2s,transform .15s,background .2s;
-  position:relative;overflow:hidden
-}
-.mode-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,var(--mc,var(--g)),transparent);
-  opacity:.6
-}
-.mode-card:hover{border-color:rgba(16,196,122,.5);transform:translateY(-2px);background:rgba(12,25,17,.9)}
-.mode-card.gate{--mc:var(--g)}
-.mode-card.hunt{--mc:var(--gold)}
-.mode-card.hover-m{--mc:var(--bl)}
-.mode-card.free{--mc:rgba(16,196,122,.4)}
-.mode-icon{font-size:1.6rem;margin-bottom:8px;display:block}
-.mode-name{font-family:'Orbitron',monospace;font-size:.8rem;font-weight:700;color:var(--g);letter-spacing:.08em;margin-bottom:5px}
-.mode-desc{font-size:.73rem;color:rgba(16,196,122,.55);line-height:1.4}
-.mode-diff{position:absolute;top:12px;right:12px;font-size:.55rem;font-family:var(--mono);letter-spacing:.06em;padding:2px 7px;border-radius:3px;border:1px solid}
-.diff-easy{color:#86efac;border-color:rgba(134,239,172,.3);background:rgba(134,239,172,.06)}
-.diff-med{color:var(--gold);border-color:rgba(241,182,90,.3);background:rgba(241,182,90,.06)}
-.diff-hard{color:var(--red);border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.06)}
-/* Controls guide */
-.ctrl-wrap{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:20px 0 8px}
-.ctrl-key{display:inline-flex;align-items:center;gap:5px;font-size:.65rem;color:rgba(16,196,122,.5)}
-.kbd{background:rgba(16,196,122,.08);border:1px solid rgba(16,196,122,.2);border-radius:4px;padding:2px 7px;font-family:var(--mono);font-size:.62rem;color:rgba(16,196,122,.75)}
+.mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:680px}
+@media(max-width:560px){.mode-grid{grid-template-columns:repeat(2,1fr)}}
+.mode-card{position:relative;padding:18px 14px 16px;border-radius:10px;border:1px solid rgba(16,196,122,.18);background:rgba(5,12,8,.7);cursor:pointer;text-align:center;transition:all .2s;overflow:hidden;-webkit-tap-highlight-color:transparent}
+.mode-card::before{content:'';position:absolute;inset:0;background:var(--mc,rgba(16,196,122,.05));opacity:0;transition:opacity .2s}
+.mode-card:hover,.mode-card:active{border-color:rgba(16,196,122,.45);transform:translateY(-2px)}
+.mode-card:hover::before,.mode-card:active::before{opacity:1}
+.mode-card.gate{--mc:rgba(16,196,122,.1)}.mode-card.hunt{--mc:rgba(241,182,90,.08)}.mode-card.hover-m{--mc:rgba(88,166,255,.08)}.mode-card.race{--mc:rgba(248,113,113,.1)}.mode-card.tut{--mc:rgba(16,196,122,.12)}.mode-card.free{--mc:rgba(100,100,100,.06)}
+.mode-icon{font-size:1.8rem;display:block;margin-bottom:8px}
+.mode-name{font-family:'Orbitron',monospace;font-size:.75rem;font-weight:700;color:var(--g);letter-spacing:.08em;margin-bottom:5px}
+.mode-desc{font-size:.7rem;color:rgba(16,196,122,.5);line-height:1.4;margin:0}
+.mode-diff{position:absolute;top:10px;right:10px;font-size:.52rem;font-family:var(--mono);letter-spacing:.06em;padding:2px 6px;border-radius:3px;border:1px solid}
+.diff-easy{color:#10c47a;border-color:rgba(16,196,122,.4)}.diff-med{color:var(--gold);border-color:rgba(241,182,90,.4)}.diff-hard{color:var(--red);border-color:rgba(248,113,113,.4)}
+.mode-new{position:absolute;top:10px;left:10px;font-size:.5rem;font-family:var(--mono);color:var(--red);border:1px solid rgba(248,113,113,.4);padding:1px 5px;border-radius:3px}
 /* Buttons */
-.btn{
-  font-family:'Orbitron',monospace;font-size:.78rem;font-weight:700;letter-spacing:.1em;
-  padding:12px 30px;border-radius:8px;cursor:pointer;border:none;
-  transition:opacity .18s,transform .12s
-}
-.btn:hover{opacity:.88;transform:translateY(-1px)}
-.btn-primary{background:var(--g);color:#021a0e}
-.btn-ghost{background:transparent;border:1px solid rgba(16,196,122,.35);color:var(--g)}
-/* Countdown */
-#countdown-num{
-  font-family:'Orbitron',monospace;font-size:clamp(6rem,20vw,12rem);font-weight:900;
-  color:var(--g);text-shadow:0 0 80px rgba(16,196,122,.6);
-  animation:countPop .6s ease-out;
-}
-@keyframes countPop{from{transform:scale(1.5);opacity:.3}to{transform:scale(1);opacity:1}}
+.btn{font-family:'Orbitron',monospace;font-size:.72rem;letter-spacing:.1em;padding:11px 28px;border-radius:8px;cursor:pointer;text-transform:uppercase;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.btn-primary{background:rgba(16,196,122,.15);border:1px solid var(--g);color:var(--g)}
+.btn-primary:hover,.btn-primary:active{background:rgba(16,196,122,.3)}
+.btn-secondary{background:rgba(16,196,122,.05);border:1px solid rgba(16,196,122,.3);color:rgba(16,196,122,.7);margin:4px}
+.btn-secondary:hover,.btn-secondary:active{border-color:var(--g)}
+.btn-red{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.4);color:var(--red)}
 /* Gameover */
-#gameover .score-big{font-family:'Orbitron',monospace;font-size:clamp(2rem,8vw,4rem);font-weight:900;color:var(--gold);text-shadow:0 0 40px rgba(241,182,90,.5);margin:12px 0}
-.rating-stars{font-size:2rem;letter-spacing:8px;margin:8px 0}
-.go-stats{display:flex;gap:24px;justify-content:center;margin:16px 0;flex-wrap:wrap}
-.go-stat{text-align:center}
-.go-stat-val{font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:700;color:var(--g)}
-.go-stat-lbl{font-size:.65rem;color:rgba(16,196,122,.5);margin-top:2px}
-.btn-row{display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+#go-mode-lbl{font-size:.75rem;letter-spacing:.1em;color:rgba(16,196,122,.6);margin-bottom:10px;font-family:var(--mono)}
+#go-score{font-family:'Orbitron',monospace;font-size:clamp(2.5rem,9vw,4.5rem);font-weight:900;color:var(--gold);text-shadow:0 0 40px rgba(241,182,90,.5);margin:8px 0}
+#go-stars{font-size:2rem;margin-bottom:16px}
+.go-stats{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:16px 0}
+.go-stat{text-align:center;min-width:70px}
+.go-stat-val{font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--g);font-weight:700}
+.go-stat-lbl{font-size:.65rem;color:rgba(16,196,122,.5);margin-top:2px;letter-spacing:.06em}
+/* Countdown */
+#countdown-num{font-family:'Orbitron',monospace;font-size:clamp(5rem,20vw,10rem);font-weight:900;color:var(--g);text-shadow:0 0 80px rgba(16,196,122,.6);animation:cdpulse .8s ease infinite}
+@keyframes cdpulse{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
 /* Pause */
-#pause-title{font-family:'Orbitron',monospace;font-size:2rem;font-weight:900;color:var(--g);margin-bottom:20px}
-/* Hover zone indicator */
-#zone-bar{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);width:200px;display:none}
-.zone-bar-label{font-size:.58rem;color:var(--bl);text-align:center;margin-bottom:5px;font-family:var(--mono);letter-spacing:.08em}
-.zone-bar-track{height:8px;background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.25);border-radius:4px;overflow:hidden}
-.zone-bar-fill{height:100%;background:var(--bl);border-radius:4px;transition:width .3s;box-shadow:0 0 8px var(--bl)}
+#pause-title{font-family:'Orbitron',monospace;font-size:2rem;color:var(--gold);margin-bottom:24px;text-shadow:0 0 30px var(--gold)}
+/* Key hint bar */
+#keys-hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:.58rem;color:rgba(16,196,122,.3);letter-spacing:.06em;font-family:var(--mono);display:none;white-space:nowrap}
 /* Notifications */
-#notify{position:absolute;top:38%;left:50%;transform:translateX(-50%);text-align:center;pointer-events:none;z-index:15}
-.notify-msg{
-  font-family:'Orbitron',monospace;font-size:clamp(.8rem,2vw,1.1rem);font-weight:700;
-  color:var(--g);text-shadow:0 0 20px rgba(16,196,122,.6);
-  animation:notifyAnim .7s ease-out forwards;white-space:nowrap
-}
-@keyframes notifyAnim{0%{opacity:0;transform:scale(.8) translateY(10px)}20%{opacity:1;transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:translateY(-20px)}}
-/* Message overlay */
-#msg{position:absolute;top:60px;left:50%;transform:translateX(-50%);font-size:.7rem;font-family:var(--mono);color:rgba(16,196,122,.5);letter-spacing:.08em;pointer-events:none;z-index:15;text-align:center}
-/* Gamepad indicator */
-#gp-badge{position:absolute;top:60px;right:16px;font-size:.55rem;font-family:var(--mono);letter-spacing:.06em;color:rgba(16,196,122,.4);z-index:16;display:none}
-/* Crash flash */
-#crash-flash{position:absolute;inset:0;background:var(--red);opacity:0;pointer-events:none;z-index:12;transition:opacity .1s}
-/* Gate flash */
-#gate-flash{position:absolute;inset:0;background:var(--g);opacity:0;pointer-events:none;z-index:12;transition:opacity .1s}
+#notify{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:25;pointer-events:none;display:flex;flex-direction:column;gap:6px;align-items:center}
+.notify-msg{font-family:'Orbitron',monospace;font-size:clamp(.75rem,3vw,1rem);font-weight:700;padding:6px 18px;border-radius:6px;background:rgba(2,6,10,.85);border:1px solid currentColor;letter-spacing:.08em;animation:nfade 2s ease forwards}
+@keyframes nfade{0%{opacity:0;transform:translateY(-8px)}15%{opacity:1;transform:translateY(0)}75%{opacity:1}100%{opacity:0}}
+/* Flash effects */
+#gate-flash,#crash-flash{position:absolute;inset:0;opacity:0;pointer-events:none;z-index:15;transition:opacity .1s}
+#gate-flash{background:rgba(16,196,122,.15)}
+#crash-flash{background:rgba(248,113,113,.35)}
+/* GP badge */
+#gp-badge{display:none;position:absolute;top:4px;right:14px;font-size:.55rem;color:rgba(16,196,122,.5);border:1px solid rgba(16,196,122,.2);padding:2px 7px;border-radius:3px;font-family:var(--mono)}
+/* Race HUD */
+#race-hud{display:none;position:absolute;top:60px;left:50%;transform:translateX(-50%);text-align:center}
+#race-lap{font-family:'Orbitron',monospace;font-size:.8rem;color:var(--bl);letter-spacing:.1em}
+#race-laptime{font-family:'Orbitron',monospace;font-size:1.4rem;color:var(--gold);font-weight:700}
+/* Tutorial progress dots */
+.tut-dots{display:flex;gap:6px;justify-content:center;margin-top:10px}
+.tut-dot{width:8px;height:8px;border-radius:50%;background:rgba(16,196,122,.2);transition:background .3s}
+.tut-dot.active{background:var(--g);box-shadow:0 0 8px var(--g)}
+.tut-dot.done{background:rgba(16,196,122,.5)}
 </style>
 {% set nav_page = "fpv_trainer" %}
 {% include "partials/nav.html" %}
 </head>
 <body>
 
-<!-- Game world -->
 <div id="gw">
-  <canvas id="cv"></canvas>
+  <!-- Three.js canvas renders here -->
 
-  <!-- HUD (shown during play) -->
+  <!-- HUD -->
   <div id="hud">
-    <div class="hud-corner tl"></div>
-    <div class="hud-corner tr"></div>
-    <div class="hud-corner bl"></div>
-    <div class="hud-corner br"></div>
-
+    <div class="hud-corner tl"></div><div class="hud-corner tr"></div>
+    <div class="hud-corner bl"></div><div class="hud-corner br"></div>
     <div id="hud-top">
-      <div>
-        <div id="hud-mode-label">—</div>
-        <div id="hud-score" style="margin-top:4px">0</div>
-      </div>
+      <div><div id="hud-mode-lbl">—</div><div id="hud-score" style="margin-top:3px">0</div></div>
       <div id="hud-obj"></div>
       <div id="hud-timer">—</div>
     </div>
-
     <div id="hud-left">
-      <div class="vert-gauge">
-        <div class="vert-label">THR</div>
-        <div class="vert-bar"><div class="vert-fill" id="thr-fill" style="height:0%"></div></div>
-        <div class="vert-val" id="thr-val">0%</div>
-      </div>
-      <div class="vert-gauge">
-        <div class="vert-label">ALT</div>
-        <div class="vert-bar"><div class="vert-fill" id="alt-fill" style="height:0%"></div></div>
-        <div class="vert-val" id="alt-val">0m</div>
-      </div>
+      <div class="vg"><div class="vg-lbl">THR</div><div class="vg-bar"><div class="vg-fill" id="thr-fill" style="height:0%"></div></div><div class="vg-val" id="thr-val">0%</div></div>
+      <div class="vg"><div class="vg-lbl">ALT</div><div class="vg-bar"><div class="vg-fill" id="alt-fill" style="height:0%"></div></div><div class="vg-val" id="alt-val">0m</div></div>
     </div>
-
     <div id="hud-right">
-      <div class="hud-readout" id="spd-val">0<span> m/s</span></div>
-      <div class="hud-readout" id="hdg-val">N<span> HDG</span></div>
-      <div class="hud-readout" id="vsi-val">+0<span> v/s</span></div>
-      <div class="hud-readout" id="roll-val">0°<span> ROL</span></div>
+      <div class="hud-ro" id="spd-val">0<span> m/s</span></div>
+      <div class="hud-ro" id="hdg-val">N<span> HDG</span></div>
+      <div class="hud-ro" id="vsi-val">+0<span> v/s</span></div>
+      <div class="hud-ro" id="rol-val">0°<span> ROL</span></div>
     </div>
-
-    <div id="hud-center">
-      <div class="ah-ring" id="ah-ring">
-        <div class="ah-cross-h"></div>
-        <div class="ah-cross-v"></div>
-        <div class="ah-dot"></div>
-      </div>
-    </div>
-
+    <div id="hud-ah"><div class="ah-ring" id="ah-ring"><div class="ah-ch"></div><div class="ah-cv"></div><div class="ah-dot"></div></div></div>
     <div id="hud-combo"></div>
-
-    <div id="hud-sticks">
-      <div>
-        <div class="stick-box" id="stick-L">
-          <div class="stick-label">THR/YAW</div>
-          <div class="stick-line-h"></div>
-          <div class="stick-line-v"></div>
-          <div class="stick-dot" id="dot-L" style="left:50%;top:50%"></div>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
-        <span class="sep-label">MODE 2</span>
-        <span class="sep-label" id="cam-mode-lbl" style="color:var(--gold)">3RD</span>
-      </div>
-      <div>
-        <div class="stick-box" id="stick-R">
-          <div class="stick-label">PITCH/ROLL</div>
-          <div class="stick-line-h"></div>
-          <div class="stick-line-v"></div>
-          <div class="stick-dot" id="dot-R" style="left:50%;top:50%"></div>
-        </div>
-      </div>
-    </div>
-
-    <div id="hud-lives">
-      <div class="life-dot" id="l1"></div>
-      <div class="life-dot" id="l2"></div>
-      <div class="life-dot" id="l3"></div>
-    </div>
-
+    <div id="hud-lives"><div class="life" id="l1"></div><div class="life" id="l2"></div><div class="life" id="l3"></div></div>
     <div id="hud-armed">ARMED</div>
-
-    <!-- Zone progress bar -->
-    <div id="zone-bar">
-      <div class="zone-bar-label">HOVER ZONE ⟦<span id="zone-pct">0</span>%⟧</div>
-      <div class="zone-bar-track"><div class="zone-bar-fill" id="zone-fill" style="width:0%"></div></div>
-    </div>
+    <div id="hud-fps"></div>
+    <div id="race-hud"><div id="race-lap">LAP 1 / 3</div><div id="race-laptime">0:00.0</div></div>
+    <div id="zone-bar"><span id="zone-pct">0</span>% Hover Time<div id="zone-fill-bg"><div id="zone-fill" style="width:0%"></div></div></div>
+    <div id="tut-step"><div class="ts-title" id="ts-title">Step</div><div class="ts-body" id="ts-body">—</div><div class="ts-prog"><div class="ts-prog-fill" id="ts-prog-fill" style="width:0%"></div></div><div class="tut-dots" id="tut-dots"></div></div>
+    <div id="keys-hint">W/S=Throttle · A/D=Yaw · ↑↓=Pitch · ←→=Roll · F=Camera · ESC=Pause</div>
+    <div id="gp-badge">🎮 GAMEPAD</div>
   </div>
 
-  <!-- Notification area -->
-  <div id="notify"></div>
-  <div id="msg"></div>
-  <div id="gp-badge">🎮 GAMEPAD</div>
+  <!-- Mobile controls -->
+  <div class="joy-zone" id="joy-L"><div class="joy-base" id="jb-L"><div class="joy-knob" id="jk-L"></div><div class="joy-label">THR / YAW</div></div></div>
+  <div class="joy-zone" id="joy-R"><div class="joy-base" id="jb-R"><div class="joy-knob" id="jk-R"></div><div class="joy-label">PITCH / ROLL</div></div></div>
+  <button id="cam-btn" onclick="toggleCamera()">📷 CAM</button>
+  <button id="pause-btn" onclick="onEsc()">⏸</button>
 
-  <!-- Crash/gate flash effects -->
-  <div id="crash-flash"></div>
-  <div id="gate-flash"></div>
-
-  <!-- ── MAIN MENU ── -->
-  <div id="menu">
-    <div class="menu-grid"></div>
+  <!-- Main Menu -->
+  <div class="screen" id="screen-menu">
+    <div class="menu-grid-bg"></div>
     <div class="menu-inner">
-      <div class="menu-logo">⬡ OBIXConfig Doctor</div>
-      <div class="menu-title">
-        FPV TRAINING
-        <span class="sub">SIMULATOR</span>
-      </div>
-      <p class="menu-desc">ฝึกควบคุม Mode 2 RC Controller ในโลก 3D แบบ real-time<br>รองรับคีย์บอร์ด + Gamepad (Xbox/PS4)</p>
-
+      <div class="menu-logo">OBIXConfig Doctor</div>
+      <div class="menu-title">FPV SIMULATOR<span class="sub">Real 3D · ฝึกบินโดรน FPV</span></div>
+      <div class="menu-desc">ฝึกทักษะบินโดรน FPV แบบ 3D · รองรับ Keyboard · Gamepad · มือถือ</div>
       <div class="mode-grid">
+        <div class="mode-card tut" onclick="selectMode('TUTORIAL')">
+          <span class="mode-icon">🎓</span>
+          <div class="mode-name">Tutorial</div>
+          <p class="mode-desc">สำหรับมือใหม่! เรียนบินทีละขั้น ปลอดภัย 100%</p>
+          <span class="mode-diff diff-easy">EASY</span>
+        </div>
         <div class="mode-card gate" onclick="selectMode('GATE')">
           <span class="mode-icon">🏁</span>
           <div class="mode-name">Gate Runner</div>
-          <div class="mode-desc">บินผ่าน 12 gate ให้เร็วที่สุด — ฝึกความแม่นยำและความเร็ว</div>
+          <p class="mode-desc">บินผ่าน 12 gate ให้เร็วที่สุด</p>
           <span class="mode-diff diff-med">MEDIUM</span>
         </div>
         <div class="mode-card hunt" onclick="selectMode('HUNT')">
           <span class="mode-icon">🎯</span>
           <div class="mode-name">Target Hunt</div>
-          <div class="mode-desc">ทำลาย 20 เป้าหมายใน 90 วินาที — ฝึกการเลี้ยวและ positioning</div>
+          <p class="mode-desc">ทำลาย 20 เป้า ใน 90 วินาที</p>
           <span class="mode-diff diff-hard">HARD</span>
         </div>
         <div class="mode-card hover-m" onclick="selectMode('HOVER')">
           <span class="mode-icon">🎪</span>
           <div class="mode-name">Hover Zone</div>
-          <div class="mode-desc">รักษาตำแหน่งใน zone สะสม 30 วินาที — ฝึก throttle control</div>
-          <span class="mode-diff diff-easy">EASY</span>
+          <p class="mode-desc">รักษาตำแหน่งใน zone สะสม 30 วินาที</p>
+          <span class="mode-diff diff-med">MEDIUM</span>
+        </div>
+        <div class="mode-card race" onclick="selectMode('RACE')">
+          <span class="mode-icon">🏆</span>
+          <div class="mode-name">Race Circuit</div>
+          <p class="mode-desc">แข่ง 3 รอบ ตั้ง lap record!</p>
+          <span class="mode-diff diff-hard">HARD</span>
+          <span class="mode-new">NEW</span>
         </div>
         <div class="mode-card free" onclick="selectMode('FREE')">
-          <span class="mode-icon">🚁</span>
+          <span class="mode-icon">🚀</span>
           <div class="mode-name">Free Fly</div>
-          <div class="mode-desc">บินอิสระ ไม่มีเงื่อนไข — ฝึก stick control ได้ตามใจ</div>
+          <p class="mode-desc">บินอิสระ สำรวจโลก 3D</p>
           <span class="mode-diff diff-easy">FREE</span>
         </div>
       </div>
-
-      <div class="ctrl-wrap">
-        <span class="ctrl-key"><span class="kbd">W/S</span> Throttle</span>
-        <span class="ctrl-key"><span class="kbd">A/D</span> Yaw</span>
-        <span class="ctrl-key"><span class="kbd">↑↓</span> Pitch</span>
-        <span class="ctrl-key"><span class="kbd">←→</span> Roll</span>
-        <span class="ctrl-key"><span class="kbd">F</span> FPV/3rd</span>
-        <span class="ctrl-key"><span class="kbd">ESC</span> Pause</span>
-      </div>
+      <p style="margin-top:18px;font-size:.72rem;color:rgba(16,196,122,.35)">⌨️ WASD + Arrows / 🎮 Gamepad / 📱 Touch Joysticks</p>
     </div>
   </div>
 
-  <!-- ── PAUSE ── -->
-  <div id="pause" class="hidden">
-    <div class="menu-grid"></div>
-    <div class="menu-inner">
-      <div id="pause-title">PAUSED</div>
-      <p style="color:rgba(16,196,122,.5);font-size:.85rem;margin-bottom:24px">กด ESC หรือ คลิกเพื่อกลับสู่การบิน</p>
-      <div class="btn-row">
-        <button class="btn btn-primary" onclick="resumeGame()">▶ RESUME</button>
-        <button class="btn btn-ghost" onclick="goMenu()">↩ MENU</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── COUNTDOWN ── -->
-  <div id="countdown" class="hidden">
+  <!-- Countdown -->
+  <div class="screen hidden" id="screen-cd">
+    <div class="menu-grid-bg"></div>
     <div id="countdown-num">3</div>
-    <p style="position:absolute;bottom:30%;color:rgba(16,196,122,.4);font-size:.75rem;font-family:var(--mono);letter-spacing:.1em">THROTTLE UP TO ARM</p>
+    <div style="margin-top:16px;font-size:.8rem;color:rgba(16,196,122,.5);font-family:var(--mono);letter-spacing:.1em" id="cd-mode-name">GATE RUNNER</div>
   </div>
 
-  <!-- ── GAME OVER ── -->
-  <div id="gameover" class="hidden">
-    <div class="menu-grid"></div>
+  <!-- Pause -->
+  <div class="screen hidden" id="screen-pause">
+    <div class="menu-grid-bg"></div>
     <div class="menu-inner">
-      <div style="font-family:'Orbitron',monospace;font-size:.75rem;letter-spacing:.12em;color:rgba(16,196,122,.5);margin-bottom:8px" id="go-mode-lbl">GATE RUNNER</div>
-      <div class="score-big" id="go-score">0</div>
-      <div class="rating-stars" id="go-stars">⭐⭐⭐</div>
+      <div id="pause-title">⏸ PAUSED</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+        <button class="btn btn-primary" onclick="resumeGame()">▶ RESUME</button>
+        <button class="btn btn-secondary" onclick="goMenu()">🏠 Menu</button>
+      </div>
+      <p style="margin-top:22px;font-size:.72rem;color:rgba(16,196,122,.35)">ESC = Resume</p>
+    </div>
+  </div>
+
+  <!-- Game Over -->
+  <div class="screen hidden" id="screen-go">
+    <div class="menu-grid-bg"></div>
+    <div class="menu-inner">
+      <div id="go-mode-lbl">GATE RUNNER</div>
+      <div id="go-score">0</div>
+      <div id="go-stars">⭐⭐⭐</div>
       <div class="go-stats" id="go-stats"></div>
-      <div class="btn-row">
-        <button class="btn btn-primary" id="go-retry" onclick="retryGame()">↺ RETRY</button>
-        <button class="btn btn-ghost" onclick="goMenu()">↩ MENU</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px">
+        <button class="btn btn-primary" onclick="retryGame()">🔄 RETRY</button>
+        <button class="btn btn-secondary" onclick="goMenu()">🏠 Menu</button>
       </div>
     </div>
   </div>
+
+  <!-- Effects -->
+  <div id="gate-flash"></div>
+  <div id="crash-flash"></div>
+  <div id="notify"></div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-// ═══════════════════════════════════════════════════════════════
-// OBIX FPV TRAINER — v1.0
-// Mode 2 RC Simulator with 3D perspective rendering
-// Controls: WASD (Left stick: Throttle/Yaw) + Arrows (Right stick: Pitch/Roll)
-// ═══════════════════════════════════════════════════════════════
+'use strict';
+// ═══════════════════════════════════════════════════════════
+//  OBIX FPV SIMULATOR 3D  — Three.js r128
+// ═══════════════════════════════════════════════════════════
 
-const cv = document.getElementById('cv');
-const ctx = cv.getContext('2d');
-let CW, CH;
+// ── Constants ──────────────────────────────────────────────
+const LIFT=28, G=9.8, DRAG=0.06, YAW_RATE=2.4, THR_RATE=1.5;
+const MAX_ALT=80, CAM_BACK=10, CAM_UP=5;
+const COLORS={ g:0x10c47a, gold:0xf1b65a, bl:0x58a6ff, red:0xf87171, bg:0x020609 };
 
-function resize() {
-  CW = cv.width  = window.innerWidth;
-  CH = cv.height = window.innerHeight;
+// ── State ───────────────────────────────────────────────────
+let STATE='MENU', gameMode='GATE';
+let score=0, combo=0, comboTimer=0, lives=3, gameTimer=0;
+let timeLimited=false, timeLimit=90;
+let gatesPassed=0, targetsHit=0, hovTimeSec=0;
+let maxAlt=0, maxSpeed=0;
+let fpvMode=false;
+let bestScores={TUTORIAL:0,GATE:0,HUNT:0,HOVER:0,RACE:0,FREE:0};
+let raceLap=0, raceLapTime=0, raceBestLap=Infinity, raceLastGate=-1;
+let tutStep=0;
+
+// ── Drone physics ────────────────────────────────────────────
+const drone={x:0,y:3,z:0,vx:0,vy:0,vz:0,yaw:0,pitch:0,roll:0,thr:0,armed:false};
+const CAM={x:0,y:8,z:-14,yaw:0,pitch:-0.3};
+
+// ── Input ────────────────────────────────────────────────────
+const K={};
+const joy={L:{x:0,y:0},R:{x:0,y:0}};
+const padAxes=[0,0,0,0];
+
+// ── Three.js ─────────────────────────────────────────────────
+const gw=document.getElementById('gw');
+let renderer, scene, camera3, clock;
+let droneGroup, propMeshes=[], trailGeo, trailLine, trailPositions;
+let gateObjects=[], targetObjects=[], hoverZone=null;
+let particleGeo, particlePositions, particleMeta=[];
+const MAX_PARTICLES=600;
+let frameCount=0, fpsTimer=0, fps=60;
+
+// ── Tutorial ─────────────────────────────────────────────────
+const TUT_STEPS=[
+  {title:'ขั้นที่ 1 — เพิ่ม Throttle',body:'กด W (หรือ Stick ซ้ายขึ้น) ค้างไว้\nเพื่อเพิ่ม Throttle ให้โดรนลอยขึ้น',goal:'alt', target:3},
+  {title:'ขั้นที่ 2 — หมุน Yaw',body:'กด A / D (หรือ Stick ซ้าย ซ้าย/ขวา)\nเพื่อหมุนหัวโดรนให้ครบ 360°',goal:'yaw',target:2*Math.PI},
+  {title:'ขั้นที่ 3 — บินไปหน้า (Pitch)',body:'กด ↑ (หรือ Stick ขวาขึ้น)\nเพื่อให้โดรนบินไปข้างหน้า',goal:'fwd',target:12},
+  {title:'ขั้นที่ 4 — เลี้ยว (Roll)',body:'กด ← / → (หรือ Stick ขวา ซ้าย/ขวา)\nเพื่อเอียงโดรนซ้าย/ขวา',goal:'roll',target:0.3},
+  {title:'ขั้นที่ 5 — บินผ่าน Gate!',body:'ใช้ทักษะที่เรียนมา\nบินผ่าน Gate สีเขียวข้างหน้า!',goal:'gate',target:1},
+];
+let tutProgress={altDone:false,yawTotal:0,lastYaw:0,fwdStart:null,rollMax:0,gateThrough:false};
+
+// ── Three.js Init ─────────────────────────────────────────────
+function initThree(){
+  renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(gw.clientWidth,gw.clientHeight);
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure=1.2;
+  gw.insertBefore(renderer.domElement,gw.firstChild);
+
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(COLORS.bg);
+  scene.fog=new THREE.FogExp2(COLORS.bg,0.009);
+
+  const W=gw.clientWidth, H=gw.clientHeight;
+  camera3=new THREE.PerspectiveCamera(72,W/H,0.05,2000);
+  camera3.position.set(0,8,-14);
+  clock=new THREE.Clock();
+
+  buildWorld();
+  buildDrone();
+  buildParticleSystem();
+  buildTrail();
+
+  window.addEventListener('resize',onResize);
 }
-resize();
-window.addEventListener('resize', resize);
 
-// ─── Constants ───
-const G     = 9.81;
-const LIFT  = 24;    // max lift acceleration (m/s²)
-const DRAG  = 0.025; // linear drag
-const YAW_RATE   = 2.2;  // rad/s
-const PITCH_RATE = 1.6;  // rad/s
-const ROLL_RATE  = 2.2;  // rad/s
-const THR_RATE   = 0.9;  // throttle change/s
-const FOV   = 520;   // perspective focal length
-const CAM_BACK = 14;
-const CAM_UP   = 5;
-const MAX_ALT  = 60;
+function onResize(){
+  const W=gw.clientWidth, H=gw.clientHeight;
+  renderer.setSize(W,H);
+  camera3.aspect=W/H;
+  camera3.updateProjectionMatrix();
+}
 
-// ─── Game State ───
-let STATE = 'MENU'; // MENU COUNTDOWN PLAYING PAUSED GAMEOVER
-let gameMode = 'FREE';
-let score = 0, lives = 3, combo = 0, comboTimer = 0;
-let gameTimer = 0, timeLimited = false, timeLimit = 90;
-let bestScores = {GATE:0, HUNT:0, HOVER:0};
-let fpvMode = false;
-let currentGate = 0;
-let hovTimeSec = 0, hovGoalSec = 30;
-let targetsRemain = 0;
-let countdownVal = 3;
-let gatesPassed = 0, targetsHit = 0;
-let maxAlt = 0, maxSpeed = 0;
+// ── World ─────────────────────────────────────────────────────
+function buildWorld(){
+  // Ambient
+  scene.add(new THREE.AmbientLight(0x102030,0.7));
+  const moon=new THREE.DirectionalLight(0x7090c0,0.4);
+  moon.position.set(80,120,60); scene.add(moon);
 
-// ─── Drone ───
-const drone = {
-  x:0, y:3, z:0,
-  vx:0, vy:0, vz:0,
-  yaw:0, pitch:0, roll:0,
-  thr:0,
-  armed: false,
-};
+  // Ground
+  const gMat=new THREE.MeshLambertMaterial({color:0x010608,side:THREE.DoubleSide});
+  const gnd=new THREE.Mesh(new THREE.PlaneGeometry(600,600),gMat);
+  gnd.rotation.x=-Math.PI/2; scene.add(gnd);
 
-// ─── Camera ───
-const CAM = { x:0, y:8, z:-14, yaw:0, pitch:-0.3 };
+  // Grid
+  const grid=new THREE.GridHelper(500,100,0x0c2015,0x081409);
+  scene.add(grid);
 
-// ─── Input ───
-const K = {};
-const pad = { axes:[0,0,0,0], btns:[] };
+  // Stars
+  const sPos=[];
+  for(let i=0;i<2500;i++) sPos.push((Math.random()-.5)*2000,(30+Math.random()*600),(Math.random()-.5)*2000);
+  const sGeo=new THREE.BufferGeometry(); sGeo.setAttribute('position',new THREE.Float32BufferAttribute(sPos,3));
+  scene.add(new THREE.Points(sGeo,new THREE.PointsMaterial({color:0xaac8ff,size:0.6})));
 
-document.addEventListener('keydown', e => {
-  K[e.code] = true;
-  if (e.code === 'Escape') { e.preventDefault(); onEsc(); }
-  if (e.code === 'KeyF' && STATE === 'PLAYING') { fpvMode = !fpvMode; updateCamMode(); }
-  if (e.code === 'Space' && STATE === 'MENU') {} // handled in mode select
-});
-document.addEventListener('keyup', e => { K[e.code] = false; });
+  // Environment pylons
+  for(let i=0;i<30;i++){
+    const h=4+Math.random()*8;
+    const x=(Math.random()-.5)*180, z=30+Math.random()*160;
+    const p=new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.2,h,6),new THREE.MeshLambertMaterial({color:0x0a1a10,emissive:0x020805}));
+    p.position.set(x,h/2,z); scene.add(p);
+    // Light on top
+    if(Math.random()>.5){
+      const lt=new THREE.Mesh(new THREE.SphereGeometry(0.12,6,6),new THREE.MeshBasicMaterial({color:0x10c47a}));
+      lt.position.set(x,h+0.1,z); scene.add(lt);
+    }
+  }
+  // Distant mountains (simple triangle shapes)
+  const ridgeMat=new THREE.MeshLambertMaterial({color:0x060f08});
+  for(let i=0;i<8;i++){
+    const h=20+Math.random()*30, w=30+Math.random()*50;
+    const ang=i*(Math.PI*2/8);
+    const d=180+Math.random()*60;
+    const mt=new THREE.Mesh(new THREE.ConeGeometry(w,h,5),ridgeMat);
+    mt.position.set(Math.cos(ang)*d,0,Math.sin(ang)*d); scene.add(mt);
+  }
+}
 
-// Touch: prevent page scroll
-document.addEventListener('touchmove', e => e.preventDefault(), {passive:false});
+// ── Drone Model ───────────────────────────────────────────────
+function buildDrone(){
+  droneGroup=new THREE.Group();
+  const bodyMat=new THREE.MeshPhongMaterial({color:0x0a1a0f,emissive:0x020805,shininess:40});
+  droneGroup.add(new THREE.Mesh(new THREE.BoxGeometry(0.42,0.12,0.42),bodyMat));
 
-// ─── Gamepad ───
-window.addEventListener('gamepadconnected', e => {
-  document.getElementById('gp-badge').style.display = 'block';
-  showNotify('🎮 Gamepad Connected!', 'ok');
-});
-window.addEventListener('gamepaddisconnected', () => {
-  document.getElementById('gp-badge').style.display = 'none';
-});
+  const armMat=new THREE.MeshPhongMaterial({color:0x0d2010,emissive:0x030805});
+  const motorMat=new THREE.MeshPhongMaterial({color:0x10c47a,emissive:0x04400d,shininess:80});
+  const propMat=new THREE.MeshBasicMaterial({color:0x10c47a,transparent:true,opacity:0.3,side:THREE.DoubleSide});
+  const ledFMat=new THREE.MeshBasicMaterial({color:0xf1b65a});
+  const ledBMat=new THREE.MeshBasicMaterial({color:0xf87171});
 
-function readGamepad() {
-  const gps = navigator.getGamepads ? navigator.getGamepads() : [];
-  for (let gp of gps) {
-    if (!gp) continue;
-    // Standard mapping: axes[0]=Lx, axes[1]=Ly, axes[2]=Rx, axes[3]=Ry
-    // Mode 2: L-stick = throttle(Y)/yaw(X), R-stick = pitch(Y)/roll(X)
-    // Axes: -1=up/left, +1=down/right → invert Y for throttle
-    const deadzone = 0.10;
-    const ax = (v) => Math.abs(v) > deadzone ? v : 0;
-    // Override key states with gamepad
-    const ly = -ax(gp.axes[1]); // throttle
-    const lx =  ax(gp.axes[0]); // yaw
-    const ry = -ax(gp.axes[3]); // pitch
-    const rx =  ax(gp.axes[2]); // roll
-    if (ly > 0) K['KeyW'] = true;  else K['KeyW'] = false;
-    if (ly < 0) K['KeyS'] = true;  else K['KeyS'] = false;
-    if (lx < 0) K['KeyA'] = true;  else K['KeyA'] = false;
-    if (lx > 0) K['KeyD'] = true;  else K['KeyD'] = false;
-    if (ry > 0) K['ArrowUp']   = true; else K['ArrowUp']   = false;
-    if (ry < 0) K['ArrowDown'] = true; else K['ArrowDown'] = false;
-    if (rx < 0) K['ArrowLeft'] = true; else K['ArrowLeft'] = false;
-    if (rx > 0) K['ArrowRight']= true; else K['ArrowRight']= false;
-    // B / circle = pause
-    if (gp.buttons[1]?.pressed) onEsc();
-    // Store analog values for stick display
-    pad.axes = [lx, ly, rx, ry];
+  propMeshes=[];
+  for(let i=0;i<4;i++){
+    const ang=Math.PI/4+i*Math.PI/2;
+    const r=0.44;
+    const mx=Math.cos(ang)*r, mz=Math.sin(ang)*r;
+
+    const arm=new THREE.Mesh(new THREE.BoxGeometry(0.92,0.05,0.07),armMat);
+    arm.rotation.y=-ang; droneGroup.add(arm);
+
+    const mot=new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.11,0.09,8),motorMat);
+    mot.position.set(mx,0,mz); droneGroup.add(mot);
+
+    const prop=new THREE.Mesh(new THREE.CylinderGeometry(0.23,0.23,0.01,16),propMat);
+    prop.position.set(mx,0.06,mz); droneGroup.add(prop); propMeshes.push(prop);
+
+    const led=new THREE.Mesh(new THREE.SphereGeometry(0.04,6,6),i<2?ledFMat:ledBMat);
+    led.position.set(mx,-0.06,mz); droneGroup.add(led);
+  }
+  // Camera nub (front indicator)
+  const camNub=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.08,0.06),new THREE.MeshPhongMaterial({color:0xf1b65a}));
+  camNub.position.set(0,0.04,-0.22); droneGroup.add(camNub);
+  scene.add(droneGroup);
+}
+
+// ── Particle System ───────────────────────────────────────────
+function buildParticleSystem(){
+  particlePositions=new Float32Array(MAX_PARTICLES*3);
+  particleGeo=new THREE.BufferGeometry();
+  particleGeo.setAttribute('position',new THREE.BufferAttribute(particlePositions,3));
+  const pMat=new THREE.PointsMaterial({color:COLORS.g,size:0.22,transparent:true,opacity:0.8,blending:THREE.AdditiveBlending,depthWrite:false});
+  scene.add(new THREE.Points(particleGeo,pMat));
+  particleMeta=[];
+}
+
+function spawnParticles(x,y,z,col,n,spread=5){
+  for(let i=0;i<n;i++){
+    if(particleMeta.length>=MAX_PARTICLES) break;
+    const a=Math.random()*Math.PI*2, e=Math.random()*Math.PI-Math.PI/2;
+    const s=1+Math.random()*spread;
+    particleMeta.push({
+      x,y,z,
+      vx:Math.cos(a)*Math.cos(e)*s,vy:Math.sin(e)*s+1,vz:Math.sin(a)*Math.cos(e)*s,
+      life:1,maxLife:1,color:col
+    });
+  }
+}
+
+function updateParticles(dt){
+  for(let i=particleMeta.length-1;i>=0;i--){
+    const p=particleMeta[i];
+    p.x+=p.vx*dt; p.y+=p.vy*dt; p.z+=p.vz*dt;
+    p.vy-=6*dt; p.vx*=0.96; p.vz*=0.96;
+    p.life-=dt*1.2;
+    if(p.life<=0||p.y<0){particleMeta.splice(i,1);continue;}
+    const idx=i*3;
+    particlePositions[idx]=p.x; particlePositions[idx+1]=p.y; particlePositions[idx+2]=p.z;
+  }
+  // Zero out unused slots
+  for(let i=particleMeta.length;i<MAX_PARTICLES;i++){
+    particlePositions[i*3+1]=-9999;
+  }
+  particleGeo.attributes.position.needsUpdate=true;
+}
+
+// ── Trail ─────────────────────────────────────────────────────
+const TRAIL_LEN=60;
+function buildTrail(){
+  const pos=new Float32Array(TRAIL_LEN*3);
+  trailGeo=new THREE.BufferGeometry();
+  trailGeo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  const mat=new THREE.LineBasicMaterial({color:COLORS.g,transparent:true,opacity:0.5,blending:THREE.AdditiveBlending,depthWrite:false});
+  trailLine=new THREE.Line(trailGeo,mat);
+  scene.add(trailLine);
+  trailPositions=[];
+}
+
+function updateTrail(){
+  trailPositions.push([drone.x,drone.y,drone.z]);
+  if(trailPositions.length>TRAIL_LEN) trailPositions.shift();
+  const arr=trailGeo.attributes.position.array;
+  for(let i=0;i<trailPositions.length;i++){
+    arr[i*3]=trailPositions[i][0]; arr[i*3+1]=trailPositions[i][1]; arr[i*3+2]=trailPositions[i][2];
+  }
+  for(let i=trailPositions.length;i<TRAIL_LEN;i++) arr[i*3+1]=-9999;
+  trailGeo.attributes.position.needsUpdate=true;
+  trailGeo.setDrawRange(0,trailPositions.length);
+}
+
+// ── Gate Generation ───────────────────────────────────────────
+function clearGates(){gateObjects.forEach(g=>{scene.remove(g.group);}); gateObjects=[];}
+
+function genGates(n=12,circuit=false){
+  clearGates();
+  const gates=[];
+  let ax=0,az=0,ay=0,ang=0;
+  const step=circuit?16:18;
+
+  if(circuit){
+    // Oval race circuit
+    for(let i=0;i<n;i++){
+      const t=i/n;
+      ax=Math.cos(t*Math.PI*2)*55;
+      az=Math.sin(t*Math.PI*2)*35;
+      ay=4+Math.sin(t*Math.PI*4)*3;
+      ang=Math.atan2(Math.cos(t*Math.PI*2)*35*Math.PI*2/n, -Math.sin(t*Math.PI*2)*55*Math.PI*2/n);
+      gates.push({x:ax,y:ay,z:az,yaw:ang,r:5,passed:false,active:i===0,lit:i===0});
+    }
+  } else {
+    for(let i=0;i<n;i++){
+      ax+=Math.sin(ang)*step; az+=Math.cos(ang)*step;
+      ay=4+Math.sin(i*0.9)*4;
+      ang+=(Math.random()-.5)*0.8;
+      gates.push({x:ax,y:ay,z:az,yaw:ang,r:4.5,passed:false,active:i===0,lit:i===0});
+    }
+  }
+
+  gates.forEach((g,gi)=>{
+    const col=g.active?COLORS.g:COLORS.bl;
+    const group=new THREE.Group();
+    const mat=new THREE.MeshBasicMaterial({color:col});
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(g.r,0.18,8,48),mat);
+    ring.rotation.y=g.yaw; group.add(ring);
+    // Glow
+    const gMat=new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.1,blending:THREE.AdditiveBlending,depthWrite:false});
+    const gRing=new THREE.Mesh(new THREE.TorusGeometry(g.r+0.5,0.55,8,48),gMat);
+    gRing.rotation.y=g.yaw; group.add(gRing);
+    // Point light
+    const lt=new THREE.PointLight(col,g.active?3:1,18);
+    group.add(lt);
+    group.position.set(g.x,g.y,g.z);
+    scene.add(group);
+    g.group=group; g.ring=ring; g.gRing=gRing; g.lt=lt; g.mat=mat; g.gMat=gMat; g.idx=gi;
+    gateObjects.push(g);
+  });
+  return gates;
+}
+
+let gates=[], tutGate=null;
+function genTutGate(){
+  if(tutGate){scene.remove(tutGate.group); tutGate=null;}
+  const g={x:0,y:5,z:20,yaw:0,r:5,passed:false};
+  const group=new THREE.Group();
+  const mat=new THREE.MeshBasicMaterial({color:COLORS.g});
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(5,0.2,8,48),mat);
+  group.add(ring);
+  const gMat=new THREE.MeshBasicMaterial({color:COLORS.g,transparent:true,opacity:0.12,blending:THREE.AdditiveBlending,depthWrite:false});
+  const gRing=new THREE.Mesh(new THREE.TorusGeometry(5.6,0.7,8,48),gMat);
+  group.add(gRing);
+  group.add(new THREE.PointLight(COLORS.g,4,25));
+  group.position.set(g.x,g.y,g.z);
+  scene.add(group);
+  g.group=group; g.mat=mat; g.gMat=gMat;
+  tutGate=g;
+}
+
+function setGateActive(gi){
+  gateObjects.forEach((g,i)=>{
+    const on=i===gi;
+    const col=on?COLORS.g:( g.passed?0x0d3318:COLORS.bl);
+    g.mat.color.setHex(col); g.gMat.color.setHex(col);
+    g.lt.intensity=on?3:( g.passed?0:0.8);
+    g.lt.color.setHex(col);
+  });
+}
+
+function checkGatePass(gi){
+  const g=gateObjects[gi];
+  if(!g||g.passed) return false;
+  const dx=drone.x-g.x, dy=drone.y-g.y, dz=drone.z-g.z;
+  const sy=Math.sin(g.yaw), cy=Math.cos(g.yaw);
+  const fwd=sy*dx+cy*dz; // should be near 0
+  if(Math.abs(fwd)>2) return false;
+  const latX=cy*dx-sy*dz;
+  return Math.sqrt(latX*latX+dy*dy)<g.r+0.7;
+}
+
+// ── Target Generation ─────────────────────────────────────────
+function clearTargets(){targetObjects.forEach(t=>{scene.remove(t.group);}); targetObjects=[];}
+
+function genTargets(n=20){
+  clearTargets();
+  for(let i=0;i<n;i++){
+    const x=(Math.random()-.5)*80, y=3+Math.random()*14, z=10+(Math.random()-.5)*80;
+    const hue=15+Math.random()*40;
+    const col=new THREE.Color().setHSL(hue/360,.9,.65);
+    const group=new THREE.Group();
+    const mat=new THREE.MeshBasicMaterial({color:col});
+    const oct=new THREE.Mesh(new THREE.OctahedronGeometry(1.1,0),mat);
+    group.add(oct);
+    const gMat=new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.12,blending:THREE.AdditiveBlending,depthWrite:false});
+    group.add(new THREE.Mesh(new THREE.SphereGeometry(1.7,8,8),gMat));
+    group.add(new THREE.PointLight(col,2,10));
+    group.position.set(x,y,z);
+    scene.add(group);
+    targetObjects.push({group,oct,mat,x,y,z,r:1.2,alive:true,hue,phase:Math.random()*Math.PI*2,col});
+  }
+}
+
+// ── Hover Zone ─────────────────────────────────────────────────
+let hzGroup=null, hzData={x:0,y:6,z:20,r:5,h:4};
+function genHoverZone(){
+  if(hzGroup){scene.remove(hzGroup); hzGroup=null;}
+  hzData={x:(Math.random()-.5)*30,y:4+Math.random()*5,z:20+(Math.random()-.5)*30,r:5,h:4};
+  hzGroup=new THREE.Group();
+  const mat=new THREE.MeshBasicMaterial({color:COLORS.bl,wireframe:true,transparent:true,opacity:0.4});
+  const cyl=new THREE.Mesh(new THREE.CylinderGeometry(hzData.r,hzData.r,hzData.h,24,1,true),mat);
+  hzGroup.add(cyl);
+  const ringMat=new THREE.MeshBasicMaterial({color:COLORS.bl});
+  [-hzData.h/2,hzData.h/2].forEach(yOff=>{
+    const r=new THREE.Mesh(new THREE.TorusGeometry(hzData.r,.08,8,32),ringMat);
+    r.rotation.x=Math.PI/2; r.position.y=yOff; hzGroup.add(r);
+  });
+  hzGroup.add(new THREE.PointLight(COLORS.bl,2,20));
+  hzGroup.position.set(hzData.x,hzData.y,hzData.z);
+  scene.add(hzGroup);
+}
+
+function inHoverZone(){
+  const dx=drone.x-hzData.x,dy=drone.y-hzData.y,dz=drone.z-hzData.z;
+  return dx*dx+dz*dz<hzData.r*hzData.r && Math.abs(dy)<hzData.h/2;
+}
+
+// ── Physics ────────────────────────────────────────────────────
+function updatePhysics(dt){
+  if(!drone.armed) return;
+  dt=Math.min(dt,.045);
+
+  // Input from keyboard + joystick
+  const thrUp   = K['KeyW']   || joy.L.y < -.1;
+  const thrDn   = K['KeyS']   || joy.L.y >  .1;
+  const yawL    = K['KeyA']   || joy.L.x < -.1;
+  const yawR    = K['KeyD']   || joy.L.x >  .1;
+  const pitchUp = K['ArrowUp']   || joy.R.y < -.1;
+  const pitchDn = K['ArrowDown'] || joy.R.y >  .1;
+  const rollL   = K['ArrowLeft'] || joy.R.x < -.1;
+  const rollR   = K['ArrowRight']|| joy.R.x >  .1;
+
+  // Analog magnitude (joystick gives smooth 0-1)
+  const thrMag = thrUp ? Math.max(.5,Math.abs(joy.L.y)) : thrDn ? Math.max(.5,Math.abs(joy.L.y)) : 0;
+  const yawMag = yawL ? Math.max(.5,Math.abs(joy.L.x)) : yawR ? Math.max(.5,Math.abs(joy.L.x)) : 0;
+
+  if(thrUp) drone.thr=Math.min(1,drone.thr+THR_RATE*(thrMag||1)*dt);
+  if(thrDn) drone.thr=Math.max(0,drone.thr-THR_RATE*(thrMag||1)*dt);
+  if(yawL)  drone.yaw-=YAW_RATE*(yawMag||1)*dt;
+  if(yawR)  drone.yaw+=YAW_RATE*(yawMag||1)*dt;
+
+  const tgPitch = pitchUp ? -0.45*(Math.max(.5,Math.abs(joy.R.y))) : pitchDn ? 0.30*(Math.max(.5,Math.abs(joy.R.y))) : 0;
+  const tgRoll  = rollL   ? -0.55*(Math.max(.5,Math.abs(joy.R.x))) : rollR  ? 0.55*(Math.max(.5,Math.abs(joy.R.x))) : 0;
+  drone.pitch=lerp(drone.pitch,tgPitch,7*dt);
+  drone.roll=lerp(drone.roll,tgRoll,7*dt);
+
+  const lift=drone.thr*LIFT;
+  const fwdX=-Math.sin(drone.yaw), fwdZ=Math.cos(drone.yaw);
+  const rgtX=Math.cos(drone.yaw),  rgtZ=Math.sin(drone.yaw);
+  drone.vx=(drone.vx*(1-DRAG))+(fwdX*lift*(-Math.sin(drone.pitch))+rgtX*lift*Math.sin(drone.roll)*Math.cos(drone.pitch))*dt;
+  drone.vz=(drone.vz*(1-DRAG))+(fwdZ*lift*(-Math.sin(drone.pitch))+rgtZ*lift*Math.sin(drone.roll)*Math.cos(drone.pitch))*dt;
+  drone.vy+=(lift*Math.cos(drone.pitch)*Math.cos(drone.roll)-G)*dt;
+  drone.vy*=(1-DRAG*2);
+
+  drone.x+=drone.vx*dt; drone.y+=drone.vy*dt; drone.z+=drone.vz*dt;
+
+  // Ground collision
+  if(drone.y<0.4){
+    const spd=Math.sqrt(drone.vx*drone.vx+drone.vy*drone.vy+drone.vz*drone.vz);
+    if(spd>8&&drone.vy<-3){triggerCrash();return;}
+    drone.y=0.4; drone.vy=Math.max(0,drone.vy); drone.vx*=0.7; drone.vz*=0.7;
+  }
+  if(drone.y>MAX_ALT){drone.y=MAX_ALT;drone.vy=Math.min(0,drone.vy);}
+  const BOUND=180;
+  if(Math.abs(drone.x)>BOUND){drone.vx*=-.5;drone.x=Math.sign(drone.x)*BOUND;}
+  if(Math.abs(drone.z)>BOUND){drone.vz*=-.5;drone.z=Math.sign(drone.z)*BOUND;}
+
+  const spd=Math.sqrt(drone.vx*drone.vx+drone.vy*drone.vy+drone.vz*drone.vz);
+  if(spd>maxSpeed) maxSpeed=spd;
+  if(drone.y>maxAlt) maxAlt=drone.y;
+}
+
+function lerp(a,b,t){return a+(b-a)*t;}
+
+// ── Camera Update ─────────────────────────────────────────────
+function updateCamera3(dt){
+  if(!camera3) return;
+  if(fpvMode){
+    camera3.position.set(drone.x,drone.y+0.12,drone.z);
+    camera3.rotation.order='YXZ';
+    camera3.rotation.y=drone.yaw+Math.PI;
+    camera3.rotation.x=drone.pitch*0.55;
+    camera3.rotation.z=drone.roll*0.4;
+  } else {
+    const tx=drone.x-Math.sin(drone.yaw)*CAM_BACK;
+    const tz=drone.z+Math.cos(drone.yaw)*CAM_BACK;
+    const ty=drone.y+CAM_UP;
+    const spd=0.10+Math.min(0.06,Math.sqrt(drone.vx*drone.vx+drone.vz*drone.vz)*0.004);
+    camera3.position.x=lerp(camera3.position.x,tx,spd*60*dt);
+    camera3.position.y=lerp(camera3.position.y,ty,0.08*60*dt);
+    camera3.position.z=lerp(camera3.position.z,tz,spd*60*dt);
+    camera3.lookAt(drone.x,drone.y+0.5,drone.z);
+  }
+}
+
+// ── Drone 3D Update ────────────────────────────────────────────
+function updateDroneModel(){
+  droneGroup.position.set(drone.x,drone.y,drone.z);
+  droneGroup.rotation.order='YXZ';
+  droneGroup.rotation.y=drone.yaw;
+  droneGroup.rotation.x=drone.pitch;
+  droneGroup.rotation.z=drone.roll;
+
+  // Spinning props
+  const spinDir=[1,-1,-1,1];
+  propMeshes.forEach((p,i)=>{p.rotation.y+=(drone.thr*15+2)*spinDir[i]*0.016;});
+
+  // Prop wash particles
+  if(drone.armed&&drone.thr>0.1&&Math.random()<0.35){
+    for(let i=0;i<4;i++){
+      const a=Math.PI/4+i*Math.PI/2+drone.yaw;
+      spawnParticles(drone.x+Math.cos(a)*1.6,drone.y,drone.z+Math.sin(a)*1.6,COLORS.g,1,0.5);
+    }
+  }
+}
+
+// ── Gamepad ─────────────────────────────────────────────────────
+function readGamepad(){
+  const gps=navigator.getGamepads?navigator.getGamepads():[];
+  for(let gp of gps){
+    if(!gp) continue;
+    const dz=v=>Math.abs(v)>.1?v:0;
+    joy.L.x=dz(gp.axes[0]); joy.L.y=-dz(gp.axes[1]);
+    joy.R.x=dz(gp.axes[2]); joy.R.y=-dz(gp.axes[3]);
+    if(gp.buttons[1]?.pressed) onEsc();
+    document.getElementById('gp-badge').style.display='block';
     break;
   }
 }
 
-// ─── Physics ───
-function updatePhysics(dt) {
-  if (!drone.armed) return;
-  dt = Math.min(dt, 0.05); // clamp dt
-
-  // Throttle
-  if (K['KeyW']) drone.thr = Math.min(1, drone.thr + THR_RATE * dt);
-  if (K['KeyS']) drone.thr = Math.max(0, drone.thr - THR_RATE * dt);
-
-  // Yaw
-  if (K['KeyA']) drone.yaw -= YAW_RATE * dt;
-  if (K['KeyD']) drone.yaw += YAW_RATE * dt;
-
-  // Pitch (nose down = forward thrust)
-  let tgPitch = 0;
-  if (K['ArrowUp'])   tgPitch = -0.45;
-  if (K['ArrowDown']) tgPitch =  0.30;
-  drone.pitch = lerp(drone.pitch, tgPitch, 7 * dt);
-
-  // Roll
-  let tgRoll = 0;
-  if (K['ArrowLeft'])  tgRoll = -0.55;
-  if (K['ArrowRight']) tgRoll =  0.55;
-  drone.roll = lerp(drone.roll, tgRoll, 7 * dt);
-
-  // Forces: thrust along tilted body axis
-  const lift  = drone.thr * LIFT;
-  const sinY  = Math.sin(drone.yaw), cosY = Math.cos(drone.yaw);
-  const sinP  = Math.sin(drone.pitch), cosP = Math.cos(drone.pitch);
-  const sinR  = Math.sin(drone.roll),  cosR = Math.cos(drone.roll);
-
-  // Thrust direction (body-up rotated by pitch/roll/yaw)
-  // Forward = sinP along heading, Side = sinR along right
-  const thrustFwd  =  lift * sinP;
-  const thrustSide =  lift * sinR * cosP;
-  const thrustUp   =  lift * cosP * cosR - G;
-
-  // World axes
-  drone.vx += (cosY * thrustSide - sinY * thrustFwd) * dt; // actually: fwd along -Z
-  drone.vy += thrustUp * dt;
-  drone.vz += (sinY * thrustSide + cosY * thrustFwd) * dt; // hm, need rethink
-
-  // Simpler direct model:
-  drone.vx += (-sinY * lift * sinP + cosY * lift * sinR * cosP) * dt;
-  drone.vz += ( cosY * lift * sinP + sinY * lift * sinR * cosP) * dt;
-  // (overwrite above two — combine into single calc)
-  // Redo clean version:
-  const fwdX = -sinY, fwdZ = cosY;
-  const rgtX =  cosY, rgtZ = sinY;
-  drone.vx = (drone.vx - drone.vx * DRAG) + (fwdX * lift * (-sinP) + rgtX * lift * sinR * cosP) * dt;
-  drone.vz = (drone.vz - drone.vz * DRAG) + (fwdZ * lift * (-sinP) + rgtZ * lift * sinR * cosP) * dt;
-  drone.vy += (lift * cosP * cosR - G) * dt;
-  drone.vy *= (1 - DRAG * 2);
-
-  // Integrate
-  drone.x += drone.vx * dt;
-  drone.y += drone.vy * dt;
-  drone.z += drone.vz * dt;
-
-  // Ground
-  if (drone.y < 0.4) {
-    const spd = Math.sqrt(drone.vx*drone.vx + drone.vy*drone.vy + drone.vz*drone.vz);
-    if (spd > 8 && drone.vy < -3) {
-      triggerCrash();
-    } else {
-      drone.y = 0.4;
-      drone.vy = Math.max(0, drone.vy);
-      drone.vx *= 0.7; drone.vz *= 0.7;
-    }
-  }
-
-  // Altitude limit
-  if (drone.y > MAX_ALT) { drone.y = MAX_ALT; drone.vy = Math.min(0, drone.vy); }
-
-  // Boundary
-  const BOUND = 120;
-  if (Math.abs(drone.x) > BOUND) { drone.vx *= -0.5; drone.x = Math.sign(drone.x) * BOUND; }
-  if (Math.abs(drone.z) > BOUND) { drone.vz *= -0.5; drone.z = Math.sign(drone.z) * BOUND; }
-
-  // Stats
-  const spd = Math.sqrt(drone.vx*drone.vx + drone.vy*drone.vy + drone.vz*drone.vz);
-  if (spd > maxSpeed) maxSpeed = spd;
-  if (drone.y > maxAlt) maxAlt = drone.y;
-}
-
-function lerp(a, b, t) { return a + (b-a)*t; }
-
-// ─── Camera update ───
-function updateCamera() {
-  if (fpvMode) {
-    CAM.x = drone.x; CAM.y = drone.y + 0.15; CAM.z = drone.z;
-    CAM.yaw = drone.yaw; CAM.pitch = drone.pitch * 0.6;
-  } else {
-    // Chase camera (smooth follow)
-    const tx = drone.x - Math.sin(drone.yaw) * CAM_BACK;
-    const tz = drone.z + Math.cos(drone.yaw) * CAM_BACK;
-    const ty = drone.y + CAM_UP;
-    CAM.x = lerp(CAM.x, tx, 0.12);
-    CAM.y = lerp(CAM.y, ty, 0.10);
-    CAM.z = lerp(CAM.z, tz, 0.12);
-    // Look direction toward drone
-    const dx = drone.x - CAM.x, dy = drone.y - CAM.y, dz = drone.z - CAM.z;
-    CAM.yaw   = Math.atan2(dx, dz);
-    CAM.pitch = Math.atan2(dy, Math.sqrt(dx*dx + dz*dz));
-  }
-}
-
-// ─── 3D Projection ───
-function project(wx, wy, wz) {
-  let dx = wx - CAM.x, dy = wy - CAM.y, dz = wz - CAM.z;
-  // Rotate Y (yaw)
-  const cy = Math.cos(-CAM.yaw), sy = Math.sin(-CAM.yaw);
-  let rx = cy*dx + sy*dz, rz = -sy*dx + cy*dz, ry = dy;
-  // Rotate X (pitch)
-  const cp = Math.cos(-CAM.pitch), sp = Math.sin(-CAM.pitch);
-  let fy = cp*ry - sp*rz, fz = sp*ry + cp*rz, fx = rx;
-  if (fz < 0.1) return null;
-  const f = FOV / fz;
-  return { sx: CW/2 + fx*f, sy: CH/2 - fy*f, sz: fz, f };
-}
-
-// ─── Renderer ───
-function render() {
-  ctx.clearRect(0, 0, CW, CH);
-
-  // Sky gradient
-  const sky = ctx.createLinearGradient(0,0,0,CH);
-  sky.addColorStop(0, '#010409');
-  sky.addColorStop(0.55, '#02070d');
-  sky.addColorStop(1, '#030c10');
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, CW, CH);
-
-  // Stars
-  drawStars();
-
-  // FPV roll effect
-  if (fpvMode && Math.abs(drone.roll) > 0.01) {
-    ctx.save();
-    ctx.translate(CW/2, CH/2);
-    ctx.rotate(drone.roll * 0.8);
-    ctx.translate(-CW/2, -CH/2);
-  }
-
-  // Ground grid
-  drawGround();
-
-  // World objects
-  drawGates();
-  drawTargets();
-  drawZone();
-
-  // Particles
-  drawParticles();
-
-  // Drone (3rd person)
-  if (!fpvMode) drawDrone3P();
-
-  if (fpvMode && Math.abs(drone.roll) > 0.01) ctx.restore();
-
-  // HUD overlays (not affected by FPV roll)
-  updateHUD();
-}
-
-// ─── Stars ───
-const STARS = Array.from({length:120}, () => ({
-  x: Math.random()*2-1, y: Math.random()*0.7-0.3,
-  s: Math.random()*1.5+0.3, b: Math.random()*.6+.1
-}));
-function drawStars() {
-  STARS.forEach(s => {
-    const p = project(s.x*300, s.y*100+60, 500);
-    if (!p || p.sz < 0) return;
-    ctx.beginPath();
-    ctx.arc(p.sx, p.sy, s.s, 0, Math.PI*2);
-    ctx.fillStyle = `rgba(180,220,255,${s.b})`;
-    ctx.fill();
-  });
-}
-
-// ─── Ground Grid ───
-function drawGround() {
-  const gs = 5, range = 80;
-  ctx.lineWidth = 1;
-
-  // Farther lines: fainter
-  for (let x = -range; x <= range; x += gs) {
-    const p1 = project(x, 0, -range), p2 = project(x, 0, range);
-    if (!p1 || !p2) continue;
-    const alpha = Math.max(0, 0.12 - Math.abs(x)/range*0.08);
-    ctx.strokeStyle = `rgba(16,196,122,${alpha})`;
-    ctx.beginPath(); ctx.moveTo(p1.sx,p1.sy); ctx.lineTo(p2.sx,p2.sy); ctx.stroke();
-  }
-  for (let z = -range; z <= range; z += gs) {
-    const p1 = project(-range, 0, z), p2 = project(range, 0, z);
-    if (!p1 || !p2) continue;
-    const dz = Math.abs(z - drone.z);
-    const alpha = Math.max(0, 0.12 - dz/range*0.08);
-    ctx.strokeStyle = `rgba(16,196,122,${alpha})`;
-    ctx.beginPath(); ctx.moveTo(p1.sx,p1.sy); ctx.lineTo(p2.sx,p2.sy); ctx.stroke();
-  }
-
-  // Horizon glow
-  const hP = project(0, 0, 100);
-  if (hP) {
-    const hGrad = ctx.createRadialGradient(CW/2, hP.sy, 0, CW/2, hP.sy, CW*0.6);
-    hGrad.addColorStop(0, 'rgba(16,196,122,.04)');
-    hGrad.addColorStop(1, 'transparent');
-    ctx.fillStyle = hGrad;
-    ctx.fillRect(0, 0, CW, CH);
-  }
-}
-
-// ─── Gates ───
-let gates = [];
-function genGates() {
-  gates = [];
-  const N = 12;
-  let ax=0, az=0, ay=0, ang=0;
-  for (let i=0; i<N; i++) {
-    ax += Math.sin(ang)*18;
-    az += Math.cos(ang)*18;
-    ay = 3 + Math.sin(i*0.9)*4;
-    ang += (Math.random()-0.5)*1.2;
-    gates.push({
-      x:ax, y:ay, z:az, yaw:ang,
-      r:4.5, passed:false, active:i===0,
-      color: i===0 ? '#10c47a' : 'rgba(88,166,255,.7)',
-      pulse: 0
-    });
-  }
-}
-
-function drawGates() {
-  if (gameMode !== 'GATE') return;
-  const N = 24;
-  gates.forEach((g, gi) => {
-    if (g.passed && gi < currentGate - 1) return;
-    const sinY = Math.sin(g.yaw), cosY = Math.cos(g.yaw);
-    const pts = [];
-    for (let i=0; i<=N; i++) {
-      const a = (i/N)*Math.PI*2;
-      const wx = g.x - sinY * g.r * Math.cos(a);
-      const wy = g.y + g.r * Math.sin(a);
-      const wz = g.z + cosY * g.r * Math.cos(a);
-      const p = project(wx, wy, wz);
-      pts.push(p);
-    }
-    // Glow
-    const pulse = 0.5 + 0.5*Math.sin(Date.now()*0.003 + gi);
-    const alpha = g.active ? (0.7 + pulse*0.3) : (g.passed ? 0.15 : 0.35);
-    const col = g.active ? '#10c47a' : (g.passed ? '#1a3a2a' : '#58a6ff');
-
-    // Outer glow ring
-    if (g.active || !g.passed) {
-      for (let pass=0; pass<(g.active?3:1); pass++) {
-        ctx.lineWidth = g.active ? [6,3,1][pass] : 1.5;
-        ctx.strokeStyle = g.active
-          ? `rgba(16,196,122,${[.08,.18,alpha][pass]})`
-          : `rgba(88,166,255,${alpha})`;
-        ctx.beginPath();
-        let started=false;
-        pts.forEach(p => {
-          if (!p) { started=false; return; }
-          if (!started) { ctx.moveTo(p.sx,p.sy); started=true; }
-          else ctx.lineTo(p.sx, p.sy);
-        });
-        ctx.stroke();
-      }
-    }
-
-    // Number label
-    if (!g.passed) {
-      const center = project(g.x, g.y, g.z);
-      if (center) {
-        ctx.font = `bold ${Math.min(16, 600/center.sz)}px 'Orbitron', monospace`;
-        ctx.fillStyle = col;
-        ctx.textAlign = 'center';
-        ctx.fillText(`${gi+1}`, center.sx, center.sy);
-        ctx.textAlign = 'left';
-      }
-    }
-  });
-}
-
-function checkGateCollision() {
-  if (gameMode !== 'GATE' || currentGate >= gates.length) return;
-  const g = gates[currentGate];
-  const dx = drone.x - g.x, dy = drone.y - g.y, dz = drone.z - g.z;
-  const sinY = Math.sin(g.yaw), cosY = Math.cos(g.yaw);
-  // Distance along gate normal (forward axis)
-  const fwdDist = -sinY*dx + cosY*dz;
-  if (Math.abs(fwdDist) < 1.5) {
-    // Distance from gate center in ring plane
-    const lateralX = cosY*dx + sinY*dz;
-    const dist = Math.sqrt(lateralX*lateralX + dy*dy);
-    if (dist < g.r + 0.5) {
-      // Passed through!
-      g.passed = true; g.active = false;
+// ── Game Mode Logic ────────────────────────────────────────────
+function runModeLogic(dt){
+  if(gameMode==='GATE'){
+    const ci=gates.indexOf(gates.find(g=>!g.passed));
+    if(ci>=0&&checkGatePass(ci)){
+      gates[ci].passed=true;
       gatesPassed++;
-      const timeBonus = Math.max(0, 60 - gameTimer)*5;
-      const pts = 100 + combo*20 + timeBonus;
-      score += pts;
-      combo++;
-      comboTimer = 3;
-      currentGate++;
-      if (currentGate < gates.length) {
-        gates[currentGate].active = true;
-        gates[currentGate].color = '#10c47a';
-      }
-      flashGate();
-      addParticleBurst(drone.x, drone.y, drone.z, '#10c47a', 30);
-      if (combo >= 3) showNotify(`🔥 COMBO ×${combo}!`, 'combo');
-      else showNotify(`✅ GATE ${gatesPassed} — +${pts}`, 'ok');
-      if (currentGate >= gates.length) endGame('complete');
+      const bonus=Math.max(0,(120-gameTimer)*4);
+      const pts=100+combo*25+bonus;
+      score+=pts; combo++; comboTimer=3;
+      setGateActive(ci+1);
+      flashGreen();
+      spawnParticles(drone.x,drone.y,drone.z,COLORS.g,35,6);
+      if(combo>=3) notify(`🔥 COMBO ×${combo}!`,'combo');
+      else notify(`✅ GATE ${gatesPassed} +${Math.round(pts)}`,'ok');
+      if(gatesPassed>=gates.length) endGame('complete');
     }
   }
-}
-
-// ─── Targets ───
-let targets = [];
-function genTargets() {
-  targets = [];
-  for (let i=0; i<20; i++) {
-    targets.push({
-      x: (Math.random()-0.5)*80, y: 2+Math.random()*14,
-      z: (Math.random()-0.5)*80,
-      r: 1.4, alive:true,
-      hue: Math.random()*40+15, // gold-orange
-      spin: Math.random()*Math.PI*2, phase: Math.random()*Math.PI*2
+  if(gameMode==='HUNT'){
+    targetObjects.forEach(t=>{
+      if(!t.alive) return;
+      const dx=drone.x-t.x,dy=drone.y-t.y,dz=drone.z-t.z;
+      if(dx*dx+dy*dy+dz*dz<(t.r+1.2)*(t.r+1.2)){
+        t.alive=false; targetsHit++;
+        scene.remove(t.group);
+        const pts=50+combo*15; score+=pts; combo++; comboTimer=2.5;
+        spawnParticles(t.x,t.y,t.z,t.col,30,5);
+        notify(`💥 HIT! +${pts}`,'ok');
+        if(targetsHit>=targetObjects.length) endGame('complete');
+      }
+    });
+    targetObjects.forEach(t=>{
+      if(!t.alive) return;
+      t.oct.rotation.y+=0.02; t.oct.rotation.x+=0.01;
+      t.group.position.y=t.y+Math.sin(Date.now()*.002+t.phase)*.35;
     });
   }
-  targetsRemain = 20;
-}
-
-function drawTargets() {
-  if (gameMode !== 'HUNT') return;
-  const N = 12;
-  targets.forEach(t => {
-    if (!t.alive) return;
-    t.spin += 0.025;
-    const bob = Math.sin(Date.now()*0.002 + t.phase)*0.4;
-    const cx = project(t.x, t.y+bob, t.z);
-    if (!cx) return;
-    const sc = Math.min(25, 250/cx.sz);
-    if (sc < 2) return;
-
-    // Draw diamond shape
-    ctx.save();
-    ctx.translate(cx.sx, cx.sy);
-    ctx.rotate(t.spin);
-    ctx.fillStyle = `hsla(${t.hue}, 85%, 65%, 0.9)`;
-    ctx.strokeStyle = `hsla(${t.hue}, 100%, 80%, 0.5)`;
-    ctx.lineWidth = 1.5;
-    ctx.shadowColor = `hsla(${t.hue}, 100%, 70%, 1)`;
-    ctx.shadowBlur = sc * 1.5;
-    ctx.beginPath();
-    ctx.moveTo(0, -sc); ctx.lineTo(sc*0.7, 0);
-    ctx.lineTo(0, sc); ctx.lineTo(-sc*0.7, 0);
-    ctx.closePath();
-    ctx.fill(); ctx.stroke();
-    // Inner cross
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = `hsla(${t.hue}, 80%, 90%, 0.7)`;
-    ctx.lineWidth = 0.7;
-    ctx.beginPath();
-    ctx.moveTo(-sc*0.4,0); ctx.lineTo(sc*0.4,0);
-    ctx.moveTo(0,-sc*0.4); ctx.lineTo(0,sc*0.4);
-    ctx.stroke();
-    ctx.restore();
-
-    // Ring pulse
-    const pulseSz = sc * (1.5 + 0.5*Math.sin(Date.now()*0.004+t.phase));
-    ctx.beginPath();
-    ctx.arc(cx.sx, cx.sy, pulseSz, 0, Math.PI*2);
-    ctx.strokeStyle = `hsla(${t.hue},90%,70%,.15)`;
-    ctx.lineWidth = 1;
-    ctx.stroke();
-  });
-}
-
-function checkTargetCollision() {
-  if (gameMode !== 'HUNT') return;
-  targets.forEach(t => {
-    if (!t.alive) return;
-    const dx=drone.x-t.x, dy=drone.y-t.y, dz=drone.z-t.z;
-    if (dx*dx+dy*dy+dz*dz < (t.r+1.2)*(t.r+1.2)) {
-      t.alive = false;
-      targetsRemain--;
-      const pts = 50 + combo*15;
-      score += pts;
-      combo++; comboTimer = 2.5;
-      targetsHit++;
-      addParticleBurst(t.x, t.y+0.5, t.z, `hsl(${t.hue},90%,70%)`, 25);
-      if (combo >= 3) showNotify(`💥 COMBO ×${combo}! +${pts}`, 'combo');
-      else showNotify(`🎯 TARGET! +${pts}`, 'ok');
-      if (targetsRemain === 0) endGame('complete');
+  if(gameMode==='HOVER'){
+    const inZ=inHoverZone();
+    if(inZ) hovTimeSec+=dt;
+    if(hzGroup){
+      const c=inZ?COLORS.bl:0x1a3060;
+      hzGroup.children.forEach(ch=>{if(ch.material)ch.material.color.setHex(c);});
     }
-  });
-}
-
-// ─── Hover Zone ───
-let hzone = {x:0, y:0, z:0, r:4.5, h:4};
-function genHoverZone() {
-  hzone.x = (Math.random()-0.5)*40;
-  hzone.y = 3 + Math.random()*5;
-  hzone.z = (Math.random()-0.5)*40;
-}
-
-function drawZone() {
-  if (gameMode !== 'HOVER') return;
-  const segs = 32;
-  const inZone = checkHoverZone();
-  const col = inZone ? 'rgba(88,166,255,.8)' : 'rgba(88,166,255,.3)';
-  const fillA = inZone ? 0.06 : 0.02;
-
-  // Draw cylinder outline
-  // Top ring
-  drawRing(hzone.x, hzone.y+hzone.h/2, hzone.z, hzone.r, col, segs);
-  // Bottom ring
-  drawRing(hzone.x, hzone.y-hzone.h/2, hzone.z, hzone.r, col, segs);
-  // Vertical lines
-  for (let i=0; i<8; i++) {
-    const a = (i/8)*Math.PI*2;
-    const wx = hzone.x+Math.cos(a)*hzone.r, wz = hzone.z+Math.sin(a)*hzone.r;
-    const pT = project(wx, hzone.y+hzone.h/2, wz);
-    const pB = project(wx, hzone.y-hzone.h/2, wz);
-    if (!pT||!pB) continue;
-    ctx.strokeStyle = col; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(pT.sx,pT.sy); ctx.lineTo(pB.sx,pB.sy); ctx.stroke();
+    if(hovTimeSec>=30) endGame('complete');
   }
-  // Center marker
-  const cP = project(hzone.x, hzone.y, hzone.z);
-  if (cP) {
-    ctx.beginPath(); ctx.arc(cP.sx,cP.sy,4,0,Math.PI*2);
-    ctx.fillStyle = inZone ? '#58a6ff' : 'rgba(88,166,255,.4)';
-    ctx.fill();
+  if(gameMode==='RACE'){
+    // Find which gate drone just passed
+    const ci=gates.findIndex((g,i)=>!g.passed||i===gates.length-1?false:false);
+    // Check next expected gate (cycling)
+    const nextG=raceLastGate+1>=gates.length?0:raceLastGate+1;
+    if(checkGatePass(nextG)){
+      raceLastGate=nextG;
+      gates[nextG].passed=false; // reset for re-passing
+      gatesPassed++;
+      if(nextG===0){
+        // Lap complete
+        raceLap++;
+        const lt=raceLapTime;
+        if(lt<raceBestLap) raceBestLap=lt;
+        notify(`🏆 LAP ${raceLap} — ${lt.toFixed(1)}s`,'combo');
+        raceLapTime=0;
+        if(raceLap>=3) endGame('complete');
+      }
+      setGateActive(nextG===gates.length-1?0:nextG+1);
+      spawnParticles(drone.x,drone.y,drone.z,COLORS.bl,15,4);
+    }
+    raceLapTime+=dt;
+    const rl=document.getElementById('race-lap');
+    const rlt=document.getElementById('race-laptime');
+    if(rl) rl.textContent=`LAP ${Math.min(raceLap+1,3)} / 3`;
+    if(rlt) rlt.textContent=fmt(raceLapTime);
+  }
+  if(gameMode==='TUTORIAL') runTutorial(dt);
+  if(gameMode==='FREE'){
+    const spd=Math.sqrt(drone.vx*drone.vx+drone.vy*drone.vy+drone.vz*drone.vz);
+    if(spd>maxSpeed+4){score+=Math.round(spd); notify(`🚀 ${Math.round(spd)} m/s`,'ok');}
   }
 }
 
-function drawRing(cx,cy,cz,r,col,segs) {
-  const pts=[];
-  for(let i=0;i<=segs;i++){
-    const a=(i/segs)*Math.PI*2;
-    const p=project(cx+Math.cos(a)*r, cy, cz+Math.sin(a)*r);
-    pts.push(p);
+// ── Tutorial ─────────────────────────────────────────────────────
+let tutYawStart=0, tutFwdStart=null, tutFwdDist=0;
+function runTutorial(dt){
+  const s=TUT_STEPS[tutStep];
+  if(!s) return;
+  let done=false;
+  if(s.goal==='alt'){
+    if(drone.y>=s.target) done=true;
+    document.getElementById('ts-prog-fill').style.width=Math.min(100,drone.y/s.target*100)+'%';
   }
-  ctx.strokeStyle=col; ctx.lineWidth=1.5;
-  ctx.beginPath();let started=false;
-  pts.forEach(p=>{
-    if(!p){started=false;return;}
-    if(!started){ctx.moveTo(p.sx,p.sy);started=true;}
-    else ctx.lineTo(p.sx,p.sy);
-  });
-  ctx.stroke();
-}
-
-function checkHoverZone() {
-  const dx=drone.x-hzone.x, dy=drone.y-hzone.y, dz=drone.z-hzone.z;
-  return dx*dx+dz*dz < hzone.r*hzone.r && Math.abs(dy) < hzone.h/2;
-}
-
-// ─── Drone Model (3rd Person) ───
-const droneTrail = [];
-function drawDrone3P() {
-  const p = project(drone.x, drone.y, drone.z);
-  if (!p || p.sz > 120) return;
-  const sc = Math.max(4, Math.min(28, 240/p.sz));
-  const relYaw = drone.yaw - CAM.yaw;
-
-  ctx.save();
-  ctx.translate(p.sx, p.sy);
-  ctx.rotate(relYaw);
-
-  const spin = Date.now()*0.012;
-  // Arms (X pattern)
-  for (let i=0; i<4; i++) {
-    const a = Math.PI/4 + i*Math.PI/2;
-    const mx = Math.cos(a)*sc, my = Math.sin(a)*sc*Math.cos(drone.pitch);
-    ctx.strokeStyle = 'rgba(16,196,122,.85)'; ctx.lineWidth = Math.max(1.2, sc*0.1);
-    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(mx,my); ctx.stroke();
-    // Motor circle
-    ctx.beginPath(); ctx.arc(mx,my,sc*0.26,0,Math.PI*2);
-    ctx.fillStyle = '#0a1f12'; ctx.fill();
-    ctx.strokeStyle = '#10c47a'; ctx.lineWidth = 1.5;
-    ctx.stroke();
-    // Prop blur
-    const ps = spin*(i%2===0?1:-1);
-    ctx.strokeStyle='rgba(16,196,122,.3)'; ctx.lineWidth=0.8;
-    ctx.beginPath();
-    ctx.moveTo(mx+Math.cos(ps)*sc*.38, my+Math.sin(ps)*sc*.38);
-    ctx.lineTo(mx+Math.cos(ps+Math.PI)*sc*.38, my+Math.sin(ps+Math.PI)*sc*.38);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(mx+Math.cos(ps+1.2)*sc*.38, my+Math.sin(ps+1.2)*sc*.38);
-    ctx.lineTo(mx+Math.cos(ps+Math.PI+1.2)*sc*.38, my+Math.sin(ps+Math.PI+1.2)*sc*.38);
-    ctx.stroke();
+  if(s.goal==='yaw'){
+    const dy=wrapAngle(drone.yaw-tutYawStart);
+    tutProgress.yawTotal+=Math.abs(dy)*dt*60; tutYawStart=drone.yaw;
+    if(tutProgress.yawTotal>=Math.PI*2) done=true;
+    document.getElementById('ts-prog-fill').style.width=Math.min(100,tutProgress.yawTotal/(Math.PI*2)*100)+'%';
   }
-  // Body
-  ctx.beginPath(); ctx.arc(0,0,sc*0.22,0,Math.PI*2);
-  ctx.fillStyle='#020e07'; ctx.fill();
-  ctx.strokeStyle='rgba(16,196,122,.6)'; ctx.lineWidth=1.5; ctx.stroke();
-  // Front indicator
-  ctx.beginPath(); ctx.arc(0,-sc*0.38,sc*0.09,0,Math.PI*2);
-  ctx.fillStyle='#f1b65a'; ctx.fill();
-  // Glow
-  ctx.shadowColor='#10c47a'; ctx.shadowBlur=sc*1.2;
-  ctx.beginPath(); ctx.arc(0,0,sc*0.18,0,Math.PI*2);
-  ctx.strokeStyle='rgba(16,196,122,.15)'; ctx.stroke();
-  ctx.shadowBlur=0;
-  ctx.restore();
-
-  // Motor smoke/prop wash particles
-  if (drone.armed && drone.thr > 0.1 && Math.random() < 0.4) {
-    for (let i=0; i<4; i++) {
-      const a = Math.PI/4 + i*Math.PI/2 + drone.yaw;
-      addParticle(
-        drone.x + Math.cos(a)*1.8, drone.y, drone.z + Math.sin(a)*1.8,
-        (Math.random()-.5)*.5, -drone.thr*.8-Math.random()*0.4, (Math.random()-.5)*.5,
-        'rgba(16,196,122,.35)', 0.4+Math.random()*0.4, 0.6
-      );
+  if(s.goal==='fwd'){
+    if(!tutFwdStart){tutFwdStart={x:drone.x,z:drone.z};}
+    else{
+      const dx=drone.x-tutFwdStart.x, dz=drone.z-tutFwdStart.z;
+      tutFwdDist=Math.sqrt(dx*dx+dz*dz);
+      if(tutFwdDist>=s.target) done=true;
+      document.getElementById('ts-prog-fill').style.width=Math.min(100,tutFwdDist/s.target*100)+'%';
     }
   }
-
-  // Trail
-  droneTrail.push({x:drone.x,y:drone.y,z:drone.z,t:Date.now()});
-  if (droneTrail.length > 40) droneTrail.shift();
-  for (let i=1; i<droneTrail.length; i++) {
-    const p1=project(droneTrail[i-1].x,droneTrail[i-1].y,droneTrail[i-1].z);
-    const p2=project(droneTrail[i].x,droneTrail[i].y,droneTrail[i].z);
-    if (!p1||!p2) continue;
-    const a = (i/droneTrail.length)*0.25;
-    ctx.strokeStyle=`rgba(16,196,122,${a})`;
-    ctx.lineWidth = (i/droneTrail.length)*2;
-    ctx.beginPath(); ctx.moveTo(p1.sx,p1.sy); ctx.lineTo(p2.sx,p2.sy); ctx.stroke();
+  if(s.goal==='roll'){
+    if(Math.abs(drone.roll)>0.25) done=true;
+    document.getElementById('ts-prog-fill').style.width=Math.min(100,Math.abs(drone.roll)/0.3*100)+'%';
   }
+  if(s.goal==='gate'&&tutGate){
+    const dx=drone.x-tutGate.x,dy=drone.y-tutGate.y,dz=drone.z-tutGate.z;
+    const fwd=dz;
+    if(Math.abs(fwd)<2&&Math.sqrt(dx*dx+dy*dy)<tutGate.r+0.7){done=true;}
+  }
+  if(done) advanceTutorial();
 }
 
-// ─── Particles ───
-const particles = [];
-function addParticle(x,y,z,vx,vy,vz,col,life,size) {
-  if (particles.length > 800) return;
-  particles.push({x,y,z,vx,vy,vz,col,life,maxLife:life,size});
-}
-function addParticleBurst(x,y,z,col,n) {
-  for (let i=0;i<n;i++) {
-    const a=Math.random()*Math.PI*2, e=Math.random()*Math.PI-Math.PI/2;
-    const s=2+Math.random()*5;
-    addParticle(x,y,z,
-      Math.cos(a)*Math.cos(e)*s, Math.sin(e)*s, Math.sin(a)*Math.cos(e)*s,
-      col, 0.8+Math.random()*0.8, 2+Math.random()*3
-    );
+function wrapAngle(a){while(a>Math.PI)a-=Math.PI*2;while(a<-Math.PI)a+=Math.PI*2;return a;}
+
+function advanceTutorial(){
+  tutStep++;
+  if(tutStep>=TUT_STEPS.length){
+    score+=500;
+    endGame('complete');
+    return;
   }
-}
-function drawParticles() {
-  for (let i=particles.length-1; i>=0; i--) {
-    const p=particles[i];
-    p.x+=p.vx*0.05; p.y+=p.vy*0.05; p.z+=p.vz*0.05;
-    p.vy-=0.05; // gravity
-    p.vx*=0.97; p.vy*=0.97; p.vz*=0.97;
-    p.life-=0.03;
-    if (p.life<=0){particles.splice(i,1);continue;}
-    const sp=project(p.x,p.y,p.z);
-    if (!sp) continue;
-    const a=p.life/p.maxLife;
-    const sz=Math.max(0.5,(p.size*a*200/sp.sz));
-    ctx.beginPath(); ctx.arc(sp.sx,sp.sy,sz,0,Math.PI*2);
-    ctx.fillStyle=p.col.replace(')',`,${a})`).replace('rgba(','rgba(');
-    // Simple opacity via globalAlpha
-    ctx.globalAlpha=a;
-    ctx.fillStyle=p.col;
-    ctx.fill();
-    ctx.globalAlpha=1;
-  }
+  renderTutStep();
+  tutYawStart=drone.yaw; tutFwdStart=null; tutFwdDist=0;
+  tutProgress.yawTotal=0;
+  if(TUT_STEPS[tutStep].goal==='gate') genTutGate();
+  notify(`✅ ดีมาก! ไปขั้นที่ ${tutStep+1}`,'ok');
 }
 
-// ─── Audio (Web Audio API) ───
-let audioCtx=null, motorNodes=[], motorGains=[];
-function initAudio() {
-  if (audioCtx) return;
-  try {
-    audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-    const master = audioCtx.createGain();
-    master.gain.value = 0.3;
-    master.connect(audioCtx.destination);
-    for(let i=0;i<4;i++) {
-      const osc=audioCtx.createOscillator();
-      const g=audioCtx.createGain();
-      const filt=audioCtx.createBiquadFilter();
-      osc.type='sawtooth'; osc.frequency.value=70+i*7;
-      filt.type='bandpass'; filt.frequency.value=200; filt.Q.value=1.5;
+function renderTutStep(){
+  const el=document.getElementById('tut-step');
+  const s=TUT_STEPS[tutStep];
+  if(!s){el.style.display='none';return;}
+  el.style.display='block';
+  document.getElementById('ts-title').textContent=s.title;
+  document.getElementById('ts-body').innerHTML=s.body.replace('\n','<br>');
+  document.getElementById('ts-prog-fill').style.width='0%';
+  // Dots
+  const dotsEl=document.getElementById('tut-dots');
+  dotsEl.innerHTML='';
+  TUT_STEPS.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='tut-dot'+(i===tutStep?' active':i<tutStep?' done':'');
+    dotsEl.appendChild(d);
+  });
+}
+
+// ── Audio ──────────────────────────────────────────────────────
+let actx=null, motorOsc=[], motorGain=[];
+function initAudio(){
+  if(actx) return;
+  try{
+    actx=new(window.AudioContext||window.webkitAudioContext)();
+    const master=actx.createGain(); master.gain.value=0.25; master.connect(actx.destination);
+    for(let i=0;i<4;i++){
+      const o=actx.createOscillator(), g=actx.createGain(), f=actx.createBiquadFilter();
+      o.type='sawtooth'; o.frequency.value=65+i*8;
+      f.type='bandpass'; f.frequency.value=180; f.Q.value=1.8;
       g.gain.value=0;
-      osc.connect(filt); filt.connect(g); g.connect(master);
-      osc.start();
-      motorNodes.push(osc); motorGains.push(g);
+      o.connect(f); f.connect(g); g.connect(master); o.start();
+      motorOsc.push(o); motorGain.push(g);
     }
-  } catch(e){}
+  }catch(e){}
 }
-function updateAudio() {
-  if (!audioCtx) return;
-  const base=55+drone.thr*220;
-  motorNodes.forEach((o,i)=>{
-    o.frequency.value=base+i*9+(Math.random()-0.5)*4;
-    motorGains[i].gain.value=drone.armed ? Math.max(0,drone.thr*0.05) : 0;
+function updateAudio(){
+  if(!actx) return;
+  const base=50+drone.thr*200;
+  motorOsc.forEach((o,i)=>{
+    o.frequency.value=base+i*10+(Math.random()-.5)*3;
+    motorGain[i].gain.value=drone.armed?Math.max(0,drone.thr*.055):0;
   });
 }
-function playBeep(freq,dur,vol=0.4) {
-  if (!audioCtx) return;
-  try {
-    const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+function beep(freq,dur,vol=0.4){
+  if(!actx) return;
+  try{
+    const o=actx.createOscillator(),g=actx.createGain();
     o.type='square'; o.frequency.value=freq;
-    g.gain.setValueAtTime(vol,audioCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur);
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(); o.stop(audioCtx.currentTime+dur);
-  } catch(e){}
+    g.gain.setValueAtTime(vol,actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+dur);
+    o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime+dur);
+  }catch(e){}
 }
 
-// ─── HUD Updates ───
-function updateHUD() {
-  if (STATE !== 'PLAYING') return;
-
-  // Throttle
-  const pct = Math.round(drone.thr*100);
-  document.getElementById('thr-fill').style.height = pct+'%';
-  document.getElementById('thr-val').textContent = pct+'%';
-
-  // Altitude
-  const altPct = Math.min(100, drone.y/MAX_ALT*100);
-  document.getElementById('alt-fill').style.height = altPct+'%';
-  document.getElementById('alt-val').textContent = Math.round(drone.y)+'m';
-
-  // Speed
-  const spd = Math.sqrt(drone.vx*drone.vx+drone.vy*drone.vy+drone.vz*drone.vz);
-  document.getElementById('spd-val').innerHTML = Math.round(spd)+'<span> m/s</span>';
-  document.getElementById('vsi-val').innerHTML = (drone.vy>=0?'+':'')+drone.vy.toFixed(1)+'<span> v/s</span>';
-
-  // Heading (yaw to cardinal)
-  const hdeg = ((drone.yaw*180/Math.PI)%360+360)%360;
+// ── HUD ────────────────────────────────────────────────────────
+function updateHUD(){
+  if(STATE!=='PLAYING') return;
+  const pct=Math.round(drone.thr*100);
+  document.getElementById('thr-fill').style.height=pct+'%';
+  document.getElementById('thr-val').textContent=pct+'%';
+  document.getElementById('alt-fill').style.height=Math.min(100,drone.y/MAX_ALT*100)+'%';
+  document.getElementById('alt-val').textContent=Math.round(drone.y)+'m';
+  const spd=Math.sqrt(drone.vx*drone.vx+drone.vy*drone.vy+drone.vz*drone.vz);
+  document.getElementById('spd-val').innerHTML=Math.round(spd)+'<span> m/s</span>';
+  document.getElementById('vsi-val').innerHTML=(drone.vy>=0?'+':'')+drone.vy.toFixed(1)+'<span> v/s</span>';
+  const hdeg=((drone.yaw*180/Math.PI)%360+360)%360;
   const cards=['N','NE','E','SE','S','SW','W','NW'];
-  const card = cards[Math.round(hdeg/45)%8];
-  document.getElementById('hdg-val').innerHTML = `${Math.round(hdeg)}°<span> ${card}</span>`;
-  document.getElementById('roll-val').innerHTML = Math.round(drone.roll*180/Math.PI)+'°<span> ROL</span>';
-
-  // Artificial horizon
-  const ah = document.getElementById('ah-ring');
-  ah.style.transform = `rotate(${drone.roll*0.6}rad)`;
-
-  // Score / timer
-  document.getElementById('hud-score').textContent = score.toLocaleString();
-  if (timeLimited) {
-    const rem = Math.max(0, timeLimit-gameTimer);
-    const min = Math.floor(rem/60).toString().padStart(2,'0');
-    const sec = Math.floor(rem%60).toString().padStart(2,'0');
-    document.getElementById('hud-timer').textContent = `${min}:${sec}`;
-    document.getElementById('hud-timer').style.color = rem<10 ? 'var(--red)' : 'var(--gold)';
+  const card=cards[Math.round(hdeg/45)%8];
+  document.getElementById('hdg-val').innerHTML=Math.round(hdeg)+'°<span> '+card+'</span>';
+  document.getElementById('rol-val').innerHTML=Math.round(drone.roll*180/Math.PI)+'°<span> ROL</span>';
+  document.getElementById('ah-ring').style.transform=`rotate(${drone.roll*.6}rad)`;
+  document.getElementById('hud-score').textContent=score.toLocaleString();
+  if(timeLimited){
+    const rem=Math.max(0,timeLimit-gameTimer);
+    document.getElementById('hud-timer').textContent=fmt(rem);
+    document.getElementById('hud-timer').style.color=rem<10?'var(--red)':'var(--gold)';
   }
-
-  // Sticks
-  const LX = (K['KeyD']?1:K['KeyA']?-1:0)*22+26;
-  const LY = (K['KeyS']?1:K['KeyW']?-1:0)*22+26;
-  const RX = (K['ArrowRight']?1:K['ArrowLeft']?-1:0)*22+26;
-  const RY = (K['ArrowDown']?1:K['ArrowUp']?-1:0)*22+26;
-  document.getElementById('dot-L').style.left=LX+'px';
-  document.getElementById('dot-L').style.top=LY+'px';
-  document.getElementById('dot-R').style.left=RX+'px';
-  document.getElementById('dot-R').style.top=RY+'px';
-
-  // Lives
-  for(let i=1;i<=3;i++) {
-    document.getElementById('l'+i).className='life-dot'+(lives<i?' dead':'');
+  for(let i=1;i<=3;i++){
+    const el=document.getElementById('l'+i);
+    if(el) el.className='life'+(lives<i?' dead':'');
   }
-
-  // Combo
-  const hc = document.getElementById('hud-combo');
-  if (comboTimer > 0 && combo >= 2) {
-    hc.textContent = `×${combo}`;
-    hc.style.opacity = Math.min(1, comboTimer);
-  } else {
-    hc.style.opacity = 0;
-  }
-
+  const hc=document.getElementById('hud-combo');
+  if(comboTimer>0&&combo>=2){hc.textContent=`×${combo}`;hc.style.opacity=Math.min(1,comboTimer);}
+  else hc.style.opacity=0;
   // Mode objective
-  updateModeHUD();
-}
-
-function updateModeHUD() {
-  const el = document.getElementById('hud-obj');
-  if (gameMode==='GATE') {
-    if (currentGate < gates.length) el.textContent = `Gate ${currentGate+1} of ${gates.length}`;
-    else el.textContent = 'ALL GATES CLEAR!';
-  } else if (gameMode==='HUNT') {
-    el.textContent = `${targetsRemain} Targets Left`;
-  } else if (gameMode==='HOVER') {
-    const pct=Math.min(100,Math.round(hovTimeSec/hovGoalSec*100));
-    el.textContent = `Hover: ${hovTimeSec.toFixed(1)}s / ${hovGoalSec}s`;
+  const obj=document.getElementById('hud-obj');
+  if(gameMode==='GATE') obj.textContent=`Gate ${gatesPassed+1} / ${gates.length}`;
+  else if(gameMode==='HUNT') obj.textContent=`${targetObjects.filter(t=>t.alive).length} Targets Left`;
+  else if(gameMode==='HOVER'){
+    const pz=Math.min(100,Math.round(hovTimeSec/30*100));
+    obj.textContent=`Hover: ${hovTimeSec.toFixed(1)}s / 30s`;
     document.getElementById('zone-bar').style.display='block';
-    document.getElementById('zone-pct').textContent=pct;
-    document.getElementById('zone-fill').style.width=pct+'%';
-  } else {
-    el.textContent = `ALT ${Math.round(drone.y)}m  SPD ${Math.sqrt(drone.vx*drone.vx+drone.vy*drone.vy+drone.vz*drone.vz).toFixed(0)}m/s`;
+    document.getElementById('zone-pct').textContent=pz;
+    document.getElementById('zone-fill').style.width=pz+'%';
   }
+  else if(gameMode==='FREE') obj.textContent=`ALT ${Math.round(drone.y)}m  SPD ${Math.round(spd)}m/s`;
+  // FPS
+  frameCount++;
+  fpsTimer+=1/60;
+  if(fpsTimer>1){fps=frameCount;frameCount=0;fpsTimer=0;}
+  const fpsEl=document.getElementById('hud-fps');
+  if(fpsEl) fpsEl.textContent=`${fps}fps`;
 }
 
-function updateCamMode() {
-  document.getElementById('cam-mode-lbl').textContent = fpvMode?'FPV':'3RD';
-}
+function fmt(s){const m=Math.floor(s/60),ss=Math.floor(s%60);return `${m}:${ss.toString().padStart(2,'0')}`;}
 
-// ─── Notifications ───
-function showNotify(msg, type='ok') {
-  const d=document.getElementById('notify');
-  d.innerHTML=''; // clear
+// ── Notifications ──────────────────────────────────────────────
+function notify(msg,type='ok'){
   const el=document.createElement('div');
   el.className='notify-msg';
   el.textContent=msg;
-  const colors={ok:'var(--g)',combo:'var(--gold)',bad:'var(--red)',info:'var(--bl)'};
-  el.style.color=colors[type]||colors.ok;
-  if(type==='combo') el.style.fontSize='clamp(1rem,3vw,1.5rem)';
-  d.appendChild(el);
+  const c={ok:'var(--g)',combo:'var(--gold)',bad:'var(--red)',info:'var(--bl)'};
+  el.style.color=c[type]||c.ok;
+  if(type==='combo') el.style.fontSize='clamp(1rem,3vw,1.4rem)';
+  document.getElementById('notify').appendChild(el);
   setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el);},2000);
 }
+function flashGreen(){const e=document.getElementById('gate-flash');e.style.opacity=0.15;e.style.transition='none';requestAnimationFrame(()=>{e.style.transition='opacity .5s';e.style.opacity=0;});}
+function flashRed(){const e=document.getElementById('crash-flash');e.style.opacity=0.4;e.style.transition='none';requestAnimationFrame(()=>{e.style.transition='opacity .5s';e.style.opacity=0;});}
 
-function flashGate() {
-  const el=document.getElementById('gate-flash');
-  el.style.opacity=0.12;
-  setTimeout(()=>{el.style.transition='opacity .4s';el.style.opacity=0;},50);
-}
-function flashCrash() {
-  const el=document.getElementById('crash-flash');
-  el.style.opacity=0.35;
-  setTimeout(()=>{el.style.transition='opacity .5s';el.style.opacity=0;},80);
-}
-
-// ─── Game flow ───
-function selectMode(mode) {
+// ── Game Flow ──────────────────────────────────────────────────
+function selectMode(mode){
   gameMode=mode;
-  startCountdown();
-}
-
-function startCountdown() {
-  document.getElementById('menu').classList.add('hidden');
-  document.getElementById('countdown').classList.remove('hidden');
+  const names={TUTORIAL:'Tutorial',GATE:'Gate Runner',HUNT:'Target Hunt',HOVER:'Hover Zone',RACE:'Race Circuit',FREE:'Free Fly'};
+  document.getElementById('cd-mode-name').textContent=names[mode]||mode;
+  hide('screen-menu'); show('screen-cd');
   initAudio();
-  countdownVal=3;
+  let cv=3;
   document.getElementById('countdown-num').textContent='3';
-  playBeep(440,0.3);
+  document.getElementById('countdown-num').style.color='var(--g)';
+  beep(440,.3);
   const iv=setInterval(()=>{
-    countdownVal--;
-    if(countdownVal>0){
-      document.getElementById('countdown-num').textContent=countdownVal;
-      playBeep(440+countdownVal*100,0.3);
-    } else {
+    cv--;
+    if(cv>0){document.getElementById('countdown-num').textContent=cv;beep(440+cv*120,.3);}
+    else{
       clearInterval(iv);
       document.getElementById('countdown-num').textContent='FLY!';
       document.getElementById('countdown-num').style.color='var(--gold)';
-      playBeep(880,0.5,0.6);
-      setTimeout(()=>{
-        document.getElementById('countdown').classList.add('hidden');
-        startGame();
-      },700);
+      beep(880,.5,.6);
+      setTimeout(()=>{hide('screen-cd');startGame();},700);
     }
   },900);
 }
 
-function startGame() {
+function startGame(){
   STATE='PLAYING';
-  score=0; combo=0; comboTimer=0; lives=3; gameTimer=0;
-  gatesPassed=0; targetsHit=0; hovTimeSec=0; maxAlt=0; maxSpeed=0;
-  drone.x=0; drone.y=3; drone.z=0;
-  drone.vx=0; drone.vy=0; drone.vz=0;
-  drone.yaw=0; drone.pitch=0; drone.roll=0; drone.thr=0;
-  drone.armed=true;
-  droneTrail.length=0; particles.length=0;
-  fpvMode=false; updateCamMode();
-  currentGate=0;
-
+  score=0;combo=0;comboTimer=0;lives=3;gameTimer=0;
+  gatesPassed=0;targetsHit=0;hovTimeSec=0;maxAlt=0;maxSpeed=0;
+  raceLap=0;raceLapTime=0;raceLastGate=-1;raceBestLap=Infinity;
+  tutStep=0;tutProgress={altDone:false,yawTotal:0,lastYaw:0,fwdStart:null,rollMax:0};
+  tutYawStart=0;tutFwdStart=null;tutFwdDist=0;
+  drone.x=0;drone.y=3;drone.z=0;
+  drone.vx=0;drone.vy=0;drone.vz=0;
+  drone.yaw=0;drone.pitch=0;drone.roll=0;drone.thr=0;drone.armed=true;
+  trailPositions.length=0;particleMeta.length=0;
+  fpvMode=false;
   timeLimited=false;
-  if(gameMode==='GATE') { genGates(); }
-  if(gameMode==='HUNT') { genTargets(); timeLimited=true; timeLimit=90; }
-  if(gameMode==='HOVER'){ genHoverZone(); }
+  clearGates();clearTargets();
+  if(hzGroup){scene.remove(hzGroup);hzGroup=null;}
+  if(tutGate){scene.remove(tutGate.group);tutGate=null;}
 
-  document.getElementById('hud').style.display='block';
-  document.getElementById('hud-mode-label').textContent=
-    {GATE:'GATE RUNNER',HUNT:'TARGET HUNT',HOVER:'HOVER ZONE',FREE:'FREE FLY'}[gameMode];
+  if(gameMode==='GATE') gates=genGates(12,false);
+  if(gameMode==='HUNT'){genTargets(20);timeLimited=true;timeLimit=90;}
+  if(gameMode==='HOVER') genHoverZone();
+  if(gameMode==='RACE'){gates=genGates(16,true);}
+  if(gameMode==='TUTORIAL'){
+    tutStep=0;
+    renderTutStep();
+    drone.y=0.4;
+  }
+
+  show('hud');
   document.getElementById('zone-bar').style.display='none';
-  document.getElementById('hud-timer').textContent = timeLimited?'1:30':'∞';
-  showNotify('⚡ ARMED — THROTTLE UP!', 'ok');
-  document.getElementById('msg').textContent = 'ESC = Pause  |  F = FPV/3rd  |  WASD + Arrows';
-  setTimeout(()=>{document.getElementById('msg').textContent='';},4000);
+  const raceHud=document.getElementById('race-hud');
+  raceHud.style.display=gameMode==='RACE'?'block':'none';
+  const modeNames={TUTORIAL:'Tutorial',GATE:'Gate Runner',HUNT:'Target Hunt',HOVER:'Hover Zone',RACE:'Race Circuit',FREE:'Free Fly'};
+  document.getElementById('hud-mode-lbl').textContent=modeNames[gameMode]||gameMode;
+  document.getElementById('hud-timer').textContent=timeLimited?'1:30':'∞';
+  document.getElementById('keys-hint').style.display=isMobile()?'none':'block';
+  notify('⚡ ARMED — THROTTLE UP!','ok');
 }
 
-function onEsc() {
+function onEsc(){
   if(STATE==='PLAYING') pauseGame();
   else if(STATE==='PAUSED') resumeGame();
 }
-function pauseGame() {
-  STATE='PAUSED';
-  document.getElementById('pause').classList.remove('hidden');
+function pauseGame(){STATE='PAUSED';show('screen-pause');}
+function resumeGame(){STATE='PLAYING';hide('screen-pause');}
+function goMenu(){
+  STATE='MENU';drone.armed=false;
+  ['hud','screen-pause','screen-go','screen-cd'].forEach(hide);
+  show('screen-menu');
 }
-function resumeGame() {
-  STATE='PLAYING';
-  document.getElementById('pause').classList.add('hidden');
-}
-function goMenu() {
-  STATE='MENU'; drone.armed=false;
-  document.getElementById('hud').style.display='none';
-  document.getElementById('pause').classList.add('hidden');
-  document.getElementById('gameover').classList.add('hidden');
-  document.getElementById('menu').classList.remove('hidden');
-}
-function retryGame() {
-  document.getElementById('gameover').classList.add('hidden');
-  selectMode(gameMode);
-}
+function retryGame(){hide('screen-go');selectMode(gameMode);}
 
-function triggerCrash() {
-  if (!drone.armed) return;
-  lives--;
-  flashCrash();
-  addParticleBurst(drone.x,drone.y,drone.z,'#f87171',40);
-  playBeep(150,0.5,0.3);
-  drone.vx=0; drone.vy=0; drone.vz=0; drone.pitch=0; drone.roll=0; drone.thr=0;
-  drone.y=3; drone.armed=false;
-  showNotify('💥 CRASHED!','bad');
-  score = Math.max(0, score-50);
-  combo=0;
-  if(lives<=0){ setTimeout(()=>endGame('gameover'),1200); }
-  else { setTimeout(()=>{ drone.armed=true; showNotify('🟢 RESPAWN','ok'); },1500); }
+function triggerCrash(){
+  if(!drone.armed) return;
+  lives--;flashRed();
+  spawnParticles(drone.x,drone.y,drone.z,COLORS.red,40,7);
+  beep(140,.6,.4);
+  drone.vx=0;drone.vy=0;drone.vz=0;drone.pitch=0;drone.roll=0;drone.thr=0;
+  drone.y=3;drone.armed=false;
+  notify('💥 CRASHED!','bad');score=Math.max(0,score-50);combo=0;
+  if(lives<=0){setTimeout(()=>endGame('gameover'),1200);}
+  else{setTimeout(()=>{drone.armed=true;notify('🟢 RESPAWN','info');},1500);}
 }
 
-function endGame(reason) {
-  STATE='GAMEOVER'; drone.armed=false;
-  document.getElementById('hud').style.display='none';
-
-  // Rating
-  let stars='⭐⭐⭐';
-  if(gameMode==='GATE'){
-    if(score>1500)stars='⭐⭐⭐';
-    else if(score>800)stars='⭐⭐';
-    else stars='⭐';
-  } else if(gameMode==='HUNT'){
-    if(targetsHit>=18)stars='⭐⭐⭐';
-    else if(targetsHit>=12)stars='⭐⭐';
-    else stars='⭐';
-  } else if(gameMode==='HOVER'){
-    if(hovTimeSec>=hovGoalSec)stars='⭐⭐⭐';
-    else if(hovTimeSec>15)stars='⭐⭐';
-    else stars='⭐';
-  }
-
-  if(score > (bestScores[gameMode]||0)) bestScores[gameMode]=score;
-
-  document.getElementById('go-mode-lbl').textContent =
-    {GATE:'GATE RUNNER',HUNT:'TARGET HUNT',HOVER:'HOVER ZONE',FREE:'FREE FLY'}[gameMode]
-    + (reason==='gameover'?' — CRASHED OUT':' — COMPLETE!');
-  document.getElementById('go-score').textContent = score.toLocaleString();
-  document.getElementById('go-stars').textContent = reason==='gameover'?'💀':stars;
-
-  let statsHTML='';
-  if(gameMode==='GATE') statsHTML=`<div class="go-stat"><div class="go-stat-val">${gatesPassed}</div><div class="go-stat-lbl">Gates</div></div>`;
-  if(gameMode==='HUNT') statsHTML=`<div class="go-stat"><div class="go-stat-val">${targetsHit}</div><div class="go-stat-lbl">Targets</div></div>`;
-  if(gameMode==='HOVER') statsHTML=`<div class="go-stat"><div class="go-stat-val">${hovTimeSec.toFixed(1)}s</div><div class="go-stat-lbl">Hover Time</div></div>`;
-  statsHTML+=`<div class="go-stat"><div class="go-stat-val">${Math.round(maxSpeed)} m/s</div><div class="go-stat-lbl">Max Speed</div></div>`;
-  statsHTML+=`<div class="go-stat"><div class="go-stat-val">${Math.round(maxAlt)} m</div><div class="go-stat-lbl">Max Alt</div></div>`;
-  statsHTML+=`<div class="go-stat"><div class="go-stat-val">${bestScores[gameMode]||0}</div><div class="go-stat-lbl">Best Score</div></div>`;
-  document.getElementById('go-stats').innerHTML=statsHTML;
-
-  document.getElementById('gameover').classList.remove('hidden');
-  playBeep(reason==='gameover'?220:660, 0.8, 0.5);
+function endGame(reason){
+  STATE='GAMEOVER';drone.armed=false;
+  hide('hud');
+  const modeNames={TUTORIAL:'Tutorial',GATE:'Gate Runner',HUNT:'Target Hunt',HOVER:'Hover Zone',RACE:'Race Circuit',FREE:'Free Fly'};
+  document.getElementById('go-mode-lbl').textContent=modeNames[gameMode]+(reason==='gameover'?' — CRASHED':'  COMPLETE!');
+  document.getElementById('go-score').textContent=score.toLocaleString();
+  // Stars
+  let stars='⭐';
+  if(gameMode==='GATE'){if(score>2000)stars='⭐⭐⭐';else if(score>900)stars='⭐⭐';}
+  else if(gameMode==='HUNT'){if(targetsHit>=18)stars='⭐⭐⭐';else if(targetsHit>=10)stars='⭐⭐';}
+  else if(gameMode==='HOVER'){if(hovTimeSec>=30)stars='⭐⭐⭐';else if(hovTimeSec>15)stars='⭐⭐';}
+  else if(gameMode==='RACE'){if(raceLap>=3)stars='⭐⭐⭐';else if(raceLap>=1)stars='⭐⭐';}
+  else if(gameMode==='TUTORIAL'){if(tutStep>=TUT_STEPS.length)stars='🎓⭐⭐⭐';else stars='🎓';}
+  document.getElementById('go-stars').textContent=reason==='gameover'?'💀':stars;
+  if(score>=(bestScores[gameMode]||0)) bestScores[gameMode]=score;
+  let st=`<div class="go-stat"><div class="go-stat-val">${score.toLocaleString()}</div><div class="go-stat-lbl">Score</div></div>`;
+  if(gameMode==='GATE') st+=`<div class="go-stat"><div class="go-stat-val">${gatesPassed}</div><div class="go-stat-lbl">Gates</div></div>`;
+  if(gameMode==='HUNT') st+=`<div class="go-stat"><div class="go-stat-val">${targetsHit}</div><div class="go-stat-lbl">Targets</div></div>`;
+  if(gameMode==='HOVER') st+=`<div class="go-stat"><div class="go-stat-val">${hovTimeSec.toFixed(1)}s</div><div class="go-stat-lbl">Hover</div></div>`;
+  if(gameMode==='RACE') st+=`<div class="go-stat"><div class="go-stat-val">${raceBestLap<Infinity?raceBestLap.toFixed(1)+'s':'—'}</div><div class="go-stat-lbl">Best Lap</div></div>`;
+  if(gameMode==='TUTORIAL') st+=`<div class="go-stat"><div class="go-stat-val">${tutStep}/${TUT_STEPS.length}</div><div class="go-stat-lbl">Steps</div></div>`;
+  st+=`<div class="go-stat"><div class="go-stat-val">${Math.round(maxSpeed)} m/s</div><div class="go-stat-lbl">Max Speed</div></div>`;
+  st+=`<div class="go-stat"><div class="go-stat-val">${Math.round(maxAlt)}m</div><div class="go-stat-lbl">Max Alt</div></div>`;
+  st+=`<div class="go-stat"><div class="go-stat-val">${bestScores[gameMode]||0}</div><div class="go-stat-lbl">Best</div></div>`;
+  document.getElementById('go-stats').innerHTML=st;
+  show('screen-go');
+  beep(reason==='gameover'?220:660,.8,.5);
 }
 
-// ─── Main Loop ───
-let lastTime=0;
-function loop(ts) {
-  const dt = Math.min(0.05, (ts-lastTime)/1000);
-  lastTime=ts;
+// ── Mobile Detection & Controls ────────────────────────────────
+function isMobile(){return('ontouchstart' in window)||(navigator.maxTouchPoints>0);}
+
+function initMobileControls(){
+  if(!isMobile()&&!window.matchMedia('(pointer:coarse)').matches) return;
+  document.getElementById('joy-L').style.display='flex';
+  document.getElementById('joy-R').style.display='flex';
+  document.getElementById('cam-btn').style.display='block';
+  document.getElementById('pause-btn').style.display='block';
+  setupJoystick('jb-L','jk-L','L');
+  setupJoystick('jb-R','jk-R','R');
+}
+
+function setupJoystick(baseId,knobId,side){
+  const base=document.getElementById(baseId);
+  const knob=document.getElementById(knobId);
+  let tid=-1;
+  const maxR=base.clientWidth*.38||40;
+
+  base.addEventListener('touchstart',e=>{
+    e.preventDefault();
+    const t=e.changedTouches[0]; tid=t.identifier;
+    joy[side].x=0; joy[side].y=0;
+  },{passive:false});
+
+  base.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    for(const t of e.changedTouches){
+      if(t.identifier!==tid) continue;
+      const rect=base.getBoundingClientRect();
+      const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+      const dx=t.clientX-cx, dy=t.clientY-cy;
+      const mr=base.clientWidth*.38||40;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      const clamp=Math.min(dist,mr)/mr;
+      const ang=Math.atan2(dy,dx);
+      joy[side].x=Math.cos(ang)*clamp;
+      joy[side].y=Math.sin(ang)*clamp;
+      knob.style.transform=`translate(calc(-50% + ${joy[side].x*mr}px),calc(-50% + ${joy[side].y*mr}px))`;
+    }
+  },{passive:false});
+
+  const reset=e=>{
+    e.preventDefault();
+    joy[side].x=0; joy[side].y=0; tid=-1;
+    knob.style.transform='translate(-50%,-50%)';
+  };
+  base.addEventListener('touchend',reset,{passive:false});
+  base.addEventListener('touchcancel',reset,{passive:false});
+}
+
+function toggleCamera(){fpvMode=!fpvMode;document.getElementById('cam-btn').textContent=fpvMode?'📷 FPV':'📷 3RD';}
+
+// ── Keyboard ───────────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  K[e.code]=true;
+  if(e.code==='Escape'){e.preventDefault();onEsc();}
+  if(e.code==='KeyF'&&STATE==='PLAYING') toggleCamera();
+});
+document.addEventListener('keyup',e=>{K[e.code]=false;});
+window.addEventListener('gamepadconnected',e=>{
+  document.getElementById('gp-badge').style.display='block';
+  notify('🎮 Gamepad Connected!','info');
+});
+window.addEventListener('gamepaddisconnected',()=>{document.getElementById('gp-badge').style.display='none';});
+document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+window.addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();},{passive:false});
+
+// ── Utility ────────────────────────────────────────────────────
+function show(id){const e=document.getElementById(id);if(e)e.classList.remove('hidden');}
+function hide(id){const e=document.getElementById(id);if(e)e.classList.add('hidden');}
+
+// ── Main Loop ──────────────────────────────────────────────────
+function loop(){
+  requestAnimationFrame(loop);
+  if(!renderer) return;
+  const dt=Math.min(clock.getDelta(),.05);
 
   readGamepad();
 
-  if(STATE==='PLAYING') {
+  if(STATE==='PLAYING'){
     updatePhysics(dt);
-    updateCamera();
+    updateCamera3(dt);
     updateAudio();
-
+    updateDroneModel();
+    updateParticles(dt);
+    updateTrail();
+    runModeLogic(dt);
     gameTimer+=dt;
-    if(comboTimer>0){ comboTimer-=dt; if(comboTimer<=0)combo=0; }
-
-    // Mode-specific
-    if(gameMode==='GATE')  checkGateCollision();
-    if(gameMode==='HUNT')  checkTargetCollision();
-    if(gameMode==='HOVER') {
-      if(checkHoverZone()) hovTimeSec+=dt;
-      if(hovTimeSec>=hovGoalSec) endGame('complete');
+    if(comboTimer>0){comboTimer-=dt;if(comboTimer<=0)combo=0;}
+    if(timeLimited&&gameTimer>=timeLimit) endGame('gameover');
+    updateHUD();
+    // Gate pulse animation
+    gateObjects.forEach((g,i)=>{
+      const pulse=0.5+0.5*Math.sin(Date.now()*.003+i);
+      if(!g.passed&&g.lit) g.lt.intensity=2+pulse*2;
+      else if(g.passed) g.lt.intensity=0;
+    });
+    if(tutGate){
+      const pulse=0.5+0.5*Math.sin(Date.now()*.004);
+      tutGate.group.children.forEach(c=>{if(c.isLight)c.intensity=2+pulse*3;});
     }
-    if(gameMode==='FREE') {
-      // Award altitude/speed records
-      const spd=Math.sqrt(drone.vx*drone.vx+drone.vy*drone.vy+drone.vz*drone.vz);
-      if(spd>maxSpeed+5){score+=Math.round(spd);showNotify(`🚀 ${Math.round(spd)} m/s!`,'ok');}
-    }
-
-    // Time limit
-    if(timeLimited && gameTimer>=timeLimit) endGame('gameover');
   }
+  if(STATE==='PAUSED') updateCamera3(0);
 
-  render();
-  requestAnimationFrame(loop);
+  renderer.render(scene,camera3);
 }
-requestAnimationFrame(ts=>{lastTime=ts;requestAnimationFrame(loop);});
 
-// Prevent arrow keys scrolling the page
-window.addEventListener('keydown',e=>{
-  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();
-},{passive:false});
+// ── Boot ───────────────────────────────────────────────────────
+initThree();
+initMobileControls();
+loop();
+
+// Hide tutorial step initially
+document.getElementById('tut-step').style.display='none';
 </script>
 </body>
 </html>
