@@ -1,6 +1,6 @@
-# app.py — OBIXConfig Doctor v5.0
+# app.py — OBIXConfig Doctor v5.1
 # ============================================================
-# v5.0 — Smart Analysis: Battery Health, Motor Thermal, Loop Analyzer
+# v5.1 — FPV Simulator NEO · Quick Tune Pad · Physics Accuracy Fixes
 # v2.3 — Blackbox CSV Analyzer + Full Tool Suite
 # Tools: PID/Filter · Blackbox · CLI Surgeon · PID Advisor
 #        RPM Filter · ESC Checker · Rates · VTX · OSD · Motor
