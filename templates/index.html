@@ -727,7 +727,7 @@ body.light .amb-orb { opacity:.25; }
           <div class="inst-card" style="--accent-line:linear-gradient(90deg,var(--green),var(--amber),var(--red))">
             <div class="inst-card-head">🚨 DANGER ZONE — TIP SPEED</div>
             <div class="inst-card-body">
-              <div class="dz-header"><span class="dz-label-g">PROP TIP SPEED</span><span style="font-size:8px;color:var(--muted)">ขีดจำกัด: 300 m/s</span></div>
+              <div class="dz-header"><span class="dz-label-g">PROP TIP SPEED</span><span style="font-size:8px;color:var(--muted)">ขีดจำกัด: 290 m/s</span></div>
               <div class="dz-bar-wrap">
                 <div class="dz-bar-gradient"></div>
                 <div class="dz-zones"><div class="dz-zone">SAFE</div><div class="dz-zone">NOM</div><div class="dz-zone">⚠️WARN</div><div class="dz-zone">⛔DNG</div></div>
@@ -894,7 +894,7 @@ save</div>
               <span class="qs-stat-lbl">Peak Current</span>
             </div>
             <div class="qs-stat">
-              <span class="qs-stat-val {% if analysis.advanced.tip_speed_mps and analysis.advanced.tip_speed_mps > 300 %}red{% elif analysis.advanced.tip_speed_mps and analysis.advanced.tip_speed_mps > 220 %}amber{% else %}green{% endif %}">
+              <span class="qs-stat-val {% if analysis.advanced.tip_speed_mps and analysis.advanced.tip_speed_mps > 290 %}red{% elif analysis.advanced.tip_speed_mps and analysis.advanced.tip_speed_mps > 265 %}amber{% else %}green{% endif %}">
                 {% if analysis.advanced.tip_speed_mps %}{{ analysis.advanced.tip_speed_mps | int }}m/s{% else %}—{% endif %}
               </span>
               <span class="qs-stat-lbl">Tip Speed</span>
