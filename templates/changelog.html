@@ -153,15 +153,105 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-t);min-height
   <div class="stat-tile r"><div class="stat-n">100%</div><div class="stat-lbl">Free</div></div>
 </div>
 
+  <div class="hero-meta">
+    <span>Branch: <strong style="color:var(--green)">{{ branch or 'main' }}</strong></span>
+    <span class="dot"></span>
+    <span>Snapshot: <strong style="color:var(--green)">{{ repo_snapshot or '2025-03' }}</strong></span>
+    <span class="dot"></span>
+    <span style="color:var(--green)">v5.1 CURRENT</span>
+  </div>
+</div>
+
+<div class="stats-strip">
+  <div class="stat-tile g"><div class="stat-n">23</div><div class="stat-lbl">Tools</div></div>
+  <div class="stat-tile b"><div class="stat-n">27</div><div class="stat-lbl">Routes</div></div>
+  <div class="stat-tile a"><div class="stat-n">10</div><div class="stat-lbl">Releases</div></div>
+  <div class="stat-tile r"><div class="stat-n">100%</div><div class="stat-lbl">Free</div></div>
+</div>
+
 <div class="tl">
+
+<!-- v5.1 -->
+<div class="ver-block">
+  <div class="ver-dot latest" style="border-color:var(--amber);background:var(--amber);box-shadow:0 0 18px rgba(255,183,0,.6)"></div>
+  <div class="ver-card latest-card" style="border-color:rgba(255,183,0,.25);box-shadow:0 0 30px rgba(255,183,0,.06)">
+    <div class="ver-head" onclick="toggleVer(this)">
+      <div class="ver-head-l">
+        <div class="ver-num" style="color:var(--amber)">v5.1 <span class="ver-badge badge-latest" style="background:rgba(255,183,0,.15);color:var(--amber);border:1px solid rgba(255,183,0,.3)">LATEST</span> <span class="ver-badge badge-feature">FEATURE</span></div>
+        <div class="ver-name">FPV Simulator NEO · Quick Tune Pad · Physics Accuracy</div>
+        <div class="ver-date">📅 มีนาคม 2568 (2025)</div>
+      </div>
+      <div class="ver-head-r">
+        <span class="change-count">14 changes</span>
+        <span class="toggle-icon">▾</span>
+      </div>
+    </div>
+    <div class="ver-body" style="display:block">
+      <div class="changes-list">
+        <div class="cat-title" style="color:var(--amber);border-color:rgba(255,183,0,.2)">🎮 NEW FEATURES</div>
+        <div class="change-item"><span class="ci-icon">🚁</span><div class="ci-body"><strong>FPV Simulator NEO</strong> — เกมส์ฝึกบิน 3D Cyberpunk Arena · Three.js r128 · 6 Game Modes (Tutorial / Gate Runner / Target Hunt / Hover Zone / Race Circuit / Free Fly) · Minimap · Speed Lines · 3 Camera Modes · Mobile Touch Joystick · Gamepad Support</div></div>
+        <div class="change-item"><span class="ci-icon">⚡</span><div class="ci-body"><strong>Quick Tune Pad</strong> — ติ๊กอาการบิน → PID delta matrix + CLI พร้อม paste ทันที · 13 อาการ · Conflict detection · Confidence score · Field Tips · สำหรับ Pro Pilot ในสนาม</div></div>
+
+        <div class="cat-title cat-fix">🔧 PHYSICS ENGINE FIXES</div>
+        <div class="change-item"><span class="ci-icon">⚙️</span><div class="ci-body"><strong>Thrust Accuracy v5.1</strong> — ลด _G_PER_W_BASE ~15%, _LOADED_RPM_FACTOR 0.82→0.80, _FLIGHT_VOLTAGE 4.0V→3.85V — 5" 4S 2306KV: thrust/motor=828g, TWR=4.42 ✅</div></div>
+        <div class="change-item"><span class="ci-icon">📐</span><div class="ci-body"><strong>Tip Speed Thresholds</strong> — Danger 290 m/s, Warning 265 m/s (เดิม 300/220) — ตรงกัน HUD + rule engine + advanced analysis + liveCalc ทุกจุด</div></div>
+        <div class="change-item"><span class="ci-icon">🔢</span><div class="ci-body"><strong>1S–2S Cell Support</strong> — cell clamp เดิม min=3 → min=1 รองรับ whoopies และ micro 1S-2S</div></div>
+        <div class="change-item"><span class="ci-icon">📡</span><div class="ci-body"><strong>RPM Filter Voltage Sync</strong> — rpm_filter_calc.py เปลี่ยนเป็น 3.85V × 0.80 ตรงกับ prop_logic.py</div></div>
+
+        <div class="cat-title cat-fix">🐛 BUG FIXES</div>
+        <div class="change-item"><span class="ci-icon">🔌</span><div class="ci-body"><strong>ESC Pipeline Fix</strong> — esc_recommended_a และ peak_per_motor_a ไม่ถูก expose ออกมา template → แก้ให้ดึงจาก _adv_inner ถูกต้อง</div></div>
+        <div class="change-item"><span class="ci-icon">🧭</span><div class="ci-body"><strong>fpv_trainer.html Nav Bug</strong> — nav.html ถูก include ภายใน &lt;head&gt; แทนหลัง &lt;body&gt; → layout พัง — แก้ไขแล้ว</div></div>
+        <div class="change-item"><span class="ci-icon">🔗</span><div class="ci-body"><strong>fpv/index.html Dead Links</strong> — 4 cards มี href="#" → เปลี่ยนเป็น /fpv-trainer, /app, /pid-advisor, /blackbox</div></div>
+        <div class="change-item"><span class="ci-icon">🎯</span><div class="ci-body"><strong>Preset KV Fix</strong> — 7" 6S: 1750KV→1200KV (tip speed 301→206 m/s), 7.5" 6S: 1500KV→1100KV</div></div>
+
+        <div class="cat-title cat-fix">🎨 UI FIXES</div>
+        <div class="change-item"><span class="ci-icon">📊</span><div class="ci-body"><strong>Tip Speed Gauge Label</strong> — HUD แสดง "ขีดจำกัด: 300 m/s" → แก้เป็น 290 m/s ตรงกับ threshold จริง</div></div>
+        <div class="change-item"><span class="ci-icon">🗂️</span><div class="ci-body"><strong>og_tags featureList</strong> — เพิ่ม Battery Health, Motor Thermal, Loop Analyzer, FPV Simulator NEO ใน JSON-LD structured data</div></div>
+        <div class="change-item"><span class="ci-icon">🗺️</span><div class="ci-body"><strong>Sitemap + Nav</strong> — เพิ่ม /fpv-trainer, /quick-tune ใน sitemap.xml, nav.html, drawer.html, tool dock, landing cards</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- v5.0 -->
+<div class="ver-block">
+  <div class="ver-dot" style="border-color:var(--blue)"></div>
+  <div class="ver-card">
+    <div class="ver-head" onclick="toggleVer(this)">
+      <div class="ver-head-l">
+        <div class="ver-num">v5.0 <span class="ver-badge badge-feature">FEATURE</span> <span class="ver-badge" style="background:rgba(0,170,255,.1);color:var(--blue);border:1px solid rgba(0,170,255,.25)">MAJOR</span></div>
+        <div class="ver-name">Smart Analysis Engine — Battery Health · Motor Thermal · Loop Latency</div>
+        <div class="ver-date">📅 มกราคม 2568 (2025)</div>
+      </div>
+      <div class="ver-head-r">
+        <span class="change-count">9 changes</span>
+        <span class="toggle-icon">▸</span>
+      </div>
+    </div>
+    <div class="ver-body" style="display:none">
+      <div class="changes-list">
+        <div class="cat-title" style="color:var(--blue);border-color:rgba(0,170,255,.2)">⚙️ NEW FEATURES</div>
+        <div class="change-item"><span class="ci-icon">🔋</span><div class="ci-body"><strong>Battery Health Advisor</strong> — วิเคราะห์ Internal Resistance, Voltage Sag, Cell Balance, Health Score A–F</div></div>
+        <div class="change-item"><span class="ci-icon">🌡️</span><div class="ci-body"><strong>Motor Thermal Estimator</strong> — คำนวณ Motor Temperature จาก amp draw, stator size, airflow — แนะนำ cooling strategy</div></div>
+        <div class="change-item"><span class="ci-icon">🔁</span><div class="ci-body"><strong>Control Loop Latency Analyzer</strong> — วัด loop time, DMA overhead, filter delay — แนะนำ optimal looprate</div></div>
+        <div class="change-item"><span class="ci-icon">⚡</span><div class="ci-body"><strong>Smart Physics Engine</strong> — คำนวณ TWR, Tip Speed, ESC sizing, C-rating ด้วย prop_logic v4 จาก bench data</div></div>
+        <div class="change-item"><span class="ci-icon">🛡️</span><div class="ci-body"><strong>Security Hardening v5.1</strong> — ปิด bare except 15 จุด, division-by-zero guards, weight/motor clamp, secure_filename ทุก route</div></div>
+        <div class="change-item"><span class="ci-icon">📋</span><div class="ci-body"><strong>Build Card</strong> — สร้าง build spec card พร้อม QR code share</div></div>
+        <div class="change-item"><span class="ci-icon">📓</span><div class="ci-body"><strong>Tuning Log</strong> — บันทึก tune sessions พร้อม diff viewer</div></div>
+        <div class="change-item"><span class="ci-icon">🏆</span><div class="ci-body"><strong>Leaderboard</strong> — community config ranking + vote</div></div>
+        <div class="change-item"><span class="ci-icon">🎨</span><div class="ci-body"><strong>Apex Orbital WOW UI</strong> — redesign หน้าหลัก mission control 2-column layout, animated hex background, Live HUD, instrument column</div></div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- v2.3 -->
 <div class="ver-block">
   <div class="ver-dot latest"></div>
-  <div class="ver-card latest-card">
+  <div class="ver-card">
     <div class="ver-head" onclick="toggleVer(this)">
       <div class="ver-head-l">
-        <div class="ver-num">v2.3 <span class="ver-badge badge-latest">LATEST</span> <span class="ver-badge badge-feature">FEATURE</span></div>
+        <div class="ver-num">v2.3 <span class="ver-badge badge-feature">FEATURE</span></div>
         <div class="ver-name">Community Edition — Build Card · Tuning Log · Leaderboard</div>
         <div class="ver-date">📅 มีนาคม 2569 (2026)</div>
       </div>
