@@ -638,6 +638,17 @@ def pid_advisor():
     advice_json = _json.dumps(advice_dict, ensure_ascii=False)
     return render_template('pid_advisor.html', symptoms=symptoms_list, advice_json=advice_json)
 
+# ── Quick Tune Pad ───────────────────────────────────────────────────────────
+@app.route('/quick-tune')
+def quick_tune():
+    import json as _json
+    symptoms_list = get_all_symptoms()
+    advice_dict = {}
+    for s in symptoms_list:
+        advice_dict[s['id']] = _get_symptom_advice(s['id'])
+    advice_json = _json.dumps(advice_dict, ensure_ascii=False)
+    return render_template('quick_tune.html', symptoms=symptoms_list, advice_json=advice_json)
+
 @app.route('/api/symptom/<symptom_id>')
 def api_symptom(symptom_id):
     # SECURITY: allow only alphanumeric + underscore IDs
@@ -921,6 +932,7 @@ def sitemap_xml():
         ("/app",              "weekly",  "0.9"),
         ("/cli_surgeon",      "weekly",  "0.9"),
         ("/pid-advisor",      "weekly",  "0.9"),
+        ("/quick-tune",       "weekly",  "0.9"),
         ("/rpm-filter",       "weekly",  "0.8"),
         ("/motor-prop",       "weekly",  "0.8"),
         ("/rates-visualizer", "weekly",  "0.8"),
