@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quick Tune Pad — OBIXConfig Doctor</title>
+{% set og_title       = "Quick Tune Pad — OBIXConfig Doctor" %}
+{% set og_description = "เลือกอาการบิน → ได้ PID delta + CLI command พร้อม paste ทันที ไม่ต้องเดา — สำหรับ Pro Pilot" %}
+{% set og_url         = "https://configdoctor.onrender.com/quick-tune" %}
+{% include "partials/og_tags.html" %}
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Sarabun:wght@300;400;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+{% set nav_page = "quick_tune" %}
+</head>
+<body>
+{% include "partials/nav.html" %}
+
+<style>
+:root{
+  --bg:#07090a;--bg2:#0b0f10;--bg3:#0f1518;
+  --amber:#f5a623;--amb2:rgba(245,166,35,.15);--amb3:rgba(245,166,35,.07);
+  --green:#10c47a;--grn2:rgba(16,196,122,.12);
+  --red:#f87171;--blue:#38bdf8;--muted:#4a6270;
+  --border:rgba(245,166,35,.14);--bord2:rgba(245,166,35,.07);
+  --mono:'IBM Plex Mono',monospace;--thai:'Sarabun',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg);color:#c8d8d0;font-family:var(--thai);min-height:100vh}
+body{background:var(--bg);min-height:100vh}
+
+/* ── Page shell ── */
+.qt-wrap{max-width:1180px;margin:0 auto;padding:28px 20px 80px}
+
+/* ── Header ── */
+.qt-head{display:flex;align-items:flex-start;gap:20px;margin-bottom:32px;position:relative}
+.qt-head::after{content:'';position:absolute;bottom:-18px;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--amber),transparent)}
+.qt-icon{font-size:2.6rem;line-height:1;flex-shrink:0}
+.qt-title-block{}
+.qt-kicker{font-family:var(--mono);font-size:.62rem;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+.qt-title{font-family:'Bebas Neue',monospace;font-size:clamp(2.2rem,5vw,3.6rem);line-height:.95;color:var(--amber);text-shadow:0 0 40px rgba(245,166,35,.25);letter-spacing:.04em}
+.qt-sub{margin-top:6px;font-size:.85rem;color:var(--muted);line-height:1.55;max-width:540px}
+.qt-badge{display:inline-block;font-family:var(--mono);font-size:.55rem;letter-spacing:.1em;padding:3px 9px;border:1px solid rgba(245,166,35,.3);border-radius:3px;color:var(--amber);margin-top:8px}
+
+/* ── Body layout ── */
+.qt-body{display:grid;grid-template-columns:1fr 1.18fr;gap:20px;align-items:start}
+@media(max-width:780px){.qt-body{grid-template-columns:1fr}}
+
+/* ── Left: Symptom Panel ── */
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.panel-hd{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--bord2);background:var(--bg3)}
+.panel-hd-dot{width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 8px var(--amber);flex-shrink:0}
+.panel-hd-title{font-family:var(--mono);font-size:.62rem;letter-spacing:.15em;color:var(--amber);text-transform:uppercase}
+.panel-hd-count{margin-left:auto;font-family:var(--mono);font-size:.58rem;color:var(--muted)}
+
+/* Category group */
+.cat-group{border-bottom:1px solid var(--bord2)}
+.cat-group:last-child{border-bottom:none}
+.cat-lbl{font-family:var(--mono);font-size:.52rem;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;padding:10px 18px 5px;display:block}
+.symp-row{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.symp-btn{display:flex;align-items:center;gap:9px;padding:10px 16px;cursor:pointer;border:none;background:none;text-align:left;width:100%;transition:.12s;position:relative;border-left:2px solid transparent}
+.symp-btn:hover{background:var(--amb3)}
+.symp-btn.active{background:var(--amb2);border-left-color:var(--amber)}
+.symp-btn.conflict{opacity:.38;cursor:not-allowed}
+.symp-icon{font-size:1.05rem;flex-shrink:0;line-height:1}
+.symp-txt{font-size:.78rem;color:#9ab8b0;line-height:1.3;font-family:var(--thai)}
+.symp-btn.active .symp-txt{color:var(--amber)}
+.symp-check{width:14px;height:14px;border:1px solid var(--muted);border-radius:3px;margin-left:auto;flex-shrink:0;position:relative;transition:.12s}
+.symp-btn.active .symp-check{border-color:var(--amber);background:var(--amber)}
+.symp-btn.active .symp-check::after{content:'✓';position:absolute;top:-1px;left:2px;font-size:.65rem;color:#000;font-weight:700}
+/* Conflict badge */
+.conf-tag{position:absolute;top:6px;right:6px;font-size:.44rem;font-family:var(--mono);letter-spacing:.06em;padding:1px 4px;border-radius:2px;border:1px solid rgba(248,113,113,.3);color:var(--red);display:none}
+.symp-btn.conflict .conf-tag{display:block}
+
+/* ── Right: Output Panel ── */
+.out-panel{display:flex;flex-direction:column;gap:16px;position:sticky;top:68px}
+
+/* Meta bar */
+.meta-bar{display:flex;gap:10px;flex-wrap:wrap}
+.mb{font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;padding:5px 12px;border-radius:4px;border:1px solid var(--border);color:var(--muted);background:var(--bg2)}
+.mb.on{border-color:var(--amber);color:var(--amber);background:var(--amb3)}
+
+/* PID delta grid */
+.delta-panel{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.delta-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--bord2);background:var(--bg3)}
+.delta-hd-title{font-family:var(--mono);font-size:.62rem;letter-spacing:.15em;color:var(--amber);text-transform:uppercase}
+.delta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+.dg-col-hd{font-family:var(--mono);font-size:.5rem;letter-spacing:.1em;color:var(--muted);text-align:center;padding:8px 0 4px;border-bottom:1px solid var(--bord2);text-transform:uppercase}
+.dg-row{display:contents}
+.dg-cell{padding:9px 10px;border-bottom:1px solid var(--bord2);font-family:var(--mono);font-size:.78rem;text-align:center;position:relative;transition:.15s}
+.dg-cell:nth-child(3n){border-right:none}
+.dg-cell.axis-label{color:var(--muted);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:5px}
+.dg-cell.axis-label::before{content:'';width:3px;height:3px;border-radius:50%;background:var(--amber)}
+.dg-val{display:block;font-size:.88rem;font-weight:600;transition:.2s}
+.dg-delta{display:block;font-size:.55rem;opacity:.7;margin-top:1px}
+.up{color:#4ade80} .dn{color:var(--red)} .nc{color:var(--muted)}
+.arr-up::before{content:'▲ '} .arr-dn::before{content:'▼ '} .arr-nc::before{content:'— '}
+/* Confidence meter */
+.conf-ring{width:42px;height:42px;border-radius:50%;background:conic-gradient(var(--amber) 0deg, var(--bg3) 0deg);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.56rem;font-weight:700;color:var(--amber);flex-shrink:0;transition:background .4s}
+.conf-inner{width:30px;height:30px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:.56rem}
+
+/* Filter delta row */
+.flt-row{display:flex;flex-wrap:wrap;gap:8px;padding:10px 18px 14px;border-top:1px solid var(--bord2)}
+.flt-tag{font-family:var(--mono);font-size:.6rem;padding:4px 10px;border-radius:4px;border:1px solid;display:flex;align-items:center;gap:5px}
+.flt-tag.up{color:#4ade80;border-color:rgba(74,222,128,.3);background:rgba(74,222,128,.06)}
+.flt-tag.dn{color:var(--red);border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.06)}
+.flt-tag.nc{color:var(--muted);border-color:rgba(74,98,112,.2);background:transparent}
+.flt-tag.info{color:var(--blue);border-color:rgba(56,189,248,.3);background:rgba(56,189,248,.06)}
+
+/* CLI terminal */
+.cli-panel{background:var(--bg);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.cli-bar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bg3);border-bottom:1px solid var(--bord2)}
+.cli-dots{display:flex;gap:5px}
+.cli-dot{width:8px;height:8px;border-radius:50%}
+.cli-title{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;color:var(--muted)}
+.cli-copy-btn{margin-left:auto;font-family:var(--mono);font-size:.55rem;letter-spacing:.1em;padding:4px 12px;border-radius:4px;background:var(--amb2);border:1px solid rgba(245,166,35,.3);color:var(--amber);cursor:pointer;transition:.12s}
+.cli-copy-btn:hover{background:rgba(245,166,35,.25)}
+.cli-copy-btn:active{transform:scale(.96)}
+.cli-copy-btn.copied{background:var(--grn2);border-color:rgba(16,196,122,.4);color:var(--green)}
+#cli-out{font-family:var(--mono);font-size:.74rem;line-height:1.85;padding:16px 18px;color:#c8d8d0;min-height:120px;white-space:pre-wrap;word-break:break-all}
+.cli-comment{color:var(--muted)}
+.cli-cmd{color:#e2f0e8}
+.cli-val{color:var(--amber)}
+.cli-key{color:var(--blue)}
+.cli-ok{color:var(--green)}
+.cli-warn{color:var(--red)}
+.cli-cursor{display:inline-block;width:7px;height:.9em;background:var(--amber);animation:blink .8s step-end infinite;vertical-align:text-bottom;margin-left:2px}
+@keyframes blink{50%{opacity:0}}
+
+/* Conflict warning */
+.conflict-warn{display:none;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.25);border-radius:8px;padding:12px 16px;font-size:.78rem;color:var(--red)}
+
+/* Tip card */
+.tip-panel{background:var(--bg2);border:1px solid var(--bord2);border-radius:10px;padding:0}
+.tip-hd{padding:10px 16px;border-bottom:1px solid var(--bord2);font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.tip-list{padding:10px 16px 14px;display:flex;flex-direction:column;gap:6px}
+.tip-item{font-size:.78rem;color:#7a9890;line-height:1.5;display:flex;gap:6px}
+.tip-item::before{content:'›';color:var(--amber);flex-shrink:0;font-size:.95rem}
+
+/* Empty state */
+.empty-state{text-align:center;padding:36px 20px}
+.empty-ico{font-size:2.4rem;margin-bottom:10px;opacity:.5}
+.empty-t{font-family:var(--mono);font-size:.72rem;color:var(--muted);letter-spacing:.1em}
+.empty-s{font-size:.78rem;color:#3a5260;margin-top:6px}
+
+/* Reset btn */
+.reset-btn{font-family:var(--mono);font-size:.56rem;letter-spacing:.1em;padding:5px 12px;border-radius:4px;background:transparent;border:1px solid rgba(74,98,112,.3);color:var(--muted);cursor:pointer;transition:.12s;margin-left:auto}
+.reset-btn:hover{border-color:var(--red);color:var(--red)}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:rgba(245,166,35,.25);border-radius:3px}
+</style>
+
+<div class="qt-wrap">
+
+  <!-- Header -->
+  <div class="qt-head">
+    <div class="qt-icon">⚡</div>
+    <div class="qt-title-block">
+      <div class="qt-kicker">OBIXConfig Doctor · v5.1</div>
+      <div class="qt-title">QUICK TUNE<br>PAD</div>
+      <div class="qt-sub">ติ๊กอาการที่เจอ → ได้ PID delta + CLI พร้อม paste ทันที<br>ออกแบบสำหรับ Pro Pilot ที่อยู่ในสนาม — ไม่ต้องเดา</div>
+      <div class="qt-badge">🎯 SYMPTOM → FIX IN &lt;15 SEC</div>
+    </div>
+  </div>
+
+  <div class="qt-body">
+
+    <!-- ═══ LEFT: Symptom Selector ═══ -->
+    <div class="panel">
+      <div class="panel-hd">
+        <div class="panel-hd-dot"></div>
+        <div class="panel-hd-title">SELECT SYMPTOMS</div>
+        <div class="panel-hd-count" id="sel-count">0 / 4 selected</div>
+        <button class="reset-btn" onclick="resetAll()">✕ RESET</button>
+      </div>
+
+      <!-- Oscillation -->
+      <div class="cat-group">
+        <span class="cat-lbl">— Oscillation / Bounce</span>
+        <div class="symp-row">
+          <button class="symp-btn" data-id="oscillation_after_flip" onclick="toggle(this)">
+            <span class="symp-icon">🔀</span>
+            <span class="symp-txt">สั่นหลัง flip / roll</span>
+            <span class="symp-check"></span>
+            <span class="conf-tag">conflict</span>
+          </button>
+          <button class="symp-btn" data-id="bounce_back" onclick="toggle(this)">
+            <span class="symp-icon">↩️</span>
+            <span class="symp-txt">Bounce-back / Overshoot</span>
+            <span class="symp-check"></span>
+            <span class="conf-tag">conflict</span>
+          </button>
+          <button class="symp-btn" data-id="propwash" onclick="toggle(this)">
+            <span class="symp-icon">💨</span>
+            <span class="symp-txt">Propwash (สั่นตอน throttle drop)</span>
+            <span class="symp-check"></span>
+            <span class="conf-tag">conflict</span>
+          </button>
+          <button class="symp-btn" data-id="yaw_spin" onclick="toggle(this)">
+            <span class="symp-icon">🌀</span>
+            <span class="symp-txt">Yaw spin / หมุน yaw เอง</span>
+            <span class="symp-check"></span>
+            <span class="conf-tag">conflict</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Feel / Response -->
+      <div class="cat-group">
+        <span class="cat-lbl">— Feel / Response</span>
+        <div class="symp-row">
+          <button class="symp-btn" data-id="slow_response" onclick="toggle(this)">
+            <span class="symp-icon">🐢</span>
+            <span class="symp-txt">ตอบสนองช้า / เฉื่อย</span>
+            <span class="symp-check"></span>
+            <span class="conf-tag">conflict</span>
+          </button>
+          <button class="symp-btn" data-id="toilet_bowl" onclick="toggle(this)">
+            <span class="symp-icon">🌪️</span>
+            <span class="symp-txt">Toilet bowl / วนตอน hover</span>
+            <span class="symp-check"></span>
+            <span class="conf-tag">conflict</span>
+          </button>
+          <button class="symp-btn" data-id="wind_rejection" onclick="toggle(this)">
+            <span class="symp-icon">💨</span>
+            <span class="symp-txt">กันลมไม่อยู่ / ล่องลอย</span>
+            <span class="symp-check"></span>
+            <span class="conf-tag">conflict</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Hardware / Heat -->
+      <div class="cat-group">
+        <span class="cat-lbl">— Hardware / Heat</span>
+        <div class="symp-row">
+          <button class="symp-btn" data-id="motor_hot" onclick="toggle(this)">
+            <span class="symp-icon">🌡️</span>
+            <span class="symp-txt">มอเตอร์ร้อนหลังบิน</span>
+            <span class="symp-check"></span>
+            <span class="conf-tag">conflict</span>
+          </button>
+          <button class="symp-btn" data-id="jello_footage" onclick="toggle(this)">
+            <span class="symp-icon">📷</span>
+            <span class="symp-txt">ภาพ Jello / ripple</span>
+            <span class="symp-check"></span>
+            <span class="conf-tag">conflict</span>
+          </button>
+          <button class="symp-btn" data-id="esc_desync" onclick="toggle(this)">
+            <span class="symp-icon">⚡</span>
+            <span class="symp-txt">ESC Desync / มอเตอร์หยุด</span>
+            <span class="symp-check"></span>
+            <span class="conf-tag">conflict</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- System -->
+      <div class="cat-group">
+        <span class="cat-lbl">— System / Setup</span>
+        <div class="symp-row">
+          <button class="symp-btn" data-id="not_arming" onclick="toggle(this)">
+            <span class="symp-icon">🔒</span>
+            <span class="symp-txt">ไม่ ARM / motor ไม่หมุน</span>
+            <span class="symp-check"></span>
+            <span class="conf-tag">conflict</span>
+          </button>
+          <button class="symp-btn" data-id="turtle_mode_fail" onclick="toggle(this)">
+            <span class="symp-icon">🐢</span>
+            <span class="symp-txt">Turtle mode ไม่ทำงาน</span>
+            <span class="symp-check"></span>
+            <span class="conf-tag">conflict</span>
+          </button>
+          <button class="symp-btn" data-id="video_breakup" onclick="toggle(this)">
+            <span class="symp-icon">📡</span>
+            <span class="symp-txt">ภาพ FPV แตก / VTX หาย</span>
+            <span class="symp-check"></span>
+            <span class="conf-tag">conflict</span>
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /panel -->
+
+    <!-- ═══ RIGHT: Output ═══ -->
+    <div class="out-panel">
+
+      <!-- Status meta bar -->
+      <div class="meta-bar">
+        <div class="mb" id="mb-symp">0 อาการ</div>
+        <div class="mb" id="mb-conf">CONFIDENCE: —</div>
+        <div class="mb" id="mb-prio">PRIORITY: —</div>
+      </div>
+
+      <!-- Conflict warning -->
+      <div class="conflict-warn" id="conflict-warn">
+        ⚠️ อาการที่เลือกมีค่า PID ที่ขัดแย้งกัน (เช่น ต้องเพิ่ม D แต่อีกอาการต้องลด D) — CLI ด้านล่างจะแสดงเฉพาะค่าที่ปลอดภัย แนะนำเลือกอาการที่ชัดเจนที่สุดก่อน
+      </div>
+
+      <!-- PID Delta Grid -->
+      <div class="delta-panel" id="delta-panel">
+        <div class="delta-hd">
+          <span class="delta-hd-title">PID DELTA MATRIX</span>
+          <div class="conf-ring" id="conf-ring">
+            <div class="conf-inner" id="conf-num">—</div>
+          </div>
+        </div>
+
+        <div id="pid-grid-wrap">
+          <div class="empty-state">
+            <div class="empty-ico">🎯</div>
+            <div class="empty-t">SELECT SYMPTOMS</div>
+            <div class="empty-s">เลือกอาการด้านซ้าย → PID delta จะปรากฏที่นี่</div>
+          </div>
+        </div>
+
+        <!-- Filter delta -->
+        <div class="flt-row" id="flt-row" style="display:none"></div>
+      </div>
+
+      <!-- CLI Output -->
+      <div class="cli-panel" id="cli-panel">
+        <div class="cli-bar">
+          <div class="cli-dots">
+            <div class="cli-dot" style="background:#f87171"></div>
+            <div class="cli-dot" style="background:#f5a623"></div>
+            <div class="cli-dot" style="background:#4ade80"></div>
+          </div>
+          <div class="cli-title">BETAFLIGHT CLI — READY TO PASTE</div>
+          <button class="cli-copy-btn" id="copy-btn" onclick="copyCLI()">⎘ COPY ALL</button>
+        </div>
+        <pre id="cli-out"><span class="cli-comment"># เลือกอาการด้านซ้ายเพื่อ generate CLI...</span><span class="cli-cursor"></span></pre>
+      </div>
+
+      <!-- Tips -->
+      <div class="tip-panel" id="tip-panel" style="display:none">
+        <div class="tip-hd">💡 FIELD TIPS</div>
+        <div class="tip-list" id="tip-list"></div>
+      </div>
+
+    </div><!-- /out-panel -->
+  </div><!-- /qt-body -->
+</div><!-- /qt-wrap -->
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  QUICK TUNE PAD — Logic Engine
+//  Symptom → PID delta → CLI output
+// ═══════════════════════════════════════════════════════════
+
+const DATA = {{ advice_json | safe }};
+
+// Conflict rules: these symptom pairs have opposing PID directions
+// [a, b, param] means symptom a and b conflict on param
+const CONFLICTS = [
+  ['oscillation_after_flip', 'propwash',    'd_main'],   // osc→D down, wash→D up
+  ['oscillation_after_flip', 'slow_response','p_main'],  // osc→P down, slow→P up
+  ['bounce_back',            'propwash',    'd_main'],   // bounce→D up, wash→D up (ok actually—but P conflicts)
+  ['bounce_back',            'slow_response','p_main'],  // bounce→P down, slow→P up
+  ['motor_hot',              'propwash',    'd_main'],   // hot→D down, wash→D up
+  ['motor_hot',              'slow_response','filter'],
+  ['jello_footage',          'slow_response','filter'],
+];
+
+// PID adjustment definitions (canonical, weighted)
+const ADJ = {
+  oscillation_after_flip:{
+    p:{roll:-2,pitch:-2,yaw:0}, d:{roll:-4,pitch:-4,yaw:0}, i:{roll:0,pitch:0,yaw:0},
+    filter:{dterm_lpf1:-15,gyro_lpf1:0,anti_gravity:0,rpm_filter:null},
+    cli:['set d_roll = {dr}','set d_pitch = {dp}','set dterm_lpf1_hz = {dlpf}'],
+    confidence:82, priority:'HIGH',
+    tips:['ลด D ทีละ 3 แล้วบินซ้ำ ถ้า propwash เพิ่มขึ้น = D ยังต้องการ ให้ปรับ filter แทน','ใช้ Blackbox ดู gyro noise หลัง maneuver','ตรวจสอบ motor balance และ prop crack ก่อน']
+  },
+  propwash:{
+    p:{roll:0,pitch:0,yaw:0}, d:{roll:4,pitch:4,yaw:0}, i:{roll:3,pitch:3,yaw:0},
+    filter:{dterm_lpf1:0,gyro_lpf1:0,anti_gravity:4,rpm_filter:true},
+    cli:['set d_roll = {dr}','set d_pitch = {dp}','set anti_gravity_gain = {ag}','set rpm_notch_harmonics = 3'],
+    confidence:78, priority:'HIGH',
+    tips:['RPM filter ช่วยได้มากที่สุด ต้องใช้ BLHeli_32 + BiDir DSHOT','ถ้ายัง propwash อยู่ ลอง เพิ่ม iterm_limit สูงขึ้น','Propwash มักดีขึ้นเมื่อ แบตไม่ sag มาก — ลอง battery ใหม่']
+  },
+  bounce_back:{
+    p:{roll:-3,pitch:-3,yaw:0}, d:{roll:3,pitch:3,yaw:0}, i:{roll:0,pitch:0,yaw:0},
+    filter:{dterm_lpf1:0,gyro_lpf1:0,anti_gravity:0,rpm_filter:null,feedforward:-12},
+    cli:['set p_roll = {pr}','set p_pitch = {pp}','set d_roll = {dr}','set d_pitch = {dp}','set feedforward_roll = {ff}','set feedforward_pitch = {ff}'],
+    confidence:80, priority:'MED',
+    tips:['Bounce-back มักเกิดจาก P สูงเกิน หรือ feedforward สูง','ลด feedforward ก่อน แล้วค่อยปรับ P','ถ้าบิน freestyle ลอง setpoint_relax_ratio = 30']
+  },
+  yaw_spin:{
+    p:{roll:0,pitch:0,yaw:-6}, d:{roll:0,pitch:0,yaw:0}, i:{roll:0,pitch:0,yaw:5},
+    filter:{dterm_lpf1:0,gyro_lpf1:0,anti_gravity:0,rpm_filter:null},
+    cli:['set p_yaw = {py}','set i_yaw = {iy}'],
+    confidence:75, priority:'MED',
+    tips:['ตรวจสอบ motor จาก Betaflight Motors tab ว่า motor ทุกตัวหมุนเร็วเท่ากัน','Yaw spin บางทีเกิดจาก prop ไม่สมดุล หรือ motor bearing เสีย','ลอง set yaw_stop_time = 0.02']
+  },
+  slow_response:{
+    p:{roll:4,pitch:4,yaw:0}, d:{roll:0,pitch:0,yaw:0}, i:{roll:0,pitch:0,yaw:0},
+    filter:{dterm_lpf1:0,gyro_lpf1:20,anti_gravity:0,rpm_filter:null,feedforward:15},
+    cli:['set p_roll = {pr}','set p_pitch = {pp}','set feedforward_roll = {ff}','set feedforward_pitch = {ff}','set gyro_lowpass_hz = {glpf}'],
+    confidence:72, priority:'MED',
+    tips:['เพิ่ม feedforward ก่อนเพิ่ม P — ผล response ชัดกว่า','ถ้า filter aggressive เกินไป ให้เพิ่ม gyro_lpf1 ขึ้น 20Hz','setpoint_relax_ratio ที่ต่ำจะทำให้ drone เร็วขึ้น แต่ bounce มากขึ้น']
+  },
+  toilet_bowl:{
+    p:{roll:0,pitch:0,yaw:-2}, d:{roll:0,pitch:0,yaw:0}, i:{roll:4,pitch:4,yaw:0},
+    filter:{dterm_lpf1:0,gyro_lpf1:0,anti_gravity:0,rpm_filter:null},
+    cli:['set i_roll = {ir}','set i_pitch = {ip}','set p_yaw = {py}'],
+    confidence:65, priority:'LOW',
+    tips:['Toilet bowl อาจมาจาก compass/magnetometer enable โดยไม่ตั้งใจ — disable ใน BF','ตรวจสอบ GPS mode อาจรบกวน','ลอง iterm_limit = 400']
+  },
+  wind_rejection:{
+    p:{roll:0,pitch:0,yaw:0}, d:{roll:0,pitch:0,yaw:0}, i:{roll:6,pitch:6,yaw:4},
+    filter:{dterm_lpf1:0,gyro_lpf1:0,anti_gravity:5,rpm_filter:null,iterm_relax:'RPH'},
+    cli:['set i_roll = {ir}','set i_pitch = {ip}','set i_yaw = {iy}','set anti_gravity_gain = {ag}','set iterm_relax = RPH'],
+    confidence:70, priority:'MED',
+    tips:['iterm_relax = RPH ดีกว่า RP สำหรับ freestyle ที่มี throttle change บ่อย','ลม = ต้องการ I-term สูง แต่ถ้าสูงเกินจะ bounce ที่ stick release','anti_gravity ช่วยตอน throttle punch']
+  },
+  motor_hot:{
+    p:{roll:0,pitch:0,yaw:0}, d:{roll:-4,pitch:-4,yaw:0}, i:{roll:0,pitch:0,yaw:0},
+    filter:{dterm_lpf1:-18,gyro_lpf1:0,anti_gravity:0,rpm_filter:true},
+    cli:['set d_roll = {dr}','set d_pitch = {dp}','set dterm_lpf1_hz = {dlpf}','set motor_pwm_protocol = DSHOT600'],
+    confidence:76, priority:'HIGH',
+    tips:['มอเตอร์ร้อนเพราะ D-term สูงทำให้ motor vibrate ตลอดเวลา','ใช้ DSHOT600 + BiDir ลด motor heat ได้ดีมาก','ตรวจ prop balance — prop ที่ไม่สมดุล = motor heat สูงมาก']
+  },
+  jello_footage:{
+    p:{roll:0,pitch:0,yaw:0}, d:{roll:-2,pitch:-2,yaw:0}, i:{roll:0,pitch:0,yaw:0},
+    filter:{dterm_lpf1:0,gyro_lpf1:-20,anti_gravity:0,rpm_filter:true},
+    cli:['set d_roll = {dr}','set d_pitch = {dp}','set gyro_lowpass_hz = {glpf}'],
+    confidence:60, priority:'LOW',
+    tips:['Jello ส่วนใหญ่มาจาก prop crack หรือ motor bearing เสีย — ตรวจก่อนปรับ filter','Camera gyro stabilization ที่ดีแก้ jello ได้ดีกว่าปรับ PID','Mount camera ด้วย soft foam/rubber ลด vibration ได้ดีที่สุด']
+  },
+  esc_desync:{
+    p:{roll:0,pitch:0,yaw:0}, d:{roll:0,pitch:0,yaw:0}, i:{roll:0,pitch:0,yaw:0},
+    filter:{dterm_lpf1:0,gyro_lpf1:0,anti_gravity:0,rpm_filter:null},
+    cli:['set motor_pwm_protocol = DSHOT300','set dshot_bidir = ON','set motor_poles = 14','set min_throttle = 1025'],
+    confidence:85, priority:'CRITICAL',
+    tips:['ESC Desync เป็น hardware issue — ปรับ PID ไม่ช่วย ต้องแก้ ESC settings','ลอง demag_compensation = HIGH ใน BLHeli Suite','motor_poles ต้องตรงกับ motor จริง: 12pole=12, 14pole=14']
+  },
+  not_arming:{
+    p:{roll:0,pitch:0,yaw:0}, d:{roll:0,pitch:0,yaw:0}, i:{roll:0,pitch:0,yaw:0},
+    filter:{dterm_lpf1:0,gyro_lpf1:0,anti_gravity:0,rpm_filter:null},
+    cli:['arm','set min_check = 1050','set max_check = 1900','set small_angle = 25'],
+    confidence:88, priority:'CRITICAL',
+    tips:['ใน CLI พิมพ์ "arm" เพื่อดู arming disable flags','ตรวจ throttle calibration — idle ต้องอยู่ต่ำกว่า min_check','วางโดรนราบก่อน ARM ถ้า small_angle limit เตะ']
+  },
+  turtle_mode_fail:{
+    p:{roll:0,pitch:0,yaw:0}, d:{roll:0,pitch:0,yaw:0}, i:{roll:0,pitch:0,yaw:0},
+    filter:{dterm_lpf1:0,gyro_lpf1:0,anti_gravity:0,rpm_filter:null},
+    cli:['set motor_pwm_protocol = DSHOT300','# กำหนด Flip Over After Crash ใน Modes tab'],
+    confidence:90, priority:'HIGH',
+    tips:['Turtle mode ต้องใช้ DSHOT protocol เท่านั้น — standard PWM ไม่รองรับ','ต้องกำหนด switch ใน Modes → Flip Over After Crash','ตรวจ ESC ว่า support bidirectional motor direction']
+  },
+  video_breakup:{
+    p:{roll:0,pitch:0,yaw:0}, d:{roll:0,pitch:0,yaw:0}, i:{roll:0,pitch:0,yaw:0},
+    filter:{dterm_lpf1:0,gyro_lpf1:0,anti_gravity:0,rpm_filter:null},
+    cli:['set vtx_power = 200','set vtx_channel = 4','# ใส่ capacitor 470µF บน VTX power'],
+    confidence:72, priority:'MED',
+    tips:['ใส่ capacitor 470-1000µF บน power supply ของ VTX ลด voltage sag','Antenna ที่หัก/บิด ลดพิสัยสัญญาณ >50%','ทดสอบ VTX บนพื้น — ถ้าภาพดีแต่บินแล้วแตก = voltage sag']
+  },
+};
+
+// Base PID values (typical 5" freestyle)
+const BASE = {p:{roll:48,pitch:52,yaw:40}, d:{roll:38,pitch:40,yaw:0}, i:{roll:90,pitch:90,yaw:90}, filter:{dterm_lpf1:100,gyro_lpf1:200,anti_gravity:5,feedforward:25}};
+
+let selected = new Set();
+
+function toggle(btn){
+  const id = btn.dataset.id;
+  if(btn.classList.contains('conflict')) return;
+  if(selected.has(id)){
+    selected.delete(id);
+    btn.classList.remove('active');
+  } else {
+    if(selected.size >= 4){ notify('เลือกได้สูงสุด 4 อาการ'); return; }
+    selected.add(id);
+    btn.classList.add('active');
+  }
+  updateConflicts();
+  render();
+}
+
+function updateConflicts(){
+  // Reset all conflict states
+  document.querySelectorAll('.symp-btn').forEach(b=>b.classList.remove('conflict'));
+  // Check each conflict rule
+  for(const [a,b,param] of CONFLICTS){
+    if(selected.has(a)&&!selected.has(b)) markConflict(b);
+    if(selected.has(b)&&!selected.has(a)) markConflict(a);
+  }
+}
+function markConflict(id){
+  const btn=document.querySelector(`.symp-btn[data-id="${id}"]`);
+  if(btn&&!selected.has(id)) btn.classList.add('conflict');
+}
+
+function resetAll(){
+  selected.clear();
+  document.querySelectorAll('.symp-btn').forEach(b=>{b.classList.remove('active','conflict');});
+  render();
+}
+
+function render(){
+  const n = selected.size;
+  document.getElementById('sel-count').textContent = `${n} / 4 selected`;
+  document.getElementById('mb-symp').textContent = `${n} อาการ`;
+  document.getElementById('mb-symp').classList.toggle('on', n>0);
+
+  if(n===0){
+    document.getElementById('pid-grid-wrap').innerHTML = `<div class="empty-state"><div class="empty-ico">🎯</div><div class="empty-t">SELECT SYMPTOMS</div><div class="empty-s">เลือกอาการด้านซ้าย → PID delta จะปรากฏที่นี่</div></div>`;
+    document.getElementById('flt-row').style.display='none';
+    document.getElementById('tip-panel').style.display='none';
+    document.getElementById('conflict-warn').style.display='none';
+    document.getElementById('cli-out').innerHTML = `<span class="cli-comment"># เลือกอาการด้านซ้ายเพื่อ generate CLI...</span><span class="cli-cursor"></span>`;
+    setConfidence(0,null,null);
+    return;
+  }
+
+  // Aggregate PID deltas
+  let dP={roll:0,pitch:0,yaw:0}, dD={roll:0,pitch:0,yaw:0}, dI={roll:0,pitch:0,yaw:0};
+  let dFilter={dterm_lpf1:0,gyro_lpf1:0,anti_gravity:0,feedforward:0};
+  let hasConflict=false, allTips=[], allCLI=[], totalConf=0, maxPrio='LOW';
+  const prioOrder=['CRITICAL','HIGH','MED','LOW'];
+
+  selected.forEach(id=>{
+    const a=ADJ[id]; if(!a) return;
+    dP.roll+=a.p.roll; dP.pitch+=a.p.pitch; dP.yaw+=a.p.yaw;
+    dD.roll+=a.d.roll; dD.pitch+=a.d.pitch; dD.yaw+=a.d.yaw;
+    dI.roll+=a.i.roll; dI.pitch+=a.i.pitch; dI.yaw+=a.i.yaw;
+    dFilter.dterm_lpf1+=a.filter.dterm_lpf1||0;
+    dFilter.gyro_lpf1+=a.filter.gyro_lpf1||0;
+    dFilter.anti_gravity+=a.filter.anti_gravity||0;
+    dFilter.feedforward+=(a.filter.feedforward||0);
+    if(a.filter.rpm_filter===true) dFilter.rpm_filter=true;
+    if(a.filter.iterm_relax) dFilter.iterm_relax=a.filter.iterm_relax;
+    totalConf+=a.confidence;
+    allTips.push(...a.tips);
+    allCLI.push({id,cli:a.cli});
+    if(prioOrder.indexOf(a.priority)<prioOrder.indexOf(maxPrio)) maxPrio=a.priority;
+  });
+
+  const avgConf = Math.min(95, Math.round(totalConf/n));
+  // Detect conflict: any delta > 5 in one direction then >5 in other = conflict
+  const conflictDetected = (Math.abs(dD.roll)>2 && conflictCheck('d_main'));
+
+  // Confidence drops with conflict
+  const dispConf = conflictDetected ? Math.max(30, avgConf-20) : avgConf;
+  setConfidence(dispConf, maxPrio, conflictDetected);
+
+  // Conflict warning
+  document.getElementById('conflict-warn').style.display = conflictDetected?'block':'none';
+
+  // Final values
+  const fP={roll:BASE.p.roll+dP.roll, pitch:BASE.p.pitch+dP.pitch, yaw:BASE.p.yaw+dP.yaw};
+  const fD={roll:BASE.d.roll+dD.roll, pitch:BASE.d.pitch+dD.pitch, yaw:BASE.d.yaw+dD.yaw};
+  const fI={roll:BASE.i.roll+dI.roll, pitch:BASE.i.pitch+dI.pitch, yaw:BASE.i.yaw+dI.yaw};
+  const ff=Math.max(5,BASE.filter.feedforward+(dFilter.feedforward||0));
+  const dlpf=Math.max(60,BASE.filter.dterm_lpf1+dFilter.dterm_lpf1);
+  const glpf=Math.max(80,BASE.filter.gyro_lpf1+dFilter.gyro_lpf1);
+  const ag=Math.max(2,BASE.filter.anti_gravity+dFilter.anti_gravity);
+
+  // Render PID grid
+  document.getElementById('pid-grid-wrap').innerHTML = buildGrid(dP,dD,dI,fP,fD,fI);
+
+  // Filter tags
+  renderFilterTags(dFilter, dlpf, glpf, ag, ff);
+
+  // Tips
+  const uniqTips=[...new Set(allTips)].slice(0,5);
+  document.getElementById('tip-list').innerHTML=uniqTips.map(t=>`<div class="tip-item">${t}</div>`).join('');
+  document.getElementById('tip-panel').style.display='block';
+
+  // CLI
+  renderCLI(allCLI, fP, fD, fI, dlpf, glpf, ag, ff, dFilter);
+}
+
+function conflictCheck(type){
+  const arr=[...selected];
+  if(type==='d_main'){
+    let up=0,dn=0;
+    arr.forEach(id=>{const a=ADJ[id];if(!a)return;if(a.d.roll>0)up++;if(a.d.roll<0)dn++;});
+    return up>0&&dn>0;
+  }
+  return false;
+}
+
+function buildGrid(dP,dD,dI,fP,fD,fI){
+  const rows=[
+    ['ROLL', fP.roll,dP.roll, fD.roll,dD.roll, fI.roll,dI.roll],
+    ['PITCH',fP.pitch,dP.pitch, fD.pitch,dD.pitch, fI.pitch,dI.pitch],
+    ['YAW',  fP.yaw,dP.yaw, fD.yaw,dD.yaw, fI.yaw,dI.yaw],
+  ];
+  let html=`<div class="delta-grid">
+    <div class="dg-col-hd">AXIS</div>
+    <div class="dg-col-hd">— P TERM —</div>
+    <div class="dg-col-hd">— D TERM —</div>
+  `;
+  // Re-layout as 4 cols: axis, P, D, I
+  html=`<div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:0">
+    <div class="dg-cell" style="font-family:var(--mono);font-size:.5rem;color:var(--muted);letter-spacing:.1em;text-align:center;border-bottom:1px solid var(--bord2);padding:6px 10px">AXIS</div>
+    ${['P','D','I'].map(x=>`<div class="dg-cell" style="font-family:var(--mono);font-size:.5rem;color:var(--muted);letter-spacing:.1em;text-align:center;border-bottom:1px solid var(--bord2);border-left:1px solid var(--bord2);padding:6px 10px">${x}‑TERM</div>`).join('')}
+  `;
+  rows.forEach(([ax,pv,pd,dv,dd,iv,id_])=>{
+    html+=`<div class="dg-cell axis-label" style="border-right:1px solid var(--bord2);border-bottom:1px solid var(--bord2)">${ax}</div>`;
+    [[pv,pd],[dv,dd],[iv,id_]].forEach(([val,delta])=>{
+      const cls=delta>0?'up':delta<0?'dn':'nc';
+      const arr=delta>0?'▲':delta<0?'▼':'—';
+      const sign=delta>0?'+':'';
+      html+=`<div class="dg-cell" style="border-left:1px solid var(--bord2);border-bottom:1px solid var(--bord2)">
+        <span class="dg-val ${cls}">${val}</span>
+        <span class="dg-delta ${cls}">${arr} ${sign}${delta}</span>
+      </div>`;
+    });
+  });
+  html+='</div>';
+  return html;
+}
+
+function renderFilterTags(df, dlpf, glpf, ag, ff){
+  const tags=[];
+  if(df.dterm_lpf1!==0) tags.push(`<span class="flt-tag ${df.dterm_lpf1<0?'dn':'up'}">${df.dterm_lpf1<0?'▼':'▲'} dterm_lpf1 → ${dlpf}Hz</span>`);
+  if(df.gyro_lpf1!==0)  tags.push(`<span class="flt-tag ${df.gyro_lpf1<0?'dn':'up'}">${df.gyro_lpf1<0?'▼':'▲'} gyro_lpf1 → ${glpf}Hz</span>`);
+  if(df.anti_gravity!==0) tags.push(`<span class="flt-tag up">▲ anti_gravity → ${ag}</span>`);
+  if(df.feedforward!==0) tags.push(`<span class="flt-tag ${df.feedforward<0?'dn':'up'}">${df.feedforward<0?'▼':'▲'} feedforward → ${ff}</span>`);
+  if(df.rpm_filter) tags.push(`<span class="flt-tag info">⚡ rpm_filter: ON (ต้องการ BiDir DSHOT)</span>`);
+  if(df.iterm_relax) tags.push(`<span class="flt-tag info">◈ iterm_relax = ${df.iterm_relax}</span>`);
+  if(tags.length===0) tags.push(`<span class="flt-tag nc">— Filter settings: ไม่ต้องเปลี่ยน —</span>`);
+  document.getElementById('flt-row').innerHTML=tags.join('');
+  document.getElementById('flt-row').style.display='flex';
+}
+
+function renderCLI(allCLI, fP,fD,fI,dlpf,glpf,ag,ff,df){
+  // Collect unique CLI commands, format with actual values
+  const seen=new Set(); const lines=[];
+  const vals={
+    pr:fP.roll, pp:fP.pitch, py:fP.yaw,
+    dr:Math.max(0,fD.roll), dp:Math.max(0,fD.pitch),
+    ir:fI.roll, ip:fI.pitch, iy:fI.yaw,
+    dlpf, glpf, ag, ff
+  };
+  lines.push(`<span class="cli-comment"># ════ Quick Tune — ${[...selected].length} symptom${selected.size>1?'s':''} ════</span>`);
+  lines.push(`<span class="cli-comment"># ${new Date().toLocaleDateString('th-TH')} · OBIXConfig Doctor v5.1</span>`);
+  lines.push(`<span class="cli-comment"># Base: 5" freestyle · ปรับตามค่า PID จริงของคุณ</span>`);
+  lines.push('');
+
+  allCLI.forEach(({id,cli})=>{
+    lines.push(`<span class="cli-comment"># — ${LABEL_MAP[id]||id} —</span>`);
+    cli.forEach(cmd=>{
+      // Replace placeholders
+      let out=cmd.replace(/\{(\w+)\}/g,(_,k)=>vals[k]!==undefined?`<span class="cli-val">${vals[k]}</span>`:k);
+      if(seen.has(cmd)) return; seen.add(cmd);
+      if(cmd.startsWith('#')) lines.push(`<span class="cli-comment">${cmd}</span>`);
+      else lines.push(`<span class="cli-key">set </span><span class="cli-cmd">${out}</span>`);
+    });
+    lines.push('');
+  });
+  if(df.rpm_filter){
+    lines.push(`<span class="cli-comment"># RPM Filter</span>`);
+    lines.push(`<span class="cli-key">set </span><span class="cli-cmd">rpm_notch_harmonics = <span class="cli-val">3</span></span>`);
+    lines.push(`<span class="cli-key">set </span><span class="cli-cmd">dshot_bidir = <span class="cli-val">ON</span></span>`);
+    lines.push('');
+  }
+  lines.push(`<span class="cli-ok">save</span>`);
+  lines.push(`<span class="cli-comment"># reboot → ทดสอบบิน → บันทึกผล</span>`);
+  document.getElementById('cli-out').innerHTML=lines.join('\n');
+}
+
+const LABEL_MAP={
+  oscillation_after_flip:'สั่นหลัง flip',propwash:'Propwash',bounce_back:'Bounce-back',
+  yaw_spin:'Yaw spin',slow_response:'ตอบสนองช้า',toilet_bowl:'Toilet bowl',
+  wind_rejection:'กันลมไม่อยู่',motor_hot:'มอเตอร์ร้อน',jello_footage:'ภาพ Jello',
+  esc_desync:'ESC Desync',not_arming:'ไม่ ARM',turtle_mode_fail:'Turtle mode',video_breakup:'ภาพ FPV แตก'
+};
+
+function setConfidence(pct, prio, conflict){
+  const ring=document.getElementById('conf-ring');
+  const num=document.getElementById('conf-num');
+  const mb=document.getElementById('mb-conf');
+  const mbp=document.getElementById('mb-prio');
+  if(!pct){ring.style.background='';num.textContent='—';mb.textContent='CONFIDENCE: —';mb.classList.remove('on');mbp.textContent='PRIORITY: —';mbp.classList.remove('on');return;}
+  const deg=Math.round(pct*3.6);
+  const col=pct>=75?'#f5a623':pct>=55?'#f5a623':'#f87171';
+  ring.style.background=`conic-gradient(${col} ${deg}deg, var(--bg3) ${deg}deg)`;
+  num.textContent=pct+'%';
+  mb.textContent=`CONFIDENCE: ${pct}%`; mb.classList.add('on');
+  if(prio){
+    const pc={CRITICAL:'var(--red)',HIGH:'var(--amber)',MED:'var(--blue)',LOW:'var(--muted)'};
+    mbp.textContent=`PRIORITY: ${prio}`; mbp.classList.add('on');
+    mbp.style.color=pc[prio]||'';mbp.style.borderColor=pc[prio]||'';
+  }
+}
+
+function copyCLI(){
+  const el=document.getElementById('cli-out');
+  const plain=el.innerText.replace(/\n\n+/g,'\n');
+  navigator.clipboard.writeText(plain).then(()=>{
+    const btn=document.getElementById('copy-btn');
+    btn.textContent='✅ COPIED!'; btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='⎘ COPY ALL';btn.classList.remove('copied');},2200);
+  });
+}
+
+function notify(msg){
+  const el=document.createElement('div');
+  el.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a2820;border:1px solid var(--amber);color:var(--amber);font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;padding:9px 20px;border-radius:6px;z-index:9999;animation:fadeIn .2s ease';
+  el.textContent=msg; document.body.appendChild(el);
+  setTimeout(()=>el.remove(),2200);
+}
+</script>
+</body>
+</html>
