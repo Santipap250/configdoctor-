@@ -565,6 +565,150 @@ section { padding: 90px 24px; }
   .mode-tab { flex: 1; padding: 12px 8px; justify-content: center; }
 }
 
+/* ═══════════════════════════════════════════════════
+   MILITARY DEEP MODE — v5.1
+   ═══════════════════════════════════════════════════ */
+
+/* Classification banner */
+.mil-classify {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 8px 20px; background: rgba(241,182,90,.07);
+  border: 1px solid rgba(241,182,90,.2); border-radius: 8px;
+  margin-bottom: 20px; font-family: 'Orbitron', sans-serif;
+  font-size: 8px; letter-spacing: .22em; color: rgba(241,182,90,.7);
+}
+.mil-classify-dot { width:6px; height:6px; border-radius:50%; background:#f1b65a; animation:pulse 2s infinite; }
+
+/* Mission matrix */
+.mis-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
+.mis-card {
+  background: rgba(8,11,18,.97); border:1.5px solid rgba(255,255,255,.06);
+  border-radius:14px; overflow:hidden; transition:all .22s; position:relative;
+}
+.mis-card:hover { transform:translateY(-3px); border-color:rgba(241,182,90,.22); box-shadow:0 12px 40px rgba(0,0,0,.6); }
+.mis-card-head {
+  padding:14px 16px 12px; display:flex; align-items:flex-start; gap:12px;
+  border-bottom:1px solid rgba(255,255,255,.04);
+}
+.mis-card-emblem { font-size:28px; flex-shrink:0; line-height:1; margin-top:2px; }
+.mis-card-type { font-family:'Orbitron',sans-serif; font-size:6.5px; letter-spacing:.2em; margin-bottom:5px; }
+.mis-card-title { font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700; letter-spacing:.06em; color:rgba(255,255,255,.88); line-height:1.3; }
+.mis-card-body { padding:12px 16px; }
+.mis-card-desc { font-size:11.5px; color:rgba(200,215,255,.55); line-height:1.7; margin-bottom:12px; }
+.mis-spec-table { width:100%; border-collapse:collapse; font-family:'JetBrains Mono',monospace; font-size:9.5px; }
+.mis-spec-table tr { border-top:1px solid rgba(255,255,255,.04); }
+.mis-spec-table tr:first-child { border-top:none; }
+.mis-spec-table td { padding:5px 0; }
+.mis-spec-key { color:rgba(255,255,255,.32); width:50%; }
+.mis-spec-val { color:rgba(255,255,255,.75); text-align:right; }
+.mis-spec-val.danger { color:#f87171; }
+.mis-spec-val.warn   { color:#f1b65a; }
+.mis-spec-val.ok     { color:#10c47a; }
+.mis-card-footer { padding:10px 16px; border-top:1px solid rgba(255,255,255,.04); display:flex; gap:6px; flex-wrap:wrap; }
+.mis-tool-chip { font-family:'Orbitron',sans-serif; font-size:6.5px; letter-spacing:.1em; padding:3px 9px; border-radius:20px; cursor:pointer; text-decoration:none; transition:all .15s; }
+
+/* Mission type colors */
+.mis-recon   { border-left:3px solid #58a6ff; } .mis-recon   .mis-card-type { color:#58a6ff; }
+.mis-isr     { border-left:3px solid #a78bfa; } .mis-isr     .mis-card-type { color:#a78bfa; }
+.mis-strike  { border-left:3px solid #f87171; } .mis-strike  .mis-card-type { color:#f87171; }
+.mis-ew      { border-left:3px solid #f1b65a; } .mis-ew      .mis-card-type { color:#f1b65a; }
+.mis-cuas    { border-left:3px solid #2dd4bf; } .mis-cuas    .mis-card-type { color:#2dd4bf; }
+.mis-log     { border-left:3px solid #10c47a; } .mis-log     .mis-card-type { color:#10c47a; }
+.mis-cbrn    { border-left:3px solid #ff8800; } .mis-cbrn    .mis-card-type { color:#ff8800; }
+.mis-train   { border-left:3px solid #f1b65a; } .mis-train   .mis-card-type { color:#f1b65a; }
+.mis-recon .mis-tool-chip   { background:rgba(88,166,255,.08); color:#58a6ff; border:1px solid rgba(88,166,255,.2); }
+.mis-isr .mis-tool-chip     { background:rgba(167,139,250,.08); color:#a78bfa; border:1px solid rgba(167,139,250,.2); }
+.mis-strike .mis-tool-chip  { background:rgba(248,113,113,.08); color:#f87171; border:1px solid rgba(248,113,113,.2); }
+.mis-ew .mis-tool-chip      { background:rgba(241,182,90,.08); color:#f1b65a; border:1px solid rgba(241,182,90,.2); }
+.mis-cuas .mis-tool-chip    { background:rgba(45,212,191,.08); color:#2dd4bf; border:1px solid rgba(45,212,191,.2); }
+.mis-log .mis-tool-chip     { background:rgba(16,196,122,.08); color:#10c47a; border:1px solid rgba(16,196,122,.2); }
+.mis-cbrn .mis-tool-chip    { background:rgba(255,136,0,.08); color:#ff8800; border:1px solid rgba(255,136,0,.2); }
+.mis-train .mis-tool-chip   { background:rgba(241,182,90,.08); color:#f1b65a; border:1px solid rgba(241,182,90,.2); }
+
+/* Operator training levels */
+.ol-track { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px; }
+.ol-card {
+  background:rgba(8,11,18,.97); border:1.5px solid rgba(255,255,255,.06);
+  border-radius:12px; padding:18px 20px; position:relative; overflow:hidden; transition:all .2s;
+}
+.ol-card:hover { border-color:rgba(241,182,90,.2); }
+.ol-card::before { content:''; position:absolute; top:0;left:0;right:0; height:3px; }
+.ol-1::before { background:linear-gradient(90deg,#10c47a,#2dd4bf); }
+.ol-2::before { background:linear-gradient(90deg,#58a6ff,#a78bfa); }
+.ol-3::before { background:linear-gradient(90deg,#f1b65a,#f87171); }
+.ol-4::before { background:linear-gradient(90deg,#f87171,#a78bfa); }
+.ol-level { font-family:'Orbitron',sans-serif; font-size:7px; letter-spacing:.18em; margin-bottom:8px; }
+.ol-1 .ol-level { color:#10c47a; } .ol-2 .ol-level { color:#58a6ff; }
+.ol-3 .ol-level { color:#f1b65a; } .ol-4 .ol-level { color:#f87171; }
+.ol-title { font-family:'Orbitron',sans-serif; font-size:12px; font-weight:700; color:rgba(255,255,255,.88); margin-bottom:6px; letter-spacing:.04em; }
+.ol-hours { font-family:'JetBrains Mono',monospace; font-size:9px; color:rgba(255,255,255,.38); margin-bottom:10px; }
+.ol-skills { display:flex; flex-direction:column; gap:5px; }
+.ol-skill { font-size:11px; color:rgba(200,215,255,.62); display:flex; align-items:flex-start; gap:7px; line-height:1.4; }
+.ol-skill::before { content:'▸'; flex-shrink:0; margin-top:1px; }
+.ol-1 .ol-skill::before { color:#10c47a; } .ol-2 .ol-skill::before { color:#58a6ff; }
+.ol-3 .ol-skill::before { color:#f1b65a; } .ol-4 .ol-skill::before { color:#f87171; }
+
+/* Pre-mission checklist */
+.chk-wrap { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:10px; }
+.chk-phase { background:rgba(8,11,18,.97); border:1.5px solid rgba(255,255,255,.05); border-radius:12px; overflow:hidden; }
+.chk-phase-head { padding:10px 14px; display:flex; align-items:center; gap:9px; border-bottom:1px solid rgba(255,255,255,.04); }
+.chk-phase-icon { font-size:16px; }
+.chk-phase-title { font-family:'Orbitron',sans-serif; font-size:8.5px; font-weight:700; letter-spacing:.1em; }
+.chk-phase-items { padding:10px 14px; display:flex; flex-direction:column; gap:6px; }
+.chk-item { display:flex; align-items:flex-start; gap:9px; font-size:11px; color:rgba(200,215,255,.6); line-height:1.45; }
+.chk-box { width:14px; height:14px; border:1.5px solid rgba(255,255,255,.2); border-radius:3px; flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center; font-size:8px; }
+.chk-tool { font-family:'Orbitron',sans-serif; font-size:6px; letter-spacing:.1em; padding:1px 7px; border-radius:10px; margin-left:4px; vertical-align:middle; }
+.chk-green { background:rgba(16,196,122,.08); color:#10c47a; border:1px solid rgba(16,196,122,.2); }
+.chk-amber { background:rgba(241,182,90,.08); color:#f1b65a; border:1px solid rgba(241,182,90,.2); }
+.chk-blue  { background:rgba(88,166,255,.08);  color:#58a6ff;  border:1px solid rgba(88,166,255,.2); }
+
+/* Threat comparison table */
+.threat-table-wrap { overflow-x:auto; border-radius:10px; border:1.5px solid rgba(255,255,255,.06); }
+.threat-table { width:100%; border-collapse:collapse; font-family:'JetBrains Mono',monospace; font-size:10.5px; }
+.threat-table th { padding:10px 12px; text-align:left; background:rgba(241,182,90,.06); font-family:'Orbitron',sans-serif; font-size:7px; letter-spacing:.14em; color:#f1b65a; border-bottom:1px solid rgba(241,182,90,.15); white-space:nowrap; }
+.threat-table td { padding:9px 12px; border-bottom:1px solid rgba(255,255,255,.04); color:rgba(200,215,255,.72); vertical-align:middle; white-space:nowrap; }
+.threat-table tr:last-child td { border-bottom:none; }
+.threat-table tr:hover td { background:rgba(241,182,90,.03); }
+.threat-cat { font-family:'Orbitron',sans-serif; font-size:6.5px; letter-spacing:.1em; padding:2px 8px; border-radius:10px; }
+.tc-micro  { background:rgba(16,196,122,.1); color:#10c47a; border:1px solid rgba(16,196,122,.2); }
+.tc-small  { background:rgba(88,166,255,.1);  color:#58a6ff;  border:1px solid rgba(88,166,255,.2); }
+.tc-med    { background:rgba(241,182,90,.1);  color:#f1b65a;  border:1px solid rgba(241,182,90,.2); }
+.tc-large  { background:rgba(248,113,113,.1); color:#f87171;  border:1px solid rgba(248,113,113,.2); }
+.thr-r { color:#f87171; } .thr-a { color:#f1b65a; } .thr-g { color:#10c47a; }
+
+/* Sortie planning calculator */
+.sortie-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+.sortie-card {
+  background:rgba(8,11,18,.97); border:1.5px solid rgba(241,182,90,.1);
+  border-radius:12px; padding:18px 20px;
+}
+.sortie-title { font-family:'Orbitron',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; color:#f1b65a; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+.sortie-row { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-top:1px solid rgba(255,255,255,.04); font-size:11px; }
+.sortie-row:first-of-type { border-top:none; }
+.sortie-key { color:rgba(255,255,255,.4); font-family:'JetBrains Mono',monospace; font-size:9.5px; }
+.sortie-val { font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700; }
+
+/* CUAS section */
+.cuas-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:10px; }
+.cuas-card {
+  background:rgba(8,11,18,.97); border:1.5px solid rgba(45,212,191,.1);
+  border-radius:12px; padding:16px 18px; transition:all .2s;
+}
+.cuas-card:hover { border-color:rgba(45,212,191,.25); }
+.cuas-card-icon { font-size:26px; margin-bottom:10px; }
+.cuas-card-title { font-family:'Orbitron',sans-serif; font-size:9px; font-weight:700; color:#2dd4bf; letter-spacing:.08em; margin-bottom:7px; }
+.cuas-card-desc { font-size:11.5px; color:rgba(200,215,255,.55); line-height:1.68; }
+.cuas-card-params { margin-top:10px; display:flex; flex-wrap:wrap; gap:5px; }
+.cuas-param { font-family:'JetBrains Mono',monospace; font-size:8.5px; padding:2px 9px; border-radius:4px; background:rgba(45,212,191,.07); color:#2dd4bf; border:1px solid rgba(45,212,191,.15); }
+
+@media(max-width:700px){
+  .mis-grid { grid-template-columns:1fr; }
+  .ol-track { grid-template-columns:1fr 1fr; }
+  .chk-wrap { grid-template-columns:1fr; }
+  .cuas-grid { grid-template-columns:1fr; }
+  .threat-table { font-size:9px; }
+}
+
 .section-divider {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--border) 15%, var(--border) 85%, transparent);
@@ -1125,208 +1269,540 @@ footer {
     <!-- ══ MILITARY PANE ══ -->
     <div class="mode-pane" id="pane-mil">
 
+      <div class="mil-classify">
+        <div class="mil-classify-dot"></div>
+        EDUCATIONAL USE · UNCLASSIFIED · สำหรับการเรียนรู้และฝึกอบรม UAS
+        <div class="mil-classify-dot"></div>
+      </div>
+
       <div class="mode-hero mode-hero-mil" data-reveal>
         <div class="mode-hero-glow"></div>
         <div class="mode-hero-top">
           <div class="mode-hero-emblem">🎖️</div>
           <div style="flex:1;">
-            <div class="mode-hero-eyebrow" style="color:#f1b65a;">MILITARY TRAINING MODE · สำหรับการฝึกและเรียนรู้ทางการทหาร</div>
-            <div class="mode-hero-title">ระบบวิเคราะห์<br>UAS/Drone ภารกิจ</div>
+            <div class="mode-hero-eyebrow" style="color:#f1b65a;">UAS MILITARY OPERATIONS MODULE · v5.1</div>
+            <div class="mode-hero-title">ระบบวิเคราะห์ UAS<br>ระดับปฏิบัติการ</div>
             <p class="mode-hero-desc">
-              เครื่องมือวิเคราะห์และเรียนรู้สำหรับผู้ปฏิบัติการ UAS ทางทหาร — ครอบคลุมการตั้งค่า PID สำหรับภารกิจต่างๆ,
-              การประเมิน performance ของอากาศยานไร้คนขับ, การฝึก simulator และ
-              <strong style="color:#f1b65a;">การเรียนรู้ระบบควบคุม</strong> ที่ถ่ายทอดจาก FPV สู่ military drone operation
+              ครอบคลุมทุกมิติของการปฏิบัติการโดรนทางทหาร — ตั้งแต่ <strong style="color:#f1b65a;">Mission Planning</strong>,
+              การวิเคราะห์สมรรถนะ UAS, การฝึก Operator ตาม curriculum จริง,
+              Pre-Mission Checklist, Sortie Planning, C-UAS Threat Recognition
+              ไปจนถึง EW และ CBRN operations
             </p>
             <div class="mode-cta-row">
-              <a href="/fpv-trainer" class="mode-btn-primary mode-btn-mil">🎮 เริ่ม UAS Simulator</a>
-              <a href="/app" class="mode-btn-ghost mode-btn-ghost-mil">📊 วิเคราะห์ Drone Spec</a>
-              <a href="/flight-quiz" class="mode-btn-ghost mode-btn-ghost-mil">🎯 Flight Assessment</a>
+              <a href="/app" class="mode-btn-primary mode-btn-mil">📊 UAS Performance Analyzer</a>
+              <a href="/fpv-trainer" class="mode-btn-ghost mode-btn-ghost-mil">🎮 Operator Simulator</a>
+              <a href="/blackbox" class="mode-btn-ghost mode-btn-ghost-mil">📈 Flight Data Analysis</a>
             </div>
           </div>
         </div>
         <div class="mode-stats">
-          <div class="mode-stat">
-            <div class="mode-stat-v">6</div>
-            <div class="mode-stat-l">FLIGHT MODES</div>
-          </div>
-          <div class="mode-stat">
-            <div class="mode-stat-v">3D</div>
-            <div class="mode-stat-l">SIMULATOR</div>
-          </div>
-          <div class="mode-stat">
-            <div class="mode-stat-v">UAS</div>
-            <div class="mode-stat-l">COMPATIBLE</div>
-          </div>
-          <div class="mode-stat">
-            <div class="mode-stat-v">ฟรี</div>
-            <div class="mode-stat-l">ใช้งาน</div>
-          </div>
+          <div class="mode-stat"><div class="mode-stat-v">8</div><div class="mode-stat-l">MISSION TYPES</div></div>
+          <div class="mode-stat"><div class="mode-stat-v">4</div><div class="mode-stat-l">OPERATOR LEVELS</div></div>
+          <div class="mode-stat"><div class="mode-stat-v">C-UAS</div><div class="mode-stat-l">THREAT INTEL</div></div>
+          <div class="mode-stat"><div class="mode-stat-v">LIVE</div><div class="mode-stat-l">PHYSICS CALC</div></div>
         </div>
       </div>
 
-      <!-- Military use cases -->
-      <div class="mode-section-label mode-section-label-mil" data-reveal>
-        🎖️ &nbsp;ภารกิจและสถานการณ์ฝึก
+      <!-- 01: MISSION MATRIX -->
+      <div class="mode-section-label mode-section-label-mil" data-reveal style="margin-top:32px;">
+        01 &nbsp;·&nbsp; MISSION MATRIX — ประเภทภารกิจและสเปคที่ต้องการ
       </div>
-      <div class="mil-scenario-grid" data-reveal>
+      <div class="mis-grid" data-reveal>
 
-        <div class="mil-scenario">
-          <span class="mil-scenario-badge mil-s-recon">ISR · RECONNAISSANCE</span>
-          <div class="mil-scenario-title">การลาดตระเวนและเฝ้าระวัง</div>
-          <div class="mil-scenario-desc">วิเคราะห์สเปค drone สำหรับภารกิจ ISR — ประเมิน flight time, ระยะสัญญาณ VTX, payload capacity สำหรับกล้อง EO/IR และ gimbal</div>
-          <div class="mil-scenario-specs">
-            <div class="mil-spec-row"><span class="mil-spec-key">Recommended size</span><span class="mil-spec-val">7" – 10" Long Range</span></div>
-            <div class="mil-spec-row"><span class="mil-spec-key">Battery</span><span class="mil-spec-val">6S 3000–5000mAh</span></div>
-            <div class="mil-spec-row"><span class="mil-spec-key">Flight time target</span><span class="mil-spec-val">20–40 min</span></div>
-            <div class="mil-spec-row"><span class="mil-spec-key">Key tool</span><span class="mil-spec-val">Motor×Prop + VTX Range</span></div>
+        <div class="mis-card mis-recon">
+          <div class="mis-card-head">
+            <div class="mis-card-emblem">🔭</div>
+            <div>
+              <div class="mis-card-type">RECONNAISSANCE · ลาดตระเวน</div>
+              <div class="mis-card-title">Visual/Area Reconnaissance</div>
+            </div>
+          </div>
+          <div class="mis-card-body">
+            <div class="mis-card-desc">บินถ่ายภาพพื้นที่กว้าง ตรวจจับการเคลื่อนไหว mapping terrain — ต้องการ endurance สูง, payload กล้อง EO, flight time ยาว</div>
+            <table class="mis-spec-table">
+              <tr><td class="mis-spec-key">Platform</td><td class="mis-spec-val">7"–10" LR / Fixed Wing</td></tr>
+              <tr><td class="mis-spec-key">Flight time</td><td class="mis-spec-val ok">&gt; 30 นาที</td></tr>
+              <tr><td class="mis-spec-key">Altitude AGL</td><td class="mis-spec-val">50–300 m</td></tr>
+              <tr><td class="mis-spec-key">TWR (loaded)</td><td class="mis-spec-val warn">&gt; 1.8 : 1</td></tr>
+              <tr><td class="mis-spec-key">Link range</td><td class="mis-spec-val">ELRS / LoRa &gt; 10km</td></tr>
+              <tr><td class="mis-spec-key">Battery</td><td class="mis-spec-val">6S 4000–6000mAh</td></tr>
+            </table>
+          </div>
+          <div class="mis-card-footer">
+            <a href="/app" class="mis-tool-chip">📊 Analyze Spec</a>
+            <a href="/motor-prop" class="mis-tool-chip">🔧 Motor×Prop</a>
+            <a href="/vtx-range" class="mis-tool-chip">📡 VTX Range</a>
           </div>
         </div>
 
-        <div class="mil-scenario">
-          <span class="mil-scenario-badge mil-s-train">TRAINING · ฝึกบิน</span>
-          <div class="mil-scenario-title">การฝึก UAS Operator</div>
-          <div class="mil-scenario-desc">FPV Simulator NEO สำหรับฝึก hand-eye coordination, waypoint navigation, hovering precision และ emergency maneuver โดยไม่เสี่ยงกับอุปกรณ์จริง</div>
-          <div class="mil-scenario-specs">
-            <div class="mil-spec-row"><span class="mil-spec-key">Training modes</span><span class="mil-spec-val">Tutorial → Race Circuit</span></div>
-            <div class="mil-spec-row"><span class="mil-spec-key">Gamepad support</span><span class="mil-spec-val">✅ Full gamepad API</span></div>
-            <div class="mil-spec-row"><span class="mil-spec-key">Platform</span><span class="mil-spec-val">Browser · No install</span></div>
-            <div class="mil-spec-row"><span class="mil-spec-key">Key tool</span><span class="mil-spec-val">FPV Simulator NEO</span></div>
+        <div class="mis-card mis-isr">
+          <div class="mis-card-head">
+            <div class="mis-card-emblem">👁️</div>
+            <div>
+              <div class="mis-card-type">ISR · Intelligence Surveillance</div>
+              <div class="mis-card-title">Persistent ISR / Loiter</div>
+            </div>
+          </div>
+          <div class="mis-card-body">
+            <div class="mis-card-desc">Loiter เหนือเป้าหมายนาน ส่ง live video กลับ TOC ตรวจจับและติดตาม — ต้องการ link เสถียร, noise ต่ำ, hover efficient</div>
+            <table class="mis-spec-table">
+              <tr><td class="mis-spec-key">Loiter time</td><td class="mis-spec-val ok">&gt; 25 นาที</td></tr>
+              <tr><td class="mis-spec-key">Hover throttle</td><td class="mis-spec-val ok">&lt; 40% (efficient)</td></tr>
+              <tr><td class="mis-spec-key">Noise signature</td><td class="mis-spec-val warn">ต่ำสุด (KV ต่ำ)</td></tr>
+              <tr><td class="mis-spec-key">Tip speed</td><td class="mis-spec-val ok">&lt; 200 m/s (quiet)</td></tr>
+              <tr><td class="mis-spec-key">Video link</td><td class="mis-spec-val">Digital encrypted</td></tr>
+              <tr><td class="mis-spec-key">Battery</td><td class="mis-spec-val">6S 5000mAh LiIon</td></tr>
+            </table>
+          </div>
+          <div class="mis-card-footer">
+            <a href="/app" class="mis-tool-chip">📊 Physics Calc</a>
+            <a href="/battery-health" class="mis-tool-chip">🔋 Battery</a>
+            <a href="/rpm-filter" class="mis-tool-chip">🔇 Noise</a>
           </div>
         </div>
 
-        <div class="mil-scenario">
-          <span class="mil-scenario-badge mil-s-intel">TECHNICAL INTEL</span>
-          <div class="mil-scenario-title">ประเมินสมรรถนะ UAS ฝ่ายตรงข้าม</div>
-          <div class="mil-scenario-desc">วิเคราะห์ prop size, KV, cell count จาก spec sheet → ประมาณ TWR, tip speed, C-rating, ระยะบิน และความเร็วสูงสุดของ drone ที่พบ</div>
-          <div class="mil-scenario-specs">
-            <div class="mil-spec-row"><span class="mil-spec-key">Input</span><span class="mil-spec-val">Motor KV + Prop + Battery</span></div>
-            <div class="mil-spec-row"><span class="mil-spec-key">Output</span><span class="mil-spec-val">TWR · Speed · Range · Current</span></div>
-            <div class="mil-spec-row"><span class="mil-spec-key">Physics accuracy</span><span class="mil-spec-val">±10% from real bench</span></div>
-            <div class="mil-spec-row"><span class="mil-spec-key">Key tool</span><span class="mil-spec-val">Main Analyzer + Physics</span></div>
+        <div class="mis-card mis-strike">
+          <div class="mis-card-head">
+            <div class="mis-card-emblem">🎯</div>
+            <div>
+              <div class="mis-card-type">STRIKE / PRECISION</div>
+              <div class="mis-card-title">Precision Payload Delivery</div>
+            </div>
+          </div>
+          <div class="mis-card-body">
+            <div class="mis-card-desc">บินตรงเป้าหมายด้วยความแม่นยำสูง — TWR สูง ตอบสนองเร็ว ทนทาน สำหรับ one-way mission หรือ precision drop</div>
+            <table class="mis-spec-table">
+              <tr><td class="mis-spec-key">TWR (unloaded)</td><td class="mis-spec-val ok">&gt; 4.0 : 1</td></tr>
+              <tr><td class="mis-spec-key">TWR (loaded)</td><td class="mis-spec-val warn">&gt; 2.0 : 1 min</td></tr>
+              <tr><td class="mis-spec-key">Max speed</td><td class="mis-spec-val">&gt; 120 km/h</td></tr>
+              <tr><td class="mis-spec-key">Payload ratio</td><td class="mis-spec-val warn">&lt; 30% total weight</td></tr>
+              <tr><td class="mis-spec-key">Control link</td><td class="mis-spec-val">ELRS 2.4GHz &lt;10ms</td></tr>
+              <tr><td class="mis-spec-key">ESC safety</td><td class="mis-spec-val danger">×2.0 peak current</td></tr>
+            </table>
+          </div>
+          <div class="mis-card-footer">
+            <a href="/app" class="mis-tool-chip">⚖️ TWR Loaded</a>
+            <a href="/esc-checker" class="mis-tool-chip">⚡ ESC Check</a>
+            <a href="/motor-thermal" class="mis-tool-chip">🌡️ Thermal</a>
           </div>
         </div>
 
-        <div class="mil-scenario">
-          <span class="mil-scenario-badge mil-s-strike">PAYLOAD · DELIVERY</span>
-          <div class="mil-scenario-title">ประเมิน Payload Capacity</div>
-          <div class="mil-scenario-desc">วิเคราะห์ TWR ก่อนและหลังเพิ่ม payload — ตรวจสอบว่า drone รับน้ำหนักได้เท่าไหร่โดยยังบินได้ปลอดภัย (TWR >2.0 สำหรับภารกิจ)</div>
-          <div class="mil-scenario-specs">
-            <div class="mil-spec-row"><span class="mil-spec-key">Min safe TWR</span><span class="mil-spec-val">&gt; 2.0 (loaded)</span></div>
-            <div class="mil-spec-row"><span class="mil-spec-key">Hover throttle</span><span class="mil-spec-val">&lt; 55% (safety margin)</span></div>
-            <div class="mil-spec-row"><span class="mil-spec-key">ESC safety</span><span class="mil-spec-val">×1.5 peak current</span></div>
-            <div class="mil-spec-row"><span class="mil-spec-key">Key tool</span><span class="mil-spec-val">Main Analyzer + What-If</span></div>
+        <div class="mis-card mis-ew">
+          <div class="mis-card-head">
+            <div class="mis-card-emblem">📡</div>
+            <div>
+              <div class="mis-card-type">ELECTRONIC WARFARE</div>
+              <div class="mis-card-title">RF Jamming / Signal Intel</div>
+            </div>
+          </div>
+          <div class="mis-card-body">
+            <div class="mis-card-desc">บินในสภาพแวดล้อม RF jamming — เข้าใจ frequency band, เลือก control link ที่ jamming-resistant, ลด GPS dependency</div>
+            <table class="mis-spec-table">
+              <tr><td class="mis-spec-key">Control link</td><td class="mis-spec-val">FHSS 2.4G / LoRa 900MHz</td></tr>
+              <tr><td class="mis-spec-key">Video</td><td class="mis-spec-val warn">Encrypted digital</td></tr>
+              <tr><td class="mis-spec-key">GPS dependency</td><td class="mis-spec-val danger">ลด GPS reliance</td></tr>
+              <tr><td class="mis-spec-key">Failsafe</td><td class="mis-spec-val">RTH &gt; Hold &gt; Disarm</td></tr>
+              <tr><td class="mis-spec-key">Alt control</td><td class="mis-spec-val">Baro + Optical flow</td></tr>
+              <tr><td class="mis-spec-key">VTX band</td><td class="mis-spec-val warn">หลีก 5.8G ใน jam zone</td></tr>
+            </table>
+          </div>
+          <div class="mis-card-footer">
+            <a href="/vtx" class="mis-tool-chip">📡 VTX Bands</a>
+            <a href="/vtx-range" class="mis-tool-chip">📶 Range</a>
+            <a href="/vtx-smartaudio" class="mis-tool-chip">🎙️ SmartAudio</a>
           </div>
         </div>
 
-        <div class="mil-scenario">
-          <span class="mil-scenario-badge mil-s-recon">RF · SIGNALS</span>
-          <div class="mil-scenario-title">การวิเคราะห์สัญญาณ RF/VTX</div>
-          <div class="mil-scenario-desc">ประเมินระยะ video link, เลือก band/channel ที่ไม่รบกวนกัน สำหรับ multi-drone operation และการ deconflict สัญญาณในพื้นที่ปฏิบัติการ</div>
-          <div class="mil-scenario-specs">
-            <div class="mil-spec-row"><span class="mil-spec-key">Frequency bands</span><span class="mil-spec-val">5.8GHz (A/B/E/F/R)</span></div>
-            <div class="mil-spec-row"><span class="mil-spec-key">Max range est.</span><span class="mil-spec-val">ตาม mW + terrain</span></div>
-            <div class="mil-spec-row"><span class="mil-spec-key">Multi-drone</span><span class="mil-spec-val">Band deconflict guide</span></div>
-            <div class="mil-spec-row"><span class="mil-spec-key">Key tool</span><span class="mil-spec-val">VTX Range + VTX Bands</span></div>
+        <div class="mis-card mis-cuas">
+          <div class="mis-card-head">
+            <div class="mis-card-emblem">🛡️</div>
+            <div>
+              <div class="mis-card-type">C-UAS · Counter-Drone</div>
+              <div class="mis-card-title">Detect-ID-Defeat</div>
+            </div>
+          </div>
+          <div class="mis-card-body">
+            <div class="mis-card-desc">วิเคราะห์ spec ของ UAS ที่ตรวจพบ ประเมินภัยคุกคาม — คำนวณ TWR, ระยะบิน, payload capacity จาก spec ที่ capture ได้</div>
+            <table class="mis-spec-table">
+              <tr><td class="mis-spec-key">Detect method</td><td class="mis-spec-val">RF + Visual + Acoustic</td></tr>
+              <tr><td class="mis-spec-key">ID ด้วย spec</td><td class="mis-spec-val">Motor KV + Prop → TWR</td></tr>
+              <tr><td class="mis-spec-key">Key parameter</td><td class="mis-spec-val warn">Tip speed &gt; 265 = อันตราย</td></tr>
+              <tr><td class="mis-spec-key">Defeat</td><td class="mis-spec-val">Jam RF / Intercept / Net</td></tr>
+              <tr><td class="mis-spec-key">Analysis tool</td><td class="mis-spec-val ok">ConfigDoctor Physics</td></tr>
+              <tr><td class="mis-spec-key">Config intel</td><td class="mis-spec-val">CLI Surgeon dump</td></tr>
+            </table>
+          </div>
+          <div class="mis-card-footer">
+            <a href="/app" class="mis-tool-chip">🔍 Threat Analysis</a>
+            <a href="/cli_surgeon" class="mis-tool-chip">🩻 Config Intel</a>
           </div>
         </div>
 
-        <div class="mil-scenario">
-          <span class="mil-scenario-badge mil-s-intel">MAINTENANCE · บำรุงรักษา</span>
-          <div class="mil-scenario-title">ระบบบำรุงรักษาและ Diagnostics</div>
-          <div class="mil-scenario-desc">ตรวจสอบสุขภาพแบตเตอรี่, ประมาณ motor temperature, วิเคราะห์ loop latency และ CLI config เพื่อให้ UAS พร้อมปฏิบัติการเสมอ</div>
-          <div class="mil-scenario-specs">
-            <div class="mil-spec-row"><span class="mil-spec-key">Battery health</span><span class="mil-spec-val">IR · Sag · Cycle count</span></div>
-            <div class="mil-spec-row"><span class="mil-spec-key">Motor thermal</span><span class="mil-spec-val">Winding temp estimate</span></div>
-            <div class="mil-spec-row"><span class="mil-spec-key">Config check</span><span class="mil-spec-val">CLI Surgeon diff/dump</span></div>
-            <div class="mil-spec-row"><span class="mil-spec-key">Key tool</span><span class="mil-spec-val">Battery + Thermal + Loop</span></div>
+        <div class="mis-card mis-log">
+          <div class="mis-card-head">
+            <div class="mis-card-emblem">📦</div>
+            <div>
+              <div class="mis-card-type">LOGISTICS · ส่งกำลังบำรุง</div>
+              <div class="mis-card-title">Resupply / MEDEVAC Relay</div>
+            </div>
+          </div>
+          <div class="mis-card-body">
+            <div class="mis-card-desc">ส่ง supply ยา สาย comm ข้ามพื้นที่อันตราย — payload capacity สูง TWR ปลอดภัยขณะรับน้ำหนัก GPS navigation แม่นยำ</div>
+            <table class="mis-spec-table">
+              <tr><td class="mis-spec-key">Platform</td><td class="mis-spec-val">10"+ / Hex / Octo</td></tr>
+              <tr><td class="mis-spec-key">Payload capacity</td><td class="mis-spec-val">&gt; 500g (safe margin)</td></tr>
+              <tr><td class="mis-spec-key">TWR loaded min</td><td class="mis-spec-val warn">2.5 : 1 recommended</td></tr>
+              <tr><td class="mis-spec-key">Hover throttle</td><td class="mis-spec-val warn">&lt; 55% (loaded)</td></tr>
+              <tr><td class="mis-spec-key">Navigation</td><td class="mis-spec-val">GPS + Waypoint</td></tr>
+              <tr><td class="mis-spec-key">Battery</td><td class="mis-spec-val">6S–12S High mAh</td></tr>
+            </table>
+          </div>
+          <div class="mis-card-footer">
+            <a href="/app" class="mis-tool-chip">⚖️ Payload TWR</a>
+            <a href="/battery-health" class="mis-tool-chip">🔋 Battery</a>
+          </div>
+        </div>
+
+        <div class="mis-card mis-cbrn">
+          <div class="mis-card-head">
+            <div class="mis-card-emblem">☢️</div>
+            <div>
+              <div class="mis-card-type">CBRN · Detection</div>
+              <div class="mis-card-title">Hazardous Area Survey</div>
+            </div>
+          </div>
+          <div class="mis-card-body">
+            <div class="mis-card-desc">บินสำรวจพื้นที่อันตราย CBRN แทนบุคลากร — drone ทนทาน, payload sensor ตรวจจับ, บินได้นาน, ส่งข้อมูล real-time</div>
+            <table class="mis-spec-table">
+              <tr><td class="mis-spec-key">Platform</td><td class="mis-spec-val">7"–10" Sealed frame</td></tr>
+              <tr><td class="mis-spec-key">Flight time</td><td class="mis-spec-val ok">&gt; 20 นาที</td></tr>
+              <tr><td class="mis-spec-key">Altitude</td><td class="mis-spec-val">2–50 m AGL</td></tr>
+              <tr><td class="mis-spec-key">TWR loaded</td><td class="mis-spec-val warn">&gt; 2.0 : 1</td></tr>
+              <tr><td class="mis-spec-key">Payload</td><td class="mis-spec-val">CBRN Detector + GPS</td></tr>
+              <tr><td class="mis-spec-key">Decon protocol</td><td class="mis-spec-val danger">Required after mission</td></tr>
+            </table>
+          </div>
+          <div class="mis-card-footer">
+            <a href="/app" class="mis-tool-chip">📊 Payload Analysis</a>
+            <a href="/motor-thermal" class="mis-tool-chip">🌡️ Thermal</a>
+          </div>
+        </div>
+
+        <div class="mis-card mis-train">
+          <div class="mis-card-head">
+            <div class="mis-card-emblem">🎮</div>
+            <div>
+              <div class="mis-card-type">TRAINING · การฝึก</div>
+              <div class="mis-card-title">UAS Operator Development</div>
+            </div>
+          </div>
+          <div class="mis-card-body">
+            <div class="mis-card-desc">ฝึก operator zero ถึง mission-ready ในสภาพแวดล้อมปลอดภัย — Simulator NEO รองรับ gamepad เหมือน controller จริง, 6 modes</div>
+            <table class="mis-spec-table">
+              <tr><td class="mis-spec-key">Simulator</td><td class="mis-spec-val ok">Browser · No install</td></tr>
+              <tr><td class="mis-spec-key">Gamepad</td><td class="mis-spec-val ok">Full Gamepad API</td></tr>
+              <tr><td class="mis-spec-key">Modes</td><td class="mis-spec-val">Tutorial → Race Circuit</td></tr>
+              <tr><td class="mis-spec-key">Hover precision</td><td class="mis-spec-val">Hover Zone mode</td></tr>
+              <tr><td class="mis-spec-key">Navigation</td><td class="mis-spec-val">Gate Runner / Free Fly</td></tr>
+              <tr><td class="mis-spec-key">Assessment</td><td class="mis-spec-val">Flight Style Quiz</td></tr>
+            </table>
+          </div>
+          <div class="mis-card-footer">
+            <a href="/fpv-trainer" class="mis-tool-chip">🎮 Launch Sim</a>
+            <a href="/flight-quiz" class="mis-tool-chip">🎯 Assessment</a>
           </div>
         </div>
 
       </div>
 
-      <!-- Military feature highlights -->
-      <div class="mode-section-label mode-section-label-mil" style="margin-top:32px;" data-reveal>
-        ⚙️ &nbsp;TOOLS สำหรับการฝึกและเรียนรู้ทางทหาร
+      <!-- 02: OPERATOR CURRICULUM -->
+      <div class="mode-section-label mode-section-label-mil" data-reveal style="margin-top:36px;">
+        02 &nbsp;·&nbsp; OPERATOR CURRICULUM — เส้นทางการพัฒนาผู้ปฏิบัติการ UAS
       </div>
-      <div class="mode-feature-grid" data-reveal>
+      <div class="ol-track" data-reveal>
 
-        <div class="mode-feat mode-feat-mil">
-          <div class="mode-feat-icon">📐</div>
-          <div class="mode-feat-title">PHYSICS ENGINE</div>
-          <div class="mode-feat-desc">คำนวณ TWR จริง, tip speed, กระแสไฟสูงสุด, ประมาณอุณหภูมิ winding จาก spec — แม่นยำ ±10% จากการ bench test จริง</div>
-          <div class="mode-feat-tags">
-            <span class="mode-feat-tag">TWR</span>
-            <span class="mode-feat-tag">Tip Speed</span>
-            <span class="mode-feat-tag">Current</span>
+        <div class="ol-card ol-1">
+          <div class="ol-level">LEVEL 1 · BASIC</div>
+          <div class="ol-title">UAS Fundamentals</div>
+          <div class="ol-hours">⏱ 0–20 ชั่วโมง sim + ground</div>
+          <div class="ol-skills">
+            <div class="ol-skill">ความรู้พื้นฐาน: axis, motor, prop, flight controller</div>
+            <div class="ol-skill">อ่านค่า TWR, battery cell count, C-rating ได้</div>
+            <div class="ol-skill">ฝึก hover และ basic maneuver ใน simulator</div>
+            <div class="ol-skill">Pre-flight checklist และ failsafe setting</div>
+            <div class="ol-skill">RF band, frequency และ deconflict พื้นฐาน</div>
+            <div class="ol-skill" style="color:#10c47a;">Tools: Main Analyzer, Flight Quiz, Sim Tutorial</div>
           </div>
         </div>
 
-        <div class="mode-feat mode-feat-mil">
-          <div class="mode-feat-icon">🎮</div>
-          <div class="mode-feat-title">UAS FLIGHT SIMULATOR</div>
-          <div class="mode-feat-desc">ฝึก operator ในสถานการณ์จำลอง — Tutorial mode สำหรับฝึกใหม่, Hover Zone สำหรับทดสอบความแม่นยำ, Free Fly สำหรับ exploration</div>
-          <div class="mode-feat-tags">
-            <span class="mode-feat-tag">No Install</span>
-            <span class="mode-feat-tag">Gamepad</span>
-            <span class="mode-feat-tag">WebGL 3D</span>
+        <div class="ol-card ol-2">
+          <div class="ol-level">LEVEL 2 · INTERMEDIATE</div>
+          <div class="ol-title">Mission-Oriented Flying</div>
+          <div class="ol-hours">⏱ 20–80 ชั่วโมง sim + field</div>
+          <div class="ol-skills">
+            <div class="ol-skill">วิเคราะห์สเปค UAS ให้ตรงกับภารกิจ ISR/Recon</div>
+            <div class="ol-skill">คำนวณ sortie duration, payload effect on TWR</div>
+            <div class="ol-skill">Blackbox analysis และ config optimization</div>
+            <div class="ol-skill">Waypoint nav, loiter, emergency RTH</div>
+            <div class="ol-skill">ESC, motor thermal, loop latency</div>
+            <div class="ol-skill" style="color:#58a6ff;">Tools: Blackbox, CLI Surgeon, Battery, Loop</div>
           </div>
         </div>
 
-        <div class="mode-feat mode-feat-mil">
-          <div class="mode-feat-icon">🔋</div>
-          <div class="mode-feat-title">BATTERY & ENDURANCE</div>
-          <div class="mode-feat-desc">วิเคราะห์ C-rating, usable Wh, ประมาณ flight time ทั้ง hover และ aggressive — วางแผน sortie duration ได้แม่นยำ</div>
-          <div class="mode-feat-tags">
-            <span class="mode-feat-tag">C-Rate</span>
-            <span class="mode-feat-tag">Flight Time</span>
-            <span class="mode-feat-tag">Wh</span>
+        <div class="ol-card ol-3">
+          <div class="ol-level">LEVEL 3 · ADVANCED</div>
+          <div class="ol-title">Tactical UAS Operator</div>
+          <div class="ol-hours">⏱ 80–200 ชั่วโมง field ops</div>
+          <div class="ol-skills">
+            <div class="ol-skill">Multi-UAS operation, RF deconflict</div>
+            <div class="ol-skill">ประเมิน threat UAS จาก spec ที่พบ (C-UAS)</div>
+            <div class="ol-skill">ปฏิบัติงานใน EW / GPS denied environment</div>
+            <div class="ol-skill">PID tuning สำหรับ payload, wind, ภารกิจเฉพาะ</div>
+            <div class="ol-skill">CBRN survey protocol + sensor integration</div>
+            <div class="ol-skill" style="color:#f1b65a;">Tools: Full suite + CLI Comparator + Quick Tune</div>
           </div>
         </div>
 
-        <div class="mode-feat mode-feat-mil">
-          <div class="mode-feat-icon">📡</div>
-          <div class="mode-feat-title">RF LINK ANALYSIS</div>
-          <div class="mode-feat-desc">ประมาณระยะสัญญาณ VTX ตาม mW และ terrain, เลือก band ที่ไม่รบกวนกัน สำหรับ multi-UAS operation ในพื้นที่เดียวกัน</div>
-          <div class="mode-feat-tags">
-            <span class="mode-feat-tag">5.8GHz</span>
-            <span class="mode-feat-tag">Range Est.</span>
-            <span class="mode-feat-tag">Deconflict</span>
+        <div class="ol-card ol-4">
+          <div class="ol-level">LEVEL 4 · EXPERT</div>
+          <div class="ol-title">UAS Systems Instructor</div>
+          <div class="ol-hours">⏱ 200+ ชั่วโมง + certification</div>
+          <div class="ol-skills">
+            <div class="ol-skill">ออกแบบ UAS platform สำหรับภารกิจเฉพาะ</div>
+            <div class="ol-skill">สอนและประเมิน operator level 1–3</div>
+            <div class="ol-skill">Blackbox analysis ระดับ forensic</div>
+            <div class="ol-skill">พัฒนา SOPs, maintenance schedule, training</div>
+            <div class="ol-skill">Threat assessment และ C-UAS doctrine</div>
+            <div class="ol-skill" style="color:#f87171;">Tools: All tools + interpret physics for training</div>
           </div>
         </div>
 
-        <div class="mode-feat mode-feat-mil">
-          <div class="mode-feat-icon">📊</div>
-          <div class="mode-feat-title">PERFORMANCE SCORING</div>
-          <div class="mode-feat-desc">Build Intelligence Score วิเคราะห์ 6 มิติ: TWR · Flight Time · Noise · Tip Speed · Motor · Efficiency — เปรียบเทียบ drone ได้ objective</div>
-          <div class="mode-feat-tags">
-            <span class="mode-feat-tag">Score A–S</span>
-            <span class="mode-feat-tag">6 Dimensions</span>
+      </div>
+
+      <!-- 03: PRE-MISSION CHECKLIST -->
+      <div class="mode-section-label mode-section-label-mil" data-reveal style="margin-top:36px;">
+        03 &nbsp;·&nbsp; PRE-MISSION CHECKLIST — ขั้นตอนก่อนปฏิบัติการ
+      </div>
+      <div class="chk-wrap" data-reveal>
+
+        <div class="chk-phase">
+          <div class="chk-phase-head" style="background:rgba(88,166,255,.05);border-bottom:1px solid rgba(88,166,255,.1);">
+            <span class="chk-phase-icon">📋</span>
+            <span class="chk-phase-title" style="color:#58a6ff;">PHASE 1 · MISSION BRIEF</span>
+          </div>
+          <div class="chk-phase-items">
+            <div class="chk-item"><div class="chk-box">☐</div><div>กำหนด objective, พื้นที่ปฏิบัติการ, ROE ที่ชัดเจน</div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>วิเคราะห์สเปค UAS ให้ตรงกับภารกิจ <span class="chk-tool chk-blue">Main Analyzer</span></div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>คำนวณ flight time และ sortie duration ที่ต้องการ</div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>ตรวจสอบ RF freq ในพื้นที่, วาง freq plan <span class="chk-tool chk-blue">VTX Bands</span></div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>กำหนด failsafe: RTH altitude, GPS home, lost link</div></div>
           </div>
         </div>
 
-        <div class="mode-feat mode-feat-mil">
-          <div class="mode-feat-icon">🩺</div>
-          <div class="mode-feat-title">DIAGNOSTIC TOOLS</div>
-          <div class="mode-feat-desc">CLI Surgeon วิเคราะห์ config file จาก UAS ที่ capture ได้ — ตรวจ PID settings, filter config, protocol ที่ใช้ และจุดอ่อนของระบบ</div>
-          <div class="mode-feat-tags">
-            <span class="mode-feat-tag">CLI Analysis</span>
-            <span class="mode-feat-tag">Config Intel</span>
+        <div class="chk-phase">
+          <div class="chk-phase-head" style="background:rgba(16,196,122,.05);border-bottom:1px solid rgba(16,196,122,.1);">
+            <span class="chk-phase-icon">🔧</span>
+            <span class="chk-phase-title" style="color:#10c47a;">PHASE 2 · PLATFORM CHECK</span>
           </div>
+          <div class="chk-phase-items">
+            <div class="chk-item"><div class="chk-box">☐</div><div>ตรวจ prop: ไม่มีรอยร้าว, ติดถูกทิศ, ขันแน่น</div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>แตะ motor ทดสอบ spin ไม่มีเสียงผิดปกติ <span class="chk-tool chk-green">Motor Thermal</span></div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>วัด battery voltage, IR, cell balance <span class="chk-tool chk-green">Battery Health</span></div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>ตรวจ frame: arm ตรง, motor mount แน่น</div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>ตรวจ ESC: ไม่ร้อน, wiring ไม่มีรอยไหม้ <span class="chk-tool chk-green">ESC Checker</span></div></div>
+          </div>
+        </div>
+
+        <div class="chk-phase">
+          <div class="chk-phase-head" style="background:rgba(241,182,90,.05);border-bottom:1px solid rgba(241,182,90,.1);">
+            <span class="chk-phase-icon">⚙️</span>
+            <span class="chk-phase-title" style="color:#f1b65a;">PHASE 3 · SOFTWARE CHECK</span>
+          </div>
+          <div class="chk-phase-items">
+            <div class="chk-item"><div class="chk-box">☐</div><div>ตรวจ config version, ยืนยัน PID last known good <span class="chk-tool chk-amber">CLI Surgeon</span></div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>ตรวจ failsafe mode: ตั้งค่าถูก, ทดสอบ disarm</div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>ตรวจ loop time, CPU load ไม่เกิน 80% <span class="chk-tool chk-amber">Loop Analyzer</span></div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>ตรวจ OSD: voltage, GPS, RSSI แสดงถูกต้อง <span class="chk-tool chk-amber">OSD Designer</span></div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>บันทึก config snapshot ก่อนบิน <span class="chk-tool chk-amber">Tuning Log</span></div></div>
+          </div>
+        </div>
+
+        <div class="chk-phase">
+          <div class="chk-phase-head" style="background:rgba(248,113,113,.05);border-bottom:1px solid rgba(248,113,113,.1);">
+            <span class="chk-phase-icon">🛫</span>
+            <span class="chk-phase-title" style="color:#f87171;">PHASE 4 · LAUNCH CHECK</span>
+          </div>
+          <div class="chk-phase-items">
+            <div class="chk-item"><div class="chk-box">☐</div><div>GPS lock: &gt; 8 sats, HDOP &lt; 1.5 ก่อน arm</div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>ทดสอบ hover &lt; 2m นาที 30 วินาที ฟัง vibration</div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>ตรวจ hover throttle ควรอยู่ที่ &lt; 50%</div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>ยืนยัน link RSSI, video feed ชัด, telemetry OK</div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>แจ้ง TOC: call sign, mission area, ETA, bingo time</div></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 04: THREAT TABLE -->
+      <div class="mode-section-label mode-section-label-mil" data-reveal style="margin-top:36px;">
+        04 &nbsp;·&nbsp; THREAT RECOGNITION — ตารางระบุ UAS ที่พบในสนาม
+      </div>
+      <div class="threat-table-wrap" data-reveal>
+        <table class="threat-table">
+          <thead>
+            <tr>
+              <th>CLASS</th><th>ขนาด</th><th>TWR</th><th>Tip Speed</th>
+              <th>Flight Time</th><th>Payload</th><th>ระดับภัย</th><th>วิธีรับมือ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="threat-cat tc-micro">MICRO</span></td>
+              <td>2.5"–3.5" Whoop</td>
+              <td class="thr-g">2.5–3.5</td><td class="thr-g">&lt;120 m/s</td>
+              <td>3–6 min</td><td>0–20g</td>
+              <td class="thr-g">ต่ำ</td><td>Net / RF jam</td>
+            </tr>
+            <tr>
+              <td><span class="threat-cat tc-small">SMALL</span></td>
+              <td>5" FPV Racing</td>
+              <td class="thr-a">4.0–6.0</td><td class="thr-a">180–260 m/s</td>
+              <td>4–7 min</td><td>50–150g</td>
+              <td class="thr-a">กลาง</td><td>Intercept / Jam</td>
+            </tr>
+            <tr>
+              <td><span class="threat-cat tc-small">SMALL+</span></td>
+              <td>7" Long Range</td>
+              <td class="thr-a">2.5–3.5</td><td class="thr-a">180–220 m/s</td>
+              <td>20–35 min</td><td>100–300g</td>
+              <td class="thr-a">กลาง-สูง</td><td>Jam RF + GPS spoof</td>
+            </tr>
+            <tr>
+              <td><span class="threat-cat tc-med">MEDIUM</span></td>
+              <td>10" Heavy LR</td>
+              <td class="thr-a">2.0–3.0</td><td class="thr-a">160–200 m/s</td>
+              <td>25–45 min</td><td>300–800g</td>
+              <td class="thr-r">สูง</td><td>Dedicated C-UAS</td>
+            </tr>
+            <tr>
+              <td><span class="threat-cat tc-large">LARGE</span></td>
+              <td>Hex/Octo &gt;12"</td>
+              <td class="thr-a">1.8–2.5</td><td class="thr-g">&lt;160 m/s</td>
+              <td>30–60 min</td><td>&gt;1kg</td>
+              <td class="thr-r">สูงมาก</td><td>Kinetic / High-power</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:10px;color:rgba(255,255,255,.3);margin-top:6px;font-family:'JetBrains Mono',monospace;">* ค่าประมาณการจาก physics model · ยืนยันด้วย ConfigDoctor Main Analyzer</p>
+
+      <!-- 05: SORTIE PLANNING -->
+      <div class="mode-section-label mode-section-label-mil" data-reveal style="margin-top:36px;">
+        05 &nbsp;·&nbsp; SORTIE PLANNING — วางแผนการบินปฏิบัติการ
+      </div>
+      <div class="sortie-grid" data-reveal>
+
+        <div class="sortie-card">
+          <div class="sortie-title">🔋 ENDURANCE BUDGET</div>
+          <div class="sortie-row"><span class="sortie-key">Usable capacity</span><span class="sortie-val" style="color:#10c47a;">80% of rated mAh</span></div>
+          <div class="sortie-row"><span class="sortie-key">Reserve</span><span class="sortie-val" style="color:#f1b65a;">20% ห้ามใช้</span></div>
+          <div class="sortie-row"><span class="sortie-key">Bingo time</span><span class="sortie-val" style="color:#f87171;">RTH ที่ 30% battery</span></div>
+          <div class="sortie-row"><span class="sortie-key">Planning factor</span><span class="sortie-val">×0.75 real vs calc</span></div>
+          <div style="margin-top:10px;padding:8px;background:rgba(16,196,122,.04);border-radius:6px;font-size:10px;color:rgba(200,215,255,.5);font-family:'JetBrains Mono',monospace;">Sortie = (mAh×0.8)÷avg_A×60×0.75</div>
+        </div>
+
+        <div class="sortie-card">
+          <div class="sortie-title">📡 LINK BUDGET</div>
+          <div class="sortie-row"><span class="sortie-key">Control (ELRS)</span><span class="sortie-val" style="color:#10c47a;">&gt; 10km LoS</span></div>
+          <div class="sortie-row"><span class="sortie-key">Video (Analog)</span><span class="sortie-val">1–3km (200mW)</span></div>
+          <div class="sortie-row"><span class="sortie-key">Video (DJI O3)</span><span class="sortie-val" style="color:#10c47a;">10km+ LoS</span></div>
+          <div class="sortie-row"><span class="sortie-key">Terrain factor</span><span class="sortie-val" style="color:#f1b65a;">÷2–4 (non-LoS)</span></div>
+          <div style="margin-top:10px;padding:8px;background:rgba(88,166,255,.04);border-radius:6px;font-size:10px;color:rgba(200,215,255,.5);font-family:'JetBrains Mono',monospace;">ใช้ VTX Range Calculator ประเมิน terrain</div>
+        </div>
+
+        <div class="sortie-card">
+          <div class="sortie-title">⚖️ PAYLOAD MARGIN</div>
+          <div class="sortie-row"><span class="sortie-key">Max payload</span><span class="sortie-val">TWR loaded &gt; 2.0:1</span></div>
+          <div class="sortie-row"><span class="sortie-key">Hover loaded</span><span class="sortie-val" style="color:#f1b65a;">&lt; 55% throttle</span></div>
+          <div class="sortie-row"><span class="sortie-key">ESC margin</span><span class="sortie-val" style="color:#f87171;">×2.0 peak</span></div>
+          <div class="sortie-row"><span class="sortie-key">Endurance effect</span><span class="sortie-val">+100g = −15% time</span></div>
+          <div style="margin-top:10px;padding:8px;background:rgba(241,182,90,.04);border-radius:6px;font-size:10px;color:rgba(200,215,255,.5);font-family:'JetBrains Mono',monospace;">ใช้ What-If Optimizer ใน Main Analyzer</div>
+        </div>
+
+        <div class="sortie-card">
+          <div class="sortie-title">🌡️ ENVIRONMENT FACTORS</div>
+          <div class="sortie-row"><span class="sortie-key">Altitude effect</span><span class="sortie-val" style="color:#f1b65a;">+300m = −5% thrust</span></div>
+          <div class="sortie-row"><span class="sortie-key">Temperature &gt;35°C</span><span class="sortie-val">motor ร้อน +20%</span></div>
+          <div class="sortie-row"><span class="sortie-key">Wind limit</span><span class="sortie-val" style="color:#f87171;">&lt; 2/3 max speed</span></div>
+          <div class="sortie-row"><span class="sortie-key">Cold batt &lt;10°C</span><span class="sortie-val" style="color:#f1b65a;">−20% capacity</span></div>
+          <div style="margin-top:10px;padding:8px;background:rgba(248,113,113,.04);border-radius:6px;font-size:10px;color:rgba(200,215,255,.5);font-family:'JetBrains Mono',monospace;">ใช้ Motor Thermal Estimator ก่อนบินร้อน</div>
+        </div>
+
+      </div>
+
+      <!-- 06: C-UAS -->
+      <div class="mode-section-label mode-section-label-mil" data-reveal style="margin-top:36px;">
+        06 &nbsp;·&nbsp; C-UAS METHODS — วิธีป้องกันและรับมือ Drone ภัยคุกคาม
+      </div>
+      <div class="cuas-grid" data-reveal>
+
+        <div class="cuas-card">
+          <div class="cuas-card-icon">📡</div>
+          <div class="cuas-card-title">RF DETECTION</div>
+          <div class="cuas-card-desc">ตรวจจับ signal จาก controller → drone ใน 2.4GHz / 5.8GHz / 900MHz — RF scanner ระบุ protocol (ELRS, DJI, Futaba) และประมาณ range</div>
+          <div class="cuas-card-params"><span class="cuas-param">2.4GHz</span><span class="cuas-param">5.8GHz</span><span class="cuas-param">900MHz</span><span class="cuas-param">FHSS detect</span></div>
+        </div>
+
+        <div class="cuas-card">
+          <div class="cuas-card-icon">🔇</div>
+          <div class="cuas-card-title">RF JAMMING</div>
+          <div class="cuas-card-desc">ส่ง noise บน frequency ที่ drone ใช้ → ขาด link → failsafe (RTH/hover) ต้องทราบ frequency ที่ target ใช้ก่อน — ใช้ VTX Band analysis</div>
+          <div class="cuas-card-params"><span class="cuas-param">Spot jam</span><span class="cuas-param">Sweep jam</span><span class="cuas-param">Barrage</span></div>
+        </div>
+
+        <div class="cuas-card">
+          <div class="cuas-card-icon">🛰️</div>
+          <div class="cuas-card-title">GPS SPOOFING / DENIAL</div>
+          <div class="cuas-card-desc">ส่ง GPS signal ปลอม → drone เข้าใจตำแหน่งผิด หรือ jam GPS L1/L2 → ไม่มี position fix → hover หรือ crash</div>
+          <div class="cuas-card-params"><span class="cuas-param">GPS L1 1.575GHz</span><span class="cuas-param">L2 1.227GHz</span><span class="cuas-param">GLONASS</span></div>
+        </div>
+
+        <div class="cuas-card">
+          <div class="cuas-card-icon">🕸️</div>
+          <div class="cuas-card-title">KINETIC / NET CAPTURE</div>
+          <div class="cuas-card-desc">ยิงตาข่ายจาก drone interceptor หรือ net gun เพื่อ capture โดยไม่ทำลาย — ใช้กับ drone ขนาดเล็ก ต้องประเมิน flight speed จาก tip speed analysis</div>
+          <div class="cuas-card-params"><span class="cuas-param">Net gun</span><span class="cuas-param">Interceptor UAS</span><span class="cuas-param">Tethered net</span></div>
+        </div>
+
+        <div class="cuas-card">
+          <div class="cuas-card-icon">🔍</div>
+          <div class="cuas-card-title">TECHNICAL INTELLIGENCE</div>
+          <div class="cuas-card-desc">capture drone ได้ → ดึง CLI config → วิเคราะห์ด้วย CLI Surgeon เพื่อหา waypoints, PID, freq ที่ใช้, firmware version เพื่อ profile ผู้ควบคุม</div>
+          <div class="cuas-card-params"><span class="cuas-param">CLI Dump</span><span class="cuas-param">Firmware ID</span><span class="cuas-param">Config Profile</span></div>
+        </div>
+
+        <div class="cuas-card">
+          <div class="cuas-card-icon">📊</div>
+          <div class="cuas-card-title">THREAT ASSESSMENT</div>
+          <div class="cuas-card-desc">กรอก spec ที่พบ (prop size, KV, battery) ใน ConfigDoctor → ได้ TWR, tip speed, payload capacity, flight time ทันที ประเมิน threat level</div>
+          <div class="cuas-card-params"><span class="cuas-param">TWR analysis</span><span class="cuas-param">Payload est.</span><span class="cuas-param">Range calc</span></div>
         </div>
 
       </div>
 
       <!-- Disclaimer -->
-      <div class="mode-disclaimer" data-reveal>
+      <div class="mode-disclaimer" data-reveal style="margin-top:28px;">
         <div class="mode-disclaimer-icon">⚠️</div>
         <div>
-          <strong style="color:rgba(255,255,255,.7);">ข้อควรทราบ:</strong> ConfigDoctor เป็น educational tool สำหรับการเรียนรู้และวิเคราะห์ระบบ UAS — ข้อมูลที่ได้เป็นการประมาณการจาก physics model
-          การนำไปใช้งานในภารกิจจริงต้องผ่านการทดสอบและยืนยันจากผู้เชี่ยวชาญ ทีมงานและหน่วยงานที่รับผิดชอบก่อนทุกครั้ง
-          ข้อมูล spec ที่กรอกเข้าระบบไม่ถูกบันทึกหรือส่งต่อ — ประมวลผลใน session เท่านั้น
+          <strong style="color:rgba(255,255,255,.7);">EDUCATIONAL USE ONLY:</strong>
+          ข้อมูลทั้งหมดมีวัตถุประสงค์เพื่อการเรียนรู้และฝึกอบรม UAS เท่านั้น
+          การนำไปใช้งานจริงในภารกิจต้องได้รับการอนุมัติจากหน่วยงานที่มีอำนาจ และปฏิบัติตามกฎหมาย ROE ที่บังคับใช้อย่างเคร่งครัด
+          · ข้อมูลที่กรอกเข้าระบบไม่ถูกบันทึกหรือส่งต่อ — ประมวลผลใน session เท่านั้น
         </div>
       </div>
 
     </div><!-- /pane-mil -->
+
 
   </div>
 </section>
