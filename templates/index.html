@@ -504,77 +504,81 @@ body.light .scan-line { display:none; }
 body.light .amb-orb { opacity:.25; }
 @media(max-width:600px) { .live-hud { grid-template-columns:repeat(2,1fr); } .adv-grid { grid-template-columns:repeat(2,1fr); } .filter-grid { grid-template-columns:1fr 1fr; } .chk-grid { grid-template-columns:1fr; } }
 
-/* ══════════════════════════════════════════════════
-   FLIGHT PERSONALITY + PRO TRIX — NEW v5.1 SECTIONS
-══════════════════════════════════════════════════ */
-/* ─── Flight Personality ─── */
-.pers-card { border-radius:16px; overflow:hidden; position:relative; margin-bottom:0; }
-.pers-glow { position:absolute; top:-40px; right:-40px; width:160px; height:160px; border-radius:50%; filter:blur(60px); opacity:0.35; pointer-events:none; }
-.pers-inner { padding:18px 18px 16px; display:flex; align-items:center; gap:16px; position:relative; }
-.pers-badge-icon { font-size:40px; flex-shrink:0; filter:drop-shadow(0 0 12px currentColor); }
-.pers-name { font-family:var(--font-d); font-size:20px; font-weight:900; letter-spacing:.06em; line-height:1.1; text-shadow:0 0 20px currentColor; }
-.pers-desc { font-family:var(--font-m); font-size:11px; color:rgba(255,255,255,0.6); margin-top:5px; line-height:1.5; }
-.pers-pills { display:flex; gap:6px; flex-wrap:wrap; margin-top:9px; }
-.pers-pill { font-family:var(--font-d); font-size:7px; letter-spacing:.12em; padding:3px 10px; border-radius:20px; border:1px solid; }
-.pers-stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:rgba(255,255,255,0.05); border-top:1px solid rgba(255,255,255,0.06); }
-.pers-stat { padding:10px 8px; text-align:center; background:rgba(0,0,0,0.3); }
-.pers-stat-v { font-family:var(--font-d); font-size:14px; font-weight:900; letter-spacing:-.02em; }
-.pers-stat-l { font-family:var(--font-d); font-size:6.5px; letter-spacing:.1em; color:rgba(255,255,255,0.4); margin-top:3px; }
+/* ═══════════════════════════════════════════════════════
+   UPGRADE SECTIONS — v5.1 ELITE ANALYSIS
+═══════════════════════════════════════════════════════ */
 
-/* ─── PRO TUNING TRIX ─── */
-.trix-header-badge { display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:20px; font-family:var(--font-d); font-size:7.5px; letter-spacing:.12em; margin-bottom:14px; }
-.trix-list { display:flex; flex-direction:column; gap:10px; }
-.trix-item { display:flex; gap:12px; padding:12px 14px; border-radius:10px; border:1.5px solid rgba(255,255,255,0.05); background:rgba(3,8,20,0.8); position:relative; overflow:hidden; transition:border-color .2s, background .2s; }
-.trix-item::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; border-radius:3px 0 0 3px; }
-.trix-item:hover { border-color:rgba(255,255,255,0.12); background:rgba(5,14,30,0.95); }
-.trix-item.t-green::before  { background:var(--green); }
-.trix-item.t-amber::before  { background:var(--amber); }
-.trix-item.t-blue::before   { background:var(--blue); }
-.trix-item.t-red::before    { background:var(--red); }
-.trix-item.t-purple::before { background:#a78bfa; }
-.trix-item.t-cyan::before   { background:var(--cyan); }
-.trix-num { font-family:var(--font-d); font-size:22px; font-weight:900; color:rgba(255,255,255,0.08); flex-shrink:0; line-height:1; margin-top:2px; min-width:28px; letter-spacing:-.03em; }
+/* FLIGHT PERSONALITY */
+.pers-wrap { border-radius:14px; overflow:hidden; position:relative; }
+.pers-glow { position:absolute; top:-50px; right:-50px; width:200px; height:200px; border-radius:50%; filter:blur(70px); opacity:.28; pointer-events:none; z-index:0; }
+.pers-top { padding:16px 18px 14px; display:flex; align-items:center; gap:14px; position:relative; z-index:1; }
+.pers-emoji { font-size:44px; flex-shrink:0; filter:drop-shadow(0 0 14px currentColor); line-height:1; }
+.pers-info { flex:1; min-width:0; }
+.pers-eyebrow { font-family:var(--font-d); font-size:7px; letter-spacing:.22em; opacity:.6; margin-bottom:5px; }
+.pers-name { font-family:var(--font-d); font-size:18px; font-weight:900; letter-spacing:.06em; line-height:1.1; text-shadow:0 0 24px currentColor; }
+.pers-desc { font-size:11.5px; color:rgba(255,255,255,.58); margin-top:6px; line-height:1.55; }
+.pers-tags { display:flex; gap:5px; flex-wrap:wrap; margin-top:10px; }
+.pers-tag { font-family:var(--font-d); font-size:7px; letter-spacing:.12em; padding:3px 10px; border-radius:20px; border:1px solid; }
+.pers-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:rgba(255,255,255,.05); position:relative; z-index:1; }
+.pers-cell { padding:11px 8px; text-align:center; background:rgba(0,0,0,.4); }
+.pers-v { font-family:var(--font-d); font-size:15px; font-weight:900; line-height:1; }
+.pers-l { font-family:var(--font-d); font-size:6px; letter-spacing:.12em; color:rgba(255,255,255,.35); margin-top:4px; }
+
+/* WHAT-IF CARDS */
+.wi-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; }
+.wi-card { background:rgba(3,8,20,.9); border:1.5px solid rgba(255,255,255,.06); border-radius:10px; padding:12px 13px; cursor:default; transition:all .2s; overflow:hidden; position:relative; }
+.wi-card::before { content:''; position:absolute; top:0;left:0;right:0; height:2px; opacity:0; transition:opacity .2s; }
+.wi-card:hover::before { opacity:1; }
+.wi-card:hover { border-color:rgba(255,255,255,.16); transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,0,0,.5); }
+.wi-card.cg::before { background:linear-gradient(90deg,var(--green),var(--cyan)); }
+.wi-card.ca::before { background:linear-gradient(90deg,var(--amber),#ff8800); }
+.wi-card.cb::before { background:linear-gradient(90deg,var(--blue),var(--purple)); }
+.wi-icon { font-size:24px; margin-bottom:7px; }
+.wi-title { font-family:var(--font-d); font-size:8.5px; font-weight:700; letter-spacing:.08em; color:var(--text); margin-bottom:4px; }
+.wi-delta { font-family:var(--font-d); font-size:14px; font-weight:900; letter-spacing:-.01em; line-height:1.1; }
+.wi-sub { font-size:9.5px; color:var(--muted2); margin-top:4px; line-height:1.45; }
+
+/* PRO TRIX */
+.trix-badge { display:inline-flex; align-items:center; gap:6px; padding:4px 13px; border-radius:20px; font-family:var(--font-d); font-size:7.5px; letter-spacing:.12em; margin-bottom:14px; }
+.trix-list { display:flex; flex-direction:column; gap:9px; }
+.trix-item { display:flex; gap:11px; padding:12px 14px; border-radius:10px; border:1.5px solid rgba(255,255,255,.05); background:rgba(3,8,20,.8); position:relative; overflow:hidden; transition:border-color .2s; }
+.trix-item::before { content:''; position:absolute; left:0;top:0;bottom:0; width:3px; }
+.trix-item:hover { border-color:rgba(255,255,255,.12); }
+.trix-item.tg::before { background:var(--green); }
+.trix-item.ta::before { background:var(--amber); }
+.trix-item.tb::before { background:var(--blue); }
+.trix-item.tr::before { background:var(--red); }
+.trix-item.tp::before { background:var(--purple); }
+.trix-item.tc::before { background:var(--cyan); }
+.trix-n { font-family:var(--font-d); font-size:22px; font-weight:900; color:rgba(255,255,255,.07); flex-shrink:0; line-height:1; margin-top:1px; min-width:26px; }
 .trix-body { flex:1; min-width:0; }
-.trix-title { font-family:var(--font-d); font-size:10px; font-weight:700; letter-spacing:.08em; color:var(--text); margin-bottom:5px; display:flex; align-items:center; gap:6px; }
-.trix-title-icon { font-size:14px; }
-.trix-desc { font-size:11px; color:rgba(200,220,255,0.7); line-height:1.65; margin-bottom:7px; }
-.trix-cli { font-family:var(--font-m); font-size:9.5px; color:#00ff88; background:rgba(0,255,136,0.06); border:1px solid rgba(0,255,136,0.12); border-radius:5px; padding:5px 9px; white-space:pre-wrap; word-break:break-all; cursor:pointer; transition:background .15s; }
-.trix-cli:hover { background:rgba(0,255,136,0.12); }
-.trix-tag { display:inline-block; font-family:var(--font-d); font-size:6.5px; letter-spacing:.1em; padding:2px 7px; border-radius:4px; margin-left:6px; }
-.trix-tag.warn { background:rgba(255,183,0,0.1); color:var(--amber); border:1px solid rgba(255,183,0,0.2); }
-.trix-tag.hot  { background:rgba(255,68,85,0.1);  color:var(--red);   border:1px solid rgba(255,68,85,0.2); }
-.trix-tag.new  { background:rgba(0,255,136,0.1);  color:var(--green); border:1px solid rgba(0,255,136,0.2); }
-.trix-tag.pro  { background:rgba(167,139,250,0.1);color:#a78bfa;       border:1px solid rgba(167,139,250,0.2); }
+.trix-title { font-family:var(--font-d); font-size:9.5px; font-weight:700; letter-spacing:.08em; color:var(--text); margin-bottom:5px; display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+.trix-ico { font-size:14px; }
+.trix-desc { font-size:11px; color:rgba(200,215,255,.65); line-height:1.68; margin-bottom:7px; }
+.trix-cli { font-family:var(--font-m); font-size:9.5px; color:#00ff88; background:rgba(0,255,136,.05); border:1px solid rgba(0,255,136,.12); border-radius:5px; padding:6px 10px; white-space:pre-wrap; word-break:break-all; cursor:pointer; transition:background .15s; }
+.trix-cli:hover { background:rgba(0,255,136,.1); }
+.ttag { display:inline-block; font-family:var(--font-d); font-size:6.5px; letter-spacing:.1em; padding:2px 8px; border-radius:4px; }
+.ttag.warn { background:rgba(255,183,0,.1); color:var(--amber); border:1px solid rgba(255,183,0,.2); }
+.ttag.hot  { background:rgba(255,68,85,.1);  color:var(--red);   border:1px solid rgba(255,68,85,.2); }
+.ttag.pro  { background:rgba(176,96,255,.1); color:var(--purple); border:1px solid rgba(176,96,255,.2); }
+.ttag.new  { background:rgba(0,255,136,.1);  color:var(--green); border:1px solid rgba(0,255,136,.2); }
 
-/* ─── Tuning Roadmap ─── */
-.roadmap-wrap { position:relative; padding-left:28px; }
-.roadmap-wrap::before { content:''; position:absolute; left:10px; top:8px; bottom:8px; width:1.5px; background:linear-gradient(180deg,var(--green),var(--blue),rgba(255,255,255,0.1)); }
-.road-step { position:relative; margin-bottom:10px; }
-.road-dot { position:absolute; left:-23px; top:9px; width:12px; height:12px; border-radius:50%; border:2px solid; background:rgba(3,9,20,0.95); z-index:1; }
-.road-dot.done  { background:var(--green); border-color:var(--green); box-shadow:0 0 8px rgba(0,255,136,0.5); }
-.road-dot.active{ background:var(--amber); border-color:var(--amber); box-shadow:0 0 8px rgba(255,183,0,0.5); animation:pulse-dot 1.5s ease-in-out infinite; }
-.road-dot.open  { border-color:rgba(255,255,255,0.2); }
-@keyframes pulse-dot { 0%,100%{box-shadow:0 0 6px rgba(255,183,0,0.5)} 50%{box-shadow:0 0 14px rgba(255,183,0,0.9)} }
-.road-card { background:rgba(5,12,26,0.9); border:1.5px solid rgba(255,255,255,0.06); border-radius:9px; padding:10px 12px; transition:border-color .2s; }
-.road-card:hover { border-color:rgba(255,255,255,0.14); }
-.road-step-num { font-family:var(--font-d); font-size:7px; letter-spacing:.14em; color:var(--muted2); margin-bottom:3px; }
-.road-step-title { font-family:var(--font-d); font-size:9.5px; font-weight:700; letter-spacing:.08em; margin-bottom:5px; }
-.road-step-desc { font-size:11px; color:rgba(200,220,255,0.65); line-height:1.6; }
-.road-cli-mini { font-family:var(--font-m); font-size:9px; color:var(--cyan); margin-top:6px; background:rgba(0,200,255,0.04); border:1px solid rgba(0,200,255,0.1); border-radius:4px; padding:4px 8px; white-space:pre-wrap; }
-
-/* ─── What-If Optimizer ─── */
-.whatif-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:8px; }
-.whatif-card { background:rgba(3,8,20,0.9); border:1.5px solid rgba(255,255,255,0.06); border-radius:10px; padding:11px 12px; text-align:center; cursor:pointer; transition:all .2s; position:relative; overflow:hidden; }
-.whatif-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; opacity:0; transition:opacity .2s; }
-.whatif-card:hover::before { opacity:1; }
-.whatif-card.wg::before { background:linear-gradient(90deg,var(--green),var(--teal)); }
-.whatif-card.wa::before { background:linear-gradient(90deg,var(--amber),#ff8800); }
-.whatif-card.wb::before { background:linear-gradient(90deg,var(--blue),var(--purple)); }
-.whatif-card:hover { border-color:rgba(255,255,255,0.18); transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.4); }
-.whatif-icon { font-size:22px; margin-bottom:6px; }
-.whatif-title { font-family:var(--font-d); font-size:8.5px; font-weight:700; letter-spacing:.08em; color:var(--text); margin-bottom:4px; }
-.whatif-delta { font-family:var(--font-d); font-size:13px; font-weight:900; letter-spacing:-.01em; }
-.whatif-desc { font-size:9.5px; color:var(--muted2); margin-top:3px; line-height:1.4; }
+/* TUNING ROADMAP */
+.rmap { padding-left:26px; position:relative; }
+.rmap::before { content:''; position:absolute; left:9px; top:10px; bottom:10px; width:1.5px;
+  background:linear-gradient(180deg,var(--green) 0%,var(--blue) 60%,rgba(255,255,255,.08) 100%); }
+.rs { position:relative; margin-bottom:9px; }
+.rs-dot { position:absolute; left:-21px; top:10px; width:12px; height:12px; border-radius:50%; border:2px solid; background:rgba(3,9,20,.95); z-index:1; }
+.rs-dot.done   { background:var(--green);  border-color:var(--green);  box-shadow:0 0 8px rgba(0,255,136,.5); }
+.rs-dot.active { background:var(--amber);  border-color:var(--amber);  box-shadow:0 0 8px rgba(255,187,0,.5); animation:rdot 1.6s ease-in-out infinite; }
+.rs-dot.open   { border-color:rgba(255,255,255,.18); }
+@keyframes rdot { 0%,100%{box-shadow:0 0 5px rgba(255,187,0,.4)} 50%{box-shadow:0 0 14px rgba(255,187,0,.9)} }
+.rs-card { background:rgba(4,11,24,.9); border:1.5px solid rgba(255,255,255,.06); border-radius:9px; padding:10px 13px; }
+.rs-step { font-family:var(--font-d); font-size:7px; letter-spacing:.14em; color:var(--muted2); margin-bottom:3px; }
+.rs-title { font-family:var(--font-d); font-size:9.5px; font-weight:700; letter-spacing:.08em; margin-bottom:5px; }
+.rs-desc { font-size:11px; color:rgba(200,215,255,.62); line-height:1.62; }
+.rs-cli { font-family:var(--font-m); font-size:9px; color:var(--cyan); margin-top:6px; background:rgba(0,200,255,.04); border:1px solid rgba(0,200,255,.1); border-radius:4px; padding:4px 9px; white-space:pre-wrap; }
+.rmap-tip { margin-top:12px; padding:10px 13px; background:rgba(0,255,136,.04); border:1.5px solid rgba(0,255,136,.1); border-radius:8px; font-size:10.5px; color:var(--muted2); line-height:1.6; }
 </style>
 </head>
 <body>
@@ -1722,185 +1726,176 @@ save</pre>
         </div>
       </div>
 
-      <!-- ══ 9B. FLIGHT PERSONALITY ══ -->
+      <!-- ══ FLIGHT PERSONALITY ══ -->
       {% if analysis.advanced %}
-      {% set _twr = analysis.advanced.thrust_ratio | default(0) | float %}
-      {% set _ft  = analysis.advanced.est_flight_time_min | default(0) | float %}
-      {% set _tip = analysis.advanced.tip_speed_mps | default(0) | float %}
-      {% set _cells = analysis.advanced.cells | default(4) | int %}
-      {% set _kv = analysis.motor_kv | default(0) | int %}
-      {% set _sz = analysis.size | default(5) | float %}
-      {% set _sty = analysis.style | default('freestyle') %}
-      {% set _eff = analysis.advanced.efficiency_class | default('nominal') %}
-
-      {# ── Determine personality ── #}
-      {% if _twr >= 7.0 %}
-        {% set _pname='MONSTER POWER' %}{% set _picon='⚡' %}{% set _pc='#ff4455' %}
-        {% set _pdesc='กำลังล้นเหลือ — เหมาะนักบินระดับ pro ที่ต้องการ ceiling สูงสุด' %}
-        {% set _ptags=['HIGH POWER','AGGRESSIVE','EXPERT'] %}
-      {% elif _sty == 'racing' and _twr >= 4.0 %}
-        {% set _pname='RACE MACHINE' %}{% set _picon='🏁' %}{% set _pc='#ff8800' %}
-        {% set _pdesc='ตอบสนองรวดเร็ว กำลังพุ่ง เหมาะ gate racing และ speed run' %}
-        {% set _ptags=['FAST RESPONSE','LOW DRAG','RACE READY'] %}
-      {% elif _sty == 'freestyle' and _twr >= 4.0 %}
-        {% set _pname='PUNCHY FREESTYLE' %}{% set _picon='🚀' %}{% set _pc='#00ff88' %}
-        {% set _pdesc='Freestyle ระดับ A+ — flip/roll คม กำลังมี headroom มาก' %}
-        {% set _ptags=['FREESTYLE','PUNCHY','4S POWER'] %}
-      {% elif _sty == 'freestyle' and _twr >= 3.0 %}
-        {% set _pname='SMOOTH FREESTYLE' %}{% set _picon='🌀' %}{% set _pc='#58a6ff' %}
-        {% set _pdesc='สมดุลระหว่างกำลังและ flight time เหมาะบิน freestyle ทั่วไป' %}
-        {% set _ptags=['SMOOTH','BALANCED','CINEMATIC OK'] %}
-      {% elif _sty == 'longrange' and _ft >= 18 %}
-        {% set _pname='ENDURANCE EXPLORER' %}{% set _picon='🛸' %}{% set _pc='#a78bfa' %}
-        {% set _pdesc='Flight time ยาว สมรรถนะดี เหมาะบิน long range และถ่ายภาพ' %}
-        {% set _ptags=['LONG RANGE','EFFICIENT','GPS READY'] %}
-      {% elif _sty == 'longrange' %}
-        {% set _pname='EFFICIENT CRUISER' %}{% set _picon='🌐' %}{% set _pc='#4fc3f7' %}
-        {% set _pdesc='ประหยัดพลังงาน เหมาะบิน FPV ระยะไกล terrain exploration' %}
-        {% set _ptags=['LONG RANGE','CRUISING','ECO MODE'] %}
-      {% elif _sz <= 3.5 %}
-        {% set _pname='MICRO RIPPER' %}{% set _picon='🐝' %}{% set _pc='#f59e0b' %}
-        {% set _pdesc='เล็กแต่ดุ บินในพื้นที่แคบได้ เหมาะ indoor / proximity' %}
-        {% set _ptags=['MICRO','INDOOR OK','AGILE'] %}
+      {% set _tw = analysis.advanced.thrust_ratio|default(0)|float %}
+      {% set _ft = analysis.advanced.est_flight_time_min|default(0)|float %}
+      {% set _tp = analysis.advanced.tip_speed_mps|default(0)|float %}
+      {% set _cl = analysis.advanced.cells|default(4)|int %}
+      {% set _sy = analysis.style|default('freestyle') %}
+      {% set _sz = analysis.size|default(5)|float %}
+      {% if _tw >= 7.0 %}
+        {% set _pn='MONSTER POWER' %}{% set _pe='⚡' %}{% set _pc='#ff3344' %}
+        {% set _pd='กำลังล้นเหลือ — เพดานสูงมาก เหมาะนักบิน pro ที่ต้องการทุกมิลลิวินาที' %}
+        {% set _pt=['HIGH POWER','AGGRESSIVE','EXPERT ONLY'] %}
+      {% elif _sy=='racing' and _tw>=4.0 %}
+        {% set _pn='RACE MACHINE' %}{% set _pe='🏁' %}{% set _pc='#ff8800' %}
+        {% set _pd='ตอบสนองรวดเร็ว กำลังพุ่ง — เหมาะ gate racing และ speed run' %}
+        {% set _pt=['FAST RESPONSE','LOW DRAG','RACE READY'] %}
+      {% elif _sy=='freestyle' and _tw>=4.0 %}
+        {% set _pn='PUNCHY FREESTYLE' %}{% set _pe='🚀' %}{% set _pc='#00ff88' %}
+        {% set _pd='Freestyle ระดับ A+ — flip/roll คมกริบ กำลังมี headroom ล้นเหลือ' %}
+        {% set _pt=['FREESTYLE','PUNCHY','4S OPTIMIZED'] %}
+      {% elif _sy=='freestyle' and _tw>=2.8 %}
+        {% set _pn='SMOOTH FREESTYLE' %}{% set _pe='🌀' %}{% set _pc='#00aaff' %}
+        {% set _pd='สมดุลระหว่างกำลังและ flight time — เหมาะ freestyle ทั่วไปและ cinewhoop' %}
+        {% set _pt=['SMOOTH','BALANCED','CINE OK'] %}
+      {% elif _sy=='longrange' and _ft>=18 %}
+        {% set _pn='ENDURANCE EXPLORER' %}{% set _pe='🛸' %}{% set _pc='#b060ff' %}
+        {% set _pd='Flight time ยาว สมรรถนะดี — เหมาะ long range, mapping, การถ่ายภาพ' %}
+        {% set _pt=['LONG RANGE','EFFICIENT','GPS READY'] %}
+      {% elif _sy=='longrange' %}
+        {% set _pn='EFFICIENT CRUISER' %}{% set _pe='🌐' %}{% set _pc='#00d4ff' %}
+        {% set _pd='ประหยัดพลังงาน เหมาะ FPV ระยะไกล exploration และ terrain following' %}
+        {% set _pt=['LONG RANGE','CRUISING','ECO MODE'] %}
+      {% elif _sz<=3.0 %}
+        {% set _pn='MICRO RIPPER' %}{% set _pe='🐝' %}{% set _pc='#ffbb00' %}
+        {% set _pd='เล็กแต่ดุ — บินในพื้นที่แคบได้ เหมาะ indoor / proximity flying' %}
+        {% set _pt=['MICRO','INDOOR OK','AGILE'] %}
       {% else %}
-        {% set _pname='BALANCED BUILDER' %}{% set _picon='⚖️' %}{% set _pc='#34d399' %}
-        {% set _pdesc='All-rounder ที่ดีมาก ใช้งานได้หลายสถานการณ์' %}
-        {% set _ptags=['VERSATILE','ALL-ROUND','BEGINNER OK'] %}
+        {% set _pn='BALANCED BUILDER' %}{% set _pe='⚖️' %}{% set _pc='#34d399' %}
+        {% set _pd='All-rounder ที่ดี — ใช้งานได้หลายสถานการณ์ เหมาะนักบินทุกระดับ' %}
+        {% set _pt=['VERSATILE','ALL-ROUND','BEGINNER FRIENDLY'] %}
       {% endif %}
 
-      <div class="tpanel pers-card" style="border:1.5px solid {{ _pc }}30; border-left:3px solid {{ _pc }};">
+      <div class="tpanel pers-wrap" style="border:1.5px solid {{ _pc }}28; border-left:3px solid {{ _pc }};">
         <div class="pers-glow" style="background:{{ _pc }};"></div>
-        <div class="pers-inner">
-          <div class="pers-badge-icon" style="color:{{ _pc }};">{{ _picon }}</div>
-          <div style="flex:1;">
-            <div style="font-family:var(--font-d);font-size:7px;letter-spacing:.2em;color:{{ _pc }};opacity:.7;margin-bottom:4px;">FLIGHT PERSONALITY</div>
-            <div class="pers-name" style="color:{{ _pc }};">{{ _pname }}</div>
-            <div class="pers-desc">{{ _pdesc }}</div>
-            <div class="pers-pills">
-              {% for _tag in _ptags %}
-              <span class="pers-pill" style="color:{{ _pc }};border-color:{{ _pc }}40;background:{{ _pc }}12;">{{ _tag }}</span>
+        <div class="pers-top">
+          <div class="pers-emoji" style="color:{{ _pc }};">{{ _pe }}</div>
+          <div class="pers-info">
+            <div class="pers-eyebrow" style="color:{{ _pc }};">FLIGHT PERSONALITY · วิเคราะห์จาก BUILD ของคุณ</div>
+            <div class="pers-name" style="color:{{ _pc }};">{{ _pn }}</div>
+            <div class="pers-desc">{{ _pd }}</div>
+            <div class="pers-tags">
+              {% for _t in _pt %}
+              <span class="pers-tag" style="color:{{ _pc }};border-color:{{ _pc }}38;background:{{ _pc }}12;">{{ _t }}</span>
               {% endfor %}
             </div>
           </div>
         </div>
-        <div class="pers-stats-row">
-          <div class="pers-stat">
-            <div class="pers-stat-v" style="color:{% if _twr>=4 %}var(--green){% elif _twr>=2.5 %}var(--amber){% else %}var(--red){% endif %};">{{ _twr | round(1) }}</div>
-            <div class="pers-stat-l">TWR</div>
+        <div class="pers-row">
+          <div class="pers-cell">
+            <div class="pers-v" style="color:{% if _tw>=4 %}var(--green){% elif _tw>=2.5 %}var(--amber){% else %}var(--red){% endif %};">{{ _tw|round(1) }}</div>
+            <div class="pers-l">TWR RATIO</div>
           </div>
-          <div class="pers-stat">
-            <div class="pers-stat-v" style="color:var(--blue);">{{ _ft | int }}</div>
-            <div class="pers-stat-l">MIN FLIGHT</div>
+          <div class="pers-cell">
+            <div class="pers-v" style="color:var(--blue);">{{ _ft|int }}</div>
+            <div class="pers-l">FLIGHT MIN</div>
           </div>
-          <div class="pers-stat">
-            <div class="pers-stat-v" style="color:{% if _tip>290 %}var(--red){% elif _tip>265 %}var(--amber){% else %}var(--green){% endif %};">{{ _tip | int }}</div>
-            <div class="pers-stat-l">TIP m/s</div>
+          <div class="pers-cell">
+            <div class="pers-v" style="color:{% if _tp>290 %}var(--red){% elif _tp>265 %}var(--amber){% else %}var(--green){% endif %};">{{ _tp|int }}</div>
+            <div class="pers-l">TIP m/s</div>
           </div>
-          <div class="pers-stat">
-            <div class="pers-stat-v" style="color:var(--amber);">{{ _cells }}S</div>
-            <div class="pers-stat-l">BATTERY</div>
+          <div class="pers-cell">
+            <div class="pers-v" style="color:var(--amber);">{{ _cl }}S</div>
+            <div class="pers-l">BATTERY</div>
           </div>
         </div>
       </div>
       {% endif %}
 
-      <!-- ══ 9C. WHAT-IF OPTIMIZER ══ -->
+      <!-- ══ WHAT-IF OPTIMIZER ══ -->
       {% if analysis.advanced %}
-      {% set _twr2 = analysis.advanced.thrust_ratio | default(0) | float %}
-      {% set _ft2 = analysis.advanced.est_flight_time_min | default(0) | float %}
-      {% set _kv2 = analysis.motor_kv | default(0) | int %}
-      {% set _sz2 = analysis.size | default(5) | float %}
-      {% set _mah2 = analysis.battery_mAh | default(1500) | int %}
-      {% set _cells2 = analysis.advanced.cells | default(4) | int %}
+      {% set _w2 = analysis.weight|default(750)|float %}
+      {% set _tw2= analysis.advanced.thrust_ratio|default(0)|float %}
+      {% set _ft2= analysis.advanced.est_flight_time_min|default(0)|float %}
+      {% set _kv2= analysis.motor_kv|default(0)|int %}
+      {% set _mh2= analysis.battery_mAh|default(1500)|int %}
+      {% set _cl2= analysis.advanced.cells|default(4)|int %}
+      {% set _sz2= analysis.size|default(5)|float %}
+      {% set _sy2= analysis.style|default('freestyle') %}
+      {% set _rf2= analysis.filter.rpm_filter if analysis.filter else false %}
       <div class="tpanel" style="border-left:3px solid var(--blue);">
         <div class="tpanel-head">
-          <div class="tpanel-head-icon" style="background:var(--b-dim);border-color:rgba(0,170,255,0.2);">🔮</div>
+          <div class="tpanel-head-icon" style="background:var(--b-dim);border-color:rgba(0,170,255,.2);">🔮</div>
           <div>
-            <div class="tpanel-title">WHAT-IF OPTIMIZER</div>
-            <div class="tpanel-sub">การปรับง่ายๆ ที่จะยกระดับ build ของคุณ</div>
+            <div class="tpanel-title">WHAT-IF OPTIMIZER — ถ้าปรับแค่นี้ จะได้อะไร?</div>
+            <div class="tpanel-sub">การเปลี่ยนเล็กๆ ที่ยกระดับ build ของคุณอย่างมีนัยสำคัญ</div>
           </div>
         </div>
         <div class="tpanel-body">
-          <div class="whatif-grid">
+          <div class="wi-grid">
 
-            {# -- Card 1: Bigger Battery -- #}
-            {% if _ft2 < 8 and _mah2 < 2000 %}
-            <div class="whatif-card wg">
-              <div class="whatif-icon">🔋</div>
-              <div class="whatif-title">ใช้แบต {{ (_mah2 * 1.33) | int }}mAh</div>
-              <div class="whatif-delta" style="color:var(--green);">+{{ (_ft2 * 0.28) | round(1) }} min</div>
-              <div class="whatif-desc">เพิ่ม capacity 33% → flight time ยาวขึ้น<br>น้ำหนักเพิ่ม ~{{ (_mah2 * 0.033 * 0.7) | int }}g</div>
+            {% if _ft2 < 9 and _mh2 < 2200 %}
+            <div class="wi-card cg">
+              <div class="wi-icon">🔋</div>
+              <div class="wi-title">ใช้แบต {{ (_mh2*1.33)|int }}mAh</div>
+              <div class="wi-delta" style="color:var(--green);">+{{ (_ft2*0.28)|round(1) }} นาที</div>
+              <div class="wi-sub">เพิ่ม capacity 33%<br>น้ำหนักเพิ่ม ~{{ (_mh2*0.033*0.75)|int }}g</div>
             </div>
             {% endif %}
 
-            {# -- Card 2: Lighter Frame -- #}
-            {% set _w2 = analysis.weight | default(750) | float %}
-            {% if _w2 > 500 %}
-            <div class="whatif-card wb">
-              <div class="whatif-icon">⚖️</div>
-              <div class="whatif-title">ลดน้ำหนัก {{ (_w2 * 0.08) | int }}g</div>
-              <div class="whatif-delta" style="color:var(--blue);">TWR +{{ ((_twr2 / (1 - 0.08)) - _twr2) | round(2) }}</div>
-              <div class="whatif-desc">ลด 8% → TWR ดีขึ้น<br>เช่น frame เบา / ถอด LED</div>
+            {% if _w2 > 450 %}
+            <div class="wi-card cb">
+              <div class="wi-icon">⚖️</div>
+              <div class="wi-title">ลดน้ำหนัก {{ (_w2*0.08)|int }}g</div>
+              <div class="wi-delta" style="color:var(--blue);">TWR +{{ ((_tw2/(1-0.08))-_tw2)|round(2) }}</div>
+              <div class="wi-sub">ลด 8% → TWR ดีขึ้น<br>frame เบา / ถอด LED</div>
             </div>
             {% endif %}
 
-            {# -- Card 3: KV adjustment -- #}
-            {% if _kv2 > 0 %}
-              {% if _cells2 == 4 and _kv2 > 2500 %}
-              <div class="whatif-card wa">
-                <div class="whatif-icon">🌡️</div>
-                <div class="whatif-title">ลด KV → 2306</div>
-                <div class="whatif-delta" style="color:var(--amber);">Motor เย็นลง</div>
-                <div class="whatif-desc">KV สูงเกิน 4S → motor ร้อน<br>2306 KV เหมาะ 4S 5\" มากกว่า</div>
-              </div>
-              {% elif _cells2 == 4 and _kv2 < 1800 %}
-              <div class="whatif-card wg">
-                <div class="whatif-icon">⚡</div>
-                <div class="whatif-title">เพิ่ม KV → 2206</div>
-                <div class="whatif-delta" style="color:var(--green);">TWR ดีขึ้น</div>
-                <div class="whatif-desc">KV ต่ำสำหรับ 4S<br>2206+ ให้กำลังมากกว่า</div>
-              </div>
-              {% elif _cells2 >= 6 and _kv2 > 1600 and _sz2 >= 7 %}
-              <div class="whatif-card wa">
-                <div class="whatif-icon">✈️</div>
-                <div class="whatif-title">ลด KV → 1200</div>
-                <div class="whatif-delta" style="color:var(--amber);">Efficiency ↑</div>
-                <div class="whatif-desc">7\"+ 6S: KV ต่ำ → tip speed ปลอดภัย<br>efficiency สูงขึ้น flight time ยาวขึ้น</div>
-              </div>
-              {% endif %}
-            {% endif %}
-
-            {# -- Card 4: Add RPM Filter -- #}
-            {% if not analysis.filter.rpm_filter %}
-            <div class="whatif-card wg">
-              <div class="whatif-icon">🔊</div>
-              <div class="whatif-title">เปิด RPM Filter</div>
-              <div class="whatif-delta" style="color:var(--green);">Noise ลดลง</div>
-              <div class="whatif-desc">ใช้ BLHeli32 + DSHOT300<br>→ motor เย็นขึ้น, video smoother</div>
+            {% if _kv2>0 and _cl2==4 and _kv2>2600 %}
+            <div class="wi-card ca">
+              <div class="wi-icon">🌡️</div>
+              <div class="wi-title">ลด KV → 2306</div>
+              <div class="wi-delta" style="color:var(--amber);">Motor เย็นลง</div>
+              <div class="wi-sub">KV สูงเกิน 4S<br>→ motor ร้อน, tip speed สูง</div>
+            </div>
+            {% elif _kv2>0 and _cl2>=6 and _kv2>1600 and _sz2>=7 %}
+            <div class="wi-card ca">
+              <div class="wi-icon">✈️</div>
+              <div class="wi-title">ลด KV → 1200</div>
+              <div class="wi-delta" style="color:var(--amber);">Tip Speed ↓</div>
+              <div class="wi-sub">7\"+ 6S: KV ต่ำ<br>→ ปลอดภัย, efficient ขึ้น</div>
+            </div>
+            {% elif _kv2>0 and _cl2==4 and _kv2<1900 %}
+            <div class="wi-card cg">
+              <div class="wi-icon">⚡</div>
+              <div class="wi-title">เพิ่ม KV → 2206</div>
+              <div class="wi-delta" style="color:var(--green);">TWR ดีขึ้น</div>
+              <div class="wi-sub">KV ต่ำสำหรับ 4S<br>→ 2206+ ให้กำลังมากกว่า</div>
             </div>
             {% endif %}
 
-            {# -- Card 5: Style-specific -- #}
-            {% if analysis.style == 'freestyle' %}
-            <div class="whatif-card wb">
-              <div class="whatif-icon">🎯</div>
-              <div class="whatif-title">ปรับ Rates</div>
-              <div class="whatif-delta" style="color:var(--blue);">Feel ดีขึ้น</div>
-              <div class="whatif-desc">RC Rate 1.0 / Expo 0.58<br>Super Rate 0.74 → freestyle feel</div>
+            {% if not _rf2 %}
+            <div class="wi-card cg">
+              <div class="wi-icon">🔊</div>
+              <div class="wi-title">เปิด RPM Filter</div>
+              <div class="wi-delta" style="color:var(--green);">Noise ลด</div>
+              <div class="wi-sub">BLHeli32 + DSHOT300<br>motor เย็นขึ้น, video smooth</div>
             </div>
-            {% elif analysis.style == 'longrange' %}
-            <div class="whatif-card wg">
-              <div class="whatif-icon">📡</div>
-              <div class="whatif-title">ตั้ง GPS Rescue</div>
-              <div class="whatif-delta" style="color:var(--green);">Safe RTH</div>
-              <div class="whatif-desc">min_sats=8, altitude=30m<br>→ ปลอดภัยเมื่อสัญญาณหาย</div>
+            {% endif %}
+
+            {% if _sy2=='freestyle' %}
+            <div class="wi-card cb">
+              <div class="wi-icon">🎯</div>
+              <div class="wi-title">ปรับ Rates</div>
+              <div class="wi-delta" style="color:var(--blue);">Feel ดีขึ้น</div>
+              <div class="wi-sub">RC Rate 1.0 / Expo 0.58<br>Super Rate 0.74</div>
             </div>
-            {% elif analysis.style == 'racing' %}
-            <div class="whatif-card wa">
-              <div class="whatif-icon">🏁</div>
-              <div class="whatif-title">ลด Filter Delay</div>
-              <div class="whatif-delta" style="color:var(--amber);">Latency ลด</div>
-              <div class="whatif-desc">Gyro LPF1 → PT2 @ 250Hz<br>DTerm LPF1 → 150Hz</div>
+            {% elif _sy2=='longrange' %}
+            <div class="wi-card cg">
+              <div class="wi-icon">📡</div>
+              <div class="wi-title">ตั้ง GPS Rescue</div>
+              <div class="wi-delta" style="color:var(--green);">Safe RTH</div>
+              <div class="wi-sub">min_sats=8, alt=30m<br>ปลอดภัยเมื่อสัญญาณหาย</div>
+            </div>
+            {% elif _sy2=='racing' %}
+            <div class="wi-card ca">
+              <div class="wi-icon">🏁</div>
+              <div class="wi-title">ลด Filter Delay</div>
+              <div class="wi-delta" style="color:var(--amber);">Latency ลด</div>
+              <div class="wi-sub">Gyro LPF1 PT2 @ 250Hz<br>DTerm LPF1 → 150Hz</div>
             </div>
             {% endif %}
 
@@ -1909,218 +1904,244 @@ save</pre>
       </div>
       {% endif %}
 
-      <!-- ══ 9D. PRO TUNING TRIX ══ -->
+      <!-- ══ PRO TUNING TRIX ══ -->
       {% if analysis %}
-      {% set _sty3 = analysis.style | default('freestyle') %}
-      {% set _sz3 = analysis.size | default(5) | float %}
-      {% set _twr3 = analysis.advanced.thrust_ratio | default(0) | float if analysis.advanced else 0 %}
-      {% set _tip3 = analysis.advanced.tip_speed_mps | default(0) | float if analysis.advanced else 0 %}
-      {% set _kv3 = analysis.motor_kv | default(0) | int %}
-      {% set _cells3 = analysis.advanced.cells | default(4) | int if analysis.advanced else 4 %}
-      {% set _P_roll = analysis.pid.roll.p | default(48) | int %}
-      {% set _D_roll = analysis.pid.roll.d | default(38) | int %}
-      {% set _I_roll = analysis.pid.roll.i | default(90) | int %}
-      <div class="tpanel" style="border-left:3px solid #a78bfa;">
+      {% set _sy3= analysis.style|default('freestyle') %}
+      {% set _sz3= analysis.size|default(5)|float %}
+      {% set _cl3= (analysis.advanced.cells|default(4)|int) if analysis.advanced else 4 %}
+      {% set _Pr = analysis.pid.roll.p|default(48)|int %}
+      {% set _Dr = analysis.pid.roll.d|default(38)|int %}
+      {% set _Ir = analysis.pid.roll.i|default(90)|int %}
+      {% set _rpm3= (analysis.advanced.rpm_estimated|default(0)|int) if analysis.advanced else 0 %}
+      <div class="tpanel" style="border-left:3px solid var(--purple);">
         <div class="tpanel-head">
-          <div class="tpanel-head-icon" style="background:rgba(167,139,250,.08);border-color:rgba(167,139,250,0.2);">🔥</div>
+          <div class="tpanel-head-icon" style="background:rgba(176,96,255,.08);border-color:rgba(176,96,255,.22);">🔥</div>
           <div>
-            <div class="tpanel-title">PRO TUNING TRIX — {{ analysis.detected_class | default('Custom') }} {{ _sty3 | capitalize }}</div>
-            <div class="tpanel-sub">เทคนิคจริงจากนักบิน — เหมาะกับ build ของคุณโดยตรง</div>
+            <div class="tpanel-title">PRO TUNING TRIX — เทคนิคเฉพาะ {{ analysis.detected_class|default('Build') }} ของคุณ</div>
+            <div class="tpanel-sub">เลือกมาเฉพาะ build นี้ · มือใหม่อ่านได้ · มือเก่าเอาไปใช้ได้เลย</div>
           </div>
         </div>
         <div class="tpanel-body">
-          <div class="trix-header-badge" style="background:rgba(167,139,250,0.08);color:#a78bfa;border:1px solid rgba(167,139,250,0.2);">
-            🎖️ PERSONALIZED FOR {{ analysis.detected_class | default('CUSTOM') }} · {{ _sty3 | upper }} · {{ _cells3 }}S
+          <div class="trix-badge" style="background:rgba(176,96,255,.08);color:var(--purple);border:1px solid rgba(176,96,255,.2);">
+            🎖️ PERSONALIZED · {{ analysis.detected_class|default('CUSTOM')|upper }} · {{ _sy3|upper }} · {{ _cl3 }}S
           </div>
           <div class="trix-list">
 
-            <!-- TRIX 01: PID Start Point -->
-            <div class="trix-item t-green">
-              <div class="trix-num">01</div>
+            <!-- TIP 01: PID Starting Point — ทุก build -->
+            <div class="trix-item tg">
+              <div class="trix-n">01</div>
               <div class="trix-body">
-                <div class="trix-title"><span class="trix-title-icon">🎯</span> จุดเริ่มต้น PID ที่ถูกต้อง <span class="trix-tag pro">PRO TIP</span></div>
-                <div class="trix-desc">ค่านี้คือ baseline ที่คำนวณจาก class + style ของคุณ อย่าเพิ่งปรับ — บินตามนี้ก่อน 1 pack แล้วสังเกต behavior ก่อนปรับ<br>
-                <strong style="color:var(--green);">Pitch P = Roll P + 5-8</strong> เสมอ เพราะ CoG ของโดรนอยู่ด้านหน้าทำให้ pitch axis ต้องการ correction มากกว่า</div>
-                <div class="trix-cli">set p_roll = {{ _P_roll }}  # จุดเริ่มต้น — pitch +5 → {{ _P_roll + 5 }}
-set d_roll = {{ _D_roll }}  # ปรับ D ก่อน P ถ้ามี propwash</div>
+                <div class="trix-title"><span class="trix-ico">🎯</span>จุดเริ่มต้น PID ที่ถูกต้อง <span class="ttag pro">PRO TIP</span></div>
+                <div class="trix-desc">
+                  ค่านี้คือ baseline ที่คำนวณจาก class + style ของ build คุณ <strong style="color:var(--green);">อย่าเพิ่งปรับ</strong> — บินตามนี้ก่อน 1 pack แล้วสังเกต behavior<br>
+                  <strong>Pitch P ต้องสูงกว่า Roll P เสมอ +5 ถึง +8</strong> เพราะ CoG ของโดรนอยู่ด้านหน้า pitch axis ต้องการ correction มากกว่า roll<br>
+                  <span style="color:var(--muted2);font-size:10px;">มือใหม่: P สูง = สั่น (oscillate) / P ต่ำ = ช้า ไม่ตอบสนอง · เริ่มต้นที่นี่เสมอ</span>
+                </div>
+                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set p_roll  = {{ _Pr }}   # baseline สำหรับ build นี้
+set p_pitch = {{ _Pr + 6 }}   # pitch ต้องสูงกว่า roll +5-8 เสมอ
+set d_roll  = {{ _Dr }}   # ปรับ D ก่อน P ถ้ามี propwash</div>
               </div>
             </div>
 
-            <!-- TRIX 02: Style-specific main tip -->
-            {% if _sty3 == 'freestyle' %}
-            <div class="trix-item t-amber">
-              <div class="trix-num">02</div>
+            <!-- TIP 02: Style-specific main -->
+            {% if _sy3=='freestyle' %}
+            <div class="trix-item ta">
+              <div class="trix-n">02</div>
               <div class="trix-body">
-                <div class="trix-title"><span class="trix-title-icon">🌀</span> แก้ Propwash ให้ถูกจุด <span class="trix-tag hot">COMMON FIX</span></div>
-                <div class="trix-desc">Propwash หลัง flip/roll เกิดจาก D term ไม่พอ ไม่ใช่ P สูงเกิน<br>
-                เพิ่ม <strong style="color:var(--amber);">D roll/pitch ทีละ +2</strong> จนหาย แต่อย่าให้ motor ร้อนเกิน (แตะ motor หลังบิน 2 pack — ควรแค่อุ่นๆ ไม่ร้อนมือ)<br>
-                ถ้าเพิ่ม D แล้ว motor ร้อน → เปิด RPM filter แทน</div>
-                <div class="trix-cli">set d_roll  = {{ _D_roll + 2 }}  # +2 จาก baseline (ทดลอง)
-set d_pitch = {{ _D_roll + 4 }}  # pitch D สูงกว่า roll ~2</div>
+                <div class="trix-title"><span class="trix-ico">🌀</span>แก้ Propwash ให้ถูกจุด <span class="ttag hot">FIX COMMON</span></div>
+                <div class="trix-desc">
+                  Propwash หลัง flip/roll มักเกิดเพราะ <strong>D term ไม่พอ</strong> ไม่ใช่ P สูงเกิน — เพิ่ม D roll/pitch ทีละ +2 จนหาย<br>
+                  หลังปรับ แตะ motor หลังบิน 2 pack — ต้อง "อุ่น" ไม่ใช่ "ร้อนมือ" ถ้าร้อน = D สูงเกิน<br>
+                  <span style="color:var(--amber);">ถ้าเพิ่ม D แล้ว motor ร้อน → เปิด RPM filter ก่อนแทนการลด D</span>
+                </div>
+                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set d_roll  = {{ _Dr+2 }}  # +2 จาก baseline (ทดลอง)
+set d_pitch = {{ _Dr+4 }}  # pitch D สูงกว่า roll ~2 เสมอ</div>
               </div>
             </div>
-            <div class="trix-item t-blue">
-              <div class="trix-num">03</div>
+            <div class="trix-item tb">
+              <div class="trix-n">03</div>
               <div class="trix-body">
-                <div class="trix-title"><span class="trix-title-icon">⚡</span> Feedforward — ความ snappy ของ stick <span class="trix-tag new">BF4.5</span></div>
-                <div class="trix-desc">Feedforward ช่วยให้โดรนตอบสนอง stick ทันที (ไม่ delay) เหมาะมากสำหรับ freestyle<br>
-                ค่า 100-120 ให้ feel snappy · ถ้า nose kick on fast input → ลด FF ลง 10<br>
-                <strong style="color:var(--blue);">Jitter reduction เปิดไว้เสมอถ้าใช้ TBS/ELRS</strong></div>
-                <div class="trix-cli">set feedforward_roll  = 110  # 100-130 freestyle
+                <div class="trix-title"><span class="trix-ico">⚡</span>Feedforward — ความ snappy ของ stick <span class="ttag new">BF4.5</span></div>
+                <div class="trix-desc">
+                  FF ให้โดรนตอบสนอง stick ทันทีก่อนที่ error จะเกิด เหมาะมากสำหรับ freestyle<br>
+                  100-120 = snappy · ถ้ามี nose kick เมื่อ input เร็ว → ลด FF 10 · <strong>Jitter reduction เปิดไว้เสมอถ้าใช้ TBS/ELRS</strong><br>
+                  <span style="color:var(--muted2);font-size:10px;">มือใหม่: FF เพิ่มทีละ 10 แล้วบินทดสอบ punch out สั้นๆ</span>
+                </div>
+                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set feedforward_roll  = 110  # 100-130 freestyle
 set feedforward_pitch = 110
-set feedforward_yaw   = 80   # yaw FF ต่ำกว่าเสมอ</div>
+set feedforward_yaw   = 80   # yaw FF ต่ำกว่าเสมอ
+set feedforward_jitter_factor = 7  # ลด noise จาก link</div>
               </div>
             </div>
-            <div class="trix-item t-purple">
-              <div class="trix-num">04</div>
+            <div class="trix-item tp">
+              <div class="trix-n">04</div>
               <div class="trix-body">
-                <div class="trix-title"><span class="trix-title-icon">🎮</span> Rates สำหรับ Freestyle ที่ดีที่สุด</div>
-                <div class="trix-desc">Rates ส่งผลต่อ feel โดยตรง — ค่านี้เป็น starting point สำหรับ 5\" freestyle<br>
-                RC Rate 1.0 → Max rotation ~670°/s ที่ full stick (เพียงพอสำหรับ freestyle)<br>
-                Expo 0.58 → Center stick นุ่ม ปลาย stick precise</div>
-                <div class="trix-cli">set roll_rc_rate = 100   # 1.0
-set roll_expo    = 58    # center smooth
-set roll_srate   = 74    # super rate</div>
+                <div class="trix-title"><span class="trix-ico">🎮</span>Rates สำหรับ Freestyle — จุดเริ่มต้นที่ดี</div>
+                <div class="trix-desc">
+                  Rates กำหนด max rotation speed และความรู้สึกของ stick<br>
+                  RC Rate 1.0 + Expo 0.58 = center smooth, ปลาย stick precise ให้ ~670°/s max<br>
+                  <span style="color:var(--muted2);font-size:10px;">มือใหม่: อย่าเพิ่ง Super Rate สูง — เริ่มที่ 0.60-0.70 แล้วค่อยเพิ่มทีละ 0.05</span>
+                </div>
+                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set roll_rc_rate  = 100  # 1.0
+set roll_expo     = 58   # center smooth
+set roll_srate    = 74   # super rate ~670°/s</div>
               </div>
             </div>
-            <div class="trix-item t-cyan">
-              <div class="trix-num">05</div>
+            <div class="trix-item ta">
+              <div class="trix-n">05</div>
               <div class="trix-body">
-                <div class="trix-title"><span class="trix-title-icon">📉</span> TPA — ลด PID ที่ throttle สูง <span class="trix-tag warn">IMPORTANT</span></div>
-                <div class="trix-desc">ที่ full throttle, P term สูงเกินจะทำให้โดรนสั่น TPA ลด P ที่ throttle สูงโดยอัตโนมัติ<br>
-                เริ่มที่ 0.65 / breakpoint 0.30 → P ลด 65% เมื่อ throttle เกิน 30%</div>
-                <div class="trix-cli">set tpa_rate  = 65   # 0.65
-set tpa_breakpoint = 1300  # ~30% throttle</div>
+                <div class="trix-title"><span class="trix-ico">📉</span>TPA — ลด P อัตโนมัติที่ throttle สูง <span class="ttag warn">IMPORTANT</span></div>
+                <div class="trix-desc">
+                  Full throttle → airflow เพิ่ม → P term overshoots → สั่น TPA ลด P โดยอัตโนมัติเมื่อ throttle สูง<br>
+                  เริ่มที่ 0.65 / breakpoint 1300 (≈30%) — P ลด 65% เมื่อ throttle เกิน 30%<br>
+                  <span style="color:var(--muted2);font-size:10px;">มือใหม่: ตั้งค่านี้แล้วลืมไปได้เลย มันทำงานเองอัตโนมัติ</span>
+                </div>
+                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set tpa_rate       = 65    # ลด P 65% ที่ full throttle
+set tpa_breakpoint = 1300  # เริ่มลดที่ ~30% throttle</div>
               </div>
             </div>
 
-            {% elif _sty3 == 'racing' %}
-            <div class="trix-item t-red">
-              <div class="trix-num">02</div>
+            {% elif _sy3=='racing' %}
+            <div class="trix-item tr">
+              <div class="trix-n">02</div>
               <div class="trix-body">
-                <div class="trix-title"><span class="trix-title-icon">🏁</span> Race Tune — ลด Latency ทุกอย่าง <span class="trix-tag hot">RACE CRITICAL</span></div>
-                <div class="trix-desc">Racing ต้องการ loop time ต่ำที่สุด — ลด filter ทุกชั้น ยิ่งน้อยยิ่งดี<br>
-                Gyro LPF1 เป็น PT2 @ 250Hz / DTerm LPF1 ลดลง → total delay ลด ~1ms<br>
-                ถ้ามี blackbox → ดู step response ก่อนปรับ</div>
-                <div class="trix-cli">set gyro_lpf1_type     = PT2
-set gyro_lpf1_hz       = 250
-set dterm_lpf1_type    = PT2  
-set dterm_lpf1_hz      = 150</div>
+                <div class="trix-title"><span class="trix-ico">🏁</span>Race Tune — ลด Filter Latency ทุกชั้น <span class="ttag hot">RACE CRITICAL</span></div>
+                <div class="trix-desc">
+                  Racing ต้องการ loop latency ต่ำสุด — filter แต่ละชั้นเพิ่ม delay<br>
+                  Gyro LPF1 PT2 @ 250Hz / DTerm LPF1 ลดลง → total delay ลด ~1ms<br>
+                  <span style="color:var(--muted2);font-size:10px;">มือใหม่: ลด filter = noise มากขึ้น ต้องมี RPM filter ช่วย หรือ motor + prop คุณภาพสูง</span>
+                </div>
+                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set gyro_lpf1_type  = PT2
+set gyro_lpf1_hz    = 250
+set dterm_lpf1_type = PT2
+set dterm_lpf1_hz   = 150</div>
               </div>
             </div>
-            <div class="trix-item t-amber">
-              <div class="trix-num">03</div>
+            <div class="trix-item ta">
+              <div class="trix-n">03</div>
               <div class="trix-body">
-                <div class="trix-title"><span class="trix-title-icon">⚡</span> P Term สูงกว่า Freestyle ได้ <span class="trix-tag pro">PRO</span></div>
-                <div class="trix-desc">Racing prop มี inertia น้อยกว่า → ตอบสนอง P ได้เร็ว ไม่ oscillate ง่าย<br>
-                เพิ่ม P roll/pitch ได้ถึง 60-70 สำหรับ race build · ลด D ลง (noise น้อย ไม่ต้องการ damping มาก)</div>
-                <div class="trix-cli">set p_roll  = {{ [_P_roll + 8, 65] | min }}
-set p_pitch = {{ [_P_roll + 13, 70] | min }}
-set d_roll  = {{ [_D_roll - 4, 28] | max }}  # ลด D สำหรับ race</div>
+                <div class="trix-title"><span class="trix-ico">⚡</span>P สูงกว่า Freestyle ได้ สำหรับ Race <span class="ttag pro">PRO</span></div>
+                <div class="trix-desc">
+                  Race prop มี inertia น้อย → ตอบสนอง P ได้เร็ว ไม่ oscillate ง่าย<br>
+                  เพิ่ม P roll/pitch ได้ถึง 60-70 · ลด D ลง (noise น้อย, ไม่ต้องการ damping มาก)
+                </div>
+                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set p_roll  = {{ [_Pr+8, 65]|min }}
+set p_pitch = {{ [_Pr+13, 70]|min }}
+set d_roll  = {{ [_Dr-4, 26]|max }}  # ลด D สำหรับ race</div>
               </div>
             </div>
-            <div class="trix-item t-blue">
-              <div class="trix-num">04</div>
+            <div class="trix-item tb">
+              <div class="trix-n">04</div>
               <div class="trix-body">
-                <div class="trix-title"><span class="trix-title-icon">🎮</span> Race Rates — Speed & Precision</div>
-                <div class="trix-desc">Racing ต้องการ rates ที่ให้ precision กลาง stick แต่ไวที่ปลาย<br>
-                Super rate สูง (0.85-0.95) → max rotation ~900°/s สำหรับ hairpin turns</div>
-                <div class="trix-cli">set roll_rc_rate = 100
-set roll_expo    = 20    # ตอบสนองตรงกว่า (น้อย expo)
-set roll_srate   = 85    # high super rate</div>
+                <div class="trix-title"><span class="trix-ico">🎮</span>Race Rates — Precision + Speed</div>
+                <div class="trix-desc">Racing ต้องการ rates ที่ center precise แต่ปลาย stick ไว — Expo ต่ำกว่า freestyle (ตอบสนองตรงกว่า)</div>
+                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set roll_rc_rate = 100
+set roll_expo    = 20    # ตอบสนองตรงกว่า
+set roll_srate   = 85    # ~900°/s สำหรับ hairpin</div>
               </div>
             </div>
-            <div class="trix-item t-green">
-              <div class="trix-num">05</div>
+            <div class="trix-item tg">
+              <div class="trix-n">05</div>
               <div class="trix-body">
-                <div class="trix-title"><span class="trix-title-icon">🔋</span> I Term Relax — ลด bounce หลัง hard cornering</div>
-                <div class="trix-desc">Hard cornering สะสม I term ทำให้ bounce กลับ — I term relax ล้าง I ขณะ flip<br>
-                Setpoint weight สูง = โดรนตาม stick ดีกว่า</div>
-                <div class="trix-cli">set iterm_relax       = RPY
-set iterm_relax_type  = SETPOINT
+                <div class="trix-title"><span class="trix-ico">🔁</span>I-Term Relax — ลด bounce หลัง hard corner</div>
+                <div class="trix-desc">
+                  Hard cornering สะสม I term → bounce กลับหลัง flip I-term relax ล้าง I ขณะ stick movement รวดเร็ว<br>
+                  <span style="color:var(--muted2);font-size:10px;">มือใหม่: ตั้งค่านี้แล้วลืมได้เลย ช่วยได้มากโดยไม่ต้องปรับอื่น</span>
+                </div>
+                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set iterm_relax        = RPY
+set iterm_relax_type   = SETPOINT
 set iterm_relax_cutoff = 15</div>
               </div>
             </div>
 
             {% else %}{# longrange #}
-            <div class="trix-item t-purple">
-              <div class="trix-num">02</div>
+            <div class="trix-item tp">
+              <div class="trix-n">02</div>
               <div class="trix-body">
-                <div class="trix-title"><span class="trix-title-icon">🌬️</span> I Term — สำคัญมากสำหรับ Long Range <span class="trix-tag warn">LR KEY</span></div>
-                <div class="trix-desc">I term ต้านแรงลมและ drift — ต้องสูงพอสำหรับ LR บินในลม<br>
-                ค่าแนะนำ <strong style="color:#a78bfa;">I roll/pitch = 85-100</strong> · ถ้าบินลมแรง เพิ่มได้ถึง 120<br>
-                ถ้า bounce หลัง flip → ลด I ลง 10 หรือเพิ่ม iterm_relax_cutoff</div>
-                <div class="trix-cli">set i_roll  = {{ _I_roll }}   # baseline LR
-set i_pitch = {{ _I_roll }}
+                <div class="trix-title"><span class="trix-ico">🌬️</span>I Term — ต้านแรงลม คือหัวใจของ Long Range <span class="ttag warn">LR KEY</span></div>
+                <div class="trix-desc">
+                  I term สำคัญที่สุดสำหรับ LR — ต้านแรงลมและป้องกัน drift ขณะบินระยะไกล<br>
+                  แนะนำ <strong style="color:var(--purple);">I roll/pitch = 85-100</strong> · ถ้าบินลมแรง เพิ่มได้ถึง 120<br>
+                  <span style="color:var(--muted2);font-size:10px;">ถ้า bounce หลัง flip → ลด I 10 หรือเพิ่ม iterm_relax_cutoff</span>
+                </div>
+                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set i_roll           = {{ _Ir }}   # baseline LR
+set i_pitch          = {{ _Ir }}
 set iterm_relax_cutoff = 10  # ลด LR bounce</div>
               </div>
             </div>
-            <div class="trix-item t-green">
-              <div class="trix-num">03</div>
+            <div class="trix-item tg">
+              <div class="trix-n">03</div>
               <div class="trix-body">
-                <div class="trix-title"><span class="trix-title-icon">🛸</span> Throttle Curve สำหรับ Long Range</div>
-                <div class="trix-desc">LR ต้องการ throttle smooth ไม่กระตุก → ใช้ throttle mid/expo ช่วย<br>
-                Mid 0.5 / Expo 0.0 → linear response เหมาะบิน cruise ระยะไกล<br>
-                ลด throttle limit ให้ hover อยู่ที่ 30-35% → efficiency สูงขึ้น</div>
-                <div class="trix-cli">set throttle_mid  = 50
+                <div class="trix-title"><span class="trix-ico">🛸</span>Throttle Curve สำหรับ Long Range</div>
+                <div class="trix-desc">
+                  LR ต้องการ throttle smooth ไม่กระตุก — linear response ดีที่สุดสำหรับ cruise ระยะไกล<br>
+                  Hover ที่ 30-35% throttle = efficiency สูงสุด ไม่ควรบินที่ 50%+ นาน
+                </div>
+                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set throttle_mid  = 50
 set throttle_expo = 0
-set throttle_limit_type = SCALE
-set throttle_limit_percent = 90  # safety buffer</div>
+set throttle_limit_type    = SCALE
+set throttle_limit_percent = 90</div>
               </div>
             </div>
-            <div class="trix-item t-blue">
-              <div class="trix-num">04</div>
+            <div class="trix-item tb">
+              <div class="trix-n">04</div>
               <div class="trix-body">
-                <div class="trix-title"><span class="trix-title-icon">📡</span> GPS Rescue — ต้องตั้งทุกครั้งบิน LR <span class="trix-tag hot">SAFETY</span></div>
-                <div class="trix-desc">LR ไม่มี GPS rescue = เสี่ยงมาก หาย link → โดรนหาย<br>
-                ตั้ง min_sats = 8, altitude = 30m, ground_speed = 5 m/s<br>
-                <strong style="color:var(--blue);">Test GPS rescue ทุกครั้งก่อนบินไกล</strong> — arm แล้วทดสอบที่ความสูงต่ำก่อน</div>
-                <div class="trix-cli">set gps_rescue_min_sats      = 8
-set gps_rescue_altitude_mode = FIXED
-set gps_rescue_return_alt    = 30
-set gps_rescue_ascend_rate   = 500</div>
+                <div class="trix-title"><span class="trix-ico">📡</span>GPS Rescue — ต้องตั้งทุกครั้งที่บิน LR <span class="ttag hot">SAFETY</span></div>
+                <div class="trix-desc">
+                  LR ไม่มี GPS rescue = เสี่ยงมาก link หาย → โดรนหาย<br>
+                  <strong style="color:var(--blue);">Test GPS rescue ทุกครั้งก่อนบินไกล</strong> — arm แล้วทดสอบที่ความสูงต่ำ 5-10m ก่อนเสมอ
+                </div>
+                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set gps_rescue_min_sats   = 8
+set gps_rescue_return_alt = 30
+set gps_rescue_ascend_rate = 500
+set gps_rescue_ground_speed = 500</div>
               </div>
             </div>
-            <div class="trix-item t-amber">
-              <div class="trix-num">05</div>
+            <div class="trix-item ta">
+              <div class="trix-n">05</div>
               <div class="trix-body">
-                <div class="trix-title"><span class="trix-title-icon">🔋</span> Battery Sag Compensation</div>
-                <div class="trix-desc">LR บินนาน → แบตสาก → thrust เปลี่ยน → PID ไม่นิ่ง<br>
-                Voltage Sag Compensation ปรับ PID ตาม voltage อัตโนมัติ<br>
-                ตั้ง vbat_pid_gain = ON ใน BF4.4+</div>
-                <div class="trix-cli">set vbat_pid_gain = ON
-set vbat_pid_off  = 0    # BF4.4+</div>
+                <div class="trix-title"><span class="trix-ico">🔋</span>Battery Sag Compensation</div>
+                <div class="trix-desc">
+                  LR บินนาน → แบตสาก → thrust เปลี่ยน → PID เสียสมดุล<br>
+                  Voltage compensation ปรับ motor output ตาม voltage อัตโนมัติ — ทำให้ feel คงที่ตลอด pack
+                </div>
+                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set vbat_pid_gain = ON   # BF4.4+
+set vbat_pid_off  = 0</div>
               </div>
             </div>
             {% endif %}
 
-            <!-- TRIX COMMON: RPM Filter -->
-            <div class="trix-item t-cyan">
-              <div class="trix-num">{% if _sty3 == 'freestyle' %}06{% elif _sty3 == 'racing' %}06{% else %}06{% endif %}</div>
+            <!-- TIP COMMON: RPM Filter -->
+            <div class="trix-item tc">
+              <div class="trix-n">06</div>
               <div class="trix-body">
-                <div class="trix-title"><span class="trix-title-icon">🔊</span> RPM Filter — ลด Motor Noise อย่างได้ผล <span class="trix-tag new">BF4.4+</span></div>
-                <div class="trix-desc">RPM filter ใช้ telemetry จาก ESC บล็อก noise ที่ความถี่ motor โดยตรง<br>
-                ต้องใช้ <strong style="color:var(--cyan);">BLHeli32 / AM32 + DSHOT300+</strong> — เปิด DSHOT Bidir ใน BF Configurator<br>
-                ผล: motor เย็นลง, video smooth ขึ้น, สามารถลด Gyro LPF ได้</div>
-                <div class="trix-cli">set dshot_bidir = ON           # ต้องเปิดก่อน
-set rpm_filter_harmonics = 3   # 3 harmonics
-set rpm_filter_min_hz = {{ [80, (analysis.advanced.rpm_estimated / 60 * 0.20) | int] | max if analysis.advanced and analysis.advanced.rpm_estimated else 100 }}
-set motor_poles = 14           # ตรวจ motor spec</div>
+                <div class="trix-title"><span class="trix-ico">🔊</span>RPM Filter — ลด Motor Noise ได้ผลดีที่สุด <span class="ttag new">BF4.4+</span></div>
+                <div class="trix-desc">
+                  RPM filter ใช้ telemetry จาก ESC บล็อก noise ที่ความถี่ motor โดยตรง ผลลัพธ์ดีกว่า notch filter คงที่มาก<br>
+                  ต้องใช้ <strong style="color:var(--cyan);">BLHeli32 / AM32 + DSHOT300+</strong> — เปิด DSHOT Bidir ใน BF Configurator ก่อน<br>
+                  <span style="color:var(--muted2);font-size:10px;">มือใหม่: เปิด 2 ค่านี้ แล้วไปที่ BF Configurator → Filters tab → เปิด RPM Filter ON</span>
+                </div>
+                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set dshot_bidir          = ON
+set rpm_filter_harmonics = 3
+set rpm_filter_min_hz    = {{ [80, (_rpm3 / 60 * 0.20)|int]|max if _rpm3 else 100 }}
+set motor_poles          = 14  # ตรวจสอบจาก motor spec</div>
               </div>
             </div>
 
-            <!-- TRIX: BlackBox -->
-            <div class="trix-item t-blue">
-              <div class="trix-num">07</div>
+            <!-- TIP COMMON: Blackbox -->
+            <div class="trix-item tb">
+              <div class="trix-n">07</div>
               <div class="trix-body">
-                <div class="trix-title"><span class="trix-title-icon">📊</span> Blackbox — เครื่องมือ tuning ที่ดีที่สุด <span class="trix-tag pro">ADVANCED</span></div>
-                <div class="trix-desc">อ่าน PID จาก Blackbox graph ได้แม่นกว่า "รู้สึก" เสมอ<br>
-                • P oscillation: เห็นเป็น high-freq vibration บน gyro trace<br>
-                • D term noise: เห็นเป็น noise ที่ high throttle บน D term trace<br>
-                • Propwash: เห็นเป็น low-freq oscillation หลัง flip/roll<br>
-                <strong style="color:var(--blue);">ใช้ <a href="/blackbox" style="color:var(--cyan);">Blackbox Analyzer</a> ใน ConfigDoctor ได้เลย</strong></div>
-                <div class="trix-cli">set blackbox_sample_rate = MEDIUM  # log rate
-set blackbox_device = SPIFLASH     # ถ้ามี onboard flash</div>
+                <div class="trix-title"><span class="trix-ico">📊</span>Blackbox — เครื่องมือ Tune ที่แม่นที่สุด <span class="ttag pro">ADVANCED</span></div>
+                <div class="trix-desc">
+                  อ่าน PID จาก Blackbox graph แม่นกว่า "รู้สึก" เสมอ<br>
+                  • P oscillation = high-freq vibration บน gyro trace หลัง input<br>
+                  • D term noise = noise ที่ high throttle บน D trace<br>
+                  • Propwash = low-freq oscillation หลัง flip สังเกตที่ axis ที่เกิด<br>
+                  <strong><a href="/blackbox" style="color:var(--cyan);text-decoration:none;">→ ใช้ Blackbox Analyzer ใน ConfigDoctor ได้เลย</a></strong>
+                </div>
+                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set blackbox_sample_rate = MEDIUM
+set blackbox_device      = SPIFLASH</div>
               </div>
             </div>
 
@@ -2129,95 +2150,107 @@ set blackbox_device = SPIFLASH     # ถ้ามี onboard flash</div>
       </div>
       {% endif %}
 
-      <!-- ══ 9E. TUNING ROADMAP ══ -->
+      <!-- ══ TUNING ROADMAP ══ -->
       {% if analysis %}
+      {% set _htp= (analysis.advanced.hover_throttle_pct|int) if analysis.advanced and analysis.advanced.hover_throttle_pct else 50 %}
+      {% set _Pr2= analysis.pid.roll.p|default(48)|int %}
+      {% set _Dr2= analysis.pid.roll.d|default(38)|int %}
+      {% set _rpm4= ((analysis.advanced.rpm_estimated|default(0)|int)) if analysis.advanced else 0 %}
       <div class="tpanel" style="border-left:3px solid var(--green);">
         <div class="tpanel-head">
-          <div class="tpanel-head-icon" style="background:var(--g-dim);border-color:rgba(0,255,136,0.2);">🗺️</div>
+          <div class="tpanel-head-icon" style="background:var(--g-dim);border-color:rgba(0,255,136,.2);">🗺️</div>
           <div>
             <div class="tpanel-title">TUNING ROADMAP — ลำดับขั้นตอนที่ถูกต้อง</div>
-            <div class="tpanel-sub">บิน step นี้ตามลำดับ — อย่าข้าม, อย่า rush</div>
+            <div class="tpanel-sub">บิน step ตามลำดับ · อย่าข้าม · อย่า rush · ปรับทีละอย่าง</div>
           </div>
         </div>
         <div class="tpanel-body">
-          <div class="roadmap-wrap">
+          <div class="rmap">
 
-            <div class="road-step">
-              <div class="road-dot done"></div>
-              <div class="road-card">
-                <div class="road-step-num">STEP 01 · PRE-FLIGHT</div>
-                <div class="road-step-title" style="color:var(--green);">✅ Load Baseline CLI</div>
-                <div class="road-step-desc">Copy CLI ด้านบน → paste ใน Betaflight CLI → save → reboot<br>ตรวจสอบ motor direction + props on correct</div>
-                <div class="road-cli-mini">copy → paste → save → reboot</div>
+            <div class="rs">
+              <div class="rs-dot done"></div>
+              <div class="rs-card">
+                <div class="rs-step">STEP 01 · PRE-FLIGHT CHECK</div>
+                <div class="rs-title" style="color:var(--green);">✅ โหลด Baseline CLI</div>
+                <div class="rs-desc">Copy Full CLI ด้านบน → paste ใน Betaflight CLI → <code style="color:var(--cyan);">save</code> → reboot<br>ตรวจสอบ motor direction + props ติดถูกทิศ + arm ทดสอบ spin ช้าๆ</div>
+                <div class="rs-cli">paste → save → reboot → ตรวจ motor spin direction</div>
               </div>
             </div>
 
-            <div class="road-step">
-              <div class="road-dot active"></div>
-              <div class="road-card" style="border-color:rgba(255,183,0,0.2);">
-                <div class="road-step-num">STEP 02 · FIRST HOVER</div>
-                <div class="road-step-title" style="color:var(--amber);">⭕ Hover Test — ตรวจสอบ</div>
-                <div class="road-step-desc">Arm และ hover ที่ความสูง 1-2 เมตร 30 วินาที สังเกต:<br>
-                • โดรนนิ่งหรือ drift? → ถ้า drift เล็กน้อย = ปกติ<br>
-                • มีเสียงสั่นผิดปกติ? → อาจเป็น prop imbalance<br>
-                • Throttle hover ที่ประมาณ {{ analysis.advanced.hover_throttle_pct | int if analysis.advanced and analysis.advanced.hover_throttle_pct else 50 }}%? → ถ้าสูงกว่า 60% โดรนหนักเกิน</div>
+            <div class="rs">
+              <div class="rs-dot active"></div>
+              <div class="rs-card" style="border-color:rgba(255,187,0,.18);">
+                <div class="rs-step">STEP 02 · FIRST HOVER</div>
+                <div class="rs-title" style="color:var(--amber);">⭕ Hover Test — สังเกตอย่างละเอียด</div>
+                <div class="rs-desc">
+                  Hover ที่ความสูง 1-2m เป็นเวลา 30 วินาที สังเกต 3 อย่าง:<br>
+                  • Hover throttle ควรอยู่ที่ ~<strong style="color:var(--amber);">{{ _htp }}%</strong> — ถ้า >60% = โดรนหนักเกิน<br>
+                  • มีสั่น/vibration ผิดปกติ? → prop imbalance หรือ P สูงเกิน<br>
+                  • โดรน drift? → ปกติเล็กน้อย ถ้า drift แรง = arm bent
+                </div>
               </div>
             </div>
 
-            <div class="road-step">
-              <div class="road-dot open"></div>
-              <div class="road-card">
-                <div class="road-step-num">STEP 03 · P TUNE</div>
-                <div class="road-step-title">P — หา Oscillation</div>
-                <div class="road-step-desc">บิน figure-8 หรือ punch out แล้วดูว่ามี high-freq vibration บน arm ไหม<br>
-                ถ้า arm สั่น = P สูงเกิน ลดลง 5 ทีละครั้ง<br>
-                ถ้า sluggish มาก = P ต่ำเกิน เพิ่มขึ้น 3</div>
-                <div class="road-cli-mini">set p_roll = {{ _P_roll }}  → ลอง ±5</div>
+            <div class="rs">
+              <div class="rs-dot open"></div>
+              <div class="rs-card">
+                <div class="rs-step">STEP 03 · TUNE P TERM</div>
+                <div class="rs-title">P Term — หา Oscillation</div>
+                <div class="rs-desc">
+                  บิน punch out สั้นๆ หรือ figure-8 แล้วสัมผัส arm — มีสั่น high-freq = P สูงเกิน<br>
+                  ลด P ลง 3-5 ทีละครั้ง บินทดสอบ 1 pack แล้วประเมิน · ถ้า sluggish = P ต่ำเกิน เพิ่ม 3
+                </div>
+                <div class="rs-cli">set p_roll = {{ _Pr2 }}  → ลอง ±3-5 แล้วบินทดสอบ</div>
               </div>
             </div>
 
-            <div class="road-step">
-              <div class="road-dot open"></div>
-              <div class="road-card">
-                <div class="road-step-num">STEP 04 · D TUNE</div>
-                <div class="road-step-title">D — Propwash & Noise</div>
-                <div class="road-step-desc">บิน flip/roll แล้วดู propwash — ถ้ามี เพิ่ม D ทีละ +2<br>
-                แตะ motor หลังบิน 2 pack — ถ้าร้อนมาก D สูงเกิน<br>
-                <strong>D tune สำคัญกว่า P สำหรับ freestyle</strong></div>
-                <div class="road-cli-mini">set d_roll = {{ _D_roll }}  → ลอง +2 ถ้า propwash</div>
+            <div class="rs">
+              <div class="rs-dot open"></div>
+              <div class="rs-card">
+                <div class="rs-step">STEP 04 · TUNE D TERM</div>
+                <div class="rs-title">D Term — Propwash & Motor Temp</div>
+                <div class="rs-desc">
+                  บิน flip/roll เร็วๆ แล้วดู propwash — ถ้ามี เพิ่ม D ทีละ +2<br>
+                  หลังบิน 2 pack แตะ motor — ต้องอุ่น ไม่ร้อนมือ ถ้าร้อน = D สูงเกิน<br>
+                  <strong>D tune สำคัญกว่า P tune สำหรับ freestyle</strong>
+                </div>
+                <div class="rs-cli">set d_roll = {{ _Dr2 }}  → ลอง +2 ถ้ามี propwash</div>
               </div>
             </div>
 
-            <div class="road-step">
-              <div class="road-dot open"></div>
-              <div class="road-card">
-                <div class="road-step-num">STEP 05 · FILTER TUNE</div>
-                <div class="road-step-title">Filter — RPM & Notch</div>
-                <div class="road-step-desc">เปิด RPM filter (ถ้ามี BLHeli32) → บินและสังเกต motor temp<br>
-                ถ้า motor เย็นลง = filter ทำงาน → สามารถลด Gyro LPF1 ได้<br>
-                ใช้ Blackbox ยืนยันผลก่อน tune ต่อ</div>
-                <div class="road-cli-mini">set dshot_bidir = ON
+            <div class="rs">
+              <div class="rs-dot open"></div>
+              <div class="rs-card">
+                <div class="rs-step">STEP 05 · FILTER TUNE</div>
+                <div class="rs-title">RPM Filter & Notch</div>
+                <div class="rs-desc">
+                  เปิด RPM filter (ต้องมี BLHeli32 + DSHOT Bidir) → บินและสังเกต motor temp<br>
+                  ถ้า motor เย็นลงหลังเปิด = filter ทำงาน → สามารถลด Gyro LPF1 Hz ลงได้<br>
+                  ใช้ <a href="/blackbox" style="color:var(--cyan);text-decoration:none;">Blackbox Analyzer</a> ยืนยันผลก่อน tune ต่อ
+                </div>
+                <div class="rs-cli">set dshot_bidir = ON
 set rpm_filter_harmonics = 3</div>
               </div>
             </div>
 
-            <div class="road-step">
-              <div class="road-dot open"></div>
-              <div class="road-card">
-                <div class="road-step-num">STEP 06 · FINE TUNE</div>
-                <div class="road-step-title">Feedforward + Rates + TPA</div>
-                <div class="road-step-desc">หลัง P/D/Filter OK แล้ว → ปรับ feel ของ stick<br>
-                Feedforward 100-120 สำหรับ snappy feel<br>
-                Rates ตาม style ส่วนตัว<br>
-                TPA ลด P ที่ throttle สูง → ลด prop wash ที่ full throttle</div>
-                <div class="road-cli-mini">set feedforward_roll  = 110
-set tpa_rate          = 65</div>
+            <div class="rs">
+              <div class="rs-dot open"></div>
+              <div class="rs-card">
+                <div class="rs-step">STEP 06 · FINE TUNE</div>
+                <div class="rs-title">Feedforward + Rates + TPA</div>
+                <div class="rs-desc">
+                  P/D/Filter OK แล้ว → ปรับ feel ของ stick ตาม preference<br>
+                  Feedforward 100-120 สำหรับ snappy feel · Rates ตาม style ส่วนตัว<br>
+                  TPA 0.65 ลด P ที่ throttle สูง → ลด prop wash ที่ full throttle
+                </div>
+                <div class="rs-cli">set feedforward_roll = 110
+set tpa_rate         = 65</div>
               </div>
             </div>
 
           </div>
-          <div style="margin-top:12px;padding:10px 12px;background:rgba(0,255,136,0.04);border:1.5px solid rgba(0,255,136,0.1);border-radius:8px;font-size:10.5px;color:var(--muted2);">
-            💡 <strong style="color:var(--green);">กฎทอง:</strong> ปรับ<strong>ทีละอย่าง</strong> — บิน 1 pack → ประเมิน → ปรับ — อย่าปรับหลายค่าพร้อมกัน ไม่งั้นไม่รู้ว่าอะไรช่วย
+          <div class="rmap-tip">
+            💡 <strong style="color:var(--green);">กฎทอง:</strong> ปรับ<strong>ทีละอย่าง</strong> เท่านั้น — บิน 1 pack → ประเมิน → ปรับ<br>อย่าปรับหลายค่าพร้อมกัน มิฉะนั้นจะไม่รู้ว่าอะไรที่ช่วยหรืออะไรที่ทำให้แย่ลง
           </div>
         </div>
       </div>
