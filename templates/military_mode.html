@@ -1,0 +1,130 @@
+<div class="military-container">
+
+<div class="military-header">
+🏅 MILITARY TRAINING MODE
+<p>ระบบวิเคราะห์โดรนสำหรับภารกิจทางการทหาร</p>
+</div>
+
+<div class="military-card">
+
+<h2>UAS / Drone Analysis</h2>
+
+<div class="spec-grid">
+
+<div>
+<label>Drone Model</label>
+<input type="text" placeholder="XR-6 Tactical">
+</div>
+
+<div>
+<label>Frame Size</label>
+<select>
+<option>5 inch</option>
+<option>6 inch</option>
+<option>7 inch</option>
+</select>
+</div>
+
+<div>
+<label>Motor KV</label>
+<input type="number" placeholder="2400">
+</div>
+
+<div>
+<label>Battery</label>
+<select>
+<option>4S</option>
+<option>6S</option>
+<option>8S</option>
+</select>
+</div>
+
+</div>
+
+<button class="military-btn" onclick="analyzeDrone()">
+📊 วิเคราะห์ Drone Spec
+</button>
+
+</div>
+
+
+<div class="military-card">
+
+<h2>Suggested PID</h2>
+
+<table class="pid-table">
+<tr>
+<th>Axis</th>
+<th>P</th>
+<th>I</th>
+<th>D</th>
+</tr>
+
+<tr>
+<td>Roll</td>
+<td id="rollP">46</td>
+<td id="rollI">36</td>
+<td id="rollD">28</td>
+</tr>
+
+<tr>
+<td>Pitch</td>
+<td id="pitchP">46</td>
+<td id="pitchI">36</td>
+<td id="pitchD">28</td>
+</tr>
+
+<tr>
+<td>Yaw</td>
+<td id="yawP">110</td>
+<td id="yawI">80</td>
+<td id="yawD">40</td>
+</tr>
+
+</table>
+
+</div>
+
+
+<div class="military-card">
+
+<h2>Flight Assessment</h2>
+
+<ul class="assessment-list">
+<li>✔ Mission Planning</li>
+<li>✔ Payload Management</li>
+<li>✔ Control Response</li>
+<li>✔ Failsafe Recovery</li>
+</ul>
+
+</div>
+
+
+<div class="military-card">
+
+<h2>Pre-flight Checklist</h2>
+
+<ul class="checklist">
+
+<li>🔋 ตรวจแบตเตอรี่</li>
+<li>⚙ ตรวจมอเตอร์</li>
+<li>📡 ตรวจสัญญาณ</li>
+<li>🛰 ตรวจ GPS</li>
+
+</ul>
+
+</div>
+
+<div class="military-buttons">
+
+<button class="military-btn">
+🎮 UAS Simulator
+</button>
+
+<button class="military-btn">
+🎯 Flight Test
+</button>
+
+</div>
+
+</div>
