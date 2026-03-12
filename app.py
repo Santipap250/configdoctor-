@@ -983,6 +983,10 @@ def motor_thermal():
 def loop_analyzer():
     return render_template('loop_analyzer.html')
 
+@app.route('/military-uas')
+def military_uas():
+    return render_template('military_uas.html')
+
 # ────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
