@@ -1,5 +1,6 @@
-# app.py — OBIXConfig Doctor v5.1
+# app.py — OBIXConfig Doctor v5.2
 # ============================================================
+# v5.2 — Security Hardening · Rate Limiting · CSP Fix
 # v5.1 — FPV Simulator NEO · Quick Tune Pad · Physics Accuracy Fixes
 # v2.3 — Blackbox CSV Analyzer + Full Tool Suite
 # Tools: PID/Filter · Blackbox · CLI Surgeon · PID Advisor
@@ -26,6 +27,15 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 from analyzer.cli_surgeon import analyze_dump as cli_analyze_dump
 import os, io, time, json, hashlib, logging
+
+# ── Rate Limiting ─────────────────────────────────────────────────────────
+try:
+    from flask_limiter import Limiter
+    from flask_limiter.util import get_remote_address
+    LIMITER_AVAILABLE = True
+except ImportError:
+    LIMITER_AVAILABLE = False
+    print("WARNING: flask_limiter not installed — rate limiting disabled")
 
 # ── Optional modules ──────────────────────────────────────────────────────
 try:
@@ -72,7 +82,20 @@ def _cells_from_str(s):
 
 # ── Flask app ─────────────────────────────────────────────────────────────
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
+
+# SECURITY: ถ้า SECRET_KEY ไม่ถูก set ใน env จะ crash ทันที (ป้องกัน fallback key)
+_secret = os.environ.get("SECRET_KEY", "")
+if not _secret:
+    import sys
+    if os.environ.get("FLASK_DEBUG", "0") in ("1", "true", "True"):
+        # local dev — ใช้ key ชั่วคราว แต่แจ้งเตือน
+        _secret = "dev-only-insecure-key-do-not-use-in-production"
+        print("WARNING: SECRET_KEY not set — using insecure dev key")
+    else:
+        # production — crash hard เพื่อให้ fix ก่อน deploy
+        sys.exit("FATAL: SECRET_KEY environment variable is not set. "
+                 "Set it in Render dashboard before deploying.")
+app.config['SECRET_KEY'] = _secret
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB global upload limit
 
 FORCE_SECURE = os.environ.get("FORCE_SECURE", "0") in ("1", "true", "True")
@@ -85,6 +108,23 @@ app.config['DEBUG'] = os.environ.get('FLASK_DEBUG', '0') in ('1', 'true', 'True'
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("configdoctor")
+
+# ── Init Rate Limiter ─────────────────────────────────────────────────────
+if LIMITER_AVAILABLE:
+    limiter = Limiter(
+        key_func=get_remote_address,
+        app=app,
+        default_limits=[],          # ไม่ limit route ทั่วไป
+        storage_uri="memory://",    # ใช้ in-memory (เพียงพอสำหรับ single worker)
+    )
+    def _rate(limit_str):
+        """Decorator shortcut สำหรับ rate limit"""
+        return limiter.limit(limit_str)
+else:
+    # Fallback no-op decorator เมื่อ flask_limiter ไม่ถูก install
+    def _rate(limit_str):
+        def decorator(f): return f
+        return decorator
 
 @app.template_filter('timestamp_to_datetime')
 def timestamp_to_datetime_filter(ts):
@@ -713,7 +753,7 @@ def rpm_filter():
             result = calculate_rpm_filter(kv, battery, prop_size)
         except Exception as e:
             logger.exception("rpm_filter error")
-            result = {"error": str(e)}
+            result = {"error": "เกิดข้อผิดพลาดในการคำนวณ RPM Filter"}
     return render_template('rpm_filter.html', result=result, form=form)
 
 # ── Rates Visualizer ──────────────────────────────────────────────────────
@@ -740,6 +780,7 @@ def blackbox_page():
     return render_template('blackbox.html')
 
 @app.route('/blackbox/analyze', methods=['POST'])
+@_rate("10 per minute;100 per day")
 def blackbox_analyze():
     try:
         if not request.is_json and not request.content_type.startswith('application/json'):
@@ -760,7 +801,7 @@ def blackbox_analyze():
         return jsonify(result)
     except Exception as e:
         logger.exception("blackbox_analyze error")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "เกิดข้อผิดพลาดในการวิเคราะห์ กรุณาลองใหม่"}), 500
 
 @app.route('/esc-checker')
 def esc_checker():
@@ -771,6 +812,7 @@ def fpv_trainer():
     return render_template('fpv_trainer.html')
 
 @app.route('/analyze_cli', methods=['POST'])
+@_rate("20 per minute;200 per day")
 def analyze_cli():
     try:
         if not request.is_json and not request.content_type.startswith('application/json'):
@@ -804,9 +846,10 @@ def analyze_cli():
         return jsonify(result)
     except Exception as e:
         logger.exception("analyze_cli error")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "เกิดข้อผิดพลาดในการวิเคราะห์ กรุณาลองใหม่"}), 500
 
 @app.route('/compare_cli', methods=['POST'])
+@_rate("20 per minute;200 per day")
 def compare_cli():
     """Compare two CLI dumps and return diff."""
     try:
@@ -825,11 +868,30 @@ def compare_cli():
         return jsonify(result)
     except Exception as e:
         logger.exception("compare_cli error")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "เกิดข้อผิดพลาดในการเปรียบเทียบ กรุณาลองใหม่"}), 500
 
 # ── OSD Designer ──────────────────────────────────────────────────────────
 @app.route('/osd')
 def osd_page(): return render_template('osd.html')
+
+def _cleanup_osd_files(max_age_hours: int = 24) -> None:
+    """ลบไฟล์ OSD เก่ากว่า max_age_hours ออกจาก static/downloads/osd/
+    เรียกก่อน save ทุกครั้งเพื่อป้องกัน disk fill"""
+    osd_dir = os.path.join(app.root_path, 'static', 'downloads', 'osd')
+    if not os.path.isdir(osd_dir):
+        return
+    cutoff = time.time() - max_age_hours * 3600
+    removed = 0
+    for fn in os.listdir(osd_dir):
+        fp = os.path.join(osd_dir, fn)
+        try:
+            if os.path.isfile(fp) and os.path.getmtime(fp) < cutoff:
+                os.remove(fp)
+                removed += 1
+        except Exception:
+            pass
+    if removed:
+        logger.info("OSD cleanup: removed %d old files", removed)
 
 def _timestamped_filename(prefix="obix_osd", ext="txt"):
     return f"{prefix}-{time.strftime('%Y%m%d-%H%M%S')}.{ext}"
@@ -859,6 +921,8 @@ def osd_export():
             return ("Content too large (max 100KB)", 413)
         out_dir = os.path.join(app.root_path, 'static', 'downloads', 'osd')
         os.makedirs(out_dir, exist_ok=True)
+        # CLEANUP: ลบไฟล์เก่ากว่า 24 ชั่วโมงก่อน save
+        _cleanup_osd_files(max_age_hours=24)
         fname = secure_filename(_timestamped_filename(prefix="obix_osd", ext=ext))
         try:
             with open(os.path.join(out_dir, fname), 'w', encoding='utf-8') as f: f.write(content)
@@ -879,11 +943,16 @@ def set_security_headers(response):
     response.headers["X-XSS-Protection"]       = "1; mode=block"
     response.headers["Referrer-Policy"]        = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"]     = "geolocation=(), microphone=(), camera=()"
-    # CSP: block inline scripts from third parties, allow self + Google Fonts + CDNs we use
+    # CSP: whitelist ครบทุก CDN ที่ใช้จริง
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; "
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; "
+        "script-src 'self' 'unsafe-inline' "
+        "  https://cdnjs.cloudflare.com "
+        "  https://cdn.jsdelivr.net "
+        "  https://fonts.googleapis.com; "
+        "style-src 'self' 'unsafe-inline' "
+        "  https://fonts.googleapis.com "
+        "  https://fonts.gstatic.com; "
         "font-src 'self' https://fonts.gstatic.com; "
         "img-src 'self' data: https:; "
         "connect-src 'self'; "
@@ -898,9 +967,19 @@ def page_not_found(e): return render_template("404.html"), 404
 @app.errorhandler(500)
 def internal_server_error(e): return render_template("500.html"), 500
 
+@app.errorhandler(429)
+def rate_limit_exceeded(e):
+    """Rate limit exceeded — คืน JSON สำหรับ API, HTML สำหรับ browser"""
+    if request.is_json or request.path.startswith('/api') or request.path in (
+        '/analyze_cli', '/compare_cli', '/blackbox/analyze'
+    ):
+        return jsonify({"error": "คำขอมากเกินไป กรุณารอสักครู่แล้วลองใหม่"}), 429
+    return render_template("429.html"), 429
+
 @app.route("/healthz")
 def healthz():
-    return {"status": "ok", "advanced_analysis": bool(ADV_ANALYSIS_AVAILABLE)}
+    # ไม่เปิดเผย module status ใน production
+    return {"status": "ok"}
 
 # ── SEO: robots.txt ────────────────────────────────────────────────────────
 @app.route("/robots.txt")
@@ -912,6 +991,7 @@ def robots_txt():
         "Disallow: /analyze_cli\n"
         "Disallow: /compare_cli\n"
         "Disallow: /blackbox/analyze\n"
+        "Disallow: /military-uas\n"
         "\n"
         "Sitemap: https://configdoctor.onrender.com/sitemap.xml\n"
     )
