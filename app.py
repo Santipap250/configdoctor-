@@ -26,13 +26,6 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 from analyzer.cli_surgeon import analyze_dump as cli_analyze_dump
 import os, io, time, json, hashlib, logging
-try:
-    from flask_limiter import Limiter
-    from flask_limiter.util import get_remote_address
-    LIMITER_AVAILABLE = True
-except ImportError:
-    LIMITER_AVAILABLE = False
-    print('Flask-Limiter not installed — rate limiting disabled')
 
 # ── Optional modules ──────────────────────────────────────────────────────
 try:
@@ -91,21 +84,6 @@ app.config['DEBUG'] = os.environ.get('FLASK_DEBUG', '0') in ('1', 'true', 'True'
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("configdoctor")
-
-# ── Rate Limiter ───────────────────────────────────────────────────────────
-if LIMITER_AVAILABLE:
-    limiter = Limiter(
-        get_remote_address,
-        app=app,
-        default_limits=[],
-        storage_uri="memory://",
-    )
-else:
-    class _NoLimiter:
-        def limit(self, *a, **kw):
-            def deco(f): return f
-            return deco
-    limiter = _NoLimiter()
 
 @app.template_filter('timestamp_to_datetime')
 def timestamp_to_datetime_filter(ts):
@@ -761,7 +739,6 @@ def blackbox_page():
     return render_template('blackbox.html')
 
 @app.route('/blackbox/analyze', methods=['POST'])
-@limiter.limit('10 per minute; 100 per day')
 def blackbox_analyze():
     try:
         if not request.is_json and not request.content_type.startswith('application/json'):
@@ -793,7 +770,6 @@ def fpv_trainer():
     return render_template('fpv_trainer.html')
 
 @app.route('/analyze_cli', methods=['POST'])
-@limiter.limit('20 per minute; 200 per day')
 def analyze_cli():
     try:
         if not request.is_json and not request.content_type.startswith('application/json'):
@@ -830,7 +806,6 @@ def analyze_cli():
         return jsonify({"error": str(e)}), 500
 
 @app.route('/compare_cli', methods=['POST'])
-@limiter.limit('20 per minute; 200 per day')
 def compare_cli():
     """Compare two CLI dumps and return diff."""
     try:
@@ -852,25 +827,6 @@ def compare_cli():
         return jsonify({"error": str(e)}), 500
 
 # ── OSD Designer ──────────────────────────────────────────────────────────
-
-def _cleanup_osd_files(max_age_hours=24):
-    """ลบไฟล์ OSD export เก่ากว่า max_age_hours ชั่วโมง"""
-    try:
-        osd_dir = os.path.join(os.path.dirname(__file__), 'static', 'downloads', 'osd')
-        if not os.path.isdir(osd_dir):
-            return
-        cutoff = time.time() - (max_age_hours * 3600)
-        removed = 0
-        for fn in os.listdir(osd_dir):
-            fpath = os.path.join(osd_dir, fn)
-            if os.path.isfile(fpath) and os.path.getmtime(fpath) < cutoff:
-                os.remove(fpath)
-                removed += 1
-        if removed:
-            logger.info('osd_cleanup: removed %d old files', removed)
-    except Exception as e:
-        logger.warning('osd_cleanup error: %s', e)
-
 @app.route('/osd')
 def osd_page(): return render_template('osd.html')
 
@@ -900,7 +856,6 @@ def osd_export():
         # SECURITY: limit OSD save to 100KB to prevent disk fill attacks
         if len(content.encode('utf-8')) > 100_000:
             return ("Content too large (max 100KB)", 413)
-        _cleanup_osd_files()  # clean old files before saving new one
         out_dir = os.path.join(app.root_path, 'static', 'downloads', 'osd')
         os.makedirs(out_dir, exist_ok=True)
         fname = secure_filename(_timestamped_filename(prefix="obix_osd", ext=ext))
@@ -926,7 +881,7 @@ def set_security_headers(response):
     # CSP: block inline scripts from third parties, allow self + Google Fonts + CDNs we use
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com; "
+        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; "
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; "
         "font-src 'self' https://fonts.gstatic.com; "
         "img-src 'self' data: https:; "
@@ -936,10 +891,6 @@ def set_security_headers(response):
     return response
 
 # ── Error handlers ─────────────────────────────────────────────────────────
-@app.errorhandler(429)
-def ratelimit_handler(e):
-    return jsonify({"error": "ส่งคำขอถี่เกินไป กรุณารอสักครู่", "retry_after": str(e.description)}), 429
-
 @app.errorhandler(404)
 def page_not_found(e): return render_template("404.html"), 404
 
@@ -1032,10 +983,6 @@ def loop_analyzer():
     return render_template('loop_analyzer.html')
 
 # ────────────────────────────────────────────────────────────
-@app.route("/military")
-def military():
-
-    return render_template("military_mode.html")
 
 if __name__ == "__main__":
     app.run(
