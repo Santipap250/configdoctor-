@@ -73,6 +73,7 @@ def _cells_from_str(s):
 # ── Flask app ─────────────────────────────────────────────────────────────
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB global upload limit
 
 FORCE_SECURE = os.environ.get("FORCE_SECURE", "0") in ("1", "true", "True")
 app.config.update(
