@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>OBIXConfig Doctor — วิเคราะห์ PID · Filter · Blackbox โดรน FPV ภาษาไทย</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-{% set og_title       = "OBIXConfig Doctor v5.0 — FPV Drone Tuning Tool" %}
+{% set og_title       = "OBIXConfig Doctor v5.1 — FPV Drone Tuning Tool" %}
 {% set og_description = "เครื่องมือวิเคราะห์ PID · Filter · Motor · ESC · Blackbox · Battery Health · Motor Thermal · Loop Latency สำหรับโดรน FPV — v5.1 Smart Analysis 🇹🇭" %}
 {% set og_url         = "https://configdoctor.onrender.com/landing" %}
 {% set og_image       = "https://configdoctor.onrender.com/static/img/og-default.jpg" %}
@@ -416,6 +416,155 @@ section { padding: 90px 24px; }
   font-size: .95rem; color: var(--muted); line-height: 1.7; max-width: 560px;
 }
 
+/* ═══════════════════════════════════════════════════
+   MODE SELECTOR — CIVILIAN vs MILITARY
+   ═══════════════════════════════════════════════════ */
+.mode-section { padding: 100px 24px; position: relative; overflow: hidden; }
+.mode-section::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(16,196,122,0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+.mode-inner { max-width: 1100px; margin: 0 auto; }
+
+/* Tab switcher */
+.mode-tabs { display: flex; justify-content: center; gap: 0; margin-bottom: 52px; border-radius: 14px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); width: fit-content; margin-left: auto; margin-right: auto; }
+.mode-tab {
+  padding: 14px 40px; font-family: 'Orbitron', sans-serif; font-size: 10px;
+  font-weight: 700; letter-spacing: .15em; cursor: pointer; transition: all .25s;
+  border: none; background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.4);
+  display: flex; align-items: center; gap: 9px;
+}
+.mode-tab.active-civ  { background: rgba(16,196,122,0.12); color: #10c47a; box-shadow: inset 0 -2px 0 #10c47a; }
+.mode-tab.active-mil  { background: rgba(241,182,90,0.12); color: #f1b65a;  box-shadow: inset 0 -2px 0 #f1b65a; }
+.mode-tab:hover:not(.active-civ):not(.active-mil) { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7); }
+.mode-tab-icon { font-size: 16px; }
+
+/* Mode pane */
+.mode-pane { display: none; animation: modeFade .35s ease; }
+.mode-pane.active { display: block; }
+@keyframes modeFade { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+/* Hero split card */
+.mode-hero {
+  border-radius: 20px; overflow: hidden; margin-bottom: 36px;
+  border: 1.5px solid rgba(255,255,255,0.07); position: relative;
+}
+.mode-hero-civ  { border-color: rgba(16,196,122,0.2); }
+.mode-hero-mil  { border-color: rgba(241,182,90,0.25); }
+.mode-hero-top {
+  padding: 36px 40px 32px; display: flex; align-items: center; gap: 28px;
+  position: relative; overflow: hidden;
+}
+.mode-hero-civ .mode-hero-top  { background: linear-gradient(135deg, rgba(16,196,122,0.07), rgba(88,166,255,0.04), rgba(6,9,11,0)); }
+.mode-hero-mil .mode-hero-top  { background: linear-gradient(135deg, rgba(241,182,90,0.09), rgba(248,113,113,0.04), rgba(6,9,11,0)); }
+.mode-hero-emblem { font-size: 64px; flex-shrink: 0; filter: drop-shadow(0 0 20px currentColor); line-height: 1; }
+.mode-hero-civ .mode-hero-emblem  { color: #10c47a; }
+.mode-hero-mil .mode-hero-emblem  { color: #f1b65a; }
+.mode-hero-eyebrow { font-family: 'Orbitron', sans-serif; font-size: 8px; letter-spacing: .22em; opacity: .55; margin-bottom: 8px; }
+.mode-hero-title { font-family: 'Orbitron', sans-serif; font-size: 26px; font-weight: 900; letter-spacing: .04em; line-height: 1.15; margin-bottom: 12px; }
+.mode-hero-civ .mode-hero-title  { color: #10c47a; text-shadow: 0 0 30px rgba(16,196,122,0.35); }
+.mode-hero-mil .mode-hero-title  { color: #f1b65a;  text-shadow: 0 0 30px rgba(241,182,90,0.35); }
+.mode-hero-desc { font-size: 14px; color: rgba(255,255,255,0.58); line-height: 1.7; max-width: 620px; }
+.mode-hero-glow { position: absolute; right: -60px; top: -60px; width: 280px; height: 280px; border-radius: 50%; filter: blur(80px); opacity: .18; pointer-events: none; }
+.mode-hero-civ .mode-hero-glow  { background: #10c47a; }
+.mode-hero-mil .mode-hero-glow  { background: #f1b65a; }
+
+/* Stats strip */
+.mode-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: rgba(255,255,255,.05); border-top: 1px solid rgba(255,255,255,.05); }
+.mode-stat { padding: 16px 12px; text-align: center; background: rgba(6,9,11,.95); }
+.mode-stat-v { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900; line-height: 1; }
+.mode-stat-l { font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .12em; color: rgba(255,255,255,.38); margin-top: 5px; }
+.mode-hero-civ .mode-stat-v { color: #10c47a; }
+.mode-hero-mil .mode-stat-v { color: #f1b65a; }
+
+/* CTA buttons row */
+.mode-cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+.mode-btn-primary {
+  padding: 13px 28px; border-radius: 10px; font-family: 'Orbitron', sans-serif;
+  font-size: 9.5px; font-weight: 700; letter-spacing: .13em; cursor: pointer;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+  transition: all .22s; border: none;
+}
+.mode-btn-civ  { background: linear-gradient(135deg,#10c47a,#0ea866); color: #000; box-shadow: 0 4px 20px rgba(16,196,122,.3); }
+.mode-btn-civ:hover  { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(16,196,122,.45); }
+.mode-btn-mil  { background: linear-gradient(135deg,#f1b65a,#d4963a); color: #000; box-shadow: 0 4px 20px rgba(241,182,90,.3); }
+.mode-btn-mil:hover  { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(241,182,90,.45); }
+.mode-btn-ghost {
+  padding: 12px 24px; border-radius: 10px; font-family: 'Orbitron', sans-serif;
+  font-size: 9.5px; font-weight: 700; letter-spacing: .13em; cursor: pointer;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+  transition: all .22s; background: transparent;
+}
+.mode-btn-ghost-civ { border: 1.5px solid rgba(16,196,122,.35); color: #10c47a; }
+.mode-btn-ghost-civ:hover { background: rgba(16,196,122,.08); }
+.mode-btn-ghost-mil { border: 1.5px solid rgba(241,182,90,.35); color: #f1b65a; }
+.mode-btn-ghost-mil:hover { background: rgba(241,182,90,.08); }
+
+/* Feature grid inside pane */
+.mode-feature-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(240px,1fr)); gap: 14px; margin-top: 8px; }
+.mode-feat {
+  background: rgba(12,17,21,.95); border: 1.5px solid rgba(255,255,255,.06);
+  border-radius: 14px; padding: 20px 22px; position: relative; overflow: hidden;
+  transition: all .22s;
+}
+.mode-feat:hover { transform: translateY(-3px); border-color: rgba(255,255,255,.14); }
+.mode-feat::before { content:''; position:absolute; top:0;left:0;right:0; height:2px; opacity:0; transition:opacity .2s; }
+.mode-feat:hover::before { opacity:1; }
+.mode-feat-civ::before { background: linear-gradient(90deg,#10c47a,#2dd4bf); }
+.mode-feat-mil::before { background: linear-gradient(90deg,#f1b65a,#f87171); }
+.mode-feat-icon { font-size: 28px; margin-bottom: 12px; line-height: 1; }
+.mode-feat-title { font-family: 'Orbitron', sans-serif; font-size: 9.5px; font-weight: 700; letter-spacing: .09em; margin-bottom: 8px; }
+.mode-feat-civ .mode-feat-title  { color: #10c47a; }
+.mode-feat-mil .mode-feat-title  { color: #f1b65a; }
+.mode-feat-desc { font-size: 12.5px; color: rgba(255,255,255,.55); line-height: 1.68; }
+.mode-feat-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px; }
+.mode-feat-tag { font-family: 'JetBrains Mono', monospace; font-size: 7.5px; letter-spacing: .08em; padding: 2px 9px; border-radius: 20px; border: 1px solid; }
+.mode-feat-civ .mode-feat-tag { color: #10c47a; border-color: rgba(16,196,122,.25); background: rgba(16,196,122,.07); }
+.mode-feat-mil .mode-feat-tag { color: #f1b65a;  border-color: rgba(241,182,90,.25);  background: rgba(241,182,90,.07); }
+
+/* Scenario cards (military) */
+.mil-scenario-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(300px,1fr)); gap: 14px; margin-top: 8px; }
+.mil-scenario {
+  background: rgba(12,17,21,.95); border: 1.5px solid rgba(241,182,90,.1);
+  border-radius: 14px; padding: 22px 24px; position: relative; overflow: hidden;
+  transition: all .22s;
+}
+.mil-scenario:hover { border-color: rgba(241,182,90,.25); transform: translateY(-2px); }
+.mil-scenario-badge { display: inline-block; font-family: 'Orbitron', sans-serif; font-size: 7px; letter-spacing: .18em; padding: 3px 10px; border-radius: 20px; margin-bottom: 12px; }
+.mil-s-recon  { background: rgba(88,166,255,.1); color: #58a6ff; border: 1px solid rgba(88,166,255,.2); }
+.mil-s-strike { background: rgba(248,113,113,.1); color: #f87171;  border: 1px solid rgba(248,113,113,.2); }
+.mil-s-train  { background: rgba(241,182,90,.1);  color: #f1b65a;  border: 1px solid rgba(241,182,90,.2); }
+.mil-s-intel  { background: rgba(167,139,250,.1); color: #a78bfa; border: 1px solid rgba(167,139,250,.2); }
+.mil-scenario-title { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; color: rgba(255,255,255,.88); margin-bottom: 8px; letter-spacing: .04em; }
+.mil-scenario-desc { font-size: 12.5px; color: rgba(255,255,255,.5); line-height: 1.7; }
+.mil-scenario-specs { margin-top: 14px; display: flex; flex-direction: column; gap: 5px; }
+.mil-spec-row { display: flex; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; border-top: 1px solid rgba(255,255,255,.04); padding-top: 5px; }
+.mil-spec-key { color: rgba(255,255,255,.35); }
+.mil-spec-val { color: rgba(255,255,255,.75); }
+
+/* Disclaimer strip */
+.mode-disclaimer {
+  margin-top: 32px; padding: 16px 20px; border-radius: 10px;
+  background: rgba(241,182,90,.04); border: 1px solid rgba(241,182,90,.15);
+  font-size: 11.5px; color: rgba(255,255,255,.45); line-height: 1.7; display: flex; gap: 12px; align-items: flex-start;
+}
+.mode-disclaimer-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+/* Section label */
+.mode-section-label { font-family: 'Orbitron', sans-serif; font-size: 8px; letter-spacing: .2em; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,.05); }
+.mode-section-label-civ { color: rgba(16,196,122,.6); }
+.mode-section-label-mil { color: rgba(241,182,90,.6); }
+
+@media(max-width:700px) {
+  .mode-hero-top { padding: 24px 20px; flex-direction: column; align-items: flex-start; gap: 16px; }
+  .mode-hero-title { font-size: 18px; }
+  .mode-hero-emblem { font-size: 44px; }
+  .mode-stats { grid-template-columns: repeat(2,1fr); }
+  .mode-tabs { width: 100%; }
+  .mode-tab { flex: 1; padding: 12px 8px; justify-content: center; }
+}
+
 .section-divider {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--border) 15%, var(--border) 85%, transparent);
@@ -675,7 +824,7 @@ footer {
     <img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="OBIX">
     <div>
       <div class="nav-logo-text">OBIX CONFIG DOCTOR</div>
-      <div class="nav-logo-sub">FPV Tuning Platform 🇹🇭 · v5.0</div>
+      <div class="nav-logo-sub">FPV Tuning Platform 🇹🇭 · v5.1</div>
     </div>
   </a>
   <div class="nav-links">
@@ -715,8 +864,8 @@ footer {
   <div class="hero-inner">
     <div class="hero-badge">
       <span class="badge-dot"></span>
-      <span class="i18n-th">🇹🇭 สำหรับชุมชน FPV ไทยแลนด์ — v5.0 Smart Analysis</span>
-      <span class="i18n-en">🇹🇭 For FPV Thailand Community — v5.0 Smart Analysis</span>
+      <span class="i18n-th">🇹🇭 สำหรับชุมชน FPV ไทย — v5.1 Smart Analysis</span>
+      <span class="i18n-en">🇹🇭 For FPV Thailand Community — v5.1 Smart Analysis</span>
     </div>
 
     <img src="{{ url_for('static', filename='img/obix-logo.png') }}"
@@ -727,7 +876,7 @@ footer {
     <h1 class="hero-title">
       <span class="i18n-th">วิเคราะห์โดรน <span class="accent">FPV</span><br>ของคุณ • ลึกที่สุดในไทย</span>
       <span class="i18n-en">Analyze your <span class="accent">FPV</span> Drone<br>Deepest tools in Thailand</span>
-      <span class="hero-title-en">TUNE SMARTER. FLY BETTER. v5.0</span>
+      <span class="hero-title-en">TUNE SMARTER. FLY BETTER. v5.1</span>
     </h1>
 
     <p class="hero-desc">
@@ -781,6 +930,420 @@ footer {
     <div class="stat-lbl"><span class="i18n-th">Community Thai</span><span class="i18n-en">Thai Community</span></div>
   </div>
 </div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODE SELECTOR — CIVILIAN vs MILITARY
+     ══════════════════════════════════════════════════════════ -->
+<section class="mode-section" id="mode-selector">
+  <div class="mode-inner">
+
+    <!-- Heading -->
+    <div style="text-align:center;margin-bottom:48px;" data-reveal>
+      <div class="section-badge badge-new" style="margin:0 auto 16px;">⚙️ &nbsp;เลือกโหมดการใช้งาน</div>
+      <h2 class="section-title" style="margin-bottom:12px;">
+        วิเคราะห์โดรนสำหรับ<br><span class="hl-green">ทุกภารกิจ</span>
+      </h2>
+      <p class="section-sub" style="max-width:540px;margin:0 auto;">
+        ไม่ว่าจะเป็นนักบิน FPV ทั่วไป หรือผู้ปฏิบัติการทางทหาร — เลือกโหมดที่ตรงกับความต้องการ
+      </p>
+    </div>
+
+    <!-- Tab switcher -->
+    <div class="mode-tabs" id="modeTabs">
+      <button class="mode-tab active-civ" onclick="switchMode('civ')" id="tab-civ">
+        <span class="mode-tab-icon">🚀</span>
+        CIVILIAN &nbsp;|&nbsp; นักบิน FPV
+      </button>
+      <button class="mode-tab" onclick="switchMode('mil')" id="tab-mil">
+        <span class="mode-tab-icon">🎖️</span>
+        MILITARY &nbsp;|&nbsp; ทางการทหาร
+      </button>
+    </div>
+
+    <!-- ══ CIVILIAN PANE ══ -->
+    <div class="mode-pane active" id="pane-civ">
+
+      <div class="mode-hero mode-hero-civ" data-reveal>
+        <div class="mode-hero-glow"></div>
+        <div class="mode-hero-top">
+          <div class="mode-hero-emblem">🚁</div>
+          <div style="flex:1;">
+            <div class="mode-hero-eyebrow" style="color:#10c47a;">CIVILIAN MODE · สำหรับนักบิน FPV ทั่วไป</div>
+            <div class="mode-hero-title">วิเคราะห์โดรน<br>ระดับ Pro</div>
+            <p class="mode-hero-desc">
+              ตั้งแต่มือใหม่ที่เพิ่งซื้อโดรนตัวแรก ไปจนถึงนักแข่ง freestyle ระดับ advanced —
+              ConfigDoctor วิเคราะห์สเปคโดรนของคุณและให้ค่า PID · Filter · Motor ที่พร้อม paste ใน Betaflight ทันที
+              พร้อม <strong style="color:#10c47a;">Pro Tuning Trix</strong> และ <strong style="color:#10c47a;">Tuning Roadmap</strong> ที่ personalized ตาม build จริง
+            </p>
+            <div class="mode-cta-row">
+              <a href="/app" class="mode-btn-primary mode-btn-civ">🚀 เริ่มวิเคราะห์โดรน</a>
+              <a href="/quick-tune" class="mode-btn-ghost mode-btn-ghost-civ">⚡ Quick Tune Pad</a>
+              <a href="/pid-advisor" class="mode-btn-ghost mode-btn-ghost-civ">🩺 PID Advisor</a>
+            </div>
+          </div>
+        </div>
+        <div class="mode-stats">
+          <div class="mode-stat">
+            <div class="mode-stat-v">23</div>
+            <div class="mode-stat-l">TOOLS</div>
+          </div>
+          <div class="mode-stat">
+            <div class="mode-stat-v">8</div>
+            <div class="mode-stat-l">BUILD SIZES</div>
+          </div>
+          <div class="mode-stat">
+            <div class="mode-stat-v">13</div>
+            <div class="mode-stat-l">PID SYMPTOMS</div>
+          </div>
+          <div class="mode-stat">
+            <div class="mode-stat-v">100%</div>
+            <div class="mode-stat-l">FREE</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Civilian features -->
+      <div class="mode-section-label mode-section-label-civ" data-reveal>
+        ✦ &nbsp;TOOLS สำหรับนักบิน FPV
+      </div>
+      <div class="mode-feature-grid" data-reveal>
+
+        <div class="mode-feat mode-feat-civ">
+          <div class="mode-feat-icon">🧠</div>
+          <div class="mode-feat-title">SMART ANALYSIS</div>
+          <div class="mode-feat-desc">กรอกสเปคโดรน → ได้ PID · Filter · ESC · Motor baseline พร้อม CLI command ทันที คำนวณจาก physics engine จริง ไม่ใช่ค่ากลาง</div>
+          <div class="mode-feat-tags">
+            <span class="mode-feat-tag">PID</span>
+            <span class="mode-feat-tag">Filter</span>
+            <span class="mode-feat-tag">CLI Ready</span>
+          </div>
+        </div>
+
+        <div class="mode-feat mode-feat-civ">
+          <div class="mode-feat-icon">🎭</div>
+          <div class="mode-feat-title">FLIGHT PERSONALITY</div>
+          <div class="mode-feat-desc">วิเคราะห์ build แล้วตีตรา personality เช่น PUNCHY FREESTYLE / RACE MACHINE / ENDURANCE EXPLORER พร้อม tuning direction เฉพาะ</div>
+          <div class="mode-feat-tags">
+            <span class="mode-feat-tag">Freestyle</span>
+            <span class="mode-feat-tag">Racing</span>
+            <span class="mode-feat-tag">Long Range</span>
+          </div>
+        </div>
+
+        <div class="mode-feat mode-feat-civ">
+          <div class="mode-feat-icon">🔥</div>
+          <div class="mode-feat-title">PRO TUNING TRIX</div>
+          <div class="mode-feat-desc">7 เทคนิค personalized ตาม style ของ build จริง — มือใหม่อ่านเข้าใจ มือเก่าเอาไปใช้ได้ทันที พร้อม CLI snippet copy</div>
+          <div class="mode-feat-tags">
+            <span class="mode-feat-tag">Propwash Fix</span>
+            <span class="mode-feat-tag">RPM Filter</span>
+            <span class="mode-feat-tag">Feedforward</span>
+          </div>
+        </div>
+
+        <div class="mode-feat mode-feat-civ">
+          <div class="mode-feat-icon">📊</div>
+          <div class="mode-feat-title">BLACKBOX ANALYZER</div>
+          <div class="mode-feat-desc">upload CSV จาก blackbox → วิเคราะห์ step response, noise floor, PID score อัตโนมัติ เห็นปัญหาที่ "รู้สึก" ไม่ได้</div>
+          <div class="mode-feat-tags">
+            <span class="mode-feat-tag">CSV Upload</span>
+            <span class="mode-feat-tag">PID Score</span>
+            <span class="mode-feat-tag">Noise Floor</span>
+          </div>
+        </div>
+
+        <div class="mode-feat mode-feat-civ">
+          <div class="mode-feat-icon">🗺️</div>
+          <div class="mode-feat-title">TUNING ROADMAP</div>
+          <div class="mode-feat-desc">6-step guide ลำดับการ tune ที่ถูกต้อง พร้อม hover throttle % จาก build จริง, CLI snippet ทุก step และกฎทองสำหรับมือใหม่</div>
+          <div class="mode-feat-tags">
+            <span class="mode-feat-tag">Step by Step</span>
+            <span class="mode-feat-tag">Beginner OK</span>
+          </div>
+        </div>
+
+        <div class="mode-feat mode-feat-civ">
+          <div class="mode-feat-icon">🔮</div>
+          <div class="mode-feat-title">WHAT-IF OPTIMIZER</div>
+          <div class="mode-feat-desc">จำลอง "ถ้าปรับแค่นี้จะได้อะไร" — เช่น ใส่แบตใหญ่ขึ้น, ลดน้ำหนัก, ปรับ KV → เห็น delta ทันทีก่อนจ่ายเงินซื้ออะไหล่</div>
+          <div class="mode-feat-tags">
+            <span class="mode-feat-tag">Battery</span>
+            <span class="mode-feat-tag">Weight</span>
+            <span class="mode-feat-tag">KV</span>
+          </div>
+        </div>
+
+        <div class="mode-feat mode-feat-civ">
+          <div class="mode-feat-icon">🎮</div>
+          <div class="mode-feat-title">FPV SIMULATOR NEO</div>
+          <div class="mode-feat-desc">ฝึกบินโดรน 3D ในเบราว์เซอร์ — 6 modes: Tutorial, Gate Runner, Target Hunt, Race Circuit, Free Fly รองรับ gamepad + mobile joystick</div>
+          <div class="mode-feat-tags">
+            <span class="mode-feat-tag">3D WebGL</span>
+            <span class="mode-feat-tag">6 Modes</span>
+            <span class="mode-feat-tag">Mobile OK</span>
+          </div>
+        </div>
+
+        <div class="mode-feat mode-feat-civ">
+          <div class="mode-feat-icon">⚡</div>
+          <div class="mode-feat-title">QUICK TUNE PAD</div>
+          <div class="mode-feat-desc">เลือกอาการ (propwash, yaw spin, jello ฯลฯ) → ได้ PID delta matrix + CLI output ทันที detect conflict อัตโนมัติ</div>
+          <div class="mode-feat-tags">
+            <span class="mode-feat-tag">13 Symptoms</span>
+            <span class="mode-feat-tag">Conflict Detect</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Who is it for -->
+      <div style="margin-top:32px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;" data-reveal>
+        <div style="padding:14px 18px;border-radius:10px;background:rgba(16,196,122,.05);border:1px solid rgba(16,196,122,.12);">
+          <div style="font-size:20px;margin-bottom:6px;">🌱</div>
+          <div style="font-family:'Orbitron',sans-serif;font-size:8px;color:#10c47a;letter-spacing:.1em;margin-bottom:5px;">มือใหม่</div>
+          <div style="font-size:11.5px;color:rgba(255,255,255,.55);line-height:1.6;">เพิ่งซื้อโดรนตัวแรก ไม่รู้ PID คืออะไร — ได้ค่าพร้อมใช้ทันที + อธิบายภาษาไทย</div>
+        </div>
+        <div style="padding:14px 18px;border-radius:10px;background:rgba(16,196,122,.05);border:1px solid rgba(16,196,122,.12);">
+          <div style="font-size:20px;margin-bottom:6px;">🚀</div>
+          <div style="font-family:'Orbitron',sans-serif;font-size:8px;color:#10c47a;letter-spacing:.1em;margin-bottom:5px;">นักบิน Freestyle</div>
+          <div style="font-size:11.5px;color:rgba(255,255,255,.55);line-height:1.6;">ต้องการ fine-tune propwash, D-term, feedforward ให้แม่นยำก่อนบินจริง</div>
+        </div>
+        <div style="padding:14px 18px;border-radius:10px;background:rgba(16,196,122,.05);border:1px solid rgba(16,196,122,.12);">
+          <div style="font-size:20px;margin-bottom:6px;">🏁</div>
+          <div style="font-family:'Orbitron',sans-serif;font-size:8px;color:#10c47a;letter-spacing:.1em;margin-bottom:5px;">นักแข่ง FPV Race</div>
+          <div style="font-size:11.5px;color:rgba(255,255,255,.55);line-height:1.6;">ลด latency, ปรับ race rates, filter tune เพื่อ lap time ดีที่สุด</div>
+        </div>
+        <div style="padding:14px 18px;border-radius:10px;background:rgba(16,196,122,.05);border:1px solid rgba(16,196,122,.12);">
+          <div style="font-size:20px;margin-bottom:6px;">🌏</div>
+          <div style="font-family:'Orbitron',sans-serif;font-size:8px;color:#10c47a;letter-spacing:.1em;margin-bottom:5px;">Long Range / Cine</div>
+          <div style="font-size:11.5px;color:rgba(255,255,255,.55);line-height:1.6;">optimize flight time, GPS rescue, battery sag compensation สำหรับบินไกล</div>
+        </div>
+      </div>
+
+    </div><!-- /pane-civ -->
+
+    <!-- ══ MILITARY PANE ══ -->
+    <div class="mode-pane" id="pane-mil">
+
+      <div class="mode-hero mode-hero-mil" data-reveal>
+        <div class="mode-hero-glow"></div>
+        <div class="mode-hero-top">
+          <div class="mode-hero-emblem">🎖️</div>
+          <div style="flex:1;">
+            <div class="mode-hero-eyebrow" style="color:#f1b65a;">MILITARY TRAINING MODE · สำหรับการฝึกและเรียนรู้ทางการทหาร</div>
+            <div class="mode-hero-title">ระบบวิเคราะห์<br>UAS/Drone ภารกิจ</div>
+            <p class="mode-hero-desc">
+              เครื่องมือวิเคราะห์และเรียนรู้สำหรับผู้ปฏิบัติการ UAS ทางทหาร — ครอบคลุมการตั้งค่า PID สำหรับภารกิจต่างๆ,
+              การประเมิน performance ของอากาศยานไร้คนขับ, การฝึก simulator และ
+              <strong style="color:#f1b65a;">การเรียนรู้ระบบควบคุม</strong> ที่ถ่ายทอดจาก FPV สู่ military drone operation
+            </p>
+            <div class="mode-cta-row">
+              <a href="/fpv-trainer" class="mode-btn-primary mode-btn-mil">🎮 เริ่ม UAS Simulator</a>
+              <a href="/app" class="mode-btn-ghost mode-btn-ghost-mil">📊 วิเคราะห์ Drone Spec</a>
+              <a href="/flight-quiz" class="mode-btn-ghost mode-btn-ghost-mil">🎯 Flight Assessment</a>
+            </div>
+          </div>
+        </div>
+        <div class="mode-stats">
+          <div class="mode-stat">
+            <div class="mode-stat-v">6</div>
+            <div class="mode-stat-l">FLIGHT MODES</div>
+          </div>
+          <div class="mode-stat">
+            <div class="mode-stat-v">3D</div>
+            <div class="mode-stat-l">SIMULATOR</div>
+          </div>
+          <div class="mode-stat">
+            <div class="mode-stat-v">UAS</div>
+            <div class="mode-stat-l">COMPATIBLE</div>
+          </div>
+          <div class="mode-stat">
+            <div class="mode-stat-v">ฟรี</div>
+            <div class="mode-stat-l">ใช้งาน</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Military use cases -->
+      <div class="mode-section-label mode-section-label-mil" data-reveal>
+        🎖️ &nbsp;ภารกิจและสถานการณ์ฝึก
+      </div>
+      <div class="mil-scenario-grid" data-reveal>
+
+        <div class="mil-scenario">
+          <span class="mil-scenario-badge mil-s-recon">ISR · RECONNAISSANCE</span>
+          <div class="mil-scenario-title">การลาดตระเวนและเฝ้าระวัง</div>
+          <div class="mil-scenario-desc">วิเคราะห์สเปค drone สำหรับภารกิจ ISR — ประเมิน flight time, ระยะสัญญาณ VTX, payload capacity สำหรับกล้อง EO/IR และ gimbal</div>
+          <div class="mil-scenario-specs">
+            <div class="mil-spec-row"><span class="mil-spec-key">Recommended size</span><span class="mil-spec-val">7" – 10" Long Range</span></div>
+            <div class="mil-spec-row"><span class="mil-spec-key">Battery</span><span class="mil-spec-val">6S 3000–5000mAh</span></div>
+            <div class="mil-spec-row"><span class="mil-spec-key">Flight time target</span><span class="mil-spec-val">20–40 min</span></div>
+            <div class="mil-spec-row"><span class="mil-spec-key">Key tool</span><span class="mil-spec-val">Motor×Prop + VTX Range</span></div>
+          </div>
+        </div>
+
+        <div class="mil-scenario">
+          <span class="mil-scenario-badge mil-s-train">TRAINING · ฝึกบิน</span>
+          <div class="mil-scenario-title">การฝึก UAS Operator</div>
+          <div class="mil-scenario-desc">FPV Simulator NEO สำหรับฝึก hand-eye coordination, waypoint navigation, hovering precision และ emergency maneuver โดยไม่เสี่ยงกับอุปกรณ์จริง</div>
+          <div class="mil-scenario-specs">
+            <div class="mil-spec-row"><span class="mil-spec-key">Training modes</span><span class="mil-spec-val">Tutorial → Race Circuit</span></div>
+            <div class="mil-spec-row"><span class="mil-spec-key">Gamepad support</span><span class="mil-spec-val">✅ Full gamepad API</span></div>
+            <div class="mil-spec-row"><span class="mil-spec-key">Platform</span><span class="mil-spec-val">Browser · No install</span></div>
+            <div class="mil-spec-row"><span class="mil-spec-key">Key tool</span><span class="mil-spec-val">FPV Simulator NEO</span></div>
+          </div>
+        </div>
+
+        <div class="mil-scenario">
+          <span class="mil-scenario-badge mil-s-intel">TECHNICAL INTEL</span>
+          <div class="mil-scenario-title">ประเมินสมรรถนะ UAS ฝ่ายตรงข้าม</div>
+          <div class="mil-scenario-desc">วิเคราะห์ prop size, KV, cell count จาก spec sheet → ประมาณ TWR, tip speed, C-rating, ระยะบิน และความเร็วสูงสุดของ drone ที่พบ</div>
+          <div class="mil-scenario-specs">
+            <div class="mil-spec-row"><span class="mil-spec-key">Input</span><span class="mil-spec-val">Motor KV + Prop + Battery</span></div>
+            <div class="mil-spec-row"><span class="mil-spec-key">Output</span><span class="mil-spec-val">TWR · Speed · Range · Current</span></div>
+            <div class="mil-spec-row"><span class="mil-spec-key">Physics accuracy</span><span class="mil-spec-val">±10% from real bench</span></div>
+            <div class="mil-spec-row"><span class="mil-spec-key">Key tool</span><span class="mil-spec-val">Main Analyzer + Physics</span></div>
+          </div>
+        </div>
+
+        <div class="mil-scenario">
+          <span class="mil-scenario-badge mil-s-strike">PAYLOAD · DELIVERY</span>
+          <div class="mil-scenario-title">ประเมิน Payload Capacity</div>
+          <div class="mil-scenario-desc">วิเคราะห์ TWR ก่อนและหลังเพิ่ม payload — ตรวจสอบว่า drone รับน้ำหนักได้เท่าไหร่โดยยังบินได้ปลอดภัย (TWR >2.0 สำหรับภารกิจ)</div>
+          <div class="mil-scenario-specs">
+            <div class="mil-spec-row"><span class="mil-spec-key">Min safe TWR</span><span class="mil-spec-val">&gt; 2.0 (loaded)</span></div>
+            <div class="mil-spec-row"><span class="mil-spec-key">Hover throttle</span><span class="mil-spec-val">&lt; 55% (safety margin)</span></div>
+            <div class="mil-spec-row"><span class="mil-spec-key">ESC safety</span><span class="mil-spec-val">×1.5 peak current</span></div>
+            <div class="mil-spec-row"><span class="mil-spec-key">Key tool</span><span class="mil-spec-val">Main Analyzer + What-If</span></div>
+          </div>
+        </div>
+
+        <div class="mil-scenario">
+          <span class="mil-scenario-badge mil-s-recon">RF · SIGNALS</span>
+          <div class="mil-scenario-title">การวิเคราะห์สัญญาณ RF/VTX</div>
+          <div class="mil-scenario-desc">ประเมินระยะ video link, เลือก band/channel ที่ไม่รบกวนกัน สำหรับ multi-drone operation และการ deconflict สัญญาณในพื้นที่ปฏิบัติการ</div>
+          <div class="mil-scenario-specs">
+            <div class="mil-spec-row"><span class="mil-spec-key">Frequency bands</span><span class="mil-spec-val">5.8GHz (A/B/E/F/R)</span></div>
+            <div class="mil-spec-row"><span class="mil-spec-key">Max range est.</span><span class="mil-spec-val">ตาม mW + terrain</span></div>
+            <div class="mil-spec-row"><span class="mil-spec-key">Multi-drone</span><span class="mil-spec-val">Band deconflict guide</span></div>
+            <div class="mil-spec-row"><span class="mil-spec-key">Key tool</span><span class="mil-spec-val">VTX Range + VTX Bands</span></div>
+          </div>
+        </div>
+
+        <div class="mil-scenario">
+          <span class="mil-scenario-badge mil-s-intel">MAINTENANCE · บำรุงรักษา</span>
+          <div class="mil-scenario-title">ระบบบำรุงรักษาและ Diagnostics</div>
+          <div class="mil-scenario-desc">ตรวจสอบสุขภาพแบตเตอรี่, ประมาณ motor temperature, วิเคราะห์ loop latency และ CLI config เพื่อให้ UAS พร้อมปฏิบัติการเสมอ</div>
+          <div class="mil-scenario-specs">
+            <div class="mil-spec-row"><span class="mil-spec-key">Battery health</span><span class="mil-spec-val">IR · Sag · Cycle count</span></div>
+            <div class="mil-spec-row"><span class="mil-spec-key">Motor thermal</span><span class="mil-spec-val">Winding temp estimate</span></div>
+            <div class="mil-spec-row"><span class="mil-spec-key">Config check</span><span class="mil-spec-val">CLI Surgeon diff/dump</span></div>
+            <div class="mil-spec-row"><span class="mil-spec-key">Key tool</span><span class="mil-spec-val">Battery + Thermal + Loop</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Military feature highlights -->
+      <div class="mode-section-label mode-section-label-mil" style="margin-top:32px;" data-reveal>
+        ⚙️ &nbsp;TOOLS สำหรับการฝึกและเรียนรู้ทางทหาร
+      </div>
+      <div class="mode-feature-grid" data-reveal>
+
+        <div class="mode-feat mode-feat-mil">
+          <div class="mode-feat-icon">📐</div>
+          <div class="mode-feat-title">PHYSICS ENGINE</div>
+          <div class="mode-feat-desc">คำนวณ TWR จริง, tip speed, กระแสไฟสูงสุด, ประมาณอุณหภูมิ winding จาก spec — แม่นยำ ±10% จากการ bench test จริง</div>
+          <div class="mode-feat-tags">
+            <span class="mode-feat-tag">TWR</span>
+            <span class="mode-feat-tag">Tip Speed</span>
+            <span class="mode-feat-tag">Current</span>
+          </div>
+        </div>
+
+        <div class="mode-feat mode-feat-mil">
+          <div class="mode-feat-icon">🎮</div>
+          <div class="mode-feat-title">UAS FLIGHT SIMULATOR</div>
+          <div class="mode-feat-desc">ฝึก operator ในสถานการณ์จำลอง — Tutorial mode สำหรับฝึกใหม่, Hover Zone สำหรับทดสอบความแม่นยำ, Free Fly สำหรับ exploration</div>
+          <div class="mode-feat-tags">
+            <span class="mode-feat-tag">No Install</span>
+            <span class="mode-feat-tag">Gamepad</span>
+            <span class="mode-feat-tag">WebGL 3D</span>
+          </div>
+        </div>
+
+        <div class="mode-feat mode-feat-mil">
+          <div class="mode-feat-icon">🔋</div>
+          <div class="mode-feat-title">BATTERY & ENDURANCE</div>
+          <div class="mode-feat-desc">วิเคราะห์ C-rating, usable Wh, ประมาณ flight time ทั้ง hover และ aggressive — วางแผน sortie duration ได้แม่นยำ</div>
+          <div class="mode-feat-tags">
+            <span class="mode-feat-tag">C-Rate</span>
+            <span class="mode-feat-tag">Flight Time</span>
+            <span class="mode-feat-tag">Wh</span>
+          </div>
+        </div>
+
+        <div class="mode-feat mode-feat-mil">
+          <div class="mode-feat-icon">📡</div>
+          <div class="mode-feat-title">RF LINK ANALYSIS</div>
+          <div class="mode-feat-desc">ประมาณระยะสัญญาณ VTX ตาม mW และ terrain, เลือก band ที่ไม่รบกวนกัน สำหรับ multi-UAS operation ในพื้นที่เดียวกัน</div>
+          <div class="mode-feat-tags">
+            <span class="mode-feat-tag">5.8GHz</span>
+            <span class="mode-feat-tag">Range Est.</span>
+            <span class="mode-feat-tag">Deconflict</span>
+          </div>
+        </div>
+
+        <div class="mode-feat mode-feat-mil">
+          <div class="mode-feat-icon">📊</div>
+          <div class="mode-feat-title">PERFORMANCE SCORING</div>
+          <div class="mode-feat-desc">Build Intelligence Score วิเคราะห์ 6 มิติ: TWR · Flight Time · Noise · Tip Speed · Motor · Efficiency — เปรียบเทียบ drone ได้ objective</div>
+          <div class="mode-feat-tags">
+            <span class="mode-feat-tag">Score A–S</span>
+            <span class="mode-feat-tag">6 Dimensions</span>
+          </div>
+        </div>
+
+        <div class="mode-feat mode-feat-mil">
+          <div class="mode-feat-icon">🩺</div>
+          <div class="mode-feat-title">DIAGNOSTIC TOOLS</div>
+          <div class="mode-feat-desc">CLI Surgeon วิเคราะห์ config file จาก UAS ที่ capture ได้ — ตรวจ PID settings, filter config, protocol ที่ใช้ และจุดอ่อนของระบบ</div>
+          <div class="mode-feat-tags">
+            <span class="mode-feat-tag">CLI Analysis</span>
+            <span class="mode-feat-tag">Config Intel</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Disclaimer -->
+      <div class="mode-disclaimer" data-reveal>
+        <div class="mode-disclaimer-icon">⚠️</div>
+        <div>
+          <strong style="color:rgba(255,255,255,.7);">ข้อควรทราบ:</strong> ConfigDoctor เป็น educational tool สำหรับการเรียนรู้และวิเคราะห์ระบบ UAS — ข้อมูลที่ได้เป็นการประมาณการจาก physics model
+          การนำไปใช้งานในภารกิจจริงต้องผ่านการทดสอบและยืนยันจากผู้เชี่ยวชาญ ทีมงานและหน่วยงานที่รับผิดชอบก่อนทุกครั้ง
+          ข้อมูล spec ที่กรอกเข้าระบบไม่ถูกบันทึกหรือส่งต่อ — ประมวลผลใน session เท่านั้น
+        </div>
+      </div>
+
+    </div><!-- /pane-mil -->
+
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Mode switcher JS -->
+<script>
+function switchMode(mode) {
+  ['civ','mil'].forEach(function(m) {
+    document.getElementById('pane-'+m).classList.toggle('active', m===mode);
+    var tab = document.getElementById('tab-'+m);
+    tab.classList.remove('active-civ','active-mil');
+    if(m===mode) tab.classList.add('active-'+m);
+  });
+}
+</script>
 
 <!-- ══════════════════════════════════════════════════════════
      NEW FEATURES v2.3
