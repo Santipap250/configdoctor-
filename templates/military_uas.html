@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MILITARY UAS ANALYZER — ConfigDoctor v5.1</title>
+<meta name="description" content="ระบบวิเคราะห์สมรรถนะ UAS ทางทหาร — Armed Drone Performance Analysis">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:       #04060d;
+  --bg2:      #080c18;
+  --bg3:      #0c1020;
+  --amber:    #f59e0b;
+  --amber2:   #fbbf24;
+  --green:    #10b981;
+  --red:      #ef4444;
+  --blue:     #3b82f6;
+  --cyan:     #06b6d4;
+  --purple:   #8b5cf6;
+  --text:     rgba(226,232,255,.85);
+  --muted:    rgba(148,163,210,.45);
+  --border:   rgba(255,255,255,.06);
+  --card:     rgba(8,12,24,.95);
+  --amber-g:  linear-gradient(135deg,#f59e0b,#fbbf24);
+  --green-g:  linear-gradient(135deg,#059669,#10b981);
+  --red-g:    linear-gradient(135deg,#dc2626,#ef4444);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Rajdhani',sans-serif;
+  font-size:15px;
+  overflow-x:hidden;
+  min-height:100vh;
+}
+
+/* ── SCANLINE OVERLAY ── */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);
+}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;
+  background:radial-gradient(ellipse at 50% 0%,rgba(245,158,11,.04) 0%,transparent 60%),
+             radial-gradient(ellipse at 100% 100%,rgba(16,185,129,.03) 0%,transparent 50%);
+}
+
+/* ── HEX GRID BG ── */
+.hex-bg{
+  position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;opacity:.18;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='104'%3E%3Cpath fill='none' stroke='%23f59e0b' stroke-width='.5' d='M30 2L58 18v36L30 70 2 54V18z'/%3E%3Cpath fill='none' stroke='%23f59e0b' stroke-width='.5' d='M30 72L58 88v16H2V88z'/%3E%3C/svg%3E");
+  background-size:60px 104px;
+}
+
+/* ── TOP BAR ── */
+.topbar{
+  position:sticky;top:0;z-index:500;
+  background:rgba(4,6,13,.97);
+  border-bottom:1px solid rgba(245,158,11,.15);
+  padding:0 24px;height:52px;
+  display:flex;align-items:center;justify-content:space-between;
+  backdrop-filter:blur(12px);
+}
+.topbar-brand{
+  display:flex;align-items:center;gap:14px;
+  font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:.14em;
+}
+.topbar-emblem{
+  width:34px;height:34px;border:2px solid var(--amber);border-radius:4px;
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+  background:rgba(245,158,11,.08);
+}
+.topbar-title{color:var(--amber);}
+.topbar-sub{font-size:7px;color:var(--muted);letter-spacing:.2em;margin-top:2px;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.status-dot{
+  width:7px;height:7px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;
+}
+.status-txt{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--green);letter-spacing:.1em;}
+.nav-back{
+  font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:.12em;padding:6px 14px;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:4px;
+  color:var(--muted);text-decoration:none;transition:all .2s;
+}
+.nav-back:hover{border-color:var(--amber);color:var(--amber);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── PAGE WRAPPER ── */
+.page{position:relative;z-index:1;max-width:1360px;margin:0 auto;padding:28px 24px 80px;}
+
+/* ── PAGE HERO ── */
+.page-hero{
+  display:grid;grid-template-columns:1fr auto;align-items:center;gap:20px;
+  padding:28px 0 24px;border-bottom:1px solid var(--border);margin-bottom:28px;
+}
+.page-hero-eyebrow{
+  font-family:'Orbitron',sans-serif;font-size:7.5px;letter-spacing:.24em;
+  color:var(--amber);margin-bottom:10px;display:flex;align-items:center;gap:8px;
+}
+.page-hero-eyebrow::before{content:'';flex:1;max-width:40px;height:1px;background:var(--amber);opacity:.5;}
+.page-hero-title{
+  font-family:'Orbitron',sans-serif;font-size:clamp(22px,4vw,36px);
+  font-weight:900;letter-spacing:.04em;line-height:1.1;
+}
+.page-hero-title span{color:var(--amber);}
+.page-hero-desc{
+  font-size:14px;color:var(--muted);line-height:1.7;margin-top:10px;max-width:680px;
+}
+.page-hero-badges{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.hero-badge{
+  font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:.15em;
+  padding:5px 12px;border-radius:3px;border:1px solid;
+}
+.hb-amber{background:rgba(245,158,11,.08);color:var(--amber);border-color:rgba(245,158,11,.25);}
+.hb-green{background:rgba(16,185,129,.08);color:var(--green);border-color:rgba(16,185,129,.25);}
+.hb-red{background:rgba(239,68,68,.08);color:var(--red);border-color:rgba(239,68,68,.25);}
+.hb-blue{background:rgba(59,130,246,.08);color:var(--blue);border-color:rgba(59,130,246,.25);}
+.page-hero-stat{
+  text-align:right;font-family:'Share Tech Mono',monospace;
+  font-size:9px;color:var(--muted);letter-spacing:.1em;line-height:2;
+}
+
+/* ── TABS ── */
+.tab-bar{
+  display:flex;gap:2px;background:rgba(8,12,24,.8);
+  border:1px solid var(--border);border-radius:6px;padding:3px;
+  margin-bottom:24px;overflow-x:auto;
+}
+.tab-btn{
+  flex:1;min-width:120px;padding:10px 16px;background:none;border:none;cursor:pointer;
+  font-family:'Orbitron',sans-serif;font-size:8.5px;letter-spacing:.12em;font-weight:700;
+  color:var(--muted);border-radius:4px;transition:all .2s;white-space:nowrap;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.tab-btn:hover{color:var(--amber);background:rgba(245,158,11,.06);}
+.tab-btn.active{background:rgba(245,158,11,.1);color:var(--amber);border:1px solid rgba(245,158,11,.2);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* ── SECTION ── */
+.section-hd{
+  display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:10px;
+  border-bottom:1px solid var(--border);
+}
+.section-num{
+  font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:.2em;
+  color:var(--amber);background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);
+  padding:4px 10px;border-radius:3px;flex-shrink:0;
+}
+.section-title{
+  font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;
+  letter-spacing:.08em;color:rgba(255,255,255,.88);
+}
+.section-desc{font-size:12px;color:var(--muted);margin-left:auto;text-align:right;}
+
+/* ── FORM GRID ── */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-bottom:20px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-label{
+  font-family:'Orbitron',sans-serif;font-size:7.5px;letter-spacing:.16em;
+  color:var(--muted);text-transform:uppercase;
+}
+.form-input,.form-select{
+  background:var(--bg3);border:1.5px solid var(--border);border-radius:5px;
+  color:var(--text);font-family:'Share Tech Mono',monospace;font-size:13px;
+  padding:10px 12px;transition:border-color .2s;width:100%;
+  -webkit-appearance:none;
+}
+.form-input:focus,.form-select:focus{
+  outline:none;border-color:var(--amber);box-shadow:0 0 0 2px rgba(245,158,11,.1);
+}
+.form-unit{font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;}
+.form-hint{font-size:10px;color:rgba(148,163,210,.35);}
+
+/* ── CARDS ── */
+.card{
+  background:var(--card);border:1.5px solid var(--border);
+  border-radius:8px;overflow:hidden;margin-bottom:16px;
+}
+.card-head{
+  padding:14px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.card-head-title{
+  font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.14em;color:rgba(255,255,255,.7);
+}
+.card-body{padding:16px 18px;}
+
+/* ── OUTPUT METRICS ── */
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:16px;}
+.metric{
+  background:var(--bg3);border:1.5px solid var(--border);border-radius:6px;
+  padding:14px 16px;transition:border-color .2s;
+}
+.metric:hover{border-color:rgba(245,158,11,.2);}
+.metric-label{font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:.2em;color:var(--muted);margin-bottom:8px;}
+.metric-value{
+  font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;
+  color:var(--amber);line-height:1;
+}
+.metric-unit{font-size:11px;color:var(--muted);margin-left:4px;}
+.metric-note{font-size:10px;color:var(--muted);margin-top:5px;}
+.metric.m-green .metric-value{color:var(--green);}
+.metric.m-red   .metric-value{color:var(--red);}
+.metric.m-blue  .metric-value{color:var(--blue);}
+.metric.m-cyan  .metric-value{color:var(--cyan);}
+
+/* ── STATUS BAR ── */
+.status-bar{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  padding:12px 18px;background:rgba(245,158,11,.04);border:1px solid rgba(245,158,11,.12);
+  border-radius:6px;margin-bottom:20px;
+}
+.sb-item{display:flex;align-items:center;gap:8px;}
+.sb-label{font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:.18em;color:var(--muted);}
+.sb-value{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--amber);}
+.sb-sep{width:1px;height:24px;background:var(--border);}
+
+/* ── WEAPONS LOADOUT ── */
+.hardpoint-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
+.hp-slot{
+  background:var(--bg3);border:1.5px solid var(--border);border-radius:6px;
+  padding:14px;cursor:pointer;transition:all .2s;
+}
+.hp-slot.armed{border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.04);}
+.hp-slot.sensor{border-color:rgba(59,130,246,.3);background:rgba(59,130,246,.04);}
+.hp-slot.fuel{border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.04);}
+.hp-slot.empty{opacity:.5;}
+.hp-num{font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:.18em;color:var(--muted);margin-bottom:8px;}
+.hp-icon{font-size:22px;margin-bottom:8px;}
+.hp-name{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:4px;}
+.hp-stats{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);line-height:1.8;}
+
+/* ── DATA TABLE ── */
+.data-table{width:100%;border-collapse:collapse;font-family:'Share Tech Mono',monospace;font-size:11px;}
+.data-table th{
+  padding:9px 12px;text-align:left;background:rgba(245,158,11,.05);
+  font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:.16em;color:var(--amber);
+  border-bottom:1px solid rgba(245,158,11,.12);
+}
+.data-table td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;}
+.data-table tr:hover td{background:rgba(255,255,255,.02);}
+.data-table tr:last-child td{border-bottom:none;}
+.dt-ok{color:var(--green);}.dt-warn{color:var(--amber);}.dt-danger{color:var(--red);}
+.dt-badge{
+  font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:.12em;
+  padding:2px 8px;border-radius:3px;
+}
+.dtb-red{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2);}
+.dtb-amber{background:rgba(245,158,11,.1);color:var(--amber);border:1px solid rgba(245,158,11,.2);}
+.dtb-green{background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.2);}
+
+/* ── REPORT PANEL ── */
+.report-header{
+  background:rgba(245,158,11,.06);border:1.5px solid rgba(245,158,11,.2);
+  border-radius:8px;padding:20px 24px;margin-bottom:20px;
+  display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;
+}
+.report-title{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:900;color:var(--amber);letter-spacing:.1em;margin-bottom:6px;}
+.report-meta{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);line-height:2;}
+.report-score{text-align:center;}
+.report-score-val{
+  font-family:'Orbitron',sans-serif;font-size:48px;font-weight:900;color:var(--amber);
+  line-height:1;text-shadow:0 0 40px rgba(245,158,11,.4);
+}
+.report-score-lbl{font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:.2em;color:var(--muted);}
+
+/* ── GAUGE BAR ── */
+.gauge-row{display:flex;align-items:center;gap:12px;padding:7px 0;border-top:1px solid var(--border);}
+.gauge-row:first-child{border-top:none;}
+.gauge-label{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:.1em;color:var(--muted);width:160px;flex-shrink:0;}
+.gauge-track{flex:1;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;}
+.gauge-fill{height:100%;border-radius:2px;transition:width .6s ease;}
+.gauge-val{font-family:'Share Tech Mono',monospace;font-size:11px;width:80px;text-align:right;flex-shrink:0;}
+
+/* ── ALERT BOX ── */
+.alert{
+  display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:6px;
+  margin-bottom:12px;font-size:13px;line-height:1.6;
+}
+.alert-red{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);}
+.alert-amber{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);}
+.alert-green{background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.2);}
+.alert-icon{font-size:18px;flex-shrink:0;}
+.alert-title{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:.14em;margin-bottom:4px;}
+.alert-red .alert-title{color:var(--red);}
+.alert-amber .alert-title{color:var(--amber);}
+.alert-green .alert-title{color:var(--green);}
+
+/* ── CALC BTN ── */
+.calc-btn{
+  display:inline-flex;align-items:center;gap:10px;padding:14px 32px;
+  background:var(--amber-g);color:#000;border:none;border-radius:5px;cursor:pointer;
+  font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;
+  transition:all .2s;box-shadow:0 4px 20px rgba(245,158,11,.3);
+}
+.calc-btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(245,158,11,.4);}
+.calc-btn:active{transform:translateY(0);}
+.calc-row{display:flex;align-items:center;gap:12px;margin-top:8px;flex-wrap:wrap;}
+
+/* ── RANGE BAR (speed envelope) ── */
+.envelope-bar{
+  position:relative;height:32px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:4px;overflow:hidden;margin:8px 0;
+}
+.env-zone{position:absolute;top:0;height:100%;display:flex;align-items:center;justify-content:center;}
+.env-stall{background:rgba(239,68,68,.2);border-right:1px solid rgba(239,68,68,.4);}
+.env-cruise{background:rgba(16,185,129,.15);border-right:1px solid rgba(16,185,129,.3);}
+.env-dash{background:rgba(245,158,11,.15);border-right:1px solid rgba(245,158,11,.3);}
+.env-vne{background:rgba(239,68,68,.08);}
+.env-label{font-family:'Orbitron',sans-serif;font-size:6.5px;letter-spacing:.1em;white-space:nowrap;color:rgba(255,255,255,.7);}
+.env-marker{
+  position:absolute;top:0;width:2px;height:100%;background:var(--amber);
+  box-shadow:0 0 8px var(--amber);
+}
+.env-marker::after{
+  content:attr(data-label);position:absolute;top:-18px;left:50%;transform:translateX(-50%);
+  font-family:'Orbitron',sans-serif;font-size:6px;color:var(--amber);white-space:nowrap;
+}
+
+/* ── TIMELINE ── */
+.timeline{position:relative;padding-left:24px;margin:16px 0;}
+.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:1px;background:rgba(245,158,11,.15);}
+.tl-item{position:relative;padding:10px 0 10px 16px;border-top:1px solid var(--border);}
+.tl-item:first-child{border-top:none;}
+.tl-dot{
+  position:absolute;left:-20px;top:14px;width:8px;height:8px;
+  border-radius:50%;border:2px solid var(--amber);background:var(--bg);
+}
+.tl-item.active .tl-dot{background:var(--amber);box-shadow:0 0 8px var(--amber);}
+.tl-label{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:.12em;color:var(--amber);margin-bottom:4px;}
+.tl-value{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text);}
+.tl-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+
+/* ── CLIPBOARD BTN ── */
+.copy-btn{
+  font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:.1em;
+  padding:7px 16px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);
+  color:var(--amber);border-radius:4px;cursor:pointer;transition:all .15s;
+}
+.copy-btn:hover{background:rgba(245,158,11,.15);}
+
+/* ── DISCLAIMER ── */
+.page-disclaimer{
+  margin-top:48px;padding:18px 20px;border-radius:6px;
+  background:rgba(239,68,68,.04);border:1px solid rgba(239,68,68,.12);
+  display:flex;gap:14px;font-size:12px;line-height:1.7;color:var(--muted);
+}
+.page-disclaimer strong{color:rgba(255,255,255,.7);}
+
+@media(max-width:768px){
+  .page{padding:16px 14px 60px;}
+  .page-hero{grid-template-columns:1fr;}
+  .tab-btn{min-width:90px;font-size:7.5px;padding:8px 10px;}
+  .form-grid{grid-template-columns:1fr 1fr;}
+  .metrics-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+<div class="hex-bg"></div>
+
+<!-- TOP BAR -->
+<nav class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-emblem">🎯</div>
+    <div>
+      <div class="topbar-title">MILITARY UAS ANALYZER</div>
+      <div class="topbar-sub">ARMED DRONE PERFORMANCE SYSTEM · v5.1</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="status-dot"></div>
+    <span class="status-txt">SYSTEM ONLINE</span>
+    <a href="/landing" class="nav-back">← MAIN</a>
+    <a href="/app" class="nav-back">FPV ANALYZER</a>
+  </div>
+</nav>
+
+<!-- PAGE -->
+<div class="page">
+
+  <!-- HERO -->
+  <div class="page-hero">
+    <div>
+      <div class="page-hero-eyebrow">UAS TACTICAL ANALYSIS SYSTEM</div>
+      <h1 class="page-hero-title">Armed <span>UAS</span> Performance<br>Analyzer</h1>
+      <p class="page-hero-desc">
+        วิเคราะห์สมรรถนะอากาศยานไร้คนขับติดอาวุธ — คำนวณ Range, Endurance, Payload Capacity,
+        Speed Envelope, Weapons Load Effect, Mission Planning Parameters
+        และ Survivability Assessment จาก physics model
+      </p>
+      <div class="page-hero-badges">
+        <span class="hero-badge hb-amber">FIXED WING UAS</span>
+        <span class="hero-badge hb-green">VTOL / MULTIROTOR</span>
+        <span class="hero-badge hb-red">ARMED PAYLOAD</span>
+        <span class="hero-badge hb-blue">MISSION PLANNING</span>
+      </div>
+    </div>
+    <div class="page-hero-stat">
+      <div>PLATFORM CLASSES: MALE · HALE · UCAV</div>
+      <div>PROPULSION: ELECTRIC · ICE · TURBINE</div>
+      <div>PHYSICS ENGINE: v5.1 VALIDATED</div>
+      <div>UNCLASSIFIED · EDUCATIONAL TOOL</div>
+    </div>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar" id="statusBar">
+    <div class="sb-item"><span class="sb-label">PLATFORM</span><span class="sb-value" id="sb-platform">—</span></div>
+    <div class="sb-sep"></div>
+    <div class="sb-item"><span class="sb-label">MTOW</span><span class="sb-value" id="sb-mtow">— kg</span></div>
+    <div class="sb-sep"></div>
+    <div class="sb-item"><span class="sb-label">RANGE</span><span class="sb-value" id="sb-range">— km</span></div>
+    <div class="sb-sep"></div>
+    <div class="sb-item"><span class="sb-label">ENDURANCE</span><span class="sb-value" id="sb-endurance">— hr</span></div>
+    <div class="sb-sep"></div>
+    <div class="sb-item"><span class="sb-label">PAYLOAD</span><span class="sb-value" id="sb-payload">— kg</span></div>
+    <div class="sb-sep"></div>
+    <div class="sb-item"><span class="sb-label">THREAT CLASS</span><span class="sb-value" id="sb-threat">—</span></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('platform')">🛩️ PLATFORM</button>
+    <button class="tab-btn" onclick="switchTab('propulsion')">⚡ PROPULSION</button>
+    <button class="tab-btn" onclick="switchTab('weapons')">🎯 WEAPONS LOAD</button>
+    <button class="tab-btn" onclick="switchTab('performance')">📊 PERFORMANCE</button>
+    <button class="tab-btn" onclick="switchTab('mission')">🗺️ MISSION</button>
+    <button class="tab-btn" onclick="switchTab('report')">📋 ANALYSIS REPORT</button>
+  </div>
+
+  <!-- ══════════════ TAB: PLATFORM ══════════════ -->
+  <div class="tab-panel active" id="tab-platform">
+    <div class="section-hd">
+      <span class="section-num">01</span>
+      <span class="section-title">PLATFORM CONFIGURATION</span>
+      <span class="section-desc">ระบุประเภทและขนาดของ UAS</span>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">PLATFORM CLASS</label>
+        <select class="form-select" id="platformClass" onchange="onPlatformChange()">
+          <option value="male">MALE — Medium Altitude Long Endurance</option>
+          <option value="hale">HALE — High Altitude Long Endurance</option>
+          <option value="ucav">UCAV — Unmanned Combat Aerial Vehicle</option>
+          <option value="loiter">LOITERING MUNITION — Kamikaze / Suicide Drone</option>
+          <option value="vtol_large">VTOL LARGE — Heavy Multirotor (&gt;10kg)</option>
+          <option value="vtol_medium">VTOL MEDIUM — Tactical Multirotor (2–10kg)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">CONFIGURATION</label>
+        <select class="form-select" id="configType">
+          <option value="fixed">Fixed Wing</option>
+          <option value="vtol_hybrid">VTOL Hybrid</option>
+          <option value="multirotor">Multirotor</option>
+          <option value="flying_wing">Flying Wing</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">EMPTY WEIGHT <span class="form-unit">kg</span></label>
+        <input class="form-input" type="number" id="emptyWeight" value="120" min="1" max="10000" step="1">
+        <span class="form-hint">น้ำหนักโครงสร้าง + อุปกรณ์ ไม่รวม fuel/battery และ payload</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">WINGSPAN / ROTOR SPAN <span class="form-unit">m</span></label>
+        <input class="form-input" type="number" id="wingspan" value="8.0" min="0.5" max="50" step="0.1">
+      </div>
+      <div class="form-group">
+        <label class="form-label">WING AREA <span class="form-unit">m²</span></label>
+        <input class="form-input" type="number" id="wingArea" value="3.2" min="0.1" max="200" step="0.1">
+        <span class="form-hint">Fixed wing: ความกว้าง × chord. Multirotor: ป้อน 0</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ROTOR DIAMETER <span class="form-unit">m</span></label>
+        <input class="form-input" type="number" id="rotorDiam" value="0" min="0" max="5" step="0.05">
+        <span class="form-hint">Multirotor/VTOL เท่านั้น · Fixed wing ป้อน 0</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">NUMBER OF ROTORS</label>
+        <select class="form-select" id="numRotors">
+          <option value="0">ไม่ใช้ (Fixed Wing)</option>
+          <option value="4">4 Quad</option>
+          <option value="6">6 Hex</option>
+          <option value="8" selected>8 Octo</option>
+          <option value="12">12 Dodeca</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">HARDPOINTS (siloed)</label>
+        <select class="form-select" id="numHardpoints">
+          <option value="0">0 — ไม่มี (ISR only)</option>
+          <option value="2">2 hardpoints</option>
+          <option value="4" selected>4 hardpoints</option>
+          <option value="6">6 hardpoints</option>
+          <option value="8">8 hardpoints</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section-hd" style="margin-top:24px;">
+      <span class="section-num">02</span>
+      <span class="section-title">AERODYNAMIC DATA</span>
+      <span class="section-desc">ค่า aero สำหรับคำนวณ performance</span>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">LIFT/DRAG RATIO (L/D)</label>
+        <input class="form-input" type="number" id="ldRatio" value="14" min="2" max="40" step="0.5">
+        <span class="form-hint">MALE ~12–18 · HALE ~20–35 · UCAV ~8–14 · Multirotor: ใช้ 0</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">DRAG COEFFICIENT (Cd)</label>
+        <input class="form-input" type="number" id="cdValue" value="0.035" min="0.01" max="0.5" step="0.001">
+      </div>
+      <div class="form-group">
+        <label class="form-label">CRUISE SPEED <span class="form-unit">km/h</span></label>
+        <input class="form-input" type="number" id="cruiseSpeed" value="180" min="20" max="1200" step="5">
+      </div>
+      <div class="form-group">
+        <label class="form-label">MAX SPEED (VNE) <span class="form-unit">km/h</span></label>
+        <input class="form-input" type="number" id="maxSpeed" value="280" min="30" max="1500" step="5">
+      </div>
+      <div class="form-group">
+        <label class="form-label">SERVICE CEILING <span class="form-unit">ft AMSL</span></label>
+        <input class="form-input" type="number" id="serviceCeiling" value="25000" min="1000" max="65000" step="500">
+      </div>
+      <div class="form-group">
+        <label class="form-label">OPERATIONAL ALTITUDE <span class="form-unit">ft AGL</span></label>
+        <input class="form-input" type="number" id="opAltitude" value="10000" min="100" max="60000" step="100">
+      </div>
+    </div>
+    <div class="calc-row">
+      <button class="calc-btn" onclick="runAll()">⚡ CALCULATE ALL</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ TAB: PROPULSION ══════════════ -->
+  <div class="tab-panel" id="tab-propulsion">
+    <div class="section-hd">
+      <span class="section-num">03</span>
+      <span class="section-title">PROPULSION SYSTEM</span>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">ENGINE TYPE</label>
+        <select class="form-select" id="engineType" onchange="onEngineChange()">
+          <option value="electric">Electric (LiPo / LiIon)</option>
+          <option value="ice" selected>ICE — Gasoline / JP8</option>
+          <option value="turbine">Turbine — Jet Fuel</option>
+          <option value="hybrid">Hybrid Electric-ICE</option>
+        </select>
+      </div>
+      <div class="form-group" id="fg-battery">
+        <label class="form-label">BATTERY CAPACITY <span class="form-unit">Wh</span></label>
+        <input class="form-input" type="number" id="batteryWh" value="0" min="0" max="500000" step="100">
+        <span class="form-hint">ใส่ 0 สำหรับ ICE/Turbine</span>
+      </div>
+      <div class="form-group" id="fg-fuel">
+        <label class="form-label">FUEL CAPACITY <span class="form-unit">liters</span></label>
+        <input class="form-input" type="number" id="fuelLiters" value="80" min="0" max="50000" step="1">
+      </div>
+      <div class="form-group" id="fg-fueltype">
+        <label class="form-label">FUEL TYPE</label>
+        <select class="form-select" id="fuelType">
+          <option value="avgas">Avgas 100LL (6.01 MJ/L)</option>
+          <option value="jp8" selected>JP-8 / Jet-A (34.7 MJ/L)</option>
+          <option value="mogas">Mogas / Gasoline (32.0 MJ/L)</option>
+          <option value="diesel">Diesel (35.8 MJ/L)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">FUEL CONSUMPTION @ CRUISE <span class="form-unit">L/hr</span></label>
+        <input class="form-input" type="number" id="fuelFlow" value="12" min="0.1" max="10000" step="0.1">
+        <span class="form-hint">Specific fuel consumption at cruise power</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">PROPULSIVE EFFICIENCY η</label>
+        <input class="form-input" type="number" id="propEff" value="0.82" min="0.3" max="0.98" step="0.01">
+        <span class="form-hint">ICE prop: 0.75–0.85 · Turbofan: 0.5–0.7 · Electric: 0.85–0.95</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">MAX THRUST <span class="form-unit">kgf</span></label>
+        <input class="form-input" type="number" id="maxThrust" value="45" min="1" max="100000" step="1">
+      </div>
+      <div class="form-group">
+        <label class="form-label">POWER OUTPUT <span class="form-unit">kW</span></label>
+        <input class="form-input" type="number" id="powerKW" value="22" min="0.1" max="50000" step="0.5">
+      </div>
+    </div>
+    <div class="calc-row">
+      <button class="calc-btn" onclick="runAll()">⚡ CALCULATE ALL</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ TAB: WEAPONS LOAD ══════════════ -->
+  <div class="tab-panel" id="tab-weapons">
+    <div class="section-hd">
+      <span class="section-num">04</span>
+      <span class="section-title">WEAPONS & PAYLOAD LOADOUT</span>
+      <span class="section-desc">กำหนด payload แต่ละ hardpoint</span>
+    </div>
+
+    <div class="form-grid" style="margin-bottom:20px;">
+      <div class="form-group">
+        <label class="form-label">MAX PAYLOAD CAPACITY <span class="form-unit">kg</span></label>
+        <input class="form-input" type="number" id="maxPayload" value="200" min="0" max="50000" step="1">
+      </div>
+      <div class="form-group">
+        <label class="form-label">INTERNAL WEAPONS BAY</label>
+        <select class="form-select" id="hasInternalBay">
+          <option value="no">ไม่มี — External Hardpoints Only</option>
+          <option value="yes">มี — Internal Bay (ลด RCS)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Hardpoint table -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-head-title">PAYLOAD CONFIGURATION</span>
+        <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);">Total loaded: <span id="totalPayloadKg" style="color:var(--amber);">0 kg</span></span>
+      </div>
+      <div class="card-body">
+        <div id="hardpointSlots" class="hardpoint-grid"></div>
+      </div>
+    </div>
+
+    <div class="section-hd" style="margin-top:24px;">
+      <span class="section-num">04b</span>
+      <span class="section-title">PAYLOAD CATEGORIES</span>
+    </div>
+
+    <table class="data-table" style="margin-bottom:20px;">
+      <thead>
+        <tr>
+          <th>CATEGORY</th><th>ITEM</th><th>WEIGHT</th><th>DRAG PENALTY</th><th>EFFECT ON ENDURANCE</th><th>NOTES</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="dt-badge dtb-red">STRIKE</span></td>
+          <td>Anti-Tank Guided Missile (ATGM)</td>
+          <td class="dt-warn">45–70 kg</td><td class="dt-warn">+8–12%</td>
+          <td class="dt-danger">−15–25%</td><td>Lock-on before/after launch</td>
+        </tr>
+        <tr>
+          <td><span class="dt-badge dtb-red">STRIKE</span></td>
+          <td>Precision Guided Bomb (PGB)</td>
+          <td class="dt-warn">100–500 kg</td><td class="dt-warn">+15–30%</td>
+          <td class="dt-danger">−25–45%</td><td>GPS/INS/Laser guided</td>
+        </tr>
+        <tr>
+          <td><span class="dt-badge dtb-red">LOITER</span></td>
+          <td>Loitering Munition (Warhead)</td>
+          <td class="dt-warn">5–30 kg</td><td>+3–6%</td>
+          <td class="dt-warn">−10–20%</td><td>One-way. Warhead 1–10kg</td>
+        </tr>
+        <tr>
+          <td><span class="dt-badge dtb-amber">SUPPORT</span></td>
+          <td>EO/IR Targeting Pod</td>
+          <td>30–80 kg</td><td class="dt-warn">+6–10%</td>
+          <td class="dt-warn">−8–15%</td><td>Slaved to weapons system</td>
+        </tr>
+        <tr>
+          <td><span class="dt-badge dtb-amber">SUPPORT</span></td>
+          <td>SAR / GMTI Radar Pod</td>
+          <td>50–150 kg</td><td class="dt-warn">+8–18%</td>
+          <td class="dt-warn">−12–22%</td><td>Ground Moving Target Indicator</td>
+        </tr>
+        <tr>
+          <td><span class="dt-badge dtb-green">ISR</span></td>
+          <td>EO Camera Ball Turret</td>
+          <td>10–40 kg</td><td>+3–7%</td>
+          <td>−5–10%</td><td>EO/IR, continuous zoom</td>
+        </tr>
+        <tr>
+          <td><span class="dt-badge dtb-green">ISR</span></td>
+          <td>COMINT / ELINT Pod</td>
+          <td>20–60 kg</td><td>+4–8%</td>
+          <td>−6–12%</td><td>Signal intelligence collection</td>
+        </tr>
+        <tr>
+          <td><span class="dt-badge dtb-amber">EW</span></td>
+          <td>Electronic Warfare Pod</td>
+          <td>40–120 kg</td><td class="dt-warn">+8–15%</td>
+          <td class="dt-warn">−12–20%</td><td>Jamming / spoofing system</td>
+        </tr>
+        <tr>
+          <td><span class="dt-badge dtb-green">LOGISTICS</span></td>
+          <td>Drop Container (Resupply)</td>
+          <td>10–200 kg</td><td>+5–20%</td>
+          <td class="dt-warn">−10–35%</td><td>Parachute deploy</td>
+        </tr>
+        <tr>
+          <td><span class="dt-badge dtb-green">FUEL</span></td>
+          <td>External Fuel Tank (Conformal)</td>
+          <td>20–300 kg (full)</td><td>+5–12%</td>
+          <td class="dt-ok">+20–60%</td><td>Jettison when empty</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">TOTAL PAYLOAD LOADED <span class="form-unit">kg</span></label>
+        <input class="form-input" type="number" id="actualPayload" value="150" min="0" max="50000" step="1">
+      </div>
+      <div class="form-group">
+        <label class="form-label">DRAG PENALTY FROM PAYLOAD <span class="form-unit">%</span></label>
+        <input class="form-input" type="number" id="dragPenalty" value="12" min="0" max="80" step="1">
+        <span class="form-hint">ดูจาก table ด้านบน</span>
+      </div>
+    </div>
+    <div class="calc-row">
+      <button class="calc-btn" onclick="runAll()">⚡ CALCULATE ALL</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ TAB: PERFORMANCE ══════════════ -->
+  <div class="tab-panel" id="tab-performance">
+    <div class="section-hd">
+      <span class="section-num">05</span>
+      <span class="section-title">PERFORMANCE ANALYSIS</span>
+    </div>
+
+    <div class="metrics-grid" id="perfMetrics">
+      <div class="metric"><div class="metric-label">RANGE (CRUISE)</div><div class="metric-value" id="m-range">—</div><div class="metric-note">km</div></div>
+      <div class="metric m-green"><div class="metric-label">ENDURANCE</div><div class="metric-value" id="m-endurance">—</div><div class="metric-note">hours</div></div>
+      <div class="metric m-blue"><div class="metric-label">CRUISE SPEED</div><div class="metric-value" id="m-cruise">—</div><div class="metric-note">km/h</div></div>
+      <div class="metric"><div class="metric-label">MTOW</div><div class="metric-value" id="m-mtow">—</div><div class="metric-note">kg</div></div>
+      <div class="metric m-cyan"><div class="metric-label">SERVICE CEILING</div><div class="metric-value" id="m-ceiling">—</div><div class="metric-note">ft AMSL</div></div>
+      <div class="metric m-green"><div class="metric-label">THRUST/WEIGHT</div><div class="metric-value" id="m-twr">—</div><div class="metric-note">ratio</div></div>
+      <div class="metric m-red"><div class="metric-label">PAYLOAD FRACTION</div><div class="metric-value" id="m-pfrac">—</div><div class="metric-note">% of MTOW</div></div>
+      <div class="metric"><div class="metric-label">WING LOADING</div><div class="metric-value" id="m-wl">—</div><div class="metric-note">kg/m²</div></div>
+    </div>
+
+    <!-- Speed Envelope -->
+    <div class="card">
+      <div class="card-head"><span class="card-head-title">SPEED ENVELOPE</span></div>
+      <div class="card-body">
+        <div class="envelope-bar" id="speedEnvelope">
+          <div class="env-zone env-stall" id="env-stall" style="left:0;width:15%;">
+            <span class="env-label">STALL</span>
+          </div>
+          <div class="env-zone env-cruise" id="env-cruise" style="left:15%;width:40%;">
+            <span class="env-label">CRUISE ENVELOPE</span>
+          </div>
+          <div class="env-zone env-dash" id="env-dash" style="left:55%;width:25%;">
+            <span class="env-label">DASH / SPRINT</span>
+          </div>
+          <div class="env-zone env-vne" id="env-vne" style="left:80%;width:20%;">
+            <span class="env-label">OVERSPEED</span>
+          </div>
+          <div class="env-marker" data-label="CRUISE" id="cruise-marker" style="left:40%;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);margin-top:6px;">
+          <span id="spd-stall">Stall: —</span>
+          <span id="spd-cruise">Cruise: —</span>
+          <span id="spd-max">Max: —</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Performance gauges -->
+    <div class="card">
+      <div class="card-head"><span class="card-head-title">PERFORMANCE GAUGES</span></div>
+      <div class="card-body" id="perfGauges">
+        <div class="gauge-row">
+          <span class="gauge-label">RANGE CAPABILITY</span>
+          <div class="gauge-track"><div class="gauge-fill" id="g-range" style="width:0%;background:var(--amber);"></div></div>
+          <span class="gauge-val" id="gv-range" style="color:var(--amber);">—</span>
+        </div>
+        <div class="gauge-row">
+          <span class="gauge-label">ENDURANCE</span>
+          <div class="gauge-track"><div class="gauge-fill" id="g-endurance" style="width:0%;background:var(--green);"></div></div>
+          <span class="gauge-val" id="gv-endurance" style="color:var(--green);">—</span>
+        </div>
+        <div class="gauge-row">
+          <span class="gauge-label">PAYLOAD EFFICIENCY</span>
+          <div class="gauge-track"><div class="gauge-fill" id="g-payload" style="width:0%;background:var(--blue);"></div></div>
+          <span class="gauge-val" id="gv-payload" style="color:var(--blue);">—</span>
+        </div>
+        <div class="gauge-row">
+          <span class="gauge-label">THRUST/WEIGHT RATIO</span>
+          <div class="gauge-track"><div class="gauge-fill" id="g-twr" style="width:0%;background:var(--cyan);"></div></div>
+          <span class="gauge-val" id="gv-twr" style="color:var(--cyan);">—</span>
+        </div>
+        <div class="gauge-row">
+          <span class="gauge-label">SURVIVABILITY</span>
+          <div class="gauge-track"><div class="gauge-fill" id="g-surv" style="width:0%;background:var(--red);"></div></div>
+          <span class="gauge-val" id="gv-surv" style="color:var(--red);">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc-row">
+      <button class="calc-btn" onclick="runAll()">⚡ RECALCULATE</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ TAB: MISSION ══════════════ -->
+  <div class="tab-panel" id="tab-mission">
+    <div class="section-hd">
+      <span class="section-num">06</span>
+      <span class="section-title">MISSION PLANNING PARAMETERS</span>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">MISSION TYPE</label>
+        <select class="form-select" id="missionType">
+          <option value="strike">Strike / Precision Attack</option>
+          <option value="isr">ISR / Persistent Surveillance</option>
+          <option value="escort">Escort / CAS</option>
+          <option value="interdiction">Interdiction</option>
+          <option value="sead">SEAD / DEAD</option>
+          <option value="logistics">Logistics / Resupply</option>
+          <option value="loiter_munition">Loitering Munition Deployment</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">DISTANCE TO TARGET <span class="form-unit">km</span></label>
+        <input class="form-input" type="number" id="targetDist" value="300" min="1" max="10000" step="10">
+      </div>
+      <div class="form-group">
+        <label class="form-label">TIME ON TARGET (TOT) <span class="form-unit">min</span></label>
+        <input class="form-input" type="number" id="totMinutes" value="30" min="1" max="480" step="5">
+        <span class="form-hint">เวลา loiter / engagement window</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">DIVERT / ABORT RESERVE <span class="form-unit">%</span></label>
+        <input class="form-input" type="number" id="reservePct" value="20" min="5" max="40" step="5">
+        <span class="form-hint">เปอร์เซ็นต์ fuel/energy สำรองสำหรับ abort/divert</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">WIND (HEADWIND) <span class="form-unit">km/h</span></label>
+        <input class="form-input" type="number" id="headwind" value="30" min="0" max="200" step="5">
+      </div>
+      <div class="form-group">
+        <label class="form-label">MISSION ALTITUDE <span class="form-unit">ft AGL</span></label>
+        <input class="form-input" type="number" id="missAlt" value="10000" min="100" max="60000" step="500">
+      </div>
+    </div>
+
+    <!-- Mission feasibility -->
+    <div class="card" style="margin-top:16px;">
+      <div class="card-head"><span class="card-head-title">MISSION FEASIBILITY</span></div>
+      <div class="card-body" id="missionFeasibility">
+        <p style="color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:11px;">กด CALCULATE เพื่อวิเคราะห์ความเป็นไปได้ของภารกิจ</p>
+      </div>
+    </div>
+
+    <!-- Mission timeline -->
+    <div class="card" style="margin-top:16px;">
+      <div class="card-head"><span class="card-head-title">SORTIE TIMELINE</span></div>
+      <div class="card-body">
+        <div class="timeline" id="missionTimeline">
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-label">TAKEOFF</div><div class="tl-value" id="tl-to">T+0 min</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-label">TRANSIT TO TARGET</div><div class="tl-value" id="tl-transit">—</div></div>
+          <div class="tl-item active"><div class="tl-dot"></div><div class="tl-label">TIME ON TARGET</div><div class="tl-value" id="tl-tot">—</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-label">BINGO FUEL</div><div class="tl-value" id="tl-bingo">—</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-label">RTB / LANDING</div><div class="tl-value" id="tl-rtb">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc-row">
+      <button class="calc-btn" onclick="runAll()">⚡ CALCULATE MISSION</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ TAB: REPORT ══════════════ -->
+  <div class="tab-panel" id="tab-report">
+    <div id="reportContainer">
+      <p style="color:var(--muted);font-family:'Share Tech Mono',monospace;text-align:center;padding:40px;">กด CALCULATE ALL ใน tab ใดก็ได้เพื่อสร้าง report</p>
+    </div>
+  </div>
+
+  <!-- DISCLAIMER -->
+  <div class="page-disclaimer">
+    <div style="font-size:22px;flex-shrink:0;">⚠️</div>
+    <div>
+      <strong>EDUCATIONAL USE ONLY — UNCLASSIFIED:</strong>
+      ระบบนี้ใช้เพื่อการเรียนรู้ การฝึกอบรม และการศึกษาเชิงเทคนิคเท่านั้น
+      ค่าที่คำนวณได้เป็นการประมาณการจาก simplified physics model — ไม่ใช่ข้อมูลจากระบบอาวุธจริง
+      การนำไปใช้ในปฏิบัติการจริงต้องผ่านการยืนยันจากผู้เชี่ยวชาญทางวิศวกรรมและได้รับอนุมัติตาม ROE
+      ที่บังคับใช้ · ข้อมูลที่กรอกเข้าระบบไม่ถูกบันทึกหรือส่งต่อ — ประมวลผลใน session เท่านั้น
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+// ─── TAB SWITCH ───────────────────────────────────────────
+function switchTab(id){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ─── HARDPOINT RENDERER ───────────────────────────────────
+const WEAPONS_DB = [
+  {id:'empty',name:'EMPTY',icon:'⬜',cat:'empty',weight:0,drag:0},
+  {id:'atgm',name:'ATGM × 2',icon:'🚀',cat:'armed',weight:120,drag:10},
+  {id:'pgb250',name:'PGB 250kg',icon:'💣',cat:'armed',weight:250,drag:18},
+  {id:'pgb100',name:'PGB 100kg',icon:'💣',cat:'armed',weight:100,drag:12},
+  {id:'loiter',name:'Loitering Munition × 4',icon:'🎯',cat:'armed',weight:80,drag:8},
+  {id:'eoir',name:'EO/IR Targeting Pod',icon:'👁️',cat:'sensor',weight:55,drag:8},
+  {id:'sar',name:'SAR Radar Pod',icon:'📡',cat:'sensor',weight:120,drag:14},
+  {id:'comint',name:'COMINT/ELINT Pod',icon:'📻',cat:'sensor',weight:45,drag:6},
+  {id:'ew',name:'EW Jammer Pod',icon:'⚡',cat:'sensor',weight:90,drag:12},
+  {id:'drop',name:'Drop Container 50kg',icon:'📦',cat:'sensor',weight:50,drag:7},
+  {id:'tank',name:'External Fuel Tank',icon:'⛽',cat:'fuel',weight:180,drag:8},
+];
+
+let hpSelections = [];
+
+function renderHardpoints(){
+  const n = parseInt(document.getElementById('numHardpoints').value)||0;
+  const grid = document.getElementById('hardpointSlots');
+  while(hpSelections.length < n) hpSelections.push('empty');
+  hpSelections = hpSelections.slice(0,n);
+  if(n===0){grid.innerHTML='<p style="color:var(--muted);font-family:\'Share Tech Mono\',monospace;font-size:11px;">ไม่มี hardpoints</p>';return;}
+  grid.innerHTML = hpSelections.map((sel,i)=>{
+    const w = WEAPONS_DB.find(x=>x.id===sel)||WEAPONS_DB[0];
+    return `<div class="hp-slot ${w.cat}" onclick="cycleHardpoint(${i})">
+      <div class="hp-num">HARDPOINT ${i+1}</div>
+      <div class="hp-icon">${w.icon}</div>
+      <div class="hp-name">${w.name}</div>
+      <div class="hp-stats">Weight: ${w.weight} kg<br>Drag: +${w.drag}%<br><span style="font-size:8px;color:var(--muted);">Click to change</span></div>
+    </div>`;
+  }).join('');
+  updateTotalPayload();
+}
+
+function cycleHardpoint(idx){
+  const cur = WEAPONS_DB.findIndex(x=>x.id===hpSelections[idx]);
+  hpSelections[idx] = WEAPONS_DB[(cur+1)%WEAPONS_DB.length].id;
+  renderHardpoints();
+}
+
+function updateTotalPayload(){
+  const total = hpSelections.reduce((s,id)=>{
+    const w=WEAPONS_DB.find(x=>x.id===id)||WEAPONS_DB[0];
+    return s+w.weight;
+  },0);
+  document.getElementById('totalPayloadKg').textContent = total+' kg';
+  document.getElementById('actualPayload').value = total||document.getElementById('actualPayload').value;
+}
+
+document.getElementById('numHardpoints').addEventListener('change',renderHardpoints);
+renderHardpoints();
+
+// ─── PLATFORM PRESETS ─────────────────────────────────────
+const PLATFORM_PRESETS = {
+  male:         {ew:120,wing:8,area:3.2,ld:15,cd:0.035,cruise:180,vmax:280,ceil:25000,opalt:15000,thrust:45,power:22,fuel:80,fflow:12},
+  hale:         {ew:450,wing:20,area:8.5,ld:28,cd:0.022,cruise:280,vmax:370,ceil:60000,opalt:45000,thrust:120,power:55,fuel:300,fflow:25},
+  ucav:         {ew:4500,wing:10,area:15,ld:10,cd:0.055,cruise:700,vmax:900,ceil:45000,opalt:35000,thrust:4000,power:2000,fuel:2500,fflow:800},
+  loiter:       {ew:8,wing:2.4,area:0.3,ld:12,cd:0.04,cruise:120,vmax:180,ceil:15000,opalt:10000,thrust:4,power:2,fuel:3,fflow:0.4},
+  vtol_large:   {ew:25,wing:2.8,area:0,ld:0,cd:0.08,cruise:80,vmax:120,ceil:10000,opalt:6000,thrust:60,power:15,fuel:0,fflow:0},
+  vtol_medium:  {ew:8,wing:1.4,area:0,ld:0,cd:0.1,cruise:60,vmax:100,ceil:8000,opalt:5000,thrust:24,power:6,fuel:0,fflow:0},
+};
+function onPlatformChange(){
+  const k = document.getElementById('platformClass').value;
+  const p = PLATFORM_PRESETS[k];
+  if(!p) return;
+  document.getElementById('emptyWeight').value = p.ew;
+  document.getElementById('wingspan').value = p.wing;
+  document.getElementById('wingArea').value = p.area;
+  document.getElementById('ldRatio').value = p.ld;
+  document.getElementById('cdValue').value = p.cd;
+  document.getElementById('cruiseSpeed').value = p.cruise;
+  document.getElementById('maxSpeed').value = p.vmax;
+  document.getElementById('serviceCeiling').value = p.ceil;
+  document.getElementById('opAltitude').value = p.opalt;
+  document.getElementById('maxThrust').value = p.thrust;
+  document.getElementById('powerKW').value = p.power;
+  document.getElementById('fuelLiters').value = p.fuel;
+  document.getElementById('fuelFlow').value = p.fflow;
+  if(k.startsWith('vtol')){
+    document.getElementById('configType').value='multirotor';
+    document.getElementById('engineType').value='electric';
+    document.getElementById('numRotors').value='8';
+  } else {
+    document.getElementById('configType').value= k==='flying_wing'?'flying_wing':'fixed';
+    document.getElementById('engineType').value= k==='ucav'?'turbine':'ice';
+  }
+}
+
+function onEngineChange(){
+  const t = document.getElementById('engineType').value;
+  document.getElementById('fg-battery').style.display = (t==='electric'||t==='hybrid')?'flex':'none';
+  document.getElementById('fg-fuel').style.display = (t==='ice'||t==='turbine'||t==='hybrid')?'flex':'none';
+  document.getElementById('fg-fueltype').style.display = (t==='ice'||t==='turbine'||t==='hybrid')?'flex':'none';
+}
+onEngineChange();
+
+// ─── PHYSICS ENGINE ───────────────────────────────────────
+function getNum(id,def=0){ return parseFloat(document.getElementById(id).value)||def; }
+function getStr(id){ return document.getElementById(id).value; }
+
+function calcDensity(ft){
+  // ISA model simplified
+  const h = ft * 0.3048; // to meters
+  return 1.225 * Math.pow(1 - 2.2558e-5*h, 4.2559);
+}
+
+function calcPerformance(){
+  const cls        = getStr('platformClass');
+  const config     = getStr('configType');
+  const emptyWt    = getNum('emptyWeight',100);
+  const maxPayload = getNum('maxPayload',0);
+  const actPayload = getNum('actualPayload',0);
+  const dragPct    = getNum('dragPenalty',0)/100;
+  const wingArea   = getNum('wingArea',1);
+  const ldRatio    = getNum('ldRatio',10)||10;
+  const cdVal      = getNum('cdValue',0.04);
+  const cruiseKph  = getNum('cruiseSpeed',150);
+  const maxKph     = getNum('maxSpeed',250);
+  const ceil_ft    = getNum('serviceCeiling',25000);
+  const opAlt_ft   = getNum('opAltitude',10000);
+  const maxThrust  = getNum('maxThrust',40);  // kgf
+  const powerKW    = getNum('powerKW',20);
+  const fuelLit    = getNum('fuelLiters',50);
+  const fuelFlow   = getNum('fuelFlow',10);   // L/hr
+  const battWh     = getNum('batteryWh',0);
+  const propEff    = getNum('propEff',0.82);
+  const engType    = getStr('engineType');
+  const numRotors  = parseInt(getStr('numRotors'))||0;
+  const rotorDiam  = getNum('rotorDiam',0);
+  
+  const fuelDensity = {avgas:0.72, jp8:0.81, mogas:0.72, diesel:0.84};
+  const fuelD = fuelDensity[getStr('fuelType')]||0.81;
+  const fuelKg = fuelLit * fuelD;
+  
+  // MTOW
+  const mtow = emptyWt + fuelKg + actPayload;
+  
+  // Endurance
+  let endurance_hr, range_km;
+  if(engType === 'electric'){
+    const avgPowerW = (powerKW * 1000 * 0.6); // 60% avg
+    endurance_hr = battWh / (avgPowerW/1000);
+    range_km = endurance_hr * (cruiseKph * (1 - dragPct));
+  } else {
+    const fuelFlowLoaded = fuelFlow * (1 + dragPct * 0.7);
+    endurance_hr = (fuelKg / fuelD) / fuelFlowLoaded;
+    range_km = endurance_hr * cruiseKph * (1 - dragPct * 0.5);
+  }
+  
+  // Breguet correction for fixed wing
+  if(config==='fixed'||config==='flying_wing'){
+    range_km = range_km * Math.min(ldRatio/10, 1.8);
+  }
+  
+  // TWR
+  const twr = maxThrust / mtow;
+  
+  // Wing loading
+  const wingLoad = wingArea > 0 ? (mtow / wingArea) : 0;
+  
+  // Stall speed (simplified)
+  const rho = calcDensity(opAlt_ft);
+  const Cl_max = 1.6;
+  const stallKph = wingArea > 0 
+    ? Math.sqrt((2*mtow*9.81)/(rho*wingArea*Cl_max)) * 3.6 
+    : 0;
+  
+  // Payload fraction
+  const payloadFrac = mtow > 0 ? (actPayload/mtow)*100 : 0;
+  
+  // Survivability score (simple heuristic)
+  const altBonus  = Math.min(opAlt_ft/60000 * 40, 40);
+  const speedBonus= Math.min((cruiseKph-100)/8, 30);
+  const rcsBonus  = getStr('hasInternalBay')==='yes' ? 20 : 0;
+  const survScore = Math.min(Math.max(altBonus + speedBonus + rcsBonus, 5), 95);
+  
+  // Threat class
+  let threatClass = 'MICRO';
+  if(mtow > 5000) threatClass = 'CLASS-IV';
+  else if(mtow > 600) threatClass = 'CLASS-III';
+  else if(mtow > 25) threatClass = 'CLASS-II';
+  else if(mtow > 5) threatClass = 'CLASS-I';
+  
+  return {mtow,endurance_hr,range_km,cruiseKph,maxKph,ceil_ft,
+          twr,wingLoad,stallKph,payloadFrac,survScore,threatClass,
+          emptyWt,fuelKg,actPayload,maxPayload};
+}
+
+function calcMission(perf){
+  const dist    = getNum('targetDist',300);
+  const tot     = getNum('totMinutes',30);
+  const reserve = getNum('reservePct',20)/100;
+  const wind    = getNum('headwind',0);
+  const gs_out  = perf.cruiseKph - wind;
+  const gs_ret  = perf.cruiseKph + wind;
+  const transit_hr = dist / Math.max(gs_out,30);
+  const return_hr  = dist / Math.max(gs_ret,30);
+  const tot_hr  = tot/60;
+  const total_needed = (transit_hr + return_hr + tot_hr) / (1-reserve);
+  const feasible = perf.endurance_hr >= total_needed;
+  const fuel_pct = Math.min(total_needed / perf.endurance_hr * 100, 120);
+  const margin_hr = perf.endurance_hr - total_needed;
+  
+  const transitMin = Math.round(transit_hr*60);
+  const returnMin  = Math.round(return_hr*60);
+  const totalMin   = Math.round(total_needed*60);
+  const bingoMin   = Math.round((transit_hr + tot_hr)*60);
+  
+  return {feasible,fuel_pct,margin_hr,transitMin,returnMin,tot,totalMin,bingoMin,gs_out,gs_ret};
+}
+
+// ─── UPDATE UI ────────────────────────────────────────────
+function runAll(){
+  const p = calcPerformance();
+  
+  // Status bar
+  document.getElementById('sb-platform').textContent = document.getElementById('platformClass').options[document.getElementById('platformClass').selectedIndex].text.split('—')[0].trim();
+  document.getElementById('sb-mtow').textContent     = p.mtow.toFixed(0)+' kg';
+  document.getElementById('sb-range').textContent    = p.range_km.toFixed(0)+' km';
+  document.getElementById('sb-endurance').textContent= p.endurance_hr.toFixed(1)+' hr';
+  document.getElementById('sb-payload').textContent  = p.actPayload.toFixed(0)+' kg';
+  document.getElementById('sb-threat').textContent   = p.threatClass;
+  
+  // Performance metrics
+  document.getElementById('m-range').textContent      = p.range_km.toFixed(0);
+  document.getElementById('m-endurance').textContent  = p.endurance_hr.toFixed(1);
+  document.getElementById('m-cruise').textContent     = p.cruiseKph.toFixed(0);
+  document.getElementById('m-mtow').textContent       = p.mtow.toFixed(0);
+  document.getElementById('m-ceiling').textContent    = p.ceil_ft.toLocaleString();
+  document.getElementById('m-twr').textContent        = p.twr.toFixed(2);
+  document.getElementById('m-pfrac').textContent      = p.payloadFrac.toFixed(1)+'%';
+  document.getElementById('m-wl').textContent         = p.wingLoad > 0 ? p.wingLoad.toFixed(1) : 'N/A';
+  
+  // Speed envelope
+  const vne = p.maxKph;
+  const vstall = Math.max(p.stallKph,30);
+  const vcruise = p.cruiseKph;
+  const stallPct  = (vstall/vne)*100;
+  const cruisePct = (vcruise/vne)*100;
+  document.getElementById('env-stall').style.width  = stallPct+'%';
+  document.getElementById('env-cruise').style.left  = stallPct+'%';
+  document.getElementById('env-cruise').style.width = (cruisePct-stallPct)*0.9+'%';
+  document.getElementById('env-dash').style.left    = (cruisePct)+'%';
+  document.getElementById('env-dash').style.width   = ((100-cruisePct)*0.6)+'%';
+  document.getElementById('env-vne').style.left     = (cruisePct+(100-cruisePct)*0.6)+'%';
+  document.getElementById('env-vne').style.width    = ((100-cruisePct)*0.4)+'%';
+  document.getElementById('cruise-marker').style.left = cruisePct+'%';
+  document.getElementById('spd-stall').textContent  = 'Stall: '+vstall.toFixed(0)+' km/h';
+  document.getElementById('spd-cruise').textContent = 'Cruise: '+vcruise+' km/h';
+  document.getElementById('spd-max').textContent    = 'VNE: '+vne+' km/h';
+  
+  // Gauges
+  const setGauge = (id,pct,val)=>{
+    document.getElementById('g-'+id).style.width = Math.min(pct,100)+'%';
+    document.getElementById('gv-'+id).textContent = val;
+  };
+  setGauge('range',    Math.min(p.range_km/3000*100,100), p.range_km.toFixed(0)+' km');
+  setGauge('endurance',Math.min(p.endurance_hr/24*100,100),p.endurance_hr.toFixed(1)+' hr');
+  setGauge('payload',  Math.min(p.payloadFrac*2,100), p.payloadFrac.toFixed(1)+'%');
+  setGauge('twr',      Math.min(p.twr*50,100), p.twr.toFixed(2));
+  setGauge('surv',     p.survScore, Math.round(p.survScore)+'%');
+  
+  // Mission
+  const m = calcMission(p);
+  const feasEl = document.getElementById('missionFeasibility');
+  if(m.feasible){
+    feasEl.innerHTML = `
+      <div class="alert alert-green">
+        <span class="alert-icon">✅</span>
+        <div><div class="alert-title">MISSION FEASIBLE</div>
+        เชื้อเพลิง/พลังงานเพียงพอสำหรับภารกิจ · เหลือ margin ${m.margin_hr.toFixed(2)} ชั่วโมง (${(m.margin_hr/p.endurance_hr*100).toFixed(0)}%)</div>
+      </div>
+      <div class="data-table-wrap"><table class="data-table">
+        <tr><th>PARAMETER</th><th>VALUE</th><th>STATUS</th></tr>
+        <tr><td>Fuel/Energy Used</td><td>${m.fuel_pct.toFixed(1)}%</td><td class="dt-ok">✅ ปลอดภัย</td></tr>
+        <tr><td>Ground Speed (outbound)</td><td>${m.gs_out.toFixed(0)} km/h</td><td>—</td></tr>
+        <tr><td>Ground Speed (return)</td><td>${m.gs_ret.toFixed(0)} km/h</td><td>—</td></tr>
+        <tr><td>Reserve Fuel</td><td>${(p.endurance_hr - m.total_needed/60||0).toFixed(2)} hr</td><td class="dt-ok">✅</td></tr>
+      </table></div>`;
+  } else {
+    feasEl.innerHTML = `
+      <div class="alert alert-red">
+        <span class="alert-icon">🚨</span>
+        <div><div class="alert-title">MISSION NOT FEASIBLE — INSUFFICIENT RANGE/ENDURANCE</div>
+        ต้องการ ${(m.totalMin/60).toFixed(1)} ชั่วโมง แต่มีเพียง ${p.endurance_hr.toFixed(1)} ชั่วโมง — Deficit: ${Math.abs(m.margin_hr).toFixed(2)} hr
+        <br><strong>แนวทางแก้ไข:</strong> เพิ่ม fuel/battery, ลด payload, เพิ่ม staging base, หรือลด TOT</div>
+      </div>`;
+  }
+  
+  // Mission timeline
+  document.getElementById('tl-transit').textContent  = `T+${m.transitMin} min (${(m.transitMin/60).toFixed(2)} hr)`;
+  document.getElementById('tl-transit').nextElementSibling && (document.getElementById('tl-transit').nextElementSibling.textContent = `GS = ${m.gs_out.toFixed(0)} km/h`);
+  document.getElementById('tl-tot').textContent     = `T+${m.transitMin+m.tot} min | ${m.tot} min on target`;
+  document.getElementById('tl-bingo').textContent   = `T+${m.bingoMin} min`;
+  document.getElementById('tl-rtb').textContent     = `T+${m.bingoMin + m.returnMin} min`;
+  
+  // Report
+  buildReport(p, m);
+}
+
+// ─── BUILD REPORT ─────────────────────────────────────────
+function buildReport(p, m){
+  const rScore = computeScore(p,m);
+  const cls = document.getElementById('platformClass').options[document.getElementById('platformClass').selectedIndex].text;
+  const now = new Date();
+  const ts = now.toISOString().slice(0,19).replace('T',' ')+'Z';
+  
+  document.getElementById('reportContainer').innerHTML = `
+    <div class="report-header">
+      <div>
+        <div class="report-title">UAS ANALYSIS REPORT</div>
+        <div class="report-meta">
+          PLATFORM: ${cls}<br>
+          GENERATED: ${ts}<br>
+          PHYSICS ENGINE: ConfigDoctor v5.1<br>
+          CLASSIFICATION: UNCLASSIFIED · EDUCATIONAL
+        </div>
+      </div>
+      <div class="report-score">
+        <div class="report-score-val">${rScore.letter}</div>
+        <div class="report-score-lbl">MISSION SCORE</div>
+      </div>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric"><div class="metric-label">MTOW</div><div class="metric-value">${p.mtow.toFixed(0)}</div><div class="metric-note">kg total</div></div>
+      <div class="metric m-green"><div class="metric-label">ENDURANCE</div><div class="metric-value">${p.endurance_hr.toFixed(1)}</div><div class="metric-note">hours</div></div>
+      <div class="metric"><div class="metric-label">RANGE</div><div class="metric-value">${p.range_km.toFixed(0)}</div><div class="metric-note">km cruise</div></div>
+      <div class="metric m-blue"><div class="metric-label">CRUISE SPEED</div><div class="metric-value">${p.cruiseKph}</div><div class="metric-note">km/h</div></div>
+      <div class="metric m-red"><div class="metric-label">PAYLOAD</div><div class="metric-value">${p.actPayload}</div><div class="metric-note">kg loaded</div></div>
+      <div class="metric m-cyan"><div class="metric-label">TWR</div><div class="metric-value">${p.twr.toFixed(2)}</div><div class="metric-note">thrust/weight</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="card-head-title">WEIGHT BREAKDOWN</span></div>
+      <div class="card-body">
+        <table class="data-table">
+          <tr><th>COMPONENT</th><th>WEIGHT (kg)</th><th>% of MTOW</th><th>STATUS</th></tr>
+          <tr><td>Empty Weight (OEW)</td><td>${p.emptyWt.toFixed(0)}</td><td>${(p.emptyWt/p.mtow*100).toFixed(1)}%</td><td>—</td></tr>
+          <tr><td>Fuel / Battery</td><td>${p.fuelKg.toFixed(0)}</td><td>${(p.fuelKg/p.mtow*100).toFixed(1)}%</td>
+            <td class="${p.fuelKg/p.mtow>0.35?'dt-ok':'dt-warn'}">${p.fuelKg/p.mtow>0.35?'✅ GOOD':'⚠️ LOW'}</td></tr>
+          <tr><td>Weapons / Payload</td><td>${p.actPayload.toFixed(0)}</td><td>${(p.actPayload/p.mtow*100).toFixed(1)}%</td>
+            <td class="${p.actPayload<=p.maxPayload?'dt-ok':'dt-danger'}">${p.actPayload<=p.maxPayload?'✅ WITHIN LIMIT':'🚨 OVERLOAD'}</td></tr>
+          <tr><td><strong>MTOW TOTAL</strong></td><td><strong>${p.mtow.toFixed(0)}</strong></td><td>100%</td><td>—</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="card-head-title">MISSION ASSESSMENT</span></div>
+      <div class="card-body">
+        ${m.feasible
+          ? `<div class="alert alert-green"><span class="alert-icon">✅</span><div><div class="alert-title">MISSION FEASIBLE</div>Margin: ${m.margin_hr.toFixed(2)} hr (${(m.margin_hr/p.endurance_hr*100).toFixed(0)}%) · Fuel used: ${m.fuel_pct.toFixed(1)}%</div></div>`
+          : `<div class="alert alert-red"><span class="alert-icon">🚨</span><div><div class="alert-title">MISSION NOT FEASIBLE</div>Endurance deficit: ${Math.abs(m.margin_hr).toFixed(2)} hr</div></div>`}
+        <table class="data-table" style="margin-top:12px;">
+          <tr><th>CHECK</th><th>RESULT</th><th>LIMIT</th><th>STATUS</th></tr>
+          <tr><td>Payload ≤ Max Payload</td><td>${p.actPayload} kg</td><td>${p.maxPayload} kg</td>
+            <td class="${p.actPayload<=p.maxPayload?'dt-ok':'dt-danger'}">${p.actPayload<=p.maxPayload?'✅ PASS':'❌ FAIL'}</td></tr>
+          <tr><td>TWR (min 0.25 for fixed wing)</td><td>${p.twr.toFixed(2)}</td><td>≥ 0.25</td>
+            <td class="${p.twr>=0.25?'dt-ok':'dt-danger'}">${p.twr>=0.25?'✅ PASS':'❌ FAIL'}</td></tr>
+          <tr><td>Mission Feasibility</td><td>${m.fuel_pct.toFixed(0)}% fuel used</td><td>≤ 100%</td>
+            <td class="${m.feasible?'dt-ok':'dt-danger'}">${m.feasible?'✅ PASS':'❌ FAIL'}</td></tr>
+          <tr><td>Survivability Score</td><td>${Math.round(p.survScore)}%</td><td>≥ 40%</td>
+            <td class="${p.survScore>=40?'dt-ok':'dt-warn'}">${p.survScore>=40?'✅ ADEQUATE':'⚠️ LOW'}</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-head-title">CLI OUTPUT — MISSION DATA BLOCK</span>
+        <button class="copy-btn" onclick="copyReport()">📋 COPY</button>
+      </div>
+      <div class="card-body">
+        <pre style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--green);line-height:1.9;white-space:pre-wrap;" id="cliOutput">${buildCLI(p,m,rScore)}</pre>
+      </div>
+    </div>
+  `;
+}
+
+function computeScore(p,m){
+  let s = 0;
+  s += Math.min(p.endurance_hr/20*25, 25);
+  s += Math.min(p.range_km/3000*25, 25);
+  s += Math.min(p.payloadFrac/30*20, 20);
+  s += m.feasible ? 20 : 0;
+  s += Math.min(p.survScore/100*10, 10);
+  const letters = ['F','D','C','B','B+','A','A+','S','S+'];
+  const idx = Math.min(Math.floor(s/12.5), 8);
+  return {score:Math.round(s), letter:letters[idx]};
+}
+
+function buildCLI(p,m,sc){
+  return [
+    '# ═══════════════════════════════════════',
+    '# MILITARY UAS ANALYSIS — ConfigDoctor v5.1',
+    '# ═══════════════════════════════════════',
+    `platform_class     = ${document.getElementById('platformClass').value.toUpperCase()}`,
+    `mtow_kg            = ${p.mtow.toFixed(1)}`,
+    `empty_weight_kg    = ${p.emptyWt}`,
+    `fuel_weight_kg     = ${p.fuelKg.toFixed(1)}`,
+    `payload_kg         = ${p.actPayload}`,
+    `payload_fraction   = ${p.payloadFrac.toFixed(1)}%`,
+    ``,
+    `# PERFORMANCE`,
+    `endurance_hr       = ${p.endurance_hr.toFixed(2)}`,
+    `range_km           = ${p.range_km.toFixed(0)}`,
+    `cruise_speed_kmh   = ${p.cruiseKph}`,
+    `max_speed_kmh      = ${p.maxKph}`,
+    `service_ceiling_ft = ${p.ceil_ft}`,
+    `twr                = ${p.twr.toFixed(3)}`,
+    `wing_loading_kg_m2 = ${p.wingLoad > 0 ? p.wingLoad.toFixed(1) : 'N/A (VTOL)'}`,
+    ``,
+    `# MISSION`,
+    `mission_type       = ${getStr('missionType').toUpperCase()}`,
+    `target_dist_km     = ${getNum('targetDist')}`,
+    `time_on_target_min = ${getNum('totMinutes')}`,
+    `mission_feasible   = ${m.feasible ? 'YES' : 'NO'}`,
+    `fuel_used_pct      = ${m.fuel_pct.toFixed(1)}%`,
+    `margin_hr          = ${m.margin_hr.toFixed(2)}`,
+    ``,
+    `# ASSESSMENT`,
+    `threat_class       = ${p.threatClass}`,
+    `survivability_pct  = ${Math.round(p.survScore)}%`,
+    `mission_score      = ${sc.letter} (${sc.score}/100)`,
+    `# ─── EDUCATIONAL USE ONLY ───────────────`,
+  ].join('\n');
+}
+
+function copyReport(){
+  const txt = document.getElementById('cliOutput').textContent;
+  navigator.clipboard.writeText(txt).then(()=>{
+    const btn = event.currentTarget;
+    btn.textContent = '✅ COPIED';
+    setTimeout(()=>btn.textContent='📋 COPY', 2000);
+  });
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+window.addEventListener('load', runAll);
+</script>
+</body>
+</html>
