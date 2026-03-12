@@ -1032,6 +1032,10 @@ def loop_analyzer():
     return render_template('loop_analyzer.html')
 
 # ────────────────────────────────────────────────────────────
+@app.route("/military")
+def military():
+
+    return render_template("military_mode.html")
 
 if __name__ == "__main__":
     app.run(
