@@ -414,6 +414,48 @@ body:not(.lang-en) .i18n-th { display: inline !important; }
 }
 .btn-secondary:hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.18); transform: translateY(-2px); }
 
+/* ── Advanced Tuning / Knowledge button ─────────────────────── */
+.btn-knowledge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 13px 20px;
+  background: rgba(176,96,255,0.07);
+  color: rgba(220,180,255,0.85);
+  font-family: var(--font-th); font-weight: 600; font-size: .88rem;
+  border-radius: 8px; text-decoration: none;
+  border: 1px solid rgba(176,96,255,0.22);
+  position: relative; overflow: hidden;
+  transition: background .18s, border-color .18s, transform .18s, box-shadow .18s;
+}
+.btn-knowledge::before {
+  content: '';
+  position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(176,96,255,0.12), transparent);
+  transition: left .5s ease;
+}
+.btn-knowledge:hover::before { left: 140%; }
+.btn-knowledge:hover {
+  background: rgba(176,96,255,0.13);
+  border-color: rgba(176,96,255,0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 1px rgba(176,96,255,0.2), 0 8px 28px rgba(176,96,255,0.15);
+  color: rgba(230,200,255,1);
+}
+.btn-knowledge-icon {
+  color: rgba(176,96,255,0.8);
+  flex-shrink: 0;
+  transition: color .18s;
+}
+.btn-knowledge:hover .btn-knowledge-icon { color: rgba(200,150,255,1); }
+.btn-knowledge-badge {
+  font-family: var(--font-en, 'Orbitron', monospace);
+  font-size: 7px; font-weight: 800; letter-spacing: .1em;
+  padding: 2px 6px; border-radius: 4px;
+  background: rgba(24,119,242,0.15);
+  border: 1px solid rgba(24,119,242,0.3);
+  color: rgba(100,170,255,0.85);
+  margin-left: 2px;
+}
+
 /* Tags */
 .hero-tags {
   display: flex; gap: 6px; flex-wrap: wrap;
@@ -1385,6 +1427,17 @@ footer {
         <a href="/blackbox" class="btn-secondary">
           <span class="i18n-th">📊 Blackbox</span>
           <span class="i18n-en">📊 Blackbox</span>
+        </a>
+        <a href="https://www.facebook.com/media/set/?set=a.YOUR_ALBUM_ID" 
+           target="_blank" rel="noopener noreferrer"
+           class="btn-knowledge">
+          <svg class="btn-knowledge-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+          <span class="i18n-th">📚 Advanced Tuning</span>
+          <span class="i18n-en">📚 Advanced Tuning</span>
+          <span class="btn-knowledge-badge">FB</span>
         </a>
       </div>
 
