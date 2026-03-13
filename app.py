@@ -991,6 +991,8 @@ def set_security_headers(response):
     response.headers["Referrer-Policy"]        = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"]     = "geolocation=(), microphone=(), camera=()"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+    response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
     # CSP: whitelist ครบทุก CDN ที่ใช้จริง
     response.headers["Content-Security-Policy"] = (
 "default-src 'self'; "
