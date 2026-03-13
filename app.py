@@ -28,6 +28,10 @@ from analyzer.cli_surgeon import analyze_dump as cli_analyze_dump
 import os, io, time, json, hashlib, logging
 from datetime import datetime
 
+# Simple IP blacklist for brute-force protection
+blocked_ips = {}
+BLOCK_TIME = 600  # block 10 นาที
+
 # ── Rate Limiting ─────────────────────────────────────────────────────────
 try:
     from flask_limiter import Limiter
