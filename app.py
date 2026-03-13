@@ -26,6 +26,7 @@ from analyzer.thrust_logic import (calculate_thrust_weight,
 from werkzeug.utils import secure_filename
 from analyzer.cli_surgeon import analyze_dump as cli_analyze_dump
 import os, io, time, json, hashlib, logging
+from datetime import datetime
 
 # ── Rate Limiting ─────────────────────────────────────────────────────────
 try:
