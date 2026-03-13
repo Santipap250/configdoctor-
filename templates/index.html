@@ -637,6 +637,253 @@ body.light .amb-orb { opacity:.25; }
 .rs-desc { font-size:11px; color:rgba(200,215,255,.62); line-height:1.62; }
 .rs-cli { font-family:var(--font-m); font-size:9px; color:var(--cyan); margin-top:6px; background:rgba(0,200,255,.04); border:1px solid rgba(0,200,255,.1); border-radius:4px; padding:4px 9px; white-space:pre-wrap; }
 .rmap-tip { margin-top:12px; padding:10px 13px; background:rgba(0,255,136,.04); border:1.5px solid rgba(0,255,136,.1); border-radius:8px; font-size:10.5px; color:var(--muted2); line-height:1.6; }
+
+/* ═══════════════════════════════════════════════════════
+   v5.2 APEX RECON — UPGRADE CSS PACK
+   Battery Selector · Style Cards · Analyze Button ·
+   Formula Lab · Battery Matrix · Harmonic Map · Hidden Params
+═══════════════════════════════════════════════════════ */
+
+/* ── BATTERY QUICK PILLS ─────────────────────────── */
+.batt-pill-row { display:flex; gap:4px; flex-wrap:wrap; margin-top:6px; }
+.batt-pill {
+  flex:1; min-width:38px; padding:6px 3px 5px;
+  background:rgba(0,5,14,.9); border:1.5px solid rgba(255,255,255,.08);
+  border-radius:8px; cursor:pointer; text-align:center;
+  transition:all .18s cubic-bezier(.4,0,.2,1); position:relative; overflow:hidden;
+}
+.batt-pill::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; opacity:0; transition:opacity .2s; }
+.batt-pill:hover { transform:translateY(-2px); }
+.batt-pill.bp-3s::before  { background:linear-gradient(90deg,#5dd8ff,#00aaff); }
+.batt-pill.bp-4s::before  { background:linear-gradient(90deg,var(--green),var(--teal)); }
+.batt-pill.bp-5s::before  { background:linear-gradient(90deg,#88ff55,var(--green)); }
+.batt-pill.bp-6s::before  { background:linear-gradient(90deg,var(--amber),#ff9900); }
+.batt-pill.bp-7s::before  { background:linear-gradient(90deg,#ff9944,var(--red)); }
+.batt-pill.bp-8s::before  { background:linear-gradient(90deg,var(--red),var(--pink)); }
+.batt-pill.bp-3s:hover,.batt-pill.bp-3s.active  { border-color:#5dd8ff; background:rgba(93,216,255,.08); }
+.batt-pill.bp-4s:hover,.batt-pill.bp-4s.active  { border-color:rgba(0,255,136,.5); background:rgba(0,255,136,.08); }
+.batt-pill.bp-5s:hover,.batt-pill.bp-5s.active  { border-color:#88ff55; background:rgba(136,255,85,.08); }
+.batt-pill.bp-6s:hover,.batt-pill.bp-6s.active  { border-color:rgba(255,187,0,.5); background:rgba(255,187,0,.08); }
+.batt-pill.bp-7s:hover,.batt-pill.bp-7s.active  { border-color:#ff9944; background:rgba(255,153,68,.08); }
+.batt-pill.bp-8s:hover,.batt-pill.bp-8s.active  { border-color:rgba(255,51,68,.5); background:rgba(255,51,68,.08); }
+.batt-pill.active::before { opacity:1; }
+.batt-pill-s {
+  font-family:var(--font-d); font-size:11px; font-weight:900; display:block; line-height:1.1;
+  letter-spacing:-.01em;
+}
+.bp-3s .batt-pill-s { color:#5dd8ff; }
+.bp-4s .batt-pill-s { color:var(--green); }
+.bp-5s .batt-pill-s { color:#88ff55; }
+.bp-6s .batt-pill-s { color:var(--amber); }
+.bp-7s .batt-pill-s { color:#ff9944; }
+.bp-8s .batt-pill-s { color:var(--red); }
+.batt-pill-v { font-family:var(--font-m); font-size:7px; color:var(--muted); display:block; margin-top:2px; }
+
+/* ── STYLE SELECTOR CARDS ────────────────────────── */
+.style-cards-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:6px; }
+.style-card {
+  padding:10px 4px 9px; border-radius:10px; cursor:pointer; text-align:center;
+  border:1.5px solid rgba(255,255,255,.07); background:rgba(3,8,22,.9);
+  transition:all .18s cubic-bezier(.4,0,.2,1); position:relative; overflow:hidden;
+}
+.style-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; opacity:0; transition:opacity .18s; }
+.style-card:hover { transform:translateY(-2px); }
+.style-card.s-free.active,.style-card.s-free:hover  { border-color:rgba(0,170,255,.5); background:rgba(0,170,255,.07); }
+.style-card.s-race.active,.style-card.s-race:hover  { border-color:rgba(255,51,68,.5);  background:rgba(255,51,68,.07); }
+.style-card.s-lr.active,  .style-card.s-lr:hover    { border-color:rgba(176,96,255,.5); background:rgba(176,96,255,.07); }
+.style-card.s-free::before  { background:linear-gradient(90deg,var(--blue),var(--cyan)); }
+.style-card.s-race::before  { background:linear-gradient(90deg,var(--red),var(--amber)); }
+.style-card.s-lr::before    { background:linear-gradient(90deg,var(--purple),var(--blue)); }
+.style-card.active::before  { opacity:1; }
+.sc-ico  { font-size:18px; line-height:1; display:block; margin-bottom:4px; }
+.sc-name { font-family:var(--font-d); font-size:7px; letter-spacing:.1em; color:var(--muted2); display:block; transition:color .15s; }
+.sc-sub  { font-size:8px; color:var(--muted); display:block; margin-top:2px; }
+.style-card.active .sc-name,.style-card:hover .sc-name { color:var(--text); }
+
+/* ── ANALYZE BUTTON — APEX OFFICIAL EDITION ─────── */
+.btn-analyze {
+  width:100%; margin-top:18px; padding:0; height:54px;
+  background:linear-gradient(135deg,rgba(0,10,26,.95) 0%,rgba(0,6,18,.98) 100%);
+  border:1.5px solid rgba(0,255,136,.35); border-radius:10px;
+  cursor:pointer; position:relative; overflow:hidden;
+  transition:all .28s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 0 0 rgba(0,255,136,0);
+}
+.btn-analyze::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg,rgba(0,255,136,.12) 0%,rgba(0,170,255,.08) 50%,rgba(0,255,136,.04) 100%);
+  opacity:0; transition:opacity .28s;
+}
+.btn-analyze::after {
+  content:''; position:absolute; top:0; left:-100%; width:60%; height:100%;
+  background:linear-gradient(90deg,transparent,rgba(0,255,136,.18),transparent);
+  transition:left .4s ease;
+}
+.btn-analyze:hover { border-color:rgba(0,255,136,.72); transform:translateY(-2px); box-shadow:0 0 28px rgba(0,255,136,.35),0 8px 32px rgba(0,0,0,.6); }
+.btn-analyze:hover::before { opacity:1; }
+.btn-analyze:hover::after  { left:150%; }
+.btn-analyze:active { transform:translateY(0); box-shadow:none; }
+.btn-analyze-inner {
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  height:100%; position:relative; z-index:1; padding:0 16px;
+}
+.btn-analyze-icon { font-size:16px; flex-shrink:0; }
+.btn-analyze-text {
+  font-family:var(--font-d); font-size:11px; font-weight:700;
+  letter-spacing:.22em; color:var(--green);
+  text-shadow:0 0 20px rgba(0,255,136,.6);
+}
+.btn-analyze-sub {
+  font-family:var(--font-m); font-size:7.5px; letter-spacing:.08em;
+  color:var(--muted2); margin-top:1px;
+}
+.btn-analyze-badge {
+  font-family:var(--font-d); font-size:6.5px; letter-spacing:.14em;
+  padding:2px 8px; border-radius:4px; flex-shrink:0;
+  background:rgba(0,255,136,.08); border:1px solid rgba(0,255,136,.2);
+  color:rgba(0,255,136,.7);
+}
+.btn-analyze-sep { width:1px; height:28px; background:rgba(0,255,136,.12); flex-shrink:0; }
+.btn-analyze-corner {
+  position:absolute; width:8px; height:8px;
+  border-color:rgba(0,255,136,.4); border-style:solid;
+}
+.btn-analyze-corner.tl { top:4px; left:4px;  border-width:1px 0 0 1px; }
+.btn-analyze-corner.tr { top:4px; right:4px; border-width:1px 1px 0 0; }
+.btn-analyze-corner.bl { bottom:4px; left:4px;  border-width:0 0 1px 1px; }
+.btn-analyze-corner.br { bottom:4px; right:4px; border-width:0 1px 1px 0; }
+
+/* ── FORMULA LAB ─────────────────────────────────── */
+.formula-lab-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:10px; }
+.formula-card {
+  background:rgba(2,8,20,.95); border:1px solid rgba(0,170,255,.1);
+  border-radius:11px; padding:14px 14px 12px; position:relative; overflow:hidden;
+  transition:all .2s cubic-bezier(.4,0,.2,1);
+}
+.formula-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+.formula-card.fc-g::before { background:linear-gradient(90deg,var(--green),var(--teal)); }
+.formula-card.fc-b::before { background:linear-gradient(90deg,var(--blue),var(--cyan)); }
+.formula-card.fc-a::before { background:linear-gradient(90deg,var(--amber),var(--red)); }
+.formula-card.fc-p::before { background:linear-gradient(90deg,var(--purple),var(--blue)); }
+.formula-card:hover { transform:translateY(-2px); box-shadow:0 10px 32px rgba(0,0,0,.6); border-color:rgba(0,170,255,.22); }
+.formula-name { font-family:var(--font-d); font-size:7.5px; letter-spacing:.16em; color:var(--muted2); margin-bottom:6px; }
+.formula-eq {
+  font-family:var(--font-m); font-size:12px; font-weight:700; color:var(--cyan);
+  background:rgba(0,200,255,.05); border:1px solid rgba(0,200,255,.12); border-radius:5px;
+  padding:7px 11px; margin:6px 0; letter-spacing:.03em; white-space:pre-wrap;
+}
+.formula-result { font-family:var(--font-d); font-size:19px; font-weight:900; letter-spacing:-.01em; margin:5px 0 3px; }
+.fr-g{color:var(--green)}.fr-b{color:var(--blue)}.fr-a{color:var(--amber)}.fr-p{color:var(--purple)}
+.formula-var-list { display:flex; flex-direction:column; gap:2px; margin:6px 0; }
+.formula-var { display:flex; align-items:baseline; gap:5px; font-size:9.5px; }
+.fv-sym { font-family:var(--font-m); color:var(--cyan); min-width:26px; }
+.fv-eq  { color:var(--muted2); }
+.fv-live{ font-family:var(--font-m); font-weight:700; }
+.formula-desc { font-size:10px; color:rgba(200,215,255,.55); line-height:1.65; margin-top:6px; }
+.formula-cli  {
+  font-family:var(--font-m); font-size:9px; color:var(--green);
+  background:rgba(0,255,136,.05); border:1px solid rgba(0,255,136,.1);
+  border-radius:4px; padding:5px 9px; cursor:pointer; transition:background .15s;
+  white-space:pre-wrap; margin-top:7px;
+}
+.formula-cli:hover { background:rgba(0,255,136,.1); }
+
+/* ── MULTI-S BATTERY MATRIX ──────────────────────── */
+.bmat-wrap { overflow-x:auto; }
+.bmat-table { width:100%; border-collapse:collapse; min-width:620px; font-size:10.5px; }
+.bmat-table th {
+  font-family:var(--font-d); font-size:7px; letter-spacing:.12em; color:var(--muted2);
+  padding:8px 10px; border-bottom:1px solid rgba(255,255,255,.07);
+  background:rgba(0,3,10,.5); white-space:nowrap;
+}
+.bmat-table th:first-child { text-align:left; padding-left:14px; }
+.bmat-table td { padding:9px 10px; border-bottom:1px solid rgba(255,255,255,.03); text-align:center; transition:background .15s; }
+.bmat-table td:first-child { text-align:left; padding-left:14px; }
+.bmat-row:hover td { background:rgba(255,255,255,.02); }
+.bmat-row.bm-current td { background:rgba(0,255,136,.04); border-bottom-color:rgba(0,255,136,.06); }
+.bmat-s-badge {
+  font-family:var(--font-d); font-size:11px; font-weight:900; padding:3px 10px;
+  border-radius:5px; display:inline-block; letter-spacing:.05em;
+}
+.bm-3s{color:#5dd8ff;background:rgba(93,216,255,.1);border:1px solid rgba(93,216,255,.2)}
+.bm-4s{color:var(--green);background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.2)}
+.bm-5s{color:#88ff55;background:rgba(136,255,85,.1);border:1px solid rgba(136,255,85,.2)}
+.bm-6s{color:var(--amber);background:rgba(255,185,0,.1);border:1px solid rgba(255,185,0,.2)}
+.bm-7s{color:#ff9944;background:rgba(255,153,68,.1);border:1px solid rgba(255,153,68,.2)}
+.bm-8s{color:var(--red);background:rgba(255,51,68,.1);border:1px solid rgba(255,51,68,.2)}
+.bmat-num { font-family:var(--font-m); font-weight:700; }
+.bmat-pill {
+  font-family:var(--font-d); font-size:7px; padding:2px 8px;
+  border-radius:4px; letter-spacing:.08em; display:inline-block;
+}
+.bmat-pill.ok     { color:var(--green); background:rgba(0,255,136,.1); border:1px solid rgba(0,255,136,.2); }
+.bmat-pill.warn   { color:var(--amber); background:rgba(255,185,0,.1);  border:1px solid rgba(255,185,0,.2); }
+.bmat-pill.danger { color:var(--red);   background:rgba(255,51,68,.1);  border:1px solid rgba(255,51,68,.2); }
+.bmat-pill.opt    { color:var(--cyan);  background:rgba(0,216,255,.1);  border:1.5px solid rgba(0,216,255,.3); font-weight:700; }
+.bmat-note   { font-size:9.5px; color:var(--muted2); padding:10px 14px; border-top:1px solid rgba(255,255,255,.05); line-height:1.7; }
+.bmat-legend { display:flex; gap:10px; flex-wrap:wrap; padding:7px 14px; border-top:1px solid rgba(255,255,255,.04); }
+.bml-item    { display:flex; align-items:center; gap:5px; font-family:var(--font-d); font-size:7px; letter-spacing:.08em; color:var(--muted2); }
+
+/* ── MOTOR HARMONIC MAP ──────────────────────────── */
+.harm-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); gap:8px; }
+.harm-node {
+  background:rgba(2,7,20,.9); border:1px solid rgba(176,96,255,.12);
+  border-radius:9px; padding:12px 12px 10px; transition:all .2s;
+}
+.harm-node:hover { border-color:rgba(176,96,255,.3); transform:translateY(-1px); box-shadow:0 6px 20px rgba(176,96,255,.1); }
+.harm-node-n   { font-family:var(--font-d); font-size:6.5px; letter-spacing:.18em; color:var(--muted2); margin-bottom:4px; }
+.harm-node-f   { font-family:var(--font-d); font-size:20px; font-weight:900; color:var(--purple); line-height:1; }
+.harm-node-u   { font-family:var(--font-m); font-size:9px; color:var(--muted2); }
+.harm-node-flt { font-family:var(--font-m); font-size:9px; color:var(--muted2); margin-top:5px; padding:3px 7px; background:rgba(176,96,255,.05); border-radius:4px; border:1px solid rgba(176,96,255,.1); }
+.harm-node-desc{ font-size:9px; color:rgba(200,215,255,.5); margin-top:5px; line-height:1.55; }
+.harm-bar-w    { height:5px; background:rgba(255,255,255,.05); border-radius:3px; overflow:hidden; margin-top:8px; }
+.harm-bar-f    { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--purple),var(--blue)); }
+.harm-risk     { display:inline-block; font-family:var(--font-d); font-size:6.5px; letter-spacing:.1em; padding:2px 7px; border-radius:4px; margin-top:5px; }
+.hr-lo  { background:rgba(0,255,136,.07); color:var(--green); border:1px solid rgba(0,255,136,.18); }
+.hr-med { background:rgba(255,185,0,.07);  color:var(--amber); border:1px solid rgba(255,185,0,.18); }
+.hr-hi  { background:rgba(255,51,68,.07);  color:var(--red);   border:1px solid rgba(255,51,68,.18); }
+.harm-explain {
+  margin-top:12px; padding:10px 13px; background:rgba(176,96,255,.04);
+  border:1px solid rgba(176,96,255,.1); border-radius:8px;
+  font-size:10.5px; color:var(--muted2); line-height:1.7;
+}
+
+/* ── HIDDEN BETAFLIGHT PARAMS ────────────────────── */
+.hparam-list  { display:flex; flex-direction:column; gap:9px; }
+.hparam-item  {
+  background:rgba(2,7,20,.9); border:1px solid rgba(255,255,255,.06);
+  border-radius:10px; padding:13px 14px; position:relative; overflow:hidden;
+  transition:all .2s;
+}
+.hparam-item::before { content:''; position:absolute; left:0;top:0;bottom:0; width:3px; }
+.hp-g::before{background:var(--green)} .hp-b::before{background:var(--blue)}
+.hp-a::before{background:var(--amber)} .hp-p::before{background:var(--purple)}
+.hp-c::before{background:var(--cyan)}  .hp-r::before{background:var(--red)}
+.hparam-item:hover { border-color:rgba(255,255,255,.14); box-shadow:0 6px 22px rgba(0,0,0,.5); }
+.hparam-top   { display:flex; align-items:center; flex-wrap:wrap; gap:7px; margin-bottom:7px; }
+.hparam-cmd   { font-family:var(--font-m); font-size:11.5px; font-weight:700; color:var(--cyan); }
+.hparam-val   { font-family:var(--font-d); font-size:9px; padding:2px 10px; border-radius:4px; background:rgba(0,200,255,.08); color:var(--cyan); border:1px solid rgba(0,200,255,.18); letter-spacing:.06em; }
+.hbadge       { font-family:var(--font-d); font-size:6px; letter-spacing:.1em; padding:2px 7px; border-radius:3px; }
+.hb-secret    { background:rgba(255,51,68,.1); color:var(--red); border:1px solid rgba(255,51,68,.2); }
+.hb-bf45      { background:rgba(0,255,136,.08); color:var(--green); border:1px solid rgba(0,255,136,.18); }
+.hb-adv       { background:rgba(176,96,255,.08); color:var(--purple); border:1px solid rgba(176,96,255,.18); }
+.hb-perf      { background:rgba(255,185,0,.08); color:var(--amber); border:1px solid rgba(255,185,0,.18); }
+.hparam-desc  { font-size:10.5px; color:rgba(200,215,255,.65); line-height:1.7; margin-bottom:6px; }
+.hparam-why   { font-size:9.5px; color:rgba(200,215,255,.38); line-height:1.55; font-style:italic; margin-bottom:7px; }
+.hparam-cli   {
+  font-family:var(--font-m); font-size:9.5px; color:var(--green);
+  background:rgba(0,255,136,.05); border:1px solid rgba(0,255,136,.12);
+  border-radius:5px; padding:6px 10px; cursor:pointer; white-space:pre-wrap;
+  transition:background .15s; display:block;
+}
+.hparam-cli:hover { background:rgba(0,255,136,.1); }
+.secret-alert {
+  display:flex; align-items:center; gap:9px; padding:9px 12px;
+  background:rgba(255,51,68,.05); border:1px solid rgba(255,51,68,.15);
+  border-radius:8px; margin-bottom:13px;
+}
+.secret-alert-ico  { font-size:15px; flex-shrink:0; }
+.secret-alert-text { font-family:var(--font-d); font-size:7.5px; letter-spacing:.1em; color:rgba(255,80,80,.8); line-height:1.5; }
 </style>
 </head>
 <body>
@@ -787,22 +1034,66 @@ body.light .amb-orb { opacity:.25; }
             <div><label>น้ำหนัก ALL-UP (กรัม)</label><input type="number" name="weight" id="f_weight" placeholder="750" value="{{ request.form.get('weight','') }}" required oninput="liveCalc()"></div>
           </div>
           <div class="fsec-label">🔋 แบตเตอรี่</div>
-          <div class="fg">
-            <div><label>Cell Count (S)</label>
-              <select name="battery" id="battery-select" onchange="liveCalc()">
-                {% for c in ['3S','4S','5S','6S','7S','8S'] %}<option value="{{ c }}" {% if request.form.get('battery','')==c %}selected{% endif %}>{{ c }}</option>{% endfor %}
-              </select></div>
-            <div><label>Capacity (mAh)</label><input type="number" name="battery_mAh" id="f_mah" placeholder="1500" value="{{ request.form.get('battery_mAh','') }}" oninput="liveCalc()"></div>
+          <!-- Battery Visual Pills -->
+          <div class="batt-pill-row">
+            {% set _bc = request.form.get('battery','4S') %}
+            <div class="batt-pill bp-3s {% if _bc=='3S' %}active{% endif %}" onclick="setBatt('3S',this)">
+              <span class="batt-pill-s">3S</span><span class="batt-pill-v">11.1V</span>
+            </div>
+            <div class="batt-pill bp-4s {% if _bc=='4S' or not _bc %}active{% endif %}" onclick="setBatt('4S',this)">
+              <span class="batt-pill-s">4S</span><span class="batt-pill-v">14.8V</span>
+            </div>
+            <div class="batt-pill bp-5s {% if _bc=='5S' %}active{% endif %}" onclick="setBatt('5S',this)">
+              <span class="batt-pill-s">5S</span><span class="batt-pill-v">18.5V</span>
+            </div>
+            <div class="batt-pill bp-6s {% if _bc=='6S' %}active{% endif %}" onclick="setBatt('6S',this)">
+              <span class="batt-pill-s">6S</span><span class="batt-pill-v">22.2V</span>
+            </div>
+            <div class="batt-pill bp-7s {% if _bc=='7S' %}active{% endif %}" onclick="setBatt('7S',this)">
+              <span class="batt-pill-s">7S</span><span class="batt-pill-v">25.9V</span>
+            </div>
+            <div class="batt-pill bp-8s {% if _bc=='8S' %}active{% endif %}" onclick="setBatt('8S',this)">
+              <span class="batt-pill-s">8S</span><span class="batt-pill-v">29.6V</span>
+            </div>
           </div>
-          <div class="fsec-label">🎮 สไตล์ & มอเตอร์</div>
-          <div class="fg">
-            <div><label>Flight Style</label>
-              <select name="style" id="f_style" onchange="liveCalc()">
-                <option value="freestyle" {% if request.form.get('style','')=='freestyle' %}selected{% endif %}>Freestyle</option>
-                <option value="longrange" {% if request.form.get('style','')=='longrange' %}selected{% endif %}>Long Range</option>
-                <option value="racing"    {% if request.form.get('style','')=='racing'    %}selected{% endif %}>Racing</option>
-              </select></div>
-            <div><label>Motor Count</label><input type="number" name="motor_count" value="{{ request.form.get('motor_count','4') }}" min="1" max="8" oninput="liveCalc()"></div>
+          <!-- Hidden select for form submission -->
+          <select name="battery" id="battery-select" onchange="liveCalc();syncBattPills(this.value)" style="display:none;">
+            {% for c in ['3S','4S','5S','6S','7S','8S'] %}<option value="{{ c }}" {% if request.form.get('battery','')==c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+          </select>
+          <div style="margin-top:8px;">
+            <label>Capacity (mAh)</label>
+            <input type="number" name="battery_mAh" id="f_mah" placeholder="1500" value="{{ request.form.get('battery_mAh','') }}" oninput="liveCalc()">
+          </div>
+
+          <div class="fsec-label">🎮 Flight Style</div>
+          <!-- Style Visual Cards -->
+          {% set _st = request.form.get('style','freestyle') %}
+          <div class="style-cards-grid">
+            <div class="style-card s-free {% if _st=='freestyle' or not request.form.get('style') %}active{% endif %}" onclick="setStyle('freestyle',this)">
+              <span class="sc-ico">🌀</span>
+              <span class="sc-name">FREESTYLE</span>
+              <span class="sc-sub">Trick · Snap</span>
+            </div>
+            <div class="style-card s-race {% if _st=='racing' %}active{% endif %}" onclick="setStyle('racing',this)">
+              <span class="sc-ico">🏁</span>
+              <span class="sc-name">RACING</span>
+              <span class="sc-sub">Speed · Gate</span>
+            </div>
+            <div class="style-card s-lr {% if _st=='longrange' %}active{% endif %}" onclick="setStyle('longrange',this)">
+              <span class="sc-ico">🛸</span>
+              <span class="sc-name">LONG RANGE</span>
+              <span class="sc-sub">Distance · Film</span>
+            </div>
+          </div>
+          <!-- Hidden select for form submission -->
+          <select name="style" id="f_style" onchange="liveCalc();syncStyleCards(this.value)" style="display:none;">
+            <option value="freestyle" {% if request.form.get('style','')=='freestyle' %}selected{% endif %}>Freestyle</option>
+            <option value="longrange" {% if request.form.get('style','')=='longrange' %}selected{% endif %}>Long Range</option>
+            <option value="racing"    {% if request.form.get('style','')=='racing'    %}selected{% endif %}>Racing</option>
+          </select>
+          <div style="margin-top:8px;">
+            <label>Motor Count</label>
+            <input type="number" name="motor_count" value="{{ request.form.get('motor_count','4') }}" min="1" max="8" oninput="liveCalc()">
           </div>
           <div class="fsec-label">🌀 Propeller</div>
           <div class="fg">
@@ -816,7 +1107,21 @@ body.light .amb-orb { opacity:.25; }
           <div class="fsec-label">⚡ Motor KV (optional)</div>
           <div><label>Motor KV — ใช้คำนวณ RPM, tip speed, filter</label>
             <input type="number" name="motor_kv" id="f_kv" placeholder="2306" value="{{ request.form.get('motor_kv','') }}" oninput="liveCalc()"></div>
-          <button type="submit" class="btn-analyze" id="btnAnalyze">🚀 &nbsp;ANALYZE DRONE</button>
+          <button type="submit" class="btn-analyze" id="btnAnalyze">
+            <div class="btn-analyze-corner tl"></div>
+            <div class="btn-analyze-corner tr"></div>
+            <div class="btn-analyze-corner bl"></div>
+            <div class="btn-analyze-corner br"></div>
+            <div class="btn-analyze-inner">
+              <span class="btn-analyze-icon">🚀</span>
+              <div style="display:flex;flex-direction:column;align-items:flex-start;">
+                <span class="btn-analyze-text">ANALYZE DRONE</span>
+                <span class="btn-analyze-sub">Physics · PID · Filter · Power · Tune</span>
+              </div>
+              <div class="btn-analyze-sep"></div>
+              <span class="btn-analyze-badge">v5.2<br>APEX</span>
+            </div>
+          </button>
         </form>
       </div>
     </aside><!-- /mission-panel -->
@@ -2406,6 +2711,480 @@ set tpa_rate         = 65</div>
       </div>
       {% endif %}
 
+
+      <!-- ══════════════════════════════════════════════
+           11. SECRET FORMULA LAB — EXCLUSIVE PHYSICS
+      ══════════════════════════════════════════════ -->
+      {% if analysis and analysis.advanced %}
+      {% set _kv_fl  = analysis.motor_kv|default(0)|int %}
+      {% set _cl_fl  = analysis.advanced.cells|default(4)|int %}
+      {% set _vn_fl  = analysis.advanced.pack_voltage_nominal|default(14.8)|float %}
+      {% set _vld_fl = _vn_fl * 0.82 %}
+      {% set _rpm_fl = (_kv_fl * _vld_fl)|int if _kv_fl>0 else 0 %}
+      {% set _pd_fl  = analysis.prop_size|default(5)|float %}
+      {% set _wt_fl  = analysis.weight|default(750)|float %}
+      {% set _twr_fl = analysis.advanced.thrust_ratio|default(0)|float %}
+      {% set _mah_fl = analysis.advanced.battery_mAh_used|default(1500)|float %}
+      {% set _tip_fl = analysis.advanced.tip_speed_mps|default(0)|float %}
+      {% set _hpw_fl = analysis.advanced.hover_power_w|default(0)|float %}
+      {% set _hth_fl = analysis.advanced.hover_throttle_pct|default(50)|float %}
+      {% set _glpf_fl= analysis.filter.gyro_lpf1|default(200)|int %}
+      {% set _dlpf_fl= analysis.filter.dterm_lpf1|default(110)|int %}
+      {% set _dr_fl  = analysis.pid.roll.d|default(38)|int %}
+
+      <div class="tpanel" style="border-left:3px solid var(--cyan);">
+        <div class="tpanel-head">
+          <div class="tpanel-head-icon" style="background:rgba(0,212,255,.07);border-color:rgba(0,212,255,.25);">🧪</div>
+          <div>
+            <div class="tpanel-title" style="color:var(--cyan);">SECRET FORMULA LAB</div>
+            <div class="tpanel-sub">สูตรฟิสิกส์จริง · คำนวณจาก spec ของ build นี้ · ไม่มีที่ไหนในไทย</div>
+          </div>
+          <span class="ttag hot" style="margin-left:auto;flex-shrink:0;">🔬 EXCLUSIVE</span>
+        </div>
+        <div class="tpanel-body">
+          <div class="formula-lab-grid">
+
+            <!-- 1: Prop Tip Speed -->
+            <div class="formula-card fc-g">
+              <div class="formula-name">🌀 PROP TIP SPEED — สูตรจริง</div>
+              <div class="formula-eq">v = π × D(m) × N / 60</div>
+              {% if _rpm_fl>0 %}<div class="formula-result fr-g">{{ _tip_fl|int }} m/s <span style="font-size:10px;color:var(--muted2)">({{ (_tip_fl/343*100)|int }}% speed of sound)</span></div>{% endif %}
+              <div class="formula-var-list">
+                <div class="formula-var"><span class="fv-sym">D</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--green)">{{ (_pd_fl*0.0254)|round(4) }}m ({{ _pd_fl }}")</span></div>
+                <div class="formula-var"><span class="fv-sym">N</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--amber)">{{ '{:,}'.format(_rpm_fl) if _rpm_fl>0 else '—' }} RPM</span></div>
+              </div>
+              <div class="formula-desc">⚠️ ขีดจำกัด <strong>290 m/s</strong> = compressibility loss · 265 m/s = warning zone · เกินนี้เสียงดังแต่ thrust ลด</div>
+            </div>
+
+            <!-- 2: Hover Throttle -->
+            <div class="formula-card fc-b">
+              <div class="formula-name">⚖️ HOVER THROTTLE — สูตรแม่นยำ</div>
+              <div class="formula-eq">THR% = (1/√TWR) × 100</div>
+              {% if _hth_fl>0 %}<div class="formula-result fr-b">{{ _hth_fl|int }}% throttle</div>{% endif %}
+              <div class="formula-var-list">
+                <div class="formula-var"><span class="fv-sym">TWR</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--blue)">{{ _twr_fl }} (thrust/weight)</span></div>
+              </div>
+              <div class="formula-desc">💡 ดีสุด: 30-40% = freestyle power · 40-55% = LR efficient · >60% = หนักเกิน ควรปรับ spec</div>
+            </div>
+
+            <!-- 3: Loaded RPM -->
+            {% if _kv_fl>0 %}
+            <div class="formula-card fc-g">
+              <div class="formula-name">⚡ LOADED MOTOR RPM</div>
+              <div class="formula-eq">N_load = KV × V_nom × 0.82</div>
+              <div class="formula-result fr-g">{{ '{:,}'.format(_rpm_fl) }} RPM</div>
+              <div class="formula-var-list">
+                <div class="formula-var"><span class="fv-sym">KV</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--green)">{{ _kv_fl }}</span></div>
+                <div class="formula-var"><span class="fv-sym">V_nom</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--amber)">{{ _vn_fl }}V ({{ _cl_fl }}S)</span></div>
+                <div class="formula-var"><span class="fv-sym">η</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--cyan)">0.82 (load factor)</span></div>
+              </div>
+              <div class="formula-desc">0.82 = empirical load factor จาก back-EMF + copper loss · No-load RPM = {{ (_kv_fl*_vn_fl)|int }} (ทางทฤษฎี)</div>
+            </div>
+            {% endif %}
+
+            <!-- 4: RPM Filter Min Hz -->
+            {% if _rpm_fl>0 %}
+            {% set _fmin = ((_kv_fl * _vn_fl * 0.70 * 14) / 120)|int %}
+            <div class="formula-card fc-p">
+              <div class="formula-name">🔊 RPM FILTER MIN HZ — สูตรที่ถูกต้อง</div>
+              <div class="formula-eq">f_min = KV × V_sag × poles / 120</div>
+              <div class="formula-result fr-p">{{ _fmin }} Hz</div>
+              <div class="formula-var-list">
+                <div class="formula-var"><span class="fv-sym">V_sag</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--purple)">{{ (_vn_fl*0.70)|round(1) }}V (70% V_nom)</span></div>
+                <div class="formula-var"><span class="fv-sym">poles</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--purple)">14 (มาตรฐาน FPV)</span></div>
+              </div>
+              <div class="formula-desc">🎯 ใช้ V_sag (70%) เพราะ filter ต้องทำงานตั้งแต่ throttle ต่ำสุด · GUI ใช้ค่า default 100Hz ซึ่งอาจเกินจริงสำหรับ KV นี้</div>
+              <div class="formula-cli" onclick="copyCliSnippet(this)">set rpm_filter_min_hz = {{ _fmin }}
+set motor_poles       = 14</div>
+            </div>
+            {% endif %}
+
+            <!-- 5: D-term Heat Index -->
+            {% set _noise_fl = analysis.prop_result.effect.noise|default(3)|float if analysis.prop_result else 3 %}
+            {% set _dhi = (_dr_fl * _dr_fl * _noise_fl / 1000)|round(2) %}
+            <div class="formula-card fc-a">
+              <div class="formula-name">🌡️ D-TERM HEAT INDEX (DHI) — ไม่มีที่ไหนเปิดเผย</div>
+              <div class="formula-eq">DHI = D² × noise_idx / 1000</div>
+              <div class="formula-result" style="color:{% if _dhi>5 %}var(--red){% elif _dhi>2.5 %}var(--amber){% else %}var(--green){% endif %}">DHI = {{ _dhi }}</div>
+              <div class="formula-var-list">
+                <div class="formula-var"><span class="fv-sym">D</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--amber)">{{ _dr_fl }} (D roll)</span></div>
+                <div class="formula-var"><span class="fv-sym">noise</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--amber)">{{ _noise_fl }}/6</span></div>
+              </div>
+              <div class="formula-desc">{% if _dhi>5 %}⛔ DHI สูงมาก — motor จะร้อนแม้บินสั้น → เปิด RPM filter หรือลด D{% elif _dhi>2.5 %}⚠️ DHI ปานกลาง — balance prop ก่อน ตรวจ motor temp หลัง 2 pack{% else %}✅ DHI ต่ำ — D-term ไม่เป็นภาระ motor มากนัก{% endif %}</div>
+            </div>
+
+            <!-- 6: Power Loading -->
+            {% if _hpw_fl>0 %}
+            {% set _tot_thr = (_wt_fl * _twr_fl)|int %}
+            {% set _pl = (_tot_thr / _hpw_fl)|round(1) %}
+            <div class="formula-card fc-b">
+              <div class="formula-name">💡 POWER LOADING (g/W) — Efficiency จริง</div>
+              <div class="formula-eq">PL = Thrust(g) / Hover_Power(W)</div>
+              <div class="formula-result fr-b">{{ _pl }} g/W</div>
+              <div class="formula-var-list">
+                <div class="formula-var"><span class="fv-sym">Thrust</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--blue)">{{ _tot_thr }}g</span></div>
+                <div class="formula-var"><span class="fv-sym">Hover W</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--blue)">{{ _hpw_fl|int }}W</span></div>
+              </div>
+              <div class="formula-desc">{% if _pl>8 %}✅ Excellent — สุดยอด efficiency เหมือน premium racing build{% elif _pl>5 %}⚡ Good — สมดุลดีระหว่างกำลังและเวลาบิน{% else %}⚠️ Low efficiency — ลอง pitch สูงขึ้น หรือ 3-blade prop{% endif %}</div>
+            </div>
+            {% endif %}
+
+            <!-- 7: Filter Delay Chain -->
+            {% set _gd = (1 / (2 * 3.14159 * _glpf_fl) * 1000)|round(2) %}
+            {% set _dd = (1 / (2 * 3.14159 * _dlpf_fl) * 1000)|round(2) %}
+            {% set _td = (_gd + _dd + 0.3)|round(2) %}
+            <div class="formula-card fc-p">
+              <div class="formula-name">⏱️ FILTER DELAY CHAIN — total latency</div>
+              <div class="formula-eq">τ = Σ [1/(2π×f_c)] × 1000 ms</div>
+              <div class="formula-result fr-p">{{ _td }} ms total</div>
+              <div class="formula-var-list">
+                <div class="formula-var"><span class="fv-sym">Gyro</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--purple)">{{ _gd }}ms ({{ _glpf_fl }}Hz)</span></div>
+                <div class="formula-var"><span class="fv-sym">DTerm</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--purple)">{{ _dd }}ms ({{ _dlpf_fl }}Hz)</span></div>
+                <div class="formula-var"><span class="fv-sym">Notch</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--purple)">~0.3ms</span></div>
+              </div>
+              <div class="formula-desc">{% if _td<1.0 %}✅ Latency ต่ำมาก — racing build ชั้นยอด{% elif _td<2.0 %}✅ Latency ดี — freestyle/racing เหมาะสม{% else %}⚠️ Latency สูง — ลอง LPF1 ที่ความถี่สูงขึ้น{% endif %}</div>
+            </div>
+
+            <!-- 8: Build Efficiency Index (BEI) — OBIX Exclusive -->
+            {% set _wkg = _wt_fl / 1000 %}
+            {% set _bei = ((_twr_fl * _twr_fl * (_mah_fl ** 0.5)) / _wkg)|round(1) if _wkg>0 else 0 %}
+            <div class="formula-card fc-g">
+              <div class="formula-name">🏆 BUILD EFFICIENCY INDEX (BEI) — สูตรลับ OBIXDoctor</div>
+              <div class="formula-eq">BEI = TWR² × √mAh / Weight(kg)</div>
+              <div class="formula-result fr-g">BEI = {{ _bei }}</div>
+              <div class="formula-desc">
+                สูตรนี้สร้างโดย OBIX Doctor รวม power + flight time + น้ำหนักในมิติเดียว<br>
+                {% if _bei>500 %}🚀 WORLD CLASS — top 5% ของ FPV community
+                {% elif _bei>300 %}✅ EXCELLENT — intermediate ถึง pro level
+                {% elif _bei>150 %}⚡ GOOD — standard FPV build
+                {% else %}⚠️ BUDGET — มีพื้นที่ปรับปรุง spec{% endif %}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- ══════════════════════════════════════════════
+           12. MULTI-S BATTERY MATRIX
+      ══════════════════════════════════════════════ -->
+      {% if analysis and analysis.advanced %}
+      {% set _kv_bm = analysis.motor_kv|default(0)|int %}
+      {% set _wt_bm = analysis.weight|default(750)|float %}
+      {% set _sz_bm = analysis.size|default(5)|float %}
+      {% set _pd_bm = analysis.prop_size|default(5)|float %}
+      {% set _cs_bm = analysis.advanced.cells|default(4)|int %}
+      {% set _mh_bm = analysis.advanced.battery_mAh_used|default(1500)|float %}
+
+      <div class="tpanel" style="border-left:3px solid var(--amber);">
+        <div class="tpanel-head">
+          <div class="tpanel-head-icon" style="background:rgba(255,185,0,.07);border-color:rgba(255,185,0,.25);">🔋</div>
+          <div>
+            <div class="tpanel-title" style="color:var(--amber);">MULTI-S BATTERY MATRIX</div>
+            <div class="tpanel-sub">Build นี้บน 3S–8S · วิเคราะห์ทุก S · หา optimal configuration</div>
+          </div>
+        </div>
+        <div class="tpanel-body" style="padding:0;">
+          <div class="bmat-wrap">
+            <table class="bmat-table">
+              <thead>
+                <tr>
+                  <th style="text-align:left;">BATTERY</th>
+                  <th>VOLTAGE</th>
+                  <th>RPM (est)</th>
+                  <th>TWR</th>
+                  <th>TIP SPEED</th>
+                  <th>FLIGHT TIME</th>
+                  <th>ESC MIN</th>
+                  <th>VERDICT</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for sc in [3,4,5,6,7,8] %}
+                {% set vn  = sc * 3.7 %}
+                {% set vld = vn * 0.82 %}
+                {% set rpm_e = (_kv_bm * vld)|int if _kv_bm>0 else 0 %}
+                {% set tip_e = (3.14159 * _pd_bm * 0.0254 * rpm_e / 60)|int if rpm_e>0 else 0 %}
+                {% set cscale = (0.55+sc*0.1125) if sc<=4 else (1.0+(sc-4)*0.18) %}
+                {% set thr4s  = 730 %}
+                {% set twr_e  = (thr4s * cscale * 4 / _wt_bm)|round(2) if _wt_bm>0 else 0 %}
+                {% set pkw    = (_kv_bm/220*vn)|round(0)|int*4 if _kv_bm>0 else sc*35*4 %}
+                {% set hthr   = (1/twr_e**0.5) if twr_e>0 else 0.5 %}
+                {% set ia     = pkw / vn %}
+                {% set ft_e   = ((_mh_bm/1000*0.8)/(ia*hthr*hthr*0.75+0.5)*60)|round(1) if ia>0 else 0 %}
+                {% set esc_e  = ([20, ((pkw/vn/4)*1.5/5)|round(0)|int*5]|max) %}
+                <tr class="bmat-row {% if sc==_cs_bm %}bm-current{% endif %}">
+                  <td>
+                    <span class="bmat-s-badge bm-{{ sc }}s">{{ sc }}S</span>
+                    {% if sc==_cs_bm %}<span style="font-family:var(--font-d);font-size:6.5px;color:var(--cyan);margin-left:6px;">◀ NOW</span>{% endif %}
+                  </td>
+                  <td><span class="bmat-num" style="color:var(--text2);">{{ vn }}V</span></td>
+                  <td>
+                    {% if rpm_e>0 %}
+                    <span class="bmat-num" style="color:{% if rpm_e>50000 %}var(--red){% elif rpm_e>35000 %}var(--amber){% else %}var(--text){% endif %}">{{ '{:,}'.format(rpm_e) }}</span>
+                    {% else %}<span style="color:var(--muted2)">กรอก KV</span>{% endif %}
+                  </td>
+                  <td><span class="bmat-num" style="color:{% if twr_e>=3.5 %}var(--green){% elif twr_e>=2.0 %}var(--amber){% else %}var(--red){% endif %}">{{ twr_e }}:1</span></td>
+                  <td>
+                    {% if tip_e>0 %}
+                    <span class="bmat-num" style="color:{% if tip_e>290 %}var(--red){% elif tip_e>265 %}var(--amber){% else %}var(--green){% endif %}">{{ tip_e }} m/s</span>
+                    {% else %}<span style="color:var(--muted2)">—</span>{% endif %}
+                  </td>
+                  <td><span class="bmat-num" style="color:{% if ft_e>10 %}var(--green){% elif ft_e>5 %}var(--amber){% else %}var(--red){% endif %}">{{ ft_e }} min</span></td>
+                  <td><span class="bmat-num" style="color:var(--blue)">{{ esc_e }}A+</span></td>
+                  <td>
+                    {% if tip_e>290 %}<span class="bmat-pill danger">⛔ Tip !</span>
+                    {% elif twr_e<2.0 %}<span class="bmat-pill warn">⚠️ Low TWR</span>
+                    {% elif twr_e>=3.5 and ft_e>=5 and (tip_e<265 or tip_e==0) %}
+                      {% if sc==_cs_bm %}<span class="bmat-pill opt">⭐ OPTIMAL</span>
+                      {% else %}<span class="bmat-pill ok">✅ Good</span>{% endif %}
+                    {% elif twr_e>=2.0 %}<span class="bmat-pill ok">✅ OK</span>
+                    {% else %}<span class="bmat-pill warn">⚠️ Check</span>{% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="bmat-note">
+            💡 <strong style="color:var(--text)">Build {{ _sz_bm }}" · {{ _wt_bm|int }}g</strong>
+            {% if _kv_bm>0 %} · KV {{ _kv_bm }}
+              {% if _cs_bm==4 and _kv_bm>2500 %} — 4S เหมาะที่สุด · 6S ควรใช้ KV 1500-1800
+              {% elif _cs_bm==6 and _kv_bm>2000 %} — ⚠️ KV สูงเกินสำหรับ 6S → tip speed อาจเกิน 290m/s
+              {% elif _cs_bm>=7 %} — High voltage build · ESC ต้องรองรับ {{ _cs_bm*4.2 }}V max
+              {% else %} — balanced ดีกับ {{ _cs_bm }}S{% endif %}
+            {% else %} — กรอก Motor KV เพื่อดู RPM + Tip Speed ใน Matrix{% endif %}
+          </div>
+          <div class="bmat-legend">
+            <div class="bml-item"><span class="bmat-pill opt">⭐ OPTIMAL</span> เหมาะที่สุด</div>
+            <div class="bml-item"><span class="bmat-pill ok">✅ Good</span> ใช้ได้</div>
+            <div class="bml-item"><span class="bmat-pill warn">⚠️ Check</span> มีจุดระวัง</div>
+            <div class="bml-item"><span class="bmat-pill danger">⛔ Danger</span> ไม่แนะนำ</div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- ══════════════════════════════════════════════
+           13. MOTOR HARMONIC MAP
+      ══════════════════════════════════════════════ -->
+      {% if analysis and analysis.advanced and analysis.motor_kv %}
+      {% set _rpm_hm  = analysis.advanced.rpm_estimated|default(0)|int %}
+      {% set _bl_hm   = request.form.get('blades','3')|int %}
+      {% set _glpf_hm = analysis.filter.gyro_lpf1|default(200)|int %}
+
+      <div class="tpanel" style="border-left:3px solid var(--purple);">
+        <div class="tpanel-head">
+          <div class="tpanel-head-icon" style="background:rgba(176,96,255,.07);border-color:rgba(176,96,255,.25);">🎵</div>
+          <div>
+            <div class="tpanel-title" style="color:var(--purple);">MOTOR HARMONIC MAP</div>
+            <div class="tpanel-sub">Resonance prediction · Filter placement · Frame vibration analysis</div>
+          </div>
+        </div>
+        <div class="tpanel-body">
+          {% if _rpm_hm>0 %}
+          {% set _f1 = (_rpm_hm / 60)|int %}
+          {% set _f2 = (_rpm_hm / 60 * 2)|int %}
+          {% set _f3 = (_rpm_hm / 60 * 3)|int %}
+          {% set _fp = (_rpm_hm / 60 * _bl_hm)|int %}
+          {% set _fr = 190 %}
+          <div class="harm-grid">
+
+            <div class="harm-node">
+              <div class="harm-node-n">🎵 Fundamental (1×)</div>
+              <div class="harm-node-f">{{ _f1 }}<span class="harm-node-u"> Hz</span></div>
+              <div class="harm-node-flt">Dyn Notch covers</div>
+              <div class="harm-bar-w"><div class="harm-bar-f" style="width:{{ [100,(_f1/600*100)|int]|min }}%"></div></div>
+              <span class="harm-risk {% if _f1<80 %}hr-lo{% elif _f1<200 %}hr-med{% else %}hr-hi{% endif %}">{% if _f1<80 %}LOW{% elif _f1<200 %}MEDIUM{% else %}HIGH{% endif %}</span>
+              <div class="harm-node-desc">RPM ÷ 60 = Hz · rpm_filter_min_hz ต้องต่ำกว่านี้</div>
+            </div>
+
+            <div class="harm-node">
+              <div class="harm-node-n">🎶 2nd Harmonic</div>
+              <div class="harm-node-f">{{ _f2 }}<span class="harm-node-u"> Hz</span></div>
+              <div class="harm-node-flt">RPM Filter H=2</div>
+              <div class="harm-bar-w"><div class="harm-bar-f" style="width:{{ [100,(_f2/600*100)|int]|min }}%;background:linear-gradient(90deg,var(--blue),var(--purple))"></div></div>
+              <span class="harm-risk {% if _f2<150 %}hr-lo{% elif _f2<350 %}hr-med{% else %}hr-hi{% endif %}">{% if _f2<150 %}LOW{% elif _f2<350 %}MEDIUM{% else %}HIGH PRIORITY{% endif %}</span>
+              <div class="harm-node-desc">2nd harmonic มักแรงที่สุดใน PMSM · สำคัญมากกว่า F1</div>
+            </div>
+
+            <div class="harm-node">
+              <div class="harm-node-n">🎸 3rd Harmonic</div>
+              <div class="harm-node-f">{{ _f3 }}<span class="harm-node-u"> Hz</span></div>
+              <div class="harm-node-flt">RPM Filter H=3</div>
+              <div class="harm-bar-w"><div class="harm-bar-f" style="width:{{ [100,(_f3/600*100)|int]|min }}%;background:linear-gradient(90deg,var(--amber),var(--red))"></div></div>
+              <span class="harm-risk {% if _f3>400 %}hr-hi{% else %}hr-med{% endif %}">{% if _f3>400 %}ABOVE LPF{% else %}WATCH{% endif %}</span>
+              <div class="harm-node-desc">ตั้ง harmonics=3 ครอบทั้ง 3 ชั้น · H3 อาจเกิน Gyro LPF cutoff</div>
+            </div>
+
+            <div class="harm-node">
+              <div class="harm-node-n">🌀 Prop Vibration ({{ _bl_hm }} blade)</div>
+              <div class="harm-node-f">{{ _fp }}<span class="harm-node-u"> Hz</span></div>
+              <div class="harm-node-flt">{{ _bl_hm }} × fundamental</div>
+              <div class="harm-bar-w"><div class="harm-bar-f" style="width:{{ [100,(_fp/600*100)|int]|min }}%;background:linear-gradient(90deg,var(--teal),var(--green))"></div></div>
+              <span class="harm-risk {% if (_fp-_fr)|abs<30 %}hr-hi{% else %}hr-lo{% endif %}">{% if (_fp-_fr)|abs<30 %}⚠️ NEAR FRAME RES!{% else %}OK{% endif %}</span>
+              <div class="harm-node-desc">ถ้าใกล้ frame resonance (~{{ _fr }}Hz) จะเกิด sympathetic vibration รุนแรง</div>
+            </div>
+
+            <div class="harm-node">
+              <div class="harm-node-n">🏗️ Frame Resonance (est)</div>
+              <div class="harm-node-f">~{{ _fr }}<span class="harm-node-u"> Hz</span></div>
+              <div class="harm-node-flt">Dyn Notch จับอัตโนมัติ</div>
+              <div class="harm-bar-w"><div class="harm-bar-f" style="width:{{ [100,(_fr/600*100)|int]|min }}%;background:rgba(255,255,255,.2)"></div></div>
+              <span class="harm-risk hr-med">STATIC</span>
+              <div class="harm-node-desc">Carbon frame ส่วนใหญ่ 180-220Hz · ถ้าตรงกับ prop freq = ปัญหา</div>
+            </div>
+
+            <div class="harm-node">
+              <div class="harm-node-n">📉 Gyro LPF1 Cutoff</div>
+              <div class="harm-node-f">{{ _glpf_hm }}<span class="harm-node-u"> Hz</span></div>
+              <div class="harm-node-flt">ความถี่เกินนี้ถูก block</div>
+              <div class="harm-bar-w"><div class="harm-bar-f" style="width:{{ [100,(_glpf_hm/600*100)|int]|min }}%;background:linear-gradient(90deg,var(--cyan),rgba(0,200,255,.3))"></div></div>
+              <span class="harm-risk hr-lo">FILTER LINE</span>
+              <div class="harm-node-desc">Harmonics เกิน {{ _glpf_hm }}Hz ถูก block ก่อน PID loop</div>
+            </div>
+
+          </div>
+          <div class="harm-explain">
+            <strong style="color:var(--purple)">🎵 Summary:</strong>
+            F1={{ _f1 }}Hz · F2={{ _f2 }}Hz · F3={{ _f3 }}Hz · Prop={{ _fp }}Hz · Frame~{{ _fr }}Hz<br>
+            {% if (_fp-_fr)|abs<30 %}⚠️ <strong style="color:var(--red)">CRITICAL: Prop freq ({{ _fp }}Hz) ใกล้ Frame resonance (~{{ _fr }}Hz) — อาจเกิด sympathetic vibration รุนแรง!</strong> ลองเปลี่ยน prop จำนวนใบ หรือใส่ motor damper<br>{% endif %}
+            ✅ <code>set rpm_filter_harmonics = 3</code> ครอบ F1+F2+F3 ·
+            Dyn notch จัดการ frame resonance อัตโนมัติ
+          </div>
+          {% else %}
+          <div style="padding:20px;text-align:center;color:var(--muted2);font-size:11px;">🎵 กรอก <strong style="color:var(--text)">Motor KV</strong> เพื่อดู Harmonic Map</div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- ══════════════════════════════════════════════
+           14. HIDDEN BETAFLIGHT PARAMETERS
+      ══════════════════════════════════════════════ -->
+      {% if analysis %}
+      {% set _st_hp  = analysis.style|default('freestyle') %}
+      {% set _sz_hp  = analysis.size|default(5)|float %}
+      {% set _cl_hp  = (analysis.advanced.cells|default(4)|int) if analysis.advanced else 4 %}
+      {% set _twr_hp = (analysis.advanced.thrust_ratio|default(0)|float) if analysis.advanced else 0 %}
+
+      <div class="tpanel" style="border-left:3px solid var(--red);">
+        <div class="tpanel-head">
+          <div class="tpanel-head-icon" style="background:rgba(255,51,68,.07);border-color:rgba(255,51,68,.25);">🕵️</div>
+          <div>
+            <div class="tpanel-title" style="color:var(--red);">HIDDEN BETAFLIGHT PARAMETERS</div>
+            <div class="tpanel-sub">99% ของนักบินไม่รู้จัก · ไม่มีใน GUI · unlock ประสิทธิภาพที่ซ่อนอยู่</div>
+          </div>
+        </div>
+        <div class="tpanel-body">
+          <div class="secret-alert">
+            <span class="secret-alert-ico">⚠️</span>
+            <span class="secret-alert-text">ทดสอบทีละ parameter · hover test ก่อนเสมอ · backup config ก่อนเปลี่ยน · parameters เหล่านี้ไม่อยู่ใน documentation อย่างเป็นทางการ</span>
+          </div>
+          <div class="hparam-list">
+
+            <div class="hparam-item hp-g">
+              <div class="hparam-top">
+                <span class="hparam-cmd">thrust_linear</span>
+                <span class="hparam-val">{% if _twr_hp>5 %}35{% elif _twr_hp>3 %}25{% else %}20{% endif %}</span>
+                <span class="hbadge hb-secret">🔥 SECRET</span><span class="hbadge hb-bf45">BF4.4+</span>
+              </div>
+              <div class="hparam-desc"><strong>Linearize throttle response ตาม motor physics ที่แท้จริง</strong><br>Motor จริงไม่ linear: thrust ∝ (throttle)² · parameter นี้ compensate ให้ stick ตอบสนองตรงขึ้น ค่า {{ 25 if _twr_hp>3 else 20 }}-40 เหมาะ build นี้ · ค่าสูง = ปลาย stick ดุขึ้น center นิ่งขึ้น</div>
+              <div class="hparam-why">BF default = 0 (ปิด) · ถ้าตั้งผิดจะ sluggish หรือ twitchy มาก</div>
+              <div class="hparam-cli" onclick="copyCliSnippet(this)">set thrust_linear = {% if _twr_hp>5 %}35{% elif _twr_hp>3 %}25{% else %}20{% endif %}</div>
+            </div>
+
+            <div class="hparam-item hp-b">
+              <div class="hparam-top">
+                <span class="hparam-cmd">iterm_rotation</span>
+                <span class="hparam-val">ON</span>
+                <span class="hbadge hb-secret">🔥 SECRET</span><span class="hbadge hb-adv">ADVANCED</span>
+              </div>
+              <div class="hparam-desc"><strong>I-term คำนวณใน body frame ไม่ใช่ world frame</strong><br>ปกติ I-term สะสมใน world frame → เวลา drone หมุน I-term ของ axis อื่นรั่วไหลเข้ามา → bobbing แปลกๆ · ON ทำให้ freestyle tricks smooth ขึ้นอย่างเห็นได้ชัด โดยเฉพาะ flat spin + split-S</div>
+              <div class="hparam-why">BF default = OFF · ใช้ CPU เพิ่มเล็กน้อย · ไม่เหมาะ loop rate ต่ำ</div>
+              <div class="hparam-cli" onclick="copyCliSnippet(this)">set iterm_rotation = ON</div>
+            </div>
+
+            <div class="hparam-item hp-a">
+              <div class="hparam-top">
+                <span class="hparam-cmd">abs_control</span>
+                <span class="hparam-val">{% if _st_hp=='racing' %}OFF{% else %}ON{% endif %}</span>
+                <span class="hbadge hb-perf">⚡ PERF</span><span class="hbadge hb-bf45">BF4.3+</span>
+              </div>
+              <div class="hparam-desc"><strong>Absolute Control — ลด heading drift ที่ hover และขณะมีลม</strong><br>เพิ่ม small correction เมื่อ drone drift จาก target heading โดยไม่รอ P term · {% if _st_hp=='freestyle' %}Freestyle: โดรนอยู่นิ่ง hover แม่น flat spin precise{% elif _st_hp=='longrange' %}LR: ต้านลม drift ดีขึ้นโดยไม่ต้องเพิ่ม I{% else %}Racing: แนะนำปิด — latency เพิ่มเล็กน้อย{% endif %}</div>
+              <div class="hparam-why">BF default = OFF · gain สูงเกิน = wobble ที่ yaw</div>
+              <div class="hparam-cli" onclick="copyCliSnippet(this)">set abs_control      = {% if _st_hp=='racing' %}OFF{% else %}ON{% endif %}
+set abs_control_gain = 10  # ปรับ 5-15</div>
+            </div>
+
+            <div class="hparam-item hp-p">
+              <div class="hparam-top">
+                <span class="hparam-cmd">gyro_hardware_lpf</span>
+                <span class="hparam-val">{% if _st_hp=='racing' %}OPTION_1{% else %}NORMAL{% endif %}</span>
+                <span class="hbadge hb-secret">🔥 HARDWARE</span><span class="hbadge hb-adv">CHIP LEVEL</span>
+              </div>
+              <div class="hparam-desc"><strong>Gyro chip hardware filter — filter ก่อน BF เห็น data เลย</strong><br>ICM-42688/MPU-6000 มี hardware LPF ใน chip · OPTION_1 ลด cutoff = ข้อมูล smooth มากขึ้น latency +0.5ms · {% if _st_hp=='racing' %}Racing OPTION_1: อาจ sluggish เล็กน้อย ทดสอบก่อน{% elif _st_hp=='longrange' %}LR: OPTION_1 แนะนำ — smooth data ดีมาก{% else %}Freestyle: ลองดู บาง build smooth ขึ้นมาก{% endif %}</div>
+              <div class="hparam-why">BF default = NORMAL · hardware-specific ต้องรู้ chip ก่อน</div>
+              <div class="hparam-cli" onclick="copyCliSnippet(this)">set gyro_hardware_lpf = {% if _st_hp=='racing' %}OPTION_1{% else %}NORMAL{% endif %}
+# ตรวจ chip: diff all | grep gyro_chip</div>
+            </div>
+
+            <div class="hparam-item hp-c">
+              <div class="hparam-top">
+                <span class="hparam-cmd">ff_interpolate_sp</span>
+                <span class="hparam-val">{% if _st_hp=='racing' %}AVERAGED_2{% else %}AVERAGED_4{% endif %}</span>
+                <span class="hbadge hb-bf45">BF4.4+</span><span class="hbadge hb-perf">FF QUALITY</span>
+              </div>
+              <div class="hparam-desc"><strong>Feedforward interpolation algorithm — ละเอียดกว่า GUI toggle</strong><br>AVERAGED_2 = fast · AVERAGED_4 = smooth แต่ช้า 1 frame · {% if _st_hp=='racing' %}AVERAGED_2: gate clipping accurate{% elif _st_hp=='freestyle' %}AVERAGED_4: flip/roll smooth ขึ้นชัดเจน{% else %}AVERAGED_4: punch smooth กำจัด RC link noise{% endif %}</div>
+              <div class="hparam-why">BF default = AVERAGED_2 · GUI เลือกได้แค่ ON/OFF</div>
+              <div class="hparam-cli" onclick="copyCliSnippet(this)">set ff_interpolate_sp = {% if _st_hp=='racing' %}AVERAGED_2{% else %}AVERAGED_4{% endif %}</div>
+            </div>
+
+            <div class="hparam-item hp-r">
+              <div class="hparam-top">
+                <span class="hparam-cmd">motor_output_limit</span>
+                <span class="hparam-val">{% if _twr_hp>6 %}85{% elif _twr_hp>4 %}95{% else %}100{% endif %}</span>
+                <span class="hbadge hb-secret">🔥 SECRET</span><span class="hbadge hb-perf">THERMAL</span>
+              </div>
+              <div class="hparam-desc"><strong>Hard cap บน motor output — ป้องกัน motor ร้อน ลด peak current</strong><br>{% if _twr_hp>6 %}TWR {{ _twr_hp }} สูงมาก — 85% output ยัง {{ (_twr_hp*0.85)|round(1) }}:1 TWR เพียงพอ motor เย็นลง ประหยัดแบต{% elif _twr_hp>4 %}TWR {{ _twr_hp }} — 95% ยังมีกำลังพอ ลด peak temp{% else %}TWR ปกติ — ไม่แนะนำ limit สำหรับ build นี้{% endif %}</div>
+              <div class="hparam-why">BF default = 100% · ลด output แต่ PID compensate — feel ไม่เปลี่ยน</div>
+              {% if _twr_hp>4 %}
+              <div class="hparam-cli" onclick="copyCliSnippet(this)">set motor_output_limit = {% if _twr_hp>6 %}85{% else %}95{% endif %}</div>
+              {% endif %}
+            </div>
+
+            <div class="hparam-item hp-a">
+              <div class="hparam-top">
+                <span class="hparam-cmd">vbat_pid_gain</span>
+                <span class="hparam-val">ON</span>
+                <span class="hbadge hb-bf45">BF4.4+</span>
+              </div>
+              <div class="hparam-desc"><strong>Scale PID gain ตาม battery voltage แบบ real-time</strong><br>แบตสาก → voltage ลด → motor output น้อยลง → PID compensate มากขึ้น → feel เปลี่ยน · vbat_pid_gain=ON ทำให้ BF scale P/I/D ตาม voltage อัตโนมัติ → feel คงที่ตลอด pack · <strong style="color:var(--amber)">สำคัญมากสำหรับ {{ _cl_hp }}S pack ที่ sag มาก</strong></div>
+              <div class="hparam-why">BF default = OFF · ต้อง voltage sensor ทำงานถูกต้อง</div>
+              <div class="hparam-cli" onclick="copyCliSnippet(this)">set vbat_pid_gain = ON
+set vbat_pid_off  = 0</div>
+            </div>
+
+            <div class="hparam-item hp-p">
+              <div class="hparam-top">
+                <span class="hparam-cmd">dyn_notch_q</span>
+                <span class="hparam-val">{% if _sz_hp<=4 %}250{% elif _sz_hp<=6 %}300{% else %}350{% endif %}</span>
+                <span class="hbadge hb-adv">Q FACTOR</span>
+              </div>
+              <div class="hparam-desc"><strong>Q factor ของ Dynamic Notch filter — ความแหลมของ notch</strong><br>Q สูง = notch แคบ กรองแม่น แต่ถ้า freq เคลื่อน → พลาด · Q ต่ำ = กว้างกว่า latency สูงขึ้น · {% if _sz_hp<=4 %}Micro/Mini: Q 200-250 vibration freq เคลื่อนเร็ว{% elif _sz_hp<=6 %}5-6": Q 250-350 สมดุล{% else %}7-10" LR: Q 350+ prop ใหญ่ freq คงที่{% endif %}</div>
+              <div class="hparam-why">BF default Q=300 · ต้อง Blackbox ยืนยัน</div>
+              <div class="hparam-cli" onclick="copyCliSnippet(this)">set dyn_notch_q = {% if _sz_hp<=4 %}250{% elif _sz_hp<=6 %}300{% else %}350{% endif %}</div>
+            </div>
+
+          </div>
+          <div style="margin-top:12px;padding:10px 12px;background:rgba(255,51,68,.04);border:1px solid rgba(255,51,68,.12);border-radius:8px;font-size:10px;color:var(--muted2);line-height:1.7;">
+            🔴 <strong style="color:var(--red)">Reminder:</strong> Parameters เหล่านี้ไม่อยู่ใน official documentation · เปิดทีละตัว · hover test ทุกครั้ง · ถ้าพฤติกรรมแปลก = revert ทันที
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
       <!-- ══ 10. DONATE ══ -->
       <div class="donate-panel">
         <div class="donate-title">☕ สนับสนุนโปรเจกต์</div>
@@ -3415,6 +4194,65 @@ function dockFilter(btn, cat) {
 function toggleTheme(){ document.body.classList.toggle('light'); }
 /* ── CONCEPT BOX ─────────────────────────────────────────── */
 function toggleConcept(){ document.getElementById('conceptBox').classList.toggle('open'); }
+
+/* ══════════════════════════════════════════════════════
+   v5.2 APEX — Battery Pills · Style Cards · CLI Snippet
+══════════════════════════════════════════════════════ */
+
+/* Battery Pill selector */
+window.setBatt = function(s, btn) {
+  var sel = document.getElementById('battery-select');
+  if (sel) { sel.value = s; }
+  document.querySelectorAll('.batt-pill').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  liveCalc();
+};
+window.syncBattPills = function(val) {
+  var map = {'3S':'bp-3s','4S':'bp-4s','5S':'bp-5s','6S':'bp-6s','7S':'bp-7s','8S':'bp-8s'};
+  document.querySelectorAll('.batt-pill').forEach(function(b) {
+    b.classList.remove('active');
+    if (map[val] && b.classList.contains(map[val])) b.classList.add('active');
+  });
+};
+
+/* Style Card selector */
+window.setStyle = function(style, card) {
+  var sel = document.getElementById('f_style');
+  if (sel) { sel.value = style; }
+  document.querySelectorAll('.style-card').forEach(function(c) { c.classList.remove('active'); });
+  if (card) card.classList.add('active');
+  liveCalc();
+};
+window.syncStyleCards = function(val) {
+  document.querySelectorAll('.style-card').forEach(function(c) {
+    c.classList.remove('active');
+    if ((val==='freestyle' && c.classList.contains('s-free')) ||
+        (val==='racing'    && c.classList.contains('s-race')) ||
+        (val==='longrange' && c.classList.contains('s-lr')))
+      c.classList.add('active');
+  });
+};
+
+/* CLI snippet one-click copy */
+window.copyCliSnippet = function(el) {
+  var txt = el.textContent || el.innerText || '';
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(txt.trim()).then(function() {
+      var orig = el.style.background;
+      el.style.background = 'rgba(0,255,136,0.25)';
+      setTimeout(function() { el.style.background = orig; }, 500);
+      showToast('✅ CLI copied — paste in Betaflight!');
+    });
+  }
+};
+
+/* Init: sync pills + cards from hidden selects on page load */
+(function() {
+  var battSel = document.getElementById('battery-select');
+  if (battSel) syncBattPills(battSel.value || '4S');
+  var styleSel = document.getElementById('f_style');
+  if (styleSel) syncStyleCards(styleSel.value || 'freestyle');
+})();
 </script>
 </body>
 </html>
