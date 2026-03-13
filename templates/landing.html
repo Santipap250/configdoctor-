@@ -150,445 +150,491 @@ body:not(.lang-en) .i18n-th { display: inline !important; }
   .nav-mobile-right { display: none !important; }
 }
 
-/* ══════════════════════════════════════════
-   HERO  — FPV Pilot Edition
-   Layout: copy LEFT · CLI terminal RIGHT
-   ══════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════
+   HERO — ConfigDoctor Visual Edition
+   Left: brand + tagline + CTA   Right: live drone data scene
+   ══════════════════════════════════════════════════════════ */
+
+/* ─── Keyframes ──────────────────────────────────────── */
+@keyframes fadeUp    { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:none} }
+@keyframes blink     { 0%,100%{opacity:1} 50%{opacity:.1} }
+@keyframes orbFloat  { 0%,100%{transform:translate(0,0)} 33%{transform:translate(16px,-24px)} 66%{transform:translate(-12px,12px)} }
+@keyframes gridBreath{ 0%,100%{opacity:.45;transform:scale(1)} 50%{opacity:.85;transform:scale(1.006)} }
+@keyframes floatCard { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-10px)} }
+@keyframes floatCardB{ 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-7px)} }
+@keyframes floatDrone{ 0%,100%{transform:translateY(0) rotate(-1deg)} 50%{transform:translateY(-18px) rotate(1.5deg)} }
+@keyframes rotorSpin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+@keyframes pulseGlow { 0%,100%{box-shadow:0 0 18px rgba(16,196,122,0.2),0 8px 40px rgba(0,0,0,.6)} 50%{box-shadow:0 0 40px rgba(16,196,122,0.45),0 8px 60px rgba(0,0,0,.5)} }
+@keyframes pulseGlowBlue { 0%,100%{box-shadow:0 0 14px rgba(88,166,255,0.2),0 4px 24px rgba(0,0,0,.5)} 50%{box-shadow:0 0 32px rgba(88,166,255,0.4),0 4px 32px rgba(0,0,0,.4)} }
+@keyframes pulseGlowGold { 0%,100%{box-shadow:0 0 14px rgba(241,182,90,0.15),0 4px 24px rgba(0,0,0,.5)} 50%{box-shadow:0 0 30px rgba(241,182,90,0.38),0 4px 32px rgba(0,0,0,.4)} }
+@keyframes pulseGlowRed  { 0%,100%{box-shadow:0 0 14px rgba(248,113,113,0.15),0 4px 24px rgba(0,0,0,.5)} 50%{box-shadow:0 0 30px rgba(248,113,113,0.38),0 4px 32px rgba(0,0,0,.4)} }
+@keyframes chartDraw { from{stroke-dashoffset:300} to{stroke-dashoffset:0} }
+@keyframes chartFill { from{opacity:0} to{opacity:1} }
+@keyframes countUp  { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+@keyframes scanMove { 0%{top:-4%} 100%{top:104%} }
+@keyframes arrowBounce { 0%,100%{transform:rotate(45deg) translateY(0)} 50%{transform:rotate(45deg) translateY(6px)} }
+@keyframes nodeFloat { 0%,100%{opacity:.4;transform:translateY(0)} 50%{opacity:.9;transform:translateY(-8px)} }
+@keyframes waveX { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+@keyframes ripple { 0%{transform:scale(1);opacity:.6} 100%{transform:scale(2.8);opacity:0} }
+@keyframes borderRun {
+  0%  { background-position: 0% 0%, 100% 0%, 100% 100%, 0% 100%; }
+  25% { background-position: 100% 0%, 100% 100%, 0% 100%, 0% 0%; }
+  50% { background-position: 100% 100%, 0% 100%, 0% 0%, 100% 0%; }
+  75% { background-position: 0% 100%, 0% 0%, 100% 0%, 100% 100%; }
+  100%{ background-position: 0% 0%, 100% 0%, 100% 100%, 0% 100%; }
+}
+
+/* ─── Hero Wrapper ─────────────────────────────────── */
 .hero {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 110px 24px 72px;
+  padding: 106px 24px 80px;
   position: relative;
   overflow: hidden;
 }
 
-/* ── Hero background image layer ── */
+/* ─── Background image ─────────────────────────────── */
 .hero-bg-img {
-  position: absolute;
-  inset: 0;
+  position: absolute; inset: 0;
   background-image: url("{{ url_for('static', filename='img/landing-bg-desktop.jpg') }}");
   background-size: cover;
-  background-position: center 25%;
-  background-repeat: no-repeat;
-  opacity: 0.38;
-  z-index: 0;
-  transform: scale(1.04);
-  transform-origin: center top;
-  transition: transform 0.1s linear;
-  -webkit-mask-image: linear-gradient(to bottom,
-    black 0%, black 45%, rgba(0,0,0,0.5) 72%, transparent 100%);
-  mask-image: linear-gradient(to bottom,
-    black 0%, black 45%, rgba(0,0,0,0.5) 72%, transparent 100%);
-  pointer-events: none;
-  will-change: transform;
+  background-position: center 28%;
+  opacity: 0.30; z-index: 0;
+  transform: scale(1.05); transform-origin: center top;
+  transition: transform .1s linear;
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 42%, rgba(0,0,0,.4) 68%, transparent 100%);
+  mask-image:         linear-gradient(to bottom, black 0%, black 42%, rgba(0,0,0,.4) 68%, transparent 100%);
+  pointer-events: none; will-change: transform;
 }
-@media (max-width: 768px) {
+@media (max-width:768px) {
   .hero-bg-img {
     background-image: url("{{ url_for('static', filename='img/landing-bg-mobile.jpg') }}");
-    background-position: center 15%;
-    opacity: 0.4;
-    -webkit-mask-image: linear-gradient(to bottom,
-      black 0%, black 42%, rgba(0,0,0,0.45) 68%, transparent 100%);
-    mask-image: linear-gradient(to bottom,
-      black 0%, black 42%, rgba(0,0,0,0.45) 68%, transparent 100%);
+    background-position: center 18%; opacity: .35;
   }
 }
-@media (max-width: 900px) and (orientation: landscape) {
-  .hero-bg-img {
-    background-image: url("{{ url_for('static', filename='img/landing-bg-desktop.jpg') }}");
-    background-position: center 22%;
-    opacity: 0.35;
-  }
-}
-@media (min-width: 1600px) {
-  .hero-bg-img { background-position: center 20%; opacity: 0.36; }
-}
+@media (min-width:1600px) { .hero-bg-img { background-position: center 22%; opacity:.28; } }
 
-/* Animated grid */
+/* ─── Grid overlay ─────────────────────────────────── */
 .hero-grid {
-  position: absolute; inset: 0;
+  position: absolute; inset: 0; z-index: 0;
   background-image:
-    linear-gradient(rgba(16,196,122,0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(16,196,122,0.045) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse 90% 80% at 50% 40%, black 10%, transparent 100%);
+    linear-gradient(rgba(16,196,122,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16,196,122,.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 100% 90% at 50% 40%, black 5%, transparent 100%);
   animation: gridBreath 7s ease-in-out infinite;
 }
-@keyframes gridBreath {
-  0%,100% { opacity:.5; transform:scale(1); }
-  50%     { opacity:.9; transform:scale(1.006); }
-}
 
-/* Glow orbs */
-.orb { position:absolute; border-radius:50%; filter:blur(100px); pointer-events:none; }
-.orb-1 {
-  width:560px; height:360px; opacity:.15;
-  background: radial-gradient(circle, #10c47a, transparent 70%);
-  top:-8%; left:15%; animation: orbFloat 10s ease-in-out infinite;
-}
-.orb-2 {
-  width:380px; height:380px; opacity:.08;
-  background: radial-gradient(circle, #58a6ff, transparent 70%);
-  bottom:8%; right:4%; animation: orbFloat 10s -4s ease-in-out infinite;
-}
-.orb-3 {
-  width:300px; height:300px; opacity:.07;
-  background: radial-gradient(circle, #f1b65a, transparent 70%);
-  bottom:20%; left:3%; animation: orbFloat 10s -7s ease-in-out infinite;
-}
-@keyframes orbFloat {
-  0%,100% { transform:translate(0,0); }
-  33%     { transform:translate(18px,-26px); }
-  66%     { transform:translate(-14px,14px); }
+/* ─── Scanline sweep ───────────────────────────────── */
+.hero-scan {
+  position: absolute; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, transparent, rgba(16,196,122,.18), transparent);
+  z-index: 1; pointer-events: none;
+  animation: scanMove 5s linear infinite;
 }
 .scanline {
-  position:absolute; inset:0; pointer-events:none;
-  background: repeating-linear-gradient(
-    0deg, transparent, transparent 2px,
-    rgba(16,196,122,0.01) 2px, rgba(16,196,122,0.01) 4px
-  );
+  position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(16,196,122,.008) 2px, rgba(16,196,122,.008) 4px);
 }
 
-/* ── Two-column hero layout ── */
+/* ─── Orbs ──────────────────────────────────────────── */
+.orb { position: absolute; border-radius: 50%; filter: blur(110px); pointer-events: none; z-index: 0; }
+.orb-1 { width:580px; height:380px; opacity:.14; background:radial-gradient(circle,#10c47a,transparent 70%); top:-10%; left:10%; animation:orbFloat 11s ease-in-out infinite; }
+.orb-2 { width:360px; height:360px; opacity:.09; background:radial-gradient(circle,#58a6ff,transparent 70%); bottom:5%; right:3%;  animation:orbFloat 11s -4.5s ease-in-out infinite; }
+.orb-3 { width:280px; height:280px; opacity:.07; background:radial-gradient(circle,#f1b65a,transparent 70%); bottom:22%; left:2%;  animation:orbFloat 11s -7s ease-in-out infinite; }
+
+/* ─── Network nodes bg ─────────────────────────────── */
+.hero-nodes {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+}
+.hero-node {
+  position: absolute; width: 5px; height: 5px;
+  border-radius: 50%; background: var(--green);
+  box-shadow: 0 0 10px rgba(16,196,122,.8);
+  opacity: .3;
+}
+.hero-node:nth-child(1)  { top:8%;  left:82%; animation: nodeFloat 3.2s ease-in-out infinite; }
+.hero-node:nth-child(2)  { top:14%; left:74%; animation: nodeFloat 4.1s -.8s ease-in-out infinite; }
+.hero-node:nth-child(3)  { top:22%; left:88%; animation: nodeFloat 3.6s -1.5s ease-in-out infinite; }
+.hero-node:nth-child(4)  { top:35%; left:92%; animation: nodeFloat 4.4s -2s ease-in-out infinite; }
+.hero-node:nth-child(5)  { top:6%;  left:96%; animation: nodeFloat 3.0s -.4s ease-in-out infinite; opacity:.2; }
+.hero-node:nth-child(6)  { top:45%; left:78%; animation: nodeFloat 5s -3s ease-in-out infinite; opacity:.18; }
+.hero-node:nth-child(7)  { top:28%; left:65%; animation: nodeFloat 4.8s -1s ease-in-out infinite; opacity:.15; background:var(--blue); box-shadow:0 0 10px rgba(88,166,255,.8); }
+.hero-node:nth-child(8)  { top:18%; left:60%; animation: nodeFloat 3.4s -2.2s ease-in-out infinite; opacity:.12; background:var(--gold); box-shadow:0 0 10px rgba(241,182,90,.8); }
+
+/* ─── Two-column inner ─────────────────────────────── */
 .hero-inner {
   position: relative; z-index: 2;
-  width: 100%; max-width: 1140px;
+  width: 100%; max-width: 1200px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 48px;
+  grid-template-columns: 1fr 1.05fr;
+  gap: 52px;
   align-items: center;
 }
-@media (max-width: 900px) {
-  .hero-inner {
-    grid-template-columns: 1fr;
-    text-align: center;
-    gap: 36px;
-  }
-  .hero-copy { align-items: center; }
-  .hero-actions { justify-content: center; }
-  .hero-tags { justify-content: center; }
+@media (max-width:960px) {
+  .hero-inner { grid-template-columns:1fr; gap:44px; }
+  .hero-copy { align-items:center; text-align:center; }
+  .hero-actions, .hero-tags, .hero-tagline-row { justify-content:center; }
 }
 
-/* ── Left: copy column ── */
+/* ─── LEFT: Copy ─────────────────────────────────── */
 .hero-copy {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0;
-}
-@media (max-width: 900px) {
-  .hero-copy { align-items: center; }
+  display: flex; flex-direction: column; align-items: flex-start;
 }
 
+/* Version badge */
 .hero-badge {
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 5px 16px;
-  background: rgba(16,196,122,0.08);
-  border: 1px solid rgba(16,196,122,0.28);
+  padding: 5px 15px;
+  background: rgba(16,196,122,.07);
+  border: 1px solid rgba(16,196,122,.3);
   border-radius: 30px;
-  font-family: var(--mono);
-  font-size: .7rem; font-weight: 700;
-  color: var(--green); letter-spacing: .1em;
-  margin-bottom: 22px;
+  font-family: var(--mono); font-size: .68rem; font-weight: 700;
+  color: var(--green); letter-spacing: .11em;
+  margin-bottom: 26px;
   animation: fadeUp .6s ease both;
   white-space: nowrap;
 }
-.badge-dot {
-  width:6px; height:6px; background:var(--green); border-radius:50%;
-  animation: blink 1.8s ease-in-out infinite;
-}
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.12} }
-@keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:none} }
+.badge-dot { width:6px; height:6px; background:var(--green); border-radius:50%; animation:blink 1.9s ease-in-out infinite; }
 
+/* Brand logo row */
+.hero-brand-row {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 20px;
+  animation: fadeUp .6s .1s ease both;
+}
 .hero-logo {
-  width: 72px;
-  filter: drop-shadow(0 0 22px rgba(16,196,122,0.55)) drop-shadow(0 0 55px rgba(16,196,122,0.18));
-  margin-bottom: 18px;
-  animation: fadeUp .6s .08s ease both, float 5s 1s ease-in-out infinite;
+  width: 64px; height: 64px;
+  filter: drop-shadow(0 0 20px rgba(16,196,122,.6)) drop-shadow(0 0 50px rgba(16,196,122,.2));
+  animation: floatCard 5s 1s ease-in-out infinite;
 }
-@keyframes float {
-  0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-7px) rotate(.4deg)}
+.hero-brand-text { line-height: 1.15; }
+.hero-brand-name {
+  font-family: var(--font-en);
+  font-size: clamp(1.9rem, 3.8vw, 3rem);
+  font-weight: 900; color: #fff; letter-spacing: -.01em;
+  line-height: 1;
 }
-
-/* Eyebrow label */
-.hero-label {
-  font-family: var(--mono);
-  font-size: .65rem;
-  letter-spacing: .28em; color: var(--green); text-transform: uppercase;
-  margin-bottom: 10px; animation: fadeUp .6s .12s ease both; opacity:.7;
-}
-
-/* Main headline — speaks directly to pilot */
-.hero-title {
-  font-family: var(--font-th);
-  font-size: clamp(2rem, 4.5vw, 3.4rem);
-  font-weight: 800; line-height: 1.12; color: #fff;
-  margin-bottom: 6px; animation: fadeUp .6s .18s ease both;
-}
-.hero-title .accent {
-  color: var(--green);
-  text-shadow: 0 0 36px rgba(16,196,122,0.5);
-}
-.hero-title .accent-gold {
-  color: var(--gold);
-  text-shadow: 0 0 30px rgba(241,182,90,0.4);
-}
-.hero-title-en {
-  font-family: var(--mono);
-  font-size: clamp(.72rem, 1.4vw, .88rem);
-  color: rgba(255,255,255,.2); letter-spacing: .2em;
-  display: block; margin-top: 8px; font-weight: 600;
-  animation: fadeUp .6s .22s ease both;
+.hero-brand-name .brand-accent { color: var(--green); text-shadow: 0 0 30px rgba(16,196,122,.5); }
+.hero-brand-sub {
+  font-family: var(--mono); font-size: .68rem; font-weight: 700;
+  letter-spacing: .22em; color: var(--muted); text-transform: uppercase;
+  margin-top: 5px;
 }
 
-/* Sub-headline — CLI hint */
-.hero-cli-hint {
-  display: inline-flex; align-items: center; gap: 10px;
-  background: rgba(0,0,0,0.45);
-  border: 1px solid rgba(16,196,122,0.18);
-  border-left: 3px solid var(--green);
-  border-radius: 8px;
-  padding: 9px 16px;
-  margin: 20px 0 24px;
-  font-family: var(--mono);
-  font-size: .8rem;
-  color: var(--muted);
-  animation: fadeUp .6s .26s ease both;
-  max-width: 440px;
+/* Tagline row: ANALYZE | OPTIMIZE | FLY BETTER */
+.hero-tagline-row {
+  display: flex; align-items: center; gap: 0;
+  margin-bottom: 28px;
+  animation: fadeUp .6s .2s ease both;
 }
-.hero-cli-hint .cli-cmd {
-  color: var(--green); font-weight: 700;
+.tagline-item {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 0 18px;
 }
-.hero-cli-hint .cli-arrow {
-  color: rgba(255,255,255,.25); font-size: .7rem;
+.tagline-item:first-child { padding-left: 0; }
+.tagline-icon {
+  font-size: 1.3rem; opacity: .85;
+  filter: drop-shadow(0 0 6px rgba(16,196,122,.5));
 }
-.hero-cli-hint .cli-result {
-  color: var(--gold); font-weight: 600;
+.tagline-text {
+  font-family: var(--font-en); font-size: .65rem; font-weight: 700;
+  letter-spacing: .18em; color: var(--muted); text-transform: uppercase;
+}
+.tagline-sep {
+  width: 1px; height: 36px;
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,.12), transparent);
+  flex-shrink: 0;
 }
 
+/* Description */
 .hero-desc {
-  font-size: clamp(.86rem,1.05vw,.97rem);
+  font-size: clamp(.88rem,1.05vw,.98rem);
   color: var(--muted); line-height: 1.75;
-  margin: 0 0 30px;
+  max-width: 480px; margin: 0 0 30px;
   animation: fadeUp .6s .28s ease both;
-  max-width: 480px;
 }
-.hero-desc strong { color: var(--text); font-weight: 700; }
-@media (max-width:900px) {
-  .hero-desc { max-width: 560px; }
-}
+.hero-desc strong { color: var(--text); }
+@media (max-width:960px) { .hero-desc { max-width: 560px; } }
 
+/* CTA buttons */
 .hero-actions {
   display: flex; gap: 12px; flex-wrap: wrap;
-  animation: fadeUp .6s .34s ease both; margin-bottom: 22px;
+  margin-bottom: 24px;
+  animation: fadeUp .6s .34s ease both;
 }
-
 .btn-primary {
   display: inline-flex; align-items: center; gap: 9px;
-  padding: 14px 30px; background: var(--green);
+  padding: 14px 32px; background: var(--green);
   color: #021a0e; font-weight: 800; font-size: .95rem;
-  border-radius: 10px; text-decoration: none; letter-spacing: .03em;
-  transition: filter .2s, transform .2s, box-shadow .3s;
-  box-shadow: 0 0 0 0 rgba(16,196,122,0.4);
+  border-radius: 10px; text-decoration: none; letter-spacing: .02em;
   font-family: var(--font-th);
+  transition: filter .2s, transform .2s, box-shadow .3s;
+  position: relative; overflow: hidden;
 }
-.btn-primary:hover {
-  filter: brightness(1.08); transform: translateY(-3px);
-  box-shadow: 0 14px 44px rgba(16,196,122,0.38), 0 0 0 7px rgba(16,196,122,0.07);
+.btn-primary::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.15) 0%, transparent 60%);
+  opacity: 0; transition: opacity .2s;
 }
+.btn-primary:hover { filter: brightness(1.1); transform: translateY(-3px); box-shadow: 0 14px 44px rgba(16,196,122,.4), 0 0 0 8px rgba(16,196,122,.07); }
+.btn-primary:hover::after { opacity: 1; }
 .btn-secondary {
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 14px 24px; background: rgba(255,255,255,0.04);
+  padding: 14px 24px; background: rgba(255,255,255,.04);
   color: var(--text); font-weight: 600; font-size: .9rem;
-  border-radius: 10px; text-decoration: none;
-  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; text-decoration: none; font-family: var(--font-th);
+  border: 1px solid rgba(255,255,255,.1);
   transition: background .2s, border-color .2s, transform .2s;
-  font-family: var(--font-th);
 }
-.btn-secondary:hover {
-  background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); transform: translateY(-2px);
-}
-.btn-ghost {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 13px 20px; background: transparent;
-  color: var(--muted); font-weight: 600; font-size: .85rem;
-  border-radius: 10px; text-decoration: none;
-  border: 1px solid rgba(255,255,255,0.07);
-  transition: color .2s, border-color .2s;
-  font-family: var(--mono);
-}
-.btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,.18); }
+.btn-secondary:hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.2); transform: translateY(-2px); }
 
-/* Feature pill row */
+/* Feature tags */
 .hero-tags {
   display: flex; gap: 7px; flex-wrap: wrap;
   animation: fadeUp .6s .42s ease both;
 }
 .hero-tag {
-  font-family: var(--mono); font-size: .62rem; font-weight: 700;
+  font-family: var(--mono); font-size: .61rem; font-weight: 700;
   letter-spacing: .07em; text-transform: uppercase;
   color: var(--muted); border: 1px solid var(--border);
-  padding: 4px 10px; border-radius: 5px; background: rgba(255,255,255,0.025);
+  padding: 4px 10px; border-radius: 5px; background: rgba(255,255,255,.02);
+  transition: background .15s, border-color .15s, color .15s;
 }
-.hero-tag.hot  { color: var(--gold);  border-color: rgba(241,182,90,0.28);  background: rgba(241,182,90,0.06); }
-.hero-tag.live { color: var(--green); border-color: rgba(16,196,122,0.28);  background: rgba(16,196,122,0.06); }
-.hero-tag.blue { color: var(--blue);  border-color: rgba(88,166,255,0.28);  background: rgba(88,166,255,0.06); }
+.hero-tag:hover { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.14); color: var(--text); }
+.hero-tag.hot  { color:var(--gold);  border-color:rgba(241,182,90,.3);  background:rgba(241,182,90,.06); }
+.hero-tag.live { color:var(--green); border-color:rgba(16,196,122,.3);  background:rgba(16,196,122,.06); }
+.hero-tag.blue { color:var(--blue);  border-color:rgba(88,166,255,.3);  background:rgba(88,166,255,.06); }
 
-/* ── Right: CLI Terminal Preview ── */
-.hero-terminal-col {
-  animation: fadeUp .7s .3s ease both;
-}
-.hero-terminal {
-  background: #080c0e;
-  border: 1px solid rgba(16,196,122,0.22);
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow:
-    0 0 0 1px rgba(16,196,122,0.06),
-    0 24px 80px rgba(0,0,0,0.7),
-    0 0 60px rgba(16,196,122,0.06);
+/* ─── RIGHT: Drone Data Scene ──────────────────────── */
+.hero-visual-col {
   position: relative;
-}
-.hero-terminal::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg,
-    rgba(16,196,122,0.025) 0%, transparent 50%,
-    rgba(88,166,255,0.015) 100%);
-  pointer-events: none;
+  animation: fadeUp .7s .22s ease both;
 }
 
-/* Terminal title bar */
-.term-bar {
-  display: flex; align-items: center; gap: 10px;
-  padding: 11px 16px;
-  background: rgba(255,255,255,0.03);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+/* Main scene container */
+.drone-scene {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 0.9;
+  max-width: 580px;
+  margin: 0 auto;
 }
-.term-dots { display: flex; gap: 6px; }
-.term-dot {
-  width: 11px; height: 11px; border-radius: 50%;
+
+/* Wave mesh background */
+.scene-waves {
+  position: absolute; bottom: -20px; left: -40px; right: -40px; height: 180px;
+  overflow: hidden; opacity: .5; z-index: 0; pointer-events: none;
 }
-.term-dot-r { background: #ff5f56; }
-.term-dot-y { background: #ffbd2e; }
-.term-dot-g { background: #27c93f; }
-.term-title-text {
-  flex: 1; text-align: center;
-  font-family: var(--mono); font-size: .67rem;
-  color: rgba(255,255,255,.3); letter-spacing: .1em;
+.scene-waves svg { width: 200%; height: 100%; animation: waveX 18s linear infinite; }
+
+/* Drone center element */
+.drone-center {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -52%);
+  z-index: 4;
+  animation: floatDrone 4s ease-in-out infinite;
+  cursor: pointer;
+  filter: drop-shadow(0 0 20px rgba(16,196,122,.35)) drop-shadow(0 0 50px rgba(16,196,122,.15));
+  transition: filter .3s;
 }
-.term-badge {
+.drone-center:hover {
+  filter: drop-shadow(0 0 30px rgba(16,196,122,.6)) drop-shadow(0 0 80px rgba(16,196,122,.25));
+}
+
+/* Drone body SVG wrapper */
+.drone-svg {
+  width: 200px; height: 140px;
+  display: block;
+}
+
+/* Drone ring pulse */
+.drone-ring {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 160px; height: 160px;
+  border-radius: 50%;
+  border: 1px solid rgba(16,196,122,.2);
+  z-index: 3;
+}
+.drone-ring::before, .drone-ring::after {
+  content: ''; position: absolute; inset: -20px;
+  border-radius: 50%;
+  border: 1px solid rgba(16,196,122,.1);
+  animation: ripple 2.8s ease-out infinite;
+}
+.drone-ring::after { animation-delay: 1.4s; }
+
+/* ─── Floating data cards ────────────────────────── */
+.dc {
+  position: absolute; z-index: 5;
+  border-radius: 12px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 13px 16px;
+  transition: transform .25s ease, box-shadow .25s ease;
+  cursor: default;
+}
+.dc:hover { transform: translateY(-4px) scale(1.03) !important; z-index: 10; }
+
+/* PID card — top center */
+.dc-pid {
+  top: -2%;  left: 50%; transform: translateX(-50%);
+  width: 170px;
+  background: rgba(8,14,18,.88);
+  border: 1px solid rgba(16,196,122,.28);
+  animation: floatCard 4.2s ease-in-out infinite, pulseGlow 4.2s ease-in-out infinite;
+}
+/* Battery — top right */
+.dc-bat {
+  top: 4%; right: 0%;
+  width: 130px;
+  background: rgba(8,14,18,.88);
+  border: 1px solid rgba(16,196,122,.25);
+  animation: floatCardB 5s -1s ease-in-out infinite, pulseGlow 5s -1s ease-in-out infinite;
+}
+/* AMP — mid right */
+.dc-amp {
+  top: 32%; right: -2%;
+  width: 126px;
+  background: rgba(8,14,18,.88);
+  border: 1px solid rgba(88,166,255,.28);
+  animation: floatCard 4.8s -2s ease-in-out infinite, pulseGlowBlue 4.8s -2s ease-in-out infinite;
+}
+/* TEMP — bottom right */
+.dc-temp {
+  bottom: 14%; right: 1%;
+  width: 126px;
+  background: rgba(8,14,18,.88);
+  border: 1px solid rgba(248,113,113,.28);
+  animation: floatCardB 5.5s -3s ease-in-out infinite, pulseGlowRed 5.5s -3s ease-in-out infinite;
+}
+/* RPM — bottom center-left */
+.dc-rpm {
+  bottom: -2%; left: 5%;
+  width: 200px;
+  background: rgba(8,14,18,.9);
+  border: 1px solid rgba(241,182,90,.25);
+  animation: floatCard 4.5s -1.5s ease-in-out infinite, pulseGlowGold 4.5s -1.5s ease-in-out infinite;
+}
+/* LOOP — top left */
+.dc-loop {
+  top: 10%; left: 0%;
+  width: 138px;
+  background: rgba(8,14,18,.88);
+  border: 1px solid rgba(167,139,250,.28);
+  animation: floatCardB 4s -.5s ease-in-out infinite;
+  box-shadow: 0 0 18px rgba(167,139,250,.12), 0 8px 32px rgba(0,0,0,.6);
+}
+.dc-loop:hover { box-shadow: 0 0 36px rgba(167,139,250,.3), 0 8px 40px rgba(0,0,0,.5) !important; }
+
+/* Card inner layout */
+.dc-label {
+  font-family: var(--mono); font-size: .58rem; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: rgba(255,255,255,.38); margin-bottom: 6px;
+}
+.dc-value {
+  font-family: var(--font-en); font-size: 1.55rem; font-weight: 900;
+  line-height: 1; letter-spacing: -.02em;
+  animation: countUp .5s ease both;
+}
+.dc-unit {
+  font-family: var(--mono); font-size: .72rem; font-weight: 600;
+  color: rgba(255,255,255,.45); margin-left: 3px;
+}
+.dc-status {
+  display: inline-flex; align-items: center; gap: 5px;
   font-family: var(--mono); font-size: .6rem; font-weight: 700;
-  padding: 2px 8px; border-radius: 4px;
-  background: rgba(16,196,122,0.15);
-  color: var(--green); letter-spacing: .08em;
+  letter-spacing: .07em; text-transform: uppercase;
+  margin-top: 7px; padding: 3px 8px; border-radius: 4px;
+}
+.dc-pid    .dc-value { color: var(--green); }
+.dc-bat    .dc-value { color: var(--green); }
+.dc-amp    .dc-value { color: var(--blue); }
+.dc-temp   .dc-value { color: #f87171; }
+.dc-rpm    .dc-value { color: var(--gold); }
+.dc-loop   .dc-value { color: #a78bfa; font-size: 1.2rem; }
+.dc-status.ok    { background: rgba(16,196,122,.12); color: var(--green); }
+.dc-status.warn  { background: rgba(241,182,90,.12);  color: var(--gold); }
+.dc-status.hot   { background: rgba(248,113,113,.12); color: #f87171; }
+.dc-status.info  { background: rgba(88,166,255,.12);  color: var(--blue); }
+.dc-status.purp  { background: rgba(167,139,250,.12); color: #a78bfa; }
+.dc-status-dot {
+  width: 5px; height: 5px; border-radius: 50;
+  animation: blink 1.6s ease-in-out infinite;
 }
 
-/* Terminal body */
-.term-body {
-  padding: 18px 20px 20px;
-  font-family: var(--mono);
-  font-size: .76rem;
-  line-height: 1.85;
-  min-height: 300px;
+/* Mini sparkline chart inside cards */
+.dc-chart {
+  width: 100%; height: 36px; margin-top: 8px; overflow: visible;
 }
-.term-line { display: flex; gap: 10px; align-items: baseline; }
-.term-prompt { color: rgba(16,196,122,0.6); user-select: none; flex-shrink: 0; }
-.term-cmd    { color: #e2e8f0; }
-.term-comment{ color: rgba(255,255,255,.25); font-style: italic; }
-.term-ok     { color: var(--green); font-weight: 700; }
-.term-warn   { color: var(--gold); font-weight: 700; }
-.term-err    { color: #f87171; font-weight: 700; }
-.term-key    { color: var(--blue); }
-.term-val    { color: #a78bfa; }
-.term-muted  { color: rgba(255,255,255,.32); }
-.term-section{
-  color: rgba(16,196,122,0.5); letter-spacing: .1em;
-  font-size: .65rem; text-transform: uppercase;
-  border-top: 1px solid rgba(255,255,255,.05);
-  padding-top: 8px; margin-top: 4px;
-  margin-bottom: 2px;
+.dc-chart-path {
+  fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 300; stroke-dashoffset: 0;
+  animation: chartDraw 1.8s ease both;
 }
-/* Cursor blink on last active line */
-.term-cursor {
-  display: inline-block; width: 7px; height: 13px;
-  background: var(--green); vertical-align: middle;
-  margin-left: 3px;
-  animation: cursorBlink .9s step-end infinite;
-}
-@keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }
-
-/* Typed-text animation — each .tl-N gets a delay */
-.term-typed { overflow: hidden; white-space: nowrap; }
-.tl-1  { animation: termReveal .12s  .55s  ease both; }
-.tl-2  { animation: termReveal .12s  .80s  ease both; }
-.tl-3  { animation: termReveal .12s  1.05s ease both; }
-.tl-4  { animation: termReveal .12s  1.30s ease both; }
-.tl-5  { animation: termReveal .12s  1.55s ease both; }
-.tl-6  { animation: termReveal .12s  1.80s ease both; }
-.tl-7  { animation: termReveal .12s  2.05s ease both; }
-.tl-8  { animation: termReveal .12s  2.30s ease both; }
-.tl-9  { animation: termReveal .12s  2.55s ease both; }
-.tl-10 { animation: termReveal .12s  2.80s ease both; }
-.tl-11 { animation: termReveal .12s  3.05s ease both; }
-.tl-12 { animation: termReveal .12s  3.30s ease both; }
-@keyframes termReveal { from{opacity:0;transform:translateX(-4px)} to{opacity:1;transform:none} }
-
-/* Mini pill badges inside terminal */
-.term-pill {
-  display: inline-block;
-  padding: 1px 7px; border-radius: 4px; font-size: .62rem;
-  font-weight: 800; letter-spacing: .06em; vertical-align: middle;
-}
-.term-pill-g { background: rgba(16,196,122,.18);  color: var(--green); }
-.term-pill-y { background: rgba(241,182,90,.18);  color: var(--gold); }
-.term-pill-r { background: rgba(248,113,113,.18); color: #f87171; }
-.term-pill-b { background: rgba(88,166,255,.18);  color: var(--blue); }
-
-/* "Analyze" footer strip inside terminal */
-.term-footer {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 20px;
-  background: rgba(16,196,122,0.06);
-  border-top: 1px solid rgba(16,196,122,0.14);
-}
-.term-footer-text {
-  font-family: var(--mono); font-size: .67rem;
-  color: var(--green); letter-spacing: .08em;
-}
-.term-footer-link {
-  font-family: var(--mono); font-size: .67rem; font-weight: 700;
-  color: var(--green); text-decoration: none; letter-spacing: .06em;
-  border: 1px solid rgba(16,196,122,0.3); padding: 4px 12px; border-radius: 5px;
-  transition: background .2s;
-}
-.term-footer-link:hover { background: rgba(16,196,122,0.1); }
-
-/* Responsive: stack on mobile */
-@media (max-width: 900px) {
-  .hero-terminal { font-size: .72rem; }
-  .term-body { min-height: auto; padding: 14px 16px 16px; }
+.dc-chart-area {
+  opacity: .15;
+  animation: chartFill .8s 1s ease both;
 }
 
-/* ── Scroll hint ── */
+/* PID bars */
+.pid-bars { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; }
+.pid-bar-row { display: flex; align-items: center; gap: 6px; }
+.pid-bar-lbl { font-family: var(--mono); font-size: .56rem; color: rgba(255,255,255,.4); width: 16px; flex-shrink: 0; }
+.pid-bar-bg { flex: 1; height: 4px; background: rgba(255,255,255,.07); border-radius: 2px; overflow: hidden; }
+.pid-bar-fill {
+  height: 100%; border-radius: 2px;
+  animation: slideIn .8s ease both;
+  transform-origin: left;
+}
+@keyframes slideIn { from{transform:scaleX(0)} to{transform:scaleX(1)} }
+.pid-bar-fill.p { background: linear-gradient(90deg, var(--green), rgba(16,196,122,.5)); width: 72%; animation-delay: .6s; }
+.pid-bar-fill.i { background: linear-gradient(90deg, var(--blue),  rgba(88,166,255,.5)); width: 58%; animation-delay: .75s; }
+.pid-bar-fill.d { background: linear-gradient(90deg, var(--gold),  rgba(241,182,90,.5)); width: 44%; animation-delay: .9s; }
+.pid-bar-val { font-family: var(--mono); font-size: .56rem; color: rgba(255,255,255,.5); width: 20px; text-align: right; flex-shrink: 0; }
+
+/* Scroll hint */
 .scroll-hint {
   position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
   display: flex; flex-direction: column; align-items: center; gap: 5px;
-  color: rgba(255,255,255,.16); font-size: .67rem; letter-spacing: .1em; text-transform: uppercase;
+  color: rgba(255,255,255,.15); font-family: var(--mono); font-size: .63rem;
+  letter-spacing: .12em; text-transform: uppercase;
   animation: fadeUp 1s .9s ease both;
 }
 .scroll-arrow {
-  width: 22px; height: 22px;
-  border-right: 2px solid rgba(16,196,122,.22);
-  border-bottom: 2px solid rgba(16,196,122,.22);
+  width: 20px; height: 20px;
+  border-right: 2px solid rgba(16,196,122,.2);
+  border-bottom: 2px solid rgba(16,196,122,.2);
   transform: rotate(45deg);
   animation: arrowBounce 2s ease-in-out infinite;
 }
-@keyframes arrowBounce { 0%,100%{transform:rotate(45deg) translateY(0)} 50%{transform:rotate(45deg) translateY(5px)} }
 
+/* ─── Responsive collapse ─────────────────────────── */
+@media (max-width:960px) {
+  .drone-scene { aspect-ratio: auto; height: 420px; }
+  .dc-pid  { top: -8px; left: 50%; transform: translateX(-50%); }
+  .dc-loop { display: none; }
+  .dc-bat  { right: 0; top: 10px; }
+  .dc-amp  { right: 0; top: auto; bottom: 30%; }
+  .dc-temp { right: 0; bottom: 5%; }
+  .dc-rpm  { left: 0; bottom: -10px; width: 175px; }
+}
+@media (max-width:600px) {
+  .dc-amp, .dc-loop { display: none; }
+  .drone-scene { height: 360px; }
+  .dc-pid  { top: -5px; }
+  .dc-bat  { top: 8px; right: 5px; width: 115px; }
+  .dc-temp { bottom: 8px; right: 5px; width: 115px; }
+  .dc-rpm  { bottom: -5px; left: 5px; width: 160px; }
+}
+
+/* ─── Stats bar ─────────────────────────────────── */
 /* ══════════════════════════════════════════
    STATS BAR
    ══════════════════════════════════════════ */
@@ -1228,58 +1274,75 @@ footer {
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
   <div class="orb orb-3"></div>
+  <div class="hero-scan"></div>
   <div class="scanline"></div>
+
+  <!-- Network nodes -->
+  <div class="hero-nodes" aria-hidden="true">
+    <span class="hero-node"></span><span class="hero-node"></span>
+    <span class="hero-node"></span><span class="hero-node"></span>
+    <span class="hero-node"></span><span class="hero-node"></span>
+    <span class="hero-node"></span><span class="hero-node"></span>
+  </div>
 
   <div class="hero-inner">
 
-    <!-- ── LEFT: Copy ─────────────────────────── -->
+    <!-- ══ LEFT: Brand Copy ══════════════════════════════ -->
     <div class="hero-copy">
 
-      <!-- Live badge -->
+      <!-- Version badge -->
       <div class="hero-badge">
         <span class="badge-dot"></span>
-        <span class="i18n-th">BETAFLIGHT CLI ANALYZER · v5.1 · 🇹🇭</span>
-        <span class="i18n-en">BETAFLIGHT CLI ANALYZER · v5.1 · 🇹🇭</span>
+        v5.1 · FPV DRONE DIAGNOSTIC PLATFORM · 🇹🇭
       </div>
 
-      <img src="{{ url_for('static', filename='img/obix-logo.png') }}"
-           class="hero-logo" alt="OBIXConfig Doctor">
-
-      <div class="hero-label">OBIXCONFIG DOCTOR</div>
-
-      <!-- Main headline — speaks to CLI pilots -->
-      <h1 class="hero-title">
-        <span class="i18n-th">
-          paste <span class="accent">`diff all`</span><br>
-          รับ tune <span class="accent-gold">พร้อมบิน</span> ทันที
-        </span>
-        <span class="i18n-en">
-          paste <span class="accent">`diff all`</span><br>
-          get a <span class="accent-gold">flight-ready</span> tune
-        </span>
-        <span class="hero-title-en">ANALYZE · DIAGNOSE · FLY — v5.1</span>
-      </h1>
-
-      <!-- CLI hint strip -->
-      <div class="hero-cli-hint">
-        <span class="cli-cmd"># diff all</span>
-        <span class="cli-arrow">→</span>
-        <span class="cli-result">⚡ PID · RPM Filter · CLI Export ทันที</span>
+      <!-- Brand row: logo + name -->
+      <div class="hero-brand-row">
+        <img src="{{ url_for('static', filename='img/obix-logo.png') }}"
+             class="hero-logo" alt="ConfigDoctor">
+        <div class="hero-brand-text">
+          <div class="hero-brand-name">Config<span class="brand-accent">Doctor</span></div>
+          <div class="hero-brand-sub">FPV Drone Diagnostic Platform</div>
+        </div>
       </div>
 
+      <!-- ANALYZE · OPTIMIZE · FLY BETTER -->
+      <div class="hero-tagline-row">
+        <div class="tagline-item">
+          <span class="tagline-icon">〰</span>
+          <span class="tagline-text">Analyze</span>
+        </div>
+        <div class="tagline-sep"></div>
+        <div class="tagline-item">
+          <span class="tagline-icon">⬡</span>
+          <span class="tagline-text">Optimize</span>
+        </div>
+        <div class="tagline-sep"></div>
+        <div class="tagline-item">
+          <span class="tagline-icon">✦</span>
+          <span class="tagline-text">Fly Better</span>
+        </div>
+      </div>
+
+      <!-- Desc -->
       <p class="hero-desc">
         <span class="i18n-th">
-          วาง <strong>diff all</strong> ของคุณ — Doctor วิเคราะห์ <strong>PID oscillation · RPM filter · motor timing · ESC protocol · battery sag · loop latency</strong> พร้อม CLI command พร้อมใช้ ฟรี 100% ไม่ต้อง login
+          วาง <strong>diff all</strong> จาก Betaflight CLI — Doctor วิเคราะห์
+          <strong>PID · RPM Filter · Motor · ESC · Battery · Loop Latency</strong>
+          พร้อม CLI command พร้อมใช้ทันที ฟรี 100% ไม่ต้อง login
         </span>
         <span class="i18n-en">
-          Drop your <strong>diff all</strong> — Doctor diagnoses <strong>PID oscillation · RPM filter · motor timing · ESC protocol · battery sag · loop latency</strong> with ready-to-paste CLI commands. Free. No login.
+          Drop your <strong>diff all</strong> from Betaflight CLI — Doctor analyzes
+          <strong>PID · RPM Filter · Motor · ESC · Battery · Loop Latency</strong>
+          with ready-to-paste commands. 100% Free. No login.
         </span>
       </p>
 
+      <!-- CTAs -->
       <div class="hero-actions">
         <a href="/app" class="btn-primary">
-          <span class="i18n-th">📋 Paste diff all → วิเคราะห์</span>
-          <span class="i18n-en">📋 Paste diff all → Analyze</span>
+          <span class="i18n-th">📋 เริ่มวิเคราะห์โดรน</span>
+          <span class="i18n-en">📋 Analyze My Drone</span>
         </a>
         <a href="/blackbox" class="btn-secondary">
           <span class="i18n-th">📊 Blackbox Analyzer</span>
@@ -1287,124 +1350,187 @@ footer {
         </a>
       </div>
 
-      <!-- Feature tags — BF-specific terminology -->
+      <!-- Tags -->
       <div class="hero-tags">
         <span class="hero-tag hot">🆕 v5.1 Physics Engine</span>
-        <span class="hero-tag live">diff all parser</span>
+        <span class="hero-tag live">diff all · CLI surgeon</span>
         <span class="hero-tag blue">RPM filter calc</span>
-        <span class="hero-tag">PID advisor</span>
         <span class="hero-tag">BF 4.3 · 4.4 · 4.5</span>
-        <span class="hero-tag">CLI surgeon</span>
         <span class="hero-tag">2.5″–10″</span>
         <span class="hero-tag"><span class="i18n-th">ฟรี · ไม่ต้อง login</span><span class="i18n-en">Free · No login</span></span>
       </div>
+
     </div><!-- /hero-copy -->
 
-    <!-- ── RIGHT: CLI Terminal Preview ──────────── -->
-    <div class="hero-terminal-col">
-      <div class="hero-terminal" role="img" aria-label="OBIXConfig Doctor CLI analysis preview">
+    <!-- ══ RIGHT: Drone Data Scene ═══════════════════════ -->
+    <div class="hero-visual-col">
+      <div class="drone-scene">
 
-        <!-- Title bar -->
-        <div class="term-bar">
-          <div class="term-dots">
-            <span class="term-dot term-dot-r"></span>
-            <span class="term-dot term-dot-y"></span>
-            <span class="term-dot term-dot-g"></span>
-          </div>
-          <span class="term-title-text">obixconfig-doctor — diff all analysis</span>
-          <span class="term-badge">BF 4.5</span>
+        <!-- Wave mesh background -->
+        <div class="scene-waves" aria-hidden="true">
+          <svg viewBox="0 0 900 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 60 Q112 20 225 60 Q337 100 450 60 Q562 20 675 60 Q787 100 900 60 L900 120 L0 120 Z" fill="rgba(16,196,122,0.07)"/>
+            <path d="M0 80 Q112 50 225 80 Q337 110 450 80 Q562 50 675 80 Q787 110 900 80 L900 120 L0 120 Z" fill="rgba(88,166,255,0.05)"/>
+            <!-- duplicate for seamless loop -->
+            <path d="M900 60 Q1012 20 1125 60 Q1237 100 1350 60 Q1462 20 1575 60 Q1687 100 1800 60 L1800 120 L900 120 Z" fill="rgba(16,196,122,0.07)"/>
+            <path d="M900 80 Q1012 50 1125 80 Q1237 110 1350 80 Q1462 50 1575 80 Q1687 110 1800 80 L1800 120 L900 120 Z" fill="rgba(88,166,255,0.05)"/>
+          </svg>
         </div>
 
-        <!-- Terminal body -->
-        <div class="term-body">
-
-          <div class="term-line tl-1">
-            <span class="term-prompt">$</span>
-            <span class="term-cmd">paste <span class="term-key">diff all</span> <span class="term-comment">← วางข้อมูล CLI ตรงนี้</span></span>
-          </div>
-          <div class="term-line tl-2">
-            <span class="term-prompt">&gt;</span>
-            <span class="term-cmd">Analyzing <span class="term-key">23 parameters</span>…</span>
-          </div>
-
-          <div class="term-line tl-3" style="margin-top:6px">
-            <span class="term-section">── PID ANALYSIS ─────────────────</span>
-          </div>
-          <div class="term-line tl-4">
-            <span class="term-prompt">&gt;</span>
-            <span class="term-cmd">
-              <span class="term-key">p_pitch</span> = <span class="term-val">52</span>
-              &nbsp;<span class="term-pill term-pill-y">⚠ HIGH</span>
-              <span class="term-muted">→ lower to 42–46</span>
-            </span>
-          </div>
-          <div class="term-line tl-5">
-            <span class="term-prompt">&gt;</span>
-            <span class="term-cmd">
-              <span class="term-key">i_pitch</span> = <span class="term-val">80</span>
-              &nbsp;<span class="term-pill term-pill-g">✓ OK</span>
-            </span>
-          </div>
-          <div class="term-line tl-6">
-            <span class="term-prompt">&gt;</span>
-            <span class="term-cmd">
-              <span class="term-key">iterm_relax_cutoff</span> = <span class="term-val">15</span>
-              &nbsp;<span class="term-pill term-pill-g">✓ OK</span>
-            </span>
-          </div>
-
-          <div class="term-line tl-7" style="margin-top:6px">
-            <span class="term-section">── RPM FILTER ───────────────────</span>
-          </div>
-          <div class="term-line tl-8">
-            <span class="term-prompt">&gt;</span>
-            <span class="term-cmd">
-              <span class="term-key">dshot_bidir</span> = <span class="term-val">ON</span>
-              &nbsp;<span class="term-pill term-pill-g">✓ RPM enabled</span>
-            </span>
-          </div>
-          <div class="term-line tl-9">
-            <span class="term-prompt">&gt;</span>
-            <span class="term-cmd">
-              <span class="term-key">gyro_rpm_notch_harmonics</span> = <span class="term-val">3</span>
-              &nbsp;<span class="term-pill term-pill-b">ℹ optimal</span>
-            </span>
-          </div>
-
-          <div class="term-line tl-10" style="margin-top:6px">
-            <span class="term-section">── CLI EXPORT ───────────────────</span>
-          </div>
-          <div class="term-line tl-11">
-            <span class="term-prompt">&gt;</span>
-            <span class="term-cmd">
-              <span class="term-ok">set p_pitch = 44</span>
-              <span class="term-muted">&nbsp;# ready to paste</span>
-            </span>
-          </div>
-          <div class="term-line tl-12">
-            <span class="term-prompt">&gt;</span>
-            <span class="term-cmd">
-              <span class="term-ok">save</span>
-              <span class="term-cursor"></span>
-            </span>
-          </div>
-
-        </div><!-- /term-body -->
-
-        <!-- Footer CTA inside terminal -->
-        <div class="term-footer">
-          <span class="term-footer-text">
-            <span class="i18n-th">✓ วิเคราะห์ด้วย diff all ของคุณ</span>
-            <span class="i18n-en">✓ Run with your own diff all</span>
-          </span>
-          <a href="/app" class="term-footer-link">
-            <span class="i18n-th">เริ่มวิเคราะห์ →</span>
-            <span class="i18n-en">Analyze now →</span>
-          </a>
+        <!-- Drone center -->
+        <div class="drone-center" title="ConfigDoctor — FPV Drone Analyzer" aria-label="FPV Drone">
+          <div class="drone-ring"></div>
+          <svg class="drone-svg" viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <!-- Motor arms -->
+            <line x1="100" y1="70" x2="44"  y2="32"  stroke="rgba(255,255,255,.18)" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="100" y1="70" x2="156" y2="32"  stroke="rgba(255,255,255,.18)" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="100" y1="70" x2="44"  y2="108" stroke="rgba(255,255,255,.18)" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="100" y1="70" x2="156" y2="108" stroke="rgba(255,255,255,.18)" stroke-width="2.5" stroke-linecap="round"/>
+            <!-- Motor hubs -->
+            <circle cx="44"  cy="32"  r="9" fill="rgba(16,196,122,.2)"  stroke="#10c47a" stroke-width="1.5"/>
+            <circle cx="156" cy="32"  r="9" fill="rgba(16,196,122,.2)"  stroke="#10c47a" stroke-width="1.5"/>
+            <circle cx="44"  cy="108" r="9" fill="rgba(88,166,255,.2)"  stroke="#58a6ff" stroke-width="1.5"/>
+            <circle cx="156" cy="108" r="9" fill="rgba(88,166,255,.2)"  stroke="#58a6ff" stroke-width="1.5"/>
+            <!-- Propeller discs -->
+            <ellipse cx="44"  cy="32"  rx="22" ry="5" fill="rgba(16,196,122,.12)" stroke="rgba(16,196,122,.3)" stroke-width="1"/>
+            <ellipse cx="156" cy="32"  rx="22" ry="5" fill="rgba(16,196,122,.12)" stroke="rgba(16,196,122,.3)" stroke-width="1"/>
+            <ellipse cx="44"  cy="108" rx="22" ry="5" fill="rgba(88,166,255,.12)" stroke="rgba(88,166,255,.3)" stroke-width="1"/>
+            <ellipse cx="156" cy="108" rx="22" ry="5" fill="rgba(88,166,255,.12)" stroke="rgba(88,166,255,.3)" stroke-width="1"/>
+            <!-- Center frame -->
+            <rect x="76" y="54" width="48" height="32" rx="6" fill="rgba(8,14,18,.9)" stroke="rgba(16,196,122,.5)" stroke-width="1.5"/>
+            <rect x="82" y="60" width="36" height="20" rx="3" fill="rgba(16,196,122,.06)" stroke="rgba(16,196,122,.2)" stroke-width="1"/>
+            <!-- FPV camera lens -->
+            <circle cx="100" cy="70" r="7" fill="rgba(8,14,18,.95)" stroke="#10c47a" stroke-width="1.5"/>
+            <circle cx="100" cy="70" r="3.5" fill="rgba(16,196,122,.3)"/>
+            <circle cx="100" cy="70" r="1.5" fill="#10c47a"/>
+            <!-- LED glow dots -->
+            <circle cx="44"  cy="32"  r="2.5" fill="#10c47a" opacity=".9"/>
+            <circle cx="156" cy="32"  r="2.5" fill="#10c47a" opacity=".9"/>
+            <circle cx="44"  cy="108" r="2.5" fill="#58a6ff" opacity=".9"/>
+            <circle cx="156" cy="108" r="2.5" fill="#58a6ff" opacity=".9"/>
+            <!-- Status indicator -->
+            <circle cx="88" cy="64" r="2" fill="#10c47a" opacity=".8"/>
+            <circle cx="112" cy="64" r="2" fill="#f87171" opacity=".6"/>
+          </svg>
         </div>
 
-      </div><!-- /hero-terminal -->
-    </div><!-- /hero-terminal-col -->
+        <!-- ── DATA CARDS ──────────────────────────── -->
+
+        <!-- PID card -->
+        <div class="dc dc-pid">
+          <div class="dc-label">PID Analysis</div>
+          <div class="pid-bars">
+            <div class="pid-bar-row">
+              <span class="pid-bar-lbl">P</span>
+              <div class="pid-bar-bg"><div class="pid-bar-fill p"></div></div>
+              <span class="pid-bar-val">46</span>
+            </div>
+            <div class="pid-bar-row">
+              <span class="pid-bar-lbl">I</span>
+              <div class="pid-bar-bg"><div class="pid-bar-fill i"></div></div>
+              <span class="pid-bar-val">80</span>
+            </div>
+            <div class="pid-bar-row">
+              <span class="pid-bar-lbl">D</span>
+              <div class="pid-bar-bg"><div class="pid-bar-fill d"></div></div>
+              <span class="pid-bar-val">28</span>
+            </div>
+          </div>
+          <div class="dc-status ok"><span class="dc-status-dot" style="background:var(--green)"></span>Optimized</div>
+        </div>
+
+        <!-- Battery card -->
+        <div class="dc dc-bat">
+          <div class="dc-label">Battery</div>
+          <div>
+            <span class="dc-value">23.7</span>
+            <span class="dc-unit">V</span>
+          </div>
+          <svg class="dc-chart" viewBox="0 0 98 36" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="gBat" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#10c47a" stop-opacity=".6"/>
+                <stop offset="100%" stop-color="#10c47a" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path class="dc-chart-area" d="M0 18 Q14 8 24 12 Q34 16 44 10 Q54 4 64 8 Q74 12 84 6 L98 6 L98 36 L0 36 Z" fill="url(#gBat)"/>
+            <path class="dc-chart-path" d="M0 18 Q14 8 24 12 Q34 16 44 10 Q54 4 64 8 Q74 12 84 6 L98 6" stroke="#10c47a"/>
+          </svg>
+          <div class="dc-status ok"><span class="dc-status-dot" style="background:var(--green)"></span>Healthy</div>
+        </div>
+
+        <!-- AMP card -->
+        <div class="dc dc-amp">
+          <div class="dc-label">Current</div>
+          <div>
+            <span class="dc-value">18.5</span>
+            <span class="dc-unit">A</span>
+          </div>
+          <svg class="dc-chart" viewBox="0 0 98 36" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="gAmp" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#58a6ff" stop-opacity=".6"/>
+                <stop offset="100%" stop-color="#58a6ff" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path class="dc-chart-area" d="M0 28 Q10 20 18 24 Q26 28 36 16 Q46 4 56 10 Q66 16 76 8 Q86 2 98 12 L98 36 L0 36 Z" fill="url(#gAmp)"/>
+            <path class="dc-chart-path" d="M0 28 Q10 20 18 24 Q26 28 36 16 Q46 4 56 10 Q66 16 76 8 Q86 2 98 12" stroke="#58a6ff"/>
+          </svg>
+          <div class="dc-status info"><span class="dc-status-dot" style="background:var(--blue)"></span>Normal</div>
+        </div>
+
+        <!-- TEMP card -->
+        <div class="dc dc-temp">
+          <div class="dc-label">Motor Temp</div>
+          <div>
+            <span class="dc-value">42</span>
+            <span class="dc-unit">°C</span>
+          </div>
+          <svg class="dc-chart" viewBox="0 0 98 36" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="gTmp" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f87171" stop-opacity=".5"/>
+                <stop offset="100%" stop-color="#f87171" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path class="dc-chart-area" d="M0 22 Q12 18 22 20 Q32 22 42 18 Q52 14 62 16 Q72 18 82 12 Q92 6 98 10 L98 36 L0 36 Z" fill="url(#gTmp)"/>
+            <path class="dc-chart-path" d="M0 22 Q12 18 22 20 Q32 22 42 18 Q52 14 62 16 Q72 18 82 12 Q92 6 98 10" stroke="#f87171"/>
+          </svg>
+          <div class="dc-status warn"><span class="dc-status-dot" style="background:#f1b65a"></span>Monitor</div>
+        </div>
+
+        <!-- RPM card -->
+        <div class="dc dc-rpm">
+          <div class="dc-label">RPM Filter · dshot_bidir ON</div>
+          <div>
+            <span class="dc-value" style="font-size:1.3rem">24,800</span>
+            <span class="dc-unit">rpm</span>
+          </div>
+          <svg class="dc-chart" viewBox="0 0 178 36" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="gRpm" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f1b65a" stop-opacity=".5"/>
+                <stop offset="100%" stop-color="#f1b65a" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path class="dc-chart-area" d="M0 30 Q18 24 32 20 Q46 16 60 22 Q74 28 88 16 Q102 4 116 10 Q130 16 144 8 Q158 2 178 6 L178 36 L0 36 Z" fill="url(#gRpm)"/>
+            <path class="dc-chart-path" d="M0 30 Q18 24 32 20 Q46 16 60 22 Q74 28 88 16 Q102 4 116 10 Q130 16 144 8 Q158 2 178 6" stroke="#f1b65a" style="stroke-dasharray:400"/>
+          </svg>
+          <div class="dc-status ok" style="margin-top:6px"><span class="dc-status-dot" style="background:var(--green)"></span>harmonics 3 · notch active</div>
+        </div>
+
+        <!-- Loop Latency card -->
+        <div class="dc dc-loop">
+          <div class="dc-label">Loop Latency</div>
+          <div>
+            <span class="dc-value">125</span>
+            <span class="dc-unit">μs</span>
+          </div>
+          <div class="dc-status purp" style="margin-top:8px"><span class="dc-status-dot" style="background:#a78bfa"></span>8K / 8K</div>
+        </div>
+
+      </div><!-- /drone-scene -->
+    </div><!-- /hero-visual-col -->
 
   </div><!-- /hero-inner -->
 
@@ -1414,7 +1540,6 @@ footer {
     <div class="scroll-arrow"></div>
   </div>
 </section>
-
 <!-- ── STATS BAR ──────────────────────────────────────────── -->
 <div class="stats-bar">
   <div class="stat-item">
@@ -1422,7 +1547,7 @@ footer {
     <div class="stat-lbl"><span class="i18n-th">Tools &amp; Analyzers</span><span class="i18n-en">Tools &amp; Analyzers</span></div>
   </div>
   <div class="stat-item">
-    <span class="stat-num" style="font-size:1.5rem;letter-spacing:-.03em">4.3–4.5</span>
+    <span class="stat-num" style="font-size:1.45rem;letter-spacing:-.03em">4.3–4.5</span>
     <div class="stat-lbl"><span class="i18n-th">Betaflight รองรับ</span><span class="i18n-en">Betaflight Support</span></div>
   </div>
   <div class="stat-item">
