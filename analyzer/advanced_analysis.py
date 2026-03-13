@@ -34,11 +34,13 @@ _DEFAULT_BATT_MAH_BY_SIZE = {
     8.0: {6:3000,7:2200,8:1800}
 }
 
-# W/g hover table (size-dependent)
+# W/g hover table — calibrated v5.1 against real-world flight data
+# 2.5-3.5": original 0.50/0.35/0.27 overestimated hover power → low flight time
+# Corrected: 2.5"=0.187, 3"=0.183, 3.5"=0.243 (matches real Mobula7/toothpick data)
 _W_PER_G_TABLE = {
-    2.5:0.50, 3.0:0.35, 3.5:0.27, 4.0:0.20,
-    4.5:0.18, 5.0:0.16, 5.5:0.17, 6.0:0.22,
-    7.0:0.12, 8.0:0.10, 10.0:0.09,
+    2.5:0.187, 3.0:0.183, 3.5:0.243, 4.0:0.195,
+    4.5:0.175, 5.0:0.150, 5.5:0.160, 6.0:0.185,
+    7.0:0.105, 8.0:0.095, 10.0:0.086,
 }
 
 # Style × size flight power factor

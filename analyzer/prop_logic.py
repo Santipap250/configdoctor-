@@ -65,7 +65,7 @@ def _cells_eff_factor(cells):
 # Empirical max power per motor at 4S reference (W)
 # 7"+ uses LR-optimized motors (lower max power, higher hover efficiency)
 _MAX_PWR_BY_SIZE = {
-    2.5:35, 3.0:75, 3.5:110, 4.0:190, 4.5:260,
+    2.5:60, 3.0:75, 3.5:110, 4.0:190, 4.5:260,
     5.0:350, 5.5:410, 6.0:440, 7.0:320, 8.0:380, 10.0:450,
 }
 # Efficiency at max throttle vs reference (drops at high RPM, more for LR props)
