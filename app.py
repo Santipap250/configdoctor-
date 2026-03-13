@@ -26,6 +26,15 @@ from analyzer.thrust_logic import (calculate_thrust_weight,
 from werkzeug.utils import secure_filename
 from analyzer.cli_surgeon import analyze_dump as cli_analyze_dump
 import os, io, time, json, hashlib, logging
+from datetime import datetime
+
+# ── Compression ───────────────────────────────────────────────────────────
+try:
+    from flask_compress import Compress
+    COMPRESS_AVAILABLE = True
+except ImportError:
+    COMPRESS_AVAILABLE = False
+    print("WARNING: flask_compress not installed — response compression disabled")
 
 # ── Rate Limiting ─────────────────────────────────────────────────────────
 try:
@@ -111,6 +120,13 @@ if not _secret:
 app.config['SECRET_KEY'] = _secret
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB global upload limit
 
+# ── Enable gzip/brotli compression ───────────────────────────────────────
+if COMPRESS_AVAILABLE:
+    Compress(app)
+
+# ── SHA-256 hash cache (avoid recomputing on every /downloads request) ────
+_HASH_CACHE: dict = {}
+
 FORCE_SECURE = os.environ.get("FORCE_SECURE", "0") in ("1", "true", "True")
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
@@ -149,7 +165,24 @@ def timestamp_to_datetime_filter(ts):
 # ═════════════════════════════════════════════════════════════════════════
 # Validation
 # ═════════════════════════════════════════════════════════════════════════
-def validate_input(size, weight, prop_size, pitch, blades, battery):
+def _file_sha256(path: str) -> str:
+    """Return cached SHA-256 hex (first 16 chars). Recomputes only when mtime changes."""
+    try:
+        mtime = os.path.getmtime(path)
+        cache_key = f"{path}:{mtime}"
+        if cache_key not in _HASH_CACHE:
+            h = hashlib.sha256()
+            with open(path, 'rb') as f:
+                for chunk in iter(lambda: f.read(65536), b''):
+                    h.update(chunk)
+            _HASH_CACHE[cache_key] = h.hexdigest()[:16]
+        return _HASH_CACHE[cache_key]
+    except Exception:
+        logger.exception("_file_sha256 failed for %s", path)
+        return "unknown"
+
+
+
     warnings = []
     try:
         size = float(size)
@@ -586,13 +619,10 @@ def downloads_index():
             for fn in sorted(os.listdir(fcdir)):
                 path = os.path.join(fcdir, fn)
                 if not os.path.isfile(path): continue
-                hobj = hashlib.sha256()
-                with open(path, 'rb') as f:
-                    for chunk in iter(lambda: f.read(8192), b''): hobj.update(chunk)
                 items.append({'fc': fc, 'filename': fn,
                               'size': os.path.getsize(path),
                               'mtime': int(os.path.getmtime(path)),
-                              'sha': hobj.hexdigest()[:16]})
+                              'sha': _file_sha256(path)})
     return render_template('downloads.html', items=items)
 
 @app.route("/vtx")
@@ -949,6 +979,7 @@ def _generate_cli_from_model(model):
     return "\n".join(lines)
 
 @app.route('/osd/export', methods=['POST'])
+@_rate("5 per minute;30 per day")
 def osd_export():
     fmt       = (request.args.get('format') or 'txt').lower()
     save_flag = str(request.args.get('save', '0')).lower() in ('1', 'true', 'yes')
@@ -1000,6 +1031,9 @@ def set_security_headers(response):
         "connect-src 'self'; "
         "frame-ancestors 'self';"
     )
+    # M2: Cache static assets for 1 year (cache-busting via query string / filename hash)
+    if request.path.startswith('/static/'):
+        response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
     return response
 
 # ── Error handlers ─────────────────────────────────────────────────────────
@@ -1021,7 +1055,7 @@ def rate_limit_exceeded(e):
 @app.route("/healthz")
 def healthz():
     # ไม่เปิดเผย module status ใน production
-    return {"status": "ok"}
+    return jsonify({"status": "ok"})
 
 # ── SEO: robots.txt ────────────────────────────────────────────────────────
 @app.route("/robots.txt")
