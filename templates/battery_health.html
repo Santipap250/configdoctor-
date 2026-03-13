@@ -7,324 +7,308 @@
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Sarabun:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Sarabun:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --green:#10c47a; --gold:#f1b65a; --blue:#58a6ff; --red:#f87171;
-  --orange:#fb923c; --teal:#2dd4bf;
-  --bg:#06090b; --bg2:#08090d; --card:#0c1115;
-  --border:rgba(255,255,255,0.07); --muted:#7a8f9e; --text:#dde7ef;
-  --font-th:'Sarabun',sans-serif; --font-en:'Orbitron',monospace; --mono:'JetBrains Mono',monospace;
+:root{
+  --green:#10c47a;--gold:#f1b65a;--blue:#58a6ff;--red:#f87171;
+  --orange:#fb923c;--teal:#2dd4bf;--purple:#a78bfa;
+  --bg:#06090b;--card:#0b0f14;--card2:#0e1318;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
+  --muted:#6b7f90;--text:#dde7ef;
+  --font-th:'Sarabun',sans-serif;--font-en:'Orbitron',monospace;--mono:'JetBrains Mono',monospace;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:var(--font-th);background:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased}
 
-.page-wrap{max-width:960px;margin:0 auto;padding:100px 24px 80px}
+/* ── GRID BG ── */
+body::before{content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(241,182,90,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(241,182,90,.03) 1px,transparent 1px);
+  background-size:48px 48px;pointer-events:none;z-index:0}
 
-/* ── Back bar ── */
-.back-bar{display:flex;align-items:center;gap:12px;margin-bottom:36px}
-.back-link{display:inline-flex;align-items:center;gap:7px;font-size:.82rem;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:7px 14px;border-radius:8px;transition:all .2s}
-.back-link:hover{color:var(--text);border-color:rgba(255,255,255,.15);background:rgba(255,255,255,.04)}
-.page-badge{font-family:var(--font-en);font-size:.68rem;font-weight:700;letter-spacing:.12em;padding:5px 14px;border-radius:30px;background:rgba(241,182,90,.08);border:1px solid rgba(241,182,90,.25);color:var(--gold)}
+.page-wrap{position:relative;max-width:980px;margin:0 auto;padding:100px 24px 80px;z-index:1}
 
-/* ── Header ── */
-.page-header{margin-bottom:40px}
-.page-icon{font-size:3rem;margin-bottom:14px}
-.page-title{font-family:var(--font-en);font-size:clamp(1.6rem,3.5vw,2.6rem);font-weight:900;color:#fff;line-height:1.15;margin-bottom:10px}
-.page-title .hl{color:var(--gold)}
-.page-sub{font-size:.95rem;color:var(--muted);line-height:1.7;max-width:580px}
-.edu-note{display:inline-flex;align-items:flex-start;gap:9px;background:rgba(88,166,255,.06);border:1px solid rgba(88,166,255,.18);border-radius:10px;padding:12px 16px;margin-top:18px;font-size:.83rem;color:rgba(221,231,239,.7);line-height:1.6;max-width:600px}
-.edu-icon{flex-shrink:0;font-size:1rem;margin-top:1px}
+/* ── BACK BAR ── */
+.back-bar{display:flex;align-items:center;gap:10px;margin-bottom:44px}
+.back-link{display:inline-flex;align-items:center;gap:7px;font-size:.8rem;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:7px 15px;border-radius:8px;transition:all .2s;font-family:var(--font-en);letter-spacing:.06em}
+.back-link:hover{color:var(--text);border-color:rgba(241,182,90,.3);background:rgba(241,182,90,.04)}
+.page-badge{font-family:var(--font-en);font-size:.65rem;font-weight:700;letter-spacing:.14em;padding:5px 14px;border-radius:30px;background:rgba(241,182,90,.1);border:1px solid rgba(241,182,90,.3);color:var(--gold)}
 
-/* ── Form layout ── */
-.tool-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
-@media(max-width:720px){.tool-layout{grid-template-columns:1fr}}
+/* ── HERO ── */
+.hero{margin-bottom:40px}
+.hero-eyebrow{font-family:var(--font-en);font-size:.65rem;font-weight:700;letter-spacing:.18em;color:rgba(241,182,90,.6);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.hero-eyebrow::before{content:'';display:block;width:24px;height:2px;background:var(--gold);border-radius:2px}
+.hero-title{font-family:var(--font-en);font-size:clamp(1.8rem,4vw,3rem);font-weight:900;color:#fff;line-height:1.1;margin-bottom:14px}
+.hero-title .hl{color:var(--gold);position:relative}
+.hero-title .hl::after{content:'';position:absolute;bottom:-3px;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent);border-radius:2px}
+.hero-sub{font-size:.95rem;color:var(--muted);line-height:1.8;max-width:600px;margin-bottom:18px}
+.hero-note{display:inline-flex;align-items:flex-start;gap:10px;background:rgba(241,182,90,.05);border:1px solid rgba(241,182,90,.15);border-radius:12px;padding:13px 17px;font-size:.82rem;color:rgba(221,231,239,.65);line-height:1.65;max-width:640px}
 
-.form-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:28px 26px}
-.form-card-title{font-family:var(--font-en);font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;display:flex;align-items:center;gap:8px}
-.form-card-title::before{content:'';display:block;width:4px;height:14px;border-radius:2px;background:var(--gold)}
+/* ── LAYOUT ── */
+.tool-layout{display:grid;grid-template-columns:360px 1fr;gap:20px;align-items:start}
+@media(max-width:820px){.tool-layout{grid-template-columns:1fr}}
 
-.field{margin-bottom:18px}
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:26px}
+.card+.card{margin-top:16px}
+.card-title{font-family:var(--font-en);font-size:.67rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.card-title::before{content:'';display:block;width:4px;height:14px;border-radius:2px;background:var(--gold)}
+
+/* ── FORM ── */
+.field{margin-bottom:17px}
 .field label{display:block;font-size:.82rem;font-weight:600;color:var(--text);margin-bottom:7px}
-.field label .unit{font-family:var(--mono);font-size:.7rem;color:var(--muted);font-weight:400;margin-left:5px}
-.field label .tip{font-size:.72rem;color:var(--muted);font-weight:400;display:block;margin-top:2px}
+.unit{font-family:var(--mono);font-size:.68rem;color:var(--muted);font-weight:400;margin-left:5px}
+.tip{font-size:.72rem;color:var(--muted);font-weight:400;display:block;margin-top:3px}
 input[type=number],select{
   width:100%;padding:10px 14px;
   background:rgba(255,255,255,.04);border:1px solid var(--border);
   border-radius:9px;color:var(--text);font-family:var(--font-th);font-size:.92rem;
-  transition:border-color .2s;
-}
+  transition:border-color .2s,background .2s}
 input[type=number]:focus,select:focus{outline:none;border-color:rgba(241,182,90,.4);background:rgba(241,182,90,.03)}
-select option{background:#1a2030}
+select option{background:#111820}
+.section-sep{height:1px;background:var(--border);margin:20px 0}
 
-/* ── Analyze button ── */
+/* ── ANALYZE BTN ── */
 .btn-analyze{
-  width:100%;padding:14px 24px;
-  background:var(--gold);color:#1a0e00;
-  font-family:var(--font-th);font-size:1rem;font-weight:800;
-  border:none;border-radius:11px;cursor:pointer;
-  transition:filter .2s,transform .2s,box-shadow .3s;
-  margin-top:8px;letter-spacing:.02em;
-}
-.btn-analyze:hover{filter:brightness(1.08);transform:translateY(-2px);box-shadow:0 12px 40px rgba(241,182,90,.3)}
+  width:100%;padding:14px 24px;margin-top:6px;
+  background:linear-gradient(135deg,var(--gold) 0%,#e8a030 100%);
+  color:#1a0e00;font-family:var(--font-en);font-size:.85rem;font-weight:700;
+  letter-spacing:.08em;border:none;border-radius:11px;cursor:pointer;
+  transition:all .25s;position:relative;overflow:hidden}
+.btn-analyze::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(255,255,255,.15));opacity:0;transition:opacity .2s}
+.btn-analyze:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(241,182,90,.35)}
+.btn-analyze:hover::after{opacity:1}
 .btn-analyze:active{transform:translateY(0)}
 
-/* ── Result panel ── */
+/* ── RESULT PANEL ── */
 #resultPanel{display:none}
-.result-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:28px 26px;margin-top:20px}
 
-/* Health gauge */
-.health-gauge-wrap{text-align:center;padding:24px 0 20px}
-.health-gauge{position:relative;width:180px;height:90px;margin:0 auto 16px;overflow:hidden}
-.gauge-bg{position:absolute;inset:0;background:rgba(255,255,255,.04);border-radius:90px 90px 0 0}
-.gauge-arc{
-  position:absolute;bottom:0;left:0;width:100%;height:100%;
-  border-radius:90px 90px 0 0;overflow:hidden;
-}
-.gauge-fill{
-  position:absolute;bottom:0;left:0;width:100%;height:100%;
-  transform-origin:bottom center;
-  transition:transform 1.2s cubic-bezier(.34,1.56,.64,1);
-  border-radius:90px 90px 0 0;
-}
-.gauge-needle{
-  position:absolute;bottom:0;left:50%;width:3px;height:82px;
-  transform-origin:bottom center;
-  transform:translateX(-50%) rotate(-90deg);
-  background:linear-gradient(to top,rgba(255,255,255,.9),rgba(255,255,255,.3));
-  border-radius:2px;
-  transition:transform 1.2s cubic-bezier(.34,1.56,.64,1);
-}
-.gauge-center{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:20px;height:20px;border-radius:50%;background:#0c1115;border:3px solid rgba(255,255,255,.2)}
-.gauge-score{font-family:var(--font-en);font-size:2.6rem;font-weight:900;line-height:1;margin-bottom:4px}
-.gauge-label{font-size:.78rem;color:var(--muted);letter-spacing:.06em;font-family:var(--font-en)}
+/* Score ring */
+.score-ring-wrap{text-align:center;padding:28px 0 22px;position:relative}
+.ring-svg{display:block;margin:0 auto 16px}
+.ring-bg{fill:none;stroke:rgba(255,255,255,.06);stroke-width:14}
+.ring-fill{fill:none;stroke-width:14;stroke-linecap:round;
+  stroke-dasharray:452;stroke-dashoffset:452;
+  transition:stroke-dashoffset 1.4s cubic-bezier(.34,1.3,.64,1),stroke 0.5s;
+  transform-origin:center;transform:rotate(-90deg) scaleX(-1)}
+.ring-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-58%);text-align:center}
+.ring-score{font-family:var(--font-en);font-size:2.8rem;font-weight:900;line-height:1}
+.ring-label{font-family:var(--font-en);font-size:.62rem;font-weight:700;letter-spacing:.14em;color:var(--muted);margin-top:4px}
+.ring-grade{font-family:var(--font-en);font-size:.85rem;font-weight:700;letter-spacing:.1em;margin-top:4px}
 
-/* Metrics grid */
-.metrics-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:20px}
-.metric-box{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:16px 16px}
-.metric-box.full{grid-column:1/-1}
-.metric-key{font-family:var(--font-en);font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-.metric-val{font-family:var(--font-en);font-size:1.25rem;font-weight:900;line-height:1}
-.metric-sub{font-size:.75rem;color:var(--muted);margin-top:3px}
+/* Metrics */
+.metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.mbox{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:13px;padding:15px}
+.mbox.full{grid-column:1/-1}
+.mbox-key{font-family:var(--font-en);font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.mbox-val{font-family:var(--font-en);font-size:1.2rem;font-weight:900;line-height:1.1}
+.mbox-sub{font-size:.72rem;color:var(--muted);margin-top:4px}
+.ok{color:var(--green)}.warn{color:var(--gold)}.bad{color:var(--orange)}.crit{color:var(--red)}
 
-/* Status badges */
-.status-ok{color:var(--green)}
-.status-warn{color:var(--gold)}
-.status-bad{color:var(--red)}
-.status-crit{color:#ff4040;text-shadow:0 0 12px rgba(255,64,64,.4)}
-
-/* Recommendations */
-.rec-list{margin-top:20px;display:flex;flex-direction:column;gap:9px}
-.rec-item{display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:10px;padding:13px 15px;font-size:.85rem;line-height:1.6}
-.rec-icon{flex-shrink:0;font-size:1.1rem;margin-top:1px}
-.rec-text strong{color:var(--text)}
+/* Recs */
+.rec-list{margin-top:16px;display:flex;flex-direction:column;gap:8px}
+.rec-item{display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:11px;padding:12px 14px;font-size:.83rem;line-height:1.6;transition:border-color .2s}
+.rec-item:hover{border-color:rgba(255,255,255,.12)}
+.rec-icon{flex-shrink:0;font-size:1rem;margin-top:1px}
 .rec-text{color:rgba(221,231,239,.75)}
+.rec-text strong{color:var(--text)}
 
-/* Physics explainer */
-.physics-card{background:rgba(88,166,255,.04);border:1px solid rgba(88,166,255,.15);border-radius:14px;padding:20px 22px;margin-top:20px}
-.physics-title{font-family:var(--font-en);font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:12px;display:flex;align-items:center;gap:6px}
-.physics-eq{font-family:var(--mono);font-size:.82rem;background:rgba(0,0,0,.35);border-radius:8px;padding:10px 14px;margin-bottom:10px;color:rgba(221,231,239,.8);border:1px solid rgba(88,166,255,.1)}
-.physics-eq .comment{color:rgba(88,166,255,.6)}
-.physics-body{font-size:.83rem;color:var(--muted);line-height:1.7}
+/* Physics */
+.physics-card{background:rgba(88,166,255,.04);border:1px solid rgba(88,166,255,.12);border-radius:14px;padding:20px}
+.physics-title{font-family:var(--font-en);font-size:.65rem;font-weight:700;letter-spacing:.12em;color:var(--blue);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.phys-eq{font-family:var(--mono);font-size:.8rem;background:rgba(0,0,0,.4);border-radius:8px;padding:10px 14px;margin-bottom:10px;color:rgba(221,231,239,.8);border:1px solid rgba(88,166,255,.1);line-height:1.8}
+.comment{color:rgba(88,166,255,.5)}
+.phys-body{font-size:.82rem;color:var(--muted);line-height:1.7}
 
-/* Educational sections */
-.edu-section{margin-top:32px}
-.edu-section-title{font-family:var(--font-en);font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+/* Hint */
+#hintPanel{text-align:center;padding:64px 20px;color:var(--muted)}
+.hint-icon{font-size:3.5rem;opacity:.2;margin-bottom:18px;display:block}
+
+/* Edu */
+.edu-wrap{margin-top:48px}
+.edu-title{font-family:var(--font-en);font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
 .edu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 @media(max-width:640px){.edu-grid{grid-template-columns:1fr}}
-.edu-card{background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:12px;padding:16px}
-.edu-card-icon{font-size:1.4rem;margin-bottom:8px}
-.edu-card-title{font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:5px}
-.edu-card-body{font-size:.78rem;color:var(--muted);line-height:1.6}
-
-/* Nav (minimal) */
-
+.edu-card{background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:13px;padding:16px;transition:border-color .2s,background .2s}
+.edu-card:hover{border-color:rgba(241,182,90,.2);background:rgba(241,182,90,.03)}
+.edu-icon{font-size:1.3rem;margin-bottom:9px}
+.edu-ctitle{font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:5px}
+.edu-cbody{font-size:.77rem;color:var(--muted);line-height:1.65}
 </style>
 {% set og_title = "Battery Health Advisor — OBIXConfig Doctor" %}
-{% set og_description = "วิเคราะห์ความสมบูรณ์แบต · IR · Capacity degradation" %}
+{% set og_description = "วิเคราะห์ความสมบูรณ์แบต LiPo · IR · Voltage Sag · Cycle Life · Physics model จริง" %}
 {% set og_url = "https://configdoctor.onrender.com/battery-health" %}
 {% set nav_page = "battery_health" %}
 {% include "partials/og_tags.html" %}
 </head>
 <body>
-
 {% include "partials/nav.html" %}
 
 <div class="page-wrap">
 
-  <!-- Back -->
   <div class="back-bar">
-    <a class="back-link" href="/landing">← กลับหน้าหลัก</a>
-    <span class="page-badge">✦ NEW v5.0</span>
+    <a class="back-link" href="/app">← ANALYZER</a>
+    <a class="back-link" href="/landing">🏠 HOME</a>
+    <span class="page-badge">⚡ BATTERY HEALTH v5.1</span>
   </div>
 
-  <!-- Header -->
-  <div class="page-header">
-    <div class="page-icon">🔋</div>
-    <h1 class="page-title">Battery Health <span class="hl">Advisor</span></h1>
-    <p class="page-sub">วิเคราะห์สุขภาพแบต LiPo จาก Internal Resistance, Voltage Sag และ Cycle Count — ด้วย physics model จริง ไม่ใช่แค่ดูตา</p>
-    <div class="edu-note">
-      <span class="edu-icon">💡</span>
-      <span>แบตที่มี IR สูงจะ sag แรงกว่า → voltage ตก → FC reboot / ESC desync — เครื่องมือนี้คำนวณว่าแบตของคุณยังอยู่ใน "safe zone" อีกนานแค่ไหน และควรเลิกใช้เมื่อไหร่</span>
+  <div class="hero">
+    <div class="hero-eyebrow">Power System Diagnostics</div>
+    <h1 class="hero-title">Battery <span class="hl">Health</span> Advisor</h1>
+    <p class="hero-sub">วิเคราะห์สุขภาพแบต LiPo จาก Internal Resistance, Voltage Sag และ Cycle Count — ด้วย physics model จริง ไม่ใช่แค่ดูตา</p>
+    <div class="hero-note">
+      <span>⚡</span>
+      <span>แบตที่มี IR สูงจะ sag แรงกว่า → voltage ตก → FC reboot / ESC desync เครื่องมือนี้คำนวณว่าแบตของคุณยังอยู่ใน <strong style="color:var(--text)">safe zone</strong> อีกนานแค่ไหน และควรเลิกใช้เมื่อไหร่</span>
     </div>
   </div>
 
   <div class="tool-layout">
 
-    <!-- Form -->
-    <div class="form-card">
-      <div class="form-card-title">Battery Specifications</div>
+    <!-- ── FORM ── -->
+    <div>
+      <div class="card">
+        <div class="card-title">Battery Specifications</div>
 
-      <div class="field">
-        <label>Cell Count (S) <span class="unit">e.g. 4S, 6S</span></label>
-        <select id="cells">
-          <option value="1">1S</option>
-          <option value="2">2S</option>
-          <option value="3">3S</option>
-          <option value="4" selected>4S</option>
-          <option value="5">5S</option>
-          <option value="6">6S</option>
-          <option value="8">8S</option>
-        </select>
+        <div class="field">
+          <label>Cell Count <span class="unit">S</span></label>
+          <select id="cells">
+            <option value="1">1S</option><option value="2">2S</option>
+            <option value="3">3S</option><option value="4" selected>4S</option>
+            <option value="5">5S</option><option value="6">6S</option>
+            <option value="8">8S</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Capacity <span class="unit">mAh</span></label>
+          <input type="number" id="capacity" value="1300" min="100" max="10000" step="50">
+        </div>
+        <div class="field">
+          <label>Rated C-Rating
+            <span class="tip">C-rating ที่ระบุบนแบต เช่น 75C, 100C</span>
+          </label>
+          <input type="number" id="crating" value="75" min="10" max="300" step="5">
+        </div>
+
+        <div class="section-sep"></div>
+        <div class="card-title" style="margin-bottom:16px">Current State</div>
+
+        <div class="field">
+          <label>Internal Resistance / cell <span class="unit">mΩ</span>
+            <span class="tip">วัดจาก charger ที่มี IR meter เช่น ISDT Q6 Plus, HOTA D6</span>
+          </label>
+          <input type="number" id="ir" value="4.5" min="0.5" max="60" step="0.5">
+        </div>
+        <div class="field">
+          <label>Resting Voltage / cell <span class="unit">V (หลังพัก 30+ นาที)</span></label>
+          <input type="number" id="restV" value="3.85" min="3.0" max="4.35" step="0.01">
+        </div>
+        <div class="field">
+          <label>Cycle Count
+            <span class="tip">จำนวนครั้งที่ชาร์จ (ประมาณ)</span>
+          </label>
+          <input type="number" id="cycles" value="50" min="0" max="1000" step="5">
+        </div>
+        <div class="field">
+          <label>Build Style</label>
+          <select id="bstyle">
+            <option value="freestyle">Freestyle (bursts สูง)</option>
+            <option value="racing">Racing (full throttle บ่อย)</option>
+            <option value="longrange" selected>Long Range (cruise ต่อเนื่อง)</option>
+            <option value="cinewhoop">Cinewhoop (smooth, low amp)</option>
+          </select>
+        </div>
+
+        <button class="btn-analyze" onclick="analyzeBattery()">🔋 ANALYZE BATTERY HEALTH</button>
       </div>
-
-      <div class="field">
-        <label>Capacity <span class="unit">mAh</span></label>
-        <input type="number" id="capacity" value="1300" min="100" max="10000" step="50">
-      </div>
-
-      <div class="field">
-        <label>Rated C-Rating
-          <span class="tip">C-rating ที่ระบุบนแบต เช่น 75C, 100C</span>
-        </label>
-        <input type="number" id="crating" value="75" min="10" max="300" step="5">
-      </div>
-
-      <div class="form-card-title" style="margin-top:24px">Current State</div>
-
-      <div class="field">
-        <label>Internal Resistance ต่อ cell <span class="unit">mΩ (มิลลิโอห์ม)</span>
-          <span class="tip">วัดได้จาก charger ที่มี IR meter เช่น ISDT Q6 Plus, HOTA D6</span>
-        </label>
-        <input type="number" id="ir" value="4.5" min="0.5" max="60" step="0.5">
-      </div>
-
-      <div class="field">
-        <label>Resting Voltage ต่อ cell <span class="unit">V (หลังพัก 30+ นาที)</span></label>
-        <input type="number" id="restV" value="3.85" min="3.0" max="4.35" step="0.01">
-      </div>
-
-      <div class="field">
-        <label>Cycle Count
-          <span class="tip">จำนวนครั้งที่ชาร์จ (ประมาณ)</span>
-        </label>
-        <input type="number" id="cycles" value="50" min="0" max="1000" step="5">
-      </div>
-
-      <div class="field">
-        <label>Build Style</label>
-        <select id="bstyle">
-          <option value="freestyle">Freestyle (bursts สูง)</option>
-          <option value="racing">Racing (full throttle บ่อย)</option>
-          <option value="longrange" selected>Long Range (cruise ต่อเนื่อง)</option>
-          <option value="cinewhoop">Cinewhoop (smooth, low amp)</option>
-        </select>
-      </div>
-
-      <button class="btn-analyze" onclick="analyzeBattery()">🔋 วิเคราะห์สุขภาพแบต</button>
     </div>
 
-    <!-- Results -->
+    <!-- ── RESULTS ── -->
     <div>
       <div id="resultPanel">
-        <div class="result-card">
-          <div class="form-card-title">Health Report</div>
+        <div class="card">
+          <div class="card-title">Health Report</div>
 
-          <!-- Gauge -->
-          <div class="health-gauge-wrap">
-            <div class="health-gauge">
-              <div class="gauge-bg"></div>
-              <div class="gauge-arc">
-                <div class="gauge-fill" id="gaugeFill"></div>
-              </div>
-              <div class="gauge-needle" id="gaugeNeedle"></div>
-              <div class="gauge-center"></div>
+          <!-- Score ring -->
+          <div class="score-ring-wrap">
+            <svg class="ring-svg" width="160" height="160" viewBox="0 0 160 160">
+              <circle class="ring-bg" cx="80" cy="80" r="72"/>
+              <circle class="ring-fill" id="ringFill" cx="80" cy="80" r="72"/>
+            </svg>
+            <div class="ring-center">
+              <div class="ring-score" id="ringScore">—</div>
+              <div class="ring-label">HEALTH</div>
+              <div class="ring-grade" id="ringGrade"></div>
             </div>
-            <div class="gauge-score" id="gaugeScore">—</div>
-            <div class="gauge-label" id="gaugeLabel">HEALTH SCORE</div>
           </div>
 
           <!-- Metrics -->
           <div class="metrics-grid">
-            <div class="metric-box">
-              <div class="metric-key">Voltage Sag (est.)</div>
-              <div class="metric-val" id="mSag">—</div>
-              <div class="metric-sub" id="mSagSub">at max burst</div>
+            <div class="mbox">
+              <div class="mbox-key">Voltage Sag</div>
+              <div class="mbox-val" id="mSag">—</div>
+              <div class="mbox-sub" id="mSagSub">at max burst</div>
             </div>
-            <div class="metric-box">
-              <div class="metric-key">Real C-Burst</div>
-              <div class="metric-val" id="mRealC">—</div>
-              <div class="metric-sub">effective now</div>
+            <div class="mbox">
+              <div class="mbox-key">Real C-Burst</div>
+              <div class="mbox-val" id="mRealC">—</div>
+              <div class="mbox-sub">effective now</div>
             </div>
-            <div class="metric-box">
-              <div class="metric-key">Life Remaining</div>
-              <div class="metric-val" id="mLife">—</div>
-              <div class="metric-sub">est. cycles left</div>
+            <div class="mbox">
+              <div class="mbox-key">Life Remaining</div>
+              <div class="mbox-val" id="mLife">—</div>
+              <div class="mbox-sub">est. cycles left</div>
             </div>
-            <div class="metric-box">
-              <div class="metric-key">Storage Voltage</div>
-              <div class="metric-val" id="mStorage">—</div>
-              <div class="metric-sub">per cell</div>
+            <div class="mbox">
+              <div class="mbox-key">Storage Voltage</div>
+              <div class="mbox-val" id="mStorage">—</div>
+              <div class="mbox-sub">per cell</div>
             </div>
-            <div class="metric-box full">
-              <div class="metric-key">Peak Current (calculated)</div>
-              <div class="metric-val" id="mPeak">—</div>
-              <div class="metric-sub" id="mPeakSub">pack total at C-rated burst</div>
+            <div class="mbox full">
+              <div class="mbox-key">Peak Current (calculated)</div>
+              <div class="mbox-val" id="mPeak">—</div>
+              <div class="mbox-sub" id="mPeakSub">pack total at C-rated burst</div>
             </div>
           </div>
 
-          <!-- Recommendations -->
           <div class="rec-list" id="recList"></div>
         </div>
 
-        <!-- Physics -->
-        <div class="physics-card" style="margin-top:20px">
-          <div class="physics-title">🔬 Physics Model</div>
-          <div class="physics-eq" id="physicsEq">
-            <span class="comment">// กำลังคำนวณ...</span>
-          </div>
-          <div class="physics-body" id="physicsBody"></div>
+        <div class="physics-card" style="margin-top:14px">
+          <div class="physics-title">🔬 PHYSICS MODEL</div>
+          <div class="phys-eq" id="physicsEq"><span class="comment">// กำลังคำนวณ...</span></div>
+          <div class="phys-body" id="physicsBody"></div>
         </div>
       </div>
 
-      <!-- Default hint -->
-      <div id="hintPanel" style="text-align:center;padding:60px 20px;color:var(--muted)">
-        <div style="font-size:3rem;margin-bottom:16px;opacity:.4">🔋</div>
-        <div style="font-size:.9rem">กรอกข้อมูลแบตแล้วกด "วิเคราะห์"</div>
-        <div style="font-size:.8rem;margin-top:8px;opacity:.6">ต้องการ IR meter → ดู charger ISDT Q6 Plus หรือ HOTA D6</div>
+      <div id="hintPanel">
+        <span class="hint-icon">🔋</span>
+        <div style="font-size:.9rem">กรอกข้อมูลแบตแล้วกด Analyze</div>
+        <div style="font-size:.78rem;margin-top:8px;opacity:.5">ต้องการ IR meter → ISDT Q6 Plus หรือ HOTA D6</div>
       </div>
     </div>
   </div>
 
-  <!-- Education section -->
-  <div class="edu-section" style="margin-top:48px">
-    <div class="edu-section-title">📚 เรียนรู้เรื่องแบต LiPo</div>
+  <!-- Edu -->
+  <div class="edu-wrap">
+    <div class="edu-title">📚 เรียนรู้เรื่องแบต LiPo</div>
     <div class="edu-grid">
       <div class="edu-card">
-        <div class="edu-card-icon">⚡</div>
-        <div class="edu-card-title">Internal Resistance คืออะไร?</div>
-        <div class="edu-card-body">IR คือความต้านทานภายในเซลล์ (มิลลิโอห์ม) — ยิ่งสูงยิ่งเก่า แบตใหม่ 4S freestyle อยู่ที่ ~3-5 mΩ/cell; >12 mΩ = ควรเลิกใช้</div>
+        <div class="edu-icon">⚡</div>
+        <div class="edu-ctitle">Internal Resistance คืออะไร?</div>
+        <div class="edu-cbody">IR คือความต้านทานภายในเซลล์ (มิลลิโอห์ม) — ยิ่งสูงยิ่งเก่า แบตใหม่ 4S freestyle อยู่ที่ ~3–5 mΩ/cell; >12 mΩ = ควรเลิกใช้</div>
       </div>
       <div class="edu-card">
-        <div class="edu-card-icon">📉</div>
-        <div class="edu-card-title">Voltage Sag เกิดขึ้นยังไง?</div>
-        <div class="edu-card-body">เมื่อดึงกระแสสูง: V_sag = I × IR_total ถ้า IR สูง + current สูง = voltage drop มาก → FC brownout, ESC desync, power loss ขณะบิน</div>
+        <div class="edu-icon">📉</div>
+        <div class="edu-ctitle">Voltage Sag เกิดขึ้นยังไง?</div>
+        <div class="edu-cbody">เมื่อดึงกระแสสูง: V_sag = I × IR_total ถ้า IR สูง + current สูง = voltage drop มาก → FC brownout, ESC desync, power loss ขณะบิน</div>
       </div>
       <div class="edu-card">
-        <div class="edu-card-icon">🔄</div>
-        <div class="edu-card-title">C-Rating ตัวเลขจริง vs ปลอม</div>
-        <div class="edu-card-body">C ที่ระบุบนแบตมักเป็นค่า peak ชั่วคราว ค่า "จริง" ที่ sustained = มักครึ่งนึง แบตเก่า IR สูง → C จริงลดลงอีก คำนวณ: C_real = V_min / (IR × cap)</div>
+        <div class="edu-icon">🔄</div>
+        <div class="edu-ctitle">C-Rating ตัวเลขจริง vs ปลอม</div>
+        <div class="edu-cbody">C ที่ระบุบนแบตมักเป็นค่า peak ชั่วคราว ค่า sustained จริง = มักครึ่งหนึ่ง แบตเก่า IR สูง → C จริงลดลงอีก</div>
       </div>
     </div>
   </div>
@@ -334,108 +318,78 @@ select option{background:#1a2030}
 <script>
 function analyzeBattery() {
   const cells    = parseFloat(document.getElementById('cells').value);
-  const cap      = parseFloat(document.getElementById('capacity').value);  // mAh
+  const cap      = parseFloat(document.getElementById('capacity').value);
   const cRated   = parseFloat(document.getElementById('crating').value);
-  const irPerCell= parseFloat(document.getElementById('ir').value);        // mΩ
-  const restV    = parseFloat(document.getElementById('restV').value);     // V per cell
+  const irPerCell= parseFloat(document.getElementById('ir').value);
+  const restV    = parseFloat(document.getElementById('restV').value);
   const cycles   = parseFloat(document.getElementById('cycles').value);
   const style    = document.getElementById('bstyle').value;
 
-  // ─── Physics calculations ───────────────────────────────────
-  // Total pack IR (cells in series)
   const irTotal_mOhm = irPerCell * cells;
   const irTotal_Ohm  = irTotal_mOhm / 1000;
-
-  // Reference IR (new battery) by cell count
-  const irRef = cells <= 3 ? 3.5 : cells === 4 ? 4.0 : 4.5; // mΩ per cell (new)
-  const irAgeFactor = irPerCell / irRef; // 1.0 = new, >2.5 = retired
-
-  // Rated peak current
-  const iPeak_A = (cRated * cap) / 1000;  // A
-
-  // Voltage sag at peak current: V_sag = I × R
+  const irRef = cells <= 3 ? 3.5 : cells === 4 ? 4.0 : 4.5;
+  const irAgeFactor = irPerCell / irRef;
+  const iPeak_A = (cRated * cap) / 1000;
   const sagV_perCell = (iPeak_A * irTotal_Ohm) / cells;
   const sagV_pack    = iPeak_A * irTotal_Ohm;
-
-  // Effective voltage at peak burst (per cell)
   const vAtPeak = restV - sagV_perCell;
-  const vNominal = cells * 3.7;
-
-  // Real C-rating based on IR: max current where vDrop < 0.3V/cell
   const iMaxForSag = (0.3 * cells) / irTotal_Ohm;
   const cReal = (iMaxForSag / (cap / 1000));
-
-  // Cycle life model: typical LiPo rated ~300 cycles; IR doubles at ~200 cycles
-  // Degradation: linear IR growth ~0.3% per cycle for quality packs
-  const irDegradation = (irPerCell - irRef) / irRef * 100; // % above new
+  const irDegradation = (irPerCell - irRef) / irRef * 100;
   const cyclesEstRemain = Math.max(0, Math.round(300 - cycles - (irDegradation * 1.5)));
 
-  // Health score (0–100)
   let score = 100;
-  // IR penalty: -4 per mΩ above reference
   score -= Math.max(0, (irPerCell - irRef)) * 6;
-  // Cycle penalty: -0.3 per cycle above 50
   score -= Math.max(0, (cycles - 50)) * 0.25;
-  // Low voltage penalty
   if (restV < 3.75) score -= (3.75 - restV) * 60;
   if (restV < 3.6)  score -= 30;
   score = Math.max(0, Math.min(100, Math.round(score)));
 
-  // Storage voltage recommendation
-  const storageV = 3.82; // LiPo storage per cell
-
-  // Style-based peak current expectations
+  const storageV = 3.82;
   const styleCurrents = {freestyle:85, racing:95, longrange:50, cinewhoop:35};
   const styleC = styleCurrents[style] || 70;
   const actualDraw_A = (styleC * cap) / 1000;
 
-  // ─── Build result ──────────────────────────────────────────
   const color = score >= 80 ? '#10c47a' : score >= 55 ? '#f1b65a' : score >= 30 ? '#fb923c' : '#f87171';
-  const label = score >= 80 ? 'EXCELLENT' : score >= 65 ? 'GOOD' : score >= 45 ? 'FAIR' : score >= 25 ? 'AGING' : 'RETIRE';
+  const grade = score >= 80 ? 'EXCELLENT' : score >= 65 ? 'GOOD' : score >= 45 ? 'FAIR' : score >= 25 ? 'AGING' : 'RETIRE';
 
-  // Gauge fill angle: -90deg (0%) to +90deg (100%)
-  const angle = -90 + (score / 100) * 180;
-  const gaugeFill = document.getElementById('gaugeFill');
-  gaugeFill.style.background = `conic-gradient(from 0deg, ${color} 0deg, ${color} ${score * 1.8}deg, rgba(255,255,255,.05) ${score*1.8}deg)`;
+  // SVG ring: circumference = 2π×72 ≈ 452.4
+  const circ = 452.4;
+  const offset = circ - (score / 100) * circ;
+  const ring = document.getElementById('ringFill');
+  ring.style.strokeDashoffset = offset;
+  ring.style.stroke = color;
 
-  const needle = document.getElementById('gaugeNeedle');
-  needle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+  document.getElementById('ringScore').innerHTML = `<span style="color:${color}">${score}</span>`;
+  document.getElementById('ringGrade').innerHTML = `<span style="color:${color}">${grade}</span>`;
 
-  document.getElementById('gaugeScore').innerHTML = `<span style="color:${color}">${score}</span>`;
-  document.getElementById('gaugeLabel').textContent = label + ' HEALTH';
-
-  // Metrics
-  const sagClass = sagV_perCell > 0.4 ? 'status-bad' : sagV_perCell > 0.25 ? 'status-warn' : 'status-ok';
+  const sagClass = sagV_perCell > 0.4 ? 'crit' : sagV_perCell > 0.25 ? 'bad' : sagV_perCell > 0.15 ? 'warn' : 'ok';
   document.getElementById('mSag').innerHTML = `<span class="${sagClass}">${sagV_perCell.toFixed(2)}V/cell</span>`;
   document.getElementById('mSagSub').textContent = `pack total: ${sagV_pack.toFixed(2)}V`;
 
-  const cClass = cReal >= cRated * 0.75 ? 'status-ok' : cReal >= cRated * 0.5 ? 'status-warn' : 'status-bad';
+  const cClass = cReal >= cRated * 0.75 ? 'ok' : cReal >= cRated * 0.5 ? 'warn' : 'bad';
   document.getElementById('mRealC').innerHTML = `<span class="${cClass}">${Math.round(cReal)}C</span>`;
 
-  const lifeClass = cyclesEstRemain > 100 ? 'status-ok' : cyclesEstRemain > 40 ? 'status-warn' : 'status-bad';
+  const lifeClass = cyclesEstRemain > 100 ? 'ok' : cyclesEstRemain > 40 ? 'warn' : 'bad';
   document.getElementById('mLife').innerHTML = `<span class="${lifeClass}">~${cyclesEstRemain}</span>`;
   document.getElementById('mStorage').textContent = `${storageV.toFixed(2)} V/cell`;
   document.getElementById('mPeak').innerHTML = `<span style="color:var(--blue)">${Math.round(iPeak_A)} A</span>`;
   document.getElementById('mPeakSub').textContent = `(${cRated}C × ${cap}mAh) — real sustained: ~${Math.round(iMaxForSag)}A`;
 
-  // Recommendations
   const recs = [];
-  if (irPerCell > 12)         recs.push({icon:'🚫', text:'<strong>ควรเลิกใช้แบตนี้</strong> — IR สูงมาก ('+irPerCell+'mΩ/cell) เสี่ยง sag แรง, brownout, หรือ thermal runaway'});
-  else if (irPerCell > 8)     recs.push({icon:'⚠️', text:'IR สูงกว่าปกติมาก — ลด C-rating ในการใช้งานลง 30% และอย่าใช้กับ racing หรือ freestyle'});
-  else if (irPerCell > 6)     recs.push({icon:'⚡', text:'IR เริ่มสูง — แบตอยู่ในช่วง mid-life แนะนำใช้กับ longrange หรือ cinematic เท่านั้น'});
-  if (restV < 3.70)           recs.push({icon:'🔌', text:'Resting voltage ต่ำ — ชาร์จไม่เต็มหรือแบตเสื่อม ตรวจสอบ balance voltage ทุก cell'});
-  if (vAtPeak < 3.5 * cells / cells) recs.push({icon:'📉', text:`Voltage ที่ peak burst ≈ ${(vAtPeak * cells).toFixed(1)}V total — อยู่ใกล้ minimum ของ ESC บางตัว`});
-  if (sagV_perCell > 0.35)    recs.push({icon:'💡', text:`Voltage sag ${sagV_perCell.toFixed(2)}V/cell สูงมาก → ลอง throttle cap ที่ 80% หรือเพิ่ม battery parallel`});
-  if (cycles > 200)           recs.push({icon:'🔄', text:`${cycles} cycles — ถือว่ามาก สำหรับแบต freestyle แนะนำตรวจ IR ทุก 20 cycles`});
-  if (score >= 80)            recs.push({icon:'✅', text:'แบตอยู่ในสภาพดีมาก ดูแลด้วยการ storage charge และเก็บในที่อุณหภูมิเหมาะสม (20–25°C)'});
-  recs.push({icon:'🌡️', text:`อุณหภูมิหลังบิน: แบตไม่ควรร้อนกว่า 45°C ถ้าร้อนกว่า = ดึงกระแสเกิน IR capacity`});
+  if (irPerCell > 12)     recs.push({icon:'🚫',text:'<strong>ควรเลิกใช้แบตนี้</strong> — IR สูงมาก ('+irPerCell+'mΩ/cell) เสี่ยง sag แรง, brownout, หรือ thermal runaway'});
+  else if (irPerCell > 8) recs.push({icon:'⚠️',text:'IR สูงกว่าปกติมาก — ลด C-rating ในการใช้งานลง 30% และอย่าใช้กับ racing หรือ freestyle'});
+  else if (irPerCell > 6) recs.push({icon:'⚡',text:'IR เริ่มสูง — แบตอยู่ในช่วง mid-life แนะนำใช้กับ longrange หรือ cinematic เท่านั้น'});
+  if (restV < 3.70)       recs.push({icon:'🔌',text:'Resting voltage ต่ำ — ชาร์จไม่เต็มหรือแบตเสื่อม ตรวจสอบ balance voltage ทุก cell'});
+  if (sagV_perCell > 0.35) recs.push({icon:'💡',text:`Voltage sag ${sagV_perCell.toFixed(2)}V/cell สูงมาก → ลอง throttle cap ที่ 80% หรือเพิ่ม battery parallel`});
+  if (cycles > 200)       recs.push({icon:'🔄',text:`${cycles} cycles — ถือว่ามาก สำหรับแบต freestyle แนะนำตรวจ IR ทุก 20 cycles`});
+  if (score >= 80)        recs.push({icon:'✅',text:'แบตอยู่ในสภาพดีมาก ดูแลด้วยการ storage charge และเก็บในที่อุณหภูมิเหมาะสม (20–25°C)'});
+  recs.push({icon:'🌡️',text:`อุณหภูมิหลังบิน: แบตไม่ควรร้อนกว่า 45°C ถ้าร้อนกว่า = ดึงกระแสเกิน IR capacity`});
 
-  const recList = document.getElementById('recList');
-  recList.innerHTML = recs.map(r =>
+  document.getElementById('recList').innerHTML = recs.map(r =>
     `<div class="rec-item"><span class="rec-icon">${r.icon}</span><span class="rec-text">${r.text}</span></div>`
   ).join('');
 
-  // Physics equation display
   document.getElementById('physicsEq').innerHTML =
     `V_sag = I_peak × R_internal<br>` +
     `<span style="color:var(--gold)">${iPeak_A.toFixed(0)} A × ${irTotal_Ohm.toFixed(4)} Ω = <strong style="color:var(--text)">${sagV_pack.toFixed(3)} V drop</strong></span><br><br>` +
