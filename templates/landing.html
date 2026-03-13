@@ -151,7 +151,8 @@ body:not(.lang-en) .i18n-th { display: inline !important; }
 }
 
 /* ══════════════════════════════════════════
-   HERO
+   HERO  — FPV Pilot Edition
+   Layout: copy LEFT · CLI terminal RIGHT
    ══════════════════════════════════════════ */
 .hero {
   min-height: 100dvh;
@@ -159,8 +160,7 @@ body:not(.lang-en) .i18n-th { display: inline !important; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  padding: 130px 24px 80px;
+  padding: 110px 24px 72px;
   position: relative;
   overflow: hidden;
 }
@@ -169,210 +169,421 @@ body:not(.lang-en) .i18n-th { display: inline !important; }
 .hero-bg-img {
   position: absolute;
   inset: 0;
-  /* Desktop default: landscape 1920×1080 */
   background-image: url("{{ url_for('static', filename='img/landing-bg-desktop.jpg') }}");
   background-size: cover;
   background-position: center 25%;
   background-repeat: no-repeat;
-  opacity: 0.55;
+  opacity: 0.38;
   z-index: 0;
   transform: scale(1.04);
   transform-origin: center top;
   transition: transform 0.1s linear;
-  /* Fade ด้านล่างให้ content อ่านง่าย */
   -webkit-mask-image: linear-gradient(to bottom,
-    black 0%, black 52%, rgba(0,0,0,0.6) 75%, transparent 100%);
+    black 0%, black 45%, rgba(0,0,0,0.5) 72%, transparent 100%);
   mask-image: linear-gradient(to bottom,
-    black 0%, black 52%, rgba(0,0,0,0.6) 75%, transparent 100%);
+    black 0%, black 45%, rgba(0,0,0,0.5) 72%, transparent 100%);
   pointer-events: none;
   will-change: transform;
 }
-
-/* Mobile portrait ≤ 768px: ใช้ภาพ portrait 1080×1920 */
 @media (max-width: 768px) {
   .hero-bg-img {
     background-image: url("{{ url_for('static', filename='img/landing-bg-mobile.jpg') }}");
     background-position: center 15%;
-    opacity: 0.58;
+    opacity: 0.4;
     -webkit-mask-image: linear-gradient(to bottom,
-      black 0%, black 48%, rgba(0,0,0,0.55) 72%, transparent 100%);
+      black 0%, black 42%, rgba(0,0,0,0.45) 68%, transparent 100%);
     mask-image: linear-gradient(to bottom,
-      black 0%, black 48%, rgba(0,0,0,0.55) 72%, transparent 100%);
+      black 0%, black 42%, rgba(0,0,0,0.45) 68%, transparent 100%);
   }
 }
-
-/* Landscape mobile / small tablet: desktop img, crop higher */
 @media (max-width: 900px) and (orientation: landscape) {
   .hero-bg-img {
     background-image: url("{{ url_for('static', filename='img/landing-bg-desktop.jpg') }}");
     background-position: center 22%;
-    opacity: 0.50;
+    opacity: 0.35;
   }
 }
-
-/* Large desktop ≥ 1600px: zoom-in slightly for crispness */
 @media (min-width: 1600px) {
-  .hero-bg-img {
-    background-position: center 20%;
-    opacity: 0.52;
-  }
+  .hero-bg-img { background-position: center 20%; opacity: 0.36; }
 }
 
 /* Animated grid */
 .hero-grid {
   position: absolute; inset: 0;
   background-image:
-    linear-gradient(rgba(16,196,122,0.038) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(16,196,122,0.038) 1px, transparent 1px);
-  background-size: 52px 52px;
-  mask-image: radial-gradient(ellipse 80% 75% at 50% 40%, black 20%, transparent 100%);
+    linear-gradient(rgba(16,196,122,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16,196,122,0.045) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 90% 80% at 50% 40%, black 10%, transparent 100%);
   animation: gridBreath 7s ease-in-out infinite;
 }
 @keyframes gridBreath {
-  0%,100% { opacity:.55; transform:scale(1); }
-  50%     { opacity:1;   transform:scale(1.008); }
+  0%,100% { opacity:.5; transform:scale(1); }
+  50%     { opacity:.9; transform:scale(1.006); }
 }
 
 /* Glow orbs */
 .orb { position:absolute; border-radius:50%; filter:blur(100px); pointer-events:none; }
 .orb-1 {
-  width:600px; height:400px; opacity:.18;
+  width:560px; height:360px; opacity:.15;
   background: radial-gradient(circle, #10c47a, transparent 70%);
-  top:-10%; left:20%; animation: orbFloat 10s ease-in-out infinite;
+  top:-8%; left:15%; animation: orbFloat 10s ease-in-out infinite;
 }
 .orb-2 {
-  width:400px; height:400px; opacity:.1;
+  width:380px; height:380px; opacity:.08;
   background: radial-gradient(circle, #58a6ff, transparent 70%);
-  bottom:10%; right:5%; animation: orbFloat 10s -4s ease-in-out infinite;
+  bottom:8%; right:4%; animation: orbFloat 10s -4s ease-in-out infinite;
 }
 .orb-3 {
-  width:320px; height:320px; opacity:.09;
+  width:300px; height:300px; opacity:.07;
   background: radial-gradient(circle, #f1b65a, transparent 70%);
-  bottom:18%; left:4%; animation: orbFloat 10s -7s ease-in-out infinite;
+  bottom:20%; left:3%; animation: orbFloat 10s -7s ease-in-out infinite;
 }
 @keyframes orbFloat {
   0%,100% { transform:translate(0,0); }
-  33%     { transform:translate(20px,-30px); }
-  66%     { transform:translate(-15px,15px); }
+  33%     { transform:translate(18px,-26px); }
+  66%     { transform:translate(-14px,14px); }
 }
-
 .scanline {
   position:absolute; inset:0; pointer-events:none;
   background: repeating-linear-gradient(
     0deg, transparent, transparent 2px,
-    rgba(16,196,122,0.012) 2px, rgba(16,196,122,0.012) 4px
+    rgba(16,196,122,0.01) 2px, rgba(16,196,122,0.01) 4px
   );
 }
 
-.hero-inner { position:relative; z-index:2; max-width:800px; }
+/* ── Two-column hero layout ── */
+.hero-inner {
+  position: relative; z-index: 2;
+  width: 100%; max-width: 1140px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+@media (max-width: 900px) {
+  .hero-inner {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 36px;
+  }
+  .hero-copy { align-items: center; }
+  .hero-actions { justify-content: center; }
+  .hero-tags { justify-content: center; }
+}
+
+/* ── Left: copy column ── */
+.hero-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+}
+@media (max-width: 900px) {
+  .hero-copy { align-items: center; }
+}
 
 .hero-badge {
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 6px 18px;
+  padding: 5px 16px;
   background: rgba(16,196,122,0.08);
-  border: 1px solid rgba(16,196,122,0.22);
+  border: 1px solid rgba(16,196,122,0.28);
   border-radius: 30px;
-  font-size: .76rem; font-weight: 700;
-  color: var(--green); letter-spacing: .12em; text-transform: uppercase;
-  margin-bottom: 28px;
-  animation: fadeUp .7s ease both;
+  font-family: var(--mono);
+  font-size: .7rem; font-weight: 700;
+  color: var(--green); letter-spacing: .1em;
+  margin-bottom: 22px;
+  animation: fadeUp .6s ease both;
+  white-space: nowrap;
 }
 .badge-dot {
   width:6px; height:6px; background:var(--green); border-radius:50%;
   animation: blink 1.8s ease-in-out infinite;
 }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
-@keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.12} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:none} }
 
 .hero-logo {
-  width: 110px;
-  filter: drop-shadow(0 0 28px rgba(16,196,122,0.5)) drop-shadow(0 0 60px rgba(16,196,122,0.2));
-  margin-bottom: 22px;
-  animation: fadeUp .7s .1s ease both, float 5s 1s ease-in-out infinite;
+  width: 72px;
+  filter: drop-shadow(0 0 22px rgba(16,196,122,0.55)) drop-shadow(0 0 55px rgba(16,196,122,0.18));
+  margin-bottom: 18px;
+  animation: fadeUp .6s .08s ease both, float 5s 1s ease-in-out infinite;
 }
 @keyframes float {
-  0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-8px) rotate(.5deg)}
+  0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-7px) rotate(.4deg)}
 }
 
+/* Eyebrow label */
 .hero-label {
-  font-family: var(--font-en);
-  font-size: clamp(.64rem,.85vw,.76rem);
-  letter-spacing: .3em; color: var(--green); text-transform: uppercase;
-  margin-bottom: 12px; animation: fadeUp .7s .15s ease both; opacity:.75;
+  font-family: var(--mono);
+  font-size: .65rem;
+  letter-spacing: .28em; color: var(--green); text-transform: uppercase;
+  margin-bottom: 10px; animation: fadeUp .6s .12s ease both; opacity:.7;
 }
 
+/* Main headline — speaks directly to pilot */
 .hero-title {
   font-family: var(--font-th);
-  font-size: clamp(2.3rem, 5.5vw, 3.9rem);
-  font-weight: 800; line-height: 1.1; color: #fff;
-  margin-bottom: 8px; animation: fadeUp .7s .2s ease both;
+  font-size: clamp(2rem, 4.5vw, 3.4rem);
+  font-weight: 800; line-height: 1.12; color: #fff;
+  margin-bottom: 6px; animation: fadeUp .6s .18s ease both;
 }
-.hero-title .accent { color: var(--green); text-shadow: 0 0 40px rgba(16,196,122,0.45); }
+.hero-title .accent {
+  color: var(--green);
+  text-shadow: 0 0 36px rgba(16,196,122,0.5);
+}
+.hero-title .accent-gold {
+  color: var(--gold);
+  text-shadow: 0 0 30px rgba(241,182,90,0.4);
+}
 .hero-title-en {
-  font-family: var(--font-en);
-  font-size: clamp(.85rem, 1.8vw, 1.15rem);
-  color: rgba(255,255,255,.22); letter-spacing: .18em;
-  display: block; margin-top: 6px; font-weight: 700;
-  animation: fadeUp .7s .25s ease both;
+  font-family: var(--mono);
+  font-size: clamp(.72rem, 1.4vw, .88rem);
+  color: rgba(255,255,255,.2); letter-spacing: .2em;
+  display: block; margin-top: 8px; font-weight: 600;
+  animation: fadeUp .6s .22s ease both;
+}
+
+/* Sub-headline — CLI hint */
+.hero-cli-hint {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(16,196,122,0.18);
+  border-left: 3px solid var(--green);
+  border-radius: 8px;
+  padding: 9px 16px;
+  margin: 20px 0 24px;
+  font-family: var(--mono);
+  font-size: .8rem;
+  color: var(--muted);
+  animation: fadeUp .6s .26s ease both;
+  max-width: 440px;
+}
+.hero-cli-hint .cli-cmd {
+  color: var(--green); font-weight: 700;
+}
+.hero-cli-hint .cli-arrow {
+  color: rgba(255,255,255,.25); font-size: .7rem;
+}
+.hero-cli-hint .cli-result {
+  color: var(--gold); font-weight: 600;
 }
 
 .hero-desc {
-  font-size: clamp(.9rem,1.1vw,1.02rem);
-  color: var(--muted); line-height: 1.72;
-  max-width: 600px; margin: 22px auto 36px;
-  animation: fadeUp .7s .3s ease both;
+  font-size: clamp(.86rem,1.05vw,.97rem);
+  color: var(--muted); line-height: 1.75;
+  margin: 0 0 30px;
+  animation: fadeUp .6s .28s ease both;
+  max-width: 480px;
 }
-.hero-desc strong { color: var(--text); }
+.hero-desc strong { color: var(--text); font-weight: 700; }
+@media (max-width:900px) {
+  .hero-desc { max-width: 560px; }
+}
 
 .hero-actions {
-  display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
-  animation: fadeUp .7s .4s ease both; margin-bottom: 28px;
+  display: flex; gap: 12px; flex-wrap: wrap;
+  animation: fadeUp .6s .34s ease both; margin-bottom: 22px;
 }
 
 .btn-primary {
-  display: inline-flex; align-items: center; gap: 10px;
-  padding: 16px 36px; background: var(--green);
-  color: #021a0e; font-weight: 800; font-size: 1rem;
-  border-radius: 12px; text-decoration: none; letter-spacing: .03em;
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 14px 30px; background: var(--green);
+  color: #021a0e; font-weight: 800; font-size: .95rem;
+  border-radius: 10px; text-decoration: none; letter-spacing: .03em;
   transition: filter .2s, transform .2s, box-shadow .3s;
   box-shadow: 0 0 0 0 rgba(16,196,122,0.4);
+  font-family: var(--font-th);
 }
 .btn-primary:hover {
   filter: brightness(1.08); transform: translateY(-3px);
-  box-shadow: 0 16px 50px rgba(16,196,122,0.35), 0 0 0 8px rgba(16,196,122,0.06);
+  box-shadow: 0 14px 44px rgba(16,196,122,0.38), 0 0 0 7px rgba(16,196,122,0.07);
 }
 .btn-secondary {
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 16px 28px; background: rgba(255,255,255,0.05);
-  color: var(--text); font-weight: 600; font-size: .95rem;
-  border-radius: 12px; text-decoration: none;
+  padding: 14px 24px; background: rgba(255,255,255,0.04);
+  color: var(--text); font-weight: 600; font-size: .9rem;
+  border-radius: 10px; text-decoration: none;
   border: 1px solid rgba(255,255,255,0.1);
   transition: background .2s, border-color .2s, transform .2s;
+  font-family: var(--font-th);
 }
 .btn-secondary:hover {
-  background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.18); transform: translateY(-2px);
+  background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); transform: translateY(-2px);
 }
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 13px 20px; background: transparent;
+  color: var(--muted); font-weight: 600; font-size: .85rem;
+  border-radius: 10px; text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.07);
+  transition: color .2s, border-color .2s;
+  font-family: var(--mono);
+}
+.btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,.18); }
 
-/* Feature tags pill row */
-.hero-tags { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; animation: fadeUp .7s .5s ease both; }
+/* Feature pill row */
+.hero-tags {
+  display: flex; gap: 7px; flex-wrap: wrap;
+  animation: fadeUp .6s .42s ease both;
+}
 .hero-tag {
-  font-family: var(--font-en); font-size: .65rem; font-weight: 700;
-  letter-spacing: .09em; text-transform: uppercase;
+  font-family: var(--mono); font-size: .62rem; font-weight: 700;
+  letter-spacing: .07em; text-transform: uppercase;
   color: var(--muted); border: 1px solid var(--border);
-  padding: 4px 11px; border-radius: 5px; background: rgba(255,255,255,0.03);
+  padding: 4px 10px; border-radius: 5px; background: rgba(255,255,255,0.025);
 }
-.hero-tag.hot { color: var(--gold); border-color: rgba(241,182,90,0.25); background: rgba(241,182,90,0.06); }
+.hero-tag.hot  { color: var(--gold);  border-color: rgba(241,182,90,0.28);  background: rgba(241,182,90,0.06); }
+.hero-tag.live { color: var(--green); border-color: rgba(16,196,122,0.28);  background: rgba(16,196,122,0.06); }
+.hero-tag.blue { color: var(--blue);  border-color: rgba(88,166,255,0.28);  background: rgba(88,166,255,0.06); }
 
+/* ── Right: CLI Terminal Preview ── */
+.hero-terminal-col {
+  animation: fadeUp .7s .3s ease both;
+}
+.hero-terminal {
+  background: #080c0e;
+  border: 1px solid rgba(16,196,122,0.22);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(16,196,122,0.06),
+    0 24px 80px rgba(0,0,0,0.7),
+    0 0 60px rgba(16,196,122,0.06);
+  position: relative;
+}
+.hero-terminal::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg,
+    rgba(16,196,122,0.025) 0%, transparent 50%,
+    rgba(88,166,255,0.015) 100%);
+  pointer-events: none;
+}
+
+/* Terminal title bar */
+.term-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 16px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.term-dots { display: flex; gap: 6px; }
+.term-dot {
+  width: 11px; height: 11px; border-radius: 50%;
+}
+.term-dot-r { background: #ff5f56; }
+.term-dot-y { background: #ffbd2e; }
+.term-dot-g { background: #27c93f; }
+.term-title-text {
+  flex: 1; text-align: center;
+  font-family: var(--mono); font-size: .67rem;
+  color: rgba(255,255,255,.3); letter-spacing: .1em;
+}
+.term-badge {
+  font-family: var(--mono); font-size: .6rem; font-weight: 700;
+  padding: 2px 8px; border-radius: 4px;
+  background: rgba(16,196,122,0.15);
+  color: var(--green); letter-spacing: .08em;
+}
+
+/* Terminal body */
+.term-body {
+  padding: 18px 20px 20px;
+  font-family: var(--mono);
+  font-size: .76rem;
+  line-height: 1.85;
+  min-height: 300px;
+}
+.term-line { display: flex; gap: 10px; align-items: baseline; }
+.term-prompt { color: rgba(16,196,122,0.6); user-select: none; flex-shrink: 0; }
+.term-cmd    { color: #e2e8f0; }
+.term-comment{ color: rgba(255,255,255,.25); font-style: italic; }
+.term-ok     { color: var(--green); font-weight: 700; }
+.term-warn   { color: var(--gold); font-weight: 700; }
+.term-err    { color: #f87171; font-weight: 700; }
+.term-key    { color: var(--blue); }
+.term-val    { color: #a78bfa; }
+.term-muted  { color: rgba(255,255,255,.32); }
+.term-section{
+  color: rgba(16,196,122,0.5); letter-spacing: .1em;
+  font-size: .65rem; text-transform: uppercase;
+  border-top: 1px solid rgba(255,255,255,.05);
+  padding-top: 8px; margin-top: 4px;
+  margin-bottom: 2px;
+}
+/* Cursor blink on last active line */
+.term-cursor {
+  display: inline-block; width: 7px; height: 13px;
+  background: var(--green); vertical-align: middle;
+  margin-left: 3px;
+  animation: cursorBlink .9s step-end infinite;
+}
+@keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* Typed-text animation — each .tl-N gets a delay */
+.term-typed { overflow: hidden; white-space: nowrap; }
+.tl-1  { animation: termReveal .12s  .55s  ease both; }
+.tl-2  { animation: termReveal .12s  .80s  ease both; }
+.tl-3  { animation: termReveal .12s  1.05s ease both; }
+.tl-4  { animation: termReveal .12s  1.30s ease both; }
+.tl-5  { animation: termReveal .12s  1.55s ease both; }
+.tl-6  { animation: termReveal .12s  1.80s ease both; }
+.tl-7  { animation: termReveal .12s  2.05s ease both; }
+.tl-8  { animation: termReveal .12s  2.30s ease both; }
+.tl-9  { animation: termReveal .12s  2.55s ease both; }
+.tl-10 { animation: termReveal .12s  2.80s ease both; }
+.tl-11 { animation: termReveal .12s  3.05s ease both; }
+.tl-12 { animation: termReveal .12s  3.30s ease both; }
+@keyframes termReveal { from{opacity:0;transform:translateX(-4px)} to{opacity:1;transform:none} }
+
+/* Mini pill badges inside terminal */
+.term-pill {
+  display: inline-block;
+  padding: 1px 7px; border-radius: 4px; font-size: .62rem;
+  font-weight: 800; letter-spacing: .06em; vertical-align: middle;
+}
+.term-pill-g { background: rgba(16,196,122,.18);  color: var(--green); }
+.term-pill-y { background: rgba(241,182,90,.18);  color: var(--gold); }
+.term-pill-r { background: rgba(248,113,113,.18); color: #f87171; }
+.term-pill-b { background: rgba(88,166,255,.18);  color: var(--blue); }
+
+/* "Analyze" footer strip inside terminal */
+.term-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 20px;
+  background: rgba(16,196,122,0.06);
+  border-top: 1px solid rgba(16,196,122,0.14);
+}
+.term-footer-text {
+  font-family: var(--mono); font-size: .67rem;
+  color: var(--green); letter-spacing: .08em;
+}
+.term-footer-link {
+  font-family: var(--mono); font-size: .67rem; font-weight: 700;
+  color: var(--green); text-decoration: none; letter-spacing: .06em;
+  border: 1px solid rgba(16,196,122,0.3); padding: 4px 12px; border-radius: 5px;
+  transition: background .2s;
+}
+.term-footer-link:hover { background: rgba(16,196,122,0.1); }
+
+/* Responsive: stack on mobile */
+@media (max-width: 900px) {
+  .hero-terminal { font-size: .72rem; }
+  .term-body { min-height: auto; padding: 14px 16px 16px; }
+}
+
+/* ── Scroll hint ── */
 .scroll-hint {
-  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
-  color: rgba(255,255,255,.18); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase;
-  animation: fadeUp 1s .8s ease both;
+  position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  color: rgba(255,255,255,.16); font-size: .67rem; letter-spacing: .1em; text-transform: uppercase;
+  animation: fadeUp 1s .9s ease both;
 }
 .scroll-arrow {
-  width: 26px; height: 26px;
-  border-right: 2px solid rgba(16,196,122,.25);
-  border-bottom: 2px solid rgba(16,196,122,.25);
+  width: 22px; height: 22px;
+  border-right: 2px solid rgba(16,196,122,.22);
+  border-bottom: 2px solid rgba(16,196,122,.22);
   transform: rotate(45deg);
   animation: arrowBounce 2s ease-in-out infinite;
 }
@@ -1012,7 +1223,6 @@ footer {
 
 <!-- ── HERO ─────────────────────────────────────────────────── -->
 <section class="hero" id="heroSection">
-  <!-- Background image layer -->
   <div class="hero-bg-img" id="heroBgImg"></div>
   <div class="hero-grid"></div>
   <div class="orb orb-1"></div>
@@ -1021,47 +1231,182 @@ footer {
   <div class="scanline"></div>
 
   <div class="hero-inner">
-    <div class="hero-badge">
-      <span class="badge-dot"></span>
-      <span class="i18n-th">🇹🇭 สำหรับชุมชน FPV ไทย — v5.1 Smart Analysis</span>
-      <span class="i18n-en">🇹🇭 For FPV Thailand Community — v5.1 Smart Analysis</span>
-    </div>
 
-    <img src="{{ url_for('static', filename='img/obix-logo.png') }}"
-         class="hero-logo" alt="OBIXConfig Doctor">
+    <!-- ── LEFT: Copy ─────────────────────────── -->
+    <div class="hero-copy">
 
-    <div class="hero-label">OBIXCONFIG DOCTOR</div>
+      <!-- Live badge -->
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        <span class="i18n-th">BETAFLIGHT CLI ANALYZER · v5.1 · 🇹🇭</span>
+        <span class="i18n-en">BETAFLIGHT CLI ANALYZER · v5.1 · 🇹🇭</span>
+      </div>
 
-    <h1 class="hero-title">
-      <span class="i18n-th">วิเคราะห์โดรน <span class="accent">FPV</span><br>ของคุณ • ลึกที่สุดในไทย</span>
-      <span class="i18n-en">Analyze your <span class="accent">FPV</span> Drone<br>Deepest tools in Thailand</span>
-      <span class="hero-title-en">TUNE SMARTER. FLY BETTER. v5.1</span>
-    </h1>
+      <img src="{{ url_for('static', filename='img/obix-logo.png') }}"
+           class="hero-logo" alt="OBIXConfig Doctor">
 
-    <p class="hero-desc">
-      <span class="i18n-th">วิเคราะห์ <strong>PID · Filter · Motor · ESC · Rates · RPM · Blackbox · Battery · Thermal · Loop</strong><br>จากข้อมูลโดรนของคุณ — ได้ค่าพร้อมใช้ + CLI command ทันที ฟรี 100%</span>
-      <span class="i18n-en">Analyze <strong>PID · Filter · Motor · ESC · Rates · RPM · Blackbox · Battery · Thermal · Loop</strong><br>from your drone specs — instant results + CLI commands. 100% Free.</span>
-    </p>
+      <div class="hero-label">OBIXCONFIG DOCTOR</div>
 
-    <div class="hero-actions">
-      <a href="/app" class="btn-primary">
-        <span class="i18n-th">🚀 เริ่มวิเคราะห์โดรน</span>
-        <span class="i18n-en">🚀 Analyze My Drone</span>
-      </a>
-      <a href="#new-features" class="btn-secondary">
-        <span class="i18n-th">ดู Features ใหม่ ↓</span>
-        <span class="i18n-en">See New Features ↓</span>
-      </a>
-    </div>
+      <!-- Main headline — speaks to CLI pilots -->
+      <h1 class="hero-title">
+        <span class="i18n-th">
+          paste <span class="accent">`diff all`</span><br>
+          รับ tune <span class="accent-gold">พร้อมบิน</span> ทันที
+        </span>
+        <span class="i18n-en">
+          paste <span class="accent">`diff all`</span><br>
+          get a <span class="accent-gold">flight-ready</span> tune
+        </span>
+        <span class="hero-title-en">ANALYZE · DIAGNOSE · FLY — v5.1</span>
+      </h1>
 
-    <div class="hero-tags">
-      <span class="hero-tag hot">🆕 v5.1 Smart Analysis + Physics Engine</span>
-      <span class="hero-tag">23 Tools</span>
-      <span class="hero-tag">BF 4.3 · 4.4 · 4.5</span>
-      <span class="hero-tag">2.5&quot;–10&quot;</span>
-      <span class="hero-tag"><span class="i18n-th">ฟรี · ไม่ต้อง login</span><span class="i18n-en">Free · No login</span></span>
-    </div>
-  </div>
+      <!-- CLI hint strip -->
+      <div class="hero-cli-hint">
+        <span class="cli-cmd"># diff all</span>
+        <span class="cli-arrow">→</span>
+        <span class="cli-result">⚡ PID · RPM Filter · CLI Export ทันที</span>
+      </div>
+
+      <p class="hero-desc">
+        <span class="i18n-th">
+          วาง <strong>diff all</strong> ของคุณ — Doctor วิเคราะห์ <strong>PID oscillation · RPM filter · motor timing · ESC protocol · battery sag · loop latency</strong> พร้อม CLI command พร้อมใช้ ฟรี 100% ไม่ต้อง login
+        </span>
+        <span class="i18n-en">
+          Drop your <strong>diff all</strong> — Doctor diagnoses <strong>PID oscillation · RPM filter · motor timing · ESC protocol · battery sag · loop latency</strong> with ready-to-paste CLI commands. Free. No login.
+        </span>
+      </p>
+
+      <div class="hero-actions">
+        <a href="/app" class="btn-primary">
+          <span class="i18n-th">📋 Paste diff all → วิเคราะห์</span>
+          <span class="i18n-en">📋 Paste diff all → Analyze</span>
+        </a>
+        <a href="/blackbox" class="btn-secondary">
+          <span class="i18n-th">📊 Blackbox Analyzer</span>
+          <span class="i18n-en">📊 Blackbox Analyzer</span>
+        </a>
+      </div>
+
+      <!-- Feature tags — BF-specific terminology -->
+      <div class="hero-tags">
+        <span class="hero-tag hot">🆕 v5.1 Physics Engine</span>
+        <span class="hero-tag live">diff all parser</span>
+        <span class="hero-tag blue">RPM filter calc</span>
+        <span class="hero-tag">PID advisor</span>
+        <span class="hero-tag">BF 4.3 · 4.4 · 4.5</span>
+        <span class="hero-tag">CLI surgeon</span>
+        <span class="hero-tag">2.5″–10″</span>
+        <span class="hero-tag"><span class="i18n-th">ฟรี · ไม่ต้อง login</span><span class="i18n-en">Free · No login</span></span>
+      </div>
+    </div><!-- /hero-copy -->
+
+    <!-- ── RIGHT: CLI Terminal Preview ──────────── -->
+    <div class="hero-terminal-col">
+      <div class="hero-terminal" role="img" aria-label="OBIXConfig Doctor CLI analysis preview">
+
+        <!-- Title bar -->
+        <div class="term-bar">
+          <div class="term-dots">
+            <span class="term-dot term-dot-r"></span>
+            <span class="term-dot term-dot-y"></span>
+            <span class="term-dot term-dot-g"></span>
+          </div>
+          <span class="term-title-text">obixconfig-doctor — diff all analysis</span>
+          <span class="term-badge">BF 4.5</span>
+        </div>
+
+        <!-- Terminal body -->
+        <div class="term-body">
+
+          <div class="term-line tl-1">
+            <span class="term-prompt">$</span>
+            <span class="term-cmd">paste <span class="term-key">diff all</span> <span class="term-comment">← วางข้อมูล CLI ตรงนี้</span></span>
+          </div>
+          <div class="term-line tl-2">
+            <span class="term-prompt">&gt;</span>
+            <span class="term-cmd">Analyzing <span class="term-key">23 parameters</span>…</span>
+          </div>
+
+          <div class="term-line tl-3" style="margin-top:6px">
+            <span class="term-section">── PID ANALYSIS ─────────────────</span>
+          </div>
+          <div class="term-line tl-4">
+            <span class="term-prompt">&gt;</span>
+            <span class="term-cmd">
+              <span class="term-key">p_pitch</span> = <span class="term-val">52</span>
+              &nbsp;<span class="term-pill term-pill-y">⚠ HIGH</span>
+              <span class="term-muted">→ lower to 42–46</span>
+            </span>
+          </div>
+          <div class="term-line tl-5">
+            <span class="term-prompt">&gt;</span>
+            <span class="term-cmd">
+              <span class="term-key">i_pitch</span> = <span class="term-val">80</span>
+              &nbsp;<span class="term-pill term-pill-g">✓ OK</span>
+            </span>
+          </div>
+          <div class="term-line tl-6">
+            <span class="term-prompt">&gt;</span>
+            <span class="term-cmd">
+              <span class="term-key">iterm_relax_cutoff</span> = <span class="term-val">15</span>
+              &nbsp;<span class="term-pill term-pill-g">✓ OK</span>
+            </span>
+          </div>
+
+          <div class="term-line tl-7" style="margin-top:6px">
+            <span class="term-section">── RPM FILTER ───────────────────</span>
+          </div>
+          <div class="term-line tl-8">
+            <span class="term-prompt">&gt;</span>
+            <span class="term-cmd">
+              <span class="term-key">dshot_bidir</span> = <span class="term-val">ON</span>
+              &nbsp;<span class="term-pill term-pill-g">✓ RPM enabled</span>
+            </span>
+          </div>
+          <div class="term-line tl-9">
+            <span class="term-prompt">&gt;</span>
+            <span class="term-cmd">
+              <span class="term-key">gyro_rpm_notch_harmonics</span> = <span class="term-val">3</span>
+              &nbsp;<span class="term-pill term-pill-b">ℹ optimal</span>
+            </span>
+          </div>
+
+          <div class="term-line tl-10" style="margin-top:6px">
+            <span class="term-section">── CLI EXPORT ───────────────────</span>
+          </div>
+          <div class="term-line tl-11">
+            <span class="term-prompt">&gt;</span>
+            <span class="term-cmd">
+              <span class="term-ok">set p_pitch = 44</span>
+              <span class="term-muted">&nbsp;# ready to paste</span>
+            </span>
+          </div>
+          <div class="term-line tl-12">
+            <span class="term-prompt">&gt;</span>
+            <span class="term-cmd">
+              <span class="term-ok">save</span>
+              <span class="term-cursor"></span>
+            </span>
+          </div>
+
+        </div><!-- /term-body -->
+
+        <!-- Footer CTA inside terminal -->
+        <div class="term-footer">
+          <span class="term-footer-text">
+            <span class="i18n-th">✓ วิเคราะห์ด้วย diff all ของคุณ</span>
+            <span class="i18n-en">✓ Run with your own diff all</span>
+          </span>
+          <a href="/app" class="term-footer-link">
+            <span class="i18n-th">เริ่มวิเคราะห์ →</span>
+            <span class="i18n-en">Analyze now →</span>
+          </a>
+        </div>
+
+      </div><!-- /hero-terminal -->
+    </div><!-- /hero-terminal-col -->
+
+  </div><!-- /hero-inner -->
 
   <div class="scroll-hint">
     <span class="i18n-th">เลื่อนลง</span>
@@ -1074,19 +1419,19 @@ footer {
 <div class="stats-bar">
   <div class="stat-item">
     <span class="stat-num">23</span>
-    <div class="stat-lbl"><span class="i18n-th">Tools &amp; Features</span><span class="i18n-en">Tools &amp; Features</span></div>
+    <div class="stat-lbl"><span class="i18n-th">Tools &amp; Analyzers</span><span class="i18n-en">Tools &amp; Analyzers</span></div>
   </div>
   <div class="stat-item">
-    <span class="stat-num">8</span>
-    <div class="stat-lbl"><span class="i18n-th">Build Sizes</span><span class="i18n-en">Build Sizes</span></div>
+    <span class="stat-num" style="font-size:1.5rem;letter-spacing:-.03em">4.3–4.5</span>
+    <div class="stat-lbl"><span class="i18n-th">Betaflight รองรับ</span><span class="i18n-en">Betaflight Support</span></div>
   </div>
   <div class="stat-item">
-    <span class="stat-num">13</span>
-    <div class="stat-lbl"><span class="i18n-th">PID Symptoms</span><span class="i18n-en">PID Symptoms</span></div>
+    <span class="stat-num">CLI</span>
+    <div class="stat-lbl"><span class="i18n-th">diff all · surgeon · export</span><span class="i18n-en">diff all · surgeon · export</span></div>
   </div>
   <div class="stat-item">
     <span class="stat-num">🇹🇭</span>
-    <div class="stat-lbl"><span class="i18n-th">Community Thai</span><span class="i18n-en">Thai Community</span></div>
+    <div class="stat-lbl"><span class="i18n-th">ชุมชน FPV ไทย</span><span class="i18n-en">Thai FPV Community</span></div>
   </div>
 </div>
 
