@@ -52,6 +52,20 @@ except Exception as e:
     def build_snapshot_meta(a): return {}
 
 try:
+    from analyzer.secret_sauce import generate_secret_sauce
+    SECRET_SAUCE_AVAILABLE = True
+except Exception as e:
+    SECRET_SAUCE_AVAILABLE = False
+    def generate_secret_sauce(*args, **kwargs): return {"cli": "# secret_sauce not available", "insights": [], "params": {}}
+    print("secret_sauce import failed:", e)
+
+try:
+    from logic.presets import get_preset_groups
+    PRESET_GROUPS = get_preset_groups()
+except Exception:
+    PRESET_GROUPS = {}
+
+try:
     from analyzer.advanced_analysis import make_advanced_report
     ADV_ANALYSIS_AVAILABLE = True
 except Exception as e:
@@ -507,9 +521,38 @@ def index():
         prop_result["effect"] = effect
         analysis["prop_result"] = prop_result
 
+        # ── Secret Sauce ─────────────────────────────────────────
+        if SECRET_SAUCE_AVAILABLE:
+            try:
+                _adv = analysis.get("advanced", {})
+                sauce = generate_secret_sauce(
+                    cls_key=detected_class,
+                    style=style,
+                    battery=battery,
+                    size_inch=size,
+                    weight_g=weight,
+                    motor_kv=motor_kv,
+                    prop_size=prop_size,
+                    pid=analysis.get("pid", {}),
+                    flt=analysis.get("filter", {}),
+                    rpm_estimated=_adv.get("rpm_estimated") or analysis.get("rpm_estimated"),
+                    tip_speed_mps=_adv.get("tip_speed_mps") or analysis.get("tip_speed_mps"),
+                )
+                analysis["secret_sauce"] = sauce
+            except Exception:
+                logger.exception("Secret sauce error")
+                analysis["secret_sauce"] = None
+        else:
+            analysis["secret_sauce"] = None
+
+        # ── Expose motor_kv for template ──────────────────────────────
+        analysis["motor_kv"] = motor_kv
+
         logger.info("analysis keys: %s", list(analysis.keys()))
 
-    return render_template("index.html", analysis=analysis)
+    return render_template("index.html", analysis=analysis,
+                           preset_groups=PRESET_GROUPS,
+                           all_presets=PRESETS)
 
 # ── Standard routes ───────────────────────────────────────────────────────
 @app.route("/about")
