@@ -126,10 +126,10 @@ logger = logging.getLogger("configdoctor")
 # ── Init Rate Limiter ─────────────────────────────────────────────────────
 if LIMITER_AVAILABLE:
     limiter = Limiter(
-        key_func=get_remote_address,
-        app=app,
-        default_limits=[],          # ไม่ limit route ทั่วไป
-        storage_uri="memory://",    # ใช้ in-memory (เพียงพอสำหรับ single worker)
+    key_func=get_remote_address,
+    app=app,
+    default_limits=[],
+    storage_uri=os.environ.get("REDIS_URL"),
     )
     def _rate(limit_str):
         """Decorator shortcut สำหรับ rate limit"""
