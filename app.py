@@ -988,11 +988,11 @@ def set_security_headers(response):
     response.headers["Permissions-Policy"]     = "geolocation=(), microphone=(), camera=()"
     # CSP: whitelist ครบทุก CDN ที่ใช้จริง
     response.headers["Content-Security-Policy"] = (
-        "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' "
-        "  https://cdnjs.cloudflare.com "
-        "  https://cdn.jsdelivr.net "
-        "  https://fonts.googleapis.com; "
+"default-src 'self'; "
+"script-src 'self' "
+"  https://cdnjs.cloudflare.com "
+"  https://cdn.jsdelivr.net "
+"  https://fonts.googleapis.com; "
         "style-src 'self' 'unsafe-inline' "
         "  https://fonts.googleapis.com "
         "  https://fonts.gstatic.com; "
