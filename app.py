@@ -1022,7 +1022,19 @@ def rate_limit_exceeded(e):
 
 @app.route("/healthz")
 def healthz():
-    # ไม่เปิดเผย module status ใน production
+
+    # IP ที่เรียก request
+    ip = request.remote_addr
+
+    # อนุญาตเฉพาะ localhost
+    allowed_ips = [
+        "127.0.0.1",
+        "::1"
+    ]
+
+    if ip not in allowed_ips:
+        return {"error": "forbidden"}, 403
+
     return {"status": "ok"}
 
 # ── SEO: robots.txt ────────────────────────────────────────────────────────
