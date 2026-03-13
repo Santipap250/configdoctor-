@@ -233,8 +233,8 @@ def analyze_drone(size, battery, style, prop_result, weight, detected_class=None
 
     # ── PID: use class+style lookup (accurate) ─────────────────────────
     if detected_class:
-        pid = get_pid_for_class_style(detected_class, style)
-        flt_raw = get_filter_for_class(detected_class)
+        pid = get_pid_for_class_style(detected_class, style, battery)
+        flt_raw = get_filter_for_class(detected_class, battery)
     else:
         # fallback style-only (should rarely happen)
         if style == "racing":
@@ -407,7 +407,7 @@ def index():
                         "flight_time": 0, "summary": "analysis fallback", "basic_tips": []}
 
         # ── Baseline from presets ─────────────────────────────────────
-        baseline_ctrl  = get_baseline_for_class(detected_class) or {}
+        baseline_ctrl  = get_baseline_for_class(detected_class, battery) or {}
         pid_axes       = baseline_ctrl.get("pid_axes", {})
         filter_baseline = baseline_ctrl.get("filter", {})
 
