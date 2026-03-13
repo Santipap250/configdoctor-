@@ -991,7 +991,6 @@ def robots_txt():
         "Disallow: /analyze_cli\n"
         "Disallow: /compare_cli\n"
         "Disallow: /blackbox/analyze\n"
-        "Disallow: /military-uas\n"
         "\n"
         "Sitemap: https://configdoctor.onrender.com/sitemap.xml\n"
     )
@@ -1031,6 +1030,7 @@ def sitemap_xml():
         ("/fpv",              "monthly", "0.6"),
         ("/about",            "monthly", "0.5"),
         ("/changelog",        "weekly",  "0.5"),
+        ("/military-uas",      "weekly",  "0.8"),
     ]
     base = "https://configdoctor.onrender.com"
     today = datetime.utcnow().strftime("%Y-%m-%d")
@@ -1049,7 +1049,7 @@ def sitemap_xml():
 </urlset>"""
     return Response(xml, mimetype="application/xml")
 
-# ── v5.0 New Feature Routes ─────────────────────────────────
+# ── v5.1 Additional Routes ──────────────────────────────────
 
 @app.route('/battery-health')
 def battery_health():
