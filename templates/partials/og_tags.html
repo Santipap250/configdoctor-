@@ -1,5 +1,5 @@
 {#
-  partials/og_tags.html — OBIXConfig Doctor v2.2
+  partials/og_tags.html — OBIXConfig Doctor v5.1
   ══════════════════════════════════════════════
   วิธีใช้ใน template อื่น:
     {% set og_title       = "ชื่อหน้า — OBIXConfig Doctor" %}
@@ -13,7 +13,7 @@
 #}
 
 {% set _title = og_title       | default("OBIXConfig Doctor — FPV Drone Tuning & Blackbox Analyzer") %}
-{% set _desc  = og_description | default("วิเคราะห์ PID · Filter · Blackbox CSV · ESC · Motor สำหรับโดรน FPV ทุกขนาด — 14 เครื่องมือ ฟรี 100% 🇹🇭") %}
+{% set _desc  = og_description | default("วิเคราะห์ PID · Filter · Blackbox CSV · ESC · Motor สำหรับโดรน FPV ทุกขนาด — 23 เครื่องมือ ฟรี 100% 🇹🇭") %}
 {% set _url   = og_url         | default("https://configdoctor.onrender.com") %}
 {% set _img   = og_image       | default("https://configdoctor.onrender.com/static/img/og-default.jpg") %}
 {% set _site  = "OBIXConfig Doctor" %}
@@ -86,7 +86,8 @@
     "Motor Thermal Estimator",
     "Control Loop Latency Analyzer",
     "FPV Simulator NEO",
-    "Quick Tune Pad"
+    "Quick Tune Pad",
+    "Military UAS Analyzer"
   ]{{ jsonld_extra | default("") }}
 }
 </script>
