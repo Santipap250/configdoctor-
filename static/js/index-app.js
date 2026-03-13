@@ -965,8 +965,12 @@ function toggleTheme(){
 
 /* ══ TOOL DOCK FILTER ════════════════════════════════════════════ */
 function dockFilter(btn, cat) {
-  document.querySelectorAll('.dock-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.dock-tab').forEach(function(t){
+    t.classList.remove('active');
+    t.setAttribute('aria-pressed', 'false');
+  });
   btn.classList.add('active');
+  btn.setAttribute('aria-pressed', 'true');
   document.querySelectorAll('.dtool[data-cat]').forEach(function(el){
     el.classList.toggle('hidden', cat !== 'all' && el.getAttribute('data-cat') !== cat);
   });
