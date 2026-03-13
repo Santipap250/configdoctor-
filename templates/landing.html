@@ -172,34 +172,49 @@ body:not(.lang-en) .i18n-th { display: inline !important; }
   /* Desktop default: landscape 1920×1080 */
   background-image: url("{{ url_for('static', filename='img/landing-bg-desktop.jpg') }}");
   background-size: cover;
-  background-position: center 30%;
+  background-position: center 25%;
   background-repeat: no-repeat;
-  opacity: 0.28;
+  opacity: 0.55;
   z-index: 0;
-  transform: scale(1.06);
+  transform: scale(1.04);
   transform-origin: center top;
   transition: transform 0.1s linear;
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 58%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 0%, black 58%, transparent 100%);
+  /* Fade ด้านล่างให้ content อ่านง่าย */
+  -webkit-mask-image: linear-gradient(to bottom,
+    black 0%, black 52%, rgba(0,0,0,0.6) 75%, transparent 100%);
+  mask-image: linear-gradient(to bottom,
+    black 0%, black 52%, rgba(0,0,0,0.6) 75%, transparent 100%);
   pointer-events: none;
   will-change: transform;
 }
 
-/* Mobile portrait: switch to 1080×1920 image */
-@media (max-width: 768px) and (orientation: portrait) {
+/* Mobile portrait ≤ 768px: ใช้ภาพ portrait 1080×1920 */
+@media (max-width: 768px) {
   .hero-bg-img {
-    background-image: url("{{ url_for('static', filename='img/landing-bg-mobile.png') }}");
-    background-position: center 20%;
-    opacity: 0.32;
-    /* Portrait: centre is higher up so drone is visible above fold */
+    background-image: url("{{ url_for('static', filename='img/landing-bg-mobile.jpg') }}");
+    background-position: center 15%;
+    opacity: 0.58;
+    -webkit-mask-image: linear-gradient(to bottom,
+      black 0%, black 48%, rgba(0,0,0,0.55) 72%, transparent 100%);
+    mask-image: linear-gradient(to bottom,
+      black 0%, black 48%, rgba(0,0,0,0.55) 72%, transparent 100%);
   }
 }
 
-/* Landscape mobile / small tablets: use desktop image centred higher */
+/* Landscape mobile / small tablet: desktop img, crop higher */
 @media (max-width: 900px) and (orientation: landscape) {
   .hero-bg-img {
-    background-position: center 25%;
-    opacity: 0.30;
+    background-image: url("{{ url_for('static', filename='img/landing-bg-desktop.jpg') }}");
+    background-position: center 22%;
+    opacity: 0.50;
+  }
+}
+
+/* Large desktop ≥ 1600px: zoom-in slightly for crispness */
+@media (min-width: 1600px) {
+  .hero-bg-img {
+    background-position: center 20%;
+    opacity: 0.52;
   }
 }
 

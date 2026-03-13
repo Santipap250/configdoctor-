@@ -63,6 +63,37 @@ html,body { height:100%; overflow-x:hidden; }
 body { font-family:var(--font-t); background:var(--bg); color:var(--text); min-height:100vh; }
 
 /* ── WORLD BACKGROUND ───────────────────────────────────────── */
+
+/* Photo layer: space + circuit board image (fixed, behind everything) */
+.page-bg-photo {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* Desktop: landscape 1920×1080 */
+  background-image: url("{{ url_for('static', filename='img/index-bg-desktop.jpg') }}");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  opacity: 0.38;
+  /* Fade bottom slightly so cards stay readable */
+  -webkit-mask-image: linear-gradient(to bottom,
+    black 0%, black 60%, rgba(0,0,0,0.7) 85%, rgba(0,0,0,0.4) 100%);
+  mask-image: linear-gradient(to bottom,
+    black 0%, black 60%, rgba(0,0,0,0.7) 85%, rgba(0,0,0,0.4) 100%);
+}
+
+/* Mobile portrait ≤ 768px: ใช้ภาพ portrait */
+@media (max-width: 768px) {
+  .page-bg-photo {
+    background-image: url("{{ url_for('static', filename='img/index-bg-mobile.jpg') }}");
+    background-attachment: scroll; /* fixed ไม่ work บน iOS */
+    background-position: center top;
+    opacity: 0.35;
+  }
+}
+
 body::before {
   content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
   background:
@@ -582,6 +613,7 @@ body.light .amb-orb { opacity:.25; }
 </style>
 </head>
 <body>
+<div class="page-bg-photo" aria-hidden="true"></div>
 <div class="scan-line"></div>
 <div class="amb-orb amb-orb-1"></div>
 <div class="amb-orb amb-orb-2"></div>
