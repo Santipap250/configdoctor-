@@ -23,7 +23,6 @@ from analyzer.prop_logic import analyze_propeller
 from analyzer.thrust_logic import (calculate_thrust_weight,
                                     estimate_battery_runtime,
                                     estimate_battery_runtime_detail)
-from datetime import datetime
 from werkzeug.utils import secure_filename
 from analyzer.cli_surgeon import analyze_dump as cli_analyze_dump
 import os, io, time, json, hashlib, logging
