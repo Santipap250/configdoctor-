@@ -1,218 +1,133 @@
 {#
-  templates/partials/nav.html
-  ─────────────────────────────────────────────────────────────────
-  Usage  : {% set nav_page = "blackbox" %}
-           {% include "partials/nav.html" %}
-
-  nav_page values:
-    home · blackbox · cli_surgeon · rates · comparator
-    pid_advisor · rpm_filter · motor_prop · esc_checker
-    osd · vtx · vtx_range · vtx_smartaudio · downloads
-    about · changelog
-  ─────────────────────────────────────────────────────────────────
+  templates/partials/nav.html — OBIXConfig Doctor v5.1
+  Features: Dark/Light mode + TH/EN language toggle
+  Usage: {% set nav_page = "blackbox" %} {% include "partials/nav.html" %}
 #}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
-/* ══════════════════════════════════════════════════════════
-   OBIX NAV SYSTEM — self-contained, zero conflicts
-   All classes prefixed .on- (obix-nav)
-══════════════════════════════════════════════════════════ */
+/* OBIX NAV SYSTEM v5.1 — all classes prefixed .on- */
+
+/* Language: default=TH, body.lang-en shows EN */
+.on-en { display:none }
+body.lang-en .on-th { display:none }
+body.lang-en .on-en { display:inline }
+
+/* NAV BAR */
 .on-bar {
-  position: sticky; top: 0; z-index: 500;
-  display: flex; align-items: center; gap: 10px;
-  height: 52px; padding: 0 16px;
-  background: rgba(2,5,10,0.92);
-  backdrop-filter: blur(22px) saturate(1.6);
-  border-bottom: 1px solid rgba(0,255,136,0.08);
-  font-family: 'Sarabun', sans-serif;
+  position:sticky;top:0;z-index:500;
+  display:flex;align-items:center;gap:10px;
+  height:52px;padding:0 16px;
+  background:rgba(2,5,10,0.92);
+  backdrop-filter:blur(22px) saturate(1.6);
+  border-bottom:1px solid rgba(0,255,136,0.08);
+  font-family:'Sarabun',sans-serif;
+  transition:background .3s,border-color .3s;
 }
-
-/* Hamburger */
 .on-ham {
-  background: none;
-  border: 1px solid rgba(0,255,136,0.1);
-  border-radius: 6px;
-  padding: 7px 8px;
-  cursor: pointer;
-  display: flex; flex-direction: column; gap: 4px;
-  transition: border-color .18s;
-  flex-shrink: 0;
+  background:none;border:1px solid rgba(0,255,136,0.1);
+  border-radius:6px;padding:7px 8px;cursor:pointer;
+  display:flex;flex-direction:column;gap:4px;
+  transition:border-color .18s;flex-shrink:0;
 }
-.on-ham:hover { border-color: rgba(0,255,136,0.4); }
-.on-ham span {
-  display: block; width: 18px; height: 1.5px;
-  background: #7090a8; transition: .2s; border-radius: 2px;
-}
-.on-ham:hover span { background: #00ff88; }
+.on-ham:hover{border-color:rgba(0,255,136,0.4)}
+.on-ham span{display:block;width:18px;height:1.5px;background:#7090a8;transition:.2s;border-radius:2px}
+.on-ham:hover span{background:#00ff88}
+.on-logo-link{display:flex;align-items:center;gap:8px;text-decoration:none}
+.on-logo-img{height:26px}
+.on-logo-text{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;color:#c8d8e8;white-space:nowrap;transition:color .3s}
+@media(max-width:440px){.on-logo-text{display:none}}
+.on-bar-right{margin-left:auto;display:flex;align-items:center;gap:6px}
+.on-crumb{display:flex;align-items:center;gap:6px;font-family:'Orbitron',sans-serif;font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#00ff88;border:1px solid rgba(0,255,136,0.22);background:rgba(0,255,136,0.05);padding:3px 10px;border-radius:100px;animation:onPulse 3.5s ease-in-out infinite;transition:color .3s,background .3s,border-color .3s}
+.on-crumb-dot{width:5px;height:5px;border-radius:50%;background:#00ff88;box-shadow:0 0 6px rgba(0,255,136,0.6);animation:onBlink 2s ease-in-out infinite;flex-shrink:0;transition:background .3s}
+@keyframes onPulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 12px rgba(0,255,136,0.25)}}
+@keyframes onBlink{0%,100%{opacity:1}50%{opacity:.2}}
+.on-icon-btn{background:none;border:1px solid rgba(255,255,255,0.09);border-radius:7px;padding:5px 9px;cursor:pointer;color:#7090a8;transition:all .18s;font-family:'Orbitron',sans-serif;font-weight:700;font-size:10px;letter-spacing:.05em;display:flex;align-items:center;gap:4px}
+.on-icon-btn:hover{color:#00ff88;border-color:rgba(0,255,136,0.35);background:rgba(0,255,136,0.04)}
+.on-theme{background:none;border:1px solid rgba(0,255,136,0.1);border-radius:6px;padding:5px 8px;cursor:pointer;color:#7090a8;font-size:13px;transition:.18s}
+.on-theme:hover{color:#00ff88;border-color:rgba(0,255,136,0.3)}
+.on-overlay{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.72);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .25s}
+.on-overlay.on-open{opacity:1;pointer-events:all}
+.on-drawer{position:fixed;left:0;top:0;bottom:0;z-index:700;width:296px;background:#040c18;border-right:1px solid rgba(0,255,136,0.09);display:flex;flex-direction:column;transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1),background .3s,border-color .3s;overflow-y:auto;overflow-x:hidden;font-family:'Sarabun',sans-serif}
+.on-drawer.on-open{transform:translateX(0)}
+.on-dh{display:flex;align-items:center;justify-content:space-between;padding:13px 14px;border-bottom:1px solid rgba(0,255,136,0.08);flex-shrink:0;transition:border-color .3s}
+.on-dh-brand{display:flex;align-items:center;gap:9px}
+.on-dh-icon{width:34px;height:34px;border-radius:8px;background:rgba(0,255,136,0.07);border:1px solid rgba(0,255,136,0.2);display:grid;place-items:center;font-size:16px;flex-shrink:0}
+.on-dh-name{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:.05em;color:#c8d8e8;transition:color .3s}
+.on-dh-sub{font-size:10px;color:#7090a8;margin-top:1px;transition:color .3s}
+.on-dclose{background:none;border:1px solid rgba(0,255,136,0.1);border-radius:6px;padding:5px 8px;color:#7090a8;cursor:pointer;font-size:13px;transition:.18s}
+.on-dclose:hover{color:#ff4455;border-color:rgba(255,68,85,0.3)}
+.on-dnav{flex:1;padding:10px 8px}
+.on-dgroup{font-family:'Orbitron',sans-serif;font-size:8px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#3d5470;padding:8px 8px 3px;margin-top:2px;transition:color .3s}
+.on-ddiv{height:1px;background:rgba(0,255,136,0.07);margin:5px 0;transition:background .3s}
+.on-dlink{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:8px;text-decoration:none;transition:all .16s;margin-bottom:1px;border:1px solid transparent}
+.on-dlink:hover{background:rgba(0,255,136,0.06);border-color:rgba(0,255,136,0.1)}
+.on-dlink.on-act{background:rgba(0,255,136,0.08);border-color:rgba(0,255,136,0.22)}
+.on-ico{width:28px;height:28px;border-radius:7px;flex-shrink:0;display:grid;place-items:center;font-size:13px;background:rgba(255,255,255,0.04);border:1px solid rgba(0,255,136,0.07)}
+.on-ico.g{background:rgba(0,255,136,0.07);border-color:rgba(0,255,136,0.2)}
+.on-ico.b{background:rgba(0,170,255,0.07);border-color:rgba(0,170,255,0.2)}
+.on-ico.a{background:rgba(255,183,0,0.07);border-color:rgba(255,183,0,0.2)}
+.on-ico.p{background:rgba(160,80,255,0.07);border-color:rgba(160,80,255,0.2)}
+.on-ico.r{background:rgba(255,68,85,0.07);border-color:rgba(255,68,85,0.2)}
+.on-dbody{flex:1;min-width:0}
+.on-dtitle{font-size:12px;font-weight:600;color:#c8d8e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .3s}
+.on-dmeta{font-size:10px;color:#7090a8;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .3s}
+.on-dlink.on-act .on-dtitle{color:#00ff88}
+.on-pill{font-family:'Orbitron',sans-serif;font-size:8px;font-weight:700;letter-spacing:.07em;padding:2px 7px;border-radius:100px;background:rgba(255,255,255,0.04);border:1px solid rgba(0,255,136,0.08);color:#7090a8;flex-shrink:0}
+.on-pill.nw{background:rgba(0,255,136,0.07);border-color:rgba(0,255,136,0.3);color:#00ff88}
+.on-pill.hot{background:rgba(255,68,85,0.1);border-color:rgba(255,68,85,0.3);color:#ff4455}
+.on-pill.act{background:rgba(0,255,136,0.12);border-color:rgba(0,255,136,0.4);color:#00ff88}
+.on-dfoot{padding:11px 14px;border-top:1px solid rgba(0,255,136,0.07);flex-shrink:0;font-size:10px;color:#7090a8;line-height:1.6;transition:color .3s,border-color .3s}
+.on-dfoot-ver{font-family:'Orbitron',sans-serif;font-size:9px;color:#00ff88}
 
-/* Logo */
-.on-logo-link { display: flex; align-items: center; gap: 8px; text-decoration: none; }
-.on-logo-img  { height: 26px; }
-.on-logo-text {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 11px; font-weight: 700; letter-spacing: .06em;
-  color: #c8d8e8; white-space: nowrap;
-}
-@media(max-width:440px) { .on-logo-text { display: none; } }
-
-/* Right side */
-.on-bar-right {
-  margin-left: auto;
-  display: flex; align-items: center; gap: 8px;
-}
-
-/* Breadcrumb pill */
-.on-crumb {
-  display: flex; align-items: center; gap: 6px;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 9px; font-weight: 600; letter-spacing: .12em;
-  text-transform: uppercase;
-  color: #00ff88;
-  border: 1px solid rgba(0,255,136,0.22);
-  background: rgba(0,255,136,0.05);
-  padding: 3px 10px; border-radius: 100px;
-  animation: onPulse 3.5s ease-in-out infinite;
-}
-.on-crumb-dot {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: #00ff88; box-shadow: 0 0 6px rgba(0,255,136,0.6);
-  animation: onBlink 2s ease-in-out infinite;
-  flex-shrink: 0;
-}
-@keyframes onPulse  { 0%,100%{box-shadow:none} 50%{box-shadow:0 0 12px rgba(0,255,136,0.25)} }
-@keyframes onBlink  { 0%,100%{opacity:1} 50%{opacity:.2} }
-
-/* Theme toggle */
-.on-theme {
-  background: none; border: 1px solid rgba(0,255,136,0.1);
-  border-radius: 6px; padding: 5px 8px; cursor: pointer;
-  color: #7090a8; font-size: 13px; transition: .18s;
-}
-.on-theme:hover { color: #00ff88; border-color: rgba(0,255,136,0.3); }
-
-/* ── Overlay ── */
-.on-overlay {
-  position: fixed; inset: 0; z-index: 600;
-  background: rgba(0,0,0,0.72); backdrop-filter: blur(4px);
-  opacity: 0; pointer-events: none; transition: opacity .25s;
-}
-.on-overlay.on-open { opacity: 1; pointer-events: all; }
-
-/* ── Drawer ── */
-.on-drawer {
-  position: fixed; left: 0; top: 0; bottom: 0; z-index: 700;
-  width: 296px;
-  background: #040c18;
-  border-right: 1px solid rgba(0,255,136,0.09);
-  display: flex; flex-direction: column;
-  transform: translateX(-100%);
-  transition: transform .28s cubic-bezier(.4,0,.2,1);
-  overflow-y: auto;
-  overflow-x: hidden;
-  font-family: 'Sarabun', sans-serif;
-}
-.on-drawer.on-open { transform: translateX(0); }
-
-/* Drawer header */
-.on-dh {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 13px 14px; border-bottom: 1px solid rgba(0,255,136,0.08);
-  flex-shrink: 0;
-}
-.on-dh-brand { display: flex; align-items: center; gap: 9px; }
-.on-dh-icon {
-  width: 34px; height: 34px; border-radius: 8px;
-  background: rgba(0,255,136,0.07); border: 1px solid rgba(0,255,136,0.2);
-  display: grid; place-items: center; font-size: 16px; flex-shrink: 0;
-}
-.on-dh-name {
-  font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700;
-  letter-spacing: .05em; color: #c8d8e8;
-}
-.on-dh-sub { font-size: 10px; color: #7090a8; margin-top: 1px; }
-.on-dclose {
-  background: none; border: 1px solid rgba(0,255,136,0.1);
-  border-radius: 6px; padding: 5px 8px; color: #7090a8;
-  cursor: pointer; font-size: 13px; transition: .18s;
-}
-.on-dclose:hover { color: #ff4455; border-color: rgba(255,68,85,0.3); }
-
-/* Drawer nav body */
-.on-dnav { flex: 1; padding: 10px 8px; }
-
-.on-dgroup {
-  font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 600;
-  letter-spacing: .16em; text-transform: uppercase;
-  color: #3d5470; padding: 8px 8px 3px; margin-top: 2px;
-}
-.on-ddiv { height: 1px; background: rgba(0,255,136,0.07); margin: 5px 0; }
-
-.on-dlink {
-  display: flex; align-items: center; gap: 9px;
-  padding: 8px 9px; border-radius: 8px; text-decoration: none;
-  transition: all .16s; margin-bottom: 1px;
-  border: 1px solid transparent;
-}
-.on-dlink:hover   { background: rgba(0,255,136,0.06); border-color: rgba(0,255,136,0.1); }
-.on-dlink.on-act  { background: rgba(0,255,136,0.08); border-color: rgba(0,255,136,0.22); }
-
-.on-ico {
-  width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
-  display: grid; place-items: center; font-size: 13px;
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(0,255,136,0.07);
-}
-.on-ico.g  { background: rgba(0,255,136,0.07);  border-color: rgba(0,255,136,0.2); }
-.on-ico.b  { background: rgba(0,170,255,0.07);  border-color: rgba(0,170,255,0.2); }
-.on-ico.a  { background: rgba(255,183,0,0.07);  border-color: rgba(255,183,0,0.2); }
-.on-ico.p  { background: rgba(160,80,255,0.07); border-color: rgba(160,80,255,0.2); }
-.on-ico.r  { background: rgba(255,68,85,0.07);  border-color: rgba(255,68,85,0.2); }
-
-.on-dbody { flex: 1; min-width: 0; }
-.on-dtitle {
-  font-size: 12px; font-weight: 600; color: #c8d8e8;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.on-dmeta {
-  font-size: 10px; color: #7090a8;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.on-dlink.on-act .on-dtitle { color: #00ff88; }
-
-.on-pill {
-  font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 700;
-  letter-spacing: .07em; padding: 2px 7px; border-radius: 100px;
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(0,255,136,0.08);
-  color: #7090a8; flex-shrink: 0;
-}
-.on-pill.nw  { background: rgba(0,255,136,0.07);  border-color: rgba(0,255,136,0.3); color: #00ff88; }
-.on-pill.hot { background: rgba(255,68,85,0.1);   border-color: rgba(255,68,85,0.3); color: #ff4455; }
-.on-pill.act { background: rgba(0,255,136,0.12);  border-color: rgba(0,255,136,0.4); color: #00ff88; }
-
-/* Drawer footer */
-.on-dfoot {
-  padding: 11px 14px; border-top: 1px solid rgba(0,255,136,0.07);
-  flex-shrink: 0;
-  font-size: 10px; color: #7090a8; line-height: 1.6;
-}
-.on-dfoot-ver {
-  font-family: 'Orbitron', sans-serif; font-size: 9px; color: #00ff88;
-}
+/* ═══ LIGHT MODE ═══ */
+body.light .on-bar{background:rgba(248,250,252,0.95);border-bottom-color:rgba(0,0,0,0.08)}
+body.light .on-ham span{background:#334155}
+body.light .on-ham{border-color:rgba(0,0,0,0.12)}
+body.light .on-ham:hover span{background:#059669}
+body.light .on-ham:hover{border-color:rgba(5,150,105,0.4)}
+body.light .on-logo-text{color:#1e293b}
+body.light .on-crumb{color:#059669;border-color:rgba(5,150,105,0.35);background:rgba(5,150,105,0.07);animation:none}
+body.light .on-crumb-dot{background:#059669;box-shadow:0 0 6px rgba(5,150,105,0.5)}
+body.light .on-icon-btn{color:#475569;border-color:rgba(0,0,0,0.1)}
+body.light .on-icon-btn:hover{color:#059669;border-color:rgba(5,150,105,0.4);background:rgba(5,150,105,0.06)}
+body.light .on-overlay{background:rgba(0,0,0,0.45)}
+body.light .on-drawer{background:#f8fafc;border-right-color:rgba(0,0,0,0.09)}
+body.light .on-dh{border-bottom-color:rgba(0,0,0,0.07)}
+body.light .on-dh-icon{background:rgba(5,150,105,0.08);border-color:rgba(5,150,105,0.2)}
+body.light .on-dh-name{color:#1e293b}
+body.light .on-dh-sub{color:#64748b}
+body.light .on-dclose{color:#64748b;border-color:rgba(0,0,0,0.1)}
+body.light .on-dgroup{color:#94a3b8}
+body.light .on-ddiv{background:rgba(0,0,0,0.07)}
+body.light .on-dlink:hover{background:rgba(0,0,0,0.04);border-color:rgba(0,0,0,0.08)}
+body.light .on-dlink.on-act{background:rgba(5,150,105,0.08);border-color:rgba(5,150,105,0.25)}
+body.light .on-ico{background:rgba(0,0,0,0.04);border-color:rgba(0,0,0,0.08)}
+body.light .on-ico.g{background:rgba(5,150,105,0.07);border-color:rgba(5,150,105,0.2)}
+body.light .on-ico.b{background:rgba(37,99,235,0.07);border-color:rgba(37,99,235,0.2)}
+body.light .on-ico.a{background:rgba(217,119,6,0.07);border-color:rgba(217,119,6,0.2)}
+body.light .on-ico.p{background:rgba(109,40,217,0.07);border-color:rgba(109,40,217,0.2)}
+body.light .on-ico.r{background:rgba(220,38,38,0.07);border-color:rgba(220,38,38,0.2)}
+body.light .on-dtitle{color:#1e293b}
+body.light .on-dmeta{color:#64748b}
+body.light .on-dlink.on-act .on-dtitle{color:#059669}
+body.light .on-pill{background:rgba(0,0,0,0.04);border-color:rgba(0,0,0,0.09);color:#64748b}
+body.light .on-pill.nw{background:rgba(5,150,105,0.08);border-color:rgba(5,150,105,0.3);color:#059669}
+body.light .on-pill.hot{background:rgba(220,38,38,0.08);border-color:rgba(220,38,38,0.3);color:#dc2626}
+body.light .on-dfoot{border-top-color:rgba(0,0,0,0.07);color:#64748b}
+body.light .on-dfoot-ver{color:#059669}
 </style>
 
-<!-- ── OVERLAY ─────────────────────────────── -->
 <div id="onOverlay" class="on-overlay" aria-hidden="true"></div>
 
-<!-- ── DRAWER ──────────────────────────────── -->
 <aside id="onDrawer" class="on-drawer" role="dialog" aria-modal="true" aria-label="เมนูหลัก">
-
   <div class="on-dh">
     <div class="on-dh-brand">
       <div class="on-dh-icon">🚁</div>
       <div>
         <div class="on-dh-name">OBIX CONFIG DOCTOR</div>
-        <div class="on-dh-sub">FPV Tuning Toolkit · v5.0</div>
+        <div class="on-dh-sub">FPV Tuning Toolkit · v5.1</div>
       </div>
     </div>
     <button id="onClose" class="on-dclose" aria-label="ปิดเมนู">✕</button>
@@ -220,160 +135,135 @@
 
   <nav class="on-dnav" aria-label="เมนูหลัก">
 
-    <!-- หน้าหลัก -->
-    <div class="on-dgroup">หน้าหลัก</div>
+    <div class="on-dgroup"><span class="on-th">หน้าหลัก</span><span class="on-en">Main</span></div>
     <a class="on-dlink {% if nav_page=='flight_quiz' %}on-act{% endif %}" href="/flight-quiz">
-      <span class="on-ico g">🎯</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">Flight Style Quiz</span>
-        <span class="on-dmeta">5 คำถาม → rates + preset แนะนำ</span>
-      </span>
+      <span class="on-ico g">🎯</span><span class="on-dbody"><span class="on-dtitle">Flight Style Quiz</span>
+        <span class="on-dmeta on-th">5 คำถาม → rates + preset แนะนำ</span>
+        <span class="on-dmeta on-en">5 questions → rates + preset</span></span>
       <span class="on-pill nw">new</span>
     </a>
     <a class="on-dlink {% if nav_page=='bf_wizard' %}on-act{% endif %}" href="/bf-wizard">
-      <span class="on-ico g">⚡</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">BF Config Wizard</span>
-        <span class="on-dmeta">7 ขั้นตอน → CLI พร้อม paste</span>
-      </span>
+      <span class="on-ico g">⚡</span><span class="on-dbody"><span class="on-dtitle">BF Config Wizard</span>
+        <span class="on-dmeta on-th">7 ขั้นตอน → CLI พร้อม paste</span>
+        <span class="on-dmeta on-en">7 steps → paste-ready CLI</span></span>
       <span class="on-pill nw">new</span>
     </a>
     <a class="on-dlink {% if nav_page=='fpv_trainer' %}on-act{% endif %}" href="/fpv-trainer">
-      <span class="on-ico g">🎮</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">FPV Simulator NEO</span>
-        <span class="on-dmeta">ฝึกบินโดรน 3D · Tutorial · Race · Gate</span>
-      </span>
+      <span class="on-ico g">🎮</span><span class="on-dbody"><span class="on-dtitle">FPV Simulator NEO</span>
+        <span class="on-dmeta on-th">ฝึกบิน 3D · Tutorial · Race · Gate</span>
+        <span class="on-dmeta on-en">3D drone sim · Tutorial · Race</span></span>
       <span class="on-pill nw">new</span>
     </a>
-    <!-- Community -->
+
     <div class="on-dgroup">Community</div>
     <a class="on-dlink {% if nav_page=='build_card' %}on-act{% endif %}" href="/build-card">
-      <span class="on-ico a">🃏</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">Build Card Generator</span>
-        <span class="on-dmeta">สร้างรูปสเปคโดรนแชร์ Social</span>
-      </span>
+      <span class="on-ico a">🃏</span><span class="on-dbody"><span class="on-dtitle">Build Card Generator</span>
+        <span class="on-dmeta on-th">สร้างรูปสเปคโดรนแชร์ Social</span>
+        <span class="on-dmeta on-en">Share your build spec card</span></span>
       <span class="on-pill nw">new</span>
     </a>
     <a class="on-dlink {% if nav_page=='tuning_log' %}on-act{% endif %}" href="/tuning-log">
-      <span class="on-ico b">📊</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">Tuning Log</span>
-        <span class="on-dmeta">บันทึก session · เปรียบเทียบ PID</span>
-      </span>
+      <span class="on-ico b">📊</span><span class="on-dbody"><span class="on-dtitle">Tuning Log</span>
+        <span class="on-dmeta on-th">บันทึก session · เปรียบเทียบ PID</span>
+        <span class="on-dmeta on-en">Log sessions · compare PID</span></span>
       <span class="on-pill nw">new</span>
     </a>
     <a class="on-dlink {% if nav_page=='leaderboard' %}on-act{% endif %}" href="/leaderboard">
-      <span class="on-ico a">🏆</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">Config Leaderboard</span>
-        <span class="on-dmeta">vote · rank · copy config ชุมชน</span>
-      </span>
+      <span class="on-ico a">🏆</span><span class="on-dbody"><span class="on-dtitle">Config Leaderboard</span>
+        <span class="on-dmeta on-th">vote · rank · copy config ชุมชน</span>
+        <span class="on-dmeta on-en">vote · rank · share configs</span></span>
       <span class="on-pill nw">new</span>
     </a>
     <a class="on-dlink {% if nav_page=='motor_prop' %}on-act{% endif %}" href="/motor-prop">
-      <span class="on-ico b">🧭</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">Motor × Prop Recommender</span>
-        <span class="on-dmeta">แนะนำมอเตอร์/ใบพัดตามสเปค</span>
-      </span>
+      <span class="on-ico b">🧭</span><span class="on-dbody"><span class="on-dtitle">Motor × Prop Recommender</span>
+        <span class="on-dmeta on-th">แนะนำมอเตอร์/ใบพัดตามสเปค</span>
+        <span class="on-dmeta on-en">Motor & prop match by spec</span></span>
       <span class="on-pill">tool</span>
     </a>
     <a class="on-dlink {% if nav_page=='cli_surgeon' %}on-act{% endif %}" href="/cli_surgeon">
-      <span class="on-ico a">🩺</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">CLI Surgeon</span>
-        <span class="on-dmeta">วิเคราะห์ diff all / dump</span>
-      </span>
+      <span class="on-ico a">🩺</span><span class="on-dbody"><span class="on-dtitle">CLI Surgeon</span>
+        <span class="on-dmeta on-th">วิเคราะห์ diff all / dump</span>
+        <span class="on-dmeta on-en">Analyze diff all / dump output</span></span>
       <span class="on-pill">tool</span>
     </a>
     <a class="on-dlink {% if nav_page=='pid_advisor' %}on-act{% endif %}" href="/pid-advisor">
-      <span class="on-ico p">💊</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">PID Symptom Advisor</span>
-        <span class="on-dmeta">บอกอาการ → รับคำแนะนำ PID</span>
-      </span>
+      <span class="on-ico p">💊</span><span class="on-dbody"><span class="on-dtitle">PID Symptom Advisor</span>
+        <span class="on-dmeta on-th">บอกอาการ → รับคำแนะนำ PID</span>
+        <span class="on-dmeta on-en">Describe symptoms → PID fixes</span></span>
       <span class="on-pill nw">new</span>
     </a>
     <a class="on-dlink {% if nav_page=='rpm_filter' %}on-act{% endif %}" href="/rpm-filter">
-      <span class="on-ico g">⚙️</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">RPM Filter Calculator</span>
-        <span class="on-dmeta">คำนวณ harmonic + dyn_notch</span>
-      </span>
+      <span class="on-ico g">⚙️</span><span class="on-dbody"><span class="on-dtitle">RPM Filter Calculator</span>
+        <span class="on-dmeta on-th">คำนวณ harmonic + dyn_notch</span>
+        <span class="on-dmeta on-en">Compute harmonics + dyn_notch</span></span>
       <span class="on-pill nw">new</span>
     </a>
     <a class="on-dlink {% if nav_page=='rates' %}on-act{% endif %}" href="/rates-visualizer">
-      <span class="on-ico b">📈</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">Rates Visualizer</span>
-        <span class="on-dmeta">curve real-time · per-axis</span>
-      </span>
+      <span class="on-ico b">📈</span><span class="on-dbody"><span class="on-dtitle">Rates Visualizer</span>
+        <span class="on-dmeta on-th">curve real-time · per-axis</span>
+        <span class="on-dmeta on-en">Real-time curve · per-axis</span></span>
       <span class="on-pill nw">new</span>
     </a>
 
     <div class="on-ddiv"></div>
-    <div class="on-dgroup">⚡ ขั้นสูง</div>
+    <div class="on-dgroup"><span class="on-th">⚡ ขั้นสูง</span><span class="on-en">⚡ Advanced</span></div>
 
     <a class="on-dlink {% if nav_page=='comparator' %}on-act{% endif %}" href="/cli-comparator">
-      <span class="on-ico a">⚖️</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">CLI Diff Comparator</span>
-        <span class="on-dmeta">วาง 2 config → เห็นทุกค่าที่เปลี่ยน</span>
-      </span>
+      <span class="on-ico a">⚖️</span><span class="on-dbody"><span class="on-dtitle">CLI Diff Comparator</span>
+        <span class="on-dmeta on-th">วาง 2 config → เห็นทุกค่าที่เปลี่ยน</span>
+        <span class="on-dmeta on-en">Paste 2 configs → see every diff</span></span>
       <span class="on-pill nw">new</span>
     </a>
     <a class="on-dlink {% if nav_page=='esc_checker' %}on-act{% endif %}" href="/esc-checker">
-      <span class="on-ico a">⚡</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">ESC Compatibility Checker</span>
-        <span class="on-dmeta">ตรวจ ESC amps, protocol, KV</span>
-      </span>
+      <span class="on-ico a">⚡</span><span class="on-dbody"><span class="on-dtitle">ESC Compatibility Checker</span>
+        <span class="on-dmeta on-th">ตรวจ ESC amps, protocol, KV</span>
+        <span class="on-dmeta on-en">Check ESC amps, protocol, KV</span></span>
       <span class="on-pill nw">new</span>
     </a>
 
     <div class="on-ddiv"></div>
-    <div class="on-dgroup">🔬 v5.0 Physics Tools</div>
+    <div class="on-dgroup">🔬 Physics Tools v5.1</div>
 
     <a class="on-dlink {% if nav_page=='battery_health' %}on-act{% endif %}" href="/battery-health">
-      <span class="on-ico a">🔋</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">Battery Health Advisor</span>
-        <span class="on-dmeta">IR · Sag · Health Score · อายุที่เหลือ</span>
-      </span>
-      <span class="on-pill nw">v5</span>
+      <span class="on-ico a">🔋</span><span class="on-dbody"><span class="on-dtitle">Battery Health Advisor</span>
+        <span class="on-dmeta on-th">IR · Sag · Health Score · อายุที่เหลือ</span>
+        <span class="on-dmeta on-en">IR · Sag · Health Score · cycles left</span></span>
+      <span class="on-pill nw">v5.1</span>
     </a>
     <a class="on-dlink {% if nav_page=='motor_thermal' %}on-act{% endif %}" href="/motor-thermal">
-      <span class="on-ico r">🌡️</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">Motor Thermal Estimator</span>
-        <span class="on-dmeta">ประมาณ winding temp · safe zone</span>
-      </span>
-      <span class="on-pill nw">v5</span>
+      <span class="on-ico r">🌡️</span><span class="on-dbody"><span class="on-dtitle">Motor Thermal Estimator</span>
+        <span class="on-dmeta on-th">ประมาณ winding temp · safe zone</span>
+        <span class="on-dmeta on-en">Estimate winding temp · safe zone</span></span>
+      <span class="on-pill nw">v5.1</span>
     </a>
     <a class="on-dlink {% if nav_page=='loop_analyzer' %}on-act{% endif %}" href="/loop-analyzer">
-      <span class="on-ico p">📡</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">Control Loop Analyzer</span>
-        <span class="on-dmeta">Stick→Prop latency · bottleneck</span>
-      </span>
-      <span class="on-pill nw">v5</span>
+      <span class="on-ico p">📡</span><span class="on-dbody"><span class="on-dtitle">Control Loop Analyzer</span>
+        <span class="on-dmeta on-th">Stick→Prop latency · bottleneck</span>
+        <span class="on-dmeta on-en">Stick→Prop latency chain</span></span>
+      <span class="on-pill nw">v5.1</span>
+    </a>
+    <a class="on-dlink {% if nav_page=='quick_tune' %}on-act{% endif %}" href="/quick-tune">
+      <span class="on-ico g">⚡</span><span class="on-dbody"><span class="on-dtitle">Quick Tune Pad</span>
+        <span class="on-dmeta on-th">เลือกอาการ → PID delta + CLI</span>
+        <span class="on-dmeta on-en">Symptom → PID delta matrix + CLI</span></span>
+      <span class="on-pill nw">v5.1</span>
     </a>
     <a class="on-dlink {% if nav_page=='blackbox' %}on-act{% endif %}" href="/blackbox">
-      <span class="on-ico b">📊</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">Blackbox CSV Analyzer</span>
-        <span class="on-dmeta">วิเคราะห์ flight log · PID score</span>
-      </span>
+      <span class="on-ico b">📊</span><span class="on-dbody"><span class="on-dtitle">Blackbox CSV Analyzer</span>
+        <span class="on-dmeta on-th">วิเคราะห์ flight log · PID score</span>
+        <span class="on-dmeta on-en">Analyze flight log · PID score</span></span>
       <span class="on-pill hot">HOT</span>
     </a>
+    <a class="on-dlink {% if nav_page=='military_uas' %}on-act{% endif %}" href="/military-uas">
+      <span class="on-ico r">🎖️</span><span class="on-dbody"><span class="on-dtitle">Military UAS Analyzer</span>
+        <span class="on-dmeta on-th">วิเคราะห์โดรนทหาร · 6 modules</span>
+        <span class="on-dmeta on-en">Military drone analysis · 6 modules</span></span>
+      <span class="on-pill hot">MIL</span>
+    </a>
     <a class="on-dlink {% if nav_page=='osd' %}on-act{% endif %}" href="/osd">
-      <span class="on-ico p">🖥️</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">OSD Designer</span>
-        <span class="on-dmeta">ออกแบบ layout OSD + export</span>
-      </span>
+      <span class="on-ico p">🖥️</span><span class="on-dbody"><span class="on-dtitle">OSD Designer</span>
+        <span class="on-dmeta on-th">ออกแบบ layout OSD + export</span>
+        <span class="on-dmeta on-en">Design OSD layout + export</span></span>
       <span class="on-pill">tool</span>
     </a>
 
@@ -381,77 +271,65 @@
     <div class="on-dgroup">📡 VTX & Signal</div>
 
     <a class="on-dlink {% if nav_page=='vtx' %}on-act{% endif %}" href="/vtx">
-      <span class="on-ico g">📡</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">VTX Bands & Channels</span>
-        <span class="on-dmeta">ตาราง Band/Channel + CLI</span>
-      </span>
+      <span class="on-ico g">📡</span><span class="on-dbody"><span class="on-dtitle">VTX Bands & Channels</span>
+        <span class="on-dmeta on-th">ตาราง Band/Channel + CLI</span>
+        <span class="on-dmeta on-en">Band/Channel table + CLI output</span></span>
       <span class="on-pill">tool</span>
     </a>
     <a class="on-dlink {% if nav_page=='vtx_range' %}on-act{% endif %}" href="/vtx-range">
-      <span class="on-ico b">🏞️</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">VTX Range Calculator</span>
-        <span class="on-dmeta">ประมาณระยะสัญญาณ + กราฟ</span>
-      </span>
+      <span class="on-ico b">🏞️</span><span class="on-dbody"><span class="on-dtitle">VTX Range Calculator</span>
+        <span class="on-dmeta on-th">ประมาณระยะสัญญาณ + กราฟ</span>
+        <span class="on-dmeta on-en">Estimate signal range + graph</span></span>
       <span class="on-pill">tool</span>
     </a>
     <a class="on-dlink {% if nav_page=='vtx_smartaudio' %}on-act{% endif %}" href="/vtx-smartaudio">
-      <span class="on-ico a">🎙️</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">VTX SmartAudio</span>
-        <span class="on-dmeta">SmartAudio / Tramp commands</span>
-      </span>
+      <span class="on-ico a">🎙️</span><span class="on-dbody"><span class="on-dtitle">VTX SmartAudio</span>
+        <span class="on-dmeta on-th">SmartAudio / Tramp commands</span>
+        <span class="on-dmeta on-en">SmartAudio / Tramp commands</span></span>
       <span class="on-pill">tool</span>
     </a>
 
     <div class="on-ddiv"></div>
-    <div class="on-dgroup">📚 แหล่งข้อมูล</div>
+    <div class="on-dgroup"><span class="on-th">📚 แหล่งข้อมูล</span><span class="on-en">📚 Resources</span></div>
 
     <a class="on-dlink {% if nav_page=='downloads' %}on-act{% endif %}" href="/downloads">
-      <span class="on-ico">📁</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">ไฟล์ DIFF และ DUMP</span>
-        <span class="on-dmeta">รวม CLI config สำเร็จรูป</span>
-      </span>
+      <span class="on-ico">📁</span><span class="on-dbody">
+        <span class="on-dtitle"><span class="on-th">ไฟล์ DIFF และ DUMP</span><span class="on-en">DIFF & DUMP Files</span></span>
+        <span class="on-dmeta on-th">รวม CLI config สำเร็จรูป</span>
+        <span class="on-dmeta on-en">Ready-to-use CLI configs</span></span>
       <span class="on-pill">files</span>
     </a>
     <a class="on-dlink" href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener">
-      <span class="on-ico b">📘</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">เพจ OBIXConfig Lab</span>
-        <span class="on-dmeta">ถาม-แนะนำ & ตัวอย่าง</span>
-      </span>
+      <span class="on-ico b">📘</span><span class="on-dbody"><span class="on-dtitle">OBIXConfig Lab</span>
+        <span class="on-dmeta on-th">ถาม-แนะนำ & ตัวอย่าง</span>
+        <span class="on-dmeta on-en">Community Q&A & examples</span></span>
       <span class="on-pill">↗</span>
     </a>
     <a class="on-dlink {% if nav_page=='about' %}on-act{% endif %}" href="/about">
-      <span class="on-ico">ℹ️</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">เกี่ยวกับ</span>
-        <span class="on-dmeta">ที่มา & วิธีใช้งาน</span>
-      </span>
+      <span class="on-ico">ℹ️</span><span class="on-dbody">
+        <span class="on-dtitle"><span class="on-th">เกี่ยวกับ</span><span class="on-en">About</span></span>
+        <span class="on-dmeta on-th">ที่มา & วิธีใช้งาน</span>
+        <span class="on-dmeta on-en">Background & how to use</span></span>
       <span class="on-pill">info</span>
     </a>
     <a class="on-dlink {% if nav_page=='changelog' %}on-act{% endif %}" href="/changelog">
-      <span class="on-ico g">📝</span>
-      <span class="on-dbody">
-        <span class="on-dtitle">Changelog</span>
-        <span class="on-dmeta">บันทึกการอัปเดต</span>
-      </span>
-      <span class="on-pill">v5.0</span>
+      <span class="on-ico g">📝</span><span class="on-dbody"><span class="on-dtitle">Changelog</span>
+        <span class="on-dmeta on-th">บันทึกการอัปเดต</span>
+        <span class="on-dmeta on-en">Update history</span></span>
+      <span class="on-pill">v5.1</span>
     </a>
 
   </nav>
 
   <div class="on-dfoot">
-    OBIXConfig Doctor &nbsp;·&nbsp; <span class="on-dfoot-ver">v5.0</span><br>
-    Developed for FPV community 🇹🇭
+    OBIXConfig Doctor &nbsp;·&nbsp; <span class="on-dfoot-ver">v5.1</span><br>
+    <span class="on-th">พัฒนาสำหรับชุมชน FPV 🇹🇭</span>
+    <span class="on-en">Built for the FPV community 🌏</span>
   </div>
 </aside>
 
-<!-- ── TOP BAR ──────────────────────────────── -->
 <div class="on-bar" role="banner">
-  <div style="display:flex;align-items:center;gap:10px;">
+  <div style="display:flex;align-items:center;gap:10px">
     <button id="onHam" class="on-ham" aria-label="เปิดเมนู" aria-expanded="false" aria-controls="onDrawer">
       <span></span><span></span><span></span>
     </button>
@@ -463,11 +341,11 @@
   <div class="on-bar-right">
     <span class="on-crumb">
       <span class="on-crumb-dot"></span>
-      {% if nav_page == 'blackbox' %}BLACKBOX ANALYZER
+      {% if nav_page == 'blackbox' %}BLACKBOX
       {% elif nav_page == 'cli_surgeon' %}CLI SURGEON
       {% elif nav_page == 'osd' %}OSD DESIGNER
-      {% elif nav_page == 'rates' %}RATES VISUALIZER
-      {% elif nav_page == 'comparator' %}CLI COMPARATOR
+      {% elif nav_page == 'rates' %}RATES VIZ
+      {% elif nav_page == 'comparator' %}CLI COMPARE
       {% elif nav_page == 'pid_advisor' %}PID ADVISOR
       {% elif nav_page == 'rpm_filter' %}RPM FILTER
       {% elif nav_page == 'motor_prop' %}MOTOR PROP
@@ -478,86 +356,80 @@
       {% elif nav_page == 'downloads' %}DOWNLOADS
       {% elif nav_page == 'about' %}ABOUT
       {% elif nav_page == 'changelog' %}CHANGELOG
-      {% elif nav_page == 'bf_wizard' %}BF CONFIG WIZARD
+      {% elif nav_page == 'bf_wizard' %}BF WIZARD
       {% elif nav_page == 'build_card' %}BUILD CARD
       {% elif nav_page == 'tuning_log' %}TUNING LOG
       {% elif nav_page == 'leaderboard' %}LEADERBOARD
+      {% elif nav_page == 'battery_health' %}BATTERY HEALTH
+      {% elif nav_page == 'motor_thermal' %}MOTOR THERMAL
+      {% elif nav_page == 'loop_analyzer' %}LOOP ANALYZER
+      {% elif nav_page == 'quick_tune' %}QUICK TUNE
+      {% elif nav_page == 'military_uas' %}MILITARY UAS
+      {% elif nav_page == 'fpv_trainer' %}FPV SIM NEO
+      {% elif nav_page == 'flight_quiz' %}FLIGHT QUIZ
       {% else %}DRONE ANALYZER
       {% endif %}
     </span>
-    <button class="on-theme" id="onTheme" title="สลับธีม" aria-label="สลับธีม">🌗</button>
+    <button class="on-icon-btn" id="onLang" title="Switch TH/EN" aria-label="Toggle language">
+      <span id="onLangLabel">TH</span>
+    </button>
+    <button class="on-icon-btn" id="onTheme" title="Toggle theme" aria-label="Toggle dark/light">
+      <span id="onThemeIcon">🌙</span>
+    </button>
   </div>
 </div>
 
 <script>
-/* ── OBIX NAV CONTROLLER ──────────────────── */
-(function () {
+(function(){
   'use strict';
+  var ham=document.getElementById('onHam'),drawer=document.getElementById('onDrawer'),
+      overlay=document.getElementById('onOverlay'),closeBtn=document.getElementById('onClose'),
+      themeBtn=document.getElementById('onTheme'),themeIcon=document.getElementById('onThemeIcon'),
+      langBtn=document.getElementById('onLang'),langLabel=document.getElementById('onLangLabel');
 
-  var ham      = document.getElementById('onHam');
-  var drawer   = document.getElementById('onDrawer');
-  var overlay  = document.getElementById('onOverlay');
-  var closeBtn = document.getElementById('onClose');
-  var themeBtn = document.getElementById('onTheme');
-
-  /* ── Theme (restore on load) ── */
-  var savedTheme = localStorage.getItem('obix-theme') || 'dark';
-  document.documentElement.classList.add(savedTheme);
-  document.addEventListener('DOMContentLoaded', function () {
-    document.body.classList.add(savedTheme);
-  });
-  if (themeBtn) {
-    themeBtn.addEventListener('click', function () {
-      var isDark = document.body.classList.contains('dark') ||
-                   (!document.body.classList.contains('light'));
-      document.body.classList.toggle('dark',  !isDark);
-      document.body.classList.toggle('light',  isDark);
-      document.documentElement.classList.toggle('dark',  !isDark);
-      document.documentElement.classList.toggle('light',  isDark);
-      localStorage.setItem('obix-theme', isDark ? 'light' : 'dark');
-    });
+  /* THEME */
+  var theme=localStorage.getItem('obix-theme')||'dark';
+  function applyTheme(t){
+    document.body.classList.toggle('light',t==='light');
+    document.body.classList.toggle('dark',t!=='light');
+    if(themeIcon)themeIcon.textContent=t==='light'?'☀️':'🌙';
+    localStorage.setItem('obix-theme',t);theme=t;
   }
+  applyTheme(theme);
+  if(themeBtn)themeBtn.addEventListener('click',function(){applyTheme(theme==='light'?'dark':'light');});
 
-  /* ── Drawer open / close ── */
-  function openDrawer() {
-    ham     && ham.setAttribute('aria-expanded', 'true');
-    drawer  && drawer.classList.add('on-open');
-    overlay && overlay.classList.add('on-open');
-    overlay && overlay.setAttribute('aria-hidden', 'false');
-    document.addEventListener('keydown', onEsc);
-    /* trap focus on first link */
-    var first = drawer && drawer.querySelector('a, button');
-    if (first) setTimeout(function(){ first.focus(); }, 60);
+  /* LANGUAGE */
+  var lang=localStorage.getItem('obix-lang')||'th';
+  function applyLang(l){
+    document.body.classList.toggle('lang-en',l==='en');
+    if(langLabel)langLabel.textContent=l==='en'?'EN':'TH';
+    localStorage.setItem('obix-lang',l);lang=l;
   }
+  applyLang(lang);
+  if(langBtn)langBtn.addEventListener('click',function(){applyLang(lang==='th'?'en':'th');});
 
-  function closeDrawer() {
-    ham     && ham.setAttribute('aria-expanded', 'false');
-    drawer  && drawer.classList.remove('on-open');
-    overlay && overlay.classList.remove('on-open');
-    overlay && overlay.setAttribute('aria-hidden', 'true');
-    document.removeEventListener('keydown', onEsc);
-    ham && ham.focus();
+  /* DRAWER */
+  function openDrawer(){
+    ham&&ham.setAttribute('aria-expanded','true');
+    drawer&&drawer.classList.add('on-open');
+    overlay&&overlay.classList.add('on-open');
+    overlay&&overlay.setAttribute('aria-hidden','false');
+    document.addEventListener('keydown',onEsc);
+    var f=drawer&&drawer.querySelector('a,button');if(f)setTimeout(function(){f.focus();},60);
   }
-
-  function onEsc(e) { if (e.key === 'Escape') closeDrawer(); }
-
-  ham      && ham.addEventListener('click', function () {
-    ham.getAttribute('aria-expanded') === 'true' ? closeDrawer() : openDrawer();
-  });
-  overlay  && overlay.addEventListener('click', closeDrawer);
-  closeBtn && closeBtn.addEventListener('click', closeDrawer);
-
-  /* Close drawer when clicking a link (mobile) */
-  if (drawer) {
-    drawer.querySelectorAll('.on-dlink').forEach(function (link) {
-      link.addEventListener('click', function () {
-        if (window.innerWidth < 900) closeDrawer();
-      });
-    });
+  function closeDrawer(){
+    ham&&ham.setAttribute('aria-expanded','false');
+    drawer&&drawer.classList.remove('on-open');
+    overlay&&overlay.classList.remove('on-open');
+    overlay&&overlay.setAttribute('aria-hidden','true');
+    document.removeEventListener('keydown',onEsc);
+    ham&&ham.focus();
   }
-
-  /* Expose for pages that define their own closeDrawer() */
-  window.onNavClose = closeDrawer;
-  window.onNavOpen  = openDrawer;
+  function onEsc(e){if(e.key==='Escape')closeDrawer();}
+  ham&&ham.addEventListener('click',function(){ham.getAttribute('aria-expanded')==='true'?closeDrawer():openDrawer();});
+  overlay&&overlay.addEventListener('click',closeDrawer);
+  closeBtn&&closeBtn.addEventListener('click',closeDrawer);
+  if(drawer)drawer.querySelectorAll('.on-dlink').forEach(function(l){l.addEventListener('click',function(){if(window.innerWidth<900)closeDrawer();});});
+  window.onNavClose=closeDrawer;window.onNavOpen=openDrawer;
 }());
 </script>
