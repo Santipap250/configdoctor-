@@ -26,11 +26,6 @@ from analyzer.thrust_logic import (calculate_thrust_weight,
 from werkzeug.utils import secure_filename
 from analyzer.cli_surgeon import analyze_dump as cli_analyze_dump
 import os, io, time, json, hashlib, logging
-from datetime import datetime
-
-# Simple IP blacklist for brute-force protection
-blocked_ips = {}
-BLOCK_TIME = 600  # block 10 นาที
 
 # ── Rate Limiting ─────────────────────────────────────────────────────────
 try:
@@ -130,10 +125,10 @@ logger = logging.getLogger("configdoctor")
 # ── Init Rate Limiter ─────────────────────────────────────────────────────
 if LIMITER_AVAILABLE:
     limiter = Limiter(
-    key_func=get_remote_address,
-    app=app,
-    default_limits=[],
-    storage_uri=os.environ.get("REDIS_URL"),
+        key_func=get_remote_address,
+        app=app,
+        default_limits=[],          # ไม่ limit route ทั่วไป
+        storage_uri="memory://",    # ใช้ in-memory (เพียงพอสำหรับ single worker)
     )
     def _rate(limit_str):
         """Decorator shortcut สำหรับ rate limit"""
@@ -233,8 +228,8 @@ def analyze_drone(size, battery, style, prop_result, weight, detected_class=None
 
     # ── PID: use class+style lookup (accurate) ─────────────────────────
     if detected_class:
-        pid = get_pid_for_class_style(detected_class, style, battery)
-        flt_raw = get_filter_for_class(detected_class, battery)
+        pid = get_pid_for_class_style(detected_class, style)
+        flt_raw = get_filter_for_class(detected_class)
     else:
         # fallback style-only (should rarely happen)
         if style == "racing":
@@ -407,7 +402,7 @@ def index():
                         "flight_time": 0, "summary": "analysis fallback", "basic_tips": []}
 
         # ── Baseline from presets ─────────────────────────────────────
-        baseline_ctrl  = get_baseline_for_class(detected_class, battery) or {}
+        baseline_ctrl  = get_baseline_for_class(detected_class) or {}
         pid_axes       = baseline_ctrl.get("pid_axes", {})
         filter_baseline = baseline_ctrl.get("filter", {})
 
@@ -990,16 +985,13 @@ def set_security_headers(response):
     response.headers["X-XSS-Protection"]       = "1; mode=block"
     response.headers["Referrer-Policy"]        = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"]     = "geolocation=(), microphone=(), camera=()"
-    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
-    response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
     # CSP: whitelist ครบทุก CDN ที่ใช้จริง
     response.headers["Content-Security-Policy"] = (
-"default-src 'self'; "
-"script-src 'self' "
-"  https://cdnjs.cloudflare.com "
-"  https://cdn.jsdelivr.net "
-"  https://fonts.googleapis.com; "
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' "
+        "  https://cdnjs.cloudflare.com "
+        "  https://cdn.jsdelivr.net "
+        "  https://fonts.googleapis.com; "
         "style-src 'self' 'unsafe-inline' "
         "  https://fonts.googleapis.com "
         "  https://fonts.gstatic.com; "
@@ -1028,19 +1020,7 @@ def rate_limit_exceeded(e):
 
 @app.route("/healthz")
 def healthz():
-
-    # IP ที่เรียก request
-    ip = request.remote_addr
-
-    # อนุญาตเฉพาะ localhost
-    allowed_ips = [
-        "127.0.0.1",
-        "::1"
-    ]
-
-    if ip not in allowed_ips:
-        return {"error": "forbidden"}, 403
-
+    # ไม่เปิดเผย module status ใน production
     return {"status": "ok"}
 
 # ── SEO: robots.txt ────────────────────────────────────────────────────────
