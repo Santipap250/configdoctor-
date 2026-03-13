@@ -561,6 +561,25 @@ body.light { --bg:#f0f4f8; --bg2:#e4ecf4; --surf:#fff; --surf2:#f5f8fc; --text:#
 body.light .scan-line { display:none; }
 body.light .amb-orb { opacity:.25; }
 @media(max-width:600px) { .live-hud { grid-template-columns:repeat(2,1fr); } .adv-grid { grid-template-columns:repeat(2,1fr); } .filter-grid { grid-template-columns:1fr 1fr; } .chk-grid { grid-template-columns:1fr; } }
+@media(max-width:600px) {
+  .sauce-block { margin:0 -2px; border-radius:10px; }
+  .sauce-header { padding:10px 12px; gap:8px; }
+  .sauce-icon { width:32px; height:32px; font-size:16px; flex-shrink:0; }
+  .sauce-title { font-size:9px; }
+  .sauce-cli-box { font-size:9.5px; padding:10px 12px; max-height:280px; }
+  .sauce-params-grid { grid-template-columns:1fr 1fr; gap:5px; padding:10px 12px; }
+  .sauce-insights { padding:10px 12px; gap:6px; }
+  .sauce-insight { padding:7px 10px; }
+  .sauce-insight-body { font-size:9.5px; }
+  .btn-sauce { padding:7px 14px; font-size:7px; }
+  .preset-grid-mini { gap:4px; }
+  .pmini { padding:4px 6px; font-size:8px; }
+  .preset-cat-btn { font-size:6.5px; padding:2px 6px; }
+  .sauce-params-grid .sparam-val { font-size:11px; }
+  .sauce-tabs { gap:4px; padding:8px 12px 0; }
+  .sauce-tab { padding:4px 10px; font-size:7px; }
+  .sauce-badge { font-size:6px; }
+}
 
 /* ═══════════════════════════════════════════════════════
    UPGRADE SECTIONS — v5.1 ELITE ANALYSIS
@@ -1058,7 +1077,7 @@ body.light .amb-orb { opacity:.25; }
           </div>
           <!-- Hidden select for form submission -->
           <select name="battery" id="battery-select" onchange="liveCalc();syncBattPills(this.value)" style="display:none;">
-            {% for c in ['3S','4S','5S','6S','7S','8S'] %}<option value="{{ c }}" {% if request.form.get('battery','')==c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+            {% for c in ['1S','2S','3S','4S','5S','6S','7S','8S'] %}<option value="{{ c }}" {% if request.form.get('battery','')==c %}selected{% endif %}>{{ c }}</option>{% endfor %}
           </select>
           <div style="margin-top:8px;">
             <label>Capacity (mAh)</label>
@@ -1274,9 +1293,13 @@ body.light .amb-orb { opacity:.25; }
             <div class="cli-deploy-sub">{{ analysis.detected_class | default('Custom') }} · {{ analysis.style | capitalize }} · Copy → Paste → Save</div>
           </div>
         </div>
-        <div class="cli-box" id="quickCLIBox"># ══ OBIXConfig Doctor v5 — {{ analysis.detected_class | default('Custom') }} · {{ analysis.style | capitalize }}
-# Prop: {{ analysis.prop_size or '5' }}" · Battery: {{ analysis.advanced.cells if analysis.advanced else '—' }}S · KV{{ analysis.motor_kv or '—' }}
-# ─────────────────────────── PID ───────────────────────────
+        <div class="cli-box" id="quickCLIBox"># ══════════════════════════════════════════════════
+# 🚁 OBIXConfig Doctor v5.2 — BASE TUNE
+# {{ analysis.detected_class | default('Custom') | upper }} · {{ analysis.style | upper }}
+# Frame: {{ analysis.size or '5' }}" · Prop: {{ analysis.prop_size or '5' }}" {{ analysis.filter.anti_gravity or '—' }}
+# Battery: {{ analysis.advanced.cells if analysis.advanced else '—' }}S · KV{{ analysis.motor_kv or '—' }}
+# ══════════════════════════════════════════════════
+# ─────────────── PID ───────────────────────────────
 set p_roll               = {{ analysis.pid.roll.p }}
 set i_roll               = {{ analysis.pid.roll.i }}
 set d_roll               = {{ analysis.pid.roll.d }}
@@ -1285,16 +1308,30 @@ set i_pitch              = {{ analysis.pid.pitch.i }}
 set d_pitch              = {{ analysis.pid.pitch.d }}
 set p_yaw                = {{ analysis.pid.yaw.p }}
 set i_yaw                = {{ analysis.pid.yaw.i }}
-# ─────────────────────────── Filter ────────────────────────
+set d_yaw                = 0
+# ─────────────── Filter ────────────────────────────
 set gyro_lpf1_static_hz  = {{ analysis.filter.gyro_lpf1 or 0 }}
+set gyro_lpf1_type       = PT1
 set dterm_lpf1_static_hz = {{ analysis.filter.dterm_lpf1 or 0 }}
+set dterm_lpf1_type      = PT1
 set dyn_notch_count      = {{ analysis.filter.dyn_notch or 1 }}
+set dyn_notch_min_hz     = {{ analysis.filter.dyn_notch_min or 80 }}
+set dyn_notch_max_hz     = {{ analysis.filter.dyn_notch_max or 400 }}
+# ─────────────── Motor / ESC ───────────────────────
 set motor_pwm_protocol   = DSHOT600
 set dshot_bidir          = {{ 'ON' if analysis.filter.rpm_filter else 'OFF' }}
 set rpm_filter_harmonics = 3
-set rpm_filter_min_hz    = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [100, (analysis.advanced.rpm_estimated / 60 * 0.20) | int] | max }}{% else %}100{% endif %}
+set rpm_filter_q         = 500
+set rpm_filter_min_hz    = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [80, (analysis.advanced.rpm_estimated / 60 * 7 * 0.18) | int] | max }}{% else %}100{% endif %}
 
+# ─────────────── Anti-Gravity ──────────────────────
 set anti_gravity_gain    = {{ analysis.filter.anti_gravity or 3 }}
+set anti_gravity_mode    = SMOOTH
+set anti_gravity_cutoff  = 30
+# ══════════════════════════════════════════════════
+# ⚠️ นี่คือ BASE TUNE — ดู SECRET SAUCE ด้านล่างสำหรับ
+#    Advanced CLI: feedforward / d_min / TPA / vbat_sag
+# ══════════════════════════════════════════════════
 save</div>
         <div class="cli-footer">
           <button class="btn-deploy" onclick="copyEl('quickCLIBox');showToast('⚡ CLI COPIED — PASTE IN BETAFLIGHT!')">
@@ -1328,6 +1365,26 @@ save</div>
         <!-- Tab 0: CLI -->
         <div id="sauce-panel-0" style="display:block;">
           <div class="sauce-cli-box" id="sauceCLIBox">{{ ss.cli }}</div>
+          <script>
+          (function(){
+            var box = document.getElementById('sauceCLIBox');
+            if(!box) return;
+            var html = box.innerHTML
+              .replace(/(&lt;|<)!--(.*?)--(&gt;|>)/g, '<span style="color:#6a9955;font-style:italic;"><!--$2--></span>')
+              .replace(/(^|
+)(# ══.*?)(
+|$)/g, '$1<span style="color:#ff8c00;font-weight:700;">$2</span>$3')
+              .replace(/(^|
+)(# ───.*?)(
+|$)/g, '$1<span style="color:#ffb700;font-weight:600;">$2</span>$3')
+              .replace(/(^|
+)(# .*?)(
+|$)/g, '$1<span style="color:#6a9955;">$2</span>$3')
+              .replace(/(^|
+)(set )(\S+)/g, '$1$2<span style="color:#00ff88;">$3</span>');
+            box.innerHTML = html;
+          })();
+          </script>
           <div class="sauce-footer">
             <button class="btn-sauce" onclick="copyEl('sauceCLIBox');showToast('🔥 SECRET SAUCE COPIED!')">
               🔥 COPY SECRET SAUCE
