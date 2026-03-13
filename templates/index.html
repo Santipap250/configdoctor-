@@ -237,6 +237,18 @@ body::after {
 .dtool-badge.hot { background:rgba(255,51,68,0.12); color:var(--red); border-color:rgba(255,51,68,0.25); }
 .dtool-badge.v5  { background:rgba(176,96,255,0.12); color:var(--purple); border-color:rgba(176,96,255,0.25); }
 .dtool[data-cat].hidden { display:none; }
+.dock-tab-count {
+  font-family:var(--font-d); font-size:8px; font-weight:700; letter-spacing:.04em;
+  padding:1px 5px; border-radius:4px; margin-left:2px;
+  background:rgba(255,255,255,0.06); color:var(--muted2);
+  transition:background .18s, color .18s;
+}
+.dock-tab.active .dock-tab-count { background:rgba(0,255,136,0.12); color:var(--green); }
+/* ── Dock group separator ── */
+.dock-group-sep {
+  width:1px; flex-shrink:0; align-self:stretch;
+  background:rgba(255,255,255,0.05); margin:6px 2px;
+}
 
 /* ── PAGE WRAP ────────────────────────────────────────────────── */
 .page-wrap { position:relative; z-index:2; padding-top:var(--nav-h); min-height:100vh; }
@@ -937,38 +949,43 @@ body.light .amb-orb { opacity:.25; }
 
   <!-- ── TOOL DOCK ──────────────────────────────────────────── -->
   <div class="tool-dock" id="toolDock">
-    <div class="dock-tabs" role="tablist">
-      <button class="dock-tab active" data-cat="all"  onclick="dockFilter(this,'all')"><span class="dock-tab-dot g"></span>ALL TOOLS</button>
-      <button class="dock-tab" data-cat="core" onclick="dockFilter(this,'core')"><span class="dock-tab-dot g"></span>🔧 TOOLS</button>
-      <button class="dock-tab" data-cat="adv"  onclick="dockFilter(this,'adv')"><span class="dock-tab-dot a"></span>⚡ ADVANCED</button>
-      <button class="dock-tab" data-cat="phys" onclick="dockFilter(this,'phys')"><span class="dock-tab-dot p"></span>🔬 PHYSICS</button>
-      <button class="dock-tab" data-cat="vtx"  onclick="dockFilter(this,'vtx')"><span class="dock-tab-dot b"></span>📡 VTX</button>
-      <button class="dock-tab" data-cat="wiz"  onclick="dockFilter(this,'wiz')"><span class="dock-tab-dot t"></span>🚀 WIZARD</button>
+    <div class="dock-tabs" role="tablist" aria-label="หมวดหมู่เครื่องมือ">
+      <button class="dock-tab active" data-cat="all"     onclick="dockFilter(this,'all')"    aria-pressed="true"><span class="dock-tab-dot g"></span>ALL <span class="dock-tab-count">23</span></button>
+      <button class="dock-tab"        data-cat="tune"    onclick="dockFilter(this,'tune')"   aria-pressed="false"><span class="dock-tab-dot p"></span>🩺 TUNE <span class="dock-tab-count">5</span></button>
+      <button class="dock-tab"        data-cat="hw"      onclick="dockFilter(this,'hw')"     aria-pressed="false"><span class="dock-tab-dot g"></span>⚙️ HARDWARE <span class="dock-tab-count">5</span></button>
+      <button class="dock-tab"        data-cat="data"    onclick="dockFilter(this,'data')"   aria-pressed="false"><span class="dock-tab-dot b"></span>📊 ANALYSIS <span class="dock-tab-count">4</span></button>
+      <button class="dock-tab"        data-cat="video"   onclick="dockFilter(this,'video')"  aria-pressed="false"><span class="dock-tab-dot t"></span>📡 VIDEO <span class="dock-tab-count">4</span></button>
+      <button class="dock-tab"        data-cat="explore" onclick="dockFilter(this,'explore')" aria-pressed="false"><span class="dock-tab-dot a"></span>🎮 EXPLORE <span class="dock-tab-count">5</span></button>
     </div>
     <div class="dock-tools" id="dockToolsRow">
-      <a href="/motor-prop"       class="dtool g" data-cat="core"><div class="dtool-icon">🧭</div><span class="dtool-label">Motor×Prop</span></a>
-      <a href="/cli_surgeon"      class="dtool a" data-cat="core"><div class="dtool-icon">🩺</div><span class="dtool-label">CLI Surgeon</span></a>
-      <a href="/pid-advisor"      class="dtool p" data-cat="core"><div class="dtool-icon">💊</div><span class="dtool-label">PID Advisor</span><span class="dtool-badge">new</span></a>
-      <a href="/rpm-filter"       class="dtool g" data-cat="core"><div class="dtool-icon">⚙️</div><span class="dtool-label">RPM Filter</span><span class="dtool-badge">new</span></a>
-      <a href="/rates-visualizer" class="dtool b" data-cat="core"><div class="dtool-icon">📈</div><span class="dtool-label">Rates Viz</span><span class="dtool-badge">new</span></a>
-      <a href="/blackbox"         class="dtool b" data-cat="core"><div class="dtool-icon">📊</div><span class="dtool-label">Blackbox</span><span class="dtool-badge hot">HOT</span></a>
-      <a href="/cli-comparator"   class="dtool a" data-cat="adv"><div class="dtool-icon">⚖️</div><span class="dtool-label">CLI Diff</span><span class="dtool-badge">new</span></a>
-      <a href="/esc-checker"      class="dtool a" data-cat="adv"><div class="dtool-icon">⚡</div><span class="dtool-label">ESC Checker</span><span class="dtool-badge">new</span></a>
-      <a href="/osd"              class="dtool p" data-cat="adv"><div class="dtool-icon">🖥️</div><span class="dtool-label">OSD Design</span></a>
-      <a href="/battery-health"   class="dtool a" data-cat="phys"><div class="dtool-icon">🔋</div><span class="dtool-label">Battery Health</span><span class="dtool-badge v5">v5</span></a>
-      <a href="/motor-thermal"    class="dtool r" data-cat="phys"><div class="dtool-icon">🌡️</div><span class="dtool-label">Motor Thermal</span><span class="dtool-badge v5">v5</span></a>
-      <a href="/loop-analyzer"    class="dtool p" data-cat="phys"><div class="dtool-icon">📡</div><span class="dtool-label">Loop Analyzer</span><span class="dtool-badge v5">v5</span></a>
-      <a href="/vtx"              class="dtool g" data-cat="vtx"><div class="dtool-icon">📡</div><span class="dtool-label">VTX Bands</span></a>
-      <a href="/vtx-range"        class="dtool b" data-cat="vtx"><div class="dtool-icon">🏞️</div><span class="dtool-label">VTX Range</span></a>
-      <a href="/vtx-smartaudio"   class="dtool a" data-cat="vtx"><div class="dtool-icon">🎙️</div><span class="dtool-label">SmartAudio</span></a>
-      <a href="/flight-quiz"      class="dtool g" data-cat="wiz"><div class="dtool-icon">🎯</div><span class="dtool-label">Flight Quiz</span><span class="dtool-badge">new</span></a>
-      <a href="/bf-wizard"        class="dtool t" data-cat="wiz"><div class="dtool-icon">⚡</div><span class="dtool-label">BF Wizard</span><span class="dtool-badge">new</span></a>
-      <a href="/build-card"       class="dtool a" data-cat="wiz"><div class="dtool-icon">🃏</div><span class="dtool-label">Build Card</span><span class="dtool-badge">new</span></a>
-      <a href="/tuning-log"       class="dtool b" data-cat="wiz"><div class="dtool-icon">📓</div><span class="dtool-label">Tuning Log</span><span class="dtool-badge">new</span></a>
-      <a href="/leaderboard"      class="dtool a" data-cat="wiz"><div class="dtool-icon">🏆</div><span class="dtool-label">Leaderboard</span></a>
-      <a href="/fpv-trainer"      class="dtool t" data-cat="wiz"><div class="dtool-icon">🎮</div><span class="dtool-label">FPV Sim NEO</span><span class="dtool-badge hot">GAME</span></a>
-      <a href="/quick-tune"       class="dtool t" data-cat="wiz"><div class="dtool-icon">⚡</div><span class="dtool-label">Quick Tune Pad</span><span class="dtool-badge hot">NEW</span></a>
-      <a href="/downloads"        class="dtool g" data-cat="wiz"><div class="dtool-icon">📁</div><span class="dtool-label">Downloads</span></a>
+      <!-- ── 🩺 TUNE ───────────────────────────────────── -->
+      <a href="/pid-advisor"      class="dtool p" data-cat="tune"><div class="dtool-icon">💊</div><span class="dtool-label">PID Advisor</span></a>
+      <a href="/cli_surgeon"      class="dtool a" data-cat="tune"><div class="dtool-icon">🩺</div><span class="dtool-label">CLI Surgeon</span></a>
+      <a href="/rates-visualizer" class="dtool b" data-cat="tune"><div class="dtool-icon">📈</div><span class="dtool-label">Rates Viz</span></a>
+      <a href="/quick-tune"       class="dtool t" data-cat="tune"><div class="dtool-icon">⚡</div><span class="dtool-label">Quick Tune</span><span class="dtool-badge hot">NEW</span></a>
+      <a href="/bf-wizard"        class="dtool t" data-cat="tune"><div class="dtool-icon">🧙</div><span class="dtool-label">BF Wizard</span></a>
+      <!-- ── ⚙️ HARDWARE ─────────────────────────────── -->
+      <a href="/motor-prop"       class="dtool g" data-cat="hw"><div class="dtool-icon">🧭</div><span class="dtool-label">Motor×Prop</span></a>
+      <a href="/esc-checker"      class="dtool a" data-cat="hw"><div class="dtool-icon">⚡</div><span class="dtool-label">ESC Checker</span></a>
+      <a href="/rpm-filter"       class="dtool g" data-cat="hw"><div class="dtool-icon">⚙️</div><span class="dtool-label">RPM Filter</span></a>
+      <a href="/battery-health"   class="dtool a" data-cat="hw"><div class="dtool-icon">🔋</div><span class="dtool-label">Battery Health</span><span class="dtool-badge v5">v5</span></a>
+      <a href="/motor-thermal"    class="dtool r" data-cat="hw"><div class="dtool-icon">🌡️</div><span class="dtool-label">Motor Thermal</span><span class="dtool-badge v5">v5</span></a>
+      <!-- ── 📊 ANALYSIS ────────────────────────────── -->
+      <a href="/blackbox"         class="dtool b" data-cat="data"><div class="dtool-icon">📊</div><span class="dtool-label">Blackbox</span><span class="dtool-badge hot">HOT</span></a>
+      <a href="/cli-comparator"   class="dtool a" data-cat="data"><div class="dtool-icon">⚖️</div><span class="dtool-label">CLI Diff</span></a>
+      <a href="/loop-analyzer"    class="dtool p" data-cat="data"><div class="dtool-icon">🔁</div><span class="dtool-label">Loop Analyzer</span><span class="dtool-badge v5">v5</span></a>
+      <a href="/tuning-log"       class="dtool b" data-cat="data"><div class="dtool-icon">📓</div><span class="dtool-label">Tuning Log</span></a>
+      <!-- ── 📡 VIDEO ───────────────────────────────── -->
+      <a href="/vtx"              class="dtool g" data-cat="video"><div class="dtool-icon">📡</div><span class="dtool-label">VTX Bands</span></a>
+      <a href="/vtx-range"        class="dtool b" data-cat="video"><div class="dtool-icon">🏞️</div><span class="dtool-label">VTX Range</span></a>
+      <a href="/vtx-smartaudio"   class="dtool a" data-cat="video"><div class="dtool-icon">🎙️</div><span class="dtool-label">SmartAudio</span></a>
+      <a href="/osd"              class="dtool p" data-cat="video"><div class="dtool-icon">🖥️</div><span class="dtool-label">OSD Design</span></a>
+      <!-- ── 🎮 EXPLORE ──────────────────────────────── -->
+      <a href="/flight-quiz"      class="dtool g" data-cat="explore"><div class="dtool-icon">🎯</div><span class="dtool-label">Flight Quiz</span></a>
+      <a href="/build-card"       class="dtool a" data-cat="explore"><div class="dtool-icon">🃏</div><span class="dtool-label">Build Card</span></a>
+      <a href="/leaderboard"      class="dtool a" data-cat="explore"><div class="dtool-icon">🏆</div><span class="dtool-label">Leaderboard</span></a>
+      <a href="/fpv-trainer"      class="dtool t" data-cat="explore"><div class="dtool-icon">🎮</div><span class="dtool-label">FPV Sim NEO</span><span class="dtool-badge hot">GAME</span></a>
+      <a href="/downloads"        class="dtool g" data-cat="explore"><div class="dtool-icon">📁</div><span class="dtool-label">Downloads</span></a>
     </div>
   </div>
 
