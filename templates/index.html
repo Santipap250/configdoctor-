@@ -439,6 +439,33 @@ select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns=
 .tpanel-body  { padding:14px; }
 .cli-deploy { background:rgba(0,255,136,0.03); border:1.5px solid rgba(0,255,136,0.18); border-radius:14px; overflow:hidden; position:relative; animation:fadeUp .35s ease both; }
 .cli-deploy::before { content:''; position:absolute; top:0; left:0; right:0; height:2.5px; background:linear-gradient(90deg,var(--green),var(--blue),var(--cyan)); background-size:200% 100%; animation:sweep 5s linear infinite; }
+.sauce-block { background:linear-gradient(135deg,rgba(255,100,0,0.05),rgba(255,50,0,0.02),rgba(255,183,0,0.04)); border:1.5px solid rgba(255,100,0,0.30); border-radius:14px; overflow:hidden; position:relative; margin-top:0; }
+.sauce-block::before { content:''; position:absolute; top:0; left:0; right:0; height:2.5px; background:linear-gradient(90deg,#ff6400,#ff2200,#ffb700,#ff6400); background-size:200% 100%; animation:sweep 4s linear infinite; }
+.sauce-header { padding:12px 16px; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,100,0,0.15); background:linear-gradient(135deg,rgba(255,100,0,0.08),rgba(255,183,0,0.04)); }
+.sauce-icon { width:40px; height:40px; border-radius:10px; flex-shrink:0; background:linear-gradient(135deg,rgba(255,100,0,0.25),rgba(255,183,0,0.15)); border:1.5px solid rgba(255,100,0,0.4); display:flex; align-items:center; justify-content:center; font-size:20px; }
+.sauce-title { font-family:var(--font-d); font-size:11px; font-weight:700; letter-spacing:.1em; color:#ff8c00; }
+.sauce-sub { font-family:var(--font-m); font-size:9px; color:var(--muted2); margin-top:3px; }
+.sauce-cli-box { background:rgba(0,0,0,0.4); border:1px solid rgba(255,100,0,0.2); border-radius:0; padding:14px 16px; font-family:var(--font-m); font-size:10.5px; line-height:1.7; color:#e0e0e0; white-space:pre; overflow-x:auto; min-height:60px; max-height:400px; overflow-y:auto; }
+.sauce-cli-box .c-header { color:#ff8c00; font-weight:700; }
+.sauce-cli-box .c-section { color:#ffb700; }
+.sauce-cli-box .c-key { color:#00ff88; }
+.sauce-cli-box .c-note { color:#888; font-style:italic; }
+.sauce-footer { padding:10px 14px; display:flex; gap:8px; align-items:center; border-top:1px solid rgba(255,100,0,0.15); background:rgba(255,100,0,0.03); }
+.btn-sauce { background:linear-gradient(90deg,#ff6400,#ff2200); color:#fff; border:none; border-radius:8px; padding:8px 18px; font-family:var(--font-d); font-size:8px; letter-spacing:.12em; font-weight:700; cursor:pointer; transition:all .2s; box-shadow:0 0 16px rgba(255,100,0,0.3); }
+.btn-sauce:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(255,100,0,0.5); }
+.sauce-tabs { display:flex; gap:6px; padding:10px 14px 0; border-bottom:1px solid rgba(255,100,0,0.12); }
+.sauce-tab { padding:5px 12px; font-family:var(--font-d); font-size:7.5px; letter-spacing:.08em; cursor:pointer; color:var(--muted2); border-bottom:2px solid transparent; transition:all .2s; }
+.sauce-tab.active { color:#ff8c00; border-bottom-color:#ff8c00; }
+.sauce-insights { padding:12px 14px; display:flex; flex-direction:column; gap:8px; }
+.sauce-insight { background:rgba(255,100,0,0.05); border:1px solid rgba(255,100,0,0.15); border-radius:8px; padding:9px 12px; display:flex; gap:10px; align-items:flex-start; }
+.sauce-insight-icon { font-size:16px; flex-shrink:0; margin-top:1px; }
+.sauce-insight-title { font-family:var(--font-d); font-size:8px; font-weight:700; letter-spacing:.06em; color:#ff8c00; margin-bottom:3px; }
+.sauce-insight-body { font-family:var(--font-m); font-size:10px; color:var(--muted2); line-height:1.6; }
+.sauce-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 7px; border-radius:4px; font-family:var(--font-d); font-size:6.5px; letter-spacing:.08em; font-weight:700; background:rgba(255,100,0,0.2); color:#ff8c00; border:1px solid rgba(255,100,0,0.3); }
+.sauce-params-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; padding:12px 14px; }
+.sparam { background:rgba(0,0,0,0.25); border:1px solid rgba(255,100,0,0.12); border-radius:7px; padding:7px 10px; }
+.sparam-key { font-family:var(--font-d); font-size:6.5px; letter-spacing:.1em; color:var(--muted); display:block; margin-bottom:2px; }
+.sparam-val { font-family:var(--font-m); font-size:13px; font-weight:700; color:#ffb700; }
 .cli-deploy-header { padding:12px 16px; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(0,255,136,0.1); background:linear-gradient(135deg,rgba(0,255,136,0.05),rgba(0,170,255,0.03)); }
 .cli-deploy-icon { width:38px; height:38px; border-radius:10px; flex-shrink:0; background:linear-gradient(135deg,rgba(0,255,136,0.18),rgba(0,170,255,0.1)); border:1.5px solid rgba(0,255,136,0.3); display:flex; align-items:center; justify-content:center; font-size:18px; }
 .cli-deploy-title { font-family:var(--font-d); font-size:11px; font-weight:700; letter-spacing:.1em; color:var(--green); }
@@ -711,26 +738,48 @@ body.light .amb-orb { opacity:.25; }
 
       <div class="form-body">
         <form method="POST" id="analyzeForm">
-          <div class="fsec-label">Preset / เริ่มต้น</div>
-          <label>Preset ชุดเริ่มต้น</label>
-          <select id="preset-select" name="preset">
-            <option value="">-- ไม่ใช้ preset --</option>
-            {% for key, lbl in [
-              ('2.5_micro','2.5" — Micro'),('3_whoop','3.0" — Whoop'),
-              ('3.5_cine','3.5" — Cine'),('4_mini','4.0" — Mini'),
-              ('5_freestyle','5.0" — Freestyle'),('6_heavy5','6.0" — Heavy'),
-              ('7_midlr','7.0" — Mid / LR'),('7.5_midlr','7.5" — Mid / LR'),
-              ('8_lr','8.0" — Long Range'),('10_lr','10" — Long Range Big')
-            ] %}
-            <option value="{{ key }}" {% if request.form.get('preset','')==key or (analysis and analysis.preset_used==key) %}selected{% endif %}>{{ lbl }}</option>
+          <div class="fsec-label">⚡ Preset / เลือก Build</div>
+
+          <!-- Quick Chips by category -->
+          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">
+            {% for gname in preset_groups.keys() %}
+            <div class="preset-cat-btn" onclick="togglePresetGroup(this)" style="padding:3px 8px;border:1px solid rgba(255,255,255,0.1);border-radius:5px;font-family:var(--font-d);font-size:7px;letter-spacing:.06em;cursor:pointer;color:var(--muted2);transition:all .2s;">{{ gname }}</div>
+            {% endfor %}
+          </div>
+
+          <!-- Grouped Presets Select -->
+          <select id="preset-select" name="preset" style="width:100%" onchange="onPresetSelect(this.value)">
+            <option value="">-- เลือก Preset Build --</option>
+            {% for gname, items in preset_groups.items() %}
+              <optgroup label="{{ gname }}">
+                {% for key, lbl in items %}
+                <option value="{{ key }}" {% if request.form.get('preset','')==key or (analysis and analysis.preset_used==key) %}selected{% endif %}>{{ lbl }}</option>
+                {% endfor %}
+              </optgroup>
             {% endfor %}
           </select>
-          <div class="preset-grid-mini" style="margin-top:8px;">
-            <div class="pmini {% if request.form.get('preset','')=='2.5_micro' %}active{% endif %}" onclick="applyPreset('2.5_micro',this)">2.5"<br>Micro</div>
-            <div class="pmini {% if request.form.get('preset','')=='4_mini' %}active{% endif %}" onclick="applyPreset('4_mini',this)">4"<br>Mini</div>
-            <div class="pmini {% if request.form.get('preset','')=='5_freestyle' or not request.form.get('preset') %}active{% endif %}" onclick="applyPreset('5_freestyle',this)">5"<br>Free</div>
-            <div class="pmini {% if request.form.get('preset','')=='7_midlr' %}active{% endif %}" onclick="applyPreset('7_midlr',this)">7"<br>LR</div>
-            <div class="pmini {% if request.form.get('preset','')=='10_lr' %}active{% endif %}" onclick="applyPreset('10_lr',this)">10"<br>LR</div>
+
+          <!-- 5" Quick Access Chips -->
+          <div style="margin-top:8px;">
+            <div style="font-family:var(--font-d);font-size:7px;color:var(--muted);letter-spacing:.1em;margin-bottom:5px;">🚀 5" — เลือก Battery</div>
+            <div class="preset-grid-mini">
+              <div class="pmini {% if request.form.get('preset','')=='5_4s_freestyle' %}active{% endif %}" onclick="applyPreset('5_4s_freestyle',this)">5" 4S<br>Free</div>
+              <div class="pmini {% if request.form.get('preset','')=='5_5s_freestyle' %}active{% endif %}" onclick="applyPreset('5_5s_freestyle',this)">5" 5S<br>Free</div>
+              <div class="pmini {% if request.form.get('preset','')=='5_6s_freestyle' %}active{% endif %}" onclick="applyPreset('5_6s_freestyle',this)">5" 6S<br>Free</div>
+              <div class="pmini {% if request.form.get('preset','')=='5_4s_racing' %}active{% endif %}" onclick="applyPreset('5_4s_racing',this)">5" 4S<br>Race</div>
+              <div class="pmini {% if request.form.get('preset','')=='5_6s_racing' %}active{% endif %}" onclick="applyPreset('5_6s_racing',this)">5" 6S<br>Race</div>
+              <div class="pmini {% if request.form.get('preset','')=='5_6s_lr' %}active{% endif %}" onclick="applyPreset('5_6s_lr',this)">5" 6S<br>LR</div>
+            </div>
+          </div>
+          <!-- Other Quick Chips -->
+          <div style="margin-top:6px;">
+            <div style="font-family:var(--font-d);font-size:7px;color:var(--muted);letter-spacing:.1em;margin-bottom:5px;">🎯 Other Sizes</div>
+            <div class="preset-grid-mini">
+              <div class="pmini {% if request.form.get('preset','')=='3_whoop_3s' %}active{% endif %}" onclick="applyPreset('3_whoop_3s',this)">3"<br>Whoop</div>
+              <div class="pmini {% if request.form.get('preset','')=='4_mini_4s_free' %}active{% endif %}" onclick="applyPreset('4_mini_4s_free',this)">4"<br>Mini</div>
+              <div class="pmini {% if request.form.get('preset','')=='7_6s_midlr' %}active{% endif %}" onclick="applyPreset('7_6s_midlr',this)">7"<br>LR</div>
+              <div class="pmini {% if request.form.get('preset','')=='10_6s_lr' %}active{% endif %}" onclick="applyPreset('10_6s_lr',this)">10"<br>ULR</div>
+            </div>
           </div>
           <div class="fsec-label">📐 ข้อมูลโดรน</div>
           <div class="fg">
@@ -949,6 +998,75 @@ save</div>
           <button class="btn-sm" onclick="copyEl('quickCLIBox')">📋</button>
         </div>
       </div>
+
+      <!-- ══ SECRET SAUCE BLOCK ══ -->
+      {% if analysis.secret_sauce %}
+      {% set ss = analysis.secret_sauce %}
+      <div class="sauce-block">
+        <div class="sauce-header">
+          <div class="sauce-icon">🔥</div>
+          <div>
+            <div class="sauce-title">SECRET SAUCE — ADVANCED TUNE</div>
+            <div class="sauce-sub">{{ analysis.detected_class | upper }} · {{ analysis.style | upper }} · {{ analysis.advanced.cells if analysis.advanced else '—' }}S · KV{{ analysis.motor_kv or '—' }} · คำนวณเฉพาะ build นี้</div>
+          </div>
+          <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
+            <span class="sauce-badge">🔒 EXCLUSIVE</span>
+            <span style="font-family:var(--font-d);font-size:6px;color:var(--muted);letter-spacing:.06em;">ไม่มีที่ไหนในไทย</span>
+          </div>
+        </div>
+        <!-- Tabs -->
+        <div class="sauce-tabs">
+          <div class="sauce-tab active" onclick="sauceTab(0,this)">⚡ CLI CODE</div>
+          <div class="sauce-tab" onclick="sauceTab(1,this)">🧠 INSIGHTS</div>
+          <div class="sauce-tab" onclick="sauceTab(2,this)">📊 PARAMS</div>
+        </div>
+        <!-- Tab 0: CLI -->
+        <div id="sauce-panel-0" style="display:block;">
+          <div class="sauce-cli-box" id="sauceCLIBox">{{ ss.cli }}</div>
+          <div class="sauce-footer">
+            <button class="btn-sauce" onclick="copyEl('sauceCLIBox');showToast('🔥 SECRET SAUCE COPIED!')">
+              🔥 COPY SECRET SAUCE
+            </button>
+            <button class="btn-sm" onclick="copyEl('sauceCLIBox')">📋</button>
+            <span style="font-family:var(--font-d);font-size:7px;color:var(--muted);letter-spacing:.06em;margin-left:auto;">ใส่หลัง PID · paste → save</span>
+          </div>
+        </div>
+        <!-- Tab 1: Insights -->
+        <div id="sauce-panel-1" style="display:none;">
+          <div class="sauce-insights">
+            {% if ss.insights %}
+              {% for ins in ss.insights %}
+              <div class="sauce-insight">
+                <div class="sauce-insight-icon">{{ ins.icon }}</div>
+                <div>
+                  <div class="sauce-insight-title">{{ ins.title }}</div>
+                  <div class="sauce-insight-body">{{ ins.body }}</div>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div style="padding:10px;color:var(--muted);font-size:11px;">ไม่มี insights</div>
+            {% endif %}
+          </div>
+        </div>
+        <!-- Tab 2: Params -->
+        <div id="sauce-panel-2" style="display:none;">
+          {% if ss.params %}
+          <div class="sauce-params-grid">
+            {% for k,v in ss.params.items() %}
+            <div class="sparam">
+              <span class="sparam-key">{{ k | upper | replace('_',' ') }}</span>
+              <span class="sparam-val">{{ v }}</span>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+          <div style="padding:8px 14px;font-family:var(--font-d);font-size:7.5px;color:var(--muted);letter-spacing:.06em;line-height:1.8;border-top:1px solid rgba(255,100,0,0.1);">
+            ⚠️ ค่าเหล่านี้คำนวณจาก build ของคุณเท่านั้น — ไม่ใช่ค่า generic · ทดสอบบินในพื้นที่ปลอดภัยก่อนเสมอ
+          </div>
+        </div>
+      </div>
+      {% endif %}
 
       <!-- ══ 1. MISSION SUMMARY ══ -->
       <div class="tpanel">
@@ -2484,12 +2602,70 @@ set tpa_rate         = 65</div>
     '3_whoop':     {size:3.0,  weight:120,  battery:'3S', prop_size:3.0, pitch:2.0, blades:'2', style:'freestyle', motor_kv:2500,  battery_mAh:450},
     '3.5_cine':    {size:3.5,  weight:350,  battery:'4S', prop_size:3.5, pitch:2.5, blades:'2', style:'longrange', motor_kv:3500,  battery_mAh:850},
     '4_mini':      {size:4.0,  weight:420,  battery:'4S', prop_size:4.0, pitch:3.0, blades:'2', style:'freestyle', motor_kv:2800,  battery_mAh:850},
-    '5_freestyle': {size:5.0,  weight:750,  battery:'4S', prop_size:5.1, pitch:4.1, blades:'3', style:'freestyle', motor_kv:2306,  battery_mAh:1500},
-    '6_heavy5':    {size:6.0,  weight:850,  battery:'6S', prop_size:6.0, pitch:4.0, blades:'3', style:'freestyle', motor_kv:1750,  battery_mAh:1800},
-    '7_midlr':     {size:7.0,  weight:1100, battery:'6S', prop_size:7.0, pitch:3.5, blades:'2', style:'longrange', motor_kv:1200,  battery_mAh:3000},
-    '7.5_midlr':   {size:7.5,  weight:1200, battery:'6S', prop_size:7.5, pitch:3.0, blades:'2', style:'longrange', motor_kv:1100,  battery_mAh:3500},
-    '8_lr':        {size:8.0,  weight:1500, battery:'6S', prop_size:8.0, pitch:3.5, blades:'2', style:'longrange', motor_kv:1200,  battery_mAh:4000},
-    '10_lr':       {size:10.0, weight:1500, battery:'6S', prop_size:10.0,pitch:4.5, blades:'2', style:'longrange', motor_kv:900,   battery_mAh:3000}
+    // 5" 4S
+    '5_4s_freestyle': {size:5.0,weight:720,battery:'4S',prop_size:5.0,pitch:4.0,blades:'3',style:'freestyle',motor_kv:2306,battery_mAh:1500},
+    '5_4s_racing':    {size:5.0,weight:650,battery:'4S',prop_size:5.1,pitch:4.5,blades:'3',style:'racing',motor_kv:2550,battery_mAh:1300},
+    '5_4s_smooth':    {size:5.0,weight:800,battery:'4S',prop_size:5.0,pitch:3.5,blades:'2',style:'longrange',motor_kv:1950,battery_mAh:1800},
+    '5_4s_bangers':   {size:5.0,weight:710,battery:'4S',prop_size:5.1,pitch:4.1,blades:'3',style:'freestyle',motor_kv:2450,battery_mAh:1500},
+    // 5" 5S
+    '5_5s_freestyle': {size:5.0,weight:730,battery:'5S',prop_size:5.0,pitch:4.0,blades:'3',style:'freestyle',motor_kv:1900,battery_mAh:1300},
+    '5_5s_racing':    {size:5.0,weight:660,battery:'5S',prop_size:5.1,pitch:4.6,blades:'3',style:'racing',motor_kv:2000,battery_mAh:1100},
+    '5_5s_dji':       {size:5.0,weight:780,battery:'5S',prop_size:5.0,pitch:4.0,blades:'3',style:'freestyle',motor_kv:1750,battery_mAh:1300},
+    // 5" 6S
+    '5_6s_freestyle': {size:5.0,weight:750,battery:'6S',prop_size:5.0,pitch:4.0,blades:'3',style:'freestyle',motor_kv:1750,battery_mAh:1100},
+    '5_6s_racing':    {size:5.0,weight:680,battery:'6S',prop_size:5.1,pitch:4.6,blades:'3',style:'racing',motor_kv:1900,battery_mAh:1000},
+    '5_6s_lr':        {size:5.0,weight:800,battery:'6S',prop_size:5.0,pitch:3.8,blades:'2',style:'longrange',motor_kv:1600,battery_mAh:1500},
+    // Nano/Micro
+    '1s_nano':        {size:1.0,weight:22,battery:'1S',prop_size:1.0,pitch:1.0,blades:'4',style:'freestyle',motor_kv:19000,battery_mAh:250},
+    '1.5_tiny':       {size:1.5,weight:30,battery:'1S',prop_size:1.5,pitch:1.2,blades:'4',style:'freestyle',motor_kv:12500,battery_mAh:300},
+    '2_nano_2s':      {size:2.0,weight:60,battery:'2S',prop_size:2.0,pitch:1.5,blades:'3',style:'freestyle',motor_kv:8000,battery_mAh:350},
+    '2.5_micro_2s':   {size:2.5,weight:75,battery:'2S',prop_size:2.5,pitch:2.0,blades:'3',style:'freestyle',motor_kv:6000,battery_mAh:400},
+    '2.5_micro_3s':   {size:2.5,weight:80,battery:'3S',prop_size:2.5,pitch:2.0,blades:'2',style:'freestyle',motor_kv:4500,battery_mAh:400},
+    // Whoop
+    '3_whoop_1s':     {size:3.0,weight:85,battery:'1S',prop_size:3.0,pitch:2.0,blades:'4',style:'freestyle',motor_kv:8500,battery_mAh:550},
+    '3_whoop_2s':     {size:3.0,weight:90,battery:'2S',prop_size:3.0,pitch:2.0,blades:'2',style:'freestyle',motor_kv:5500,battery_mAh:500},
+    '3_whoop_3s':     {size:3.0,weight:120,battery:'3S',prop_size:3.0,pitch:2.0,blades:'2',style:'freestyle',motor_kv:3500,battery_mAh:550},
+    // Cine
+    '3.5_cine_3s':    {size:3.5,weight:280,battery:'3S',prop_size:3.5,pitch:2.5,blades:'2',style:'longrange',motor_kv:2750,battery_mAh:750},
+    '3.5_cine_4s':    {size:3.5,weight:300,battery:'4S',prop_size:3.5,pitch:2.5,blades:'2',style:'longrange',motor_kv:2500,battery_mAh:650},
+    // Mini 4"
+    '4_mini_3s':      {size:4.0,weight:380,battery:'3S',prop_size:4.0,pitch:3.0,blades:'2',style:'freestyle',motor_kv:2800,battery_mAh:850},
+    '4_mini_4s_free': {size:4.0,weight:420,battery:'4S',prop_size:4.0,pitch:3.0,blades:'2',style:'freestyle',motor_kv:2500,battery_mAh:850},
+    '4_mini_4s_race': {size:4.0,weight:400,battery:'4S',prop_size:4.0,pitch:3.5,blades:'3',style:'racing',motor_kv:2600,battery_mAh:750},
+    // 6"
+    '6_4s_heavy':     {size:6.0,weight:900,battery:'4S',prop_size:6.0,pitch:4.0,blades:'3',style:'freestyle',motor_kv:1700,battery_mAh:2200},
+    '6_6s_standard':  {size:6.0,weight:850,battery:'6S',prop_size:6.0,pitch:4.0,blades:'3',style:'freestyle',motor_kv:1750,battery_mAh:1300},
+    '6_6s_cine':      {size:6.0,weight:950,battery:'6S',prop_size:6.0,pitch:3.8,blades:'2',style:'longrange',motor_kv:1600,battery_mAh:1500},
+    // 7"
+    '7_4s_midlr':     {size:7.0,weight:1000,battery:'4S',prop_size:7.0,pitch:3.5,blades:'2',style:'longrange',motor_kv:1300,battery_mAh:3000},
+    '7_6s_midlr':     {size:7.0,weight:1100,battery:'6S',prop_size:7.0,pitch:3.5,blades:'2',style:'longrange',motor_kv:1200,battery_mAh:2200},
+    '7.5_6s_midlr':   {size:7.5,weight:1200,battery:'6S',prop_size:7.5,pitch:3.0,blades:'2',style:'longrange',motor_kv:1100,battery_mAh:2500},
+    '7_6s_freestyle': {size:7.0,weight:1050,battery:'6S',prop_size:7.0,pitch:4.0,blades:'3',style:'freestyle',motor_kv:1300,battery_mAh:2000},
+    // 8" LR
+    '8_6s_lr':        {size:8.0,weight:1400,battery:'6S',prop_size:8.0,pitch:3.5,blades:'2',style:'longrange',motor_kv:1000,battery_mAh:3000},
+    '8_6s_hd':        {size:8.0,weight:1600,battery:'6S',prop_size:8.0,pitch:3.5,blades:'2',style:'longrange',motor_kv:900,battery_mAh:3500},
+    '8_7s_ultra':     {size:8.0,weight:1500,battery:'7S',prop_size:8.0,pitch:3.5,blades:'2',style:'longrange',motor_kv:900,battery_mAh:2500},
+    // 10"+ Ultra
+    '10_6s_lr':       {size:10.0,weight:1800,battery:'6S',prop_size:10.0,pitch:4.5,blades:'2',style:'longrange',motor_kv:800,battery_mAh:4000},
+    '10_6s_heavy':    {size:10.0,weight:2200,battery:'6S',prop_size:10.0,pitch:4.5,blades:'2',style:'longrange',motor_kv:700,battery_mAh:5000},
+    '10_7s_ultra':    {size:10.0,weight:1900,battery:'7S',prop_size:10.0,pitch:4.5,blades:'2',style:'longrange',motor_kv:750,battery_mAh:3500},
+    '12_6s_ultra':    {size:12.0,weight:2500,battery:'6S',prop_size:12.0,pitch:5.0,blades:'2',style:'longrange',motor_kv:600,battery_mAh:6000},
+    // Legacy compat
+    '5_freestyle':    {size:5.0,weight:720,battery:'4S',prop_size:5.0,pitch:4.0,blades:'3',style:'freestyle',motor_kv:2306,battery_mAh:1500},
+    '6_heavy5':       {size:6.0,weight:850,battery:'6S',prop_size:6.0,pitch:4.0,blades:'3',style:'freestyle',motor_kv:1750,battery_mAh:1800},
+    '7_midlr':        {size:7.0,weight:1100,battery:'6S',prop_size:7.0,pitch:3.5,blades:'2',style:'longrange',motor_kv:1200,battery_mAh:3000},
+    '10_lr':          {size:10.0,weight:1800,battery:'6S',prop_size:10.0,pitch:4.5,blades:'2',style:'longrange',motor_kv:800,battery_mAh:4000}
+  };
+
+  window.onPresetSelect = function(key){
+    if(!key) return;
+    applyPreset(key, null);
+  };
+
+  window.togglePresetGroup = function(idx, btn){
+    // just highlight clicked group
+    document.querySelectorAll('.preset-cat-btn').forEach(function(b){ b.style.borderColor='rgba(255,255,255,0.1)'; b.style.color='var(--muted2)'; });
+    btn.style.borderColor='rgba(0,255,136,0.4)'; btn.style.color='var(--green)';
   };
 
   window.applyPreset = function(key, chip){
@@ -2498,7 +2674,7 @@ set tpa_rate         = 65</div>
     var p = PRESETS_LIVE[key]; if(!p) return;
     var ps = document.getElementById('preset-select');
     if(ps) ps.value = key;
-    function sf(sel,v){ var el=document.querySelector(sel); if(el) el.value=v; }
+    function sf(sel,v){ var el=document.querySelector(sel); if(el && v!==undefined && v!==null) el.value=v; }
     sf('input[name="size"]', p.size);
     sf('input[name="weight"]', p.weight);
     sf('select[name="battery"]', p.battery);
@@ -2509,7 +2685,8 @@ set tpa_rate         = 65</div>
     if(p.motor_kv){ sf('input[name="motor_kv"]', p.motor_kv); }
     if(p.battery_mAh){ sf('input[name="battery_mAh"]', p.battery_mAh); }
     liveCalc();
-    showToast('✓ โหลด preset '+key+' แล้ว');
+    var lbl = p.label || key;
+    showToast('✅ ' + key + ' โหลดแล้ว');
   };
 
   /* attach liveCalc to all inputs */
@@ -2535,6 +2712,15 @@ function switchTab(btn, paneId) {
   btn.classList.add('active');
   var pane = document.getElementById(paneId);
   if(pane){ pane.classList.add('active'); if(paneId==='t-radar') renderRadar(); }
+}
+
+function sauceTab(idx, btn) {
+  var panels = [document.getElementById('sauce-panel-0'), document.getElementById('sauce-panel-1'), document.getElementById('sauce-panel-2')];
+  panels.forEach(function(p){ if(p) p.style.display='none'; });
+  if(panels[idx]) panels[idx].style.display='block';
+  var tabs = document.querySelectorAll('.sauce-tab');
+  tabs.forEach(function(t){ t.classList.remove('active'); });
+  if(btn) btn.classList.add('active');
 }
 
 function copyEl(id) {
