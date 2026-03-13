@@ -350,7 +350,7 @@ body{background:var(--bg);min-height:100vh}
 //  Symptom → PID delta → CLI output
 // ═══════════════════════════════════════════════════════════
 
-const DATA = {{ advice_json | safe }};
+const DATA = {{ advice_json | tojson }};
 
 // Conflict rules: these symptom pairs have opposing PID directions
 // [a, b, param] means symptom a and b conflict on param
