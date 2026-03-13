@@ -11,7 +11,7 @@ from typing import Dict, Any, Optional
 
 def _cells(batt: str) -> int:
     try: return max(1, min(int(str(batt).upper().replace("S","").strip()), 8))
-    except: return 4
+    except (ValueError, TypeError): return 4
 
 
 def generate_secret_sauce(

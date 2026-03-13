@@ -13,8 +13,6 @@
 from __future__ import annotations
 import math
 import json
-import sys
-import argparse
 from typing import Dict, Any, Optional
 
 NOMINAL_CELL_V   = 3.7
@@ -381,6 +379,8 @@ __all__ = ["analyze","make_advanced_report"]
 
 # ── CLI entry point (compat) ────────────────────────────────────
 def main(argv=None):
+    import sys
+    import argparse
     p = argparse.ArgumentParser()
     p.add_argument("--size",type=float,default=5.0)
     p.add_argument("--cells",type=str,default="4")
@@ -394,5 +394,6 @@ def main(argv=None):
     print(json.dumps(res,indent=2,ensure_ascii=False))
 
 if __name__=="__main__":
+    import sys
     try: main()
     except KeyboardInterrupt: sys.exit(0)
