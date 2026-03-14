@@ -128,6 +128,9 @@ if not _secret:
 app.config['SECRET_KEY'] = _secret
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB global upload limit
 
+# ── SHA-256 hash cache (avoid recomputing on every /downloads request) ────
+_HASH_CACHE: dict = {}
+
 # ── Enable gzip/brotli compression ───────────────────────────────────────
 if COMPRESS_AVAILABLE:
     Compress(app)
@@ -135,20 +138,13 @@ if COMPRESS_AVAILABLE:
 # ── Init CSRF protection ──────────────────────────────────────────────────
 if CSRF_AVAILABLE:
     csrf = CSRFProtect(app)
-    # JSON API endpoints รับ token ผ่าน X-CSRFToken header
-    # (JS fetch ส่ง header นี้จาก <meta name="csrf-token">)
-    # ไม่ต้อง exempt — Flask-WTF รองรับ header-based CSRF โดย default
-    app.config['WTF_CSRF_TIME_LIMIT'] = 3600  # token อายุ 1 ชั่วโมง
+    app.config['WTF_CSRF_TIME_LIMIT'] = 3600
     app.config['WTF_CSRF_HEADERS']    = ['X-CSRFToken', 'X-CSRF-Token']
 
     @app.after_request
     def inject_csrf_cookie(response):
-        """Ensure CSRF token is always generated (accessible via csrf_token() in templates)."""
         generate_csrf()
         return response
-
-# ── SHA-256 hash cache (avoid recomputing on every /downloads request) ────
-_HASH_CACHE: dict = {}
 
 FORCE_SECURE = os.environ.get("FORCE_SECURE", "0") in ("1", "true", "True")
 app.config.update(
@@ -185,9 +181,6 @@ def timestamp_to_datetime_filter(ts):
     except Exception:
         return ''
 
-# ═════════════════════════════════════════════════════════════════════════
-# Validation
-# ═════════════════════════════════════════════════════════════════════════
 def _file_sha256(path: str) -> str:
     """Return cached SHA-256 hex (first 16 chars). Recomputes only when mtime changes."""
     try:
@@ -205,7 +198,10 @@ def _file_sha256(path: str) -> str:
         return "unknown"
 
 
-
+# ═════════════════════════════════════════════════════════════════════════
+# Validation
+# ═════════════════════════════════════════════════════════════════════════
+def validate_input(size, weight, prop_size, pitch, blades, battery):
     warnings = []
     try:
         size = float(size)
@@ -1054,7 +1050,7 @@ def set_security_headers(response):
         "connect-src 'self'; "
         "frame-ancestors 'self';"
     )
-    # M2: Cache static assets for 1 year (cache-busting via query string / filename hash)
+    # M2: Cache static assets aggressively (1 year, cache-busted by filename)
     if request.path.startswith('/static/'):
         response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
     return response
