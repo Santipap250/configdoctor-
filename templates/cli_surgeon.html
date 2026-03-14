@@ -703,7 +703,10 @@ async function analyze() {
     pipe(2);
     const res = await fetch('/analyze_cli', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || ''
+      },
       body: JSON.stringify({ dump: txt }),
     });
 

@@ -1021,6 +1021,7 @@ body.light .amb-orb { opacity:.25; }
 
       <div class="form-body">
         <form method="POST" id="analyzeForm">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <div class="fsec-label">⚡ Preset / เลือก Build</div>
 
           <!-- Quick Chips by category -->
