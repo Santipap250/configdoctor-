@@ -1041,7 +1041,7 @@ def set_security_headers(response):
         "script-src 'self' 'unsafe-inline' "
         "  https://cdnjs.cloudflare.com "
         "  https://cdn.jsdelivr.net "
-        "  https://fonts.googleapis.com; "       
+        "  https://fonts.googleapis.com "
         "  https://www.gstatic.com; "
         "style-src 'self' 'unsafe-inline' "
         "  https://fonts.googleapis.com "
