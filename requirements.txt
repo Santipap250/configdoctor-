@@ -1,5 +1,6 @@
 # OBIXConfig Doctor v5.2 — production requirements
 # ─────────────────────────────────────────────────
+# FIX v5.2: เพิ่ม Flask-WTF สำหรับ CSRF Protection ทุก POST route
 # FIX v5.2: เพิ่ม Flask-Compress ลด HTML/JSON size ~70%
 # FIX v5.1: เพิ่ม Flask-Limiter เพื่อป้องกัน API abuse/spam
 # FIX: Pin Jinja2 ไม่ให้ auto-upgrade เป็น v4 ที่อาจ breaking
@@ -10,3 +11,4 @@ python-dotenv==1.0.0
 Jinja2>=3.1.2,<4.0
 Flask-Limiter==3.5.0
 Flask-Compress==1.14
+Flask-WTF==1.2.1
