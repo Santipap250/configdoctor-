@@ -1053,6 +1053,7 @@ def set_security_headers(response):
         "  https://*.firebasedatabase.app "
         "  wss://*.firebaseio.com "
         "  wss://*.firebasedatabase.app; "
+        "frame-ancestors 'self';"
     )
     # M2: Cache static assets aggressively (1 year, cache-busted by filename)
     if request.path.startswith('/static/'):
