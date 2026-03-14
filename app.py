@@ -28,6 +28,14 @@ from analyzer.cli_surgeon import analyze_dump as cli_analyze_dump
 import os, io, time, json, hashlib, logging
 from datetime import datetime
 
+# ── CSRF Protection ───────────────────────────────────────────────────────
+try:
+    from flask_wtf.csrf import CSRFProtect, generate_csrf
+    CSRF_AVAILABLE = True
+except ImportError:
+    CSRF_AVAILABLE = False
+    print("WARNING: flask_wtf not installed — CSRF protection disabled")
+
 # ── Compression ───────────────────────────────────────────────────────────
 try:
     from flask_compress import Compress
@@ -123,6 +131,21 @@ app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB global upload limit
 # ── Enable gzip/brotli compression ───────────────────────────────────────
 if COMPRESS_AVAILABLE:
     Compress(app)
+
+# ── Init CSRF protection ──────────────────────────────────────────────────
+if CSRF_AVAILABLE:
+    csrf = CSRFProtect(app)
+    # JSON API endpoints รับ token ผ่าน X-CSRFToken header
+    # (JS fetch ส่ง header นี้จาก <meta name="csrf-token">)
+    # ไม่ต้อง exempt — Flask-WTF รองรับ header-based CSRF โดย default
+    app.config['WTF_CSRF_TIME_LIMIT'] = 3600  # token อายุ 1 ชั่วโมง
+    app.config['WTF_CSRF_HEADERS']    = ['X-CSRFToken', 'X-CSRF-Token']
+
+    @app.after_request
+    def inject_csrf_cookie(response):
+        """Ensure CSRF token is always generated (accessible via csrf_token() in templates)."""
+        generate_csrf()
+        return response
 
 # ── SHA-256 hash cache (avoid recomputing on every /downloads request) ────
 _HASH_CACHE: dict = {}
