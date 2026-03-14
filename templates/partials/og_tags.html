@@ -49,6 +49,9 @@
 <!-- ══ Canonical URL ════════════════════════════════════════════ -->
 <link rel="canonical" href="{{ _url }}">
 
+<!-- ══ CSRF Token (readable by JS fetch via X-CSRFToken header) ═ -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
 <!-- ══ JSON-LD Structured Data ══════════════════════════════════ -->
 <script type="application/ld+json">
 {
