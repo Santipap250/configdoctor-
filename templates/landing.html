@@ -1235,7 +1235,7 @@ footer {
       </button>
     </div>
 
-    <!-- CIVILIAN PANE -->
+    <!-- ══ CIVILIAN PANE ══ -->
     <div class="mode-pane active" id="pane-civ">
       <div class="mode-hero mode-hero-civ" data-reveal>
         <div class="mode-hero-glow"></div>
@@ -1244,14 +1244,10 @@ footer {
           <div style="flex:1;">
             <div class="mode-hero-eyebrow" style="color:var(--green);">CIVILIAN MODE · สำหรับนักบิน FPV ทั่วไป</div>
             <div class="mode-hero-title">วิเคราะห์โดรน<br>ระดับ Pro</div>
-            <p class="mode-hero-desc">
-              ตั้งแต่มือใหม่ที่เพิ่งซื้อโดรนตัวแรก ไปจนถึงนักแข่ง freestyle ระดับ advanced —
-              ConfigDoctor วิเคราะห์สเปคโดรนของคุณและให้ค่า PID · Filter · Motor ที่พร้อม paste ใน Betaflight ทันที
-              พร้อม <strong style="color:var(--green);">Pro Tuning Trix</strong> และ <strong style="color:var(--green);">Tuning Roadmap</strong> ที่ personalized ตาม build จริง
-            </p>
+            <p class="mode-hero-desc">ตั้งแต่มือใหม่ที่เพิ่งซื้อโดรนตัวแรก ไปจนถึงนักแข่ง freestyle ระดับ advanced — ConfigDoctor วิเคราะห์สเปคโดรนของคุณและให้ค่า PID · Filter · Motor ที่พร้อม paste ใน Betaflight ทันที พร้อม <strong style="color:var(--green);">Pro Tuning Trix</strong> และ <strong style="color:var(--green);">Tuning Roadmap</strong> ที่ personalized ตาม build จริง</p>
             <div class="mode-cta-row">
               <a href="/app" class="mode-btn-primary mode-btn-civ">🚀 เริ่มวิเคราะห์โดรน</a>
-              <a href="/quick-tune" class="mode-btn-ghost mode-btn-ghost-civ">⚡ Quick Tune</a>
+              <a href="/quick-tune" class="mode-btn-ghost mode-btn-ghost-civ">⚡ Quick Tune Pad</a>
               <a href="/pid-advisor" class="mode-btn-ghost mode-btn-ghost-civ">🩺 PID Advisor</a>
             </div>
           </div>
@@ -1270,127 +1266,588 @@ footer {
         <div class="mode-feat mode-feat-civ"><div class="mode-feat-icon">🎭</div><div class="mode-feat-title">FLIGHT PERSONALITY</div><div class="mode-feat-desc">วิเคราะห์ build แล้วตีตรา personality เช่น PUNCHY FREESTYLE / RACE MACHINE / ENDURANCE EXPLORER พร้อม tuning direction เฉพาะ</div><div class="mode-feat-tags"><span class="mode-feat-tag">Freestyle</span><span class="mode-feat-tag">Racing</span><span class="mode-feat-tag">Long Range</span></div></div>
         <div class="mode-feat mode-feat-civ"><div class="mode-feat-icon">🔥</div><div class="mode-feat-title">PRO TUNING TRIX</div><div class="mode-feat-desc">7 เทคนิค personalized ตาม style ของ build จริง — มือใหม่อ่านเข้าใจ มือเก่าเอาไปใช้ได้ทันที พร้อม CLI snippet copy</div><div class="mode-feat-tags"><span class="mode-feat-tag">Propwash Fix</span><span class="mode-feat-tag">RPM Filter</span><span class="mode-feat-tag">Feedforward</span></div></div>
         <div class="mode-feat mode-feat-civ"><div class="mode-feat-icon">📊</div><div class="mode-feat-title">BLACKBOX ANALYZER</div><div class="mode-feat-desc">upload CSV จาก blackbox → วิเคราะห์ step response, noise floor, PID score อัตโนมัติ เห็นปัญหาที่ "รู้สึก" ไม่ได้</div><div class="mode-feat-tags"><span class="mode-feat-tag">CSV Upload</span><span class="mode-feat-tag">PID Score</span><span class="mode-feat-tag">Noise Floor</span></div></div>
-        <div class="mode-feat mode-feat-civ"><div class="mode-feat-icon">🗺️</div><div class="mode-feat-title">TUNING ROADMAP</div><div class="mode-feat-desc">6-step guide ลำดับการ tune ที่ถูกต้อง พร้อม hover throttle % จาก build จริง, CLI snippet ทุก step</div><div class="mode-feat-tags"><span class="mode-feat-tag">Step by Step</span><span class="mode-feat-tag">Beginner OK</span></div></div>
-        <div class="mode-feat mode-feat-civ"><div class="mode-feat-icon">🔮</div><div class="mode-feat-title">WHAT-IF OPTIMIZER</div><div class="mode-feat-desc">จำลอง "ถ้าปรับแค่นี้จะได้อะไร" — ใส่แบตใหญ่ขึ้น, ลดน้ำหนัก, ปรับ KV → เห็น delta ทันทีก่อนจ่ายเงินซื้ออะไหล่</div><div class="mode-feat-tags"><span class="mode-feat-tag">Simulation</span><span class="mode-feat-tag">Battery</span><span class="mode-feat-tag">Weight</span></div></div>
+        <div class="mode-feat mode-feat-civ"><div class="mode-feat-icon">🗺️</div><div class="mode-feat-title">TUNING ROADMAP</div><div class="mode-feat-desc">6-step guide ลำดับการ tune ที่ถูกต้อง พร้อม hover throttle % จาก build จริง, CLI snippet ทุก step และกฎทองสำหรับมือใหม่</div><div class="mode-feat-tags"><span class="mode-feat-tag">Step by Step</span><span class="mode-feat-tag">Beginner OK</span></div></div>
+        <div class="mode-feat mode-feat-civ"><div class="mode-feat-icon">🔮</div><div class="mode-feat-title">WHAT-IF OPTIMIZER</div><div class="mode-feat-desc">จำลอง "ถ้าปรับแค่นี้จะได้อะไร" — เช่น ใส่แบตใหญ่ขึ้น, ลดน้ำหนัก, ปรับ KV → เห็น delta ทันทีก่อนจ่ายเงินซื้ออะไหล่</div><div class="mode-feat-tags"><span class="mode-feat-tag">Simulation</span><span class="mode-feat-tag">Battery</span><span class="mode-feat-tag">Weight</span></div></div>
+        <div class="mode-feat mode-feat-civ"><div class="mode-feat-icon">🎮</div><div class="mode-feat-title">FPV SIMULATOR NEO</div><div class="mode-feat-desc">ฝึกบินโดรน 3D ในเบราว์เซอร์ — 6 modes: Tutorial, Gate Runner, Target Hunt, Race Circuit, Free Fly รองรับ gamepad + mobile joystick</div><div class="mode-feat-tags"><span class="mode-feat-tag">3D WebGL</span><span class="mode-feat-tag">6 Modes</span><span class="mode-feat-tag">Mobile OK</span></div></div>
+        <div class="mode-feat mode-feat-civ"><div class="mode-feat-icon">⚡</div><div class="mode-feat-title">QUICK TUNE PAD</div><div class="mode-feat-desc">เลือกอาการ (propwash, yaw spin, jello ฯลฯ) → ได้ PID delta matrix + CLI output ทันที detect conflict อัตโนมัติ</div><div class="mode-feat-tags"><span class="mode-feat-tag">13 Symptoms</span><span class="mode-feat-tag">Conflict Detect</span></div></div>
       </div>
-    </div>
 
-    <!-- MILITARY PANE -->
-    <div class="mode-pane" id="pane-mil">
-      <div class="mil-classify" data-reveal>
-        <span class="mil-classify-dot"></span>
-        ⚠️ SENSITIVE USE CASE — FOR AUTHORIZED OPERATORS ONLY
-        <span class="mil-classify-dot"></span>
+      <!-- Who is it for -->
+      <div style="margin-top:32px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;" data-reveal>
+        <div style="padding:14px 18px;border-radius:10px;background:rgba(0,255,157,.04);border:1px solid rgba(0,255,157,.12);transition:all .2s;" onmouseover="this.style.borderColor='rgba(0,255,157,.28)'" onmouseout="this.style.borderColor='rgba(0,255,157,.12)'">
+          <div style="font-size:22px;margin-bottom:7px;">🌱</div>
+          <div style="font-family:var(--font-d);font-size:8px;color:var(--green);letter-spacing:.1em;margin-bottom:5px;">มือใหม่</div>
+          <div style="font-size:11.5px;color:rgba(255,255,255,.52);line-height:1.65;">เพิ่งซื้อโดรนตัวแรก ไม่รู้ PID คืออะไร — ได้ค่าพร้อมใช้ทันที + อธิบายภาษาไทย</div>
+        </div>
+        <div style="padding:14px 18px;border-radius:10px;background:rgba(0,255,157,.04);border:1px solid rgba(0,255,157,.12);transition:all .2s;" onmouseover="this.style.borderColor='rgba(0,255,157,.28)'" onmouseout="this.style.borderColor='rgba(0,255,157,.12)'">
+          <div style="font-size:22px;margin-bottom:7px;">🚀</div>
+          <div style="font-family:var(--font-d);font-size:8px;color:var(--green);letter-spacing:.1em;margin-bottom:5px;">นักบิน Freestyle</div>
+          <div style="font-size:11.5px;color:rgba(255,255,255,.52);line-height:1.65;">ต้องการ fine-tune propwash, D-term, feedforward ให้แม่นยำก่อนบินจริง</div>
+        </div>
+        <div style="padding:14px 18px;border-radius:10px;background:rgba(0,255,157,.04);border:1px solid rgba(0,255,157,.12);transition:all .2s;" onmouseover="this.style.borderColor='rgba(0,255,157,.28)'" onmouseout="this.style.borderColor='rgba(0,255,157,.12)'">
+          <div style="font-size:22px;margin-bottom:7px;">🏁</div>
+          <div style="font-family:var(--font-d);font-size:8px;color:var(--green);letter-spacing:.1em;margin-bottom:5px;">นักแข่ง FPV Race</div>
+          <div style="font-size:11.5px;color:rgba(255,255,255,.52);line-height:1.65;">ลด latency, ปรับ race rates, filter tune เพื่อ lap time ดีที่สุด</div>
+        </div>
+        <div style="padding:14px 18px;border-radius:10px;background:rgba(0,255,157,.04);border:1px solid rgba(0,255,157,.12);transition:all .2s;" onmouseover="this.style.borderColor='rgba(0,255,157,.28)'" onmouseout="this.style.borderColor='rgba(0,255,157,.12)'">
+          <div style="font-size:22px;margin-bottom:7px;">🌏</div>
+          <div style="font-family:var(--font-d);font-size:8px;color:var(--green);letter-spacing:.1em;margin-bottom:5px;">Long Range / Cine</div>
+          <div style="font-size:11.5px;color:rgba(255,255,255,.52);line-height:1.65;">optimize flight time, GPS rescue, battery sag compensation สำหรับบินไกล</div>
+        </div>
       </div>
+    </div><!-- /pane-civ -->
+
+    <!-- ══ MILITARY PANE ══ -->
+    <div class="mode-pane" id="pane-mil">
+      <div class="mil-classify">
+        <div class="mil-classify-dot"></div>
+        EDUCATIONAL USE · UNCLASSIFIED · สำหรับการเรียนรู้และฝึกอบรม UAS
+        <div class="mil-classify-dot"></div>
+      </div>
+
       <div class="mode-hero mode-hero-mil" data-reveal>
         <div class="mode-hero-glow"></div>
         <div class="mode-hero-top">
           <div class="mode-hero-emblem">🎖️</div>
           <div style="flex:1;">
-            <div class="mode-hero-eyebrow" style="color:var(--gold);">MILITARY MODE · สำหรับผู้ปฏิบัติการทางทหาร</div>
-            <div class="mode-hero-title">Mission Planning<br>&amp; UAS Analysis</div>
-            <p class="mode-hero-desc">
-              สำหรับผู้ปฏิบัติการ UAS ทางทหาร — วิเคราะห์ payload capacity, range, endurance
-              พร้อม mission planning tools, threat assessment, และ counter-UAS analysis
-              <strong style="color:var(--gold);">สำหรับใช้งานโดยบุคลากรที่ได้รับอนุญาตเท่านั้น</strong>
-            </p>
+            <div class="mode-hero-eyebrow" style="color:var(--gold);">UAS MILITARY OPERATIONS MODULE · v5.2</div>
+            <div class="mode-hero-title">ระบบวิเคราะห์ UAS<br>ระดับปฏิบัติการ</div>
+            <p class="mode-hero-desc">ครอบคลุมทุกมิติของการปฏิบัติการโดรนทางทหาร — ตั้งแต่ <strong style="color:var(--gold);">Mission Planning</strong>, การวิเคราะห์สมรรถนะ UAS, การฝึก Operator ตาม curriculum จริง, Pre-Mission Checklist, Sortie Planning, C-UAS Threat Recognition ไปจนถึง EW และ CBRN operations</p>
             <div class="mode-cta-row">
-              <a href="/military-uas" class="mode-btn-primary mode-btn-mil">🎖️ MISSION PLANNING</a>
-              <a href="/app" class="mode-btn-ghost mode-btn-ghost-mil">⚙️ Performance Analysis</a>
+              <a href="/app" class="mode-btn-primary mode-btn-mil">📊 UAS Performance Analyzer</a>
+              <a href="/fpv-trainer" class="mode-btn-ghost mode-btn-ghost-mil">🎮 Operator Simulator</a>
+              <a href="/blackbox" class="mode-btn-ghost mode-btn-ghost-mil">📈 Flight Data Analysis</a>
             </div>
           </div>
         </div>
         <div class="mode-stats">
           <div class="mode-stat"><div class="mode-stat-v">8</div><div class="mode-stat-l">MISSION TYPES</div></div>
           <div class="mode-stat"><div class="mode-stat-v">4</div><div class="mode-stat-l">OPERATOR LEVELS</div></div>
-          <div class="mode-stat"><div class="mode-stat-v">C-UAS</div><div class="mode-stat-l">COUNTER-UAS</div></div>
-          <div class="mode-stat"><div class="mode-stat-v">ISR</div><div class="mode-stat-l">INTEL TOOLS</div></div>
+          <div class="mode-stat"><div class="mode-stat-v">C-UAS</div><div class="mode-stat-l">THREAT INTEL</div></div>
+          <div class="mode-stat"><div class="mode-stat-v">LIVE</div><div class="mode-stat-l">PHYSICS CALC</div></div>
         </div>
       </div>
-      <div class="mode-disclaimer"><span class="mode-disclaimer-icon">⚠️</span><span>เนื้อหาในส่วนนี้เป็นข้อมูลเชิงการศึกษาและการฝึกซ้อมเท่านั้น การใช้งาน UAS ทางทหารต้องอยู่ภายใต้กฎหมาย กฎระเบียบ และการอนุมัติของหน่วยงานที่เกี่ยวข้อง</span></div>
-    </div>
+
+      <!-- 01: MISSION MATRIX -->
+      <div class="mode-section-label mode-section-label-mil" data-reveal style="margin-top:32px;">01&nbsp;·&nbsp;MISSION MATRIX — ประเภทภารกิจและสเปคที่ต้องการ</div>
+      <div class="mis-grid" data-reveal>
+
+        <div class="mis-card mis-recon">
+          <div class="mis-card-head"><div class="mis-card-emblem">🔭</div><div><div class="mis-card-type">RECONNAISSANCE · ลาดตระเวน</div><div class="mis-card-title">Visual/Area Reconnaissance</div></div></div>
+          <div class="mis-card-body">
+            <div class="mis-card-desc">บินถ่ายภาพพื้นที่กว้าง ตรวจจับการเคลื่อนไหว mapping terrain — ต้องการ endurance สูง, payload กล้อง EO, flight time ยาว</div>
+            <table class="mis-spec-table">
+              <tr><td class="mis-spec-key">Platform</td><td class="mis-spec-val">7″–10″ LR / Fixed Wing</td></tr>
+              <tr><td class="mis-spec-key">Flight time</td><td class="mis-spec-val ok">&gt; 30 นาที</td></tr>
+              <tr><td class="mis-spec-key">Altitude AGL</td><td class="mis-spec-val">50–300 m</td></tr>
+              <tr><td class="mis-spec-key">TWR (loaded)</td><td class="mis-spec-val warn">&gt; 1.8 : 1</td></tr>
+              <tr><td class="mis-spec-key">Link range</td><td class="mis-spec-val">ELRS / LoRa &gt; 10km</td></tr>
+              <tr><td class="mis-spec-key">Battery</td><td class="mis-spec-val">6S 4000–6000mAh</td></tr>
+            </table>
+          </div>
+          <div class="mis-card-footer"><a href="/app" class="mis-tool-chip">📊 Analyze Spec</a><a href="/motor-prop" class="mis-tool-chip">🔧 Motor×Prop</a><a href="/vtx-range" class="mis-tool-chip">📡 VTX Range</a></div>
+        </div>
+
+        <div class="mis-card mis-isr">
+          <div class="mis-card-head"><div class="mis-card-emblem">👁️</div><div><div class="mis-card-type">ISR · Intelligence Surveillance</div><div class="mis-card-title">Persistent ISR / Loiter</div></div></div>
+          <div class="mis-card-body">
+            <div class="mis-card-desc">Loiter เหนือเป้าหมายนาน ส่ง live video กลับ TOC — ต้องการ link เสถียร, noise ต่ำ, hover efficient</div>
+            <table class="mis-spec-table">
+              <tr><td class="mis-spec-key">Loiter time</td><td class="mis-spec-val ok">&gt; 25 นาที</td></tr>
+              <tr><td class="mis-spec-key">Hover throttle</td><td class="mis-spec-val ok">&lt; 40% (efficient)</td></tr>
+              <tr><td class="mis-spec-key">Noise signature</td><td class="mis-spec-val warn">ต่ำสุด (KV ต่ำ)</td></tr>
+              <tr><td class="mis-spec-key">Tip speed</td><td class="mis-spec-val ok">&lt; 200 m/s (quiet)</td></tr>
+              <tr><td class="mis-spec-key">Video link</td><td class="mis-spec-val">Digital encrypted</td></tr>
+              <tr><td class="mis-spec-key">Battery</td><td class="mis-spec-val">6S 5000mAh LiIon</td></tr>
+            </table>
+          </div>
+          <div class="mis-card-footer"><a href="/app" class="mis-tool-chip">📊 Physics Calc</a><a href="/battery-health" class="mis-tool-chip">🔋 Battery</a><a href="/rpm-filter" class="mis-tool-chip">🔇 Noise</a></div>
+        </div>
+
+        <div class="mis-card mis-strike">
+          <div class="mis-card-head"><div class="mis-card-emblem">🎯</div><div><div class="mis-card-type">STRIKE / PRECISION</div><div class="mis-card-title">Precision Payload Delivery</div></div></div>
+          <div class="mis-card-body">
+            <div class="mis-card-desc">บินตรงเป้าหมายด้วยความแม่นยำสูง — TWR สูง ตอบสนองเร็ว ทนทาน สำหรับ one-way mission หรือ precision drop</div>
+            <table class="mis-spec-table">
+              <tr><td class="mis-spec-key">TWR (unloaded)</td><td class="mis-spec-val ok">&gt; 4.0 : 1</td></tr>
+              <tr><td class="mis-spec-key">TWR (loaded)</td><td class="mis-spec-val warn">&gt; 2.0 : 1 min</td></tr>
+              <tr><td class="mis-spec-key">Max speed</td><td class="mis-spec-val">&gt; 120 km/h</td></tr>
+              <tr><td class="mis-spec-key">Payload ratio</td><td class="mis-spec-val warn">&lt; 30% total weight</td></tr>
+              <tr><td class="mis-spec-key">Control link</td><td class="mis-spec-val">ELRS 2.4GHz &lt;10ms</td></tr>
+              <tr><td class="mis-spec-key">ESC safety</td><td class="mis-spec-val danger">×2.0 peak current</td></tr>
+            </table>
+          </div>
+          <div class="mis-card-footer"><a href="/app" class="mis-tool-chip">⚖️ TWR Loaded</a><a href="/esc-checker" class="mis-tool-chip">⚡ ESC Check</a><a href="/motor-thermal" class="mis-tool-chip">🌡️ Thermal</a></div>
+        </div>
+
+        <div class="mis-card mis-ew">
+          <div class="mis-card-head"><div class="mis-card-emblem">📡</div><div><div class="mis-card-type">ELECTRONIC WARFARE</div><div class="mis-card-title">RF Jamming / Signal Intel</div></div></div>
+          <div class="mis-card-body">
+            <div class="mis-card-desc">บินในสภาพแวดล้อม RF jamming — เลือก control link ที่ jamming-resistant, ลด GPS dependency</div>
+            <table class="mis-spec-table">
+              <tr><td class="mis-spec-key">Control link</td><td class="mis-spec-val">FHSS 2.4G / LoRa 900MHz</td></tr>
+              <tr><td class="mis-spec-key">Video</td><td class="mis-spec-val warn">Encrypted digital</td></tr>
+              <tr><td class="mis-spec-key">GPS dependency</td><td class="mis-spec-val danger">ลด GPS reliance</td></tr>
+              <tr><td class="mis-spec-key">Failsafe</td><td class="mis-spec-val">RTH &gt; Hold &gt; Disarm</td></tr>
+              <tr><td class="mis-spec-key">Alt control</td><td class="mis-spec-val">Baro + Optical flow</td></tr>
+              <tr><td class="mis-spec-key">VTX band</td><td class="mis-spec-val warn">หลีก 5.8G ใน jam zone</td></tr>
+            </table>
+          </div>
+          <div class="mis-card-footer"><a href="/vtx" class="mis-tool-chip">📡 VTX Bands</a><a href="/vtx-range" class="mis-tool-chip">📶 Range</a><a href="/vtx-smartaudio" class="mis-tool-chip">🎙️ SmartAudio</a></div>
+        </div>
+
+        <div class="mis-card mis-cuas">
+          <div class="mis-card-head"><div class="mis-card-emblem">🛡️</div><div><div class="mis-card-type">C-UAS · Counter-Drone</div><div class="mis-card-title">Detect-ID-Defeat</div></div></div>
+          <div class="mis-card-body">
+            <div class="mis-card-desc">วิเคราะห์ spec ของ UAS ที่ตรวจพบ ประเมินภัยคุกคาม — คำนวณ TWR, ระยะบิน, payload capacity จาก spec ที่ capture ได้</div>
+            <table class="mis-spec-table">
+              <tr><td class="mis-spec-key">Detect method</td><td class="mis-spec-val">RF + Visual + Acoustic</td></tr>
+              <tr><td class="mis-spec-key">ID ด้วย spec</td><td class="mis-spec-val">Motor KV + Prop → TWR</td></tr>
+              <tr><td class="mis-spec-key">Key parameter</td><td class="mis-spec-val warn">Tip speed &gt; 265 = อันตราย</td></tr>
+              <tr><td class="mis-spec-key">Defeat</td><td class="mis-spec-val">Jam RF / Intercept / Net</td></tr>
+              <tr><td class="mis-spec-key">Analysis tool</td><td class="mis-spec-val ok">ConfigDoctor Physics</td></tr>
+              <tr><td class="mis-spec-key">Config intel</td><td class="mis-spec-val">CLI Surgeon dump</td></tr>
+            </table>
+          </div>
+          <div class="mis-card-footer"><a href="/app" class="mis-tool-chip">🔍 Threat Analysis</a><a href="/cli_surgeon" class="mis-tool-chip">🩻 Config Intel</a></div>
+        </div>
+
+        <div class="mis-card mis-log">
+          <div class="mis-card-head"><div class="mis-card-emblem">📦</div><div><div class="mis-card-type">LOGISTICS · ส่งกำลังบำรุง</div><div class="mis-card-title">Resupply / MEDEVAC Relay</div></div></div>
+          <div class="mis-card-body">
+            <div class="mis-card-desc">ส่ง supply ยา สาย comm ข้ามพื้นที่อันตราย — payload capacity สูง TWR ปลอดภัย GPS navigation แม่นยำ</div>
+            <table class="mis-spec-table">
+              <tr><td class="mis-spec-key">Platform</td><td class="mis-spec-val">10″+ / Hex / Octo</td></tr>
+              <tr><td class="mis-spec-key">Payload capacity</td><td class="mis-spec-val">&gt; 500g (safe margin)</td></tr>
+              <tr><td class="mis-spec-key">TWR loaded min</td><td class="mis-spec-val warn">2.5 : 1 recommended</td></tr>
+              <tr><td class="mis-spec-key">Hover throttle</td><td class="mis-spec-val warn">&lt; 55% (loaded)</td></tr>
+              <tr><td class="mis-spec-key">Navigation</td><td class="mis-spec-val">GPS + Waypoint</td></tr>
+              <tr><td class="mis-spec-key">Battery</td><td class="mis-spec-val">6S–12S High mAh</td></tr>
+            </table>
+          </div>
+          <div class="mis-card-footer"><a href="/app" class="mis-tool-chip">⚖️ Payload TWR</a><a href="/battery-health" class="mis-tool-chip">🔋 Battery</a></div>
+        </div>
+
+        <div class="mis-card mis-cbrn">
+          <div class="mis-card-head"><div class="mis-card-emblem">☢️</div><div><div class="mis-card-type">CBRN · Detection</div><div class="mis-card-title">Hazardous Area Survey</div></div></div>
+          <div class="mis-card-body">
+            <div class="mis-card-desc">บินสำรวจพื้นที่อันตราย CBRN แทนบุคลากร — drone ทนทาน, payload sensor ตรวจจับ, บินได้นาน</div>
+            <table class="mis-spec-table">
+              <tr><td class="mis-spec-key">Platform</td><td class="mis-spec-val">7″–10″ Sealed frame</td></tr>
+              <tr><td class="mis-spec-key">Flight time</td><td class="mis-spec-val ok">&gt; 20 นาที</td></tr>
+              <tr><td class="mis-spec-key">Altitude</td><td class="mis-spec-val">2–50 m AGL</td></tr>
+              <tr><td class="mis-spec-key">TWR loaded</td><td class="mis-spec-val warn">&gt; 2.0 : 1</td></tr>
+              <tr><td class="mis-spec-key">Payload</td><td class="mis-spec-val">CBRN Detector + GPS</td></tr>
+              <tr><td class="mis-spec-key">Decon protocol</td><td class="mis-spec-val danger">Required after mission</td></tr>
+            </table>
+          </div>
+          <div class="mis-card-footer"><a href="/app" class="mis-tool-chip">📊 Payload Analysis</a><a href="/motor-thermal" class="mis-tool-chip">🌡️ Thermal</a></div>
+        </div>
+
+        <div class="mis-card mis-train">
+          <div class="mis-card-head"><div class="mis-card-emblem">🎮</div><div><div class="mis-card-type">TRAINING · การฝึก</div><div class="mis-card-title">UAS Operator Development</div></div></div>
+          <div class="mis-card-body">
+            <div class="mis-card-desc">ฝึก operator zero ถึง mission-ready ในสภาพแวดล้อมปลอดภัย — Simulator NEO รองรับ gamepad 6 modes</div>
+            <table class="mis-spec-table">
+              <tr><td class="mis-spec-key">Simulator</td><td class="mis-spec-val ok">Browser · No install</td></tr>
+              <tr><td class="mis-spec-key">Gamepad</td><td class="mis-spec-val ok">Full Gamepad API</td></tr>
+              <tr><td class="mis-spec-key">Modes</td><td class="mis-spec-val">Tutorial → Race Circuit</td></tr>
+              <tr><td class="mis-spec-key">Hover precision</td><td class="mis-spec-val">Hover Zone mode</td></tr>
+              <tr><td class="mis-spec-key">Navigation</td><td class="mis-spec-val">Gate Runner / Free Fly</td></tr>
+              <tr><td class="mis-spec-key">Assessment</td><td class="mis-spec-val">Flight Style Quiz</td></tr>
+            </table>
+          </div>
+          <div class="mis-card-footer"><a href="/fpv-trainer" class="mis-tool-chip">🎮 Launch Sim</a><a href="/flight-quiz" class="mis-tool-chip">🎯 Assessment</a></div>
+        </div>
+
+      </div><!-- /mis-grid -->
+
+      <!-- 02: OPERATOR CURRICULUM -->
+      <div class="mode-section-label mode-section-label-mil" data-reveal style="margin-top:36px;">02&nbsp;·&nbsp;OPERATOR CURRICULUM — เส้นทางการพัฒนาผู้ปฏิบัติการ UAS</div>
+      <div class="ol-track" data-reveal>
+        <div class="ol-card ol-1">
+          <div class="ol-level">LEVEL 1 · BASIC</div><div class="ol-title">UAS Fundamentals</div><div class="ol-hours">⏱ 0–20 ชั่วโมง sim + ground</div>
+          <div class="ol-skills">
+            <div class="ol-skill">ความรู้พื้นฐาน: axis, motor, prop, flight controller</div>
+            <div class="ol-skill">อ่านค่า TWR, battery cell count, C-rating ได้</div>
+            <div class="ol-skill">ฝึก hover และ basic maneuver ใน simulator</div>
+            <div class="ol-skill">Pre-flight checklist และ failsafe setting</div>
+            <div class="ol-skill">RF band, frequency และ deconflict พื้นฐาน</div>
+            <div class="ol-skill" style="color:var(--green);">Tools: Main Analyzer, Flight Quiz, Sim Tutorial</div>
+          </div>
+        </div>
+        <div class="ol-card ol-2">
+          <div class="ol-level">LEVEL 2 · INTERMEDIATE</div><div class="ol-title">Mission-Oriented Flying</div><div class="ol-hours">⏱ 20–80 ชั่วโมง sim + field</div>
+          <div class="ol-skills">
+            <div class="ol-skill">วิเคราะห์สเปค UAS ให้ตรงกับภารกิจ ISR/Recon</div>
+            <div class="ol-skill">คำนวณ sortie duration, payload effect on TWR</div>
+            <div class="ol-skill">Blackbox analysis และ config optimization</div>
+            <div class="ol-skill">Waypoint nav, loiter, emergency RTH</div>
+            <div class="ol-skill">ESC, motor thermal, loop latency</div>
+            <div class="ol-skill" style="color:var(--blue);">Tools: Blackbox, CLI Surgeon, Battery, Loop</div>
+          </div>
+        </div>
+        <div class="ol-card ol-3">
+          <div class="ol-level">LEVEL 3 · ADVANCED</div><div class="ol-title">Tactical UAS Operator</div><div class="ol-hours">⏱ 80–200 ชั่วโมง field ops</div>
+          <div class="ol-skills">
+            <div class="ol-skill">Multi-UAS operation, RF deconflict</div>
+            <div class="ol-skill">ประเมิน threat UAS จาก spec ที่พบ (C-UAS)</div>
+            <div class="ol-skill">ปฏิบัติงานใน EW / GPS denied environment</div>
+            <div class="ol-skill">PID tuning สำหรับ payload, wind, ภารกิจเฉพาะ</div>
+            <div class="ol-skill">CBRN survey protocol + sensor integration</div>
+            <div class="ol-skill" style="color:var(--gold);">Tools: Full suite + CLI Comparator + Quick Tune</div>
+          </div>
+        </div>
+        <div class="ol-card ol-4">
+          <div class="ol-level">LEVEL 4 · EXPERT</div><div class="ol-title">UAS Systems Instructor</div><div class="ol-hours">⏱ 200+ ชั่วโมง + certification</div>
+          <div class="ol-skills">
+            <div class="ol-skill">ออกแบบ UAS platform สำหรับภารกิจเฉพาะ</div>
+            <div class="ol-skill">สอนและประเมิน operator level 1–3</div>
+            <div class="ol-skill">Blackbox analysis ระดับ forensic</div>
+            <div class="ol-skill">พัฒนา SOPs, maintenance schedule, training</div>
+            <div class="ol-skill">Threat assessment และ C-UAS doctrine</div>
+            <div class="ol-skill" style="color:var(--red);">Tools: All tools + interpret physics for training</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 03: PRE-MISSION CHECKLIST -->
+      <div class="mode-section-label mode-section-label-mil" data-reveal style="margin-top:36px;">03&nbsp;·&nbsp;PRE-MISSION CHECKLIST — ขั้นตอนก่อนปฏิบัติการ</div>
+      <div class="chk-wrap" data-reveal>
+        <div class="chk-phase">
+          <div class="chk-phase-head" style="background:rgba(0,168,255,.05);border-bottom:1px solid rgba(0,168,255,.1);"><span class="chk-phase-icon">📋</span><span class="chk-phase-title" style="color:var(--blue);">PHASE 1 · MISSION BRIEF</span></div>
+          <div class="chk-phase-items">
+            <div class="chk-item"><div class="chk-box">☐</div><div>กำหนด objective, พื้นที่ปฏิบัติการ, ROE ที่ชัดเจน</div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>วิเคราะห์สเปค UAS ให้ตรงกับภารกิจ <span class="chk-tool chk-blue">Main Analyzer</span></div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>คำนวณ flight time และ sortie duration ที่ต้องการ</div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>ตรวจสอบ RF freq ในพื้นที่, วาง freq plan <span class="chk-tool chk-blue">VTX Bands</span></div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>กำหนด failsafe: RTH altitude, GPS home, lost link</div></div>
+          </div>
+        </div>
+        <div class="chk-phase">
+          <div class="chk-phase-head" style="background:rgba(0,255,157,.05);border-bottom:1px solid rgba(0,255,157,.1);"><span class="chk-phase-icon">🔧</span><span class="chk-phase-title" style="color:var(--green);">PHASE 2 · PLATFORM CHECK</span></div>
+          <div class="chk-phase-items">
+            <div class="chk-item"><div class="chk-box">☐</div><div>ตรวจ prop: ไม่มีรอยร้าว, ติดถูกทิศ, ขันแน่น</div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>แตะ motor ทดสอบ spin ไม่มีเสียงผิดปกติ <span class="chk-tool chk-green">Motor Thermal</span></div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>วัด battery voltage, IR, cell balance <span class="chk-tool chk-green">Battery Health</span></div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>ตรวจ frame: arm ตรง, motor mount แน่น</div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>ตรวจ ESC: ไม่ร้อน, wiring ไม่มีรอยไหม้ <span class="chk-tool chk-green">ESC Checker</span></div></div>
+          </div>
+        </div>
+        <div class="chk-phase">
+          <div class="chk-phase-head" style="background:rgba(255,204,0,.05);border-bottom:1px solid rgba(255,204,0,.1);"><span class="chk-phase-icon">⚙️</span><span class="chk-phase-title" style="color:var(--gold);">PHASE 3 · SOFTWARE CHECK</span></div>
+          <div class="chk-phase-items">
+            <div class="chk-item"><div class="chk-box">☐</div><div>ตรวจ config version, ยืนยัน PID last known good <span class="chk-tool chk-amber">CLI Surgeon</span></div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>ตรวจ failsafe mode: ตั้งค่าถูก, ทดสอบ disarm</div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>ตรวจ loop time, CPU load ไม่เกิน 80% <span class="chk-tool chk-amber">Loop Analyzer</span></div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>ตรวจ OSD: voltage, GPS, RSSI แสดงถูกต้อง <span class="chk-tool chk-amber">OSD Designer</span></div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>บันทึก config snapshot ก่อนบิน <span class="chk-tool chk-amber">Tuning Log</span></div></div>
+          </div>
+        </div>
+        <div class="chk-phase">
+          <div class="chk-phase-head" style="background:rgba(255,51,85,.05);border-bottom:1px solid rgba(255,51,85,.1);"><span class="chk-phase-icon">🛫</span><span class="chk-phase-title" style="color:var(--red);">PHASE 4 · LAUNCH CHECK</span></div>
+          <div class="chk-phase-items">
+            <div class="chk-item"><div class="chk-box">☐</div><div>GPS lock: &gt; 8 sats, HDOP &lt; 1.5 ก่อน arm</div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>ทดสอบ hover &lt; 2m นาที 30 วินาที ฟัง vibration</div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>ตรวจ hover throttle ควรอยู่ที่ &lt; 50%</div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>ยืนยัน link RSSI, video feed ชัด, telemetry OK</div></div>
+            <div class="chk-item"><div class="chk-box">☐</div><div>แจ้ง TOC: call sign, mission area, ETA, bingo time</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 04: THREAT TABLE -->
+      <div class="mode-section-label mode-section-label-mil" data-reveal style="margin-top:36px;">04&nbsp;·&nbsp;THREAT RECOGNITION — ตารางระบุ UAS ที่พบในสนาม</div>
+      <div class="threat-table-wrap" data-reveal>
+        <table class="threat-table">
+          <thead><tr><th>CLASS</th><th>ขนาด</th><th>TWR</th><th>Tip Speed</th><th>Flight Time</th><th>Payload</th><th>ระดับภัย</th><th>วิธีรับมือ</th></tr></thead>
+          <tbody>
+            <tr><td><span class="threat-cat tc-micro">MICRO</span></td><td>2.5″–3.5″ Whoop</td><td class="thr-g">2.5–3.5</td><td class="thr-g">&lt;120 m/s</td><td>3–6 min</td><td>0–20g</td><td class="thr-g">ต่ำ</td><td>Net / RF jam</td></tr>
+            <tr><td><span class="threat-cat tc-small">SMALL</span></td><td>5″ FPV Racing</td><td class="thr-a">4.0–6.0</td><td class="thr-a">180–260 m/s</td><td>4–7 min</td><td>50–150g</td><td class="thr-a">กลาง</td><td>Intercept / Jam</td></tr>
+            <tr><td><span class="threat-cat tc-small">SMALL+</span></td><td>7″ Long Range</td><td class="thr-a">2.5–3.5</td><td class="thr-a">180–220 m/s</td><td>20–35 min</td><td>100–300g</td><td class="thr-a">กลาง-สูง</td><td>Jam RF + GPS spoof</td></tr>
+            <tr><td><span class="threat-cat tc-med">MEDIUM</span></td><td>10″ Heavy LR</td><td class="thr-a">2.0–3.0</td><td class="thr-a">160–200 m/s</td><td>25–45 min</td><td>300–800g</td><td class="thr-r">สูง</td><td>Dedicated C-UAS</td></tr>
+            <tr><td><span class="threat-cat tc-large">LARGE</span></td><td>Hex/Octo &gt;12″</td><td class="thr-a">1.8–2.5</td><td class="thr-g">&lt;160 m/s</td><td>30–60 min</td><td>&gt;1kg</td><td class="thr-r">สูงมาก</td><td>Kinetic / High-power</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:10px;color:rgba(255,255,255,.28);margin-top:6px;font-family:var(--font-m);">* ค่าประมาณการจาก physics model · ยืนยันด้วย ConfigDoctor Main Analyzer</p>
+
+      <!-- 05: SORTIE PLANNING -->
+      <div class="mode-section-label mode-section-label-mil" data-reveal style="margin-top:36px;">05&nbsp;·&nbsp;SORTIE PLANNING — วางแผนการบินปฏิบัติการ</div>
+      <div class="sortie-grid" data-reveal>
+        <div class="sortie-card">
+          <div class="sortie-title">🔋 ENDURANCE BUDGET</div>
+          <div class="sortie-row"><span class="sortie-key">Usable capacity</span><span class="sortie-val" style="color:var(--green);">80% of rated mAh</span></div>
+          <div class="sortie-row"><span class="sortie-key">Reserve</span><span class="sortie-val" style="color:var(--gold);">20% ห้ามใช้</span></div>
+          <div class="sortie-row"><span class="sortie-key">Bingo time</span><span class="sortie-val" style="color:var(--red);">RTH ที่ 30% battery</span></div>
+          <div class="sortie-row"><span class="sortie-key">Planning factor</span><span class="sortie-val">×0.75 real vs calc</span></div>
+          <div style="margin-top:10px;padding:8px;background:rgba(0,255,157,.04);border-radius:6px;font-size:10px;color:rgba(200,215,255,.45);font-family:var(--font-m);">Sortie = (mAh×0.8)÷avg_A×60×0.75</div>
+        </div>
+        <div class="sortie-card">
+          <div class="sortie-title">📡 LINK BUDGET</div>
+          <div class="sortie-row"><span class="sortie-key">Control (ELRS)</span><span class="sortie-val" style="color:var(--green);">&gt; 10km LoS</span></div>
+          <div class="sortie-row"><span class="sortie-key">Video (Analog)</span><span class="sortie-val">1–3km (200mW)</span></div>
+          <div class="sortie-row"><span class="sortie-key">Video (DJI O3)</span><span class="sortie-val" style="color:var(--green);">10km+ LoS</span></div>
+          <div class="sortie-row"><span class="sortie-key">Terrain factor</span><span class="sortie-val" style="color:var(--gold);">÷2–4 (non-LoS)</span></div>
+          <div style="margin-top:10px;padding:8px;background:rgba(0,168,255,.04);border-radius:6px;font-size:10px;color:rgba(200,215,255,.45);font-family:var(--font-m);">ใช้ VTX Range Calculator ประเมิน terrain</div>
+        </div>
+        <div class="sortie-card">
+          <div class="sortie-title">⚖️ PAYLOAD MARGIN</div>
+          <div class="sortie-row"><span class="sortie-key">Max payload</span><span class="sortie-val">TWR loaded &gt; 2.0:1</span></div>
+          <div class="sortie-row"><span class="sortie-key">Hover loaded</span><span class="sortie-val" style="color:var(--gold);">&lt; 55% throttle</span></div>
+          <div class="sortie-row"><span class="sortie-key">ESC margin</span><span class="sortie-val" style="color:var(--red);">×2.0 peak</span></div>
+          <div class="sortie-row"><span class="sortie-key">Endurance effect</span><span class="sortie-val">+100g = −15% time</span></div>
+          <div style="margin-top:10px;padding:8px;background:rgba(255,204,0,.04);border-radius:6px;font-size:10px;color:rgba(200,215,255,.45);font-family:var(--font-m);">ใช้ What-If Optimizer ใน Main Analyzer</div>
+        </div>
+        <div class="sortie-card">
+          <div class="sortie-title">🌡️ ENVIRONMENT FACTORS</div>
+          <div class="sortie-row"><span class="sortie-key">Altitude effect</span><span class="sortie-val" style="color:var(--gold);">+300m = −5% thrust</span></div>
+          <div class="sortie-row"><span class="sortie-key">Temperature &gt;35°C</span><span class="sortie-val">motor ร้อน +20%</span></div>
+          <div class="sortie-row"><span class="sortie-key">Wind limit</span><span class="sortie-val" style="color:var(--red);">&lt; 2/3 max speed</span></div>
+          <div class="sortie-row"><span class="sortie-key">Cold batt &lt;10°C</span><span class="sortie-val" style="color:var(--gold);">−20% capacity</span></div>
+          <div style="margin-top:10px;padding:8px;background:rgba(255,51,85,.04);border-radius:6px;font-size:10px;color:rgba(200,215,255,.45);font-family:var(--font-m);">ใช้ Motor Thermal Estimator ก่อนบินร้อน</div>
+        </div>
+      </div>
+
+      <!-- 06: C-UAS -->
+      <div class="mode-section-label mode-section-label-mil" data-reveal style="margin-top:36px;">06&nbsp;·&nbsp;C-UAS METHODS — วิธีป้องกันและรับมือ Drone ภัยคุกคาม</div>
+      <div class="cuas-grid" data-reveal>
+        <div class="cuas-card"><div class="cuas-card-icon">📡</div><div class="cuas-card-title">RF DETECTION</div><div class="cuas-card-desc">ตรวจจับ signal จาก controller → drone ใน 2.4GHz / 5.8GHz / 900MHz — RF scanner ระบุ protocol (ELRS, DJI, Futaba) และประมาณ range</div><div class="cuas-card-params"><span class="cuas-param">2.4GHz</span><span class="cuas-param">5.8GHz</span><span class="cuas-param">900MHz</span><span class="cuas-param">FHSS detect</span></div></div>
+        <div class="cuas-card"><div class="cuas-card-icon">🔇</div><div class="cuas-card-title">RF JAMMING</div><div class="cuas-card-desc">ส่ง noise บน frequency ที่ drone ใช้ → ขาด link → failsafe (RTH/hover) ต้องทราบ frequency ที่ target ใช้ก่อน — ใช้ VTX Band analysis</div><div class="cuas-card-params"><span class="cuas-param">Spot jam</span><span class="cuas-param">Sweep jam</span><span class="cuas-param">Barrage</span></div></div>
+        <div class="cuas-card"><div class="cuas-card-icon">🛰️</div><div class="cuas-card-title">GPS SPOOFING / DENIAL</div><div class="cuas-card-desc">ส่ง GPS signal ปลอม → drone เข้าใจตำแหน่งผิด หรือ jam GPS L1/L2 → ไม่มี position fix → hover หรือ crash</div><div class="cuas-card-params"><span class="cuas-param">GPS L1 1.575GHz</span><span class="cuas-param">L2 1.227GHz</span><span class="cuas-param">GLONASS</span></div></div>
+        <div class="cuas-card"><div class="cuas-card-icon">🕸️</div><div class="cuas-card-title">KINETIC / NET CAPTURE</div><div class="cuas-card-desc">ยิงตาข่ายจาก drone interceptor หรือ net gun เพื่อ capture โดยไม่ทำลาย — ใช้กับ drone ขนาดเล็ก ต้องประเมิน flight speed จาก tip speed analysis</div><div class="cuas-card-params"><span class="cuas-param">Net gun</span><span class="cuas-param">Interceptor UAS</span><span class="cuas-param">Tethered net</span></div></div>
+        <div class="cuas-card"><div class="cuas-card-icon">🔍</div><div class="cuas-card-title">TECHNICAL INTELLIGENCE</div><div class="cuas-card-desc">capture drone ได้ → ดึง CLI config → วิเคราะห์ด้วย CLI Surgeon เพื่อหา waypoints, PID, freq ที่ใช้, firmware version เพื่อ profile ผู้ควบคุม</div><div class="cuas-card-params"><span class="cuas-param">CLI Dump</span><span class="cuas-param">Firmware ID</span><span class="cuas-param">Config Profile</span></div></div>
+        <div class="cuas-card"><div class="cuas-card-icon">📊</div><div class="cuas-card-title">THREAT ASSESSMENT</div><div class="cuas-card-desc">กรอก spec ที่พบ (prop size, KV, battery) ใน ConfigDoctor → ได้ TWR, tip speed, payload capacity, flight time ทันที ประเมิน threat level</div><div class="cuas-card-params"><span class="cuas-param">TWR analysis</span><span class="cuas-param">Payload est.</span><span class="cuas-param">Range calc</span></div></div>
+      </div>
+
+      <div class="mode-disclaimer" data-reveal style="margin-top:28px;">
+        <div class="mode-disclaimer-icon">⚠️</div>
+        <div><strong style="color:rgba(255,255,255,.7);">EDUCATIONAL USE ONLY:</strong> ข้อมูลทั้งหมดมีวัตถุประสงค์เพื่อการเรียนรู้และฝึกอบรม UAS เท่านั้น การนำไปใช้งานจริงในภารกิจต้องได้รับการอนุมัติจากหน่วยงานที่มีอำนาจ และปฏิบัติตามกฎหมาย ROE ที่บังคับใช้อย่างเคร่งครัด · ข้อมูลที่กรอกเข้าระบบไม่ถูกบันทึกหรือส่งต่อ — ประมวลผลใน session เท่านั้น</div>
+      </div>
+    </div><!-- /pane-mil -->
+
   </div>
 </section>
 
 <div class="neon-divider"></div>
 
 <!-- ═══ NEW FEATURES ═══ -->
-<section>
+<section id="new-features">
   <div class="section-inner">
     <div data-reveal>
-      <div class="section-badge badge-new">🆕&nbsp;&nbsp;NEW IN v5.1</div>
+      <div class="section-badge badge-new">✦&nbsp;&nbsp;Features ใหม่ v5.1–5.2</div>
       <h2 class="section-title">
-        <span class="i18n-th">ฟีเจอร์ใหม่<br><span class="hl-gold">ที่นักบินรอคอย</span></span>
-        <span class="i18n-en">New Features<br><span class="hl-gold">Pilots Been Waiting For</span></span>
+        <span class="i18n-th">เครื่องมือที่<br><span class="hl-gold">ไม่มีที่ไหนในโลก FPV</span></span>
+        <span class="i18n-en">Tools that<br><span class="hl-gold">don't exist anywhere else</span></span>
       </h2>
+      <p class="section-sub">
+        <span class="i18n-th">สร้างขึ้นจากความรู้ community จริงๆ — ไม่ต้องเดา ไม่ต้องลองผิดลองถูก รวม v5.2 Smart Analysis ครบวงจร</span>
+        <span class="i18n-en">Built from real community knowledge — no guessing, no trial-and-error. v5.2 packs a complete Smart Analysis suite.</span>
+      </p>
     </div>
 
-    <div class="new-grid" data-reveal>
-      <!-- Flagship -->
-      <a href="/blackbox" class="new-card card-gold new-card-flagship">
+    <div class="new-grid">
+
+      <!-- FLAGSHIP: Blackbox -->
+      <a href="/blackbox" class="new-card card-green new-card-flagship" data-reveal>
         <div class="holo-shine"></div>
-        <div class="new-card-new-pill pill-flagship">🔥 FLAGSHIP</div>
+        <div class="new-card-new-pill pill-flagship">✦ v5.2 FLAGSHIP</div>
         <div class="flagship-inner">
           <div>
             <span class="new-card-icon">📊</span>
             <div class="new-card-title">
-              <span class="en">BLACKBOX ANALYZER</span>
-              Blackbox วิเคราะห์ CSV อัตโนมัติ
+              <span class="en">BLACKBOX CSV ANALYZER</span>
+              Blackbox CSV Analyzer
             </div>
-            <p class="new-card-desc">Upload CSV จาก Blackbox → ดู step response, noise floor, P/I/D score อัตโนมัติ — เห็นปัญหาที่ "รู้สึก" แต่ไม่รู้สาเหตุ</p>
-            <div class="new-card-tags"><span class="tag" style="color:var(--gold);border-color:rgba(255,204,0,.2)">CSV Upload</span><span class="tag">Step Response</span><span class="tag">Noise Map</span></div>
+            <p class="new-card-desc">Upload ไฟล์ <strong style="color:var(--green)">CSV จาก Betaflight Blackbox</strong> — วิเคราะห์ได้ทันที ทั้ง PID quality score (เกรด A–D), oscillation ต่อ axis, motor imbalance, battery sag, throttle distribution และ CLI fix recommendations พร้อม copy ครบวงจร — ไม่มีเว็บไหนในไทยทำได้แบบนี้</p>
+            <div class="new-card-tags" style="margin-top:16px">
+              <span class="tag">PID Score A–D</span><span class="tag">Oscillation/Axis</span>
+              <span class="tag">Motor Balance</span><span class="tag">Battery Sag</span>
+              <span class="tag">BF 4.3–4.5</span><span class="tag">CLI Auto-fix</span>
+            </div>
           </div>
-          <div class="flagship-visual" aria-hidden="true">
-<span class="hi">BLACKBOX PARSE OK</span>
-<span class="mu">── frequency analysis</span>
-<span class="hi">noise_floor: <span class="go">42.3 dB</span></span>
-<span class="hi">P_score:     <span class="go">86/100</span></span>
-<span class="re">D_noise_idx: <span style="color:var(--red)">HIGH</span></span>
-<span class="mu">── recommendation</span>
-<span class="hi">→ lower d_roll -2</span>
-<span class="hi">→ enable RPM filter</span>
+          <div class="flagship-visual">
+<span class="mu">╔══ Flight Analysis Report ══╗</span>
+<span class="mu">║ </span>PID Score <span class="hi">87/100</span> <span class="go">(Grade B)</span>  <span class="mu">║</span>
+<span class="mu">╠════════════════════════════╣</span>
+<span class="mu">║ </span>Roll  RMS  <span class="hi">12.4</span>  <span class="mu">← ดี</span>        <span class="mu">║</span>
+<span class="mu">║ </span>D-noise    <span class="go">42.1</span>  <span class="mu">← warning</span>  <span class="mu">║</span>
+<span class="mu">║ </span>Motor imb  <span class="hi">3.2%</span>  <span class="mu">← สมดุล</span>    <span class="mu">║</span>
+<span class="mu">║ </span>Battery    <span class="hi">4S · sag 0.6V</span>     <span class="mu">║</span>
+<span class="mu">╠════════════════════════════╣</span>
+<span class="mu">║ </span>Fix: <span class="hi">set dterm_lpf1_hz = 90</span>  <span class="mu">║</span>
+<span class="mu">╚════════════════════════════╝</span>
           </div>
         </div>
         <div class="new-card-arrow">→</div>
       </a>
 
-      <a href="/motor-thermal" class="new-card card-red">
+      <a href="/pid-advisor" class="new-card card-gold" data-reveal>
         <div class="holo-shine"></div>
-        <div class="new-card-new-pill pill-new">NEW</div>
-        <span class="new-card-icon">🌡️</span>
-        <div class="new-card-title">
-          <span class="en">MOTOR THERMAL</span>
-          Motor Thermal Analyzer
-        </div>
-        <p class="new-card-desc">วิเคราะห์อุณหภูมิ motor · ป้องกัน motor burn</p>
-        <div class="new-card-tags"><span class="tag">Heat Index</span><span class="tag">D-term Load</span></div>
+        <div class="new-card-new-pill pill-new">✦ ใหม่</div>
+        <span class="new-card-icon">🩺</span>
+        <div class="new-card-title"><span class="en">PID SYMPTOM ADVISOR</span>PID Symptom Advisor</div>
+        <p class="new-card-desc">บินแล้วเจออาการแปลกๆ? บอกอาการ — ระบบวินิจฉัยสาเหตุ แนะนำค่าที่ต้องปรับ พร้อม CLI commands copy ได้เลย ครอบคลุม 13 อาการ: propwash, bounce-back, yaw spin, motor hot, ESC desync</p>
+        <div class="new-card-tags"><span class="tag">13 Symptoms</span><span class="tag">Auto Diagnose</span><span class="tag">CLI Ready</span></div>
         <div class="new-card-arrow">→</div>
       </a>
 
-      <a href="/loop-analyzer" class="new-card card-purple">
+      <a href="/rpm-filter" class="new-card card-blue" data-reveal>
         <div class="holo-shine"></div>
-        <div class="new-card-new-pill pill-new">NEW</div>
-        <span class="new-card-icon">🔁</span>
-        <div class="new-card-title">
-          <span class="en">LOOP ANALYZER</span>
-          Loop Rate &amp; Latency
-        </div>
-        <p class="new-card-desc">คำนวณ total filter latency chain · วิเคราะห์ 8K/4K/2K trade-off</p>
-        <div class="new-card-tags"><span class="tag">Filter Chain</span><span class="tag">Latency ms</span></div>
+        <div class="new-card-new-pill pill-new">✦ ใหม่</div>
+        <span class="new-card-icon">🔔</span>
+        <div class="new-card-title"><span class="en">RPM FILTER CALCULATOR</span>RPM Filter Calculator</div>
+        <p class="new-card-desc">ใส่ KV + แบต → ได้ตารางความถี่ harmonic ครบ 4 levels พร้อมค่า dyn_notch_min/max ที่แม่นยำ และ CLI command พร้อม paste</p>
+        <div class="new-card-tags"><span class="tag">Harmonic Table</span><span class="tag">dyn_notch</span><span class="tag">CLI Ready</span></div>
         <div class="new-card-arrow">→</div>
       </a>
 
-      <a href="/battery-health" class="new-card card-teal">
+      <a href="/cli-comparator" class="new-card card-teal" data-reveal>
         <div class="holo-shine"></div>
+        <div class="new-card-new-pill pill-new">✦ ใหม่</div>
+        <span class="new-card-icon">⚖️</span>
+        <div class="new-card-title"><span class="en">CLI DIFF COMPARATOR</span>CLI Diff Comparator</div>
+        <p class="new-card-desc">วาง config 2 ชุด — เห็นทุกค่าที่เปลี่ยนแปลงทันที พร้อมคำอธิบายแต่ละ parameter ใช้เปรียบ before/after tuning หรือกับ community preset</p>
+        <div class="new-card-tags"><span class="tag">Before/After</span><span class="tag">Community Preset</span><span class="tag">Auto Explain</span></div>
+        <div class="new-card-arrow">→</div>
+      </a>
+
+      <a href="/rates-visualizer" class="new-card card-purple" data-reveal>
+        <div class="holo-shine"></div>
+        <div class="new-card-new-pill pill-new">✦ ใหม่</div>
+        <span class="new-card-icon">📈</span>
+        <div class="new-card-title"><span class="en">RATES VISUALIZER</span>Rates Visualizer</div>
+        <p class="new-card-desc">ดู stick response curve real-time รองรับ Betaflight ACTUAL, RC+Super, KISS — 6 presets สำเร็จรูป และ generate CLI command ได้ทันที</p>
+        <div class="new-card-tags"><span class="tag">ACTUAL</span><span class="tag">KISS</span><span class="tag">6 Presets</span><span class="tag">Live Curve</span></div>
+        <div class="new-card-arrow">→</div>
+      </a>
+
+      <a href="/esc-checker" class="new-card card-red" data-reveal>
+        <div class="holo-shine"></div>
+        <div class="new-card-new-pill pill-new">✦ ใหม่</div>
+        <span class="new-card-icon">⚡</span>
+        <div class="new-card-title"><span class="en">ESC COMPATIBILITY CHECKER</span>ESC Compatibility Checker</div>
+        <p class="new-card-desc">ใส่ KV + แบต + stator → คำนวณ peak current, แนะนำ ESC amperage ที่ต้องการ และ protocol ที่เหมาะสม (DShot300/600/BiDir)</p>
+        <div class="new-card-tags"><span class="tag">Peak Current</span><span class="tag">ESC Rating</span><span class="tag">DShot Protocol</span></div>
+        <div class="new-card-arrow">→</div>
+      </a>
+
+      <a href="/bf-wizard" class="new-card card-green" data-reveal>
+        <div class="holo-shine"></div>
+        <div class="new-card-new-pill pill-flagship">⚡ v5.2 NEW</div>
+        <span class="new-card-icon">🧙</span>
+        <div class="new-card-title"><span class="en">BF CONFIG WIZARD</span>BF Config Wizard</div>
+        <p class="new-card-desc">7 ขั้นตอน กรอกสเปคโดรน → ได้ CLI ครบสมบูรณ์ทันที ทั้ง PID · Rates · Filter · Features · RPM Filter ปรับ preset ได้ตาม style บิน — Freestyle / Racing / LR / Cine</p>
+        <div class="new-card-tags"><span class="tag">7 Steps</span><span class="tag">Auto PID</span><span class="tag">CLI Ready</span><span class="tag">BF 4.4/4.5</span></div>
+        <div class="new-card-arrow">→</div>
+      </a>
+
+      <a href="/flight-quiz" class="new-card card-gold" data-reveal>
+        <div class="holo-shine"></div>
+        <div class="new-card-new-pill pill-new">✦ ใหม่</div>
+        <span class="new-card-icon">🎯</span>
+        <div class="new-card-title"><span class="en">FLIGHT STYLE QUIZ</span>Flight Style Quiz</div>
+        <p class="new-card-desc">ตอบ 5 คำถาม ระบบวิเคราะห์สไตล์การบินของคุณ — แนะนำ rates preset และ tune direction ที่เหมาะที่สุด ไม่ต้องเดาเอง</p>
+        <div class="new-card-tags"><span class="tag">5 Questions</span><span class="tag">Rates Preset</span><span class="tag">Style Match</span></div>
+        <div class="new-card-arrow">→</div>
+      </a>
+
+      <a href="/build-card" class="new-card card-blue" data-reveal>
+        <div class="holo-shine"></div>
+        <div class="new-card-new-pill pill-new">✦ ใหม่</div>
+        <span class="new-card-icon">🃏</span>
+        <div class="new-card-title"><span class="en">BUILD CARD GENERATOR</span>Build Card Generator</div>
+        <p class="new-card-desc">สร้างรูปสเปคโดรนสวยๆ 1200×628 px พร้อมแชร์ Facebook · LINE · Instagram ได้ทันที เลือก 4 themes และ export PNG ได้เลย ไม่ต้องติดตั้ง</p>
+        <div class="new-card-tags"><span class="tag">PNG Export</span><span class="tag">4 Themes</span><span class="tag">Share Ready</span></div>
+        <div class="new-card-arrow">→</div>
+      </a>
+
+      <a href="/tuning-log" class="new-card card-teal" data-reveal>
+        <div class="holo-shine"></div>
+        <div class="new-card-new-pill pill-new">✦ ใหม่</div>
+        <span class="new-card-icon">📋</span>
+        <div class="new-card-title"><span class="en">TUNING LOG + LEADERBOARD</span>Tuning Log &amp; Leaderboard</div>
+        <p class="new-card-desc"><span class="i18n-th">บันทึกทุก session การ tune — ดู PID delta ระหว่างครั้ง — แชร์ config เข้า Leaderboard ชุมชน vote ให้คะแนน copy CLI ของ top config ได้เลย</span><span class="i18n-en">Log every tuning session — see PID deltas — share to community Leaderboard, vote, copy top configs instantly.</span></p>
+        <div class="new-card-tags"><span class="tag">PID Delta</span><span class="tag">Timeline</span><span class="tag">Community Vote</span></div>
+        <div class="new-card-arrow">→</div>
+      </a>
+
+      <a href="/battery-health" class="new-card card-gold" data-reveal>
+        <div class="holo-shine"></div>
+        <div class="new-card-new-pill pill-flagship">⚡ v5.0 NEW</div>
         <span class="new-card-icon">🔋</span>
-        <div class="new-card-title">
-          <span class="en">BATTERY HEALTH</span>
-          Battery Health Check
-        </div>
-        <p class="new-card-desc">วิเคราะห์ C-rate, voltage sag, cell balance · แนะนำแบต</p>
-        <div class="new-card-tags"><span class="tag">C-Rate</span><span class="tag">Sag Analysis</span></div>
+        <div class="new-card-title"><span class="en">BATTERY HEALTH ADVISOR</span>Battery Health Advisor</div>
+        <p class="new-card-desc"><span class="i18n-th">ใส่ IR, Voltage Sag, Cycle Count → ได้ Health Score + ประมาณอายุใช้งานที่เหลือ + voltage sag จริง ด้วย physics model — ไม่มีใครทำแบบนี้มาก่อน</span><span class="i18n-en">Input IR, voltage sag, cycles → get Health Score + remaining life estimate + real sag calculation using physics model.</span></p>
+        <div class="new-card-tags"><span class="tag">IR Analysis</span><span class="tag">Health Score</span><span class="tag">Sag Physics</span><span class="tag">Retire Advice</span></div>
         <div class="new-card-arrow">→</div>
       </a>
+
+      <a href="/motor-thermal" class="new-card card-red" data-reveal>
+        <div class="holo-shine"></div>
+        <div class="new-card-new-pill pill-flagship">⚡ v5.0 NEW</div>
+        <span class="new-card-icon">🌡️</span>
+        <div class="new-card-title"><span class="en">MOTOR THERMAL ESTIMATOR</span>Motor Thermal Estimator</div>
+        <p class="new-card-desc"><span class="i18n-th">ประมาณอุณหภูมิ winding จาก stator size, KV, กระแส, style บิน — บอก safe zone / danger zone และ max duration ก่อน motor จะเกิน 70°C</span><span class="i18n-en">Estimate winding temperature from stator size, KV, current, flight style — shows safe/danger zones and time before exceeding 70°C.</span></p>
+        <div class="new-card-tags"><span class="tag">Thermal Model</span><span class="tag">Winding Temp</span><span class="tag">Safe Zone</span><span class="tag">Physics Engine</span></div>
+        <div class="new-card-arrow">→</div>
+      </a>
+
+      <!-- FLAGSHIP: Loop Analyzer (full width) -->
+      <a href="/loop-analyzer" class="new-card card-purple new-card-flagship" data-reveal>
+        <div class="holo-shine"></div>
+        <div class="new-card-new-pill pill-flagship">⚡ v5.0 · WORLD FIRST</div>
+        <div class="flagship-inner">
+          <div>
+            <span class="new-card-icon">📡</span>
+            <div class="new-card-title">
+              <span class="en">CONTROL LOOP LATENCY ANALYZER</span>
+              Control Loop Latency Analyzer
+            </div>
+            <p class="new-card-desc">
+              <span class="i18n-th">วิเคราะห์ latency ทุก stage: RC Link → FC Processing → DShot → ESC → Motor — หา bottleneck, คำนวณ CPU load, jitter และ effective loop rate จาก configuration จริงๆ ของคุณ เข้าใจครั้งแรกว่าทำไม F7 "รู้สึก" ดีกว่า F4</span>
+              <span class="i18n-en">Analyze every stage of signal latency: RC Link → FC Processing → DShot → ESC → Motor — find bottlenecks, CPU load, jitter. Finally understand why F7 "feels" better than F4.</span>
+            </p>
+            <div class="new-card-tags" style="margin-top:16px">
+              <span class="tag">RC Link</span><span class="tag">DShot Timing</span>
+              <span class="tag">CPU Budget</span><span class="tag">Bottleneck Map</span>
+              <span class="tag">F4/F7/H7</span><span class="tag">ELRS / Crossfire</span>
+            </div>
+          </div>
+          <div class="flagship-visual" style="border-color:rgba(157,78,221,.15)">
+<span class="mu">🎮 RC Link (ELRS 500Hz)   </span><span class="hi">████████████</span><span class="go"> 2.0ms</span>
+<span class="mu">📥 RC Decode (FC)         </span><span class="hi">██           </span><span class="go"> 0.05ms</span>
+<span class="mu">🧭 Gyro Read (ICM42688)   </span><span class="hi">█            </span><span class="go"> 0.01ms</span>
+<span class="mu">🔧 FC Processing (F7)     </span><span class="hi">████         </span><span class="go"> 0.02ms</span>
+<span class="mu">⚡ DShot600               </span><span class="hi">██           </span><span class="go"> 0.06ms</span>
+<span class="mu">🔌 ESC Processing         </span><span class="hi">████         </span><span class="go"> 0.08ms</span>
+<span class="mu">🌀 Motor Response         </span><span class="hi">████████████████████████</span><span class="go"> 3.0ms</span>
+<span class="mu">──────────────────────────────────</span>
+<span class="mu">Total:</span>                       <span class="hi" style="font-size:1rem;font-weight:900">5.21ms ✅</span>
+          </div>
+        </div>
+        <div class="new-card-arrow">→</div>
+      </a>
+
+      <a href="/fpv-trainer" class="new-card card-teal" data-reveal>
+        <div class="holo-shine"></div>
+        <div class="new-card-new-pill pill-flagship" style="background:rgba(0,229,200,.1);color:var(--teal);border-color:rgba(0,229,200,.28)">🎮 v5.1 · GAME</div>
+        <span class="new-card-icon">🚁</span>
+        <div class="new-card-title"><span class="en">FPV SIMULATOR NEO</span>FPV Simulator NEO</div>
+        <p class="new-card-desc"><span class="i18n-th">เกมส์ฝึกบินโดรน FPV แบบ 3D Real-time ใน Cyberpunk Neo Arena — Tutorial 5 ขั้นตอนสำหรับมือใหม่, Gate Runner, Target Hunt, Hover Zone, Race Circuit 3 รอบ และ Free Fly รองรับ Keyboard · Gamepad · มือถือ Touch Joystick</span><span class="i18n-en">3D real-time FPV drone sim in Cyberpunk Neo Arena — Tutorial, Gate Runner, Target Hunt, Hover Zone, Race Circuit, Free Fly. Supports Keyboard · Gamepad · Mobile joystick.</span></p>
+        <div class="new-card-tags"><span class="tag">🎓 Tutorial</span><span class="tag">🏁 Gate Runner</span><span class="tag">🏆 Race Circuit</span><span class="tag">📱 Mobile OK</span><span class="tag">Three.js 3D</span></div>
+        <div class="new-card-arrow">→</div>
+      </a>
+
+      <a href="/quick-tune" class="new-card card-green" data-reveal>
+        <div class="holo-shine"></div>
+        <div class="new-card-new-pill pill-flagship" style="background:rgba(255,165,0,.1);color:#ffa500;border-color:rgba(255,165,0,.28)">⚡ v5.1 · PRO TOOL</div>
+        <span class="new-card-icon">🎯</span>
+        <div class="new-card-title"><span class="en">QUICK TUNE PAD</span>Quick Tune Pad</div>
+        <p class="new-card-desc"><span class="i18n-th">ติ๊กอาการที่เจอตอนบิน → ได้ PID delta matrix + CLI command พร้อม paste ทันที — ออกแบบสำหรับ Pro Pilot ที่สนาม รองรับ 13 อาการ พร้อม conflict detection อัตโนมัติ</span><span class="i18n-en">Select flight symptoms → instant PID delta matrix + ready-to-paste CLI. Designed for Pro Pilots in the field. 13 symptoms, automatic conflict detection.</span></p>
+        <div class="new-card-tags"><span class="tag">⚡ Instant CLI</span><span class="tag">🎯 13 อาการ</span><span class="tag">⚠️ Conflict Detect</span><span class="tag">Pro Pilot</span></div>
+        <div class="new-card-arrow">→</div>
+      </a>
+
     </div>
   </div>
 </section>
@@ -1401,19 +1858,23 @@ footer {
 <section>
   <div class="section-inner">
     <div data-reveal>
-      <div class="section-badge badge-core">⚙️&nbsp;&nbsp;<span class="i18n-th">CORE TOOLS</span><span class="i18n-en">CORE TOOLS</span></div>
+      <div class="section-badge badge-core">⚙️&nbsp;&nbsp;Core Features</div>
       <h2 class="section-title">
-        <span class="i18n-th">เครื่องมือหลัก<br><span class="hl-green">พร้อมใช้ทันที</span></span>
-        <span class="i18n-en">Core Tools<br><span class="hl-green">Ready to Use</span></span>
+        <span class="i18n-th">ฟีเจอร์หลักที่<br><span class="hl-green">ครบทุก workflow</span></span>
+        <span class="i18n-en">Core features for<br><span class="hl-green">every workflow</span></span>
       </h2>
+      <p class="section-sub">
+        <span class="i18n-th">ตั้งแต่วิเคราะห์ config ไปจนถึง download ไฟล์ตัวอย่าง — ทุกอย่างอยู่ที่นี่</span>
+        <span class="i18n-en">From config analysis to downloading sample files — everything is here.</span>
+      </p>
     </div>
     <div class="core-grid" data-reveal>
-      <div class="core-card"><div class="core-icon">🧠</div><div class="core-title">Smart Drone Analyzer</div><div class="core-desc">กรอกสเปค → PID + Filter + CLI พร้อม paste ใน Betaflight ทันที</div></div>
-      <div class="core-card"><div class="core-icon">🩺</div><div class="core-title">CLI Surgeon</div><div class="core-desc">วิเคราะห์ diff all → ตรวจพบ parameter ผิดปกติ + แนะนำแก้ไข</div></div>
-      <div class="core-card"><div class="core-icon">💊</div><div class="core-title">PID Advisor</div><div class="core-desc">บอกอาการ → รู้สาเหตุ + CLI fix ทันที (13 อาการ)</div></div>
-      <div class="core-card"><div class="core-icon">⚡</div><div class="core-title">Quick Tune Pad</div><div class="core-desc">interface เดียว tune PID + Filter + Rates พร้อม export</div></div>
-      <div class="core-card"><div class="core-icon">⚙️</div><div class="core-title">RPM Filter Calc</div><div class="core-desc">คำนวณ rpm_filter_min_hz จาก KV + Voltage + Motor Poles จริง</div></div>
-      <div class="core-card"><div class="core-icon">🧭</div><div class="core-title">Motor × Prop</div><div class="core-desc">เปรียบ prop ต่างขนาด/ใบ → noise, grip, pitch speed, motor load</div></div>
+      <div class="core-card"><div class="core-icon">⚙️</div><div class="core-title">PID &amp; Filter Baseline</div><p class="core-desc"><span class="i18n-th">ค่า PID และ Filter ที่ปลอดภัยตาม class โดรน พร้อม CLI copy ได้เลย</span><span class="i18n-en">Safe PID &amp; Filter baselines per drone class — CLI-ready to paste</span></p></div>
+      <div class="core-card"><div class="core-icon">🔬</div><div class="core-title">Advanced Physics Engine v5</div><p class="core-desc"><span class="i18n-th">ประมาณ TWR, กระแสไฟ, C-rating, tip speed, winding temp (2.5″–10″)</span><span class="i18n-en">Estimate TWR, current, C-rating, tip speed, winding temp (2.5″–10″)</span></p></div>
+      <div class="core-card"><div class="core-icon">🧭</div><div class="core-title">Motor × Prop Recommender</div><p class="core-desc"><span class="i18n-th">แนะนำ KV, stator size และประมาณกระแสตามน้ำหนัก + battery + style</span><span class="i18n-en">Recommends KV, stator size and estimates current based on weight + battery + style</span></p></div>
+      <div class="core-card"><div class="core-icon">🛠️</div><div class="core-title">Smart Rule Checks</div><p class="core-desc"><span class="i18n-th">ตรวจ warning อัตโนมัติ เช่น TWR ต่ำ, C-rating สูง, KV ไม่เหมาะ cell count, tip speed</span><span class="i18n-en">Auto-checks: low TWR, high C-rating, KV mismatched with cell count, tip speed danger</span></p></div>
+      <div class="core-card"><div class="core-icon">🩻</div><div class="core-title">CLI Surgeon v5.0</div><p class="core-desc"><span class="i18n-th">วาง diff all หรือ dump — ตรวจ gyro_lpf1, simplified filter, motor_poles พร้อม fix</span><span class="i18n-en">Paste diff all or dump — checks gyro_lpf1, simplified filter, motor_poles and fixes</span></p></div>
+      <div class="core-card"><div class="core-icon">📁</div><div class="core-title">DIFF / DUMP Library</div><p class="core-desc"><span class="i18n-th">รวมไฟล์จากโดรนหลายรุ่น — F4/F7, 5″/7″, หลาย build แยก ดาวน์โหลดได้ทันที</span><span class="i18n-en">Collection of CLI configs from many drones — F4/F7, 5″/7″, multiple builds</span></p></div>
     </div>
   </div>
 </section>
@@ -1445,36 +1906,41 @@ footer {
 <section>
   <div class="section-inner">
     <div data-reveal>
-      <div class="section-badge badge-tools">🛠️&nbsp;&nbsp;23 TOOLS</div>
+      <div class="section-badge badge-tools">🔗&nbsp;&nbsp;Quick Access — 23 Tools</div>
       <h2 class="section-title">
-        <span class="i18n-th">ครบจบที่เดียว<br><span class="hl-blue">23 เครื่องมือ</span></span>
-        <span class="i18n-en">All-in-One Platform<br><span class="hl-blue">23 Tools</span></span>
+        <span class="i18n-th">เครื่องมือ<span class="hl-blue">ทั้งหมด</span></span>
+        <span class="i18n-en">All <span class="hl-blue">Tools</span></span>
       </h2>
+      <p class="section-sub">
+        <span class="i18n-th">คลิกได้เลย — ทุก tool ฟรีและไม่ต้อง login</span>
+        <span class="i18n-en">Click directly — every tool is free and requires no login</span>
+      </p>
     </div>
     <div class="tools-grid" data-reveal>
-      <a href="/app"            class="tool-card"><div class="tool-shine"></div><span class="tool-icon">🧠</span><span class="tool-name">Analyzer</span><span class="tool-hint">PID · Filter · CLI</span><span class="tool-badge tb-new">CORE</span></a>
-      <a href="/cli_surgeon"    class="tool-card"><div class="tool-shine"></div><span class="tool-icon">🩺</span><span class="tool-name">CLI Surgeon</span><span class="tool-hint">diff all analysis</span></a>
-      <a href="/blackbox"       class="tool-card"><div class="tool-shine"></div><span class="tool-icon">📊</span><span class="tool-name">Blackbox</span><span class="tool-hint">CSV analyzer</span><span class="tool-badge tb-gold">HOT</span></a>
-      <a href="/bf-wizard"      class="tool-card"><div class="tool-shine"></div><span class="tool-icon">🧙</span><span class="tool-name">BF Wizard</span><span class="tool-hint">step-by-step</span></a>
-      <a href="/pid-advisor"    class="tool-card"><div class="tool-shine"></div><span class="tool-icon">💊</span><span class="tool-name">PID Advisor</span><span class="tool-hint">symptom → fix</span></a>
-      <a href="/rates-visualizer" class="tool-card"><div class="tool-shine"></div><span class="tool-icon">📈</span><span class="tool-name">Rates Viz</span><span class="tool-hint">rate curve</span></a>
-      <a href="/quick-tune"     class="tool-card"><div class="tool-shine"></div><span class="tool-icon">⚡</span><span class="tool-name">Quick Tune</span><span class="tool-hint">fast tuning</span><span class="tool-badge tb-new">NEW</span></a>
-      <a href="/motor-prop"     class="tool-card"><div class="tool-shine"></div><span class="tool-icon">🧭</span><span class="tool-name">Motor×Prop</span><span class="tool-hint">physics calc</span></a>
-      <a href="/esc-checker"    class="tool-card"><div class="tool-shine"></div><span class="tool-icon">⚡</span><span class="tool-name">ESC Checker</span><span class="tool-hint">ESC analysis</span></a>
-      <a href="/rpm-filter"     class="tool-card"><div class="tool-shine"></div><span class="tool-icon">⚙️</span><span class="tool-name">RPM Filter</span><span class="tool-hint">min_hz calc</span></a>
-      <a href="/battery-health" class="tool-card"><div class="tool-shine"></div><span class="tool-icon">🔋</span><span class="tool-name">Battery</span><span class="tool-hint">health check</span></a>
-      <a href="/motor-thermal"  class="tool-card"><div class="tool-shine"></div><span class="tool-icon">🌡️</span><span class="tool-name">Motor Thermal</span><span class="tool-hint">heat index</span></a>
-      <a href="/cli-comparator" class="tool-card"><div class="tool-shine"></div><span class="tool-icon">⚖️</span><span class="tool-name">CLI Diff</span><span class="tool-hint">compare configs</span></a>
-      <a href="/loop-analyzer"  class="tool-card"><div class="tool-shine"></div><span class="tool-icon">🔁</span><span class="tool-name">Loop Analyzer</span><span class="tool-hint">latency chain</span></a>
-      <a href="/tuning-log"     class="tool-card"><div class="tool-shine"></div><span class="tool-icon">📓</span><span class="tool-name">Tuning Log</span><span class="tool-hint">session notes</span></a>
-      <a href="/vtx"            class="tool-card"><div class="tool-shine"></div><span class="tool-icon">📡</span><span class="tool-name">VTX Bands</span><span class="tool-hint">freq planner</span></a>
-      <a href="/vtx-range"      class="tool-card"><div class="tool-shine"></div><span class="tool-icon">🏞️</span><span class="tool-name">VTX Range</span><span class="tool-hint">range calc</span></a>
-      <a href="/vtx-smartaudio" class="tool-card"><div class="tool-shine"></div><span class="tool-icon">🎙️</span><span class="tool-name">SmartAudio</span><span class="tool-hint">VTX control</span></a>
-      <a href="/osd"            class="tool-card"><div class="tool-shine"></div><span class="tool-icon">🖥️</span><span class="tool-name">OSD Design</span><span class="tool-hint">layout builder</span></a>
-      <a href="/flight-quiz"    class="tool-card"><div class="tool-shine"></div><span class="tool-icon">🎯</span><span class="tool-name">Flight Quiz</span><span class="tool-hint">test knowledge</span></a>
-      <a href="/build-card"     class="tool-card"><div class="tool-shine"></div><span class="tool-icon">🃏</span><span class="tool-name">Build Card</span><span class="tool-hint">share build</span></a>
-      <a href="/leaderboard"    class="tool-card"><div class="tool-shine"></div><span class="tool-icon">🏆</span><span class="tool-name">Leaderboard</span><span class="tool-hint">top builds</span></a>
-      <a href="/fpv-trainer"    class="tool-card"><div class="tool-shine"></div><span class="tool-icon">🎮</span><span class="tool-name">FPV Sim NEO</span><span class="tool-hint">mini simulator</span><span class="tool-badge tb-gold">GAME</span></a>
+      <a class="tool-card" href="/app"><div class="tool-shine"></div><div class="tool-icon">🚀</div><div class="tool-name"><span class="i18n-th">วิเคราะห์โดรน</span><span class="i18n-en">Drone Analyzer</span></div><div class="tool-hint">Main PID/Filter analyzer</div></a>
+      <a class="tool-card" href="/blackbox"><div class="tool-shine"></div><div class="tool-icon">📊</div><div class="tool-name">Blackbox Analyzer</div><div class="tool-hint">Flight log CSV → PID score</div><span class="tool-badge tb-gold">HOT</span></a>
+      <a class="tool-card" href="/pid-advisor"><div class="tool-shine"></div><div class="tool-icon">🩺</div><div class="tool-name">PID Advisor</div><div class="tool-hint"><span class="i18n-th">อาการ → วิธีแก้ทันที</span><span class="i18n-en">Symptom → fix instantly</span></div></a>
+      <a class="tool-card" href="/cli_surgeon"><div class="tool-shine"></div><div class="tool-icon">🩻</div><div class="tool-name">CLI Surgeon</div><div class="tool-hint"><span class="i18n-th">วิเคราะห์ diff all / dump</span><span class="i18n-en">Analyze diff all / dump</span></div></a>
+      <a class="tool-card" href="/motor-prop"><div class="tool-shine"></div><div class="tool-icon">🧭</div><div class="tool-name">Motor × Prop</div><div class="tool-hint"><span class="i18n-th">แนะนำ KV + stator</span><span class="i18n-en">Recommend KV + stator</span></div></a>
+      <a class="tool-card" href="/rpm-filter"><div class="tool-shine"></div><div class="tool-icon">🔔</div><div class="tool-name">RPM Filter</div><div class="tool-hint"><span class="i18n-th">คำนวณ harmonic Hz</span><span class="i18n-en">Calculate harmonic Hz</span></div></a>
+      <a class="tool-card" href="/rates-visualizer"><div class="tool-shine"></div><div class="tool-icon">📈</div><div class="tool-name">Rates Visualizer</div><div class="tool-hint"><span class="i18n-th">ดู curve live + CLI</span><span class="i18n-en">Live curve + CLI</span></div></a>
+      <a class="tool-card" href="/cli-comparator"><div class="tool-shine"></div><div class="tool-icon">⚖️</div><div class="tool-name">CLI Comparator</div><div class="tool-hint"><span class="i18n-th">เปรียบ 2 config</span><span class="i18n-en">Compare 2 configs</span></div></a>
+      <a class="tool-card" href="/esc-checker"><div class="tool-shine"></div><div class="tool-icon">⚡</div><div class="tool-name">ESC Checker</div><div class="tool-hint"><span class="i18n-th">ตรวจ ESC + protocol</span><span class="i18n-en">Check ESC + protocol</span></div></a>
+      <a class="tool-card" href="/osd"><div class="tool-shine"></div><div class="tool-icon">🖥️</div><div class="tool-name">OSD Designer</div><div class="tool-hint"><span class="i18n-th">ออกแบบ OSD layout</span><span class="i18n-en">Design OSD layout</span></div></a>
+      <a class="tool-card" href="/vtx"><div class="tool-shine"></div><div class="tool-icon">📡</div><div class="tool-name">VTX Bands</div><div class="tool-hint"><span class="i18n-th">ตาราง Band/Channel</span><span class="i18n-en">Band/Channel table</span></div></a>
+      <a class="tool-card" href="/vtx-range"><div class="tool-shine"></div><div class="tool-icon">🏞️</div><div class="tool-name">VTX Range</div><div class="tool-hint"><span class="i18n-th">ประมาณระยะสัญญาณ</span><span class="i18n-en">Signal range estimator</span></div></a>
+      <a class="tool-card" href="/vtx-smartaudio"><div class="tool-shine"></div><div class="tool-icon">🎙️</div><div class="tool-name">SmartAudio</div><div class="tool-hint">SmartAudio commands</div></a>
+      <a class="tool-card" href="{{ url_for('downloads_index') }}"><div class="tool-shine"></div><div class="tool-icon">📁</div><div class="tool-name">DIFF Library</div><div class="tool-hint"><span class="i18n-th">ดาวน์โหลดไฟล์ตัวอย่าง</span><span class="i18n-en">Download sample files</span></div><span class="tool-badge tb-gold">F4/F7</span></a>
+      <a class="tool-card" href="/flight-quiz"><div class="tool-shine"></div><div class="tool-icon">🎯</div><div class="tool-name">Flight Style Quiz</div><div class="tool-hint"><span class="i18n-th">5 คำถาม → rates แนะนำ</span><span class="i18n-en">5 questions → rates</span></div><span class="tool-badge tb-new">NEW</span></a>
+      <a class="tool-card" href="/bf-wizard"><div class="tool-shine"></div><div class="tool-icon">🧙</div><div class="tool-name">BF Config Wizard</div><div class="tool-hint"><span class="i18n-th">7 steps → CLI พร้อม paste</span><span class="i18n-en">7 steps → CLI ready</span></div><span class="tool-badge tb-new">NEW</span></a>
+      <a class="tool-card" href="/build-card"><div class="tool-shine"></div><div class="tool-icon">🃏</div><div class="tool-name">Build Card</div><div class="tool-hint"><span class="i18n-th">รูปสเปคโดรนแชร์ Social</span><span class="i18n-en">Build card for Social</span></div><span class="tool-badge tb-new">NEW</span></a>
+      <a class="tool-card" href="/tuning-log"><div class="tool-shine"></div><div class="tool-icon">📋</div><div class="tool-name">Tuning Log</div><div class="tool-hint"><span class="i18n-th">บันทึก session PID</span><span class="i18n-en">Log PID sessions</span></div><span class="tool-badge tb-new">NEW</span></a>
+      <a class="tool-card" href="/leaderboard"><div class="tool-shine"></div><div class="tool-icon">🏆</div><div class="tool-name">Config Leaderboard</div><div class="tool-hint"><span class="i18n-th">vote · rank · copy config</span><span class="i18n-en">vote · rank · copy config</span></div><span class="tool-badge tb-new">NEW</span></a>
+      <a class="tool-card" href="/battery-health"><div class="tool-shine"></div><div class="tool-icon">🔋</div><div class="tool-name">Battery Health</div><div class="tool-hint"><span class="i18n-th">IR · Sag · Health Score</span><span class="i18n-en">IR · Sag · Health Score</span></div><span class="tool-badge tb-new">v5.0</span></a>
+      <a class="tool-card" href="/motor-thermal"><div class="tool-shine"></div><div class="tool-icon">🌡️</div><div class="tool-name">Motor Thermal</div><div class="tool-hint"><span class="i18n-th">ประมาณอุณหภูมิ winding</span><span class="i18n-en">Winding temp estimator</span></div><span class="tool-badge tb-new">v5.0</span></a>
+      <a class="tool-card" href="/loop-analyzer"><div class="tool-shine"></div><div class="tool-icon">🔁</div><div class="tool-name">Loop Analyzer</div><div class="tool-hint"><span class="i18n-th">Stick→Prop latency</span><span class="i18n-en">Stick→Prop latency</span></div><span class="tool-badge tb-new">v5.0</span></a>
+      <a class="tool-card" href="/fpv-trainer"><div class="tool-shine"></div><div class="tool-icon">🎮</div><div class="tool-name">FPV Simulator NEO</div><div class="tool-hint"><span class="i18n-th">ฝึกบินโดรน 3D · Tutorial · Race</span><span class="i18n-en">3D drone sim · Race</span></div><span class="tool-badge tb-gold">GAME</span></a>
+      <a class="tool-card" href="/quick-tune"><div class="tool-shine"></div><div class="tool-icon">⚡</div><div class="tool-name">Quick Tune Pad</div><div class="tool-hint"><span class="i18n-th">อาการ → PID delta + CLI ทันที</span><span class="i18n-en">Symptom → PID delta + CLI</span></div><span class="tool-badge tb-gold">NEW</span></a>
     </div>
   </div>
 </section>
