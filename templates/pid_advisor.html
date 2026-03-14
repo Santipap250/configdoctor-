@@ -755,7 +755,7 @@ body::after {
 /* ═══════════════════════════════════════════════════════
    PID DIAGNOSTIC LAB — Brain
 ═══════════════════════════════════════════════════════ */
-const DATA = {{ advice_json|safe }};
+const DATA = {{ advice_json|tojson }};
 
 // Symptom metadata (icons + axis + confidence)
 const SYMP_META = {
