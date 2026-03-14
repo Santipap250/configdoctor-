@@ -1042,13 +1042,17 @@ def set_security_headers(response):
         "  https://cdnjs.cloudflare.com "
         "  https://cdn.jsdelivr.net "
         "  https://fonts.googleapis.com; "       
+        "  https://www.gstatic.com; "
         "style-src 'self' 'unsafe-inline' "
         "  https://fonts.googleapis.com "
         "  https://fonts.gstatic.com; "
         "font-src 'self' https://fonts.gstatic.com; "
         "img-src 'self' data: https:; "
-        "connect-src 'self'; "
-        "frame-ancestors 'self';"
+        "connect-src 'self' "
+        "  https://*.firebaseio.com "
+        "  https://*.firebasedatabase.app "
+        "  wss://*.firebaseio.com "
+        "  wss://*.firebasedatabase.app; "
     )
     # M2: Cache static assets aggressively (1 year, cache-busted by filename)
     if request.path.startswith('/static/'):
