@@ -2,398 +2,306 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>OBIXConfig Doctor — Initializing</title>
+<title>OBIXConfig Doctor</title>
 {% set og_title       = "OBIXConfig Doctor" %}
 {% set og_description = "กำลังโหลด OBIXConfig Doctor — FPV Tuning Tool" %}
 {% set og_url         = "https://configdoctor.onrender.com" %}
 {% include "partials/og_tags.html" %}
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Sarabun:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
+/* ── Design tokens ─────────────────────────────────────── */
 :root {
-  --green:  #00ff88;
-  --blue:   #00aaff;
-  --cyan:   #00e5ff;
-  --amber:  #ffb700;
-  --bg:     #010407;
+  --g:    #10c47a;          /* green accent */
+  --g2:   rgba(16,196,122,.12);
+  --g3:   rgba(16,196,122,.06);
+  --bg:   #050a0d;
+  --text: #d4e8e0;
+  --dim:  rgba(255,255,255,.18);
 }
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; overflow: hidden; background: var(--bg); }
 
-/* Grid BG */
+/* ── Reset ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%; overflow: hidden;
+  background: var(--bg);
+  font-family: 'Sarabun', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Subtle grid background ────────────────────────────── */
 body::before {
   content: '';
-  position: fixed; inset: 0; z-index: 0;
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background-image:
-    linear-gradient(rgba(0,255,136,0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,255,136,0.035) 1px, transparent 1px);
-  background-size: 44px 44px;
-  animation: gridScroll 14s linear infinite;
-  pointer-events: none;
+    linear-gradient(rgba(16,196,122,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16,196,122,.025) 1px, transparent 1px);
+  background-size: 48px 48px;
 }
-@keyframes gridScroll { to { background-position: 44px 44px; } }
 
-/* Ambient orbs */
-.orb { position: fixed; border-radius: 50%; pointer-events: none; filter: blur(100px); z-index: 0; }
-.orb-g { width: 600px; height: 600px; top: -200px; left: -200px;
-  background: radial-gradient(circle, rgba(0,255,136,0.14) 0%, transparent 70%);
-  animation: of1 22s ease-in-out infinite; }
-.orb-b { width: 700px; height: 700px; bottom: -250px; right: -200px;
-  background: radial-gradient(circle, rgba(0,170,255,0.11) 0%, transparent 70%);
-  animation: of2 28s ease-in-out infinite; }
-@keyframes of1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(60px,40px)} }
-@keyframes of2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-50px,-60px)} }
-
-/* Scanline */
+/* ── Single ambient glow ───────────────────────────────── */
 body::after {
   content: '';
-  position: fixed; inset: 0; z-index: 1; pointer-events: none;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px,
-    rgba(0,0,0,0.015) 2px, rgba(0,0,0,0.015) 4px);
+  position: fixed;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(16,196,122,.1) 0%, transparent 65%);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -60%);
+  filter: blur(80px);
+  pointer-events: none; z-index: 0;
+  animation: breathe 5s ease-in-out infinite;
+}
+@keyframes breathe {
+  0%,100% { opacity: .7; transform: translate(-50%,-60%) scale(1); }
+  50%      { opacity: 1;  transform: translate(-50%,-60%) scale(1.08); }
 }
 
-/* HUD corners */
-.hc { position: fixed; width: 56px; height: 56px; border-color: rgba(0,255,136,0.22); border-style: solid; z-index: 3;
-  animation: hcp 3s ease-in-out infinite; }
-.hc-tl { top:18px; left:18px; border-width: 2px 0 0 2px; }
-.hc-tr { top:18px; right:18px; border-width: 2px 2px 0 0; }
-.hc-bl { bottom:18px; left:18px; border-width: 0 0 2px 2px; }
-.hc-br { bottom:18px; right:18px; border-width: 0 2px 2px 0; }
-@keyframes hcp { 0%,100%{ border-color:rgba(0,255,136,0.22); } 50%{ border-color:rgba(0,255,136,0.5); } }
-
-.hud-tl { position:fixed; top:26px; left:82px; z-index:4;
-  font-family:'Orbitron',sans-serif; font-size:7.5px; letter-spacing:.2em; color:rgba(0,255,136,0.45); }
-.hud-tr { position:fixed; top:26px; right:82px; z-index:4; text-align:right;
-  font-family:'Orbitron',sans-serif; font-size:7.5px; letter-spacing:.2em; color:rgba(0,170,255,0.45); }
-.hud-bl { position:fixed; bottom:26px; left:82px; z-index:4;
-  font-family:'JetBrains Mono',monospace; font-size:7.5px; letter-spacing:.1em; color:rgba(0,255,136,0.3); }
-.hud-br { position:fixed; bottom:26px; right:82px; z-index:4; text-align:right;
-  font-family:'Orbitron',sans-serif; font-size:7px; letter-spacing:.16em; color:rgba(255,255,255,0.12); }
-
-/* Main layout */
-.main {
-  position: relative; z-index: 10;
+/* ── Layout ────────────────────────────────────────────── */
+.shell {
+  position: relative; z-index: 1;
   width: 100vw; height: 100vh;
-  display: flex; align-items: center; justify-content: center;
+  display: grid;
+  place-items: center;
+}
+
+.card {
+  display: flex;
   flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  padding: 48px 40px;
+  width: min(420px, 92vw);
+  background: rgba(255,255,255,.018);
+  border: 1px solid rgba(16,196,122,.1);
+  border-radius: 20px;
+  box-shadow: 0 0 60px rgba(16,196,122,.06), 0 24px 80px rgba(0,0,0,.5);
+  backdrop-filter: blur(6px);
+  animation: cardIn .5s ease both;
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* DRONE RADAR */
-.drone-wrap {
+/* ── Drone icon ─────────────────────────────────────────── */
+.drone-icon {
   position: relative;
-  width: 210px; height: 210px;
-  margin-bottom: 28px;
+  width: 96px; height: 96px;
+  flex-shrink: 0;
+}
+.drone-icon svg {
+  animation: droneFloat 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 14px rgba(16,196,122,.5));
+}
+@keyframes droneFloat {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
 }
 
-.ring-outer {
-  position: absolute; inset: 0; border-radius: 50%;
-  border: 1px solid rgba(0,255,136,0.1);
-  animation: rot 10s linear infinite;
+/* Spin ring around drone */
+.drone-ring {
+  position: absolute; inset: -12px;
+  border-radius: 50%;
+  border: 1px solid rgba(16,196,122,.2);
+  border-top-color: rgba(16,196,122,.7);
+  animation: spin 2s linear infinite;
 }
-.ring-outer::before {
-  content: ''; position: absolute;
-  width: 9px; height: 9px; border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 14px var(--green), 0 0 28px rgba(0,255,136,0.5);
-  top: -4.5px; left: calc(50% - 4.5px);
-}
-.ring-outer::after {
-  content: ''; position: absolute;
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--blue);
-  box-shadow: 0 0 12px var(--blue);
-  bottom: -3.5px; left: calc(50% - 3.5px);
-}
-@keyframes rot { to { transform: rotate(360deg); } }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-.ring-mid {
-  position: absolute; inset: 22px; border-radius: 50%;
-  border: 1px dashed rgba(0,170,255,0.18);
-  animation: rot 6s linear infinite reverse;
+/* ── Brand ──────────────────────────────────────────────── */
+.brand-wrap { text-align: center; }
+.brand-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 22px; font-weight: 900;
+  letter-spacing: .1em;
+  color: #e8f8f2;
+  line-height: 1;
 }
-
-/* RADAR SWEEP */
-.radar {
-  position: absolute; inset: 32px; border-radius: 50%; overflow: hidden;
-}
-.radar::before {
-  content: ''; position: absolute; inset: 0; border-radius: 50%;
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg, transparent 280deg,
-    rgba(0,255,136,0.08) 300deg,
-    rgba(0,255,136,0.35) 340deg,
-    rgba(0,255,136,0.55) 360deg
-  );
-  animation: radarSpin 2.4s linear infinite;
-}
-.radar::after {
-  content: ''; position: absolute; inset: 0; border-radius: 50%;
-  background: radial-gradient(circle, transparent 30%, rgba(0,255,136,0.03) 100%);
-  border: 1px solid rgba(0,255,136,0.12);
-}
-@keyframes radarSpin { to { transform: rotate(360deg); } }
-
-/* Blips */
-.blip {
-  position: absolute; width: 5px; height: 5px; border-radius: 50%;
-  background: var(--green); box-shadow: 0 0 8px var(--green);
-  animation: blipFade 2.6s ease-out infinite;
-}
-.b1 { top: 28%; left: 62%; animation-delay: 0s; }
-.b2 { top: 62%; left: 28%; animation-delay: 0.9s; }
-.b3 { top: 38%; left: 72%; animation-delay: 1.8s; }
-@keyframes blipFade {
-  0%{ opacity:1; transform:scale(1); }
-  50%{ opacity:0.6; transform:scale(1.6); }
-  100%{ opacity:0; transform:scale(2.4); }
+.brand-name em { color: var(--g); font-style: normal; }
+.brand-sub {
+  display: block;
+  font-size: 11px; letter-spacing: .18em;
+  color: var(--dim); text-transform: uppercase;
+  margin-top: 8px;
 }
 
-/* DRONE CENTER */
-.dc { position: absolute; inset:0; display:flex; align-items:center; justify-content:center; }
-.dsv {
-  filter: drop-shadow(0 0 9px rgba(0,255,136,0.5)) drop-shadow(0 0 22px rgba(0,255,136,0.18));
-  animation: dp 2.2s ease-in-out infinite;
-}
-@keyframes dp {
-  0%,100%{ filter: drop-shadow(0 0 9px rgba(0,255,136,0.5)) drop-shadow(0 0 22px rgba(0,255,136,0.18)); }
-  50%{ filter: drop-shadow(0 0 16px rgba(0,255,136,0.85)) drop-shadow(0 0 38px rgba(0,255,136,0.3)); }
-}
-.pt1 { transform-origin:36px 36px; animation:rot .22s linear infinite; }
-.pt2 { transform-origin:124px 36px; animation:rot .22s linear infinite reverse; }
-.pt3 { transform-origin:36px 124px; animation:rot .22s linear infinite reverse; }
-.pt4 { transform-origin:124px 124px; animation:rot .22s linear infinite; }
-
-/* LOGO */
-.logo-wrap { text-align:center; margin-bottom:18px; }
-.logo-main {
-  font-family:'Orbitron',sans-serif; font-weight:900;
-  font-size: clamp(16px,3.5vw,26px); letter-spacing:.16em;
-  color: var(--green);
-  text-shadow: 0 0 30px rgba(0,255,136,0.55), 0 0 70px rgba(0,255,136,0.15);
-  animation: lg 3s ease-in-out infinite;
-}
-@keyframes lg {
-  0%,100%{ text-shadow:0 0 30px rgba(0,255,136,0.55), 0 0 70px rgba(0,255,136,0.15); }
-  50%{ text-shadow:0 0 50px rgba(0,255,136,0.9), 0 0 110px rgba(0,255,136,0.28); }
-}
-.logo-sub {
-  font-family:'Orbitron',sans-serif; font-size:7.5px; letter-spacing:.38em;
-  color: rgba(0,170,255,0.65); display:block; margin-top:7px;
+/* ── Status ─────────────────────────────────────────────── */
+.status-area { width: 100%; }
+.status-msg {
+  font-size: 13px; color: rgba(16,196,122,.75);
+  text-align: center; min-height: 20px;
+  margin-bottom: 14px;
+  letter-spacing: .02em;
+  transition: opacity .3s;
 }
 
-/* STATUS */
-.status-wrap { text-align:center; width:330px; max-width:92vw; }
-.status-text {
-  font-family:'JetBrains Mono',monospace;
-  font-size:11px; letter-spacing:.1em;
-  color: rgba(0,255,136,0.72); min-height:18px;
-  margin-bottom:14px;
+/* Progress bar */
+.bar-track {
+  width: 100%; height: 3px;
+  background: rgba(255,255,255,.05);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, var(--g), #5af5c4);
+  transition: width .4s cubic-bezier(.4,0,.2,1);
+  position: relative;
+}
+.bar-fill::after {
+  content: '';
+  position: absolute; right: 0; top: 0; bottom: 0; width: 24px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.5));
+  border-radius: 3px;
 }
 
-/* PROGRESS */
-.prog-outer {
-  width:100%; height:3px; background:rgba(255,255,255,0.04);
-  border-radius:3px; overflow:visible; position:relative; margin-bottom:10px;
+/* Ping metric */
+.ping-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 14px; font-size: 11px; color: var(--dim);
+  font-family: 'Orbitron', sans-serif; letter-spacing: .05em;
 }
-.prog-fill {
-  height:100%; width:0%; border-radius:3px;
-  background: linear-gradient(90deg, var(--green), var(--cyan), var(--blue));
-  background-size:200% 100%;
-  animation: progShimmer 2s linear infinite;
-  transition: width .45s cubic-bezier(.4,0,.2,1);
-  position:relative;
+.ping-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(255,255,255,.15);
+  transition: background .3s, box-shadow .3s;
 }
-.prog-fill::after {
-  content:''; position:absolute; right:-10px; top:-4px; bottom:-4px; width:20px;
-  background: linear-gradient(90deg, transparent, rgba(0,255,136,0.9));
-  border-radius:3px; filter:blur(4px);
+.ping-dot.alive {
+  background: var(--g);
+  box-shadow: 0 0 8px rgba(16,196,122,.6);
 }
-@keyframes progShimmer { 0%{background-position:0%} 100%{background-position:200%} }
 
-/* BOOT LOG */
-.boot-log {
-  width:100%; font-family:'JetBrains Mono',monospace;
-  font-size:8.5px; letter-spacing:.04em;
-  color:rgba(0,255,136,0.28); text-align:left;
-  height:44px; overflow:hidden; position:relative; margin-top:6px;
+/* ── Version tag ─────────────────────────────────────────── */
+.ver-tag {
+  font-size: 10px; letter-spacing: .12em;
+  color: rgba(255,255,255,.12);
+  font-family: 'Orbitron', sans-serif;
 }
-.boot-log::before {
-  content:''; position:absolute; top:0; left:0; right:0; height:16px;
-  background:linear-gradient(180deg, var(--bg), transparent); z-index:1;
-}
-.log-line { display:block; line-height:1.85; animation:la .18s ease both; }
-.log-line.ok   { color:rgba(0,255,136,0.5); }
-.log-line.info { color:rgba(0,170,255,0.4); }
-.log-line.warn { color:rgba(255,183,0,0.4); }
-@keyframes la { from{opacity:0;transform:translateX(-5px)} to{opacity:1;transform:none} }
-
-/* METRICS */
-.metrics-row {
-  display:flex; gap:16px; margin-top:22px;
-}
-.metric {
-  text-align:center; padding:8px 16px;
-  border:1px solid rgba(0,255,136,0.1); border-radius:6px;
-  background:rgba(0,255,136,0.025);
-  transition: border-color .3s;
-}
-.metric:hover { border-color:rgba(0,255,136,0.25); }
-.mv { display:block; font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700;
-  color:var(--green); line-height:1; }
-.ml { display:block; font-family:'Orbitron',sans-serif; font-size:6px; letter-spacing:.2em;
-  color:rgba(0,255,136,0.38); margin-top:4px; }
 </style>
 </head>
 <body>
 
-<div class="orb orb-g"></div>
-<div class="orb orb-b"></div>
+<div class="shell">
+  <div class="card">
 
-<!-- HUD corners -->
-<div class="hc hc-tl"></div>
-<div class="hc hc-tr"></div>
-<div class="hc hc-bl"></div>
-<div class="hc hc-br"></div>
-<div class="hud-tl" id="hudTL">SYS · BOOT</div>
-<div class="hud-tr" id="hudTR">RENDER.COM · COLD START</div>
-<div class="hud-bl" id="hudBL">FPVCTL v5.0 ▶ INIT</div>
-<div class="hud-br">POWERED BY RENDER · OBIX LAB 🇹🇭</div>
-
-<div class="main">
-
-  <div class="logo-wrap">
-    <div class="logo-main">OBIX<span style="color:var(--blue);">CONFIG</span> DOCTOR</div>
-    <span class="logo-sub">FPV TUNING TOOLKIT · v5.0 FULL</span>
-  </div>
-
-  <!-- Drone radar spinner -->
-  <div class="drone-wrap">
-    <div class="ring-outer"></div>
-    <div class="ring-mid"></div>
-    <div class="radar"></div>
-    <div class="blip b1"></div>
-    <div class="blip b2"></div>
-    <div class="blip b3"></div>
-    <div class="dc">
-      <svg class="dsv" width="145" height="145" viewBox="0 0 160 160">
+    <!-- Drone icon -->
+    <div class="drone-icon">
+      <div class="drone-ring"></div>
+      <svg width="96" height="96" viewBox="0 0 96 96" fill="none">
         <!-- Arms -->
-        <line x1="80" y1="80" x2="36" y2="36" stroke="rgba(0,170,255,0.5)" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="80" y1="80" x2="124" y2="36" stroke="rgba(0,170,255,0.5)" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="80" y1="80" x2="36" y2="124" stroke="rgba(0,170,255,0.5)" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="80" y1="80" x2="124" y2="124" stroke="rgba(0,170,255,0.5)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="48" y1="48" x2="22" y2="22" stroke="rgba(16,196,122,.5)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="48" y1="48" x2="74" y2="22" stroke="rgba(16,196,122,.5)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="48" y1="48" x2="22" y2="74" stroke="rgba(16,196,122,.5)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="48" y1="48" x2="74" y2="74" stroke="rgba(16,196,122,.5)" stroke-width="2" stroke-linecap="round"/>
         <!-- FC body -->
-        <rect x="65" y="65" width="30" height="30" rx="5" fill="rgba(0,170,255,0.1)" stroke="rgba(0,170,255,0.5)" stroke-width="1.5"/>
-        <text x="80" y="84" text-anchor="middle" font-family="Orbitron" font-size="6.5" fill="rgba(0,255,136,0.9)">FC</text>
-        <!-- Motors + spinning props -->
-        <circle cx="36" cy="36" r="16" fill="rgba(0,255,136,0.04)" stroke="rgba(0,255,136,0.45)" stroke-width="1.5"/>
-        <g class="pt1">
-          <ellipse cx="36" cy="36" rx="13" ry="3.5" fill="none" stroke="rgba(0,255,136,0.65)" stroke-width="2" stroke-linecap="round"/>
-        </g>
-        <circle cx="124" cy="36" r="16" fill="rgba(0,255,136,0.04)" stroke="rgba(0,255,136,0.45)" stroke-width="1.5"/>
-        <g class="pt2">
-          <ellipse cx="124" cy="36" rx="13" ry="3.5" fill="none" stroke="rgba(0,255,136,0.65)" stroke-width="2" stroke-linecap="round"/>
-        </g>
-        <circle cx="36" cy="124" r="16" fill="rgba(0,255,136,0.04)" stroke="rgba(0,255,136,0.45)" stroke-width="1.5"/>
-        <g class="pt3">
-          <ellipse cx="36" cy="124" rx="13" ry="3.5" fill="none" stroke="rgba(0,255,136,0.65)" stroke-width="2" stroke-linecap="round"/>
-        </g>
-        <circle cx="124" cy="124" r="16" fill="rgba(0,255,136,0.04)" stroke="rgba(0,255,136,0.45)" stroke-width="1.5"/>
-        <g class="pt4">
-          <ellipse cx="124" cy="124" rx="13" ry="3.5" fill="none" stroke="rgba(0,255,136,0.65)" stroke-width="2" stroke-linecap="round"/>
-        </g>
-        <!-- Center pulse -->
-        <circle cx="80" cy="80" r="3.5" fill="var(--green)" opacity="0.85">
-          <animate attributeName="r" values="3.5;5.5;3.5" dur="2s" repeatCount="indefinite"/>
-          <animate attributeName="opacity" values="0.85;0.35;0.85" dur="2s" repeatCount="indefinite"/>
+        <rect x="38" y="38" width="20" height="20" rx="4"
+              fill="rgba(16,196,122,.1)" stroke="rgba(16,196,122,.6)" stroke-width="1.5"/>
+        <circle cx="48" cy="48" r="2.5" fill="rgba(16,196,122,.9)">
+          <animate attributeName="opacity" values="1;.3;1" dur="2s" repeatCount="indefinite"/>
         </circle>
+        <!-- Motor circles -->
+        <circle cx="22" cy="22" r="11" fill="rgba(16,196,122,.06)" stroke="rgba(16,196,122,.4)" stroke-width="1.5"/>
+        <ellipse cx="22" cy="22" rx="9" ry="2.5" fill="none" stroke="rgba(16,196,122,.6)" stroke-width="1.5">
+          <animateTransform attributeName="transform" type="rotate" from="0 22 22" to="360 22 22" dur=".4s" repeatCount="indefinite"/>
+        </ellipse>
+        <circle cx="74" cy="22" r="11" fill="rgba(16,196,122,.06)" stroke="rgba(16,196,122,.4)" stroke-width="1.5"/>
+        <ellipse cx="74" cy="22" rx="9" ry="2.5" fill="none" stroke="rgba(16,196,122,.6)" stroke-width="1.5">
+          <animateTransform attributeName="transform" type="rotate" from="360 74 22" to="0 74 22" dur=".4s" repeatCount="indefinite"/>
+        </ellipse>
+        <circle cx="22" cy="74" r="11" fill="rgba(16,196,122,.06)" stroke="rgba(16,196,122,.4)" stroke-width="1.5"/>
+        <ellipse cx="22" cy="74" rx="9" ry="2.5" fill="none" stroke="rgba(16,196,122,.6)" stroke-width="1.5">
+          <animateTransform attributeName="transform" type="rotate" from="360 22 74" to="0 22 74" dur=".4s" repeatCount="indefinite"/>
+        </ellipse>
+        <circle cx="74" cy="74" r="11" fill="rgba(16,196,122,.06)" stroke="rgba(16,196,122,.4)" stroke-width="1.5"/>
+        <ellipse cx="74" cy="74" rx="9" ry="2.5" fill="none" stroke="rgba(16,196,122,.6)" stroke-width="1.5">
+          <animateTransform attributeName="transform" type="rotate" from="0 74 74" to="360 74 74" dur=".4s" repeatCount="indefinite"/>
+        </ellipse>
       </svg>
     </div>
-  </div>
 
-  <div class="status-wrap">
-    <div class="status-text" id="statusText">กำลังปลุกระบบ...</div>
-    <div class="prog-outer">
-      <div class="prog-fill" id="progFill"></div>
+    <!-- Brand -->
+    <div class="brand-wrap">
+      <div class="brand-name">OBIX<em>CONFIG</em> DOCTOR</div>
+      <span class="brand-sub">FPV Tuning Toolkit · v5.2</span>
     </div>
-    <div class="boot-log" id="bootLog"></div>
-  </div>
 
-  <div class="metrics-row">
-    <div class="metric"><span class="mv" id="pingMs">—</span><span class="ml">PING</span></div>
-    <div class="metric"><span class="mv" id="attNum">1</span><span class="ml">ATTEMPT</span></div>
-    <div class="metric"><span class="mv" id="elapsed">0s</span><span class="ml">ELAPSED</span></div>
-  </div>
+    <!-- Status -->
+    <div class="status-area">
+      <div class="status-msg" id="statusMsg">กำลังเชื่อมต่อ...</div>
+      <div class="bar-track">
+        <div class="bar-fill" id="barFill"></div>
+      </div>
+      <div style="text-align:center">
+        <span class="ping-badge">
+          <span class="ping-dot" id="pingDot"></span>
+          <span id="pingLabel">รอการตอบสนอง</span>
+        </span>
+      </div>
+    </div>
 
+    <span class="ver-tag">OBIXCONFIG LAB 🇹🇭</span>
+
+  </div>
 </div>
 
 <script>
-const steps = [
-  { text:"กำลังปลุก Physics Engine v5...",      pct:8,  cls:"info", log:"[INIT] Physics engine v5.0 loading..." },
-  { text:"กำลังเชื่อมต่อเซิร์ฟเวอร์...",         pct:18, cls:"info", log:"[NET]  Connecting to Render.com..." },
-  { text:"กำลังโหลด Rule Engine...",               pct:30, cls:"ok",   log:"[OK]   Rule engine: 47 rules loaded" },
-  { text:"กำลังโหลด Preset Library...",            pct:43, cls:"ok",   log:"[OK]   Presets: 10 classes · 5 styles" },
-  { text:"กำลังตรวจสอบ PID Database...",           pct:55, cls:"ok",   log:"[OK]   PID DB: BF4.3/4.4/4.5" },
-  { text:"กำลังเตรียม Filter Calculator...",       pct:67, cls:"ok",   log:"[OK]   RPM filter calc active" },
-  { text:"กำลังเตรียม Analyzer Tools...",          pct:79, cls:"info", log:"[INIT] 22 tools · CLI · Blackbox" },
-  { text:"กำลัง handshake backend...",             pct:90, cls:"warn", log:"[WAIT] Awaiting server response..." },
-  { text:"ใกล้เสร็จแล้ว...",                       pct:96, cls:"ok",   log:"[PING] Server check in progress..." },
-];
+(function () {
+  'use strict';
 
-let si = 0, att = 1;
-const t0 = Date.now();
-const logEl = document.getElementById('bootLog');
-const logLines = [];
+  var fill    = document.getElementById('barFill');
+  var msg     = document.getElementById('statusMsg');
+  var dot     = document.getElementById('pingDot');
+  var label   = document.getElementById('pingLabel');
+  var attempt = 0;
 
-function addLog(text, cls) {
-  const el = document.createElement('span');
-  el.className = 'log-line ' + (cls||'');
-  el.textContent = text;
-  logEl.appendChild(el);
-  logLines.push(el);
-  if (logLines.length > 4) { logLines[0].remove(); logLines.shift(); }
-}
+  var steps = [
+    { pct: 15, text: 'กำลังปลุกเซิร์ฟเวอร์...' },
+    { pct: 35, text: 'โหลด Rule Engine...' },
+    { pct: 55, text: 'โหลด Preset Library...' },
+    { pct: 72, text: 'เตรียม Analyzer Tools...' },
+    { pct: 88, text: 'รอการตอบสนอง...' },
+  ];
+  var si = 0;
 
-function setProg(pct) {
-  document.getElementById('progFill').style.width = pct + '%';
-}
+  var stepTimer = setInterval(function () {
+    if (si >= steps.length) return;
+    var s = steps[si++];
+    fill.style.width = s.pct + '%';
+    msg.textContent  = s.text;
+  }, 900);
 
-const stepTimer = setInterval(() => {
-  if (si >= steps.length) { si = steps.length - 1; return; }
-  const s = steps[si++];
-  document.getElementById('statusText').textContent = s.text;
-  setProg(s.pct);
-  addLog(s.log, s.cls);
-}, 1000);
+  function ping() {
+    attempt++;
+    var t0 = Date.now();
+    fetch('/ping', { cache: 'no-store' })
+      .then(function (res) {
+        var ms = Date.now() - t0;
+        if (res.ok) {
+          clearInterval(stepTimer);
+          fill.style.width = '100%';
+          msg.textContent  = '✓ พร้อมแล้ว — กำลังเข้า...';
+          dot.classList.add('alive');
+          label.textContent = ms + 'ms';
+          setTimeout(function () {
+            window.location.replace('/landing');
+          }, 500);
+        } else {
+          label.textContent = 'retry #' + attempt;
+        }
+      })
+      .catch(function () {
+        label.textContent = 'retry #' + attempt;
+      });
+  }
 
-setInterval(() => {
-  const elapsed = Math.round((Date.now() - t0) / 1000);
-  document.getElementById('elapsed').textContent = elapsed + 's';
-  document.getElementById('attNum').textContent = att;
-  document.getElementById('hudBL').textContent = 'FPVCTL v5.0 ▶ ATTEMPT #' + att + ' · ' + elapsed + 's';
-}, 500);
-
-function checkBackend() {
-  const pt = Date.now();
-  fetch("/ping", { cache:"no-store" })
-    .then(res => {
-      const ping = Date.now() - pt;
-      document.getElementById('pingMs').textContent = ping + 'ms';
-      if (res.ok) {
-        addLog('[OK]   Server alive · ping ' + ping + 'ms · redirecting...', 'ok');
-        setProg(100);
-        document.getElementById('statusText').textContent = '✓ พร้อมแล้ว — เข้าสู่ระบบ...';
-        clearInterval(stepTimer);
-        setTimeout(() => window.location.replace("/app"), 600);
-      } else { att++; addLog('[ERR]  HTTP ' + res.status + ' · retry #' + att, 'warn'); }
-    })
-    .catch(() => { att++; addLog('[WAIT] No response · retry #' + att, 'warn'); });
-}
-
-setInterval(checkBackend, 1500);
-checkBackend();
+  ping();
+  var retryTimer = setInterval(ping, 1800);
+}());
 </script>
 </body>
 </html>
