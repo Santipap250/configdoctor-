@@ -112,24 +112,28 @@ body.lang-en .on-en { display: inline }
 
 /* ── OVERLAY ─────────────────────────────────────────────── */
 .on-overlay {
-  position: fixed; inset: 0; z-index: 600;
+  position: fixed; inset: 0; z-index: 650;
   background: rgba(0,0,0,.72);
-  backdrop-filter: blur(3px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   opacity: 0; pointer-events: none;
   transition: opacity .22s;
+  touch-action: none;
 }
 .on-overlay.on-open { opacity: 1; pointer-events: all; }
 
 /* ── DRAWER ──────────────────────────────────────────────── */
 .on-drawer {
   position: fixed; left: 0; top: 0; bottom: 0; z-index: 700;
-  width: 288px;
+  width: min(300px, calc(100vw - 48px));
   background: #04090e;
   border-right: 1px solid rgba(255,255,255,.06);
   display: flex; flex-direction: column;
   transform: translateX(-100%);
   transition: transform .26s cubic-bezier(.4,0,.2,1);
   font-family: 'Sarabun', sans-serif;
+  will-change: transform;
+  -webkit-overflow-scrolling: touch;
 }
 .on-drawer.on-open { transform: translateX(0); box-shadow: 8px 0 40px rgba(0,0,0,.7); }
 
@@ -841,6 +845,62 @@ body.light .on-dfoot-ver       { color: #059669; }
   });
 
   /* Expose for external use */
+  window.onNavClose = closeDrawer;
+  window.onNavOpen  = openDrawer;
+
+  /* ── SWIPE TO CLOSE (touch) ──────────────────────────── */
+  var touchStartX = 0;
+  var touchStartY = 0;
+  var SWIPE_THRESHOLD = 60;
+
+  if (drawer) {
+    drawer.addEventListener('touchstart', function(e) {
+      touchStartX = e.changedTouches[0].clientX;
+      touchStartY = e.changedTouches[0].clientY;
+    }, { passive: true });
+
+    drawer.addEventListener('touchend', function(e) {
+      var dx = e.changedTouches[0].clientX - touchStartX;
+      var dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+      // Swipe left > 60px and not a vertical scroll
+      if (dx < -SWIPE_THRESHOLD && dy < 80) {
+        closeDrawer();
+      }
+    }, { passive: true });
+  }
+
+  /* ── DRAG INDICATOR (rubber-band feel) ───────────────── */
+  if (drawer) {
+    var dragging = false;
+    var dragStartX = 0;
+    drawer.addEventListener('touchmove', function(e) {
+      var dx = e.changedTouches[0].clientX - touchStartX;
+      if (dx < 0) {
+        var resist = Math.min(Math.abs(dx) * 0.35, 40);
+        drawer.style.transform = 'translateX(-' + resist + 'px)';
+        drawer.style.transition = 'none';
+      }
+    }, { passive: true });
+    drawer.addEventListener('touchend', function() {
+      drawer.style.transform = '';
+      drawer.style.transition = '';
+    }, { passive: true });
+  }
+
+  /* ── PREVENT BODY SCROLL WHEN DRAWER OPEN ────────────── */
+  function lockScroll()   { document.body.style.overflow = 'hidden'; }
+  function unlockScroll() { document.body.style.overflow = ''; }
+
+  var origOpen  = openDrawer;
+  var origClose = closeDrawer;
+  openDrawer = function() { origOpen(); if (window.innerWidth < 900) lockScroll(); };
+  closeDrawer = function() { origClose(); unlockScroll(); };
+  // Re-bind
+  ham     && ham.addEventListener('click', function() {});  // already bound above
+  overlay && overlay.removeEventListener('click', origClose);
+  overlay && overlay.addEventListener('click', closeDrawer);
+  closeBtn && closeBtn.removeEventListener('click', origClose);
+  closeBtn && closeBtn.addEventListener('click', closeDrawer);
   window.onNavClose = closeDrawer;
   window.onNavOpen  = openDrawer;
 
