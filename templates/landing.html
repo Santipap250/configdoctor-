@@ -891,7 +891,8 @@ section { padding:90px 24px; position:relative; z-index:2; }
 .like-msg { font-size:.82rem; color:rgba(255,255,255,.4); min-height:20px; }
 .stars-row { display:flex; gap:6px; justify-content:center; }
 .star-btn { background:none; border:none; font-size:1.5rem; cursor:pointer; opacity:.35; transition:all .18s; padding:4px; }
-.star-btn:hover,.star-btn.hovered,.star-btn.filled { opacity:1; transform:scale(1.15); filter:drop-shadow(0 0 4px var(--gold)); }
+.star-btn:hover,.star-btn.hovered,.star-btn.hover-fill { filter: brightness(1.3); }
+.star-btn.filled { opacity:1; transform:scale(1.15); filter:drop-shadow(0 0 4px var(--gold)); }
 .star-btn.rated { cursor:default; transform:none; }
 .rating-display { font-family:var(--font-d); font-size:.7rem; color:rgba(255,255,255,.4); letter-spacing:.08em; }
 
@@ -2079,137 +2080,226 @@ footer {
 <!-- ═══════════════════════════════════════
      FIREBASE + LIKE/RATING
      ═══════════════════════════════════════ -->
-<script type="module">
-/*
-  Firebase Realtime Database — Like & Rating
-  Setup: ดูคำแนะนำในส่วน firebaseConfig ด้านล่าง
+<script>
+/* ════════════════════════════════════════════════════════════
+   RATING & LIKE — OBIXConfig Doctor v5.2
+   Backend: Flask /api/rating (GET/POST) + /api/like (POST)
+   Storage: SQLite on server (persistent across restarts)
+   IP-guard: ป้องกัน vote ซ้ำ per IP (server-side)
+   Local-state: localStorage ป้องกัน UI ซ้ำฝั่ง client
+   ════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
 
-  1. ไปที่ https://console.firebase.google.com
-  2. สร้าง project ใหม่
-  3. เปิด Realtime Database
-  4. ตั้ง rules ให้ปลอดภัย (PATCH: อย่าใช้ .read/.write = true ใน production!):
-     ตัวอย่าง rules ที่ปลอดภัย:
-     { "rules": { "configdoctor": { "likes": { ".read": true, ".write": true }, "ratings": { ".read": true, ".write": true } }, "$other": { ".read": false, ".write": false } } }
-  5. Copy firebaseConfig แล้วแทนที่ค่าด้านล่างนี้
-*/
-import { initializeApp }           from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getDatabase, ref, onValue,
-         runTransaction, set, get } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+  const LS_LIKED  = 'cd_liked_v2';
+  const LS_RATED  = 'cd_rated_v2';
+  const CSRF_META = document.querySelector('meta[name="csrf-token"]');
 
-const firebaseConfig = {
-  apiKey:            "YOUR_API_KEY",
-  authDomain:        "obixconfig-dt.firebaseapp.com",
-  databaseURL:       "https://obixconfig-dt-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:         "obixconfig-dt",
-  storageBucket:     "obixconfig-dt.firebasestorage.app",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId:             "YOUR_APP_ID"
-};
-
-const LS_LIKED  = 'configdoctor_liked_v1';
-const LS_RATED  = 'configdoctor_rated_v1';
-const LS_LCOUNT = 'configdoctor_lcount_v1';
-
-const IS_CONFIGURED = !firebaseConfig.apiKey.startsWith('YOUR_');
-
-let db=null,likeRef=null,ratingRef=null;
-let isLiked   = localStorage.getItem(LS_LIKED) === '1';
-let userRating= parseInt(localStorage.getItem(LS_RATED) || '0');
-
-(async function init() {
-  if (isLiked) setLikedUI();
-  if (userRating > 0) setStarsUI(userRating, true);
-  if (!IS_CONFIGURED) {
-    setLikeCount(parseInt(localStorage.getItem(LS_LCOUNT) || '0'));
-    setRatingDisplay(null, null); return;
+  /* ── helpers ── */
+  function csrfHeaders() {
+    const h = { 'Content-Type': 'application/json' };
+    if (CSRF_META) h['X-CSRFToken'] = CSRF_META.content;
+    else {
+      const m = document.cookie.match(/csrf_token=([^;]+)/);
+      if (m) h['X-CSRFToken'] = m[1];
+    }
+    return h;
   }
-  try {
-    const app = initializeApp(firebaseConfig);
-    db = getDatabase(app);
-    likeRef   = ref(db, 'configdoctor/likes');
-    ratingRef = ref(db, 'configdoctor/ratings');
-    onValue(likeRef, snap => { const v=snap.val(); setLikeCount(typeof v==='number'?v:0); });
-    onValue(ratingRef, snap => {
-      const d=snap.val();
-      if (d && d.count>0) setRatingDisplay((d.total/d.count).toFixed(1), d.count);
-      else setRatingDisplay(null, null);
+
+  function showToast(msg, dur) {
+    const t = document.getElementById('loveToast');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._to);
+    t._to = setTimeout(() => t.classList.remove('show'), dur || 3000);
+  }
+
+  function isLangEN() {
+    return document.body.classList.contains('lang-en');
+  }
+
+  /* ── LOAD STATS on page open ── */
+  function loadStats() {
+    fetch('/api/rating')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d) return;
+        setRatingDisplay(
+          d.count > 0 ? parseFloat(d.avg).toFixed(1) : null,
+          d.count > 0 ? d.count : null
+        );
+        setLikeCount(d.likes || 0);
+      })
+      .catch(() => {/* offline — silent */});
+  }
+
+  /* ── LIKE ── */
+  window.handleLike = function () {
+    const btn = document.getElementById('likeBtn');
+    if (!btn || btn.disabled) return;
+
+    /* Already liked this session? show friendly message */
+    if (localStorage.getItem(LS_LIKED) === '1') {
+      showToast(isLangEN() ? '❤️ Already liked — thank you!' : '❤️ คุณถูกใจแล้ว ขอบคุณมากๆ!');
+      triggerPop();
+      return;
+    }
+
+    btn.disabled = true;
+
+    fetch('/api/like', {
+      method: 'POST',
+      headers: csrfHeaders(),
+      body: JSON.stringify({})
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.ok) {
+        localStorage.setItem(LS_LIKED, '1');
+        setLikedUI();
+        setLikeCount(d.likes);
+        triggerPop();
+        showToast(isLangEN() ? '❤️ Thank you for the love!' : '❤️ ขอบคุณมากๆ ที่ถูกใจ!');
+      } else if (d.error === 'already_liked') {
+        /* server says already voted from this IP */
+        localStorage.setItem(LS_LIKED, '1');
+        setLikedUI();
+        showToast(isLangEN() ? '❤️ Already counted — thank you!' : '❤️ นับแล้ว ขอบคุณ!');
+        btn.disabled = false;
+      } else {
+        btn.disabled = false;
+        showToast('⚠️ ' + (d.error || 'ไม่สามารถบันทึกได้ กรุณาลองใหม่'));
+      }
+    })
+    .catch(() => {
+      btn.disabled = false;
+      showToast(isLangEN() ? '⚠️ Network error' : '⚠️ เชื่อมต่อไม่ได้ กรุณาลองใหม่');
     });
-    const snap = await get(likeRef);   if (snap.val()===null) await set(likeRef,0);
-    const rs   = await get(ratingRef); if (rs.val()===null)   await set(ratingRef,{total:0,count:0});
-  } catch(e) {
-    console.warn('Firebase init failed', e);
-    setLikeCount(parseInt(localStorage.getItem(LS_LCOUNT)||'0'));
+  };
+
+  /* ── RATE ── */
+  window.handleRate = function (star) {
+    star = parseInt(star);
+    if (isNaN(star) || star < 1 || star > 5) return;
+
+    /* Already rated this session? */
+    const prev = parseInt(localStorage.getItem(LS_RATED) || '0');
+    if (prev > 0) {
+      showToast(isLangEN()
+        ? `⭐ You already gave ${prev} star${prev > 1 ? 's' : ''} — thank you!`
+        : `⭐ คุณให้ ${prev} ดาวแล้ว ขอบคุณ!`);
+      return;
+    }
+
+    /* Optimistic UI */
+    setStarsUI(star, false);
+    const popEl = document.querySelector(`.star-btn[data-star="${star}"]`);
+    if (popEl) { popEl.classList.add('pop'); setTimeout(() => popEl.classList.remove('pop'), 400); }
+
+    fetch('/api/rating', {
+      method: 'POST',
+      headers: csrfHeaders(),
+      body: JSON.stringify({ stars: star })
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.ok) {
+        localStorage.setItem(LS_RATED, String(star));
+        setStarsUI(star, true);  /* lock stars */
+        setRatingDisplay(
+          parseFloat(d.avg).toFixed(1),
+          d.count
+        );
+        const emojis = ['😐','👍','👍👍','🔥','🔥🔥'];
+        showToast(`${emojis[star-1]} ${isLangEN()
+          ? 'Thank you for ' + star + ' star' + (star>1?'s':'') + '!'
+          : 'ขอบคุณที่ให้ ' + star + ' ดาว!'}`);
+      } else if (d.error === 'already_rated') {
+        localStorage.setItem(LS_RATED, String(star));
+        setStarsUI(star, true);
+        showToast(isLangEN() ? '⭐ Already counted — thank you!' : '⭐ นับแล้ว ขอบคุณ!');
+      } else {
+        /* revert optimistic */
+        setStarsUI(0, false);
+        showToast('⚠️ ' + (d.error || 'ไม่สามารถบันทึกได้'));
+      }
+    })
+    .catch(() => {
+      setStarsUI(0, false);
+      showToast(isLangEN() ? '⚠️ Network error' : '⚠️ เชื่อมต่อไม่ได้ กรุณาลองใหม่');
+    });
+  };
+
+  /* ── STAR HOVER ── */
+  document.querySelectorAll('.star-btn').forEach(btn => {
+    btn.addEventListener('mouseenter', function () {
+      if (parseInt(localStorage.getItem(LS_RATED) || '0') > 0) return;
+      const s = parseInt(this.dataset.star);
+      document.querySelectorAll('.star-btn').forEach(b => {
+        b.classList.toggle('hover-fill', parseInt(b.dataset.star) <= s);
+      });
+    });
+    btn.addEventListener('mouseleave', function () {
+      document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('hover-fill'));
+    });
+  });
+
+  /* ── UI helpers ── */
+  function setLikeCount(n) {
+    const el = document.getElementById('likeCount');
+    if (!el) return;
+    const disp = n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(n);
+    const prev = el.textContent;
+    el.textContent = disp;
+    if (prev !== '—' && prev !== disp) {
+      el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
+    }
   }
+
+  function setLikedUI() {
+    const btn   = document.getElementById('likeBtn');
+    const heart = document.getElementById('likeHeart');
+    const msg   = document.getElementById('likeMsg');
+    if (btn)   btn.classList.add('liked');
+    if (heart) heart.textContent = '❤️';
+    if (msg)   msg.innerHTML =
+      '<span class="i18n-th">ขอบคุณที่ถูกใจ 💚</span>' +
+      '<span class="i18n-en">Thank you 💚</span>';
+  }
+
+  function setRatingDisplay(avg, count) {
+    const ae = document.getElementById('ratingAvg');
+    const ce = document.getElementById('ratingCount');
+    if (ae) ae.textContent = avg  !== null ? avg   : '—';
+    if (ce) ce.textContent = count !== null ? count : '—';
+  }
+
+  function setStarsUI(star, locked) {
+    document.querySelectorAll('.star-btn').forEach(b => {
+      const s = parseInt(b.dataset.star);
+      b.classList.toggle('filled', s <= star);
+      b.classList.toggle('rated',  locked);
+      if (locked) b.disabled = true;
+    });
+  }
+
+  function triggerPop() {
+    const btn = document.getElementById('likeBtn'); if (!btn) return;
+    btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop');
+    setTimeout(() => btn.classList.remove('pop'), 500);
+  }
+
+  /* ── RESTORE LOCAL STATE ── */
+  const savedLiked = localStorage.getItem(LS_LIKED) === '1';
+  const savedRated = parseInt(localStorage.getItem(LS_RATED) || '0');
+  if (savedLiked) setLikedUI();
+  if (savedRated > 0) setStarsUI(savedRated, true);
+
+  /* ── INIT ── */
+  loadStats();
+
 })();
-
-window.handleLike = async function() {
-  const btn = document.getElementById('likeBtn');
-  if (btn.disabled) return;
-  if (isLiked) { showToast('❤️ คุณถูกใจแล้ว!'); triggerPop(); return; }
-  isLiked = true; localStorage.setItem(LS_LIKED,'1'); setLikedUI(); triggerPop();
-  if (IS_CONFIGURED && db) {
-    try { await runTransaction(likeRef, c=>(c||0)+1); }
-    catch(e) { bumpLocalCount(); }
-  } else { bumpLocalCount(); }
-  showToast(document.body.classList.contains('lang-en') ? '❤️ Thank you!' : '❤️ ขอบคุณมากๆ!');
-};
-
-window.handleRate = async function(star) {
-  if (userRating>0) { showToast('⭐ คุณให้คะแนนแล้ว'); return; }
-  userRating=star; localStorage.setItem(LS_RATED,String(star)); setStarsUI(star,true);
-  const el=document.querySelector(`.star-btn[data-star="${star}"]`);
-  if(el){el.classList.add('pop');setTimeout(()=>el.classList.remove('pop'),400);}
-  if (IS_CONFIGURED && db) {
-    try { await runTransaction(ratingRef, d=>{const r=d||{total:0,count:0};return{total:r.total+star,count:r.count+1};}); }
-    catch(e) {}
-  }
-  const msg=['😐','👍','👍👍','🔥','🔥🔥'][star-1];
-  showToast(`${msg} ขอบคุณที่ให้ ${star} ดาว!`);
-};
-
-function setLikeCount(n) {
-  const el=document.getElementById('likeCount'); if(!el) return;
-  const prev=el.textContent; el.textContent=n>=1000?(n/1000).toFixed(1)+'k':String(n);
-  if(prev!=='—'&&prev!==el.textContent){el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');}
-}
-function setLikedUI() {
-  const btn=document.getElementById('likeBtn'),heart=document.getElementById('likeHeart'),msg=document.getElementById('likeMsg');
-  if(btn)btn.classList.add('liked'); if(heart)heart.textContent='❤️';
-  if(msg)msg.innerHTML='<span class="i18n-th">ขอบคุณที่ถูกใจ 💚</span><span class="i18n-en">Thank you 💚</span>';
-}
-function setRatingDisplay(avg,count) {
-  const ae=document.getElementById('ratingAvg'),ce=document.getElementById('ratingCount');
-  if(ae)ae.textContent=avg!==null?avg:'—'; if(ce)ce.textContent=count!==null?count:'—';
-}
-function setStarsUI(star,rated) {
-  document.querySelectorAll('.star-btn').forEach(b=>{
-    const s=parseInt(b.dataset.star);
-    b.classList.toggle('filled',s<=star); b.classList.toggle('rated',rated);
-    if(rated)b.disabled=true;
-  });
-}
-function triggerPop() {
-  const btn=document.getElementById('likeBtn'); if(!btn)return;
-  btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop');
-  setTimeout(()=>btn.classList.remove('pop'),500);
-}
-function bumpLocalCount() {
-  const n=parseInt(localStorage.getItem(LS_LCOUNT)||'0')+1;
-  localStorage.setItem(LS_LCOUNT,String(n)); setLikeCount(n);
-}
-function showToast(msg) {
-  const t=document.getElementById('loveToast'); if(!t)return;
-  t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000);
-}
-
-document.querySelectorAll('.star-btn').forEach(btn=>{
-  btn.addEventListener('mouseenter',()=>{
-    if(userRating>0)return;
-    const s=parseInt(btn.dataset.star);
-    document.querySelectorAll('.star-btn').forEach(b=>b.classList.toggle('hovered',parseInt(b.dataset.star)<=s));
-  });
-  btn.addEventListener('mouseleave',()=>document.querySelectorAll('.star-btn').forEach(b=>b.classList.remove('hovered')));
-});
 </script>
 
 <!-- ═══ FOOTER ═══ -->
