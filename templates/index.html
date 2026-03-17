@@ -940,7 +940,7 @@ body.light .amb-orb { opacity:.25; }
     </nav>
   </div>
   <div class="tb-right">
-    <span class="tb-version">v5.1 FULL</span>
+    <span class="tb-version">v5.2 FULL</span>
     <button class="toggle-theme" onclick="toggleTheme()" title="สลับธีม">🌗</button>
   </div>
 </div>
@@ -950,7 +950,7 @@ body.light .amb-orb { opacity:.25; }
   <!-- ── TOOL DOCK ──────────────────────────────────────────── -->
   <div class="tool-dock" id="toolDock">
     <div class="dock-tabs" role="tablist" aria-label="หมวดหมู่เครื่องมือ">
-      <button class="dock-tab active" data-cat="all"     onclick="dockFilter(this,'all')"    aria-pressed="true"><span class="dock-tab-dot g"></span>ALL <span class="dock-tab-count">23</span></button>
+      <button class="dock-tab active" data-cat="all"     onclick="dockFilter(this,'all')"    aria-pressed="true"><span class="dock-tab-dot g"></span>ALL <span class="dock-tab-count">22</span></button>
       <button class="dock-tab"        data-cat="tune"    onclick="dockFilter(this,'tune')"   aria-pressed="false"><span class="dock-tab-dot p"></span>🩺 TUNE <span class="dock-tab-count">5</span></button>
       <button class="dock-tab"        data-cat="hw"      onclick="dockFilter(this,'hw')"     aria-pressed="false"><span class="dock-tab-dot g"></span>⚙️ HARDWARE <span class="dock-tab-count">5</span></button>
       <button class="dock-tab"        data-cat="data"    onclick="dockFilter(this,'data')"   aria-pressed="false"><span class="dock-tab-dot b"></span>📊 ANALYSIS <span class="dock-tab-count">4</span></button>
@@ -1314,7 +1314,7 @@ body.light .amb-orb { opacity:.25; }
         <div class="cli-box" id="quickCLIBox"># ══════════════════════════════════════════════════
 # 🚁 OBIXConfig Doctor v5.2 — BASE TUNE
 # {{ analysis.detected_class | default('Custom') | upper }} · {{ analysis.style | upper }}
-# Frame: {{ analysis.size or '5' }}" · Prop: {{ analysis.prop_size or '5' }}" {{ analysis.filter.anti_gravity or '—' }}
+# Frame: {{ analysis.size or '5' }}" · Prop: {{ analysis.prop_size or '5' }}"×{{ analysis.pitch or '4.0' }}p {{ request.form.get('blades','3') }}blade
 # Battery: {{ analysis.advanced.cells if analysis.advanced else '—' }}S · KV{{ analysis.motor_kv or '—' }}
 # ══════════════════════════════════════════════════
 # ─────────────── PID ───────────────────────────────
@@ -3252,7 +3252,7 @@ set vbat_pid_off  = 0</div>
           <button class="amt-btn">฿500</button>
         </div>
         <div class="qr-wrap">
-          <img src="{{ url_for('static', filename='img/promptpay-qr.png') }}" alt="PromptPay QR">
+          <img src="{{ url_for('static', filename='img/support-qr.png') }}" alt="PromptPay QR">
         </div>
       </div>
 
