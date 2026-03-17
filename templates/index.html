@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>OBIXConfig Doctor — Drone Analyzer v5</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 {% set og_title       = "Drone Analyzer — OBIXConfig Doctor" %}
 {% set og_description = "วิเคราะห์และแนะนำค่า PID · Filter · Motor สำหรับโดรน FPV — กรอกข้อมูลโดรนแล้วรับผลทันที" %}
 {% set og_url         = "https://configdoctor.onrender.com/app" %}
@@ -134,8 +134,10 @@ body::after {
 .top-bar {
   position:fixed; top:0; left:0; right:0; height:var(--nav-h); z-index:200;
   background:rgba(0,2,8,0.97); backdrop-filter:blur(28px) saturate(1.6);
+  -webkit-backdrop-filter:blur(28px) saturate(1.6);
   border-bottom:1.5px solid rgba(0,255,136,0.1);
-  display:flex; align-items:center; padding:0 20px;
+  display:flex; align-items:center; padding:0 clamp(10px,3vw,20px);
+  gap: clamp(6px,2vw,12px);
 }
 .top-bar::after {
   content:''; position:absolute; bottom:0; left:0; right:0; height:1.5px;
@@ -1162,6 +1164,258 @@ label {
   .qs-stats-6 { grid-template-columns:repeat(2,1fr) !important; }
   .pf-grid { grid-template-columns:1fr !important; }
   .biq-wrap { flex-direction:column; align-items:center; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE OVERHAUL — Mobile-First Typography & Navigation
+   Targets: top-bar · tool-dock · drawer · form · HUD · cards
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Global clamp-based type scale ───────────────────────── */
+:root {
+  --fz-xs:   clamp(9px,  2vw, 11px);
+  --fz-sm:   clamp(10px, 2.2vw, 12px);
+  --fz-base: clamp(12px, 2.5vw, 14px);
+  --fz-md:   clamp(13px, 2.8vw, 15px);
+  --fz-lg:   clamp(15px, 3.5vw, 20px);
+  --fz-hud:  clamp(18px, 4.5vw, 26px);
+  --touch:   44px;   /* minimum touch target */
+  --nav-h:   54px;
+}
+@media(max-width:480px) { :root { --nav-h: 50px; } }
+
+/* ── TOP BAR — hide quick-nav links on mobile ─────────────── */
+@media(max-width:900px) {
+  .tb-nav        { display: none !important; }
+  .tb-divider    { display: none !important; }
+  .tb-version    { font-size: 9px !important; padding: 4px 8px !important; }
+  .top-bar       { padding: 0 12px !important; gap: 8px !important; }
+}
+/* Make sure the OBIX hamburger nav renders above old top-bar on mobile */
+@media(max-width:900px) {
+  .on-bar { z-index: 600 !important; }
+}
+
+/* ── TOOL DOCK — mobile scroll + bigger touch targets ─────── */
+.dock-tabs {
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 2px;
+}
+.dock-tab {
+  scroll-snap-align: start;
+  font-size: clamp(8px, 1.8vw, 10px) !important;
+  padding: clamp(5px,1.5vw,7px) clamp(8px,2vw,14px) clamp(7px,2vw,9px) !important;
+  min-height: var(--touch);
+  display: flex !important; align-items: center !important;
+}
+.dock-tab-count { font-size: clamp(7px,1.6vw,9px) !important; }
+.dtool {
+  padding: clamp(6px,1.5vw,8px) clamp(10px,2vw,13px) !important;
+  min-height: clamp(36px,8vw,42px);
+}
+.dtool-label { font-size: clamp(8px, 1.8vw, 9px) !important; }
+.dtool-icon  { font-size: clamp(13px,3vw,15px) !important; }
+
+@media(max-width:600px) {
+  /* Collapse dock-tabs into icon-only row, tools scroll horizontally */
+  .dock-tabs  { padding: 4px 10px 2px; gap: 2px; }
+  .dock-tab   { padding: 6px 10px 7px !important; font-size: 8px !important; min-height: 40px; }
+  .dock-tab .dock-tab-count { display: none !important; }
+  .dock-tools { padding: 5px 10px 8px; gap: 5px; }
+  .dtool-label { font-size: 8px !important; letter-spacing: .03em !important; }
+  .dtool      { padding: 5px 8px !important; gap: 5px !important; }
+  .dtool-badge { font-size: 6px !important; padding: 1px 4px !important; }
+}
+
+/* ── MISSION PANEL FORM — readable on mobile ──────────────── */
+label {
+  font-size: clamp(9px, 2vw, 11px) !important;
+  letter-spacing: .08em !important;
+  margin-top: clamp(8px,2vw,10px) !important;
+}
+.fsec-label {
+  font-size: clamp(8px, 1.8vw, 10px) !important;
+  letter-spacing: .14em !important;
+  padding: clamp(8px,2vw,12px) 0 4px !important;
+}
+input[type=number], input[type=text], select {
+  font-size: clamp(13px, 3vw, 15px) !important;
+  padding: clamp(9px,2vw,11px) clamp(10px,2vw,12px) !important;
+  min-height: var(--touch);
+}
+.btn-analyze {
+  font-size: clamp(11px, 2.5vw, 13px) !important;
+  padding: clamp(13px,3vw,16px) !important;
+  min-height: var(--touch);
+  letter-spacing: .12em !important;
+}
+.pmini {
+  font-size: clamp(9px,2.2vw,10px) !important;
+  padding: clamp(5px,1.5vw,7px) clamp(7px,2vw,9px) !important;
+  min-height: 36px;
+  display: flex; align-items: center; justify-content: center;
+}
+.mp-title { font-size: clamp(10px, 2.2vw, 12px) !important; }
+.mp-sub   { font-size: clamp(9px,  2vw,  11px)  !important; }
+
+@media(max-width:600px) {
+  .mission-panel { border-right: none !important; }
+  .mp-header     { padding: 12px 14px !important; }
+  .form-body     { padding: 8px 12px 14px !important; }
+  .fg            { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
+  .concept-header { font-size: 11px !important; min-height: var(--touch); }
+  .concept-content{ font-size: 11px !important; line-height: 1.65 !important; }
+}
+
+/* ── LIVE HUD — value + label scaling ────────────────────── */
+.hud-val {
+  font-size: var(--fz-hud) !important;
+  letter-spacing: -.01em !important;
+}
+.hud-lbl {
+  font-size: clamp(8px, 1.8vw, 9px) !important;
+  letter-spacing: .12em !important;
+}
+.hud-cell {
+  padding: clamp(10px,2.5vw,16px) clamp(10px,2.5vw,18px) !important;
+}
+@media(max-width:480px) {
+  .live-hud { grid-template-columns: repeat(2,1fr) !important; }
+  .hud-val  { font-size: 20px !important; }
+  .hud-lbl  { font-size: 8px !important; }
+  .hud-cell { padding: 10px 12px !important; }
+  .hud-bar  { margin-top: 4px !important; }
+}
+
+/* ── SECTION HEADERS ──────────────────────────────────────── */
+.tpanel-head, .inst-card-head {
+  font-size: clamp(9px, 2vw, 11px) !important;
+  padding: clamp(8px,2vw,11px) clamp(10px,2vw,14px) !important;
+  min-height: var(--touch);
+}
+.tpanel-title {
+  font-size: clamp(9px, 2vw, 11px) !important;
+}
+
+/* ── SCORE RING ───────────────────────────────────────────── */
+.score-num   { font-size: clamp(22px, 5vw, 30px) !important; }
+.score-grade { font-size: clamp(10px, 2.4vw, 13px) !important; }
+.score-lbl   { font-size: clamp(7px, 1.6vw, 9px) !important; }
+.sb-label    { font-size: clamp(7px, 1.6vw, 9px) !important; }
+.sb-pct      { font-size: clamp(8px, 1.8vw, 9px) !important; }
+
+/* ── RESULT TABS ──────────────────────────────────────────── */
+.rtab-btn, .tab-btn, .sauce-tab {
+  font-size: clamp(8px, 2vw, 10px) !important;
+  padding: clamp(6px,1.5vw,8px) clamp(10px,2.5vw,16px) !important;
+  min-height: var(--touch);
+  white-space: nowrap;
+}
+.rtabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* ── PID / FILTER VALUE PANELS ────────────────────────────── */
+.pid-val, .dvstat-val {
+  font-size: clamp(14px, 3.2vw, 18px) !important;
+}
+.pid-lbl, .dvstat-key {
+  font-size: clamp(7px, 1.6vw, 9px) !important;
+}
+.adv-val {
+  font-size: clamp(13px, 3vw, 16px) !important;
+}
+.adv-lbl {
+  font-size: clamp(7px, 1.6vw, 8px) !important;
+}
+@media(max-width:480px) {
+  .pid-table  { font-size: 11px !important; }
+  .filter-grid { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
+  .adv-grid   { grid-template-columns: repeat(2,1fr) !important; gap: 6px !important; }
+}
+
+/* ── CHECKLIST ────────────────────────────────────────────── */
+.chk-title { font-size: clamp(9px, 2.2vw, 11px) !important; }
+.chk-val   { font-size: clamp(9px, 2.2vw, 11px) !important; }
+.chk-grid  { gap: clamp(4px, 1vw, 6px) !important; }
+
+/* ── PERSONALITY SECTION ──────────────────────────────────── */
+.pers-name  { font-size: clamp(14px, 3.5vw, 20px) !important; }
+.pers-desc  { font-size: clamp(11px, 2.5vw, 13px) !important; }
+.pers-v     { font-size: clamp(13px, 3vw, 16px) !important; }
+.pers-l     { font-size: clamp(7px, 1.6vw, 8px) !important; }
+@media(max-width:480px) {
+  .pers-emoji { font-size: 36px !important; }
+  .pers-row   { grid-template-columns: repeat(2,1fr) !important; }
+  .pers-cell  { padding: 10px 6px !important; }
+  .pers-top   { padding: 14px 14px 12px !important; gap: 10px !important; }
+}
+
+/* ── BODY TEXT IN CARDS ───────────────────────────────────── */
+.tpanel-body, .inst-card-body {
+  font-size: clamp(11px, 2.5vw, 13px) !important;
+}
+.tip-item, .rule-item {
+  font-size: clamp(11px, 2.5vw, 13px) !important;
+}
+
+/* ── CLI OUTPUT BOX ───────────────────────────────────────── */
+.cli-box, .sauce-cli-box, pre {
+  font-size: clamp(10px, 2.2vw, 12px) !important;
+  line-height: 1.6 !important;
+}
+@media(max-width:480px) {
+  .cli-box, .sauce-cli-box { max-height: 220px !important; }
+}
+
+/* ── TOAST + COPY BTN ─────────────────────────────────────── */
+.copy-btn {
+  font-size: clamp(9px, 2vw, 11px) !important;
+  padding: clamp(5px,1.5vw,7px) clamp(10px,2vw,14px) !important;
+  min-height: 36px;
+}
+#toast {
+  font-size: clamp(11px, 2.5vw, 13px) !important;
+  padding: 10px 18px !important;
+  border-radius: 10px !important;
+  bottom: 20px !important;
+  max-width: calc(100vw - 32px) !important;
+}
+
+/* ── FULL-WIDTH LAYOUT on narrow screens ──────────────────── */
+@media(max-width:900px) {
+  .app-shell    { grid-template-columns: 1fr !important; }
+  .mission-panel { position: static !important; max-height: none !important; border-right: none !important; border-bottom: 1.5px solid rgba(0,255,136,0.08); }
+  .main-grid    { grid-template-columns: 1fr !important; }
+  .inst-col     { border-right: none !important; border-bottom: 1.5px solid rgba(0,255,136,0.06); }
+}
+
+/* ── SAFE AREAS (iPhone notch) ────────────────────────────── */
+@supports(padding-bottom: env(safe-area-inset-bottom)) {
+  body { padding-bottom: env(safe-area-inset-bottom); }
+  .on-drawer { padding-bottom: env(safe-area-inset-bottom); }
+}
+
+/* ── DRAWER TOUCH IMPROVEMENTS ───────────────────────────── */
+.on-dlink {
+  min-height: var(--touch) !important;
+  padding: clamp(8px,2vw,10px) 9px !important;
+}
+.on-dtitle { font-size: clamp(12px,2.8vw,14px) !important; }
+.on-dmeta  { font-size: clamp(10px,2.2vw,11px) !important; }
+.on-ico    { width: 32px !important; height: 32px !important; }
+.on-ham    { width: 40px !important; height: 40px !important; }
+.on-icon-btn { min-height: 36px !important; padding: 6px 11px !important; font-size: clamp(10px,2.2vw,11px) !important; }
+.on-search-input { font-size: clamp(13px,3vw,15px) !important; }
+@media(max-width:480px) {
+  .on-drawer { width: min(288px, calc(100vw - 48px)) !important; }
+}
+
+/* ── PRESET CATEGORY BUTTONS ──────────────────────────────── */
+.preset-cat-btn {
+  font-size: clamp(8px, 2vw, 10px) !important;
+  padding: clamp(4px,1.2vw,6px) clamp(8px,2vw,12px) !important;
+  min-height: 34px;
 }
 
 </style>
