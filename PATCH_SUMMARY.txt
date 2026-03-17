@@ -1,0 +1,58 @@
+PATCH SUMMARY — OBIXConfig Doctor v5.2 Security Patch
+======================================================
+Date   : 2024 (Security Audit)
+Auditor: Claude Security Audit Engine
+
+FILES CHANGED
+─────────────
+1. requirements.txt
+   - gunicorn: 21.2.0 → 22.0.0       [CVE-2024-1135: HTTP Request Smuggling, HIGH]
+   - Werkzeug:  2.3.7 → 3.0.3        [CVE-2023-46136: Multipart DoS, HIGH]
+   - Jinja2:    >=3.1.2 → >=3.1.4    [CVE-2024-34064: XSS via xmlattr, MEDIUM]
+
+2. app.py
+   - SESSION_COOKIE_SECURE: default False → True  [MEDIUM — Cookie hijack via HTTP]
+   - Added HSTS header (max-age=31536000)          [MEDIUM — Force HTTPS on browser]
+   - Added @_rate("30/min;300/day") on /app POST   [MEDIUM — DoS via compute abuse]
+   - Added @_rate("30/min;300/day") on /motor-prop [MEDIUM — DoS via compute abuse]
+   - Added @_rate("30/min;300/day") on /rpm-filter [MEDIUM — DoS via compute abuse]
+   - OSD export: removed exception detail from 500 [MEDIUM — Error info leak]
+
+3. templates/landing.html
+   - Firebase rules comment: .read/.write=true → scoped rules  [MEDIUM — Open DB]
+
+GIT COMMANDS
+────────────
+# Stage ทุก file ที่แก้
+git add requirements.txt app.py templates/landing.html SECURITY_REPORT.md PATCH_SUMMARY.txt
+
+# Commit
+git commit -m "fix: security hardening — dep upgrades + session/HSTS/rate-limit [security]"
+
+# Tag สำหรับ audit trail
+git tag -a v5.2.1-security -m "Security patch: CVE-2024-1135, CVE-2023-46136, CVE-2024-34064 + hardening"
+
+# Push
+git push origin main --tags
+
+DEPLOY STEPS (Render / production)
+────────────────────────────────────
+1. ตรวจสอบ env vars ใน Render dashboard:
+   - SECRET_KEY=<strong random 32+ hex>
+   - FLASK_DEBUG=0
+   - FORCE_INSECURE ไม่ต้องตั้ง (ปล่อยให้ default=False เพื่อ Secure=True)
+
+2. pip install -r requirements.txt  (deploy จะรัน auto)
+
+3. ตรวจสอบ response headers หลัง deploy:
+   curl -I https://your-app.onrender.com/ | grep -E "Strict-Transport|X-Frame|X-Content"
+
+4. ตรวจสอบ Firebase Rules ใน Firebase Console ด้วยตนเอง
+
+FOLLOW-UP (ไม่ใช่ code change — ต้อง action แยก)
+───────────────────────────────────────────────
+- [ ] pip-audit ใน CI: เพิ่ม "pip-audit -r requirements.txt" ใน GitHub Actions
+- [ ] Rotate SECRET_KEY ถ้าเคย deploy ด้วย dev key
+- [ ] ตรวจ Firebase Realtime Database rules ใน console
+- [ ] วางแผน migrate inline JS → nonce-based CSP (ลบ 'unsafe-inline')
+- [ ] พิจารณา upgrade Flask 2.x → 3.x (LTS)

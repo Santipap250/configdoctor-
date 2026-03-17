@@ -146,11 +146,12 @@ if CSRF_AVAILABLE:
         generate_csrf()
         return response
 
-FORCE_SECURE = os.environ.get("FORCE_SECURE", "0") in ("1", "true", "True")
+# SECURITY PATCH: SESSION_COOKIE_SECURE=True by default; set FORCE_INSECURE=1 only for local HTTP dev
+FORCE_INSECURE = os.environ.get("FORCE_INSECURE", "0") in ("1", "true", "True")
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',
-    SESSION_COOKIE_SECURE=FORCE_SECURE,
+    SESSION_COOKIE_SECURE=not FORCE_INSECURE,  # PATCH: Secure=True by default
 )
 app.config['DEBUG'] = os.environ.get('FLASK_DEBUG', '0') in ('1', 'true', 'True')
 
@@ -359,6 +360,7 @@ def ping():
     return "pong"
 
 @app.route("/app", methods=["GET", "POST"])
+@_rate("30 per minute;300 per day")  # PATCH: rate-limit main analysis POST
 def index():
     analysis = None
 
@@ -740,6 +742,7 @@ def _recommend_motor_prop(form):
     }
 
 @app.route('/motor-prop', methods=['GET', 'POST'])
+@_rate("30 per minute;300 per day")  # PATCH: rate-limit motor-prop POST
 def motor_prop():
     if request.method == 'POST':
         result = _recommend_motor_prop(request.form)
@@ -832,6 +835,7 @@ except Exception as e:
     print("rpm_filter_calc import failed:", e)
 
 @app.route('/rpm-filter', methods=['GET', 'POST'])
+@_rate("30 per minute;300 per day")  # PATCH: rate-limit rpm-filter POST
 def rpm_filter():
     result = None
     form   = {}
@@ -1018,8 +1022,10 @@ def osd_export():
         fname = secure_filename(_timestamped_filename(prefix="obix_osd", ext=ext))
         try:
             with open(os.path.join(out_dir, fname), 'w', encoding='utf-8') as f: f.write(content)
-        except Exception as e:
-            return (f"Failed to save: {e}", 500)
+        except Exception:
+            # PATCH: do not leak exception detail to client
+            logger.exception("osd_export save failed")
+            return ("Failed to save file. Please try again.", 500)
         return jsonify({"ok": True, "download_url": url_for('static', filename=f'downloads/osd/{fname}'), "filename": fname})
     buf = io.BytesIO(); buf.write(content.encode('utf-8')); buf.seek(0)
     return send_file(buf, mimetype='text/plain', as_attachment=True, download_name=f"obix_osd.{ext}")
@@ -1036,6 +1042,10 @@ def set_security_headers(response):
     response.headers["Referrer-Policy"]        = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"]     = "geolocation=(), microphone=(), camera=()"
     # CSP: whitelist ครบทุก CDN ที่ใช้จริง
+    # PATCH: Add HSTS (1 year, includeSubDomains) — required for TLS enforcement
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    # NOTE: 'unsafe-inline' in script-src is kept for compatibility with inline JS in templates.
+    # TODO (follow-up): migrate inline scripts to nonce-based CSP to remove 'unsafe-inline'.
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
         "script-src 'self' 'unsafe-inline' "
