@@ -830,6 +830,55 @@ section { padding:90px 24px; position:relative; z-index:2; }
 .community-btn { display:inline-flex; align-items:center; gap:10px; font-family:var(--font-d); font-size:.72rem; font-weight:700; letter-spacing:.08em; color:var(--green); border:1px solid rgba(0,255,157,.3); background:rgba(0,255,157,.07); padding:12px 26px; border-radius:10px; text-decoration:none; transition:all .25s; }
 .community-btn:hover { background:rgba(0,255,157,.14); border-color:rgba(0,255,157,.5); box-shadow:0 0 24px rgba(0,255,157,.15); transform:translateY(-2px); }
 
+/* ── Team & Community row ── */
+.lnd-team-row {
+  display:flex; gap:12px; flex-wrap:wrap;
+  justify-content:center; margin-top:20px;
+}
+.lnd-team-btn {
+  display:inline-flex; align-items:center; gap:12px;
+  padding:12px 22px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;
+  text-decoration:none; color:var(--text2);
+  transition:all .25s; min-width:190px;
+}
+.lnd-team-btn:hover {
+  background:rgba(0,255,157,.07);
+  border-color:rgba(0,255,157,.35);
+  color:var(--green);
+  transform:translateY(-2px);
+  box-shadow:0 8px 28px rgba(0,255,157,.1);
+}
+.lnd-fb-btn { color:var(--text2); }
+.lnd-fb-btn:hover {
+  background:rgba(24,119,242,.09);
+  border-color:rgba(24,119,242,.4);
+  color:#60a5fa;
+  box-shadow:0 8px 28px rgba(24,119,242,.1);
+}
+.lnd-team-btn-icon {
+  font-size:20px; flex-shrink:0;
+  width:36px; height:36px;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,.06); border-radius:9px;
+}
+.lnd-fb-btn .lnd-team-btn-icon { color:#60a5fa; }
+.lnd-team-btn-label {
+  display:block; font-family:var(--font-d);
+  font-size:.72rem; font-weight:700;
+  letter-spacing:.06em; color:inherit;
+}
+.lnd-team-btn-sub {
+  display:block; font-size:.65rem;
+  color:var(--muted2); margin-top:1px;
+}
+@media(max-width:480px){
+  .lnd-team-row { flex-direction:column; align-items:center; }
+  .lnd-team-btn { width:100%; max-width:280px; justify-content:center; }
+}
+
 /* Like/Rating widgets */
 .love-widget { margin-top:28px; display:flex; flex-direction:column; align-items:center; gap:14px; }
 .like-btn { display:inline-flex; align-items:center; gap:8px; padding:12px 24px; background:rgba(255,255,255,.04); border:1.5px solid rgba(255,255,255,.12); border-radius:50px; cursor:pointer; font-family:var(--font-d); font-size:.7rem; font-weight:700; letter-spacing:.08em; color:rgba(255,255,255,.65); transition:all .25s; }
@@ -1967,6 +2016,36 @@ footer {
       <span class="i18n-en">🚀 Start Free Analysis</span>
     </a>
 
+    <!-- ── Team & Community buttons ── -->
+    <div class="lnd-team-row">
+      <a href="/team" class="lnd-team-btn">
+        <span class="lnd-team-btn-icon">👥</span>
+        <span>
+          <span class="lnd-team-btn-label i18n-th">ทีมพัฒนา</span>
+          <span class="lnd-team-btn-label i18n-en">Meet the Team</span>
+          <span class="lnd-team-btn-sub i18n-th">ผู้สร้าง &amp; AI partners</span>
+          <span class="lnd-team-btn-sub i18n-en">Creators &amp; AI partners</span>
+        </span>
+      </a>
+      <a href="https://www.facebook.com/OBIXConfigLab"
+         target="_blank" rel="noopener noreferrer"
+         class="lnd-team-btn lnd-fb-btn">
+        <span class="lnd-team-btn-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094
+              10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697
+              1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.874v2.25h3.328
+              l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
+          </svg>
+        </span>
+        <span>
+          <span class="lnd-team-btn-label">OBIXConfigLab</span>
+          <span class="lnd-team-btn-sub i18n-th">ชุมชน Facebook</span>
+          <span class="lnd-team-btn-sub i18n-en">Facebook Community</span>
+        </span>
+      </a>
+    </div>
+
     <!-- ─── Like / Rating widget ─── -->
     <div class="love-widget">
       <div>
@@ -2140,8 +2219,10 @@ document.querySelectorAll('.star-btn').forEach(btn=>{
   </div>
   <div class="footer-right">
     <a class="footer-link" href="/app"><span class="i18n-th">วิเคราะห์</span><span class="i18n-en">Analyzer</span></a>
+    <a class="footer-link" href="/team"><span class="i18n-th">ทีม</span><span class="i18n-en">Team</span></a>
     <a class="footer-link" href="/about">About</a>
     <a class="footer-link" href="{{ url_for('downloads_index') }}">Downloads</a>
+    <a class="footer-link" href="https://www.facebook.com/OBIXConfigLab" target="_blank" rel="noopener noreferrer" style="color:#60a5fa">OBIXConfigLab ↗</a>
   </div>
 </footer>
 
