@@ -1,0 +1,651 @@
+{% set og_title       = "Team — OBIXConfig Doctor" %}
+{% set og_description = "ทีมผู้พัฒนา OBIXConfig Doctor — นักบิน FPV และ AI ที่ร่วมสร้างเครื่องมือวิเคราะห์โดรนที่ดีที่สุด" %}
+{% set og_url         = "https://configdoctor.onrender.com/team" %}
+{% include "partials/og_tags.html" %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Team — OBIXConfig Doctor</title>
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/site-theme.css') }}">
+<style>
+/* ═══════════════════════════════════════════════════
+   TEAM PAGE — OBIXConfig Doctor
+   Dark FPV aesthetic · glowing cards · particle bg
+   ═══════════════════════════════════════════════════ */
+
+/* ── Particle canvas background ─── */
+#team-particles {
+  position:fixed; inset:0; z-index:0;
+  pointer-events:none; opacity:.45;
+}
+
+.team-wrap { position:relative; z-index:1; }
+
+/* ── Hero ─── */
+.team-hero {
+  text-align:center;
+  padding:64px 0 40px;
+}
+.team-hero-eyebrow {
+  font-family:var(--font-head);
+  font-size:11px; font-weight:700;
+  letter-spacing:.25em; color:var(--green);
+  text-transform:uppercase; margin-bottom:14px;
+}
+.team-hero-title {
+  font-family:var(--font-head);
+  font-size:clamp(28px,5vw,46px);
+  font-weight:900; color:var(--text);
+  line-height:1.15; margin:0 0 16px;
+}
+.team-hero-title em { color:var(--green); font-style:normal; }
+.team-hero-sub {
+  font-size:15px; color:var(--text2);
+  max-width:560px; margin:0 auto;
+  line-height:1.75;
+}
+
+/* ── Section label ─── */
+.team-section-label {
+  display:flex; align-items:center; gap:12px;
+  margin:48px 0 24px;
+}
+.team-section-label span {
+  font-family:var(--font-head); font-size:11px;
+  font-weight:700; letter-spacing:.2em;
+  color:var(--muted2); text-transform:uppercase;
+}
+.team-section-label::after {
+  content:''; flex:1; height:1px;
+  background:linear-gradient(90deg,var(--border),transparent);
+}
+
+/* ══ DEVELOPER CARD ══════════════════════════════ */
+.dev-cards {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+  gap:20px; margin-bottom:12px;
+}
+
+.dev-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r-xl);
+  overflow:hidden;
+  transition:all .3s var(--ease);
+  position:relative;
+}
+.dev-card::before {
+  content:'';
+  position:absolute; inset:0;
+  background:radial-gradient(ellipse 120% 60% at 50% -10%,
+    rgba(16,196,122,.07) 0%, transparent 65%);
+  pointer-events:none;
+}
+.dev-card:hover {
+  border-color:rgba(16,196,122,.3);
+  transform:translateY(-4px);
+  box-shadow:0 20px 60px rgba(0,0,0,.5),
+             0 0 40px rgba(16,196,122,.08);
+}
+
+/* Profile photo area */
+.dev-photo-wrap {
+  position:relative;
+  height:240px;
+  overflow:hidden;
+  background:var(--bg);
+}
+.dev-photo-wrap img {
+  width:100%; height:100%;
+  object-fit:cover; object-position:center top;
+  transition:transform .5s var(--ease);
+  filter:saturate(1.1) contrast(1.05);
+}
+.dev-card:hover .dev-photo-wrap img {
+  transform:scale(1.04);
+}
+/* Green scan-line overlay */
+.dev-photo-wrap::after {
+  content:'';
+  position:absolute; inset:0;
+  background:linear-gradient(
+    180deg,
+    transparent 0%,
+    transparent 55%,
+    rgba(5,10,14,.6) 80%,
+    var(--surface) 100%
+  );
+  pointer-events:none;
+}
+/* Glowing frame */
+.dev-photo-wrap::before {
+  content:'';
+  position:absolute; inset:0; z-index:1;
+  box-shadow:inset 0 0 40px rgba(16,196,122,.1);
+  border-radius:inherit;
+  pointer-events:none;
+}
+/* FPV pilot badge */
+.dev-badge {
+  position:absolute; top:14px; right:14px; z-index:2;
+  background:rgba(5,10,14,.82);
+  border:1px solid rgba(16,196,122,.4);
+  border-radius:6px;
+  padding:4px 10px;
+  font-family:var(--font-head);
+  font-size:9px; font-weight:700;
+  letter-spacing:.15em; color:var(--green);
+  text-transform:uppercase;
+  backdrop-filter:blur(8px);
+}
+
+/* Card body */
+.dev-body {
+  padding:20px 22px 22px;
+  position:relative; z-index:1;
+}
+.dev-name {
+  font-family:var(--font-head);
+  font-size:22px; font-weight:900;
+  color:var(--text); letter-spacing:.03em;
+  margin-bottom:4px;
+}
+.dev-role {
+  font-size:12px; font-weight:600;
+  color:var(--green); letter-spacing:.12em;
+  text-transform:uppercase; margin-bottom:12px;
+}
+.dev-bio {
+  font-size:13px; color:var(--text2);
+  line-height:1.7; margin-bottom:18px;
+}
+
+/* Skill tags */
+.dev-tags {
+  display:flex; flex-wrap:wrap; gap:6px;
+  margin-bottom:18px;
+}
+.dev-tag {
+  font-family:var(--font-mono);
+  font-size:10px; font-weight:600;
+  padding:3px 9px;
+  border-radius:4px;
+  background:rgba(16,196,122,.08);
+  border:1px solid rgba(16,196,122,.18);
+  color:var(--green);
+  letter-spacing:.05em;
+}
+.dev-tag.b {
+  background:rgba(0,170,255,.08);
+  border-color:rgba(0,170,255,.18);
+  color:var(--blue);
+}
+.dev-tag.a {
+  background:rgba(245,158,11,.08);
+  border-color:rgba(245,158,11,.2);
+  color:var(--amber);
+}
+
+/* Social links */
+.dev-socials {
+  display:flex; gap:8px; flex-wrap:wrap;
+}
+.dev-social-btn {
+  display:inline-flex; align-items:center; gap:7px;
+  padding:8px 14px;
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:var(--r-sm);
+  font-size:12px; font-weight:600; color:var(--text2);
+  text-decoration:none;
+  transition:all .2s var(--ease);
+}
+.dev-social-btn:hover {
+  border-color:rgba(16,196,122,.4);
+  color:var(--green);
+  background:rgba(16,196,122,.05);
+  transform:translateY(-1px);
+}
+.dev-social-btn svg {
+  width:14px; height:14px; flex-shrink:0;
+  fill:currentColor;
+}
+.dev-social-btn.fb:hover {
+  border-color:rgba(24,119,242,.5);
+  color:#1877f2;
+  background:rgba(24,119,242,.07);
+}
+
+/* ══ AI TEAM CARDS ══════════════════════════════ */
+.ai-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:16px;
+}
+
+.ai-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r-xl);
+  padding:26px 24px;
+  position:relative;
+  overflow:hidden;
+  transition:all .3s var(--ease);
+}
+.ai-card::before {
+  content:'';
+  position:absolute; top:-40px; left:-40px;
+  width:160px; height:160px;
+  border-radius:50%;
+  pointer-events:none;
+  filter:blur(60px);
+  opacity:.12;
+}
+.ai-card.claude::before { background:var(--purple); }
+.ai-card.chatgpt::before { background:var(--green); }
+.ai-card:hover {
+  transform:translateY(-3px);
+}
+.ai-card.claude:hover { border-color:rgba(160,80,255,.35); box-shadow:0 12px 40px rgba(160,80,255,.1); }
+.ai-card.chatgpt:hover { border-color:rgba(16,196,122,.35); box-shadow:0 12px 40px rgba(16,196,122,.1); }
+
+.ai-logo-row {
+  display:flex; align-items:center; gap:14px;
+  margin-bottom:16px;
+}
+.ai-logo {
+  width:48px; height:48px;
+  border-radius:14px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:26px; flex-shrink:0;
+}
+.ai-card.claude  .ai-logo { background:rgba(160,80,255,.12); border:1px solid rgba(160,80,255,.25); }
+.ai-card.chatgpt .ai-logo { background:rgba(16,196,122,.10); border:1px solid rgba(16,196,122,.22); }
+
+.ai-name {
+  font-family:var(--font-head);
+  font-size:18px; font-weight:900; color:var(--text);
+}
+.ai-maker {
+  font-size:11px; color:var(--muted2);
+  letter-spacing:.06em; margin-top:2px;
+}
+.ai-card.claude  .ai-maker { color:rgba(160,80,255,.7); }
+.ai-card.chatgpt .ai-maker { color:rgba(16,196,122,.7); }
+
+.ai-role-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:var(--font-head);
+  font-size:9px; font-weight:700;
+  letter-spacing:.18em; text-transform:uppercase;
+  padding:4px 10px; border-radius:5px;
+  margin-bottom:14px;
+}
+.ai-card.claude  .ai-role-badge { background:rgba(160,80,255,.1); border:1px solid rgba(160,80,255,.2); color:#c084fc; }
+.ai-card.chatgpt .ai-role-badge { background:rgba(16,196,122,.09); border:1px solid rgba(16,196,122,.2); color:var(--green); }
+
+.ai-desc {
+  font-size:13px; color:var(--text2);
+  line-height:1.75; margin-bottom:18px;
+}
+
+.ai-contrib-list {
+  list-style:none; padding:0; margin:0;
+  display:flex; flex-direction:column; gap:6px;
+}
+.ai-contrib-list li {
+  display:flex; align-items:flex-start; gap:8px;
+  font-size:12px; color:var(--text2); line-height:1.5;
+}
+.ai-contrib-list li::before {
+  content:'▸'; flex-shrink:0; margin-top:1px;
+  font-size:10px;
+}
+.ai-card.claude  .ai-contrib-list li::before { color:#a855f7; }
+.ai-card.chatgpt .ai-contrib-list li::before { color:var(--green); }
+
+/* ── SENSOR PROJECT BADGE ── */
+.sensor-badge {
+  display:flex; align-items:center; gap:16px;
+  padding:20px 24px;
+  background:linear-gradient(135deg,
+    rgba(16,196,122,.06) 0%,
+    rgba(0,170,255,.04) 50%,
+    rgba(160,80,255,.06) 100%);
+  border:1px solid rgba(16,196,122,.15);
+  border-radius:var(--r-xl);
+  margin-top:24px;
+}
+.sensor-icon {
+  width:52px; height:52px; flex-shrink:0;
+  background:rgba(16,196,122,.1);
+  border:1px solid rgba(16,196,122,.2);
+  border-radius:14px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:26px;
+}
+.sensor-title {
+  font-family:var(--font-head); font-size:16px;
+  font-weight:900; color:var(--text); margin-bottom:4px;
+}
+.sensor-title em { color:var(--green); font-style:normal; }
+.sensor-sub {
+  font-size:12px; color:var(--text2); line-height:1.6;
+}
+
+/* ── STATS ROW ── */
+.team-stats {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  gap:12px; margin-top:48px;
+}
+.team-stat {
+  text-align:center;
+  padding:20px 12px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+}
+.team-stat-val {
+  font-family:var(--font-head);
+  font-size:28px; font-weight:900;
+  color:var(--green); display:block;
+}
+.team-stat-lbl {
+  font-size:11px; color:var(--muted2);
+  letter-spacing:.08em; margin-top:4px;
+}
+
+/* ── PARTICLE ANIM ── */
+@keyframes float-up {
+  0%   { transform:translateY(0) translateX(0); opacity:0; }
+  10%  { opacity:.6; }
+  90%  { opacity:.3; }
+  100% { transform:translateY(-100vh) translateX(20px); opacity:0; }
+}
+</style>
+{% set nav_page = "team" %}
+</head>
+<body>
+{% include "partials/nav.html" %}
+
+<!-- Particles -->
+<canvas id="team-particles"></canvas>
+
+<div class="page-wrap page-wrap--narrow team-wrap" style="padding-top:60px;padding-bottom:80px">
+
+  <!-- ── HERO ── -->
+  <div class="team-hero v5-fade-in">
+    <div class="team-hero-eyebrow">👥 Meet the Team</div>
+    <h1 class="team-hero-title">ผู้อยู่เบื้องหลัง<br><em>OBIXConfig Doctor</em></h1>
+    <p class="team-hero-sub">
+      สร้างโดยนักบิน FPV จริงๆ — ด้วยความช่วยเหลือจาก AI ที่ทรงพลัง<br>
+      เพื่อชุมชน FPV ไทยและโลก 🌏
+    </p>
+  </div>
+
+  <!-- ── STATS ── -->
+  <div class="team-stats v5-fade-in-1">
+    <div class="team-stat">
+      <span class="team-stat-val">40+</span>
+      <span class="team-stat-lbl">เครื่องมือ</span>
+    </div>
+    <div class="team-stat">
+      <span class="team-stat-val">5.2</span>
+      <span class="team-stat-lbl">เวอร์ชัน</span>
+    </div>
+    <div class="team-stat">
+      <span class="team-stat-val">🇹🇭</span>
+      <span class="team-stat-lbl">Made in Thailand</span>
+    </div>
+    <div class="team-stat">
+      <span class="team-stat-val">100%</span>
+      <span class="team-stat-lbl">ฟรี</span>
+    </div>
+  </div>
+
+  <!-- ── DEVELOPERS ── -->
+  <div class="team-section-label v5-fade-in-2">
+    <span>🧑‍💻 Lead Developer</span>
+  </div>
+
+  <div class="dev-cards v5-fade-in-2">
+
+    <!-- SanTiPap -->
+    <div class="dev-card">
+      <div class="dev-photo-wrap">
+        <img
+          src="{{ url_for('static', filename='img/santipap-profile.webp') }}"
+          alt="SanTiPap — Lead Developer & FPV Pilot"
+          loading="eager"
+        >
+        <div class="dev-badge">🕹️ FPV PILOT</div>
+      </div>
+      <div class="dev-body">
+        <div class="dev-name">SanTiPap</div>
+        <div class="dev-role">Lead Developer &amp; FPV Systems Engineer</div>
+        <p class="dev-bio">
+          นักบิน FPV และนักพัฒนาซอฟต์แวร์ผู้สร้าง OBIXConfig Doctor
+          ตั้งแต่ต้น — ออกแบบระบบ PID Analyzer, Blackbox Engine,
+          CLI Surgeon และ tool อีกกว่า 40 ชิ้นที่ช่วยชุมชน FPV ไทยทั้งหมด
+        </p>
+        <div class="dev-tags">
+          <span class="dev-tag">Python / Flask</span>
+          <span class="dev-tag">FPV Systems</span>
+          <span class="dev-tag b">Betaflight</span>
+          <span class="dev-tag b">PID Tuning</span>
+          <span class="dev-tag a">Blackbox Analysis</span>
+          <span class="dev-tag a">CLI Engineering</span>
+        </div>
+        <div class="dev-socials">
+          <a
+            href="https://www.facebook.com/santipab.songkarak"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="dev-social-btn fb"
+            aria-label="Facebook ของ SanTiPap"
+          >
+            <!-- Facebook SVG icon -->
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094
+                10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697
+                1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.874v2.25h3.328
+                l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
+            </svg>
+            Facebook
+          </a>
+          <a
+            href="https://github.com/Santipap250"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="dev-social-btn"
+            aria-label="GitHub ของ SanTiPap"
+          >
+            <!-- GitHub SVG icon -->
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111
+                .793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333
+                -1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839
+                1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665
+                -.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535
+                -1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02
+                .005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242
+                2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479
+                5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797
+                24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+            </svg>
+            GitHub
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /dev-cards -->
+
+  <!-- ── AI TEAM ── -->
+  <div class="team-section-label v5-fade-in-3" style="margin-top:52px">
+    <span>🤖 AI Development Team</span>
+  </div>
+
+  <!-- Sensor project badge -->
+  <div class="sensor-badge v5-fade-in-3">
+    <div class="sensor-icon">🛰️</div>
+    <div>
+      <div class="sensor-title">Project <em>SENSOR</em></div>
+      <div class="sensor-sub">
+        AI-assisted development pipeline — ใช้ AI เป็น co-engineer ในการออกแบบ logic,
+        วิเคราะห์โค้ด, ปรับปรุงความปลอดภัย และสร้าง content สำหรับชุมชน FPV
+      </div>
+    </div>
+  </div>
+
+  <div class="ai-grid v5-fade-in-3" style="margin-top:20px">
+
+    <!-- Claude -->
+    <div class="ai-card claude">
+      <div class="ai-logo-row">
+        <div class="ai-logo">🟣</div>
+        <div>
+          <div class="ai-name">Claude</div>
+          <div class="ai-maker">by Anthropic</div>
+        </div>
+      </div>
+      <div class="ai-role-badge">
+        ⚡ Security &amp; Backend Engineer
+      </div>
+      <p class="ai-desc">
+        AI หลักในการ audit ความปลอดภัย, refactor โค้ด backend,
+        เขียน unit tests และออกแบบสถาปัตยกรรมของ analyzer engine
+      </p>
+      <ul class="ai-contrib-list">
+        <li>Security audit &amp; CVE patching (gunicorn, Werkzeug, Jinja2)</li>
+        <li>Refactor app.py — ลด god function 248 บรรทัด</li>
+        <li>เพิ่ม HSTS, rate limiting, CSRF hardening</li>
+        <li>เขียน 14 security tests ใหม่</li>
+        <li>สร้าง GitHub Actions CI pipeline</li>
+      </ul>
+    </div>
+
+    <!-- ChatGPT -->
+    <div class="ai-card chatgpt">
+      <div class="ai-logo-row">
+        <div class="ai-logo">🟢</div>
+        <div>
+          <div class="ai-name">ChatGPT</div>
+          <div class="ai-maker">by OpenAI</div>
+        </div>
+      </div>
+      <div class="ai-role-badge">
+        ✍️ Content &amp; UX Advisor
+      </div>
+      <p class="ai-desc">
+        AI ผู้ช่วยในการเขียนคำอธิบาย, แปลเนื้อหา TH/EN,
+        ออกแบบ UX flow และให้คำแนะนำด้าน feature
+      </p>
+      <ul class="ai-contrib-list">
+        <li>เขียนคำอธิบายเครื่องมือและ UI copy</li>
+        <li>แปลและปรับภาษา TH ↔ EN</li>
+        <li>ออกแบบ user journey สำหรับ flight quiz</li>
+        <li>คำแนะนำ feature และ roadmap</li>
+        <li>ช่วยเขียน tooltip และ help text</li>
+      </ul>
+    </div>
+
+  </div><!-- /ai-grid -->
+
+  <!-- ── FOOTER NOTE ── -->
+  <div class="v5-card v5-fade-in-3" style="margin-top:40px;text-align:center;padding:28px 24px">
+    <div style="font-size:28px;margin-bottom:12px">🚁</div>
+    <div style="font-family:var(--font-head);font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px">
+      Built with passion for the FPV community 🇹🇭
+    </div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.75;max-width:480px;margin:0 auto">
+      OBIXConfig Doctor เป็นโปรเจ็คโอเพนซอร์สฟรี 100% — สร้างโดยนักบิน FPV
+      เพื่อนักบิน FPV ทุกคน ไม่มีโฆษณา ไม่มี paywall
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px">
+      <a href="/about" class="v5-btn v5-btn--ghost" style="font-size:12px;padding:8px 18px">ℹ️ About</a>
+      <a href="/app"   class="v5-btn" style="font-size:12px;padding:8px 18px">🚀 เริ่มใช้งาน</a>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<script>
+/* ── Particle canvas ───────────────────────────── */
+(function(){
+  const canvas = document.getElementById('team-particles');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize(){
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function rand(a,b){ return a + Math.random()*(b-a); }
+
+  function spawn(){
+    return {
+      x: rand(0, W),
+      y: H + 10,
+      r: rand(0.5, 2),
+      speed: rand(0.4, 1.2),
+      opacity: rand(0.2, 0.7),
+      color: Math.random() > .5 ? '16,196,122' : '0,170,255',
+      dx: rand(-0.3, 0.3),
+    };
+  }
+
+  for(let i=0; i<60; i++){
+    const p = spawn();
+    p.y = rand(0, H);
+    particles.push(p);
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    particles.forEach((p,i) => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(${p.color},${p.opacity})`;
+      ctx.fill();
+      p.y -= p.speed;
+      p.x += p.dx;
+      if(p.y < -10){ particles[i] = spawn(); }
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ── Scroll reveal ─────────────────────────────── */
+(function(){
+  if(!('IntersectionObserver' in window)) return;
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.dev-card, .ai-card, .team-stat, .sensor-badge').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity .5s ease, transform .5s ease';
+    obs.observe(el);
+  });
+})();
+</script>
+</body>
+</html>
