@@ -1418,11 +1418,683 @@ input[type=number], input[type=text], select {
   min-height: 34px;
 }
 
+
+/* ═══════════════════════════════════════════════════════════════════
+   DRONE ANALYZER — SUPER APEX UPGRADE
+   Ultra typography · Cinematic animations · Full responsive
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── ENHANCED CSS VARIABLES ──────────────────────────────── */
+:root {
+  --font-size-xs:    clamp(10px, 2vw, 12px);
+  --font-size-sm:    clamp(11px, 2.2vw, 13px);
+  --font-size-base:  clamp(13px, 2.6vw, 15px);
+  --font-size-md:    clamp(14px, 2.8vw, 16px);
+  --font-size-lg:    clamp(16px, 3.5vw, 20px);
+  --font-size-xl:    clamp(20px, 4.5vw, 28px);
+  --font-size-hud:   clamp(22px, 4.8vw, 30px);
+  --font-size-label: clamp(10px, 2.1vw, 12px);
+  --touch-min: 46px;
+  --card-radius: 14px;
+  --glow-g2: 0 0 40px rgba(0,255,136,0.25), 0 0 80px rgba(0,255,136,0.08);
+  --glow-b2: 0 0 40px rgba(0,170,255,0.25), 0 0 80px rgba(0,170,255,0.08);
+}
+
+/* ── DRAMATIC BACKGROUND ENHANCEMENTS ────────────────────── */
+body::before {
+  background:
+    radial-gradient(ellipse 90% 60% at 10% 10%, rgba(0,255,136,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 90% 80%, rgba(0,170,255,0.055) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 70% at 55% 5%,  rgba(176,96,255,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 40% at 20% 90%, rgba(0,232,208,0.03) 0%, transparent 50%),
+    linear-gradient(180deg, #000409 0%, #000d1a 100%) !important;
+}
+
+/* Enhanced grid animation */
+body::after {
+  background-image:
+    linear-gradient(rgba(0,255,136,0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,136,0.028) 1px, transparent 1px),
+    linear-gradient(60deg,  rgba(0,170,255,0.012) 1px, transparent 1px),
+    linear-gradient(-60deg, rgba(0,170,255,0.012) 1px, transparent 1px) !important;
+  animation: gridDrift 50s linear infinite !important;
+}
+
+/* Bigger ambient orbs */
+.amb-orb-1 {
+  width: 700px !important; height: 700px !important;
+  background: radial-gradient(circle, rgba(0,255,136,0.11) 0%, transparent 65%) !important;
+  animation: orbA 28s ease-in-out infinite !important;
+}
+.amb-orb-2 {
+  width: 800px !important; height: 800px !important;
+  background: radial-gradient(circle, rgba(0,170,255,0.09) 0%, transparent 65%) !important;
+  animation: orbB 36s ease-in-out infinite !important;
+}
+.amb-orb-3 {
+  width: 500px !important; height: 500px !important;
+  background: radial-gradient(circle, rgba(176,96,255,0.08) 0%, transparent 65%) !important;
+}
+
+/* Extra ambient orb */
+.amb-orb-4 {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+  filter: blur(100px);
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(0,232,208,0.06) 0%, transparent 65%);
+  top: 50%; right: -100px;
+  animation: orbD 32s ease-in-out infinite;
+}
+@keyframes orbD { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-50px,80px) scale(1.1)} }
+
+/* Dual scan lines */
+.scan-line {
+  height: 2px !important;
+  background: linear-gradient(90deg, transparent 0%, rgba(0,255,136,0.9) 20%,
+    rgba(0,232,208,0.8) 50%, rgba(0,170,255,0.8) 80%, transparent 100%) !important;
+  animation: scanLine 6s linear infinite !important;
+  opacity: 0.5 !important;
+}
+.scan-line-2 {
+  position: fixed; top: 0; left: 0; right: 0; height: 1px;
+  z-index: 998; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(176,96,255,0.5), transparent);
+  animation: scanLine 6s 3s linear infinite;
+  opacity: 0.4;
+}
+
+/* ── TYPOGRAPHY OVERHAUL — ALL SIZES UP ──────────────────── */
+/* Labels - minimum 10px, readable */
+label, .fsec-label, .form-label,
+.qs-stat-lbl, .adv-stat-l, .dvstat-key,
+.hud-lbl, .sb-label, .chk-label {
+  font-size: var(--font-size-label) !important;
+  letter-spacing: 0.1em !important;
+}
+
+/* Body text - minimum 13px */
+.tpanel-body, .inst-card-body, .warn-item,
+.rule-item, .rule-body, .sauce-insight-body,
+.concept-content, .sauce-cli-box,
+.bmat-note, .harm-node-desc {
+  font-size: var(--font-size-base) !important;
+  line-height: 1.75 !important;
+}
+
+/* Card headings - bolder, bigger */
+.tpanel-title {
+  font-size: clamp(11px, 2.4vw, 14px) !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.1em !important;
+}
+.tpanel-sub {
+  font-size: clamp(11px, 2.2vw, 12px) !important;
+}
+.inst-card-head {
+  font-size: clamp(10px, 2.2vw, 12px) !important;
+  font-weight: 700 !important;
+}
+
+/* Values - big, impactful */
+.qs-stat-val    { font-size: clamp(18px, 4vw, 24px) !important; }
+.adv-stat-v     { font-size: clamp(18px, 4vw, 22px) !important; }
+.pid-val        { font-size: clamp(16px, 3.5vw, 20px) !important; }
+.dvstat-val     { font-size: clamp(14px, 3.2vw, 18px) !important; }
+.fval-num       { font-size: clamp(16px, 3.5vw, 20px) !important; }
+.hud-val        { font-size: var(--font-size-hud) !important; }
+.score-num      { font-size: clamp(26px, 5.5vw, 36px) !important; }
+.score-grade    { font-size: clamp(12px, 2.6vw, 15px) !important; }
+
+/* Form inputs bigger */
+input[type=number], input[type=text], select {
+  font-size: clamp(14px, 3vw, 16px) !important;
+  padding: clamp(10px, 2vw, 12px) clamp(10px, 2vw, 13px) !important;
+  min-height: var(--touch-min) !important;
+  border-radius: 9px !important;
+}
+
+/* Tool dock labels */
+.dtool-label { font-size: clamp(9px, 2vw, 11px) !important; }
+.dtool-badge { font-size: clamp(7px, 1.5vw, 8px) !important; }
+.dock-tab    { font-size: clamp(9px, 1.9vw, 11px) !important; }
+
+/* Nav links */
+.tb-nav-link { font-size: clamp(9px, 1.9vw, 11px) !important; }
+.tb-version  { font-size: clamp(9px, 1.9vw, 10px) !important; }
+
+/* Section preset labels */
+.batt-pill-s { font-size: clamp(13px, 2.8vw, 15px) !important; }
+.batt-pill-v { font-size: clamp(9px, 2vw, 11px) !important; }
+.sc-name     { font-size: clamp(9px, 2vw, 11px) !important; }
+.sc-sub      { font-size: clamp(10px, 2.2vw, 12px) !important; }
+.sc-ico      { font-size: clamp(18px, 4vw, 22px) !important; }
+.pmini       { font-size: clamp(10px, 2.2vw, 12px) !important; }
+
+/* Checklist values */
+.chk-val  { font-size: clamp(11px, 2.4vw, 13px) !important; }
+.chk-icon { font-size: clamp(16px, 3.5vw, 18px) !important; }
+
+/* Mission panel */
+.mp-title { font-size: clamp(12px, 2.6vw, 14px) !important; font-weight: 800 !important; }
+.mp-sub   { font-size: clamp(10px, 2.2vw, 12px) !important; }
+
+/* CLI boxes */
+.cli-box, pre { font-size: clamp(11px, 2.2vw, 13px) !important; }
+.sauce-cli-box { font-size: clamp(11px, 2.2vw, 13px) !important; }
+
+/* Buttons */
+.btn-analyze-text {
+  font-size: clamp(12px, 2.6vw, 15px) !important;
+  letter-spacing: 0.2em !important;
+}
+.btn-analyze-sub { font-size: clamp(9px, 2vw, 11px) !important; }
+.tab-btn {
+  font-size: clamp(10px, 2.2vw, 12px) !important;
+  padding: clamp(7px,1.5vw,9px) clamp(12px,2.5vw,18px) !important;
+  min-height: 38px !important;
+}
+
+/* Battery matrix table */
+.bmat-num { font-size: clamp(12px, 2.5vw, 14px) !important; }
+.bmat-s-badge { font-size: clamp(10px, 2.2vw, 12px) !important; }
+
+/* Filter values */
+.fval-label { font-size: clamp(9px, 2vw, 11px) !important; }
+
+/* ── HUD CELLS — DRAMATIC UPGRADE ────────────────────────── */
+.live-hud {
+  background: rgba(0,3,10,0.97) !important;
+}
+.hud-cell {
+  padding: clamp(14px,3vw,22px) clamp(14px,3vw,22px) !important;
+  transition: background .4s, box-shadow .4s !important;
+}
+.hud-cell:hover {
+  background: rgba(0,255,136,0.03) !important;
+  box-shadow: inset 0 0 40px rgba(0,255,136,0.04) !important;
+}
+.hud-val {
+  letter-spacing: -0.02em !important;
+  transition: all .5s cubic-bezier(.4,0,.2,1) !important;
+}
+.hud-val.green { text-shadow: 0 0 24px rgba(0,255,136,0.55), 0 0 60px rgba(0,255,136,0.15) !important; }
+.hud-val.amber { text-shadow: 0 0 24px rgba(255,185,0,0.55), 0 0 60px rgba(255,185,0,0.15) !important; }
+.hud-val.red   { text-shadow: 0 0 24px rgba(255,51,68,0.55), 0 0 60px rgba(255,51,68,0.15) !important; }
+.hud-val.blue  { text-shadow: 0 0 24px rgba(0,170,255,0.55), 0 0 60px rgba(0,170,255,0.15) !important; }
+.hud-lbl {
+  font-size: clamp(9px, 2vw, 11px) !important;
+  letter-spacing: 0.15em !important;
+  color: var(--text2) !important;
+}
+.hud-bar {
+  height: 4px !important;
+  border-radius: 3px !important;
+  margin-top: 10px !important;
+}
+.hud-bar-fill {
+  border-radius: 3px !important;
+  transition: width .8s cubic-bezier(.4,0,.2,1) !important;
+  box-shadow: 0 0 10px currentColor !important;
+}
+
+/* HUD value count animation */
+@keyframes hudCountUp {
+  from { opacity: 0; transform: translateY(6px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.hud-val.updated {
+  animation: hudCountUp .4s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── SCORE RING — SUPER DRAMATIC ─────────────────────────── */
+.score-ring-panel {
+  background: rgba(1,6,18,0.95) !important;
+  border: 1.5px solid rgba(0,255,136,0.15) !important;
+  border-radius: 16px !important;
+  padding: 20px !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+.score-ring-panel::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 80% at 50% 50%, rgba(0,255,136,0.03) 0%, transparent 70%);
+  pointer-events: none;
+}
+.score-num {
+  letter-spacing: -0.03em !important;
+  transition: all .6s cubic-bezier(.4,0,.2,1) !important;
+}
+@keyframes scoreReveal {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.score-num.revealed { animation: scoreReveal .5s cubic-bezier(.4,0,.2,1); }
+
+.sb-track {
+  height: 5px !important;
+  border-radius: 3px !important;
+  background: rgba(255,255,255,0.06) !important;
+}
+.sb-fill {
+  border-radius: 3px !important;
+  box-shadow: 0 0 8px currentColor !important;
+}
+
+/* ── RESULT PANELS — CINEMATIC REVEAL ────────────────────── */
+.tpanel {
+  border-radius: 14px !important;
+  border: 1.5px solid rgba(0,255,136,0.09) !important;
+  transition: border-color .3s, box-shadow .3s, transform .3s !important;
+}
+.tpanel:hover {
+  transform: translateY(-3px) !important;
+  border-color: rgba(0,255,136,0.22) !important;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6), 0 0 24px rgba(0,255,136,0.06) !important;
+}
+.tpanel-head {
+  padding: clamp(12px,2.5vw,16px) clamp(14px,2.8vw,18px) !important;
+  background: linear-gradient(135deg, rgba(0,255,136,0.04), rgba(0,170,255,0.02)) !important;
+}
+.tpanel-head-icon {
+  width: clamp(34px,7vw,40px) !important;
+  height: clamp(34px,7vw,40px) !important;
+  border-radius: 10px !important;
+  font-size: clamp(15px,3vw,18px) !important;
+}
+.tpanel-body {
+  padding: clamp(14px,2.8vw,18px) !important;
+}
+
+/* Stagger reveal animation */
+@keyframes panelReveal {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.tpanel { animation: panelReveal .45s cubic-bezier(.4,0,.2,1) both; }
+.tpanel:nth-child(1)  { animation-delay: 0.00s; }
+.tpanel:nth-child(2)  { animation-delay: 0.07s; }
+.tpanel:nth-child(3)  { animation-delay: 0.14s; }
+.tpanel:nth-child(4)  { animation-delay: 0.21s; }
+.tpanel:nth-child(5)  { animation-delay: 0.28s; }
+.tpanel:nth-child(6)  { animation-delay: 0.35s; }
+.tpanel:nth-child(7)  { animation-delay: 0.42s; }
+.tpanel:nth-child(8)  { animation-delay: 0.49s; }
+.tpanel:nth-child(9)  { animation-delay: 0.56s; }
+.tpanel:nth-child(10) { animation-delay: 0.63s; }
+
+/* ── INSTRUMENT CARDS — ELEVATED ─────────────────────────── */
+.inst-card {
+  border-radius: 13px !important;
+  border: 1.5px solid rgba(255,255,255,0.06) !important;
+  transition: all .3s cubic-bezier(.4,0,.2,1) !important;
+}
+.inst-card:hover {
+  border-color: rgba(0,255,136,0.22) !important;
+  box-shadow: 0 10px 36px rgba(0,0,0,0.55), 0 0 20px rgba(0,255,136,0.05) !important;
+  transform: translateY(-2px) !important;
+}
+.dvstat {
+  border-radius: 9px !important;
+  border: 1.5px solid rgba(255,255,255,0.05) !important;
+  padding: clamp(8px,2vw,10px) !important;
+  transition: all .2s !important;
+}
+.dvstat:hover {
+  border-color: rgba(0,255,136,0.2) !important;
+  background: rgba(0,255,136,0.04) !important;
+}
+
+/* ── BATTERY PILLS — BIGGER, BOLDER ─────────────────────── */
+.batt-pill {
+  padding: clamp(9px,2vw,12px) clamp(10px,2.5vw,14px) !important;
+  border-radius: 10px !important;
+  min-height: var(--touch-min) !important;
+  transition: all .2s cubic-bezier(.4,0,.2,1) !important;
+}
+.batt-pill:hover { transform: translateY(-3px) !important; box-shadow: 0 8px 20px rgba(0,0,0,0.4) !important; }
+.batt-pill.active { box-shadow: 0 0 18px rgba(0,255,136,0.2), 0 4px 20px rgba(0,0,0,0.4) !important; }
+
+/* ── STYLE CARDS — CINEMATIC ─────────────────────────────── */
+.style-card {
+  padding: clamp(12px,3vw,16px) clamp(6px,1.5vw,10px) !important;
+  border-radius: 12px !important;
+  min-height: var(--touch-min) !important;
+  transition: all .22s cubic-bezier(.4,0,.2,1) !important;
+}
+.style-card:hover {
+  transform: translateY(-4px) scale(1.02) !important;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.5) !important;
+}
+.style-card.active {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important;
+}
+
+/* ── PRESET MINI BUTTONS ─────────────────────────────────── */
+.pmini {
+  border-radius: 9px !important;
+  min-height: 42px !important;
+  transition: all .18s cubic-bezier(.4,0,.2,1) !important;
+  display: flex !important; flex-direction: column !important;
+  align-items: center !important; justify-content: center !important;
+}
+.pmini:hover { transform: translateY(-2px) scale(1.03) !important; }
+.pmini.active { box-shadow: 0 0 16px rgba(0,255,136,0.2) !important; }
+
+/* ── ANALYZE BUTTON — MAXIMUM IMPACT ────────────────────── */
+.btn-analyze {
+  height: clamp(58px,12vw,68px) !important;
+  border-radius: 12px !important;
+  border: 1.5px solid rgba(0,255,136,0.4) !important;
+  transition: all .3s cubic-bezier(.4,0,.2,1) !important;
+}
+.btn-analyze:hover {
+  border-color: rgba(0,255,136,0.8) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 0 36px rgba(0,255,136,0.4), 0 0 80px rgba(0,255,136,0.12),
+              0 12px 36px rgba(0,0,0,0.6) !important;
+}
+
+/* Pulse animation on hover */
+@keyframes btnPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(0,255,136,0.4); }
+  70%  { box-shadow: 0 0 0 12px rgba(0,255,136,0); }
+  100% { box-shadow: 0 0 0 0 rgba(0,255,136,0); }
+}
+.btn-analyze:hover { animation: btnPulse 1.5s ease-out infinite; }
+
+/* ── TOP BAR ENHANCED ────────────────────────────────────── */
+.top-bar::before {
+  content: '';
+  position: absolute; bottom: -1px; left: 0; right: 0; height: 1.5px;
+  background: linear-gradient(90deg, transparent, var(--green) 20%, var(--cyan) 50%,
+    var(--blue) 80%, transparent);
+  background-size: 300% 100%;
+  animation: sweep 4s linear infinite;
+}
+.top-bar::after { display: none !important; }
+
+/* ── TOOL DOCK ENHANCED ──────────────────────────────────── */
+.tool-dock::before {
+  height: 2px !important;
+  background: linear-gradient(90deg, transparent, var(--green) 10%, var(--cyan) 35%,
+    var(--blue) 65%, var(--purple) 85%, transparent) !important;
+  background-size: 300% 100% !important;
+  animation: sweep 6s linear infinite !important;
+}
+.dtool {
+  border-radius: 9px !important;
+  transition: all .2s cubic-bezier(.4,0,.2,1) !important;
+}
+.dtool:hover {
+  transform: translateY(-3px) scale(1.03) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 14px rgba(0,255,136,0.1) !important;
+}
+
+/* ── MISSION PANEL ENHANCED ──────────────────────────────── */
+.mp-header {
+  padding: clamp(14px,3vw,18px) clamp(14px,3vw,18px) clamp(12px,2.5vw,16px) !important;
+  background: linear-gradient(135deg,rgba(0,255,136,0.07) 0%,rgba(0,170,255,0.04) 100%) !important;
+  border-bottom: 1.5px solid rgba(0,255,136,0.1) !important;
+}
+.mp-header-icon {
+  width: clamp(38px,8vw,44px) !important;
+  height: clamp(38px,8vw,44px) !important;
+  border-radius: 11px !important;
+  font-size: clamp(17px,3.5vw,20px) !important;
+  background: linear-gradient(135deg,rgba(0,255,136,0.2),rgba(0,170,255,0.12)) !important;
+  border: 1.5px solid rgba(0,255,136,0.3) !important;
+}
+.mp-status-dot {
+  width: 7px !important; height: 7px !important;
+  box-shadow: 0 0 8px var(--green) !important;
+}
+
+/* Form section labels */
+.fsec-label::before {
+  width: 20px !important; height: 2px !important;
+}
+
+/* ── WARN / RULE ITEMS ────────────────────────────────────── */
+.warn-item, .rule-item {
+  border-radius: 10px !important;
+  padding: clamp(10px,2vw,13px) clamp(12px,2.5vw,16px) !important;
+  transition: background .2s !important;
+}
+.rule-title { font-size: clamp(10px,2.2vw,12px) !important; }
+.warn-icon, .rule-icon { font-size: clamp(16px,3vw,18px) !important; }
+
+/* ── EMPTY STATE — ULTRA DRAMATIC ────────────────────────── */
+.empty-state {
+  min-height: clamp(300px,50vh,500px) !important;
+  background: radial-gradient(ellipse 60% 40% at 50% 50%,
+    rgba(0,255,136,0.04), transparent) !important;
+}
+.empty-hex {
+  font-size: clamp(60px,12vw,80px) !important;
+  filter: drop-shadow(0 0 30px rgba(0,255,136,0.4)) !important;
+  animation: hexFloat 4s ease-in-out infinite, hexPulse 3s ease-in-out infinite !important;
+}
+@keyframes hexPulse {
+  0%,100% { filter: drop-shadow(0 0 20px rgba(0,255,136,0.3)); }
+  50%     { filter: drop-shadow(0 0 40px rgba(0,255,136,0.7)); }
+}
+.empty-title {
+  font-size: clamp(18px,4vw,24px) !important;
+  letter-spacing: 0.12em !important;
+  text-shadow: 0 0 30px rgba(0,255,136,0.3) !important;
+}
+.empty-sub {
+  font-size: clamp(12px,2.6vw,15px) !important;
+  line-height: 1.8 !important;
+}
+.chip {
+  font-size: clamp(9px,2vw,11px) !important;
+  padding: clamp(5px,1.2vw,7px) clamp(14px,3vw,18px) !important;
+}
+
+/* ── CLI DEPLOY PANEL ─────────────────────────────────────── */
+.cli-deploy {
+  border-radius: 16px !important;
+}
+.cli-deploy-title {
+  font-size: clamp(12px,2.6vw,14px) !important;
+  font-weight: 800 !important;
+}
+.cli-deploy-icon {
+  width: clamp(40px,8vw,46px) !important;
+  height: clamp(40px,8vw,46px) !important;
+  font-size: clamp(18px,3.5vw,22px) !important;
+}
+.cli-box {
+  border-radius: 0 0 14px 14px !important;
+  padding: clamp(14px,3vw,18px) clamp(14px,3vw,18px) !important;
+}
+
+/* ── SECRET SAUCE BLOCK ───────────────────────────────────── */
+.sauce-title {
+  font-size: clamp(12px,2.6vw,15px) !important;
+  font-weight: 800 !important;
+}
+.sauce-insight-title { font-size: clamp(9px,2vw,11px) !important; }
+.sauce-insight-body  { font-size: clamp(11px,2.2vw,13px) !important; }
+.sparam-val { font-size: clamp(13px,3vw,16px) !important; }
+
+/* ── TAB BUTTONS ─────────────────────────────────────────── */
+.tab-btn, .sauce-tab {
+  border-radius: 7px !important;
+  transition: all .18s cubic-bezier(.4,0,.2,1) !important;
+}
+.tab-btn:hover { transform: translateY(-1px) !important; }
+.tab-btn.active {
+  font-weight: 700 !important;
+  box-shadow: 0 0 12px rgba(0,255,136,0.15) !important;
+}
+
+/* ── INSIGHT CARDS ────────────────────────────────────────── */
+.insight-card {
+  border-radius: 12px !important;
+  transition: all .25s cubic-bezier(.4,0,.2,1) !important;
+  padding: clamp(14px,3vw,18px) !important;
+}
+.insight-card:hover {
+  transform: translateY(-4px) scale(1.01) !important;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.55) !important;
+}
+
+/* ── CHECKLIST GRID ───────────────────────────────────────── */
+.chk-item {
+  border-radius: 10px !important;
+  padding: clamp(9px,2vw,12px) clamp(10px,2.5vw,13px) !important;
+  min-height: 48px !important;
+  transition: all .2s !important;
+}
+.chk-item:hover { transform: translateX(2px) !important; }
+
+/* ── CONCEPT BOX ──────────────────────────────────────────── */
+.concept-box {
+  border-radius: 11px !important;
+  margin: clamp(10px,2.5vw,14px) clamp(12px,2.5vw,16px) !important;
+}
+.concept-header {
+  padding: clamp(10px,2vw,13px) clamp(12px,2.5vw,16px) !important;
+  font-size: clamp(12px,2.6vw,14px) !important;
+  min-height: var(--touch-min) !important;
+}
+.concept-content {
+  padding: clamp(12px,2.5vw,16px) !important;
+  font-size: clamp(12px,2.5vw,14px) !important;
+  line-height: 1.8 !important;
+}
+
+/* ── QS STATS — bigger spacing ───────────────────────────── */
+.qs-stats { gap: clamp(16px,4vw,24px) !important; padding: clamp(14px,3vw,18px) !important; }
+
+/* ── TOAST ────────────────────────────────────────────────── */
+.toast {
+  font-size: clamp(11px,2.4vw,13px) !important;
+  padding: clamp(10px,2vw,13px) clamp(20px,4vw,28px) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(20px) !important;
+  bottom: clamp(20px,4vw,28px) !important;
+}
+
+/* ── HARM / BATTERY MATRIX ───────────────────────────────── */
+.harm-node {
+  padding: clamp(12px,2.5vw,16px) !important;
+  border-radius: 12px !important;
+}
+.harm-node-f   { font-size: clamp(20px,4vw,26px) !important; }
+.harm-node-n   { font-size: clamp(10px,2.2vw,12px) !important; }
+.harm-node-desc { font-size: clamp(10px,2vw,12px) !important; line-height: 1.65 !important; }
+.bmat-table th, .bmat-table td { font-size: clamp(10px,2vw,12px) !important; }
+
+/* ── MISSION PANEL STICKY ANALYZE MOBILE ─────────────────── */
+@media(max-width:900px) {
+  .mission-panel {
+    border-bottom: 1.5px solid rgba(0,255,136,0.1) !important;
+  }
+  .btn-analyze {
+    position: sticky;
+    bottom: 0;
+    z-index: 50;
+    margin-left: -14px;
+    margin-right: -14px;
+    width: calc(100% + 28px);
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+  }
+}
+
+/* ── MOBILE LAYOUT DEEP FIX ──────────────────────────────── */
+@media(max-width:640px) {
+  .live-hud { grid-template-columns: repeat(2,1fr) !important; }
+  .hud-cell { padding: 12px 14px !important; }
+  .hud-val  { font-size: clamp(20px,5.5vw,26px) !important; }
+  .hud-lbl  { font-size: 9px !important; letter-spacing: .1em !important; }
+
+  .style-cards-grid { gap: 6px !important; }
+  .style-card { padding: 12px 4px !important; }
+  .sc-name { font-size: 9px !important; letter-spacing: .06em !important; }
+  .sc-sub  { display: none !important; }
+
+  .chk-grid { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
+
+  .tpanel-head { padding: 12px 14px !important; }
+  .tpanel-body { padding: 12px 14px !important; }
+  .tpanel-title { font-size: 11px !important; }
+  .tpanel-sub   { font-size: 10px !important; }
+
+  .results-col { padding: 12px 10px !important; gap: 12px !important; }
+
+  .filter-grid { grid-template-columns: 1fr 1fr !important; }
+  .adv-grid    { grid-template-columns: repeat(2,1fr) !important; }
+  .pid-grid    { display: grid !important; grid-template-columns: 1fr !important; gap: 10px !important; }
+
+  .sauce-params-grid { grid-template-columns: 1fr 1fr !important; }
+  .sparam-val { font-size: 13px !important; }
+
+  .insight-grid { grid-template-columns: 1fr !important; }
+  .out-summary  { grid-template-columns: 1fr 1fr !important; }
+
+  .qs-stats { gap: 14px !important; }
+  .qs-stat-val { font-size: 20px !important; }
+
+  .harm-grid { grid-template-columns: 1fr !important; }
+  .bmat-wrap { overflow-x: auto !important; }
+  .bmat-table { min-width: 580px !important; }
+}
+
+@media(max-width:480px) {
+  .dock-tab-count { display: none !important; }
+  .dtool-label { display: none !important; }
+  .dtool { padding: 7px 10px !important; }
+
+  .preset-grid-mini { gap: 5px !important; }
+  .pmini { min-width: 52px !important; font-size: 9px !important; }
+
+  .mp-header { padding: 12px 14px !important; }
+  .form-body { padding: 8px 12px 60px !important; }
+
+  .adv-stat-v { font-size: 18px !important; }
+  .adv-stat-l { font-size: 8px !important; }
+
+  .score-num { font-size: 28px !important; }
+  .score-grade { font-size: 12px !important; }
+}
+
+/* ── SCROLLBARS UPGRADE ───────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+::-webkit-scrollbar-thumb {
+  background: rgba(0,255,136,0.2); border-radius: 3px;
+  transition: background .2s;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(0,255,136,0.4); }
+
+/* ── SPECIAL GLOW EFFECTS ────────────────────────────────── */
+@keyframes glowPulse {
+  0%,100% { box-shadow: 0 0 12px rgba(0,255,136,0.2); }
+  50%     { box-shadow: 0 0 28px rgba(0,255,136,0.5); }
+}
+.score-ring-panel { animation: glowPulse 4s ease-in-out infinite; }
+
+/* ── SAFE AREA + OVERFLOW ─────────────────────────────────── */
+html, body { overflow-x: hidden; }
+@supports(padding: env(safe-area-inset-bottom)) {
+  .btn-analyze, .form-body { padding-bottom: max(env(safe-area-inset-bottom), 12px); }
+}
+
 </style>
 </head>
 <body>
 <div class="page-bg-photo" aria-hidden="true"></div>
 <div class="scan-line"></div>
+<div class="scan-line-2"></div>
+<div class="amb-orb amb-orb-4"></div>
 <div class="amb-orb amb-orb-1"></div>
 <div class="amb-orb amb-orb-2"></div>
 <div class="amb-orb amb-orb-3"></div>
@@ -3802,7 +4474,110 @@ window.OBIX = {
   }{% else %}null{% endif %}
 };
 </script>
-<script src="{{ url_for('static', filename='js/index-app.js') }}"></script>
+<script src="{{ url_for('static', filename='js/index-app.js') }}">
+/* ── SUPER UPGRADE: Animated counters + HUD pulse ─────── */
+(function(){
+  'use strict';
+
+  /* Animate number counting up */
+  function animateCounter(el, targetText, duration) {
+    if (!el) return;
+    const num = parseFloat(targetText);
+    if (isNaN(num)) { el.textContent = targetText; return; }
+    const unit = targetText.replace(/[-\d.]/g, '');
+    const start = 0, startTime = performance.now();
+    function step(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      el.textContent = (start + (num - start) * eased).toFixed(num % 1 === 0 ? 0 : 1) + unit;
+      if (progress < 1) requestAnimationFrame(step);
+      else { el.textContent = targetText; el.classList.add('updated'); setTimeout(() => el.classList.remove('updated'), 500); }
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* Observe HUD value changes */
+  const hudIds = ['h_twr','h_tip','h_rpm','h_ft'];
+  hudIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    let prev = el.textContent;
+    const obs = new MutationObserver(() => {
+      const cur = el.textContent;
+      if (cur !== prev && cur !== '— :1' && cur !== '— m/s' && cur !== '— RPM' && cur !== '— min') {
+        animateCounter(el, cur, 800);
+        prev = cur;
+      }
+    });
+    obs.observe(el, { childList: true, characterData: true, subtree: true });
+  });
+
+  /* Score ring pulse on update */
+  const scoreEl = document.querySelector('.score-num');
+  if (scoreEl) {
+    const scoreObs = new MutationObserver(() => {
+      scoreEl.classList.remove('revealed');
+      void scoreEl.offsetWidth;
+      scoreEl.classList.add('revealed');
+    });
+    scoreObs.observe(scoreEl, { childList: true, characterData: true, subtree: true });
+  }
+
+  /* Scroll reveal for tpanels */
+  const panels = document.querySelectorAll('.tpanel');
+  if (panels.length && 'IntersectionObserver' in window) {
+    panels.forEach(p => {
+      p.style.opacity = '0';
+      p.style.transform = 'translateY(24px)';
+    });
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const p = e.target;
+          p.style.transition = 'opacity .5s cubic-bezier(.4,0,.2,1), transform .5s cubic-bezier(.4,0,.2,1)';
+          p.style.opacity = '1';
+          p.style.transform = 'translateY(0)';
+          io.unobserve(p);
+        }
+      });
+    }, { threshold: 0.08 });
+    panels.forEach(p => io.observe(p));
+  }
+
+  /* HUD cell hover shimmer effect */
+  document.querySelectorAll('.hud-cell').forEach(cell => {
+    cell.addEventListener('mouseenter', function() {
+      const fill = this.querySelector('.hud-bar-fill');
+      if (fill) {
+        fill.style.filter = 'brightness(1.5)';
+        setTimeout(() => fill.style.filter = '', 400);
+      }
+    });
+  });
+
+  /* Insight card reveal */
+  const insCards = document.querySelectorAll('.insight-card');
+  if (insCards.length && 'IntersectionObserver' in window) {
+    insCards.forEach((c,i) => {
+      c.style.opacity = '0';
+      c.style.transform = 'translateY(16px)';
+      c.style.transition = `opacity .4s ${i*0.07}s cubic-bezier(.4,0,.2,1), transform .4s ${i*0.07}s cubic-bezier(.4,0,.2,1)`;
+    });
+    const io2 = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1 });
+    insCards.forEach(c => io2.observe(c));
+  }
+
+})();
+
+</script>
 
 </body>
 </html>
