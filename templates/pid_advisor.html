@@ -1,1551 +1,1452 @@
+{% set og_title       = "PID Symptom Advisor v5 Pro — OBIXConfig Doctor" %}
+{% set og_description = "วินิจฉัยอาการโดรน → ได้ PID fix + CLI พร้อม paste ทันที — Advanced Diagnostic Engine" %}
+{% set og_url         = "https://configdoctor.onrender.com/pid-advisor" %}
+{% set nav_page       = "pid_advisor" %}
+{% include "partials/og_tags.html" %}
 <!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PID Diagnostic Lab v3 — OBIXConfig Doctor</title>
-{% set og_title       = "PID Diagnostic Lab v3 — OBIXConfig Doctor" %}
-{% set og_description = "วิเคราะห์อาการโดรน → วินิจฉัย PID + CLI commands พร้อม paste ทันที — OBIX Diagnostic Lab" %}
-{% set og_url         = "https://configdoctor.onrender.com/pid-advisor" %}
-{% set nav_page       = "pid_advisor" %}
-{% include "partials/og_tags.html" %}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@300;400;500;600&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>PID Advisor v5 Pro — OBIXConfig Doctor</title>
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/site-theme.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-/* ═══════════════════════════════════════════════════════════
-   OBIX PID DIAGNOSTIC LAB — v3.0 APEX
-   Concept: Surgical Precision · Military Diagnostic HUD
-   Every output uses real numbers from user's actual PID values
-   ═══════════════════════════════════════════════════════════ */
-:root {
-  --bg:      #010407;
-  --bg2:     #030c16;
-  --panel:   #050d1a;
-  --panel2:  #071120;
-  --border:  rgba(0,200,255,.09);
-  --green:   #00ff88;
-  --blue:    #00c8ff;
-  --amber:   #ffbb00;
-  --red:     #ff3355;
-  --purple:  #c060ff;
-  --teal:    #00e8c8;
-  --muted:   #2a4060;
-  --muted2:  #4a6880;
-  --text:    #c0d8ec;
-  --font-d:  'Orbitron', monospace;
-  --font-m:  'JetBrains Mono', monospace;
-  --font-t:  'Sarabun', sans-serif;
-}
-*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-html,body { overflow-x:hidden; }
-body {
-  background:var(--bg);
-  color:var(--text);
-  font-family:var(--font-t);
-  font-size:14px;
-  min-height:100vh;
-}
-/* Subtle hex grid */
-body::before {
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='69'%3E%3Cpolygon points='20,1 39,11 39,31 20,41 1,31 1,11' fill='none' stroke='rgba(0,200,255,0.025)' stroke-width='1'/%3E%3C/svg%3E");
-  background-size:40px 69px;
-}
-/* Ambient glow */
-body::after {
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
-  background:
-    radial-gradient(ellipse 70% 50% at 10% 5%, rgba(255,51,85,.04) 0%,transparent 65%),
-    radial-gradient(ellipse 60% 40% at 90% 90%, rgba(0,200,255,.04) 0%,transparent 65%);
-}
-.page { position:relative; z-index:1; max-width:1500px; margin:0 auto; padding:0 16px 60px; }
+/* ══════════════════════════════════════════════════════════
+   PID ADVISOR v5 PRO — Advanced Diagnostic Interface
+   Design: Precision surgical tool · clear hierarchy · data-rich
+   ══════════════════════════════════════════════════════════ */
 
-/* ══════════════════════════════════
-   HERO
-══════════════════════════════════ */
-.hero {
-  padding:24px 0 20px;
-  border-bottom:1px solid var(--border);
-  display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:14px;
+/* Page layout */
+.adv-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 0;
+  min-height: calc(100vh - 54px);
 }
-.hero-eyebrow {
-  font-family:var(--font-d); font-size:8px; font-weight:700; letter-spacing:.22em;
-  color:var(--red); text-transform:uppercase; display:flex; align-items:center; gap:8px; margin-bottom:10px;
-}
-.hero-led { width:7px; height:7px; border-radius:50%; background:var(--red); box-shadow:0 0 10px var(--red); animation:pulse 1.5s ease-in-out infinite; }
-@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(.85)} }
-.hero-title { font-family:var(--font-d); font-size:clamp(18px,3vw,34px); font-weight:900; letter-spacing:.04em; color:#fff; line-height:1.1; }
-.hero-title .hl { color:var(--red); text-shadow:0 0 24px rgba(255,51,85,.5); }
-.hero-title .badge { display:inline-block; font-size:.38em; vertical-align:super; padding:2px 8px; border-radius:4px; background:rgba(255,51,85,.15); border:1px solid rgba(255,51,85,.3); color:var(--red); letter-spacing:.12em; margin-left:8px; }
-.hero-sub { margin-top:8px; font-size:12.5px; color:var(--muted2); line-height:1.7; }
-.hero-pills { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
-.hero-pill { font-family:var(--font-d); font-size:7px; letter-spacing:.1em; padding:3px 10px; border-radius:20px; border:1px solid rgba(0,200,255,.2); background:rgba(0,200,255,.06); color:var(--blue); }
-.hero-pill.red   { border-color:rgba(255,51,85,.2);  background:rgba(255,51,85,.06);  color:var(--red); }
-.hero-pill.green { border-color:rgba(0,255,136,.2); background:rgba(0,255,136,.06); color:var(--green); }
-.hero-pill.amber { border-color:rgba(255,187,0,.2);  background:rgba(255,187,0,.06);  color:var(--amber); }
-.hero-stats { display:flex; gap:20px; flex-wrap:wrap; font-family:var(--font-d); font-size:9px; letter-spacing:.1em; }
-.hs-item { display:flex; flex-direction:column; gap:3px; }
-.hs-num { font-size:22px; font-weight:700; color:#fff; line-height:1; }
+@media(max-width:960px) { .adv-layout { grid-template-columns: 1fr; } }
 
-/* ══════════════════════════════════
-   FLIGHT PROFILE BANNER
-══════════════════════════════════ */
-.profile-bar {
-  margin-top:16px; padding:10px 14px;
-  background:var(--panel); border:1px solid var(--border); border-radius:10px;
-  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+/* ── LEFT PANEL ──────────────────────────────────────────── */
+.adv-left {
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 54px);
+  position: sticky;
+  top: 54px;
+  overflow-y: auto;
 }
-.profile-label { font-family:var(--font-d); font-size:8px; letter-spacing:.14em; color:var(--muted2); flex-shrink:0; }
-.profile-btns  { display:flex; gap:5px; }
-.profile-btn {
-  font-family:var(--font-d); font-size:8px; letter-spacing:.1em; font-weight:700;
-  padding:5px 14px; border-radius:7px; border:1px solid var(--border);
-  background:none; cursor:pointer; color:var(--muted2); transition:.18s;
-}
-.profile-btn:hover { color:var(--text); border-color:rgba(255,255,255,.2); }
-.profile-btn.active[data-p=freestyle] { color:var(--blue);  border-color:rgba(0,200,255,.4);  background:rgba(0,200,255,.08);  }
-.profile-btn.active[data-p=racing]    { color:var(--red);   border-color:rgba(255,51,85,.4);   background:rgba(255,51,85,.08);  }
-.profile-btn.active[data-p=longrange] { color:var(--green); border-color:rgba(0,255,136,.4);  background:rgba(0,255,136,.08);  }
-.profile-desc { font-size:11.5px; color:var(--muted2); margin-left:auto; font-style:italic; }
+@media(max-width:960px) { .adv-left { position:static; height:auto; } }
 
-/* ══════════════════════════════════
-   MAIN GRID
-══════════════════════════════════ */
-.lab-grid {
-  display:grid;
-  grid-template-columns:290px 1fr 330px;
-  gap:14px; margin-top:16px; align-items:start;
+/* PID Input section */
+.pid-input-section {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.015);
 }
-@media(max-width:1200px) { .lab-grid { grid-template-columns:270px 1fr; } .col-right { grid-column:1/-1; display:grid; grid-template-columns:1fr 1fr; gap:14px; } }
-@media(max-width:700px)  { .lab-grid { grid-template-columns:1fr; } .col-right { grid-template-columns:1fr; } }
-
-/* Panel base */
-.panel {
-  background:var(--panel); border:1px solid var(--border); border-radius:14px; overflow:hidden; position:relative;
+.pid-input-title {
+  font-family: var(--font-head);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.panel::before { content:''; position:absolute; top:0; left:0; right:0; height:1.5px; background:linear-gradient(90deg,transparent,rgba(0,200,255,.3),transparent); }
-.panel-hd {
-  padding:11px 14px 10px; border-bottom:1px solid var(--border);
-  display:flex; align-items:center; justify-content:space-between; gap:8px;
-  background:linear-gradient(135deg,rgba(0,200,255,.03),transparent);
+.pid-input-title::after { content:''; flex:1; height:1px; background:var(--border2); }
+
+.pid-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 6px;
 }
-.panel-title { font-family:var(--font-d); font-size:8.5px; font-weight:700; letter-spacing:.16em; color:var(--blue); text-transform:uppercase; display:flex; align-items:center; gap:7px; }
-.panel-body { padding:13px; }
-
-/* ══════════════════════════════════
-   COL LEFT — INPUTS
-══════════════════════════════════ */
-
-/* Current PID inputs */
+.pid-axis-label {
+  font-family: var(--font-head);
+  font-size: 9px;
+  letter-spacing: .1em;
+  color: var(--muted2);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
 .pid-input-wrap {
-  background:rgba(0,200,255,.03); border:1px solid rgba(0,200,255,.1); border-radius:10px; padding:12px; margin-bottom:12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
-.pid-input-title { font-family:var(--font-d); font-size:8px; letter-spacing:.16em; color:var(--blue); margin-bottom:10px; display:flex; align-items:center; gap:7px; justify-content:space-between; }
-.pid-input-subtitle { font-size:9.5px; color:var(--muted2); font-family:var(--font-t); font-style:italic; }
-.pid-row { display:grid; grid-template-columns:52px 1fr 1fr 1fr; gap:5px; margin-bottom:6px; align-items:center; }
-.pid-row-label { font-family:var(--font-d); font-size:8px; letter-spacing:.08em; color:var(--muted2); }
-.pid-input-hdr { font-family:var(--font-d); font-size:7px; letter-spacing:.14em; color:var(--muted); text-align:center; padding-bottom:4px; border-bottom:1px solid var(--border); margin-bottom:4px; }
+.pid-term-label {
+  font-family: var(--font-head);
+  font-size: 8px;
+  letter-spacing: .1em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
 .pid-num {
-  width:100%; background:var(--panel2); border:1px solid var(--border); border-radius:6px;
-  color:var(--text); font-family:var(--font-m); font-size:12px; text-align:center;
-  padding:6px 4px; transition:.18s; outline:none;
+  width: 100%;
+  padding: 7px 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  outline: none;
+  text-align: center;
+  transition: border-color .15s;
 }
-.pid-num:focus { border-color:rgba(0,200,255,.4); box-shadow:0 0 0 2px rgba(0,200,255,.08); }
-.pid-extra-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:6px; }
-.pid-extra-label { font-family:var(--font-d); font-size:7px; letter-spacing:.1em; color:var(--muted2); margin-bottom:3px; }
-.pid-load-preset { font-family:var(--font-d); font-size:7px; letter-spacing:.08em; padding:3px 9px; border-radius:5px; border:1px solid rgba(0,200,255,.2); background:rgba(0,200,255,.05); color:var(--blue); cursor:pointer; transition:.15s; white-space:nowrap; }
-.pid-load-preset:hover { background:rgba(0,200,255,.12); }
+.pid-num:focus { border-color: rgba(16,196,122,0.45); }
+.pid-num.p { color: var(--green); }
+.pid-num.i { color: var(--blue); }
+.pid-num.d { color: var(--amber); }
 
-/* Severity */
-.severity-row { display:flex; gap:5px; margin-bottom:11px; border-radius:8px; overflow:hidden; border:1px solid var(--border); }
-.sev-btn { flex:1; padding:7px 4px; font-family:var(--font-d); font-size:7.5px; font-weight:700; letter-spacing:.08em; background:none; border:none; cursor:pointer; text-align:center; text-transform:uppercase; transition:.18s; }
-.sev-btn:hover { background:rgba(255,255,255,.04); }
-.sev-btn[data-sev="mild"].active     { background:rgba(0,255,136,.1);  color:var(--green); }
-.sev-btn[data-sev="moderate"].active { background:rgba(255,187,0,.1);  color:var(--amber); }
-.sev-btn[data-sev="severe"].active   { background:rgba(255,51,85,.1);  color:var(--red); }
-.sev-btn:not(.active) { color:var(--muted2); }
+/* Filter input */
+.filter-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 8px;
+}
+.filt-group { display: flex; flex-direction: column; gap: 3px; }
+.filt-label {
+  font-family: var(--font-head);
+  font-size: 8px;
+  letter-spacing: .1em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.filt-num {
+  padding: 6px 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--cyan);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  outline: none;
+  transition: border-color .15s;
+  width: 100%;
+}
+.filt-num:focus { border-color: rgba(34,211,238,0.45); }
 
-/* Category tabs */
-.cat-tabs { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px; }
-.cat-tab { font-family:var(--font-d); font-size:7px; font-weight:700; letter-spacing:.08em; padding:3px 9px; border-radius:20px; border:1px solid var(--border); background:none; color:var(--muted2); cursor:pointer; transition:.18s; }
-.cat-tab:hover { color:var(--text); border-color:rgba(255,255,255,.15); }
-.cat-tab.active { color:var(--red); border-color:rgba(255,51,85,.35); background:rgba(255,51,85,.08); }
+/* Profile selector */
+.profile-section {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.profile-btns {
+  display: flex;
+  gap: 5px;
+}
+.profile-btn {
+  flex: 1;
+  padding: 7px 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-head);
+  font-size: 8px;
+  letter-spacing: .06em;
+  color: var(--muted2);
+  transition: all .15s;
+  text-align: center;
+}
+.profile-btn:hover { border-color: rgba(255,255,255,.15); color: var(--text2); }
+.profile-btn.active[data-p=freestyle] { background:rgba(74,158,255,.1); border-color:rgba(74,158,255,.35); color:var(--blue); }
+.profile-btn.active[data-p=racing]    { background:var(--red-dim); border-color:rgba(248,113,113,.35); color:var(--red); }
+.profile-btn.active[data-p=longrange] { background:var(--green-dim); border-color:rgba(16,196,122,.35); color:var(--green); }
 
 /* Symptom list */
-.symptom-list { display:flex; flex-direction:column; gap:6px; max-height:500px; overflow-y:auto; }
-.symptom-list::-webkit-scrollbar { width:3px; }
-.symptom-list::-webkit-scrollbar-thumb { background:rgba(255,51,85,.4); border-radius:2px; }
-.symp-card {
-  padding:10px 12px; border:1px solid var(--border); border-radius:9px; background:var(--panel2);
-  cursor:pointer; transition:.2s; position:relative; overflow:hidden;
-  display:flex; align-items:center; gap:9px;
+.symptom-section {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 10px;
 }
-.symp-card:hover { border-color:rgba(255,51,85,.2); background:rgba(255,51,85,.03); }
-.symp-card.active { border-color:rgba(255,51,85,.5); background:rgba(255,51,85,.07); }
-.symp-card.active::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--red); border-radius:2px 0 0 2px; }
-.symp-icon { font-size:17px; flex-shrink:0; line-height:1; }
-.symp-info { flex:1; min-width:0; }
-.symp-name { font-size:12px; color:var(--text); line-height:1.35; font-weight:500; }
-.symp-cat  { font-family:var(--font-d); font-size:7px; letter-spacing:.1em; text-transform:uppercase; margin-top:2px; }
-.symp-conf { font-family:var(--font-m); font-size:9px; color:var(--muted2); margin-left:auto; flex-shrink:0; }
-.symp-check { width:15px; height:15px; border-radius:50%; border:1.5px solid var(--muted); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:.2s; font-size:9px; }
-.symp-card.active .symp-check { background:var(--red); border-color:var(--red); }
-
-/* Quick actions */
-.quick-acts { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
-.qa-btn { flex:1; min-width:90px; padding:8px; border-radius:8px; cursor:pointer; font-family:var(--font-d); font-size:7.5px; font-weight:700; letter-spacing:.08em; border:1px solid; text-transform:uppercase; transition:.18s; text-align:center; }
-.qa-btn.rd { color:var(--red);   border-color:rgba(255,51,85,.3);  background:rgba(255,51,85,.06); }
-.qa-btn.bb { color:var(--blue);  border-color:rgba(0,200,255,.3);  background:rgba(0,200,255,.06); }
-.qa-btn.gr { color:var(--green); border-color:rgba(0,255,136,.3); background:rgba(0,255,136,.06); }
-.qa-btn:hover { filter:brightness(1.2); }
-
-/* History panel */
-.history-item {
-  padding:8px 10px; border:1px solid var(--border); border-radius:8px; cursor:pointer;
-  background:var(--panel2); transition:.15s; display:flex; align-items:center; gap:8px; margin-bottom:5px;
+.symptom-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0 10px;
+  margin-bottom: 10px;
+  transition: border-color .15s;
 }
-.history-item:hover { border-color:rgba(0,200,255,.25); }
-.history-dots { display:flex; gap:3px; flex-wrap:wrap; max-width:120px; }
-.history-dot  { width:5px; height:5px; border-radius:50%; background:var(--red); opacity:.7; }
-.history-time { font-family:var(--font-m); font-size:9px; color:var(--muted2); margin-left:auto; flex-shrink:0; }
-
-/* ══════════════════════════════════
-   COL MID — DIAGNOSIS
-══════════════════════════════════ */
-
-.empty-state {
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  padding:60px 20px; text-align:center; min-height:320px;
+.symptom-search-wrap:focus-within { border-color: var(--border-hi); }
+.symptom-search-icon { color: var(--muted2); font-size: 12px; flex-shrink: 0; }
+.symptom-search {
+  background: none; border: none; outline: none;
+  color: var(--text); font-size: 13px; width: 100%; padding: 8px 0;
 }
-.er-wrap { width:80px; height:80px; position:relative; margin-bottom:22px; }
-.er-ring { position:absolute; border-radius:50%; border:1px solid; animation:erSpin 8s linear infinite; }
-.er-ring:nth-child(1){inset:0;border-color:rgba(255,51,85,.35);}
-.er-ring:nth-child(2){inset:12px;border-color:rgba(255,51,85,.2);animation-duration:5s;animation-direction:reverse;}
-.er-ring:nth-child(3){inset:24px;border-color:rgba(255,51,85,.12);animation-duration:3s;}
-.er-scan { position:absolute; inset:0; border-radius:50%; overflow:hidden; }
-.er-scan::after { content:''; position:absolute; width:50%; height:100%; right:50%; top:0; background:conic-gradient(from 0deg,transparent 0deg,rgba(255,51,85,.15) 90deg,transparent 90deg); transform-origin:right center; animation:erSpin 3s linear infinite; }
-@keyframes erSpin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
-.er-dot { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:22px; }
-.empty-title { font-family:var(--font-d); font-size:13px; font-weight:700; letter-spacing:.1em; color:var(--text); margin-bottom:8px; }
-.empty-sub { font-size:12px; color:var(--muted2); line-height:1.65; }
+.symptom-search::placeholder { color: var(--muted); }
 
-.diag-content { display:none; }
-.diag-content.show { display:block; }
-.empty-state.hide { display:none; }
-
-/* Conflict Alert */
-.conflict-alert {
-  margin:12px 14px; padding:11px 14px;
-  background:rgba(255,187,0,.07); border:1.5px solid rgba(255,187,0,.35); border-radius:10px;
-  display:none; align-items:flex-start; gap:10px;
-  animation:fadeIn .3s ease;
+.category-group { margin-bottom: 6px; }
+.category-label {
+  font-family: var(--font-head);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 8px 6px 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
-.conflict-alert.show { display:flex; }
-.conflict-icon { font-size:18px; flex-shrink:0; line-height:1; margin-top:1px; }
-.conflict-title { font-family:var(--font-d); font-size:8.5px; font-weight:700; letter-spacing:.1em; color:var(--amber); margin-bottom:5px; }
-.conflict-body  { font-size:12px; color:var(--text); line-height:1.6; }
-.conflict-item  { display:inline-block; font-family:var(--font-m); font-size:10px; padding:2px 8px; border-radius:4px; background:rgba(255,187,0,.12); color:var(--amber); margin:2px 2px 0; }
-.conflict-resolution { margin-top:8px; padding:8px 10px; background:rgba(0,0,0,.3); border-radius:7px; font-size:11.5px; color:var(--muted2); line-height:1.6; border-left:2px solid var(--amber); }
+.category-label::after { content:''; flex:1; height:1px; background:var(--border2); }
 
-/* Axis diagram */
-.axis-wrap { display:flex; justify-content:center; padding:14px 14px 6px; border-bottom:1px solid var(--border); }
-.axis-svg { overflow:visible; }
-.ax-body { fill:var(--panel2); stroke:rgba(255,255,255,.1); stroke-width:1; }
-.ax-arm  { fill:none; stroke:var(--muted); stroke-width:5; stroke-linecap:round; transition:.4s; }
-.ax-prop { fill:none; stroke:var(--muted); stroke-width:1.5; opacity:.4; transition:.4s; }
-.ax-motor { fill:rgba(0,200,255,.08); stroke:rgba(0,200,255,.3); stroke-width:1.5; transition:.4s; }
-.ax-roll-ind  { fill:none; stroke:var(--amber);  stroke-width:2; stroke-dasharray:5 3; opacity:0; transition:.4s; }
-.ax-pitch-ind { fill:none; stroke:var(--green);  stroke-width:2; stroke-dasharray:5 3; opacity:0; transition:.4s; }
-.ax-yaw-ind   { fill:none; stroke:var(--purple); stroke-width:2; stroke-dasharray:5 3; opacity:0; transition:.4s; }
-.ax-label { font-family:var(--font-d); font-size:8px; font-weight:700; letter-spacing:.1em; fill:var(--muted2); transition:.4s; }
-.axis-legend { display:flex; justify-content:center; gap:14px; padding:7px 0 12px; flex-wrap:wrap; }
-.ax-leg { font-family:var(--font-d); font-size:8px; letter-spacing:.1em; font-weight:700; padding:3px 11px; border-radius:20px; border:1px solid; opacity:.28; transition:.3s; }
-.ax-leg.on { opacity:1; }
+.symptom-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all .15s;
+  margin-bottom: 2px;
+}
+.symptom-item:hover {
+  background: rgba(255,255,255,0.03);
+  border-color: var(--border);
+}
+.symptom-item.active {
+  background: var(--green-dim);
+  border-color: rgba(16,196,122,0.25);
+}
+.symptom-item.active .symptom-name { color: var(--green); }
+.symptom-icon { font-size: 16px; flex-shrink: 0; width: 24px; text-align: center; }
+.symptom-info { flex: 1; min-width: 0; }
+.symptom-name { font-size: 12.5px; font-weight: 600; color: var(--text); line-height: 1.3; }
+.symptom-name-en { font-size: 10px; color: var(--muted2); margin-top: 1px; font-style: italic; }
+.severity-dot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+}
+.severity-dot.critical { background: var(--red); box-shadow: 0 0 6px var(--red); }
+.severity-dot.high     { background: var(--orange); }
+.severity-dot.medium   { background: var(--amber); }
+.severity-dot.low      { background: var(--blue); }
+
+/* ── RIGHT PANEL ─────────────────────────────────────────── */
+.adv-right {
+  overflow-y: auto;
+  max-height: calc(100vh - 54px);
+  display: flex;
+  flex-direction: column;
+}
+@media(max-width:960px) { .adv-right { max-height: none; } }
+
+/* Empty state */
+.adv-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+  text-align: center;
+  gap: 16px;
+}
+.adv-empty-icon {
+  font-size: 56px;
+  animation: floatIcon 4s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px rgba(16,196,122,0.3));
+}
+@keyframes floatIcon { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+.adv-empty-title {
+  font-family: var(--font-head);
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--text);
+}
+.adv-empty-sub {
+  font-size: 13px;
+  color: var(--muted2);
+  max-width: 320px;
+  line-height: 1.7;
+}
+.adv-empty-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Result panels */
+.adv-result { display: none; flex: 1; flex-direction: column; }
+.adv-result.show { display: flex; }
+
+/* Diagnosis header */
+.diag-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.015);
+}
+.diag-header-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.diag-icon-wrap {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; flex-shrink: 0;
+  border: 2px solid;
+}
+.diag-title {
+  font-family: var(--font-head);
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: .03em;
+  color: var(--text);
+  line-height: 1.2;
+}
+.diag-title-en {
+  font-size: 11px;
+  color: var(--muted2);
+  margin-top: 4px;
+  font-style: italic;
+}
+.diag-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.confidence-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-head);
+  font-size: 10px;
+  letter-spacing: .08em;
+  color: var(--muted2);
+}
+.confidence-bar {
+  width: 80px;
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.confidence-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--green), var(--cyan));
+  transition: width .5s var(--ease);
+}
+
+/* Quick win banner */
+.quick-win-banner {
+  margin: 16px 24px 0;
+  padding: 12px 14px;
+  background: rgba(16,196,122,0.07);
+  border: 1px solid rgba(16,196,122,0.2);
+  border-left: 3px solid var(--green);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.quick-win-label {
+  font-family: var(--font-head);
+  font-size: 9px;
+  letter-spacing: .12em;
+  color: var(--green);
+  white-space: nowrap;
+}
+.quick-win-text { color: var(--text); }
+
+/* Content area */
+.adv-content { padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; flex: 1; }
+
+/* Section titles */
+.adv-sec-title {
+  font-family: var(--font-head);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.adv-sec-title::after { content:''; flex:1; height:1px; background:var(--border2); }
 
 /* Diagnosis block */
-.diag-block {
-  margin:0 14px 12px; background:rgba(0,0,0,.3); border:1px solid var(--border);
-  border-radius:10px; padding:13px; position:relative; overflow:hidden;
+.diag-text {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--text2);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  position: relative;
 }
-.diag-block::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--red); }
-.diag-label { font-family:var(--font-d); font-size:8px; letter-spacing:.15em; font-weight:700; color:var(--muted2); text-transform:uppercase; margin-bottom:7px; display:flex; align-items:center; gap:8px; }
-.diag-label::after { content:''; flex:1; height:1px; background:var(--border); }
-.diag-text { font-size:12.5px; line-height:1.75; color:var(--text); }
-.cause-tag { display:inline-flex; align-items:center; gap:6px; margin-top:9px; padding:4px 12px; border-radius:20px; font-family:var(--font-d); font-size:9px; font-weight:700; letter-spacing:.08em; background:rgba(255,51,85,.1); border:1px solid rgba(255,51,85,.25); color:var(--red); }
-
-/* Step-by-step guide */
-.steps-wrap { margin:0 14px 12px; }
-.steps-title { font-family:var(--font-d); font-size:8.5px; letter-spacing:.14em; font-weight:700; color:var(--muted2); text-transform:uppercase; display:flex; align-items:center; gap:8px; margin-bottom:10px; }
-.steps-title::after { content:''; flex:1; height:1px; background:var(--border); }
-.step-row {
-  display:flex; gap:10px; padding:9px 11px; border-radius:9px;
-  border:1px solid var(--border); background:var(--panel2); margin-bottom:6px;
-  position:relative; overflow:hidden; transition:.2s;
+.diag-cause {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border2);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
 }
-.step-row::before { content:''; position:absolute; left:0; top:0; bottom:0; width:2.5px; }
-.step-row.step-crit::before { background:var(--red); }
-.step-row.step-imp::before  { background:var(--amber); }
-.step-row.step-opt::before  { background:var(--blue); }
-.step-row:hover { border-color:rgba(255,255,255,.12); }
-.step-num { font-family:var(--font-d); font-size:18px; font-weight:900; color:rgba(255,255,255,.06); flex-shrink:0; line-height:1; min-width:22px; }
-.step-body { flex:1; min-width:0; }
-.step-name { font-family:var(--font-d); font-size:9px; font-weight:700; letter-spacing:.08em; color:var(--text); margin-bottom:4px; display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
-.step-badge { font-family:var(--font-d); font-size:6.5px; letter-spacing:.1em; padding:2px 7px; border-radius:4px; }
-.badge-crit { background:rgba(255,51,85,.12);  color:var(--red);   border:1px solid rgba(255,51,85,.25); }
-.badge-imp  { background:rgba(255,187,0,.12); color:var(--amber); border:1px solid rgba(255,187,0,.25); }
-.badge-opt  { background:rgba(0,200,255,.10); color:var(--blue);  border:1px solid rgba(0,200,255,.22); }
-.step-desc  { font-size:11.5px; color:rgba(200,220,240,.6); line-height:1.65; }
-.step-cli   { font-family:var(--font-m); font-size:10px; color:var(--green); background:rgba(0,255,136,.06); border:1px solid rgba(0,255,136,.12); border-radius:5px; padding:5px 9px; margin-top:6px; cursor:pointer; white-space:pre-wrap; word-break:break-all; transition:.15s; }
-.step-cli:hover { background:rgba(0,255,136,.12); }
+.diag-cause-label {
+  font-family: var(--font-head);
+  font-size: 8px;
+  letter-spacing: .1em;
+  color: var(--muted2);
+  white-space: nowrap;
+  padding-top: 1px;
+}
+.diag-cause-text { color: var(--text); font-weight: 600; }
 
-/* Before/After PID delta viz */
-.delta-section { margin:0 14px 14px; }
-.delta-title { font-family:var(--font-d); font-size:8.5px; letter-spacing:.14em; font-weight:700; color:var(--muted2); text-transform:uppercase; display:flex; align-items:center; gap:8px; margin-bottom:10px; }
-.delta-title::after { content:''; flex:1; height:1px; background:var(--border); }
-.delta-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
-.delta-axis { background:var(--panel2); border:1px solid var(--border); border-radius:9px; padding:10px 11px; }
-.delta-axis-name { font-family:var(--font-d); font-size:8px; letter-spacing:.12em; font-weight:700; margin-bottom:8px; }
-.delta-row { margin-bottom:7px; }
-.delta-row-label { font-family:var(--font-d); font-size:7px; letter-spacing:.1em; color:var(--muted2); margin-bottom:3px; display:flex; justify-content:space-between; }
-.delta-bar-bg { height:8px; background:rgba(255,255,255,.05); border-radius:4px; overflow:hidden; position:relative; }
-.delta-bar-cur { position:absolute; top:0; left:0; height:100%; border-radius:4px; background:rgba(255,255,255,.2); transition:width .5s ease; }
-.delta-bar-new { position:absolute; top:0; left:0; height:100%; border-radius:4px; transition:width .7s ease; opacity:.8; }
-.delta-bar-new.up   { background:var(--green); }
-.delta-bar-new.down { background:var(--red); }
-.delta-bar-new.same { background:rgba(255,255,255,.3); }
-.delta-nums { display:flex; justify-content:space-between; font-family:var(--font-m); font-size:9px; margin-top:2px; }
-.delta-cur-val { color:rgba(255,255,255,.35); }
-.delta-new-val { font-weight:700; }
-.delta-new-val.up   { color:var(--green); }
-.delta-new-val.down { color:var(--red); }
-.delta-new-val.same { color:rgba(255,255,255,.5); }
+/* Adjustments — visual delta cards */
+.adj-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+.adj-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 13px 14px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .15s, box-shadow .15s;
+}
+.adj-card:hover { border-color: rgba(255,255,255,.15); box-shadow: 0 4px 16px rgba(0,0,0,.35); }
+.adj-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+.adj-card.up::before   { background: var(--green); }
+.adj-card.down::before { background: var(--red); }
+.adj-card.check::before{ background: var(--amber); }
+.adj-card.set::before  { background: var(--blue); }
 
-/* Multi banner */
-.multi-banner { margin:0 14px 12px; padding:9px 13px; background:rgba(0,200,255,.06); border:1px solid rgba(0,200,255,.2); border-radius:9px; font-family:var(--font-d); font-size:8.5px; letter-spacing:.1em; color:var(--blue); display:none; align-items:center; gap:10px; }
-.multi-banner.show { display:flex; }
-@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+.adj-param {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.adj-delta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.adj-dir {
+  font-family: var(--font-head);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  padding: 3px 9px;
+  border-radius: 4px;
+}
+.adj-dir.up    { background:rgba(16,196,122,.1); color:var(--green); border:1px solid rgba(16,196,122,.2); }
+.adj-dir.down  { background:rgba(248,113,113,.1); color:var(--red);  border:1px solid rgba(248,113,113,.2); }
+.adj-dir.check { background:rgba(245,158,11,.1); color:var(--amber); border:1px solid rgba(245,158,11,.2); }
+.adj-dir.set   { background:rgba(74,158,255,.1); color:var(--blue);  border:1px solid rgba(74,158,255,.2); }
 
-/* ══════════════════════════════════
-   COL RIGHT — CLI + CONFIDENCE + TIPS
-══════════════════════════════════ */
-.cli-panel { background:rgba(0,0,0,.5); border-radius:10px; overflow:hidden; border:1px solid rgba(0,200,255,.1); position:relative; }
-.cli-panel::before { content:''; position:absolute; top:0; left:0; right:0; height:1.5px; background:linear-gradient(90deg,transparent,var(--green),var(--blue),transparent); background-size:200%; animation:sweep 5s linear infinite; }
-@keyframes sweep { 0%{background-position:100%} 100%{background-position:-100%} }
-.cli-topbar { display:flex; align-items:center; justify-content:space-between; padding:9px 12px; border-bottom:1px solid rgba(0,200,255,.08); }
-.cli-dots { display:flex; gap:5px; }
-.cli-dot { width:8px; height:8px; border-radius:50%; }
-.cli-dot-r { background:#ff5f57; } .cli-dot-a { background:#ffbd2e; } .cli-dot-g { background:#28c840; }
-.cli-fname { font-family:var(--font-m); font-size:10px; color:var(--muted2); }
-.cli-btn-row { display:flex; gap:5px; }
-.cli-copy-btn { font-family:var(--font-d); font-size:7.5px; font-weight:700; letter-spacing:.1em; padding:4px 11px; border-radius:6px; border:1px solid rgba(0,255,136,.25); background:rgba(0,255,136,.07); color:var(--green); cursor:pointer; transition:.18s; }
-.cli-copy-btn:hover { background:rgba(0,255,136,.14); border-color:rgba(0,255,136,.45); }
-.cli-copy-btn.copied { color:var(--amber); border-color:rgba(255,187,0,.3); }
-.cli-dl-btn { font-family:var(--font-d); font-size:7.5px; font-weight:700; letter-spacing:.1em; padding:4px 11px; border-radius:6px; border:1px solid rgba(0,200,255,.2); background:rgba(0,200,255,.06); color:var(--blue); cursor:pointer; transition:.18s; }
-.cli-dl-btn:hover { background:rgba(0,200,255,.12); }
+.adj-amount {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+.adj-reason {
+  font-size: 11.5px;
+  color: var(--text2);
+  line-height: 1.55;
+}
 
-.cli-body { padding:13px; font-family:var(--font-m); font-size:11.5px; line-height:1.85; min-height:140px; max-height:300px; overflow-y:auto; }
-.cli-body::-webkit-scrollbar { width:3px; }
-.cli-body::-webkit-scrollbar-thumb { background:rgba(0,255,136,.3); border-radius:2px; }
-.cli-cmt  { color:rgba(0,255,136,.4); }
-.cli-cmd  { color:#c4dce8; }
-.cli-val  { color:var(--amber); font-weight:600; }
-.cli-key  { color:#79c0ff; }
-.cli-save { color:var(--green); font-weight:700; }
-.cli-note { color:var(--muted2); font-size:10.5px; }
-.cli-section { color:var(--blue); font-weight:600; }
-.cli-new  { color:var(--green); font-size:10.5px; }
-.cli-old  { color:rgba(255,255,255,.25); font-size:10.5px; text-decoration:line-through; }
-.cli-empty { color:var(--muted2); font-size:11.5px; padding:8px 0; display:flex; align-items:center; gap:8px; }
+/* PID Delta preview */
+.pid-delta-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.pid-delta-head {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border2);
+  background: rgba(255,255,255,0.015);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.pid-delta-title {
+  font-family: var(--font-head);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: var(--text);
+}
+.pid-delta-body { padding: 14px 16px; }
 
-/* Confidence */
-.conf-box { margin:10px 12px; background:var(--panel2); border:1px solid var(--border); border-radius:9px; padding:11px 13px; }
-.conf-hd  { font-family:var(--font-d); font-size:8px; letter-spacing:.12em; color:var(--muted2); display:flex; justify-content:space-between; margin-bottom:8px; }
-.conf-track { height:8px; background:rgba(255,255,255,.05); border-radius:4px; overflow:hidden; }
-.conf-bar   { height:100%; border-radius:4px; background:linear-gradient(90deg,var(--red),var(--amber),var(--green)); transition:width .7s cubic-bezier(.4,0,.2,1); position:relative; }
-.conf-bar::after { content:''; position:absolute; right:0; top:0; bottom:0; width:3px; background:#fff; opacity:.5; filter:blur(2px); }
-.conf-factors { display:flex; gap:4px; flex-wrap:wrap; margin-top:8px; }
-.conf-factor  { font-family:var(--font-d); font-size:7px; letter-spacing:.08em; padding:2px 8px; border-radius:4px; }
-.cf-high { background:rgba(0,255,136,.1);  color:var(--green); border:1px solid rgba(0,255,136,.2); }
-.cf-med  { background:rgba(255,187,0,.1); color:var(--amber); border:1px solid rgba(255,187,0,.2); }
-.cf-low  { background:rgba(255,51,85,.1);  color:var(--red);   border:1px solid rgba(255,51,85,.2); }
+.pid-delta-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.pid-delta-table th {
+  font-family: var(--font-head);
+  font-size: 8px;
+  letter-spacing: .12em;
+  color: var(--muted2);
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+  text-transform: uppercase;
+}
+.pid-delta-table th:first-child { text-align: left; }
+.pid-delta-table td {
+  padding: 8px 8px;
+  border-bottom: 1px solid var(--border2);
+  text-align: center;
+  vertical-align: middle;
+}
+.pid-delta-table tr:last-child td { border-bottom: none; }
+.pdt-axis {
+  font-family: var(--font-head);
+  font-size: 9px;
+  letter-spacing: .12em;
+  color: var(--muted2);
+  text-align: left;
+  text-transform: uppercase;
+}
+.pdt-cur { color: var(--text2); }
+.pdt-arrow { color: var(--muted); font-size: 10px; }
+.pdt-new { font-weight: 700; }
+.pdt-new.up   { color: var(--green); }
+.pdt-new.down { color: var(--red); }
+.pdt-new.same { color: var(--text2); }
+.pdt-delta {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.pdt-delta.up   { background:rgba(16,196,122,.1); color:var(--green); }
+.pdt-delta.down { background:rgba(248,113,113,.1); color:var(--red); }
+.pdt-delta.same { background:rgba(255,255,255,.04); color:var(--muted2); }
 
-/* Severity note */
-.sev-note { padding:8px 12px; border-radius:8px; border:1px solid; display:flex; align-items:flex-start; gap:9px; margin-bottom:12px; }
-.sev-note-label { font-family:var(--font-d); font-size:9px; font-weight:700; letter-spacing:.1em; flex-shrink:0; }
-.sev-note-text  { font-size:11.5px; line-height:1.6; }
+/* CLI box */
+.cli-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.cli-head {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border2);
+  background: rgba(255,255,255,0.015);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cli-title { font-family:var(--font-head); font-size:11px; font-weight:700; letter-spacing:.08em; color:var(--text); }
+.cli-body {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.85;
+  color: var(--text);
+  padding: 14px 16px;
+  white-space: pre;
+  overflow-x: auto;
+  max-height: 280px;
+}
+.cli-comment { color: var(--muted2); font-style: italic; }
+.cli-key     { color: var(--green); }
+.cli-val     { color: var(--cyan); }
+.cli-foot {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border2);
+  background: rgba(255,255,255,0.01);
+}
 
-/* Tips */
-.tip-card { padding:9px 12px; border-radius:8px; border-left:2px solid var(--amber); background:rgba(255,187,0,.04); font-size:12px; line-height:1.65; color:var(--text); margin-bottom:6px; }
-.tip-card::before { content:'💡 '; }
-.tip-warn { border-left-color:var(--red); background:rgba(255,51,85,.04); }
-.tip-warn::before { content:'⚠️ '; }
-.tip-pro  { border-left-color:var(--blue); background:rgba(0,200,255,.04); }
-.tip-pro::before  { content:'🔧 '; }
+/* Blackbox hint */
+.bb-hint {
+  padding: 12px 14px;
+  background: rgba(167,139,250,0.07);
+  border: 1px solid rgba(167,139,250,0.2);
+  border-left: 3px solid var(--purple);
+  border-radius: var(--r-sm);
+  display: flex;
+  gap: 10px;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--text2);
+}
+.bb-hint-icon { font-size: 16px; flex-shrink: 0; }
+.bb-hint-label {
+  font-family: var(--font-head);
+  font-size: 8px;
+  letter-spacing: .12em;
+  color: var(--purple);
+  margin-bottom: 4px;
+}
 
-/* Counter + misc */
-.sel-counter { font-family:var(--font-d); font-size:8.5px; letter-spacing:.1em; font-weight:700; padding:3px 10px; border-radius:20px; background:rgba(255,51,85,.1); border:1px solid rgba(255,51,85,.25); color:var(--red); }
-.multi-badge { font-family:var(--font-d); font-size:7.5px; font-weight:700; padding:2px 8px; border-radius:20px; background:rgba(0,200,255,.1); border:1px solid rgba(0,200,255,.2); color:var(--blue); display:none; }
-.multi-badge.show { display:inline-block; }
+/* BF version note */
+.bf-note {
+  padding: 10px 13px;
+  background: rgba(74,158,255,0.07);
+  border: 1px solid rgba(74,158,255,0.18);
+  border-radius: var(--r-sm);
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text2);
+  align-items: flex-start;
+}
+.bf-note-icon { flex-shrink: 0; }
 
-::-webkit-scrollbar { width:4px; height:4px; }
-::-webkit-scrollbar-track { background:transparent; }
-::-webkit-scrollbar-thumb { background:var(--muted); border-radius:2px; }
+/* Tips list */
+.tips-list { display: flex; flex-direction: column; gap: 8px; }
+.tip-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 9px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text2);
+  transition: border-color .15s;
+}
+.tip-item:hover { border-color: rgba(255,255,255,.12); }
+.tip-num {
+  font-family: var(--font-head);
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--muted);
+  flex-shrink: 0;
+  width: 20px;
+}
+
+/* Related symptoms */
+.related-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+.related-chip {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 12px;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+}
+.related-chip:hover { border-color: rgba(16,196,122,.3); color: var(--text); background: var(--green-dim); }
+
+/* Radar chart */
+.radar-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 16px;
+}
+.radar-wrap { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+.radar-chart-wrap { width: 200px; height: 200px; flex-shrink: 0; }
+.radar-legend { flex: 1; min-width: 140px; }
+.radar-leg-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 12px;
+  color: var(--text2);
+  border-bottom: 1px solid var(--border2);
+}
+.radar-leg-item:last-child { border-bottom: none; }
+.radar-leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.radar-leg-label { flex: 1; }
+.radar-leg-val { font-family: var(--font-mono); font-size: 11px; color: var(--text); font-weight: 700; }
+
+/* Stats strip */
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.2);
+}
+.stat-cell {
+  padding: 12px 16px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.stat-cell:last-child { border-right: none; }
+.stat-num { font-family: var(--font-head); font-size: 22px; font-weight: 900; line-height: 1; }
+.stat-lbl { font-family: var(--font-head); font-size: 7px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted2); }
+
+/* Toast */
+.v5-toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(12px); background:rgba(16,196,122,.12); border:1px solid rgba(16,196,122,.3); color:var(--green); font-family:var(--font-head); font-size:10px; letter-spacing:.1em; padding:9px 20px; border-radius:100px; backdrop-filter:blur(12px); z-index:9999; opacity:0; pointer-events:none; transition:all .3s var(--ease); }
+.v5-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* Responsive */
+@media(max-width:700px) {
+  .adj-grid { grid-template-columns: 1fr; }
+  .stats-strip { grid-template-columns: 1fr 1fr; }
+  .adv-content { padding: 14px; }
+  .pid-grid { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
-
 {% include "partials/nav.html" %}
 
-<div class="page">
-
-  <!-- HERO -->
-  <div class="hero">
-    <div>
-      <div class="hero-eyebrow">
-        <span class="hero-led"></span>
-        OBIX · PID DIAGNOSTIC LAB · BETAFLIGHT TUNING
-      </div>
-      <h1 class="hero-title">PID <span class="hl">Diagnostic</span> Lab<span class="badge">v3.0</span></h1>
-      <p class="hero-sub">
-        กรอกค่า PID ปัจจุบัน → เลือกอาการ → รับ CLI พร้อมตัวเลขจริง<br>
-        Conflict detection · Step-by-step guide · Before/After visualization
-      </p>
-      <div class="hero-pills">
-        <span class="hero-pill red">18 Symptoms</span>
-        <span class="hero-pill">3 Severity Levels</span>
-        <span class="hero-pill green">Real CLI Numbers</span>
-        <span class="hero-pill">Conflict Detect</span>
-        <span class="hero-pill amber">Step Guide</span>
-      </div>
-    </div>
-    <div class="hero-stats">
-      <div class="hs-item"><span class="hs-num" style="color:var(--red)">18</span><span style="font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--muted2)">Symptoms</span></div>
-      <div class="hs-item"><span class="hs-num" style="color:var(--amber)">3</span><span style="font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--muted2)">Severity</span></div>
-      <div class="hs-item"><span class="hs-num" style="color:var(--green)">CLI</span><span style="font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--muted2)">Actual #</span></div>
-      <div class="hs-item"><span class="hs-num" style="color:var(--blue)">∆</span><span style="font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--muted2)">Delta Viz</span></div>
-    </div>
+<!-- Stats strip -->
+<div class="stats-strip">
+  <div class="stat-cell">
+    <div class="stat-num v5-green">{{ symptoms|length }}</div>
+    <div class="stat-lbl">อาการทั้งหมด</div>
   </div>
-
-  <!-- PROFILE BAR -->
-  <div class="profile-bar">
-    <span class="profile-label">FLIGHT PROFILE</span>
-    <div class="profile-btns">
-      <button class="profile-btn active" data-p="freestyle" onclick="setProfile('freestyle',this)">🌀 FREESTYLE</button>
-      <button class="profile-btn" data-p="racing" onclick="setProfile('racing',this)">🏁 RACING</button>
-      <button class="profile-btn" data-p="longrange" onclick="setProfile('longrange',this)">🛸 LONG RANGE</button>
-    </div>
-    <span class="profile-desc" id="profileDesc">Freestyle: เน้น propwash fix · D-term balance · Rates smooth</span>
+  <div class="stat-cell">
+    <div class="stat-num v5-blue">14</div>
+    <div class="stat-lbl">หมวดหมู่</div>
   </div>
-
-  <!-- MAIN GRID -->
-  <div class="lab-grid">
-
-    <!-- ══════ COL LEFT ══════ -->
-    <div class="col-left">
-      <div class="panel">
-        <div class="panel-hd">
-          <div class="panel-title">⚙️ Current PID Values</div>
-          <button class="pid-load-preset" onclick="loadCommonPreset()">Load 5" 4S</button>
-        </div>
-        <div class="panel-body">
-          <div class="pid-input-wrap">
-            <div class="pid-input-title">
-              <span>PID INPUT — ค่าปัจจุบันของคุณ</span>
-            </div>
-            <p class="pid-input-subtitle" style="margin-bottom:10px;">ใส่ค่าจริงจาก Betaflight CLI → CLI output จะใช้ตัวเลขเหล่านี้</p>
-
-            <div class="pid-row pid-input-hdr">
-              <div></div>
-              <div style="text-align:center;">P</div>
-              <div style="text-align:center;">I</div>
-              <div style="text-align:center;">D</div>
-            </div>
-            <div class="pid-row">
-              <div class="pid-row-label">ROLL</div>
-              <input class="pid-num" id="p_roll"  type="number" value="48"  min="1" max="200" oninput="onPidChange()">
-              <input class="pid-num" id="i_roll"  type="number" value="90"  min="1" max="200" oninput="onPidChange()">
-              <input class="pid-num" id="d_roll"  type="number" value="38"  min="1" max="200" oninput="onPidChange()">
-            </div>
-            <div class="pid-row">
-              <div class="pid-row-label">PITCH</div>
-              <input class="pid-num" id="p_pitch" type="number" value="52"  min="1" max="200" oninput="onPidChange()">
-              <input class="pid-num" id="i_pitch" type="number" value="90"  min="1" max="200" oninput="onPidChange()">
-              <input class="pid-num" id="d_pitch" type="number" value="40"  min="1" max="200" oninput="onPidChange()">
-            </div>
-            <div class="pid-row">
-              <div class="pid-row-label">YAW</div>
-              <input class="pid-num" id="p_yaw"   type="number" value="40"  min="1" max="200" oninput="onPidChange()">
-              <input class="pid-num" id="i_yaw"   type="number" value="90"  min="1" max="200" oninput="onPidChange()">
-              <input class="pid-num" id="d_yaw"   type="number" value="0"   min="0" max="200" oninput="onPidChange()">
-            </div>
-
-            <div class="pid-extra-grid">
-              <div>
-                <div class="pid-extra-label">FF ROLL</div>
-                <input class="pid-num" id="ff_roll"  type="number" value="25" min="0" max="300" oninput="onPidChange()">
-              </div>
-              <div>
-                <div class="pid-extra-label">FF PITCH</div>
-                <input class="pid-num" id="ff_pitch" type="number" value="25" min="0" max="300" oninput="onPidChange()">
-              </div>
-              <div>
-                <div class="pid-extra-label">GYRO LPF1 Hz</div>
-                <input class="pid-num" id="gyro_lpf" type="number" value="200" min="50" max="500" oninput="onPidChange()">
-              </div>
-              <div>
-                <div class="pid-extra-label">DTERM LPF1 Hz</div>
-                <input class="pid-num" id="dterm_lpf" type="number" value="110" min="40" max="300" oninput="onPidChange()">
-              </div>
-            </div>
-          </div>
-
-          <!-- Severity -->
-          <div style="font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--muted2);margin-bottom:6px;">ความรุนแรงของอาการ</div>
-          <div class="severity-row">
-            <button class="sev-btn" data-sev="mild">เล็กน้อย</button>
-            <button class="sev-btn active" data-sev="moderate">ปานกลาง</button>
-            <button class="sev-btn" data-sev="severe">รุนแรง</button>
-          </div>
-
-          <!-- Multi hint -->
-          <div style="font-size:10.5px;color:var(--muted2);margin-bottom:9px;display:flex;align-items:center;gap:6px;">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"/><path d="M8 6v2M8 10h.01"/></svg>
-            เลือกได้หลายอาการพร้อมกัน
-            <span class="multi-badge" id="multiBadge">MULTI</span>
-          </div>
-
-          <!-- Category tabs -->
-          <div class="cat-tabs" id="catTabs">
-            <button class="cat-tab active" data-cat="all">ทั้งหมด</button>
-            <button class="cat-tab" data-cat="oscillation">Oscillation</button>
-            <button class="cat-tab" data-cat="propwash">Propwash</button>
-            <button class="cat-tab" data-cat="yaw">Yaw</button>
-            <button class="cat-tab" data-cat="thermal">Thermal</button>
-            <button class="cat-tab" data-cat="esc">ESC</button>
-            <button class="cat-tab" data-cat="setup">Setup</button>
-            <button class="cat-tab" data-cat="vtx">VTX</button>
-            <button class="cat-tab" data-cat="filter">Filter</button>
-          </div>
-
-          <!-- Symptom list -->
-          <div class="symptom-list" id="symptomList"></div>
-
-          <div class="quick-acts">
-            <button class="qa-btn rd" onclick="clearAll()">✕ ล้าง</button>
-            <button class="qa-btn bb" onclick="selectCommon()">⚡ ทั่วไป</button>
-            <button class="qa-btn gr" onclick="selectRace()">🏁 Race</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- History -->
-      <div class="panel" style="margin-top:12px;" id="historyPanel">
-        <div class="panel-hd">
-          <div class="panel-title">🕑 History</div>
-          <span style="font-family:var(--font-d);font-size:8px;color:var(--muted2);" id="histCount">0 sessions</span>
-        </div>
-        <div class="panel-body" id="historyList">
-          <p style="font-size:12px;color:var(--muted2);">ยังไม่มี session</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════ COL MID ══════ -->
-    <div class="col-mid">
-      <div class="panel">
-        <div class="panel-hd">
-          <div class="panel-title">🩺 Diagnosis Report</div>
-          <div id="diagStatus" style="font-family:var(--font-m);font-size:9px;color:var(--muted2);letter-spacing:.05em;">รอการวินิจฉัย...</div>
-        </div>
-
-        <!-- Empty state -->
-        <div class="empty-state" id="emptyState">
-          <div class="er-wrap">
-            <div class="er-ring"></div>
-            <div class="er-ring"></div>
-            <div class="er-ring"></div>
-            <div class="er-scan"></div>
-            <div class="er-dot">🩺</div>
-          </div>
-          <div class="empty-title">AWAITING DIAGNOSIS</div>
-          <p class="empty-sub">กรอก PID ปัจจุบัน + เลือกอาการ<br>CLI output จะใช้ตัวเลขจริงของคุณ</p>
-        </div>
-
-        <!-- Diagnosis content -->
-        <div class="diag-content" id="diagContent">
-
-          <!-- Conflict Alert -->
-          <div class="conflict-alert" id="conflictAlert">
-            <span class="conflict-icon">⚠️</span>
-            <div style="flex:1;">
-              <div class="conflict-title">PARAMETER CONFLICT DETECTED</div>
-              <div class="conflict-body" id="conflictBody"></div>
-              <div class="conflict-resolution" id="conflictResolution"></div>
-            </div>
-          </div>
-
-          <!-- Axis diagram -->
-          <div class="axis-wrap">
-            <svg class="axis-svg" id="axisDiagram" width="220" height="130" viewBox="0 0 220 130">
-              <line class="ax-arm" id="arm-fl" x1="110" y1="65" x2="60"  y2="30"/>
-              <line class="ax-arm" id="arm-fr" x1="110" y1="65" x2="160" y2="30"/>
-              <line class="ax-arm" id="arm-bl" x1="110" y1="65" x2="60"  y2="100"/>
-              <line class="ax-arm" id="arm-br" x1="110" y1="65" x2="160" y2="100"/>
-              <circle class="ax-prop" cx="60"  cy="30"  r="18"/>
-              <circle class="ax-prop" cx="160" cy="30"  r="18"/>
-              <circle class="ax-prop" cx="60"  cy="100" r="18"/>
-              <circle class="ax-prop" cx="160" cy="100" r="18"/>
-              <circle class="ax-motor" cx="60"  cy="30"  r="9"/>
-              <circle class="ax-motor" cx="160" cy="30"  r="9"/>
-              <circle class="ax-motor" cx="60"  cy="100" r="9"/>
-              <circle class="ax-motor" cx="160" cy="100" r="9"/>
-              <rect class="ax-body" x="95" y="50" width="30" height="30" rx="7"/>
-              <line class="ax-roll-ind"  id="rollInd"  x1="38" y1="65" x2="182" y2="65"/>
-              <line class="ax-pitch-ind" id="pitchInd" x1="110" y1="12" x2="110" y2="118"/>
-              <circle class="ax-yaw-ind" id="yawInd" cx="110" cy="65" r="32"/>
-              <text class="ax-label" x="13" y="68">ROLL</text>
-              <text class="ax-label" x="92" y="10">PITCH</text>
-              <text class="ax-label" x="76" y="100">YAW</text>
-            </svg>
-          </div>
-          <div class="axis-legend">
-            <span class="ax-leg" id="leg-roll"  style="color:var(--amber);border-color:rgba(255,187,0,.3)">◉ ROLL</span>
-            <span class="ax-leg" id="leg-pitch" style="color:var(--green);border-color:rgba(0,255,136,.3)">◉ PITCH</span>
-            <span class="ax-leg" id="leg-yaw"   style="color:var(--purple);border-color:rgba(192,96,255,.3)">◉ YAW</span>
-          </div>
-
-          <!-- Root cause -->
-          <div class="diag-block" id="diagBlock">
-            <div class="diag-label">ROOT CAUSE ANALYSIS</div>
-            <p class="diag-text" id="diagText"></p>
-            <div class="cause-tag" id="causeTag"></div>
-          </div>
-
-          <!-- Multi banner -->
-          <div class="multi-banner" id="multiBanner">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v10M3 8h10"/></svg>
-            <span id="multiBannerText">Combined analysis</span>
-          </div>
-
-          <!-- Step-by-step fix guide -->
-          <div class="steps-wrap">
-            <div class="steps-title">STEP-BY-STEP FIX GUIDE</div>
-            <div id="stepsList"></div>
-          </div>
-
-          <!-- Before/After Delta Viz -->
-          <div class="delta-section">
-            <div class="delta-title">PID DELTA — BEFORE / AFTER</div>
-            <div class="delta-grid" id="deltaGrid"></div>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════ COL RIGHT ══════ -->
-    <div class="col-right">
-
-      <!-- CLI Panel -->
-      <div class="panel" style="margin-bottom:12px;">
-        <div class="panel-hd">
-          <div class="panel-title">💻 CLI Output</div>
-          <span style="font-family:var(--font-m);font-size:9px;color:var(--muted2);" id="cliLineCount">0 lines</span>
-        </div>
-        <div class="cli-panel">
-          <div class="cli-topbar">
-            <div class="cli-dots">
-              <div class="cli-dot cli-dot-r"></div>
-              <div class="cli-dot cli-dot-a"></div>
-              <div class="cli-dot cli-dot-g"></div>
-            </div>
-            <span class="cli-fname">betaflight_pid_fix.txt</span>
-            <div class="cli-btn-row">
-              <button class="cli-dl-btn" id="cliDlBtn" onclick="downloadCLI()">⬇</button>
-              <button class="cli-copy-btn" id="cliCopyBtn" onclick="copyCLI()">📋 COPY</button>
-            </div>
-          </div>
-          <div class="cli-body" id="cliBody">
-            <div class="cli-empty">
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"/><path d="M8 5v3M8 11h.01"/></svg>
-              กรอก PID + เลือกอาการ...
-            </div>
-          </div>
-          <!-- Confidence -->
-          <div class="conf-box" id="confBox" style="display:none;">
-            <div class="conf-hd">
-              <span>FIX CONFIDENCE</span>
-              <span id="confPct" style="color:var(--green);font-weight:700;">—</span>
-            </div>
-            <div class="conf-track"><div class="conf-bar" id="confBar" style="width:0%"></div></div>
-            <div class="conf-factors" id="confFactors"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Severity Note -->
-      <div class="panel" style="margin-bottom:12px;" id="sevPanel">
-        <div class="panel-hd">
-          <div class="panel-title">⚠️ Severity Note</div>
-        </div>
-        <div class="panel-body">
-          <div id="sevNoteArea">
-            <p style="font-size:12px;color:var(--muted2);line-height:1.6;">เลือก severity level เพื่อดูคำแนะนำ</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Pro Tips -->
-      <div class="panel">
-        <div class="panel-hd">
-          <div class="panel-title">💡 Pro Tips</div>
-          <span id="tipsCount" style="font-family:var(--font-d);font-size:8px;color:var(--muted2);">0 tips</span>
-        </div>
-        <div class="panel-body">
-          <div id="tipsList">
-            <p style="font-size:12px;color:var(--muted2);">เลือกอาการเพื่อดู tips...</p>
-          </div>
-        </div>
-      </div>
-
-    </div>
+  <div class="stat-cell">
+    <div class="stat-num v5-amber">v5 Pro</div>
+    <div class="stat-lbl">Engine</div>
   </div>
-</div><!-- /page -->
+  <div class="stat-cell">
+    <div class="stat-num v5-purple">BF 4.5</div>
+    <div class="stat-lbl">Validated</div>
+  </div>
+</div>
 
+<!-- Main layout -->
+<div class="adv-layout">
+
+  <!-- ══ LEFT: Symptom selector ══════════════════════════════ -->
+  <aside class="adv-left">
+
+    <!-- PID Input -->
+    <div class="pid-input-section">
+      <div class="pid-input-title">กรอกค่า PID ปัจจุบัน <span style="font-size:9px;color:var(--green)">(optional)</span></div>
+
+      <!-- Roll row -->
+      <div class="pid-axis-label">Roll</div>
+      <div class="pid-grid" style="margin-bottom:10px">
+        <div class="pid-input-wrap">
+          <div class="pid-term-label">P</div>
+          <input type="number" class="pid-num p" id="pid_p_roll" value="48" min="0" max="200" oninput="onPidChange()">
+        </div>
+        <div class="pid-input-wrap">
+          <div class="pid-term-label">I</div>
+          <input type="number" class="pid-num i" id="pid_i_roll" value="90" min="0" max="200" oninput="onPidChange()">
+        </div>
+        <div class="pid-input-wrap">
+          <div class="pid-term-label">D</div>
+          <input type="number" class="pid-num d" id="pid_d_roll" value="38" min="0" max="200" oninput="onPidChange()">
+        </div>
+      </div>
+
+      <!-- Pitch row -->
+      <div class="pid-axis-label">Pitch</div>
+      <div class="pid-grid" style="margin-bottom:10px">
+        <div class="pid-input-wrap">
+          <div class="pid-term-label">P</div>
+          <input type="number" class="pid-num p" id="pid_p_pitch" value="52" min="0" max="200" oninput="onPidChange()">
+        </div>
+        <div class="pid-input-wrap">
+          <div class="pid-term-label">I</div>
+          <input type="number" class="pid-num i" id="pid_i_pitch" value="90" min="0" max="200" oninput="onPidChange()">
+        </div>
+        <div class="pid-input-wrap">
+          <div class="pid-term-label">D</div>
+          <input type="number" class="pid-num d" id="pid_d_pitch" value="40" min="0" max="200" oninput="onPidChange()">
+        </div>
+      </div>
+
+      <!-- Yaw row -->
+      <div class="pid-axis-label">Yaw</div>
+      <div class="pid-grid" style="margin-bottom:10px">
+        <div class="pid-input-wrap">
+          <div class="pid-term-label">P</div>
+          <input type="number" class="pid-num p" id="pid_p_yaw" value="40" min="0" max="200" oninput="onPidChange()">
+        </div>
+        <div class="pid-input-wrap">
+          <div class="pid-term-label">I</div>
+          <input type="number" class="pid-num i" id="pid_i_yaw" value="90" min="0" max="200" oninput="onPidChange()">
+        </div>
+        <div class="pid-input-wrap">
+          <div class="pid-term-label">D</div>
+          <input type="number" class="pid-num d" id="pid_d_yaw" value="0" min="0" max="200" oninput="onPidChange()">
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-row">
+        <div class="filt-group">
+          <div class="filt-label">Gyro LPF1 Hz</div>
+          <input type="number" class="filt-num" id="filt_gyro" value="200" min="0" max="500" oninput="onPidChange()">
+        </div>
+        <div class="filt-group">
+          <div class="filt-label">D-term LPF Hz</div>
+          <input type="number" class="filt-num" id="filt_dterm" value="110" min="0" max="500" oninput="onPidChange()">
+        </div>
+        <div class="filt-group">
+          <div class="filt-label">Anti-Gravity</div>
+          <input type="number" class="filt-num" id="filt_ag" value="5" min="0" max="30" oninput="onPidChange()">
+        </div>
+        <div class="filt-group">
+          <div class="filt-label">Feedforward</div>
+          <input type="number" class="filt-num" id="filt_ff" value="100" min="0" max="300" oninput="onPidChange()">
+        </div>
+      </div>
+    </div>
+
+    <!-- Flight Profile -->
+    <div class="profile-section">
+      <div style="font-family:var(--font-head);font-size:8px;letter-spacing:.14em;color:var(--muted2);margin-bottom:8px;text-transform:uppercase">Flight Profile</div>
+      <div class="profile-btns">
+        <button class="profile-btn active" data-p="freestyle" onclick="setProfile(this)">🌀 Freestyle</button>
+        <button class="profile-btn" data-p="racing" onclick="setProfile(this)">🏁 Racing</button>
+        <button class="profile-btn" data-p="longrange" onclick="setProfile(this)">🛸 Long Range</button>
+      </div>
+    </div>
+
+    <!-- Symptom List -->
+    <div class="symptom-section">
+      <div class="symptom-search-wrap">
+        <span class="symptom-search-icon">🔍</span>
+        <input type="search" class="symptom-search" id="symptomSearch" placeholder="ค้นหาอาการ..." autocomplete="off" oninput="filterSymptoms(this.value)">
+      </div>
+
+      <div id="symptomList">
+        {% set categories = {} %}
+        {% for s in symptoms %}
+          {% if s.category not in categories %}
+            {% set _ = categories.update({s.category: []}) %}
+          {% endif %}
+        {% endfor %}
+
+        {% set cat_order = ['oscillation','propwash','response','yaw','thermal','pid_advanced','esc','video','vtx','setup','gps_or_pid'] %}
+        {% for cat in cat_order %}
+          {% set cat_symptoms = symptoms | selectattr('category','eq',cat) | list %}
+          {% if cat_symptoms %}
+          <div class="category-group" data-cat="{{ cat }}">
+            <div class="category-label">
+              {{ cat_symptoms[0].icon if cat_symptoms else '🔧' }}
+              {{ cat | replace('_',' ') | upper }}
+            </div>
+            {% for s in cat_symptoms %}
+            <div class="symptom-item" data-id="{{ s.id }}" onclick="selectSymptom('{{ s.id }}')" id="si-{{ s.id }}">
+              <span class="symptom-icon">{{ s.icon }}</span>
+              <div class="symptom-info">
+                <div class="symptom-name">{{ s.label }}</div>
+                {% if s.label_en %}<div class="symptom-name-en">{{ s.label_en }}</div>{% endif %}
+              </div>
+              <div class="severity-dot {{ s.severity }}"></div>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══ RIGHT: Result panel ═══════════════════════════════ -->
+  <main class="adv-right">
+
+    <!-- Empty state -->
+    <div class="adv-empty" id="advEmpty">
+      <div class="adv-empty-icon">💊</div>
+      <div class="adv-empty-title">PID Symptom Advisor</div>
+      <div class="adv-empty-sub">
+        กรอกค่า PID ปัจจุบัน แล้วเลือกอาการที่โดรนแสดง<br>
+        ระบบจะวินิจฉัยและให้ CLI fix พร้อม paste ทันที
+      </div>
+      <div class="adv-empty-chips">
+        <span class="v5-pill g">{{ symptoms|length }} อาการ</span>
+        <span class="v5-pill b">Real PID Delta</span>
+        <span class="v5-pill a">Blackbox Hints</span>
+        <span class="v5-pill p">BF 4.4/4.5</span>
+      </div>
+      <div style="margin-top:8px">
+        <div style="font-size:12px;color:var(--muted2);line-height:1.7;max-width:340px;text-align:center">
+          💡 เลือกอาการจากรายการทางซ้าย → ดู diagnosis + adjustment ที่แม่นยำ<br>
+          ค่า PID ที่กรอกจะถูกนำมาคำนวณ delta จริง
+        </div>
+      </div>
+    </div>
+
+    <!-- Result (hidden until symptom selected) -->
+    <div class="adv-result" id="advResult">
+
+      <!-- Diagnosis header -->
+      <div class="diag-header">
+        <div class="diag-header-top">
+          <div class="diag-icon-wrap" id="res-icon-wrap">🔧</div>
+          <div style="flex:1;min-width:0">
+            <div class="diag-title" id="res-title">—</div>
+            <div class="diag-title-en" id="res-title-en"></div>
+            <div class="diag-meta" style="margin-top:8px">
+              <span id="res-severity-pill"></span>
+              <div class="confidence-bar-wrap">
+                <span>Confidence</span>
+                <div class="confidence-bar">
+                  <div class="confidence-fill" id="res-confidence-fill" style="width:0%"></div>
+                </div>
+                <span id="res-confidence-pct">0%</span>
+              </div>
+              <span id="res-axes-pills"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick win banner -->
+      <div class="quick-win-banner" id="res-quickwin" style="display:none">
+        <span style="font-size:18px">⚡</span>
+        <div>
+          <div class="quick-win-label">QUICK WIN — ลองก่อนเลย</div>
+          <div class="quick-win-text" id="res-quickwin-text"></div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="adv-content">
+
+        <!-- 1. Diagnosis -->
+        <div>
+          <div class="adv-sec-title">🩺 วินิจฉัย</div>
+          <div class="diag-text">
+            <div id="res-diagnosis"></div>
+            <div class="diag-cause">
+              <span class="diag-cause-label">สาเหตุหลัก</span>
+              <span class="diag-cause-text" id="res-cause"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Adjustments -->
+        <div>
+          <div class="adv-sec-title">🎛️ การปรับแต่ง</div>
+          <div class="adj-grid" id="res-adj"></div>
+        </div>
+
+        <!-- 3. PID Delta Preview -->
+        <div>
+          <div class="adv-sec-title">📊 ค่า PID หลังปรับ (Delta Preview)</div>
+          <div class="pid-delta-section">
+            <div class="pid-delta-head">
+              <div class="pid-delta-title">Before → After Comparison</div>
+              <span class="v5-pill g" style="font-size:9px">จากค่าที่กรอก</span>
+            </div>
+            <div class="pid-delta-body">
+              <table class="pid-delta-table" id="pidDeltaTable">
+                <thead>
+                  <tr>
+                    <th>Axis</th>
+                    <th>P (before→after)</th>
+                    <th>I (before→after)</th>
+                    <th>D (before→after)</th>
+                  </tr>
+                </thead>
+                <tbody id="pidDeltaBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. CLI Output -->
+        <div>
+          <div class="adv-sec-title">📋 Betaflight CLI — Copy & Paste</div>
+          <div class="cli-section">
+            <div class="cli-head">
+              <span style="font-size:14px">⚡</span>
+              <span class="cli-title">CLI Commands — พร้อม paste</span>
+              <span class="v5-pill g" style="margin-left:auto;font-size:9px">BF 4.4/4.5</span>
+            </div>
+            <div class="cli-body" id="res-cli"></div>
+            <div class="cli-foot">
+              <button class="v5-btn v5-btn-primary v5-btn-sm" onclick="copyCLI()">📋 Copy CLI</button>
+              <button class="v5-btn v5-btn-secondary v5-btn-sm" onclick="copyDelta()">📊 Copy Delta Only</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Radar Chart -->
+        <div>
+          <div class="adv-sec-title">🕸️ Impact Analysis</div>
+          <div class="radar-section">
+            <div class="radar-wrap">
+              <div class="radar-chart-wrap">
+                <canvas id="impactRadar" width="200" height="200"></canvas>
+              </div>
+              <div class="radar-legend" id="radarLegend"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Blackbox hint -->
+        <div id="res-bb-wrap" style="display:none">
+          <div class="adv-sec-title">📊 Blackbox Diagnostic Hint</div>
+          <div class="bb-hint">
+            <span class="bb-hint-icon">📊</span>
+            <div>
+              <div class="bb-hint-label">BLACKBOX — สิ่งที่ต้องมองหา</div>
+              <div id="res-bb-hint"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. BF version note -->
+        <div id="res-bf-wrap" style="display:none">
+          <div class="bf-note">
+            <span class="bf-note-icon">ℹ️</span>
+            <div>
+              <div style="font-family:var(--font-head);font-size:8px;letter-spacing:.1em;color:var(--blue);margin-bottom:4px">BETAFLIGHT VERSION NOTE</div>
+              <div id="res-bf-note" style="font-size:12.5px"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. Tips -->
+        <div>
+          <div class="adv-sec-title">💡 Tips & Best Practices</div>
+          <div class="tips-list" id="res-tips"></div>
+        </div>
+
+        <!-- 9. Related symptoms -->
+        <div id="res-related-wrap" style="display:none">
+          <div class="adv-sec-title">🔗 อาการที่เกี่ยวข้อง</div>
+          <div class="related-grid" id="res-related"></div>
+        </div>
+
+      </div><!-- /adv-content -->
+    </div><!-- /adv-result -->
+  </main>
+
+</div><!-- /adv-layout -->
+
+<div class="v5-toast" id="v5Toast"></div>
+
+<!-- Advice data from backend -->
 <script>
-/* ═══════════════════════════════════════════════════════
-   PID DIAGNOSTIC LAB v3.0 — Full Brain
-   Key upgrades:
-   1. Real PID numbers from user input
-   2. Conflict detection + resolution
-   3. Step-by-step priority guide
-   4. Before/After delta visualization
-   5. 5 new symptoms (filter, noise, iterm, rc smoothing, d_min)
-   6. History in localStorage
-   7. Download CLI as file
-═══════════════════════════════════════════════════════ */
+const ADVICE_MAP = {{ advice_json | safe }};
+const ALL_SYMPTOMS = {{ symptoms | tojson }};
+const SYMPTOM_MAP = {};
+ALL_SYMPTOMS.forEach(function(s){ SYMPTOM_MAP[s.id] = s; });
 
-// ── Jinja2 backend data ──────────────────────────────────
-const DATA_BACKEND = {{ advice_json|tojson }};
+// ── State ──
+var currentSymptom = null;
+var currentProfile = 'freestyle';
+var radarChart = null;
 
-// ── Extended symptoms (added in JS) ────────────────────
-const DATA_EXTRA = {
-  "d_term_noise": {
-    label: "D-term noise / Motor buzz ที่ full throttle",
-    category: "filter",
-    diagnosis: "Motor ส่งเสียง buzz หรือร้อนเฉพาะ full throttle โดยไม่มี propwash — อาการนี้มักเป็น D-term noise ที่ความถี่สูง ไม่ใช่ปัญหา PID ตรงๆ แต่ D สูงเกินไป amplify noise ทุก Hz ที่ filter ปล่อยผ่าน",
-    primary_cause: "D สูงเกิน / filter ไม่พอ / ไม่มี RPM filter",
-    adjustments: [
-      {param:"dterm_lpf1_hz", direction:"ลด", amount:"ลด 15–20Hz", reason:"D-term filter ลดลง block high-freq noise"},
-      {param:"d_roll / d_pitch", direction:"ลดเล็กน้อย", amount:"ลด 2–3", reason:"D ต่ำลงลด sensitivity ต่อ noise"},
-      {param:"dshot_bidir + RPM filter", direction:"เปิด", amount:"ON", reason:"RPM filter ตรงเป้าหมายกว่า static LPF มาก"},
-    ],
-    cli_template: [
-      "# แก้: D-term noise / motor buzz",
-      "set dterm_lpf1_hz = {dterm_lpf - 15}",
-      "set dterm_lpf1_type = PT1",
-      "set d_roll = {d_roll - 2}",
-      "set d_pitch = {d_pitch - 2}",
-      "set dshot_bidir = ON",
-      "set rpm_filter_harmonics = 3",
-      "save",
-    ],
-    tips: [
-      "ถ้า motor ร้อนเฉพาะ full throttle = D-term noise แน่นอน",
-      "RPM filter แก้ได้ตรงกว่า static LPF เสมอ — ทำก่อน",
-      "ทดสอบโดยบิน full throttle ตรงๆ 10 วินาที แล้วแตะ motor",
-    ],
-    priority: 2, axes: ['roll','pitch'], conf: 87,
-  },
-  "iterm_windup": {
-    label: "I-term windup / โดรน 'kick' หลัง flip หรือ flip ไม่หยุด",
-    category: "oscillation",
-    diagnosis: "I-term สะสม (wind up) ระหว่างทำ maneuver เนื่องจาก I-term ไม่ได้ถูก relax ตอน stick input รุนแรง — ผลคือโดรนดันตัวเองออกนอก trajectory หรือ 'kick' กลับอย่างรุนแรงหลัง flip/roll",
-    primary_cause: "iterm_relax ปิด / iterm_relax_cutoff ต่ำเกิน",
-    adjustments: [
-      {param:"iterm_relax", direction:"ตั้งค่า", amount:"ค่า = RPH", reason:"ลด I buildup ระหว่าง stick input"},
-      {param:"iterm_relax_type", direction:"ตั้งค่า", amount:"SETPOINT", reason:"ดีกว่า GYRO สำหรับ freestyle"},
-      {param:"iterm_relax_cutoff", direction:"ปรับ", amount:"10–15 Hz", reason:"ลด cutoff = relax ทำงานบ่อยกว่า"},
-    ],
-    cli_template: [
-      "# แก้: I-term windup",
-      "set iterm_relax        = RPH",
-      "set iterm_relax_type   = SETPOINT",
-      "set iterm_relax_cutoff = 12",
-      "# ถ้ายังมีอยู่: เพิ่ม anti_gravity_gain ด้วย",
-      "set anti_gravity_gain  = 8",
-      "save",
-    ],
-    tips: [
-      "iterm_relax = RPH คือ default ที่ดีที่สุดสำหรับ freestyle",
-      "Racing: ใช้ SETPOINT cutoff 20Hz ตอบสนองเร็วกว่า",
-      "ถ้ายังมี kick หลัง flip = I ยังสูงอยู่ → ลด I pitch/roll 5",
-    ],
-    priority: 2, axes: ['roll','pitch'], conf: 83,
-  },
-  "rc_smoothing_bad": {
-    label: "RC smoothing ไม่ดี / stick input กระตุกหรือ latency สูง",
-    category: "filter",
-    diagnosis: "RC link jitter หรือ RC smoothing setting ผิดทำให้ stick input ไม่ smooth — ผลที่เห็น: feedforward กระโดด (spike), motor buzz ที่ความถี่ RC link, หรือรู้สึก 'laggy' ทั้งที่ PID ปกติ",
-    primary_cause: "RC smoothing ต่ำ / feedforward jitter / link packet loss",
-    adjustments: [
-      {param:"rc_smoothing_auto_factor", direction:"เพิ่ม", amount:"ลอง 40–60", reason:"เพิ่ม smoothing บน RC channel"},
-      {param:"feedforward_jitter_factor", direction:"เพิ่ม", amount:"ลอง 7–10", reason:"ลด FF spike จาก link jitter"},
-      {param:"rc_smoothing_setpoint_cutoff", direction:"ลด", amount:"ลอง 20–25Hz", reason:"smooth setpoint มากขึ้น"},
-    ],
-    cli_template: [
-      "# แก้: RC smoothing / stick jitter",
-      "set rc_smoothing_auto_factor = 40",
-      "set feedforward_jitter_factor = 7",
-      "set rc_smoothing_setpoint_cutoff = 25",
-      "# ELRS: ตรวจ packet rate (250Hz ขึ้น) และ RF mode",
-      "save",
-    ],
-    tips: [
-      "ELRS 500Hz มี jitter น้อยกว่า 250Hz อย่างเห็นได้ชัด",
-      "ดู Blackbox: ถ้า setpoint มี spike แต่ gyro ไม่มี = RC jitter",
-      "rc_smoothing_auto_factor 30–40 สำหรับ 500Hz, 60–80 สำหรับ 50Hz",
-    ],
-    priority: 2, axes: [], conf: 76,
-  },
-  "filter_latency_high": {
-    label: "Filter latency สูง / โดรนรู้สึก delayed ทั้งที่ P ปกติ",
-    category: "filter",
-    diagnosis: "Filter stack ที่ conservative เกินไปเพิ่ม delay หลาย ms — ผลคือ stick input ไปถึง motor ช้า ทำให้รู้สึก 'mushy' หรือ 'floaty' แม้ P สูง เป็นปัญหาต่างจาก P ต่ำอย่างสิ้นเชิง",
-    primary_cause: "Gyro LPF ต่ำเกิน / dterm LPF ต่ำเกิน / filter chain รวม >2ms",
-    adjustments: [
-      {param:"gyro_lpf1_hz", direction:"เพิ่ม", amount:"เพิ่ม 20–40Hz", reason:"Gyro LPF สูงขึ้น ลด latency"},
-      {param:"gyro_lpf2_hz", direction:"ลด/ปิด", amount:"0 = ปิด LPF2", reason:"LPF2 เพิ่ม delay เสมอ ถ้าไม่จำเป็นปิดได้"},
-      {param:"dterm_lpf2_hz", direction:"ลด/ปิด", amount:"0 = ปิด", reason:"D-term LPF2 เพิ่ม latency"},
-    ],
-    cli_template: [
-      "# แก้: Filter latency สูง",
-      "set gyro_lpf1_hz     = {gyro_lpf + 30}",
-      "set gyro_lpf2_hz     = 0     # ปิด LPF2",
-      "set dterm_lpf2_hz    = 0     # ปิด D LPF2",
-      "# ต้องเปิด RPM filter ก่อน ไม่งั้น noise จะสูงมาก",
-      "set dshot_bidir = ON",
-      "set rpm_filter_harmonics = 3",
-      "save",
-    ],
-    tips: [
-      "เปิด RPM filter ก่อนเพิ่ม LPF frequency เสมอ",
-      "Loop Analyzer ใน ConfigDoctor คำนวณ total latency ให้ได้",
-      "F7 FC มี latency น้อยกว่า F4 อยู่ดี แต่ filter ก็สำคัญกว่า",
-    ],
-    priority: 2, axes: [], conf: 72,
-  },
-  "d_min_issue": {
-    label: "D_min / D หลุดต่ำขณะ hover ทำให้ propwash เฉพาะ hover",
-    category: "oscillation",
-    diagnosis: "BF4.4+ มี D_min feature ที่ลด D อัตโนมัติเมื่อ throttle ต่ำ เพื่อลด motor heat — แต่ถ้า D_min ต่ำเกิน หรือ D_min_boost_gain สูงเกิน จะเกิด propwash เฉพาะตอน hover/low throttle แต่ไม่มีปัญหาตอน full throttle",
-    primary_cause: "d_min ต่ำเกิน / d_min_boost_gain สูงเกิน",
-    adjustments: [
-      {param:"d_min_roll", direction:"เพิ่ม", amount:"เพิ่ม 5–8", reason:"D_min ต่ำทำให้ D หลุดที่ hover"},
-      {param:"d_min_pitch", direction:"เพิ่ม", amount:"เพิ่ม 5–8", reason:"เช่นเดียวกัน"},
-      {param:"d_min_boost_gain", direction:"ลด", amount:"ลด 10–15", reason:"gain สูงทำให้ D เปลี่ยนแปลงมากเกิน"},
-    ],
-    cli_template: [
-      "# แก้: D_min issue / hover propwash",
-      "set d_min_roll        = {d_roll - 5}",
-      "set d_min_pitch       = {d_pitch - 5}",
-      "set d_min_boost_gain  = 25",
-      "set d_min_advance     = 20",
-      "save",
-    ],
-    tips: [
-      "ถ้า propwash เฉพาะ hover แต่ full throttle โอเค = D_min issue",
-      "D_min ควรเป็น D_roll × 0.7–0.8 เป็นจุดเริ่มต้น",
-      "ปิด D_min: ตั้ง d_min_roll = d_roll (เท่ากัน = ไม่ลด D)",
-    ],
-    priority: 2, axes: ['roll','pitch'], conf: 80,
-  },
-};
-
-// Merge backend + extra
-const DATA = {...DATA_BACKEND, ...DATA_EXTRA};
-
-// ── Symptom metadata ─────────────────────────────────────
-const META = {
-  oscillation_after_flip: { icon:'〰️', axes:['roll','pitch'], conf:88, color:'var(--amber)' },
-  propwash:               { icon:'🌀', axes:['roll','pitch'], conf:75, color:'var(--amber)' },
-  bounce_back:            { icon:'↩️', axes:['roll','pitch'], conf:85, color:'var(--red)' },
-  yaw_spin:               { icon:'🔄', axes:['yaw'],          conf:82, color:'var(--purple)' },
-  toilet_bowl:            { icon:'🌊', axes:['roll','pitch','yaw'], conf:70, color:'var(--blue)' },
-  slow_response:          { icon:'🐌', axes:['roll','pitch'], conf:80, color:'var(--green)' },
-  motor_hot:              { icon:'🌡️', axes:['roll','pitch'], conf:90, color:'var(--red)' },
-  jello_footage:          { icon:'📷', axes:[],               conf:78, color:'var(--amber)' },
-  esc_desync:             { icon:'⚡', axes:['roll','pitch','yaw'], conf:85, color:'var(--red)' },
-  wind_rejection:         { icon:'💨', axes:['roll','pitch','yaw'], conf:72, color:'var(--blue)' },
-  not_arming:             { icon:'🔴', axes:[],               conf:95, color:'var(--red)' },
-  turtle_mode_fail:       { icon:'🐢', axes:[],               conf:92, color:'var(--amber)' },
-  video_breakup:          { icon:'📡', axes:[],               conf:88, color:'var(--blue)' },
-  d_term_noise:           { icon:'🔊', axes:['roll','pitch'], conf:87, color:'var(--red)' },
-  iterm_windup:           { icon:'🔃', axes:['roll','pitch'], conf:83, color:'var(--amber)' },
-  rc_smoothing_bad:       { icon:'🎮', axes:[],               conf:76, color:'var(--blue)' },
-  filter_latency_high:    { icon:'⏱️', axes:[],               conf:72, color:'var(--blue)' },
-  d_min_issue:            { icon:'📉', axes:['roll','pitch'], conf:80, color:'var(--amber)' },
-};
-const CAT_COLORS = {
-  oscillation:'var(--amber)', propwash:'var(--amber)', yaw:'var(--purple)',
-  response:'var(--green)', thermal:'var(--red)', esc:'var(--red)',
-  pid_advanced:'var(--blue)', gps_or_pid:'var(--purple)',
-  setup:'var(--green)', vtx:'var(--blue)', video:'var(--blue)', filter:'var(--teal)',
-};
-
-// ── Conflict matrix ───────────────────────────────────────
-// Params that can conflict: direction can be 'up' or 'down'
-// If two selected symptoms push the SAME param in OPPOSITE directions → conflict
-function extractParamDirections(ids) {
-  const map = {}; // param → { up: [symIds], down: [symIds] }
-  ids.forEach(id => {
-    const s = DATA[id]; if (!s) return;
-    s.adjustments.forEach(a => {
-      const p = a.param.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z_/]/g,'');
-      const dir = a.direction.includes('เพิ่ม') ? 'up' : a.direction.includes('ลด') ? 'down' : null;
-      if (!dir) return;
-      if (!map[p]) map[p] = {up:[], down:[]};
-      map[p][dir].push(id);
-    });
-  });
-  return map;
-}
-function detectConflicts(ids) {
-  const map = extractParamDirections(ids);
-  const conflicts = [];
-  Object.entries(map).forEach(([param, dirs]) => {
-    if (dirs.up.length > 0 && dirs.down.length > 0) {
-      conflicts.push({
-        param,
-        upSyms: dirs.up.map(i => DATA[i]?.label?.split('/')[0].trim() || i),
-        downSyms: dirs.down.map(i => DATA[i]?.label?.split('/')[0].trim() || i),
-      });
-    }
-  });
-  return conflicts;
-}
-
-// ── Severity ─────────────────────────────────────────────
-const SEV_MULT = { mild:.55, moderate:1.0, severe:1.5 };
-const SEV_INFO = {
-  mild:     { note:'ปรับค่าทีละ 50%', color:'var(--green)',  label:'MILD' },
-  moderate: { note:'ปรับตามค่าที่แนะนำ', color:'var(--amber)', label:'MODERATE' },
-  severe:   { note:'เพิ่ม 50% จากค่าแนะนำ — ระวังอย่าปรับมาก', color:'var(--red)', label:'SEVERE ⚠' },
-};
-
-// ── Profile ───────────────────────────────────────────────
-const PROFILE_DESC = {
-  freestyle: 'Freestyle: เน้น propwash fix · D-term balance · Rates smooth',
-  racing:    'Racing: ลด filter latency · ตอบสนองเร็ว · I-term tight',
-  longrange: 'Long Range: I สูง · Rates ต่ำ · GPS rescue · battery sag OK',
-};
-// Profile adjusts some delta multipliers
-const PROFILE_MULT = {
-  freestyle: { D:1.1, I:.9,  FF:1.0 },
-  racing:    { D:.85, I:1.0, FF:1.2 },
-  longrange: { D:.9,  I:1.2, FF:.8  },
-};
-
-// ── State ─────────────────────────────────────────────────
-let selectedIds = new Set();
-let currentSev  = 'moderate';
-let currentCat  = 'all';
-let currentProfile = 'freestyle';
-let history     = JSON.parse(localStorage.getItem('obix_pid_history_v3') || '[]');
-
-// ── Get current PID from inputs ───────────────────────────
+// ── PID getters ──
 function getPID() {
   return {
-    p_roll:   +document.getElementById('p_roll').value   || 48,
-    i_roll:   +document.getElementById('i_roll').value   || 90,
-    d_roll:   +document.getElementById('d_roll').value   || 38,
-    p_pitch:  +document.getElementById('p_pitch').value  || 52,
-    i_pitch:  +document.getElementById('i_pitch').value  || 90,
-    d_pitch:  +document.getElementById('d_pitch').value  || 40,
-    p_yaw:    +document.getElementById('p_yaw').value    || 40,
-    i_yaw:    +document.getElementById('i_yaw').value    || 90,
-    d_yaw:    +document.getElementById('d_yaw').value    || 0,
-    ff_roll:  +document.getElementById('ff_roll').value  || 25,
-    ff_pitch: +document.getElementById('ff_pitch').value || 25,
-    gyro_lpf: +document.getElementById('gyro_lpf').value || 200,
-    dterm_lpf:+document.getElementById('dterm_lpf').value|| 110,
+    p_roll:  +document.getElementById('pid_p_roll').value || 48,
+    i_roll:  +document.getElementById('pid_i_roll').value || 90,
+    d_roll:  +document.getElementById('pid_d_roll').value || 38,
+    p_pitch: +document.getElementById('pid_p_pitch').value || 52,
+    i_pitch: +document.getElementById('pid_i_pitch').value || 90,
+    d_pitch: +document.getElementById('pid_d_pitch').value || 40,
+    p_yaw:   +document.getElementById('pid_p_yaw').value || 40,
+    i_yaw:   +document.getElementById('pid_i_yaw').value || 90,
+    d_yaw:   +document.getElementById('pid_d_yaw').value || 0,
+    gyro_lpf1: +document.getElementById('filt_gyro').value || 200,
+    dterm_lpf1: +document.getElementById('filt_dterm').value || 110,
+    ag:      +document.getElementById('filt_ag').value || 5,
+    ff:      +document.getElementById('filt_ff').value || 100,
   };
 }
 
-// ── Compute adjusted value based on direction & multiplier ─
-function computeAdj(pid, param, direction, amount) {
-  const mult = SEV_MULT[currentSev];
-  const pm   = PROFILE_MULT[currentProfile];
-  const isUp   = direction.includes('เพิ่ม');
-  const isDown = direction.includes('ลด');
-  if (!isUp && !isDown) return null;
-
-  // Extract number from amount string
-  const nums = amount.match(/\d+\.?\d*/g);
-  if (!nums) return null;
-  const step = Math.round(parseFloat(nums[0]) * mult);
-
-  // Determine current base value
-  const lp = param.toLowerCase();
-  let cur = null;
-  if (lp.includes('d_roll') || lp.includes('d roll'))   cur = pid.d_roll;
-  if (lp.includes('d_pitch')|| lp.includes('d pitch'))  cur = pid.d_pitch;
-  if (lp.includes('p_roll') || lp.includes('p roll'))   cur = pid.p_roll;
-  if (lp.includes('p_pitch')|| lp.includes('p pitch'))  cur = pid.p_pitch;
-  if (lp.includes('p_yaw')  || lp.includes('p yaw'))    cur = pid.p_yaw;
-  if (lp.includes('i_roll') || lp.includes('i roll'))   cur = pid.i_roll;
-  if (lp.includes('i_pitch')|| lp.includes('i pitch'))  cur = pid.i_pitch;
-  if (lp.includes('i_yaw')  || lp.includes('i yaw'))    cur = pid.i_yaw;
-  if (lp.includes('gyro_lpf1'))   cur = pid.gyro_lpf;
-  if (lp.includes('dterm_lpf1'))  cur = pid.dterm_lpf;
-  if (lp.includes('feedforward') || lp.includes('ff'))  cur = pid.ff_roll;
-
-  if (cur === null) return null;
-  const newVal = isUp ? cur + step : Math.max(1, cur - step);
-  return { cur, newVal, isUp, param };
+// ── Profile ──
+function setProfile(btn) {
+  document.querySelectorAll('.profile-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  currentProfile = btn.dataset.p;
+  if(currentSymptom) renderResult(currentSymptom);
 }
 
-// ── Build CLI output with real numbers ────────────────────
-function buildCLI(ids, pid) {
-  const mult = SEV_MULT[currentSev];
-  const lines = [];
-  const symLabel = ids.map(i => DATA[i]?.label?.split('/')[0].trim() || i).join(' + ');
-
-  lines.push(`# ═══ OBIX PID Diagnostic Lab v3 ═══`);
-  lines.push(`# Profile: ${currentProfile.toUpperCase()} | Severity: ${currentSev.toUpperCase()}`);
-  lines.push(`# Symptoms: ${symLabel}`);
-  lines.push(`# Multiplier: ${mult}x | Generated: ${new Date().toLocaleTimeString('th-TH')}`);
-  lines.push(`# ────────────────────────────────────`);
-
-  const applied = new Set();
-
-  ids.forEach((id, idx) => {
-    const s = DATA[id]; if (!s) return;
-    lines.push('');
-    lines.push(`# [${idx+1}] ${s.label.split('/')[0].trim()}`);
-
-    s.cli_template.forEach(raw => {
-      const l = raw.trim();
-      if (l.startsWith('#')) { lines.push(l); return; }
-      if (l === '' ) { return; }
-      if (l === 'save') return; // add at end
-
-      // Replace template placeholders with real values
-      let resolved = l
-        .replace(/\{d_roll\s*-\s*(\d+)\}/g,  (_,n)=>Math.max(0,pid.d_roll  - Math.round(+n*mult)))
-        .replace(/\{d_roll\s*\+\s*(\d+)\}/g,  (_,n)=>pid.d_roll  + Math.round(+n*mult))
-        .replace(/\{d_pitch\s*-\s*(\d+)\}/g,  (_,n)=>Math.max(0,pid.d_pitch - Math.round(+n*mult)))
-        .replace(/\{d_pitch\s*\+\s*(\d+)\}/g, (_,n)=>pid.d_pitch + Math.round(+n*mult))
-        .replace(/\{p_roll\s*-\s*(\d+)\}/g,   (_,n)=>Math.max(1,pid.p_roll  - Math.round(+n*mult)))
-        .replace(/\{p_roll\s*\+\s*(\d+)\}/g,  (_,n)=>pid.p_roll  + Math.round(+n*mult))
-        .replace(/\{p_pitch\s*-\s*(\d+)\}/g,  (_,n)=>Math.max(1,pid.p_pitch - Math.round(+n*mult)))
-        .replace(/\{p_pitch\s*\+\s*(\d+)\}/g, (_,n)=>pid.p_pitch + Math.round(+n*mult))
-        .replace(/\{p_yaw\s*-\s*(\d+)\}/g,    (_,n)=>Math.max(1,pid.p_yaw   - Math.round(+n*mult)))
-        .replace(/\{p_yaw\s*\+\s*(\d+)\}/g,   (_,n)=>pid.p_yaw   + Math.round(+n*mult))
-        .replace(/\{i_roll\s*\+\s*(\d+)\}/g,  (_,n)=>pid.i_roll  + Math.round(+n*mult))
-        .replace(/\{i_pitch\s*\+\s*(\d+)\}/g, (_,n)=>pid.i_pitch + Math.round(+n*mult))
-        .replace(/\{i_yaw\s*\+\s*(\d+)\}/g,   (_,n)=>pid.i_yaw   + Math.round(+n*mult))
-        .replace(/\{i_yaw\s*-\s*(\d+)\}/g,    (_,n)=>Math.max(1,pid.i_yaw   - Math.round(+n*mult)))
-        .replace(/\{ff\s*\+\s*(\d+)\}/g,       (_,n)=>pid.ff_roll + Math.round(+n*mult))
-        .replace(/\{gyro_lpf\s*-\s*(\d+)\}/g, (_,n)=>Math.max(50,pid.gyro_lpf - Math.round(+n*mult)))
-        .replace(/\{gyro_lpf\s*\+\s*(\d+)\}/g,(_,n)=>pid.gyro_lpf + Math.round(+n*mult))
-        .replace(/\{dterm_lpf\s*-\s*(\d+)\}/g,(_,n)=>Math.max(40,pid.dterm_lpf - Math.round(+n*mult)))
-        .replace(/\{dterm_lpf\s*\+\s*(\d+)\}/g,(_,n)=>pid.dterm_lpf + Math.round(+n*mult))
-        .replace(/\{d_min_roll[^}]*\}/g,       pid.d_roll - 5)
-        .replace(/\{d_min_pitch[^}]*\}/g,       pid.d_pitch - 5)
-        // remove any remaining {…}
-        .replace(/\{[^}]+\}/g, '?');
-
-      // Track if this is a duplicate set line
-      const setMatch = resolved.match(/^set\s+(\S+)\s*=/);
-      if (setMatch) {
-        if (applied.has(setMatch[1]) && ids.length > 1) {
-          resolved = '# ' + resolved + '  ← already set above';
-        } else {
-          applied.add(setMatch[1]);
-        }
-      }
-      lines.push(resolved);
-    });
+// ── Symptom filter ──
+function filterSymptoms(q) {
+  q = q.toLowerCase().trim();
+  document.querySelectorAll('.symptom-item').forEach(function(item) {
+    var name = item.querySelector('.symptom-name').textContent.toLowerCase();
+    var nameEn = (item.querySelector('.symptom-name-en') || {}).textContent || '';
+    nameEn = nameEn.toLowerCase();
+    item.style.display = (!q || name.indexOf(q)>=0 || nameEn.indexOf(q)>=0) ? '' : 'none';
   });
-
-  lines.push('');
-  lines.push('# ────────────────────────────────────');
-  lines.push('save');
-  return lines;
-}
-
-// ── Render CLI into HTML ──────────────────────────────────
-function renderCLIHtml(lines) {
-  const body = document.getElementById('cliBody');
-  body.innerHTML = '';
-  let lineCount = 0;
-  lines.forEach(l => {
-    const d = document.createElement('div');
-    const t = l.trim();
-    if (t.startsWith('#')) {
-      d.innerHTML = `<span class="cli-cmt">${esc(l)}</span>`;
-    } else if (t === '') {
-      d.innerHTML = '<br>';
-    } else if (t === 'save') {
-      d.innerHTML = `<span class="cli-save">save</span>`;
-      lineCount++;
-    } else if (t.startsWith('set ')) {
-      const m = t.match(/^(set\s+)(\S+)(\s*=\s*)(.+)$/);
-      if (m) {
-        d.innerHTML = `<span class="cli-cmd">set </span><span class="cli-key">${esc(m[2])}</span><span class="cli-cmd">${esc(m[3])}</span><span class="cli-val">${esc(m[4])}</span>`;
-      } else {
-        d.innerHTML = `<span class="cli-cmd">${esc(l)}</span>`;
-      }
-      lineCount++;
-    } else {
-      d.innerHTML = `<span class="cli-note">${esc(l)}</span>`;
-    }
-    body.appendChild(d);
-  });
-  document.getElementById('cliLineCount').textContent = lineCount + ' commands';
-}
-
-// ── Build delta visualization ─────────────────────────────
-function buildDelta(ids, pid) {
-  // Compute proposed PID values by merging all adjustments
-  const proposed = {...pid};
-  const pm = PROFILE_MULT[currentProfile];
-
-  ids.forEach(id => {
-    const s = DATA[id]; if (!s) return;
-    s.adjustments.forEach(a => {
-      const r = computeAdj(pid, a.param, a.direction, a.amount);
-      if (!r) return;
-      const lp = a.param.toLowerCase();
-      if (lp.includes('d_roll'))  proposed.d_roll  = r.newVal;
-      if (lp.includes('d_pitch')) proposed.d_pitch = r.newVal;
-      if (lp.includes('p_roll'))  proposed.p_roll  = r.newVal;
-      if (lp.includes('p_pitch')) proposed.p_pitch = r.newVal;
-      if (lp.includes('p_yaw'))   proposed.p_yaw   = r.newVal;
-      if (lp.includes('i_roll'))  proposed.i_roll  = r.newVal;
-      if (lp.includes('i_pitch')) proposed.i_pitch = r.newVal;
-      if (lp.includes('i_yaw'))   proposed.i_yaw   = r.newVal;
-    });
-  });
-
-  const axes = [
-    { name:'ROLL',  color:'var(--amber)',  params:['P','I','D'], cur:[pid.p_roll, pid.i_roll, pid.d_roll], new:[proposed.p_roll, proposed.i_roll, proposed.d_roll] },
-    { name:'PITCH', color:'var(--green)',  params:['P','I','D'], cur:[pid.p_pitch,pid.i_pitch,pid.d_pitch], new:[proposed.p_pitch,proposed.i_pitch,proposed.d_pitch] },
-    { name:'YAW',   color:'var(--purple)', params:['P','I','D'], cur:[pid.p_yaw,  pid.i_yaw,  pid.d_yaw],  new:[proposed.p_yaw,  proposed.i_yaw,  proposed.d_yaw] },
-  ];
-
-  const grid = document.getElementById('deltaGrid');
-  grid.innerHTML = '';
-  const MAX = 120;
-
-  axes.forEach(ax => {
-    const div = document.createElement('div');
-    div.className = 'delta-axis';
-    div.innerHTML = `<div class="delta-axis-name" style="color:${ax.color}">${ax.name}</div>`;
-
-    ax.params.forEach((p, i) => {
-      const curV = ax.cur[i];
-      const newV = ax.new[i];
-      const isUp = newV > curV;
-      const isDn = newV < curV;
-      const cls  = isUp ? 'up' : isDn ? 'down' : 'same';
-      const curW = Math.min(100, curV / MAX * 100).toFixed(1);
-      const newW = Math.min(100, newV / MAX * 100).toFixed(1);
-      const sign = isUp ? '+' : isDn ? '' : '±';
-      const diff = newV - curV;
-
-      div.innerHTML += `
-        <div class="delta-row">
-          <div class="delta-row-label"><span>${p}</span><span class="delta-new-val ${cls}">${sign}${diff !== 0 ? diff : 0}</span></div>
-          <div class="delta-bar-bg">
-            <div class="delta-bar-cur" style="width:${curW}%"></div>
-            <div class="delta-bar-new ${cls}" style="width:${newW}%"></div>
-          </div>
-          <div class="delta-nums">
-            <span class="delta-cur-val">${curV}</span>
-            <span class="delta-new-val ${cls}">${newV}</span>
-          </div>
-        </div>`;
-    });
-    grid.appendChild(div);
+  // Hide empty category groups
+  document.querySelectorAll('.category-group').forEach(function(g){
+    var visible = Array.from(g.querySelectorAll('.symptom-item')).some(function(i){ return i.style.display !== 'none'; });
+    g.style.display = visible ? '' : 'none';
   });
 }
 
-// ── Build step guide ──────────────────────────────────────
-function buildSteps(ids, pid) {
-  // Categorize adjustments by priority
-  const steps = [];
+// ── Select symptom ──
+function selectSymptom(id) {
+  // Deactivate all
+  document.querySelectorAll('.symptom-item').forEach(function(i){ i.classList.remove('active'); });
+  var item = document.getElementById('si-'+id);
+  if(item) item.classList.add('active');
 
-  ids.forEach(id => {
-    const s = DATA[id]; if (!s) return;
-    s.adjustments.forEach((a, i) => {
-      const priority = (a.priority || (i === 0 ? 1 : 2));
-      const r = computeAdj(pid, a.param, a.direction, a.amount);
-      const cliLine = r
-        ? `set ${a.param.replace(/\s*\/\s*\S+/,'')} = ${r.newVal}`
-        : null;
-      steps.push({ priority, param:a.param, direction:a.direction, amount:a.amount, reason:a.reason, cli:cliLine, srcId:id });
-    });
-  });
+  currentSymptom = id;
+  renderResult(id);
 
-  // De-dupe by param, keep highest priority
-  const seen = {};
-  const unique = steps.filter(s => {
-    const k = s.param;
-    if (seen[k]) return false;
-    seen[k] = true; return true;
-  });
-
-  // Sort by priority
-  unique.sort((a,b) => (a.priority||2) - (b.priority||2));
-
-  const list = document.getElementById('stepsList');
-  list.innerHTML = '';
-  unique.slice(0, 8).forEach((s, i) => {
-    const isUp   = s.direction.includes('เพิ่ม');
-    const isDown = s.direction.includes('ลด');
-    const cls    = s.priority === 1 ? 'step-crit' : s.priority === 2 ? 'step-imp' : 'step-opt';
-    const badge  = s.priority === 1 ? '<span class="step-badge badge-crit">CRITICAL</span>'
-                 : s.priority === 2 ? '<span class="step-badge badge-imp">IMPORTANT</span>'
-                 :                    '<span class="step-badge badge-opt">OPTIONAL</span>';
-    const icon   = isUp ? '↑' : isDown ? '↓' : '⚡';
-    const color  = isUp ? 'var(--green)' : isDown ? 'var(--red)' : 'var(--amber)';
-
-    const el = document.createElement('div');
-    el.className = `step-row ${cls}`;
-    el.innerHTML = `
-      <div class="step-num">${String(i+1).padStart(2,'0')}</div>
-      <div class="step-body">
-        <div class="step-name">
-          <span style="color:${color};font-size:14px;">${icon}</span>
-          <span class="cli-key" style="font-size:10px;">${esc(s.param)}</span>
-          ${badge}
-        </div>
-        <div class="step-desc">${esc(s.reason)}</div>
-        ${s.cli ? `<div class="step-cli" onclick="navigator.clipboard.writeText(this.textContent)">${esc(s.cli)}</div>` : ''}
-      </div>`;
-    list.appendChild(el);
-  });
-}
-
-// ── Main render ───────────────────────────────────────────
-function render() {
-  const emptyEl   = document.getElementById('emptyState');
-  const contentEl = document.getElementById('diagContent');
-
-  if (selectedIds.size === 0) {
-    emptyEl.classList.remove('hide');
-    contentEl.classList.remove('show');
-    clearOutputs();
-    return;
+  // Scroll to top of right panel on mobile
+  if(window.innerWidth <= 960) {
+    document.querySelector('.adv-right').scrollIntoView({behavior:'smooth'});
   }
+}
 
-  emptyEl.classList.add('hide');
-  contentEl.classList.add('show');
+// ── Render result ──
+function renderResult(id) {
+  var adv = ADVICE_MAP[id];
+  var sym = SYMPTOM_MAP[id];
+  if(!adv || !sym) return;
 
-  const ids = [...selectedIds];
-  const primary = DATA[ids[0]];
-  const pid = getPID();
+  document.getElementById('advEmpty').style.display = 'none';
+  var result = document.getElementById('advResult');
+  result.classList.add('show');
 
-  if (!primary) return;
+  // Header
+  var iconWrap = document.getElementById('res-icon-wrap');
+  iconWrap.textContent = sym.icon || '🔧';
+  iconWrap.style.background = (sym.color||'#10c47a') + '15';
+  iconWrap.style.borderColor = sym.color || 'var(--border)';
 
-  // Status
-  document.getElementById('diagStatus').textContent =
-    ids.length > 1 ? `MULTI (${ids.length}) · ${currentSev.toUpperCase()}` : `${(primary.category||'').toUpperCase()} · ${currentSev.toUpperCase()}`;
+  document.getElementById('res-title').textContent = adv.label;
+  document.getElementById('res-title-en').textContent = adv.label_en || '';
 
-  // Conflicts
-  const conflicts = detectConflicts(ids);
-  const conflEl = document.getElementById('conflictAlert');
-  if (conflicts.length > 0) {
-    conflEl.classList.add('show');
-    const bodyEl = document.getElementById('conflictBody');
-    bodyEl.innerHTML = `<strong>Parameter ที่ขัดแย้งกัน:</strong><br>` +
-      conflicts.map(c =>
-        `<span class="conflict-item">${c.param}</span> — ` +
-        `<em style="color:var(--green)">${c.upSyms.join(', ')}</em> ต้องการเพิ่ม · ` +
-        `<em style="color:var(--red)">${c.downSyms.join(', ')}</em> ต้องการลด`
-      ).join('<br>');
-    document.getElementById('conflictResolution').textContent =
-      `💡 แนะนำ: แก้ทีละอาการตาม Step Guide ด้านล่าง เริ่มจาก CRITICAL ก่อน แล้วบินทดสอบ 1 pack ก่อน step ถัดไป`;
-  } else {
-    conflEl.classList.remove('show');
-  }
-
-  // Axis diagram
-  updateAxis(ids);
-
-  // Root cause
-  document.getElementById('diagText').textContent = primary.diagnosis || '';
-  document.getElementById('causeTag').textContent  = '⚡ ' + (primary.primary_cause || '');
-
-  // Multi banner
-  const mb = document.getElementById('multiBanner');
-  if (ids.length > 1) {
-    mb.classList.add('show');
-    document.getElementById('multiBannerText').textContent =
-      `Combined: ${ids.map(i => DATA[i]?.label?.split('/')[0].trim() || i).join(' + ')}`;
-  } else {
-    mb.classList.remove('show');
-  }
-
-  // Step guide
-  buildSteps(ids, pid);
-
-  // Delta viz
-  buildDelta(ids, pid);
-
-  // CLI
-  const cliLines = buildCLI(ids, pid);
-  renderCLIHtml(cliLines);
+  // Severity pill
+  var sevColors = {critical:'r', high:'r', medium:'a', low:'b'};
+  var sevLabels = {critical:'🔴 CRITICAL', high:'🟠 HIGH', medium:'🟡 MEDIUM', low:'🔵 LOW'};
+  var sevPill = document.getElementById('res-severity-pill');
+  sevPill.className = 'v5-pill ' + (sevColors[adv.severity]||'a');
+  sevPill.textContent = sevLabels[adv.severity] || adv.severity;
 
   // Confidence
-  const confs = ids.map(i => (META[i]||{conf:70}).conf);
-  const avgConf = Math.round(confs.reduce((a,b)=>a+b,0)/confs.length * (ids.length > 1 ? .88 : 1));
-  const confBox = document.getElementById('confBox');
-  confBox.style.display = 'block';
-  document.getElementById('confPct').textContent = avgConf + '%';
-  setTimeout(()=>{ document.getElementById('confBar').style.width = avgConf + '%'; }, 50);
-  // Confidence factors
-  const factors = [];
-  if (ids.length === 1) factors.push({label:'Single symptom', cls:'cf-high'});
-  else if (ids.length <= 3) factors.push({label:`${ids.length} symptoms`, cls:'cf-med'});
-  else factors.push({label:`${ids.length}+ symptoms`, cls:'cf-low'});
-  if (conflicts.length > 0) factors.push({label:'Conflict detected', cls:'cf-low'});
-  else factors.push({label:'No conflict', cls:'cf-high'});
-  document.getElementById('confFactors').innerHTML = factors.map(f=>
-    `<span class="conf-factor ${f.cls}">${f.label}</span>`).join('');
+  document.getElementById('res-confidence-fill').style.width = (adv.confidence||75) + '%';
+  document.getElementById('res-confidence-pct').textContent = (adv.confidence||75) + '%';
 
-  // Severity note
-  const si = SEV_INFO[currentSev];
-  document.getElementById('sevNoteArea').innerHTML =
-    `<div class="sev-note" style="border-color:${si.color}33;color:${si.color};background:${si.color}0d;">
-      <span class="sev-note-label">${si.label}</span>
-      <span class="sev-note-text">${si.note}</span>
-    </div>`;
+  // Axes pills
+  var axesPills = document.getElementById('res-axes-pills');
+  axesPills.innerHTML = '';
+  if(adv.axes_affected && adv.axes_affected.length) {
+    adv.axes_affected.forEach(function(ax){
+      var span = document.createElement('span');
+      span.className = 'v5-pill neu';
+      span.style.fontSize = '9px';
+      span.textContent = ax.toUpperCase();
+      axesPills.appendChild(span);
+    });
+  }
+
+  // Quick win
+  var qwBanner = document.getElementById('res-quickwin');
+  if(adv.quick_win) {
+    qwBanner.style.display = 'flex';
+    document.getElementById('res-quickwin-text').textContent = adv.quick_win;
+  } else {
+    qwBanner.style.display = 'none';
+  }
+
+  // Diagnosis
+  document.getElementById('res-diagnosis').textContent = adv.diagnosis;
+  document.getElementById('res-cause').textContent = adv.primary_cause;
+
+  // Adjustments
+  renderAdjustments(adv.adjustments);
+
+  // PID Delta
+  renderPIDDelta(adv.adjustments);
+
+  // CLI
+  renderCLI(adv.cli_template);
+
+  // Radar
+  renderRadar(adv);
+
+  // Blackbox hint
+  var bbWrap = document.getElementById('res-bb-wrap');
+  if(adv.blackbox_hint) {
+    bbWrap.style.display = 'block';
+    document.getElementById('res-bb-hint').textContent = adv.blackbox_hint;
+  } else {
+    bbWrap.style.display = 'none';
+  }
+
+  // BF version note
+  var bfWrap = document.getElementById('res-bf-wrap');
+  if(adv.bf_version_note) {
+    bfWrap.style.display = 'block';
+    document.getElementById('res-bf-note').textContent = adv.bf_version_note;
+  } else {
+    bfWrap.style.display = 'none';
+  }
 
   // Tips
-  const allTips = [];
-  ids.forEach(id => { const s=DATA[id]; if(s) allTips.push(...s.tips); });
-  const uniqTips = [...new Set(allTips)].slice(0,7);
-  document.getElementById('tipsCount').textContent = uniqTips.length + ' tips';
-  document.getElementById('tipsList').innerHTML = uniqTips.map(t => {
-    const cls = t.startsWith('⚠️') || t.startsWith('ถ้า') ? 'tip-warn' : t.startsWith('🔧') || t.startsWith('ดู ') ? 'tip-pro' : '';
-    return `<div class="tip-card ${cls}">${esc(t)}</div>`;
-  }).join('');
-
-  // Save to history
-  saveHistory(ids);
-}
-
-// ── Axis diagram ──────────────────────────────────────────
-function updateAxis(ids) {
-  const axes = new Set();
-  ids.forEach(id => { (META[id]?.axes||[]).forEach(a=>axes.add(a)); });
-
-  const rollA = axes.has('roll');
-  const pitchA = axes.has('pitch');
-  ['arm-fl','arm-fr'].forEach(id=>{
-    const el=document.getElementById(id);
-    const on = pitchA;
-    el.style.stroke = on ? 'var(--amber)' : 'var(--muted)';
-    el.style.strokeWidth = on ? '7' : '5';
-    el.style.filter = on ? 'drop-shadow(0 0 5px var(--amber))' : 'none';
+  var tipsList = document.getElementById('res-tips');
+  tipsList.innerHTML = '';
+  (adv.tips || []).forEach(function(tip, i) {
+    var div = document.createElement('div');
+    div.className = 'tip-item';
+    div.innerHTML = '<div class="tip-num">0'+(i+1)+'</div><div>'+tip+'</div>';
+    tipsList.appendChild(div);
   });
-  ['arm-bl','arm-br'].forEach(id=>{
-    const el=document.getElementById(id);
-    const on = rollA;
-    el.style.stroke = on ? 'var(--amber)' : 'var(--muted)';
-    el.style.strokeWidth = on ? '7' : '5';
-    el.style.filter = on ? 'drop-shadow(0 0 5px var(--amber))' : 'none';
-  });
-  document.getElementById('rollInd').style.opacity  = rollA  ? '1' : '0';
-  document.getElementById('pitchInd').style.opacity = pitchA ? '1' : '0';
-  document.getElementById('yawInd').style.opacity   = axes.has('yaw') ? '1' : '0';
-  document.getElementById('leg-roll').classList.toggle('on',  rollA);
-  document.getElementById('leg-pitch').classList.toggle('on', pitchA);
-  document.getElementById('leg-yaw').classList.toggle('on',   axes.has('yaw'));
-}
 
-// ── Symptom list ──────────────────────────────────────────
-function buildSymptomList() {
-  const list = document.getElementById('symptomList');
-  list.innerHTML = '';
-  Object.entries(DATA).forEach(([id, s]) => {
-    if (currentCat !== 'all' && s.category !== currentCat) return;
-    const meta = META[id] || {icon:'🔧', axes:[], conf:70, color:'var(--red)'};
-    const catColor = CAT_COLORS[s.category] || 'var(--red)';
-    const isActive = selectedIds.has(id);
-
-    const div = document.createElement('div');
-    div.className = 'symp-card' + (isActive ? ' active' : '');
-    div.innerHTML = `
-      <div class="symp-icon">${meta.icon}</div>
-      <div class="symp-info">
-        <div class="symp-name">${s.label}</div>
-        <div class="symp-cat" style="color:${catColor}">${s.category}</div>
-      </div>
-      <div class="symp-conf">${meta.conf}%</div>
-      <div class="symp-check">${isActive?'✓':''}</div>`;
-    if (isActive) div.style.borderLeftColor = meta.color;
-    div.addEventListener('click', ()=>toggleSymptom(id));
-    list.appendChild(div);
-  });
-}
-
-function toggleSymptom(id) {
-  selectedIds.has(id) ? selectedIds.delete(id) : selectedIds.add(id);
-  buildSymptomList();
-  updateCounter();
-  render();
-}
-
-function updateCounter() {
-  const n = selectedIds.size;
-  document.getElementById('selCounter').textContent = n + ' เลือก';
-  document.getElementById('multiBadge').classList.toggle('show', n > 1);
-}
-
-// ── Clear outputs ─────────────────────────────────────────
-function clearOutputs() {
-  document.getElementById('cliBody').innerHTML = '<div class="cli-empty"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"/><path d="M8 5v3M8 11h.01"/></svg>กรอก PID + เลือกอาการ...</div>';
-  document.getElementById('cliLineCount').textContent = '0 lines';
-  document.getElementById('tipsList').innerHTML = '<p style="font-size:12px;color:var(--muted2);">เลือกอาการเพื่อดู tips...</p>';
-  document.getElementById('tipsCount').textContent = '0 tips';
-  document.getElementById('confBox').style.display = 'none';
-  document.getElementById('stepsList').innerHTML = '';
-  document.getElementById('deltaGrid').innerHTML = '';
-  document.getElementById('diagStatus').textContent = 'รอการวินิจฉัย...';
-  document.getElementById('multiBanner').classList.remove('show');
-  document.getElementById('conflictAlert').classList.remove('show');
-  document.getElementById('sevNoteArea').innerHTML = '<p style="font-size:12px;color:var(--muted2);line-height:1.6;">เลือก severity level เพื่อดูคำแนะนำ</p>';
-  ['arm-fl','arm-fr','arm-bl','arm-br'].forEach(id=>{const el=document.getElementById(id);el.style.stroke='var(--muted)';el.style.strokeWidth='5';el.style.filter='none';});
-  ['rollInd','pitchInd','yawInd'].forEach(id=>document.getElementById(id).style.opacity='0');
-  ['leg-roll','leg-pitch','leg-yaw'].forEach(id=>document.getElementById(id).classList.remove('on'));
-}
-
-// ── History ───────────────────────────────────────────────
-function saveHistory(ids) {
-  if (ids.length === 0) return;
-  const entry = { ids:[...ids], ts:Date.now(), pid:getPID(), sev:currentSev, profile:currentProfile };
-  history = [entry, ...history.filter((_,i)=>i<4)];
-  localStorage.setItem('obix_pid_history_v3', JSON.stringify(history));
-  renderHistory();
-}
-
-function renderHistory() {
-  const list = document.getElementById('historyList');
-  document.getElementById('histCount').textContent = history.length + ' sessions';
-  if (history.length === 0) {
-    list.innerHTML = '<p style="font-size:12px;color:var(--muted2);">ยังไม่มี session</p>';
-    return;
-  }
-  list.innerHTML = '';
-  history.forEach((e, i) => {
-    const d = new Date(e.ts);
-    const timeStr = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
-    const div = document.createElement('div');
-    div.className = 'history-item';
-    div.title = 'คลิกเพื่อโหลด session นี้';
-    div.innerHTML = `
-      <div class="history-dots">${e.ids.slice(0,4).map(id=>`<div class="history-dot" style="background:${(META[id]||{color:'var(--red)'}).color}"></div>`).join('')}</div>
-      <div style="flex:1;min-width:0;"><div style="font-size:11px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.ids.map(id=>DATA[id]?.label?.split('/')[0].trim()||id).join(', ')}</div><div style="font-family:var(--font-d);font-size:7.5px;color:var(--muted2);margin-top:2px;">${e.profile.toUpperCase()} · ${e.sev.toUpperCase()}</div></div>
-      <div class="history-time">${timeStr}</div>`;
-    div.addEventListener('click', ()=>{
-      selectedIds = new Set(e.ids);
-      currentSev = e.sev;
-      currentProfile = e.profile;
-      if (e.pid) {
-        Object.entries(e.pid).forEach(([k,v])=>{ const el=document.getElementById(k); if(el) el.value=v; });
-      }
-      document.querySelectorAll('.sev-btn').forEach(b=>b.classList.toggle('active', b.dataset.sev===currentSev));
-      document.querySelectorAll('.profile-btn').forEach(b=>b.classList.toggle('active', b.dataset.p===currentProfile));
-      buildSymptomList(); updateCounter(); render();
+  // Related
+  var relWrap = document.getElementById('res-related-wrap');
+  var relGrid = document.getElementById('res-related');
+  relGrid.innerHTML = '';
+  if(adv.related && adv.related.length) {
+    relWrap.style.display = 'block';
+    adv.related.forEach(function(relId) {
+      var relSym = SYMPTOM_MAP[relId];
+      if(!relSym) return;
+      var chip = document.createElement('div');
+      chip.className = 'related-chip';
+      chip.onclick = function(){ selectSymptom(relId); };
+      chip.innerHTML = '<span>'+relSym.icon+'</span><span>'+relSym.label+'</span>';
+      relGrid.appendChild(chip);
     });
-    list.appendChild(div);
+  } else {
+    relWrap.style.display = 'none';
+  }
+}
+
+// ── Adjustments ──
+function renderAdjustments(adjs) {
+  var grid = document.getElementById('res-adj');
+  grid.innerHTML = '';
+  if(!adjs) return;
+
+  adjs.forEach(function(adj) {
+    var dir = adj.direction || '';
+    var dirClass = 'check';
+    var dirLabel = dir;
+    if(dir.indexOf('เพิ่ม')>=0 || dir.indexOf('เปิด')>=0) { dirClass='up'; dirLabel='↑ '+dir; }
+    else if(dir.indexOf('ลด')>=0) { dirClass='down'; dirLabel='↓ '+dir; }
+    else if(dir.indexOf('ตั้ง')>=0 || dir.indexOf('เปลี่ยน')>=0 || dir.indexOf('assign')>=0) { dirClass='set'; }
+
+    var card = document.createElement('div');
+    card.className = 'adj-card ' + dirClass;
+    card.innerHTML =
+      '<div class="adj-param">'+adj.param+'</div>'+
+      '<div class="adj-delta-row">'+
+        '<span class="adj-dir '+dirClass+'">'+dirLabel+'</span>'+
+        '<span class="adj-amount">'+adj.amount+'</span>'+
+      '</div>'+
+      '<div class="adj-reason">'+adj.reason+'</div>';
+    grid.appendChild(card);
   });
 }
 
-// ── Copy / Download CLI ───────────────────────────────────
+// ── PID Delta ──
+function renderPIDDelta(adjs) {
+  var pid = getPID();
+  var deltas = {p_roll:0, i_roll:0, d_roll:0, p_pitch:0, i_pitch:0, d_pitch:0, p_yaw:0, i_yaw:0, d_yaw:0};
+
+  if(adjs) {
+    adjs.forEach(function(adj) {
+      var d = adj.delta || 0;
+      if(d === 0) return;
+      var ax = adj.axis || 'both';
+      if(ax === 'both' || ax === 'roll')  { deltas.p_roll+=d; deltas.d_roll+=d; }
+      if(ax === 'both' || ax === 'pitch') { deltas.p_pitch+=d; deltas.d_pitch+=d; }
+      if(ax === 'yaw')  { deltas.p_yaw+=d; deltas.i_yaw+=d; }
+      if(adj.param && adj.param.indexOf('i_roll')>=0)  { deltas.i_roll+=d; }
+      if(adj.param && adj.param.indexOf('i_pitch')>=0) { deltas.i_pitch+=d; }
+    });
+  }
+
+  var tbody = document.getElementById('pidDeltaBody');
+  tbody.innerHTML = '';
+
+  var rows = [
+    {label:'ROLL',  p_cur:pid.p_roll,  p_del:deltas.p_roll,  i_cur:pid.i_roll,  i_del:deltas.i_roll,  d_cur:pid.d_roll,  d_del:deltas.d_roll},
+    {label:'PITCH', p_cur:pid.p_pitch, p_del:deltas.p_pitch, i_cur:pid.i_pitch, i_del:deltas.i_pitch, d_cur:pid.d_pitch, d_del:deltas.d_pitch},
+    {label:'YAW',   p_cur:pid.p_yaw,   p_del:deltas.p_yaw,   i_cur:pid.i_yaw,   i_del:deltas.i_yaw,   d_cur:pid.d_yaw,   d_del:deltas.d_yaw},
+  ];
+
+  rows.forEach(function(r){
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="pdt-axis">'+r.label+'</td>'+
+      makeDeltaCell(r.p_cur, r.p_del)+
+      makeDeltaCell(r.i_cur, r.i_del)+
+      makeDeltaCell(r.d_cur, r.d_del);
+    tbody.appendChild(tr);
+  });
+}
+
+function makeDeltaCell(cur, delta) {
+  var newVal = Math.max(0, cur + delta);
+  var cls = delta>0 ? 'up' : (delta<0 ? 'down' : 'same');
+  var dStr = delta>0 ? '+'+delta : (delta<0 ? ''+delta : '—');
+  return '<td>'+
+    '<span class="pdt-cur">'+cur+'</span>'+
+    ' <span class="pdt-arrow">→</span> '+
+    '<span class="pdt-new '+cls+'">'+newVal+'</span>'+
+    ' <span class="pdt-delta '+cls+'">'+dStr+'</span>'+
+    '</td>';
+}
+
+// ── CLI render ──
+function renderCLI(template) {
+  var pid = getPID();
+  var cliDiv = document.getElementById('res-cli');
+  if(!template) { cliDiv.textContent = '# ไม่มี CLI template'; return; }
+
+  var lines = template.map(function(line) {
+    // Replace placeholders with real values
+    return line
+      .replace(/{p_roll\s*([+-]\s*\d+)?}/g,  function(m,op){ return op ? Math.max(0,pid.p_roll+eval(op)) : pid.p_roll; })
+      .replace(/{p_pitch\s*([+-]\s*\d+)?}/g, function(m,op){ return op ? Math.max(0,pid.p_pitch+eval(op)) : pid.p_pitch; })
+      .replace(/{i_roll\s*([+-]\s*\d+)?}/g,  function(m,op){ return op ? Math.max(0,pid.i_roll+eval(op)) : pid.i_roll; })
+      .replace(/{i_pitch\s*([+-]\s*\d+)?}/g, function(m,op){ return op ? Math.max(0,pid.i_pitch+eval(op)) : pid.i_pitch; })
+      .replace(/{d_roll\s*([+-]\s*\d+)?}/g,  function(m,op){ return op ? Math.max(0,pid.d_roll+eval(op)) : pid.d_roll; })
+      .replace(/{d_pitch\s*([+-]\s*\d+)?}/g, function(m,op){ return op ? Math.max(0,pid.d_pitch+eval(op)) : pid.d_pitch; })
+      .replace(/{p_yaw\s*([+-]\s*\d+)?}/g,   function(m,op){ return op ? Math.max(0,pid.p_yaw+eval(op)) : pid.p_yaw; })
+      .replace(/{i_yaw\s*([+-]\s*\d+)?}/g,   function(m,op){ return op ? Math.max(0,pid.i_yaw+eval(op)) : pid.i_yaw; })
+      .replace(/{gyro_lpf1\s*([+-]\s*\d+)?}/g, function(m,op){ return op ? Math.max(50,pid.gyro_lpf1+eval(op)) : pid.gyro_lpf1; })
+      .replace(/{dterm_lpf1\s*([+-]\s*\d+)?}/g, function(m,op){ return op ? Math.max(40,pid.dterm_lpf1+eval(op)) : pid.dterm_lpf1; })
+      .replace(/{ag\s*([+-]\s*\d+)?}/g,      function(m,op){ return op ? Math.max(0,pid.ag+eval(op)) : pid.ag; })
+      .replace(/{ff\s*([+-]\s*\d+)?}/g,      function(m,op){ return op ? Math.max(0,pid.ff+eval(op)) : pid.ff; })
+      .replace(/{ff_yaw\s*([+-]\s*\d+)?}/g,  function(m,op){ return op ? Math.max(0,70+eval(op)) : 70; });
+  });
+
+  // Syntax highlight
+  cliDiv.innerHTML = lines.map(function(line) {
+    if(line.trimStart().startsWith('#')) {
+      return '<span class="cli-comment">'+escHtml(line)+'</span>';
+    }
+    var m = line.match(/^(set\s+)(\S+)(\s*=\s*)(.+)$/);
+    if(m) {
+      return '<span class="cli-key">'+escHtml(m[1]+m[2])+'</span>'+escHtml(m[3])+'<span class="cli-val">'+escHtml(m[4])+'</span>';
+    }
+    return escHtml(line);
+  }).join('\n');
+
+  window._currentCLIText = lines.join('\n');
+}
+
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Radar chart ──
+function renderRadar(adv) {
+  var ctx = document.getElementById('impactRadar').getContext('2d');
+  var adjs = adv.adjustments || [];
+
+  // Score each PID term impact
+  var impact = {P:0, I:0, D:0, Filter:0, System:0, Yaw:0};
+  adjs.forEach(function(adj) {
+    var d = Math.abs(adj.delta || 0);
+    var ax = adj.axis || 'both';
+    if(ax === 'both')   { impact.P += d*0.5; impact.D += d*0.5; }
+    if(ax === 'roll' || ax === 'pitch') { impact.P += d*0.3; impact.D += d*0.7; }
+    if(ax === 'yaw')    { impact.Yaw += d; }
+    if(ax === 'filter') { impact.Filter += d*1.5; }
+    if(ax === 'system') { impact.System += 20; }
+  });
+
+  // Normalize 0-100
+  var maxV = Math.max(1, Math.max.apply(null, Object.values(impact)));
+  var data = Object.values(impact).map(function(v){ return Math.min(100, Math.round(v/maxV*100)); });
+
+  if(radarChart) radarChart.destroy();
+  radarChart = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ['P-term','I-term','D-term','Filter','System','Yaw'],
+      datasets: [{
+        data: data,
+        backgroundColor: 'rgba(16,196,122,0.15)',
+        borderColor: 'rgba(16,196,122,0.7)',
+        pointBackgroundColor: 'rgba(16,196,122,1)',
+        pointRadius: 4,
+        borderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        r: {
+          min:0, max:100,
+          ticks: { display:false },
+          grid: { color:'rgba(255,255,255,0.06)' },
+          angleLines: { color:'rgba(255,255,255,0.06)' },
+          pointLabels: { color:'#5a7a8a', font: { size:10, family:"'Orbitron',monospace" } }
+        }
+      }
+    }
+  });
+
+  // Legend
+  var leg = document.getElementById('radarLegend');
+  leg.innerHTML = '';
+  var colors = ['var(--green)','var(--blue)','var(--amber)','var(--cyan)','var(--purple)','var(--orange)'];
+  ['P-term','I-term','D-term','Filter','System','Yaw'].forEach(function(label, i) {
+    var row = document.createElement('div');
+    row.className = 'radar-leg-item';
+    row.innerHTML =
+      '<div class="radar-leg-dot" style="background:'+colors[i]+'"></div>'+
+      '<div class="radar-leg-label">'+label+'</div>'+
+      '<div class="radar-leg-val">'+data[i]+'%</div>';
+    leg.appendChild(row);
+  });
+}
+
+// ── Copy functions ──
 function copyCLI() {
-  const text = document.getElementById('cliBody').innerText;
-  navigator.clipboard.writeText(text).then(()=>{
-    const btn = document.getElementById('cliCopyBtn');
-    btn.textContent = '✅ Copied!';
-    btn.classList.add('copied');
-    setTimeout(()=>{ btn.textContent = '📋 COPY'; btn.classList.remove('copied'); }, 2200);
+  var text = window._currentCLIText || document.getElementById('res-cli').textContent;
+  navigator.clipboard && navigator.clipboard.writeText(text).then(function(){
+    showToast('✅ Copy CLI แล้ว — paste ใน Betaflight CLI');
   });
 }
-function downloadCLI() {
-  const text = document.getElementById('cliBody').innerText;
-  const blob = new Blob([text], {type:'text/plain'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `obix_pid_fix_${Date.now()}.txt`;
-  a.click();
-}
-
-// ── Load preset PIDs ──────────────────────────────────────
-function loadCommonPreset() {
-  document.getElementById('p_roll').value=48; document.getElementById('i_roll').value=90; document.getElementById('d_roll').value=38;
-  document.getElementById('p_pitch').value=52; document.getElementById('i_pitch').value=90; document.getElementById('d_pitch').value=40;
-  document.getElementById('p_yaw').value=40; document.getElementById('i_yaw').value=90; document.getElementById('d_yaw').value=0;
-  document.getElementById('ff_roll').value=25; document.getElementById('ff_pitch').value=25;
-  document.getElementById('gyro_lpf').value=200; document.getElementById('dterm_lpf').value=110;
-  if (selectedIds.size > 0) render();
-}
-function onPidChange() { if (selectedIds.size > 0) render(); }
-
-// ── Quick selects ─────────────────────────────────────────
-function clearAll() { selectedIds.clear(); buildSymptomList(); updateCounter(); render(); }
-function selectCommon() {
-  clearAll();
-  ['propwash','oscillation_after_flip','bounce_back'].forEach(id=>selectedIds.add(id));
-  buildSymptomList(); updateCounter(); render();
-}
-function selectRace() {
-  clearAll();
-  ['slow_response','filter_latency_high','iterm_windup'].forEach(id=>selectedIds.add(id));
-  buildSymptomList(); updateCounter(); render();
-}
-
-// ── Profile ───────────────────────────────────────────────
-function setProfile(p, btn) {
-  currentProfile = p;
-  document.querySelectorAll('.profile-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('profileDesc').textContent = PROFILE_DESC[p];
-  if (selectedIds.size > 0) render();
-}
-
-// ── Severity ─────────────────────────────────────────────
-document.querySelectorAll('.sev-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('.sev-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    currentSev = btn.dataset.sev;
-    if (selectedIds.size > 0) render();
+function copyDelta() {
+  var pid = getPID();
+  var text = document.getElementById('res-cli').textContent
+    .split('\n').filter(function(l){ return l.trim().startsWith('set '); }).join('\n');
+  navigator.clipboard && navigator.clipboard.writeText(text).then(function(){
+    showToast('✅ Copy delta commands แล้ว');
   });
-});
+}
 
-// ── Category tabs ─────────────────────────────────────────
-document.getElementById('catTabs').querySelectorAll('.cat-tab').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('.cat-tab').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    currentCat = btn.dataset.cat;
-    buildSymptomList();
-  });
-});
+function showToast(msg) {
+  var t = document.getElementById('v5Toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2800);
+}
 
-// ── Helpers ───────────────────────────────────────────────
-function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-// ── Init ──────────────────────────────────────────────────
-buildSymptomList();
-updateCounter();
-renderHistory();
+function onPidChange() {
+  if(currentSymptom) renderResult(currentSymptom);
+}
 </script>
 </body>
 </html>
