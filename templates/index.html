@@ -915,6 +915,255 @@ body.light .amb-orb { opacity:.25; }
 }
 .secret-alert-ico  { font-size:15px; flex-shrink:0; }
 .secret-alert-text { font-family:var(--font-d); font-size:7.5px; letter-spacing:.1em; color:rgba(255,80,80,.8); line-height:1.5; }
+
+/* ═══════════════════════════════════════════════════════════════
+   OBIX v5.2 — UI POLISH · ระเบียบ · อ่านง่าย · สวยงาม
+   Strategy: Override เฉพาะค่าที่ต้องการ ไม่แตะโครงสร้างเดิม
+═══════════════════════════════════════════════════════════════ */
+
+/* ── TOOL DOCK ── */
+.tool-dock { background:rgba(0,4,12,0.98) !important; }
+.dock-tab { font-size:8px; padding:7px 11px 8px; }
+.dock-tools { padding:5px 12px 8px; gap:5px; }
+.dtool { padding:4px 9px 4px 7px; border-radius:6px; }
+.dtool-label { font-size:7px; }
+.dtool-icon { font-size:12px; width:18px; height:18px; }
+
+/* ── FORM — label ใหญ่ขึ้น อ่านง่าย ── */
+label {
+  font-size: 9px !important;
+  letter-spacing: .1em !important;
+  color: var(--text2) !important;
+  margin-top: 10px !important;
+  margin-bottom: 5px !important;
+}
+.fsec-label {
+  font-size: 8.5px !important;
+  letter-spacing: .2em !important;
+  padding: 13px 0 7px !important;
+  border-bottom: 1px solid rgba(0,255,136,0.1);
+  margin-bottom: 8px !important;
+}
+.form-body { padding: 12px 16px 20px !important; }
+.form-body input, .form-body select {
+  font-size: 12px !important;
+  padding: 9px 11px !important;
+  border-radius: 8px !important;
+}
+
+/* ── BATTERY PILLS ── */
+.batt-pill { border-radius:10px !important; padding:7px 4px 6px !important; }
+.batt-pill-s { font-size:12px !important; }
+.batt-pill-v { font-size:7.5px !important; }
+
+/* ── STYLE CARDS ── */
+.style-card { padding:11px 4px 10px !important; border-radius:10px !important; }
+.sc-ico { font-size:20px !important; margin-bottom:5px !important; }
+.sc-name { font-size:8px !important; }
+.sc-sub  { font-size:9px !important; }
+.pmini { font-size:9.5px !important; padding:6px 7px !important; }
+
+/* ── LIVE HUD ── ตัวเลขใหญ่ขึ้น อ่านได้ทันที */
+.hud-cell { padding:18px 20px !important; }
+.hud-val  { font-size:28px !important; }
+.hud-lbl  { font-size:8px !important; letter-spacing:.16em !important; margin-top:5px !important; }
+.hud-bar  { height:3px !important; margin-top:9px !important; }
+
+/* ── RESULTS — แต่ละ panel ชัดขึ้น ── */
+.results-col { gap:12px !important; padding:14px 14px 20px !important; }
+.tpanel { border-radius:14px !important; }
+.tpanel-head { padding:13px 16px !important; }
+.tpanel-head-icon { width:34px !important; height:34px !important; font-size:15px !important; }
+.tpanel-title { font-size:11px !important; }
+.tpanel-sub   { font-size:9px !important; margin-top:3px !important; }
+.tpanel-body  { padding:14px 16px !important; }
+
+/* ── CLI Deploy hero ── */
+.cli-deploy { border-radius:14px !important; margin-bottom:0 !important; }
+.cli-deploy-header { padding:14px 18px !important; }
+.cli-deploy-title  { font-size:12px !important; }
+.cli-box { font-size:10.5px !important; padding:14px 18px !important; max-height:220px !important; line-height:1.75 !important; }
+
+/* CLI footer buttons */
+.cli-footer {
+  display:flex; gap:8px; align-items:center;
+  padding:10px 18px; border-top:1px solid rgba(0,255,136,0.1);
+  background:rgba(0,255,136,0.02);
+}
+.btn-deploy {
+  background:linear-gradient(90deg,rgba(0,255,136,0.14),rgba(0,170,255,0.09));
+  border:1.5px solid rgba(0,255,136,0.35); border-radius:8px;
+  color:var(--green); font-family:var(--font-d); font-size:8.5px;
+  font-weight:700; letter-spacing:.14em; padding:8px 18px; cursor:pointer; transition:all .2s;
+}
+.btn-deploy:hover { border-color:rgba(0,255,136,0.7); box-shadow:0 0 20px rgba(0,255,136,0.2); }
+.btn-sm {
+  background:rgba(255,255,255,0.05); border:1.5px solid rgba(255,255,255,0.1);
+  border-radius:7px; color:var(--muted2); padding:7px 12px;
+  font-size:13px; cursor:pointer; transition:all .18s;
+}
+.btn-sm:hover { border-color:rgba(0,255,136,0.25); color:var(--green); }
+
+/* ── STATS — ค่าต่างๆ อ่านง่าย ── */
+.qs-stats { gap:14px !important; padding:14px 0 4px !important; }
+.qs-stat-val { font-size:20px !important; }
+.qs-stat-lbl { font-size:8px !important; letter-spacing:.14em !important; margin-top:3px !important; }
+
+/* 6-grid */
+.qs-stats-6 { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:10px 0 4px; }
+.qs-stats-6 .qs-stat {
+  background:rgba(0,5,14,0.65); border:1px solid rgba(255,255,255,0.06);
+  border-radius:10px; padding:10px 12px;
+}
+.qs-stats-6 .qs-stat-val { font-size:17px !important; }
+
+/* ── WHAT-THIS-MEANS box ── */
+.wtm-box {
+  background:rgba(0,5,14,0.7); border:1px solid rgba(255,255,255,0.07);
+  border-radius:10px; padding:12px 14px; font-size:11px;
+  line-height:1.8; color:var(--muted2); margin-top:10px;
+}
+.wtm-box .wtm-head {
+  font-family:var(--font-d); font-size:8px; letter-spacing:.16em;
+  color:var(--text2); margin-bottom:8px; display:block;
+}
+.wtm-box .ok   { color:var(--green); }
+.wtm-box .warn { color:var(--amber); }
+.wtm-box .bad  { color:var(--red); }
+
+/* ── SUMMARY BOX ── */
+.qs-summary-box {
+  background:rgba(0,5,14,0.6); border:1px solid rgba(0,170,255,0.12);
+  border-left:3px solid rgba(0,170,255,0.35); border-radius:9px;
+  padding:11px 14px; font-size:11.5px; line-height:1.75;
+  color:var(--muted2); margin-top:10px;
+}
+
+/* ── ALERT / RULE LIST ── */
+.alert-list { display:flex; flex-direction:column; gap:7px; }
+.alert-item {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:10px 13px; border-radius:9px; font-size:11.5px; line-height:1.65;
+}
+.alert-item.warning { background:rgba(255,185,0,0.06); border:1.5px solid rgba(255,185,0,0.2); }
+.alert-item.danger  { background:rgba(255,51,68,0.06);  border:1.5px solid rgba(255,51,68,0.2); }
+.alert-item.info    { background:rgba(0,170,255,0.06);  border:1.5px solid rgba(0,170,255,0.2); }
+.alert-item.ok      { background:rgba(0,255,136,0.05);  border:1.5px solid rgba(0,255,136,0.2); }
+.alert-ico { font-size:15px; flex-shrink:0; margin-top:1px; }
+
+/* ── CLASS BADGE ── */
+.class-badge {
+  display:inline-block; padding:2px 10px; border-radius:5px;
+  font-family:var(--font-d); font-size:9px; font-weight:700; letter-spacing:.1em;
+  background:rgba(0,170,255,0.1); color:var(--blue); border:1px solid rgba(0,170,255,0.25);
+}
+
+/* ── PID / FILTER BOXES ── */
+.pf-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+@media(max-width:700px) { .pf-grid { grid-template-columns:1fr; } }
+.pf-box { background:rgba(0,5,14,0.8); border:1.5px solid rgba(255,255,255,0.07); border-radius:10px; overflow:hidden; }
+.pf-box-head {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:9px 13px; border-bottom:1px solid rgba(255,255,255,0.05);
+  background:rgba(0,255,136,0.025);
+}
+.pf-box-title { font-family:var(--font-d); font-size:8.5px; font-weight:700; letter-spacing:.1em; color:var(--text2); }
+.pf-copy-btn {
+  font-family:var(--font-d); font-size:7px; letter-spacing:.1em;
+  padding:3px 10px; border-radius:5px; cursor:pointer;
+  background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.2); color:var(--green); transition:all .16s;
+}
+.pf-copy-btn:hover { background:rgba(0,255,136,0.16); }
+.pf-code { font-family:var(--font-m); font-size:11px; line-height:1.85; color:var(--text); padding:12px 14px; white-space:pre; overflow-x:auto; display:block; }
+
+/* ── TAB BUTTONS inside panels ── */
+.tab-row { display:flex; gap:4px; padding:10px 16px; border-bottom:1px solid rgba(255,255,255,0.04); flex-wrap:wrap; }
+.tab-btn { font-size:8px !important; padding:6px 14px !important; border-radius:6px !important; }
+
+/* ── METRIC GRID ── */
+.metric-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:14px 0 6px; }
+.metric-card {
+  background:rgba(0,5,14,0.7); border:1px solid rgba(255,255,255,0.06);
+  border-radius:10px; padding:11px 12px; display:flex; flex-direction:column; gap:4px;
+}
+.metric-val { font-family:var(--font-d); font-size:18px; font-weight:900; line-height:1; }
+.metric-val.green { color:var(--green); }
+.metric-val.amber { color:var(--amber); }
+.metric-val.red   { color:var(--red); }
+.metric-val.blue  { color:var(--blue); }
+.metric-lbl { font-family:var(--font-d); font-size:7px; letter-spacing:.12em; color:var(--muted2); }
+.metric-sub { font-size:9px; color:var(--muted); }
+
+/* ── INSIGHT CARDS ── */
+.insight-grid { grid-template-columns:repeat(auto-fill,minmax(190px,1fr)) !important; gap:10px !important; }
+.insight-card { border-radius:12px !important; padding:14px 16px !important; }
+.ic-val { font-family:var(--font-d); font-size:24px; font-weight:900; line-height:1; }
+.ic-label { font-family:var(--font-d); font-size:7.5px; letter-spacing:.14em; color:var(--muted2); margin-top:5px; }
+.ic-explain { font-size:10.5px; color:rgba(200,215,255,0.6); line-height:1.7; margin-top:8px; }
+.ic-bar { height:4px; background:rgba(255,255,255,0.05); border-radius:2px; overflow:hidden; margin-top:10px; }
+.ic-bar-fill { height:100%; border-radius:2px; transition:width .8s cubic-bezier(.4,0,.2,1); }
+
+/* ── BUILD SCORE RING ── */
+.biq-wrap { display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+.biq-ring-wrap { position:relative; flex-shrink:0; }
+.biq-ring-svg { display:block; }
+.biq-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.biq-score-num { font-family:var(--font-d); font-size:26px; font-weight:900; line-height:1; }
+.biq-grade { font-family:var(--font-d); font-size:12px; font-weight:700; letter-spacing:.1em; margin-top:1px; }
+.biq-label { font-family:var(--font-d); font-size:6px; letter-spacing:.18em; color:var(--muted2); margin-top:2px; }
+.biq-bars { flex:1; min-width:160px; display:flex; flex-direction:column; gap:8px; }
+.biq-bar-row { display:flex; align-items:center; gap:8px; }
+.biq-bar-label { font-family:var(--font-d); font-size:8px; color:var(--muted2); letter-spacing:.06em; width:74px; flex-shrink:0; }
+.biq-bar-track { flex:1; height:5px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden; }
+.biq-bar-fill  { height:100%; border-radius:3px; transition:width .8s cubic-bezier(.4,0,.2,1); }
+.biq-bar-val   { font-family:var(--font-m); font-size:9px; color:var(--muted2); width:28px; text-align:right; flex-shrink:0; }
+
+/* ── VERDICT BANNER ── */
+.verdict-banner { display:flex; gap:12px; align-items:flex-start; padding:12px 14px; border-radius:10px; font-size:11.5px; line-height:1.65; }
+.verdict-banner.good { background:rgba(0,255,136,0.06); border:1.5px solid rgba(0,255,136,0.2); }
+.verdict-banner.warn { background:rgba(255,185,0,0.06);  border:1.5px solid rgba(255,185,0,0.2); }
+.verdict-banner.bad  { background:rgba(255,51,68,0.06);   border:1.5px solid rgba(255,51,68,0.2); }
+.verdict-ico  { font-size:22px; flex-shrink:0; }
+.verdict-text { color:var(--text2); line-height:1.7; }
+
+/* ── RADAR CHART ── */
+.radar-wrap { display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap; }
+.radar-legend { flex:1; min-width:140px; display:flex; flex-direction:column; gap:7px; padding-top:6px; }
+.radar-leg-item { display:flex; align-items:center; gap:8px; font-size:10.5px; color:var(--muted2); }
+.radar-leg-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+
+/* ── KV BAR ── */
+.kv-bar-outer { height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:visible; position:relative; margin:6px 0 2px; }
+.kv-bar-fill  { height:100%; border-radius:4px; transition:width .8s cubic-bezier(.4,0,.2,1); }
+.kv-needle    { position:absolute; top:-4px; width:2px; height:16px; background:white; border-radius:1px; transform:translateX(-50%); box-shadow:0 0 6px rgba(255,255,255,.7); }
+.kv-labels    { display:flex; justify-content:space-between; font-family:var(--font-m); font-size:8px; color:var(--muted); margin-top:3px; }
+
+/* ── DONATE ── */
+.donate-panel { margin:16px; border-radius:14px !important; }
+
+/* ── SECTION DIVIDER LABEL (ใหม่) ── */
+.rsec-divider {
+  display:flex; align-items:center; gap:10px;
+  padding:18px 0 10px;
+  font-family:var(--font-d); font-size:7.5px; letter-spacing:.22em;
+  color:var(--muted); text-transform:uppercase; user-select:none;
+}
+.rsec-divider::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.06); }
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px) {
+  .live-hud { grid-template-columns:repeat(2,1fr) !important; }
+  .hud-val  { font-size:22px !important; }
+  .metric-grid { grid-template-columns:1fr 1fr !important; }
+  .insight-grid { grid-template-columns:1fr 1fr !important; }
+}
+@media(max-width:600px) {
+  .hud-val { font-size:20px !important; }
+  .qs-stats-6 { grid-template-columns:repeat(2,1fr) !important; }
+  .pf-grid { grid-template-columns:1fr !important; }
+  .biq-wrap { flex-direction:column; align-items:center; }
+}
+
 </style>
 </head>
 <body>
@@ -940,7 +1189,7 @@ body.light .amb-orb { opacity:.25; }
     </nav>
   </div>
   <div class="tb-right">
-    <span class="tb-version">v5.1 FULL</span>
+    <span class="tb-version">v5.2 FULL</span>
     <button class="toggle-theme" onclick="toggleTheme()" title="สลับธีม">🌗</button>
   </div>
 </div>
@@ -950,7 +1199,7 @@ body.light .amb-orb { opacity:.25; }
   <!-- ── TOOL DOCK ──────────────────────────────────────────── -->
   <div class="tool-dock" id="toolDock">
     <div class="dock-tabs" role="tablist" aria-label="หมวดหมู่เครื่องมือ">
-      <button class="dock-tab active" data-cat="all"     onclick="dockFilter(this,'all')"    aria-pressed="true"><span class="dock-tab-dot g"></span>ALL <span class="dock-tab-count">23</span></button>
+      <button class="dock-tab active" data-cat="all"     onclick="dockFilter(this,'all')"    aria-pressed="true"><span class="dock-tab-dot g"></span>ALL <span class="dock-tab-count">22</span></button>
       <button class="dock-tab"        data-cat="tune"    onclick="dockFilter(this,'tune')"   aria-pressed="false"><span class="dock-tab-dot p"></span>🩺 TUNE <span class="dock-tab-count">5</span></button>
       <button class="dock-tab"        data-cat="hw"      onclick="dockFilter(this,'hw')"     aria-pressed="false"><span class="dock-tab-dot g"></span>⚙️ HARDWARE <span class="dock-tab-count">5</span></button>
       <button class="dock-tab"        data-cat="data"    onclick="dockFilter(this,'data')"   aria-pressed="false"><span class="dock-tab-dot b"></span>📊 ANALYSIS <span class="dock-tab-count">4</span></button>
@@ -1314,7 +1563,7 @@ body.light .amb-orb { opacity:.25; }
         <div class="cli-box" id="quickCLIBox"># ══════════════════════════════════════════════════
 # 🚁 OBIXConfig Doctor v5.2 — BASE TUNE
 # {{ analysis.detected_class | default('Custom') | upper }} · {{ analysis.style | upper }}
-# Frame: {{ analysis.size or '5' }}" · Prop: {{ analysis.prop_size or '5' }}" {{ analysis.filter.anti_gravity or '—' }}
+# Frame: {{ analysis.size or '5' }}" · Prop: {{ analysis.prop_size or '5' }}"×{{ analysis.pitch or '4.0' }}p {{ request.form.get('blades','3') }}blade
 # Battery: {{ analysis.advanced.cells if analysis.advanced else '—' }}S · KV{{ analysis.motor_kv or '—' }}
 # ══════════════════════════════════════════════════
 # ─────────────── PID ───────────────────────────────
@@ -3252,7 +3501,7 @@ set vbat_pid_off  = 0</div>
           <button class="amt-btn">฿500</button>
         </div>
         <div class="qr-wrap">
-          <img src="{{ url_for('static', filename='img/promptpay-qr.png') }}" alt="PromptPay QR">
+          <img src="{{ url_for('static', filename='img/support-qr.png') }}" alt="PromptPay QR">
         </div>
       </div>
 
