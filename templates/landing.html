@@ -2008,7 +2008,9 @@ footer {
   1. ไปที่ https://console.firebase.google.com
   2. สร้าง project ใหม่
   3. เปิด Realtime Database
-  4. ตั้ง rules: { "rules": { ".read": true, ".write": true } }
+  4. ตั้ง rules ให้ปลอดภัย (PATCH: อย่าใช้ .read/.write = true ใน production!):
+     ตัวอย่าง rules ที่ปลอดภัย:
+     { "rules": { "configdoctor": { "likes": { ".read": true, ".write": true }, "ratings": { ".read": true, ".write": true } }, "$other": { ".read": false, ".write": false } } }
   5. Copy firebaseConfig แล้วแทนที่ค่าด้านล่างนี้
 */
 import { initializeApp }           from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
