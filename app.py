@@ -606,6 +606,9 @@ def index():
 @app.route("/about")
 def about(): return render_template("about.html")
 
+@app.route("/team")
+def team(): return render_template("team.html")
+
 @app.route("/changelog")
 def changelog(): return render_template("changelog.html")
 
@@ -1106,6 +1109,7 @@ def robots_txt():
 def sitemap_xml():
     from flask import Response
     pages = [
+        ("/team",             "monthly", "0.7"),
         ("/flight-quiz",      "weekly",  "0.8"),
         ("/bf-wizard",        "weekly",  "0.9"),
         ("/build-card",       "weekly",  "0.8"),
