@@ -274,17 +274,6 @@ function toggleConcept(){
   document.getElementById('conceptBox').classList.toggle('open');
 }
 
-/* ── Result 3-Tab navigation ── */
-function switchRTab(btn, paneId) {
-  document.querySelectorAll('.rtab-btn').forEach(function(b){ b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
-  document.querySelectorAll('.rtab-pane').forEach(function(p){ p.classList.remove('active'); });
-  btn.classList.add('active');
-  btn.setAttribute('aria-selected','true');
-  var pane = document.getElementById(paneId);
-  if(pane){ pane.classList.add('active'); }
-  if(paneId==='rt-deep'){ setTimeout(function(){ if(window.renderRadar) renderRadar(); }, 50); }
-}
-
 function switchTab(btn, paneId) {
   var card = btn.closest('.tpanel');
   card.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
