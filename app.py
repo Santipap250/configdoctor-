@@ -69,88 +69,6 @@ def _ip_hash(request_obj):
     return _hashlib.sha256(ip.encode()).hexdigest()
 
 
-# ── GET /api/rating — public stats ───────────────────────────────────────
-@app.route('/api/rating', methods=['GET'])
-def api_rating_get():
-    try:
-        with _db_lock:
-            conn = _get_db()
-            row = conn.execute(
-                "SELECT COUNT(*) AS cnt, COALESCE(AVG(stars),0) AS avg FROM ratings"
-            ).fetchone()
-            likes_row = conn.execute("SELECT COUNT(*) AS cnt FROM likes").fetchone()
-            conn.close()
-        avg = round(row['avg'], 2) if row['cnt'] > 0 else None
-        return jsonify({
-            'count':  row['cnt'],
-            'avg':    avg,
-            'likes':  likes_row['cnt'],
-        })
-    except Exception as e:
-        logger.exception("api_rating_get error")
-        return jsonify({'error': str(e)}), 500
-
-
-# ── POST /api/rating — submit star (1-5) ─────────────────────────────────
-@app.route('/api/rating', methods=['POST'])
-@_rate("5 per minute;20 per day")
-def api_rating_post():
-    try:
-        data  = request.get_json(force=True) or {}
-        stars = int(data.get('stars', 0))
-        if stars < 1 or stars > 5:
-            return jsonify({'error': 'stars must be 1–5'}), 400
-        h = _ip_hash(request)
-        with _db_lock:
-            conn = _get_db()
-            existing = conn.execute(
-                "SELECT id FROM ratings WHERE ip_hash = ?", (h,)
-            ).fetchone()
-            if existing:
-                conn.close()
-                return jsonify({'error': 'already_rated'}), 409
-            conn.execute(
-                "INSERT INTO ratings (ip_hash, stars) VALUES (?, ?)", (h, stars)
-            )
-            conn.commit()
-            row = conn.execute(
-                "SELECT COUNT(*) AS cnt, AVG(stars) AS avg FROM ratings"
-            ).fetchone()
-            conn.close()
-        return jsonify({
-            'ok':    True,
-            'count': row['cnt'],
-            'avg':   round(row['avg'], 2),
-        })
-    except Exception as e:
-        logger.exception("api_rating_post error")
-        return jsonify({'error': str(e)}), 500
-
-
-# ── POST /api/like — toggle like (once per IP) ───────────────────────────
-@app.route('/api/like', methods=['POST'])
-@_rate("5 per minute;10 per day")
-def api_like_post():
-    try:
-        h = _ip_hash(request)
-        with _db_lock:
-            conn = _get_db()
-            existing = conn.execute(
-                "SELECT id FROM likes WHERE ip_hash = ?", (h,)
-            ).fetchone()
-            if existing:
-                conn.close()
-                return jsonify({'error': 'already_liked'}), 409
-            conn.execute("INSERT INTO likes (ip_hash) VALUES (?)", (h,))
-            conn.commit()
-            cnt = conn.execute("SELECT COUNT(*) AS cnt FROM likes").fetchone()['cnt']
-            conn.close()
-        return jsonify({'ok': True, 'likes': cnt})
-    except Exception as e:
-        logger.exception("api_like_post error")
-        return jsonify({'error': str(e)}), 500
-# ─────────────────────────────────────────────────────────────────────────────
-
 from datetime import datetime
 
 # ── CSRF Protection ───────────────────────────────────────────────────────
@@ -1301,6 +1219,89 @@ def military_uas():
     return render_template('military_uas.html')
 
 # ────────────────────────────────────────────────────────────
+
+# ── GET /api/rating — public stats ───────────────────────────────────────
+@app.route('/api/rating', methods=['GET'])
+def api_rating_get():
+    try:
+        with _db_lock:
+            conn = _get_db()
+            row = conn.execute(
+                "SELECT COUNT(*) AS cnt, COALESCE(AVG(stars),0) AS avg FROM ratings"
+            ).fetchone()
+            likes_row = conn.execute("SELECT COUNT(*) AS cnt FROM likes").fetchone()
+            conn.close()
+        avg = round(row['avg'], 2) if row['cnt'] > 0 else None
+        return jsonify({
+            'count':  row['cnt'],
+            'avg':    avg,
+            'likes':  likes_row['cnt'],
+        })
+    except Exception as e:
+        logger.exception("api_rating_get error")
+        return jsonify({'error': str(e)}), 500
+
+
+# ── POST /api/rating — submit star (1-5) ─────────────────────────────────
+@app.route('/api/rating', methods=['POST'])
+@_rate("5 per minute;20 per day")
+def api_rating_post():
+    try:
+        data  = request.get_json(force=True) or {}
+        stars = int(data.get('stars', 0))
+        if stars < 1 or stars > 5:
+            return jsonify({'error': 'stars must be 1–5'}), 400
+        h = _ip_hash(request)
+        with _db_lock:
+            conn = _get_db()
+            existing = conn.execute(
+                "SELECT id FROM ratings WHERE ip_hash = ?", (h,)
+            ).fetchone()
+            if existing:
+                conn.close()
+                return jsonify({'error': 'already_rated'}), 409
+            conn.execute(
+                "INSERT INTO ratings (ip_hash, stars) VALUES (?, ?)", (h, stars)
+            )
+            conn.commit()
+            row = conn.execute(
+                "SELECT COUNT(*) AS cnt, AVG(stars) AS avg FROM ratings"
+            ).fetchone()
+            conn.close()
+        return jsonify({
+            'ok':    True,
+            'count': row['cnt'],
+            'avg':   round(row['avg'], 2),
+        })
+    except Exception as e:
+        logger.exception("api_rating_post error")
+        return jsonify({'error': str(e)}), 500
+
+
+# ── POST /api/like — toggle like (once per IP) ───────────────────────────
+@app.route('/api/like', methods=['POST'])
+@_rate("5 per minute;10 per day")
+def api_like_post():
+    try:
+        h = _ip_hash(request)
+        with _db_lock:
+            conn = _get_db()
+            existing = conn.execute(
+                "SELECT id FROM likes WHERE ip_hash = ?", (h,)
+            ).fetchone()
+            if existing:
+                conn.close()
+                return jsonify({'error': 'already_liked'}), 409
+            conn.execute("INSERT INTO likes (ip_hash) VALUES (?)", (h,))
+            conn.commit()
+            cnt = conn.execute("SELECT COUNT(*) AS cnt FROM likes").fetchone()['cnt']
+            conn.close()
+        return jsonify({'ok': True, 'likes': cnt})
+    except Exception as e:
+        logger.exception("api_like_post error")
+        return jsonify({'error': str(e)}), 500
+# ─────────────────────────────────────────────────────────────────────────────
+
 
 if __name__ == "__main__":
     app.run(
