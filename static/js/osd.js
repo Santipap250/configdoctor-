@@ -274,25 +274,65 @@
   }
 
   // save to server endpoint /osd/export?format=txt&save=1
+  // PATCH: added CSRF token header + proper error handling + no alert() abuse
   async function saveToServer(){
     const payload = buildPayload();
-    const fmt = $('#exportFormat').value || 'txt';
+    const fmt = ($('#exportFormat') || {}).value || 'txt';
     const q = new URLSearchParams({format: fmt, save: '1'});
+
+    // Read CSRF token from cookie (set by Flask-WTF inject_csrf_cookie)
+    const csrfToken = (document.cookie.match(/csrf_token=([^;]+)/) || [])[1] || '';
+
+    let res;
     try {
-      const res = await fetch('/osd/export?' + q.toString(), {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(payload)
+      res = await fetch('/osd/export?' + q.toString(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken,        // PATCH: CSRF token header
+        },
+        body: JSON.stringify(payload),
       });
-      const j = await res.json();
-      if (j && j.ok){
-        alert('Save OK → ' + j.download_url);
-      } else {
-        alert('Save failed: ' + (j && j.error || res.status));
-      }
-    } catch (err){
-      alert('Save error: ' + err);
+    } catch (networkErr) {
+      // PATCH: network failure (offline/timeout) — show user-friendly message
+      showStatus('⚠️ ไม่สามารถเชื่อมต่อ server ได้ กรุณาตรวจสอบการเชื่อมต่อ', 'error');
+      console.error('[osd] saveToServer network error:', networkErr);
+      return;
     }
+
+    let j;
+    try {
+      j = await res.json();
+    } catch (_) {
+      showStatus('⚠️ Server ตอบกลับในรูปแบบที่ไม่คาดหวัง (HTTP ' + res.status + ')', 'error');
+      return;
+    }
+
+    if (res.ok && j && j.ok) {
+      showStatus('✅ บันทึกสำเร็จ — <a href="' + j.download_url + '" target="_blank" rel="noopener">ดาวน์โหลด</a>', 'success');
+    } else {
+      const msg = (j && j.error) ? j.error : ('HTTP ' + res.status);
+      showStatus('⚠️ บันทึกไม่สำเร็จ: ' + msg, 'error');
+    }
+  }
+
+  // PATCH: helper — show status messages in DOM instead of alert()
+  function showStatus(html, type) {
+    let el = document.getElementById('osd-status-msg');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'osd-status-msg';
+      el.style.cssText = 'margin-top:8px;padding:8px 14px;border-radius:6px;font-size:13px;transition:opacity .3s';
+      const anchor = $('#btnSaveServer');
+      if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(el, anchor.nextSibling);
+      else document.body.appendChild(el);
+    }
+    el.innerHTML = html;
+    el.style.background = type === 'error' ? 'rgba(255,68,85,0.15)' : 'rgba(0,255,136,0.12)';
+    el.style.color       = type === 'error' ? '#ff8899' : '#00ff88';
+    el.style.opacity     = '1';
+    clearTimeout(el._timer);
+    el._timer = setTimeout(() => { el.style.opacity = '0'; }, 5000);
   }
 
   // init on DOM ready

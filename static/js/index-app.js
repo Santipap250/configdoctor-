@@ -5,7 +5,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 
 /* ── Read OBIX data bridge (set by Jinja2 in index.html) ─────── */
-var OBIX = window.OBIX || {
+let OBIX = window.OBIX || {
   analysis: false,
   pid: { pRoll:48, iRoll:90, dRoll:38, pPitch:52, iPitch:90, dPitch:40, pYaw:40, iYaw:90 },
   filter: { gLpf1:200, dLpf1:110, notch:2, ag:5 },
@@ -14,11 +14,11 @@ var OBIX = window.OBIX || {
 };
 
 /* ── Shorthand vars used across PRESETS / CLI builders ───────── */
-var _pRoll  = OBIX.pid.pRoll,  _iRoll  = OBIX.pid.iRoll,  _dRoll  = OBIX.pid.dRoll;
-var _pPitch = OBIX.pid.pPitch, _iPitch = OBIX.pid.iPitch, _dPitch = OBIX.pid.dPitch;
-var _pYaw   = OBIX.pid.pYaw,   _iYaw   = OBIX.pid.iYaw;
-var _gLpf1  = OBIX.filter.gLpf1, _dLpf1 = OBIX.filter.dLpf1;
-var _notch  = OBIX.filter.notch,  _ag   = OBIX.filter.ag;
+let _pRoll  = OBIX.pid.pRoll,  _iRoll  = OBIX.pid.iRoll,  _dRoll  = OBIX.pid.dRoll;
+let _pPitch = OBIX.pid.pPitch, _iPitch = OBIX.pid.iPitch, _dPitch = OBIX.pid.dPitch;
+let _pYaw   = OBIX.pid.pYaw,   _iYaw   = OBIX.pid.iYaw;
+let _gLpf1  = OBIX.filter.gLpf1, _dLpf1 = OBIX.filter.dLpf1;
+let _notch  = OBIX.filter.notch,  _ag   = OBIX.filter.ag;
 function _r(v){ return Math.max(1, Math.round(v)); }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -26,88 +26,88 @@ function _r(v){ return Math.max(1, Math.round(v)); }
    instantly as user types, no page reload needed
 ═══════════════════════════════════════════════════════════════ */
 (function(){
-  var STYLE_PID = {
+  let STYLE_PID = {
     freestyle: { roll:{p:48,i:90,d:38}, pitch:{p:52,i:90,d:40}, yaw:{p:40,i:90} },
     racing:    { roll:{p:55,i:85,d:42}, pitch:{p:60,i:85,d:44}, yaw:{p:45,i:80} },
     longrange: { roll:{p:38,i:85,d:22}, pitch:{p:40,i:85,d:24}, yaw:{p:32,i:82} },
   };
 
-  var SIZE_CLASSES = {
+  let SIZE_CLASSES = {
     2.5:'2.5" Micro', 3:'3" Whoop', 3.5:'3.5" Cinewhoop', 4:'4" Mini',
     5:'5" Freestyle', 6:'6" Heavy', 7:'7" Mid-LR', 7.5:'7.5" Mid-LR', 8:'8" LR', 10:'10" Long Range'
   };
 
   function g(id){ return document.getElementById(id); }
-  function sv(id,v){ var e=g(id); if(e) e.textContent=v; }
+  function sv(id,v){ let e=g(id); if(e) e.textContent=v; }
   function sc(el,cls){ el.classList.remove('green','amber','red','blue','ok','warn','bad'); if(cls) el.classList.add(cls); }
 
   window.liveCalc = function(){
-    var size   = parseFloat((g('f_size')||{}).value)   || 5.0;
-    var weight = parseFloat((g('f_weight')||{}).value)  || 750;
-    var prop   = parseFloat((g('f_prop')||{}).value)    || 5.0;
-    var pitch  = parseFloat((g('f_pitch')||{}).value)   || 4.0;
-    var cells  = parseInt((g('battery-select')||{}).value) || 4;
-    var mah    = parseFloat((g('f_mah')||{}).value)     || 1500;
-    var kv     = parseFloat((g('f_kv')||{}).value)      || 0;
-    var style  = (g('f_style')||{}).value || 'freestyle';
+    let size   = parseFloat((g('f_size')||{}).value)   || 5.0;
+    let weight = parseFloat((g('f_weight')||{}).value)  || 750;
+    let prop   = parseFloat((g('f_prop')||{}).value)    || 5.0;
+    let pitch  = parseFloat((g('f_pitch')||{}).value)   || 4.0;
+    let cells  = parseInt((g('battery-select')||{}).value) || 4;
+    let mah    = parseFloat((g('f_mah')||{}).value)     || 1500;
+    let kv     = parseFloat((g('f_kv')||{}).value)      || 0;
+    let style  = (g('f_style')||{}).value || 'freestyle';
 
-    var volt   = cells * 3.7;
-    var maxRPM = kv > 0 ? kv * cells * 3.85 * 0.80 : 0;
-    var tipSpeed = kv > 0 ? (Math.PI * prop * 0.0254 * maxRPM) / 60 : 0;
+    let volt   = cells * 3.7;
+    let maxRPM = kv > 0 ? kv * cells * 3.85 * 0.80 : 0;
+    let tipSpeed = kv > 0 ? (Math.PI * prop * 0.0254 * maxRPM) / 60 : 0;
 
-    var _THRUST_4S = {2.5:130,3:170,3.5:280,4:400,4.5:540,5:730,5.5:760,6:720,7:640,7.5:620,8:680,10:700};
-    function _interpT(v,t){var ks=Object.keys(t).map(Number).sort(function(a,b){return a-b;});if(v<=ks[0])return t[ks[0]];if(v>=ks[ks.length-1])return t[ks[ks.length-1]];for(var i=0;i<ks.length-1;i++){if(v>=ks[i]&&v<=ks[i+1]){var r=(v-ks[i])/(ks[i+1]-ks[i]);return t[ks[i]]*(1-r)+t[ks[i+1]]*r;}}return t[ks[Math.floor(ks.length/2)]];}
-    var cellScale = cells<=4 ? (0.55+cells*0.1125) : (1.0+(cells-4)*0.18);
-    var totalThrust = _interpT(prop,_THRUST_4S) * cellScale * 4;
-    var twr = weight > 0 ? Math.min(totalThrust / weight, 9.0) : 0;
+    let _THRUST_4S = {2.5:130,3:170,3.5:280,4:400,4.5:540,5:730,5.5:760,6:720,7:640,7.5:620,8:680,10:700};
+    function _interpT(v,t){let ks=Object.keys(t).map(Number).sort(function(a,b){return a-b;});if(v<=ks[0])return t[ks[0]];if(v>=ks[ks.length-1])return t[ks[ks.length-1]];for(let i=0;i<ks.length-1;i++){if(v>=ks[i]&&v<=ks[i+1]){let r=(v-ks[i])/(ks[i+1]-ks[i]);return t[ks[i]]*(1-r)+t[ks[i+1]]*r;}}return t[ks[Math.floor(ks.length/2)]];}
+    let cellScale = cells<=4 ? (0.55+cells*0.1125) : (1.0+(cells-4)*0.18);
+    let totalThrust = _interpT(prop,_THRUST_4S) * cellScale * 4;
+    let twr = weight > 0 ? Math.min(totalThrust / weight, 9.0) : 0;
 
-    var peakW = kv > 0 ? Math.min(cells * 4.2 * kv / 220, 750) * 4 : cells * 35 * 4;
-    var hoverThrottle = twr > 0 ? Math.sqrt(1/twr) : 0.5;
-    var hoverCurrent = (peakW / (volt + 0.001)) * hoverThrottle * hoverThrottle;
-    var ftMin = hoverCurrent > 0 ? Math.min(30, (mah / 1000 * 0.8) / (hoverCurrent * 0.75 + 0.5) * 60) : 0;
-    var ftSafe = Math.max(0, ftMin);
+    let peakW = kv > 0 ? Math.min(cells * 4.2 * kv / 220, 750) * 4 : cells * 35 * 4;
+    let hoverThrottle = twr > 0 ? Math.sqrt(1/twr) : 0.5;
+    let hoverCurrent = (peakW / (volt + 0.001)) * hoverThrottle * hoverThrottle;
+    let ftMin = hoverCurrent > 0 ? Math.min(30, (mah / 1000 * 0.8) / (hoverCurrent * 0.75 + 0.5) * 60) : 0;
+    let ftSafe = Math.max(0, ftMin);
 
-    var peakCurrentTotal = peakW / (volt + 0.001);
-    var cBurst = mah > 0 ? Math.min(200, peakCurrentTotal / (mah/1000)) : 0;
+    let peakCurrentTotal = peakW / (volt + 0.001);
+    let cBurst = mah > 0 ? Math.min(200, peakCurrentTotal / (mah/1000)) : 0;
 
-    var motorCount = 4;
-    var escA = Math.max(20, Math.ceil((peakCurrentTotal / motorCount) * 1.5 / 5) * 5);
+    let motorCount = 4;
+    let escA = Math.max(20, Math.ceil((peakCurrentTotal / motorCount) * 1.5 / 5) * 5);
 
     /* ── HUD ── */
-    var twrDisp = twr > 0 ? twr.toFixed(2)+':1' : '—';
-    var twrColor = twr >= 3.5 ? 'green' : twr >= 2.0 ? 'amber' : twr > 0 ? 'red' : '';
+    let twrDisp = twr > 0 ? twr.toFixed(2)+':1' : '—';
+    let twrColor = twr >= 3.5 ? 'green' : twr >= 2.0 ? 'amber' : twr > 0 ? 'red' : '';
     sv('h_twr', twrDisp);
-    var twrEl = g('h_twr'); if(twrEl){ sc(twrEl,''); twrEl.classList.add(twrColor||'blue'); }
-    var hbTwr = g('hb_twr');
+    let twrEl = g('h_twr'); if(twrEl){ sc(twrEl,''); twrEl.classList.add(twrColor||'blue'); }
+    let hbTwr = g('hb_twr');
     if(hbTwr){ hbTwr.style.width = Math.min(100,twr/6*100)+'%'; hbTwr.style.background = twrColor=='green'?'var(--green)':twrColor=='amber'?'var(--amber)':'var(--red)'; }
 
-    var tipDisp = tipSpeed > 0 ? Math.round(tipSpeed)+' m/s' : '— m/s';
-    var tipColor = tipSpeed > 290 ? 'red' : tipSpeed > 265 ? 'amber' : tipSpeed > 0 ? 'green' : '';
+    let tipDisp = tipSpeed > 0 ? Math.round(tipSpeed)+' m/s' : '— m/s';
+    let tipColor = tipSpeed > 290 ? 'red' : tipSpeed > 265 ? 'amber' : tipSpeed > 0 ? 'green' : '';
     sv('h_tip', tipDisp);
-    var tipEl = g('h_tip'); if(tipEl){ sc(tipEl,''); if(tipColor) tipEl.classList.add(tipColor); }
-    var hbTip = g('hb_tip');
+    let tipEl = g('h_tip'); if(tipEl){ sc(tipEl,''); if(tipColor) tipEl.classList.add(tipColor); }
+    let hbTip = g('hb_tip');
     if(hbTip){ hbTip.style.width = Math.min(100,tipSpeed/350*100)+'%'; hbTip.style.background = tipColor=='green'?'var(--green)':tipColor=='amber'?'var(--amber)':'var(--red)'; }
 
-    var rpmDisp = maxRPM > 0 ? Math.round(maxRPM/1000*10)/10+'k RPM' : '— RPM';
+    let rpmDisp = maxRPM > 0 ? Math.round(maxRPM/1000*10)/10+'k RPM' : '— RPM';
     sv('h_rpm', rpmDisp);
-    var hbRpm = g('hb_rpm');
+    let hbRpm = g('hb_rpm');
     if(hbRpm){ hbRpm.style.width = Math.min(100,maxRPM/80000*100)+'%'; }
 
-    var ftDisp = ftSafe > 0 ? ftSafe.toFixed(1)+' min' : '— min';
-    var ftColor = ftSafe > 6 ? 'green' : ftSafe > 3 ? 'amber' : ftSafe > 0 ? 'red' : '';
+    let ftDisp = ftSafe > 0 ? ftSafe.toFixed(1)+' min' : '— min';
+    let ftColor = ftSafe > 6 ? 'green' : ftSafe > 3 ? 'amber' : ftSafe > 0 ? 'red' : '';
     sv('h_ft', ftDisp);
-    var ftEl = g('h_ft'); if(ftEl){ sc(ftEl,''); if(ftColor) ftEl.classList.add(ftColor); }
-    var hbFt = g('hb_ft');
+    let ftEl = g('h_ft'); if(ftEl){ sc(ftEl,''); if(ftColor) ftEl.classList.add(ftColor); }
+    let hbFt = g('hb_ft');
     if(hbFt){ hbFt.style.width = Math.min(100,ftSafe/15*100)+'%'; hbFt.style.background = ftColor=='green'?'var(--green)':ftColor=='amber'?'var(--amber)':'var(--red)'; }
 
     /* ── DANGER ZONE NEEDLE ── */
-    var needle = g('dzNeedle');
+    let needle = g('dzNeedle');
     if(needle){
-      var pct = tipSpeed > 0 ? Math.min(95, Math.max(3, tipSpeed/350*100)) : 15;
+      let pct = tipSpeed > 0 ? Math.min(95, Math.max(3, tipSpeed/350*100)) : 15;
       needle.style.left = pct+'%';
       needle.setAttribute('data-val', tipSpeed > 0 ? Math.round(tipSpeed)+' m/s' : 'N/A');
     }
-    var dzStatus = g('dzStatus');
+    let dzStatus = g('dzStatus');
     if(dzStatus && tipSpeed > 0){
       if(tipSpeed > 290){
         dzStatus.innerHTML = '<strong style="color:var(--red);">⛔ DANGER: '+Math.round(tipSpeed)+'m/s — เกิน 290 m/s compressibility loss รุนแรง</strong><br><span style="font-size:10px;color:var(--muted2);">ลด KV หรือเปลี่ยน prop เล็กลง / pitch ต่ำลง</span>';
@@ -119,21 +119,21 @@ function _r(v){ return Math.max(1, Math.round(v)); }
     }
 
     /* ── DRONE SVG ── */
-    var motorColor = tipSpeed > 290 ? 'rgba(255,68,85,0.7)' : tipSpeed > 265 ? 'rgba(255,183,0,0.7)' : 'rgba(0,255,136,0.5)';
+    let motorColor = tipSpeed > 290 ? 'rgba(255,68,85,0.7)' : tipSpeed > 265 ? 'rgba(255,183,0,0.7)' : 'rgba(0,255,136,0.5)';
     ['dv_m1','dv_m2','dv_m3','dv_m4'].forEach(function(id){
-      var el = g(id); if(el) el.setAttribute('stroke', motorColor);
+      let el = g(id); if(el) el.setAttribute('stroke', motorColor);
     });
-    var classKey = [2.5,3,3.5,4,5,6,7,7.5,8,10].find(function(k){ return Math.abs(size-k) < 0.26; }) || size;
+    const classKey = [2.5,3,3.5,4,5,6,7,7.5,8,10].find(function(k){ return Math.abs(size-k) < 0.26; }) || size;
     sv('dv_class', SIZE_CLASSES[classKey] || size+'" Custom');
     sv('dv_volt', volt.toFixed(1)+'V');
     sv('dv_kvv', kv > 0 ? Math.round(maxRPM).toLocaleString()+' RPM (loaded)' : 'กรอก KV');
     sv('dv_wclass', weight<250?'Ultra-Light':weight<500?'Light':weight<800?'Medium':weight<1500?'Heavy':'X-Heavy');
     sv('dv_esc', escA+'A recommended');
-    var sizeLbl = g('dv_sizelbl'); if(sizeLbl) sizeLbl.textContent = size+'" · '+(style||'').toUpperCase();
+    let sizeLbl = g('dv_sizelbl'); if(sizeLbl) sizeLbl.textContent = size+'" · '+(style||'').toUpperCase();
 
     /* ── PRE-FLIGHT CHECKS ── */
     function setChk(idx, status, val){
-      var item = g('chk'+idx); var valEl = g('chk'+idx+'v');
+      let item = g('chk'+idx); let valEl = g('chk'+idx+'v');
       if(!item) return;
       item.className = 'chk-item ' + status;
       if(valEl){
@@ -149,29 +149,29 @@ function _r(v){ return Math.max(1, Math.round(v)); }
     setChk(4, escA>80?'warn':'ok', escA+'A+');
 
     /* ── LIVE BUILD SCORE ── */
-    var s_twr  = twr > 0 ? Math.min(100, Math.max(0, (twr-0.5)/5*100)) : 0;
-    var s_ft   = ftSafe > 0 ? Math.min(100, ftSafe/12*100) : 0;
-    var s_tip  = tipSpeed > 0 ? Math.min(100, Math.max(0, (1-(tipSpeed-100)/250)*100)) : 70;
-    var s_c    = cBurst > 0 ? Math.min(100, Math.max(0, (1-cBurst/120)*100)) : 70;
-    var s_eff  = twr > 3 ? 85 : twr > 2 ? 70 : twr > 0 ? 45 : 50;
-    var s_safe = (tipSpeed<265||tipSpeed===0) && twr>1.5 ? 88 : twr>1.2 ? 55 : 30;
-    var scores = [s_twr, s_ft, s_tip, s_c, s_eff, s_safe];
-    var weights = [0.25,0.20,0.20,0.15,0.10,0.10];
-    var total = Math.round(scores.reduce(function(a,s,i){ return a+s*weights[i]; }, 0));
-    var grade = total>=92?'S':total>=85?'A+':total>=78?'A':total>=70?'B+':total>=60?'B':'C';
-    var gColor = total>=78?'var(--green)':total>=55?'var(--amber)':'var(--red)';
+    let s_twr  = twr > 0 ? Math.min(100, Math.max(0, (twr-0.5)/5*100)) : 0;
+    let s_ft   = ftSafe > 0 ? Math.min(100, ftSafe/12*100) : 0;
+    let s_tip  = tipSpeed > 0 ? Math.min(100, Math.max(0, (1-(tipSpeed-100)/250)*100)) : 70;
+    let s_c    = cBurst > 0 ? Math.min(100, Math.max(0, (1-cBurst/120)*100)) : 70;
+    let s_eff  = twr > 3 ? 85 : twr > 2 ? 70 : twr > 0 ? 45 : 50;
+    let s_safe = (tipSpeed<265||tipSpeed===0) && twr>1.5 ? 88 : twr>1.2 ? 55 : 30;
+    const scores = [s_twr, s_ft, s_tip, s_c, s_eff, s_safe];
+    const weights = [0.25,0.20,0.20,0.15,0.10,0.10];
+    let total = Math.round(scores.reduce(function(a,s,i){ return a+s*weights[i]; }, 0));
+    let grade = total>=92?'S':total>=85?'A+':total>=78?'A':total>=70?'B+':total>=60?'B':'C';
+    let gColor = total>=78?'var(--green)':total>=55?'var(--amber)':'var(--red)';
 
-    var sn = g('liveScoreNum'); if(sn){ sn.textContent = total>0?total:'—'; sn.style.color = gColor; }
-    var sg = g('liveScoreGrade'); if(sg){ sg.textContent = total>0?grade:'—'; sg.style.color = gColor; }
-    var ring = g('liveScoreRing');
+    let sn = g('liveScoreNum'); if(sn){ sn.textContent = total>0?total:'—'; sn.style.color = gColor; }
+    let sg = g('liveScoreGrade'); if(sg){ sg.textContent = total>0?grade:'—'; sg.style.color = gColor; }
+    let ring = g('liveScoreRing');
     if(ring && total>0){
-      var circ = 326.7;
+      let circ = 326.7;
       ring.style.strokeDashoffset = circ - (total/100*circ);
       ring.style.stroke = gColor;
     }
-    var scoreColors = scores.map(function(s){ return s>=70?'var(--green)':s>=45?'var(--amber)':'var(--red)'; });
+    let scoreColors = scores.map(function(s){ return s>=70?'var(--green)':s>=45?'var(--amber)':'var(--red)'; });
     scores.forEach(function(s,i){
-      var bar = g('lsb'+i); var pct = g('lsp'+i);
+      let bar = g('lsb'+i); let pct = g('lsp'+i);
       if(bar){ bar.style.width = s.toFixed(0)+'%'; bar.style.background = scoreColors[i]; }
       if(pct) pct.textContent = total>0 ? s.toFixed(0)+'%' : '—';
     });
@@ -180,7 +180,7 @@ function _r(v){ return Math.max(1, Math.round(v)); }
   };
 
   /* applyPreset — fills form fields */
-  var PRESETS_LIVE = {
+  let PRESETS_LIVE = {
     '2.5_micro':   {size:2.5,  weight:80,   battery:'3S', prop_size:2.5, pitch:2.0, blades:'2', style:'freestyle', motor_kv:3500,  battery_mAh:300},
     '3_whoop':     {size:3.0,  weight:120,  battery:'3S', prop_size:3.0, pitch:2.0, blades:'2', style:'freestyle', motor_kv:2500,  battery_mAh:450},
     '3.5_cine':    {size:3.5,  weight:350,  battery:'4S', prop_size:3.5, pitch:2.5, blades:'2', style:'longrange', motor_kv:3500,  battery_mAh:850},
@@ -241,10 +241,10 @@ function _r(v){ return Math.max(1, Math.round(v)); }
   window.applyPreset = function(key, chip){
     document.querySelectorAll('.pmini').forEach(function(c){ c.classList.remove('active'); });
     if(chip) chip.classList.add('active');
-    var p = PRESETS_LIVE[key]; if(!p) return;
-    var ps = document.getElementById('preset-select');
+    let p = PRESETS_LIVE[key]; if(!p) return;
+    let ps = document.getElementById('preset-select');
     if(ps) ps.value = key;
-    function sf(sel,v){ var el=document.querySelector(sel); if(el && v!==undefined && v!==null) el.value=v; }
+    function sf(sel,v){ let el=document.querySelector(sel); if(el && v!==undefined && v!==null) el.value=v; }
     sf('input[name="size"]', p.size);
     sf('input[name="weight"]', p.weight);
     sf('select[name="battery"]', p.battery);
@@ -259,7 +259,7 @@ function _r(v){ return Math.max(1, Math.round(v)); }
   };
 
   /* attach liveCalc to all inputs */
-  var inputs = document.querySelectorAll('input[type=number], select');
+  let inputs = document.querySelectorAll('input[type=number], select');
   inputs.forEach(function(el){
     el.addEventListener('input', liveCalc);
     el.addEventListener('change', liveCalc);
@@ -280,37 +280,37 @@ function switchRTab(btn, paneId) {
   document.querySelectorAll('.rtab-pane').forEach(function(p){ p.classList.remove('active'); });
   btn.classList.add('active');
   btn.setAttribute('aria-selected','true');
-  var pane = document.getElementById(paneId);
+  let pane = document.getElementById(paneId);
   if(pane){ pane.classList.add('active'); }
   if(paneId==='rt-deep'){ setTimeout(function(){ if(window.renderRadar) renderRadar(); }, 50); }
 }
 
 function switchTab(btn, paneId) {
-  var card = btn.closest('.tpanel');
+  let card = btn.closest('.tpanel');
   card.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
   card.querySelectorAll('.tab-pane').forEach(function(p){ p.classList.remove('active'); });
   btn.classList.add('active');
-  var pane = document.getElementById(paneId);
+  let pane = document.getElementById(paneId);
   if(pane){ pane.classList.add('active'); if(paneId==='t-radar') renderRadar(); }
 }
 
 function sauceTab(idx, btn) {
-  var panels = [document.getElementById('sauce-panel-0'), document.getElementById('sauce-panel-1'), document.getElementById('sauce-panel-2')];
+  const panels = [document.getElementById('sauce-panel-0'), document.getElementById('sauce-panel-1'), document.getElementById('sauce-panel-2')];
   panels.forEach(function(p){ if(p) p.style.display='none'; });
   if(panels[idx]) panels[idx].style.display='block';
-  var tabs = document.querySelectorAll('.sauce-tab');
+  let tabs = document.querySelectorAll('.sauce-tab');
   tabs.forEach(function(t){ t.classList.remove('active'); });
   if(btn) btn.classList.add('active');
 }
 
 function copyEl(id) {
-  var el = document.getElementById(id);
+  let el = document.getElementById(id);
   if(!el) return;
-  var text = el.innerText || el.textContent;
+  let text = el.innerText || el.textContent;
   navigator.clipboard.writeText(text)
     .then(function(){ showToast('✓ คัดลอกแล้ว!'); })
     .catch(function(){
-      var ta = document.createElement('textarea');
+      let ta = document.createElement('textarea');
       ta.value = text; document.body.appendChild(ta);
       ta.select(); document.execCommand('copy');
       document.body.removeChild(ta);
@@ -319,7 +319,7 @@ function copyEl(id) {
 }
 
 function showToast(msg) {
-  var t = document.getElementById('toast');
+  let t = document.getElementById('toast');
   if(!t) return;
   t.textContent = msg;
   t.classList.add('show');
@@ -328,16 +328,16 @@ function showToast(msg) {
 }
 
 function copyAdvJSON(){
-  var el = document.getElementById('advJSON');
+  let el = document.getElementById('advJSON');
   if(el){ navigator.clipboard.writeText(el.textContent).then(function(){ showToast('✓ JSON copied'); }); }
 }
 
 /* ─── SAUCE CLI SYNTAX HIGHLIGHTER ───────────────────────────── */
 /* Called inline from HTML inside {% if analysis.secret_sauce %} */
 window.highlightSauceCLI = function() {
-  var box = document.getElementById('sauceCLIBox');
+  let box = document.getElementById('sauceCLIBox');
   if(!box) return;
-  var html = box.innerHTML
+  let html = box.innerHTML
     .replace(/(&lt;|<)!--(.*?)--(&gt;|>)/g, '<span style="color:#6a9955;font-style:italic;"><!--$2--></span>')
     .replace(/(^|\n)(# ══.*?)(\n|$)/g, '$1<span style="color:#ff8c00;font-weight:700;">$2</span>$3')
     .replace(/(^|\n)(# ───.*?)(\n|$)/g, '$1<span style="color:#ffb700;font-weight:600;">$2</span>$3')
@@ -348,10 +348,10 @@ window.highlightSauceCLI = function() {
 
 /* ─── DRAWER ──────────────────────────────────────────────────── */
 (function(){
-  var btn = document.getElementById('hamburgerBtn');
-  var drawer = document.getElementById('drawer');
-  var overlay = document.getElementById('overlay');
-  var closeBtn = document.getElementById('closeDrawer');
+  let btn = document.getElementById('hamburgerBtn');
+  let drawer = document.getElementById('drawer');
+  let overlay = document.getElementById('overlay');
+  let closeBtn = document.getElementById('closeDrawer');
   function openDrawer(){
     btn && btn.setAttribute('aria-expanded','true');
     drawer && drawer.classList.add('open');
@@ -372,7 +372,7 @@ window.highlightSauceCLI = function() {
 })();
 
 /* ─── PRESET SELECT (dropdown sync) ─────────────────────────── */
-var presetMap = {
+let presetMap = {
   "2.5_micro":   {size:2.5,  weight:80,   battery:"3S", prop_size:2.5, pitch:2.0, blades:"2", style:"freestyle"},
   "3_whoop":     {size:3.0,  weight:120,  battery:"3S", prop_size:3.0, pitch:2.0, blades:"2", style:"freestyle"},
   "3.5_cine":    {size:3.5,  weight:350,  battery:"4S", prop_size:3.5, pitch:2.5, blades:"2", style:"longrange"},
@@ -385,10 +385,10 @@ var presetMap = {
   "10_lr":       {size:10.0, weight:1500, battery:"6S", prop_size:10.0,pitch:4.5, blades:"2", style:"longrange"}
 };
 (function(){
-  function sf(sel,v){ var el=document.querySelector(sel); if(el) el.value=v; }
-  var ps = document.getElementById('preset-select');
+  function sf(sel,v){ let el=document.querySelector(sel); if(el) el.value=v; }
+  let ps = document.getElementById('preset-select');
   if(ps) ps.addEventListener('change', function(){
-    var p = presetMap[this.value]; if(!p) return;
+    let p = presetMap[this.value]; if(!p) return;
     sf('input[name="size"]',p.size); sf('input[name="weight"]',p.weight);
     sf('select[name="battery"]',p.battery); sf('input[name="prop_size"]',p.prop_size);
     sf('input[name="pitch"]',p.pitch); sf('select[name="blades"]',p.blades);
@@ -401,7 +401,7 @@ var presetMap = {
 /* ═══════════════════════════════════════════════════════════
    PRESET CLI PROFILES
 ═══════════════════════════════════════════════════════════ */
-var PRESETS = {
+let PRESETS = {
   beginner: {
     label:'BEGINNER', color:'var(--green)',
     title:'Beginner — ปลอดภัย เหมาะสำหรับมือใหม่',
@@ -716,7 +716,7 @@ var PRESETS = {
   }
 };
 
-var PRESET_INFO = {
+let PRESET_INFO = {
   beginner:   {badge:'🟢 SAFE',      bStyle:'background:rgba(0,255,136,0.1);border-color:rgba(0,255,136,0.4);color:var(--green)'},
   freestyle:  {badge:'🔵 BALANCED',  bStyle:'background:rgba(0,170,255,0.1);border-color:rgba(0,170,255,0.4);color:var(--blue)'},
   racing:     {badge:'🔴 AGGRESSIVE',bStyle:'background:rgba(255,68,85,0.1);border-color:rgba(255,68,85,0.4);color:var(--red)'},
@@ -727,18 +727,18 @@ var PRESET_INFO = {
 function selectPreset(type, btn) {
   document.querySelectorAll('.ptab').forEach(function(t){ t.className='ptab'; });
   btn.className = 'ptab active';
-  var p = PRESETS[type]; var info = PRESET_INFO[type]; if(!p) return;
+  let p = PRESETS[type]; let info = PRESET_INFO[type]; if(!p) return;
   document.getElementById('picBadge').textContent = info.badge;
   document.getElementById('picBadge').setAttribute('style', info.bStyle+';display:inline-block;font-family:var(--font-d);font-size:8px;letter-spacing:.1em;padding:3px 10px;border-radius:4px;margin-bottom:8px;border:1px solid;');
   document.getElementById('picTitle').textContent = p.title;
   document.getElementById('picDesc').textContent  = p.desc;
-  var statsHtml = p.stats.map(function(s){ return '<div class="pstat"><span class="pstat-val '+s.c+'">'+s.v+'</span><span class="pstat-lbl">'+s.l+'</span></div>'; }).join('');
+  let statsHtml = p.stats.map(function(s){ return '<div class="pstat"><span class="pstat-val '+s.c+'">'+s.v+'</span><span class="pstat-lbl">'+s.l+'</span></div>'; }).join('');
   document.getElementById('picStats').innerHTML = statsHtml;
-  var tipsHtml = p.tips.map(function(t){ return '<div class="ptip"><span class="ptip-icon">'+t.i+'</span><span>'+t.t+'</span></div>'; }).join('');
+  let tipsHtml = p.tips.map(function(t){ return '<div class="ptip"><span class="ptip-icon">'+t.i+'</span><span>'+t.t+'</span></div>'; }).join('');
   document.getElementById('picTips').innerHTML = tipsHtml;
   document.getElementById('cliOutput').textContent = p.cli();
 }
-function showPreset(type){ var btn = document.querySelector('.ptab[data-preset="'+type+'"]'); if(btn) selectPreset(type,btn); }
+function showPreset(type){ let btn = document.querySelector('.ptab[data-preset="'+type+'"]'); if(btn) selectPreset(type,btn); }
 
 /* ─── DONATE AMOUNT BUTTONS ──────────────────────────────────── */
 document.querySelectorAll('.amt-btn').forEach(function(btn){
@@ -750,11 +750,11 @@ document.querySelectorAll('.amt-btn').forEach(function(btn){
 
 /* ─── CHARTS (analysis only — data from window.OBIX) ─────────── */
 (function(){
-  var tEl = document.getElementById('thrustChart');
+  let tEl = document.getElementById('thrustChart');
   if(tEl && typeof Chart !== 'undefined'){
-    var _hoverW = OBIX.charts.hoverW;
-    var _aggrW  = OBIX.charts.aggrW;
-    var _peakW  = OBIX.charts.peakW;
+    let _hoverW = OBIX.charts.hoverW;
+    let _aggrW  = OBIX.charts.aggrW;
+    let _peakW  = OBIX.charts.peakW;
     if(_hoverW || _aggrW || _peakW){
       new Chart(tEl, {
         type: 'bar',
@@ -782,9 +782,9 @@ document.querySelectorAll('.amt-btn').forEach(function(btn){
 
   /* Prop noise radar chart — data from window.OBIX.propRadar */
   if(OBIX.propRadar && typeof Chart !== 'undefined'){
-    var nEl = document.getElementById('noiseChart');
+    let nEl = document.getElementById('noiseChart');
     if(nEl){
-      var pr = OBIX.propRadar;
+      let pr = OBIX.propRadar;
       new Chart(nEl, {
         type: 'radar',
         data: {
@@ -809,13 +809,13 @@ document.querySelectorAll('.amt-btn').forEach(function(btn){
 
   /* Counter animation */
   document.querySelectorAll('.qs-stat-val.counter').forEach(function(el){
-    var target = parseFloat(el.textContent);
+    let target = parseFloat(el.textContent);
     if(isNaN(target)) return;
-    var startTime = null; var dur = 800;
+    let startTime = null; let dur = 800;
     function step(ts){
       if(!startTime) startTime = ts;
-      var prog = Math.min((ts-startTime)/dur, 1);
-      var eased = 1 - Math.pow(1-prog, 3);
+      let prog = Math.min((ts-startTime)/dur, 1);
+      let eased = 1 - Math.pow(1-prog, 3);
       el.textContent = (target * eased).toFixed(target%1===0?0:2);
       if(prog<1) requestAnimationFrame(step);
     }
@@ -824,11 +824,11 @@ document.querySelectorAll('.amt-btn').forEach(function(btn){
 })();
 
 /* ─── RADAR CHART ─────────────────────────────────────────────── */
-var radarChartInst = null;
+let radarChartInst = null;
 function renderRadar(){
-  var d = document.getElementById('radarData');
+  let d = document.getElementById('radarData');
   if(!d || radarChartInst) return;
-  var vals = [
+  const vals = [
     parseInt(d.dataset.power||0),
     parseInt(d.dataset.flight||0),
     parseInt(d.dataset.noise||0),
@@ -836,7 +836,7 @@ function renderRadar(){
     parseInt(d.dataset.motor||0),
     parseInt(d.dataset.eff||0),
   ];
-  var ctx2 = document.getElementById('radarChart');
+  let ctx2 = document.getElementById('radarChart');
   if(!ctx2 || typeof Chart === 'undefined') return;
   radarChartInst = new Chart(ctx2, {
     type: 'radar',
@@ -860,10 +860,10 @@ function renderRadar(){
 
 /* ─── SCORE RING ANIMATE ON LOAD ─────────────────────────────── */
 (function(){
-  var ring = document.getElementById('score-ring-circle');
+  let ring = document.getElementById('score-ring-circle');
   if(!ring) return;
-  var final = parseFloat(ring.getAttribute('stroke-dashoffset'));
-  var circ = 339.3;
+  let final = parseFloat(ring.getAttribute('stroke-dashoffset'));
+  let circ = 339.3;
   ring.setAttribute('stroke-dashoffset', circ);
   setTimeout(function(){
     ring.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(.2,.8,.3,1)';
@@ -873,14 +873,14 @@ function renderRadar(){
 
 /* ─── PARTICLE BURST ON ANALYZE ──────────────────────────────── */
 (function(){
-  var btn = document.querySelector('.btn-analyze');
+  let btn = document.querySelector('.btn-analyze');
   if(!btn) return;
   btn.addEventListener('click', function(e){
-    var colors = ['#00ff88','#00aaff','#00e5ff','#00cc6a','#ffffff'];
-    for(var i=0; i<22; i++){
-      var spark = document.createElement('div');
-      var color = colors[Math.floor(Math.random()*colors.length)];
-      var size = 3 + Math.random()*4;
+    const colors = ['#00ff88','#00aaff','#00e5ff','#00cc6a','#ffffff'];
+    for(let i=0; i<22; i++){
+      let spark = document.createElement('div');
+      let color = colors[Math.floor(Math.random()*colors.length)];
+      let size = 3 + Math.random()*4;
       spark.style.cssText = [
         'position:fixed',
         'left:'+e.clientX+'px',
@@ -894,11 +894,11 @@ function renderRadar(){
         'box-shadow:0 0 '+(size*2)+'px '+color
       ].join(';');
       document.body.appendChild(spark);
-      var angle = (i/22)*Math.PI*2 + Math.random()*0.3;
-      var dist = 50 + Math.random()*80;
-      var tx = Math.cos(angle)*dist;
-      var ty = Math.sin(angle)*dist;
-      var dur = 500+Math.random()*400;
+      let angle = (i/22)*Math.PI*2 + Math.random()*0.3;
+      let dist = 50 + Math.random()*80;
+      let tx = Math.cos(angle)*dist;
+      let ty = Math.sin(angle)*dist;
+      let dur = 500+Math.random()*400;
       spark.animate(
         [{transform:'translate(0,0) scale(1)',opacity:1},
          {transform:'translate('+tx+'px,'+ty+'px) scale(0)',opacity:0}],
@@ -912,29 +912,29 @@ function renderRadar(){
 
 /* ─── INIT PRESET VIEW ───────────────────────────────────────── */
 (function(){
-  var initBtn = document.querySelector('.ptab[data-preset="beginner"]');
+  let initBtn = document.querySelector('.ptab[data-preset="beginner"]');
   if(initBtn) selectPreset('beginner', initBtn);
 })();
 
 /* ─── THEME TOGGLE ───────────────────────────────────────────── */
 function toggleTheme(){
-  var b = document.body;
-  var isDark = !b.classList.contains('light');
+  let b = document.body;
+  let isDark = !b.classList.contains('light');
   b.classList.toggle('light', isDark);
   localStorage.setItem('obix-theme', isDark ? 'light' : 'dark');
 }
 (function(){
-  var t = localStorage.getItem('obix-theme');
+  let t = localStorage.getItem('obix-theme');
   if(t === 'light') document.body.classList.add('light');
 })();
 
 /* ─── HUD VALUE FLASH on change ──────────────────────────────── */
 (function(){
-  var prev = {};
-  var flash = function(id, newVal){
+  let prev = {};
+  const flash = function(id, newVal){
     if(prev[id] === newVal) return;
     prev[id] = newVal;
-    var el = document.getElementById(id);
+    let el = document.getElementById(id);
     if(!el) return;
     el.style.transition = 'none';
     el.style.transform = 'scale(1.12)';
@@ -945,12 +945,12 @@ function toggleTheme(){
       el.style.filter = '';
     }, 120);
   };
-  var origLiveCalc = window.liveCalc;
+  let origLiveCalc = window.liveCalc;
   if(origLiveCalc) {
     window.liveCalc = function(){
       origLiveCalc();
       ['h_twr','h_tip','h_rpm','h_ft'].forEach(function(id){
-        var el = document.getElementById(id);
+        let el = document.getElementById(id);
         if(el) flash(id, el.textContent);
       });
     };
@@ -960,7 +960,7 @@ function toggleTheme(){
 /* ─── PANEL SCROLL REVEAL ────────────────────────────────────── */
 (function(){
   if(!('IntersectionObserver' in window)) return;
-  var obs = new IntersectionObserver(function(entries){
+  const obs = new IntersectionObserver(function(entries){
     entries.forEach(function(e){
       if(e.isIntersecting){
         e.target.style.opacity = '1';
@@ -989,14 +989,14 @@ function dockFilter(btn, cat) {
 
 /* ═══ v5.2 Battery Pills · Style Cards · CLI Snippet ════════════ */
 window.setBatt = function(s, btn) {
-  var sel = document.getElementById('battery-select');
+  let sel = document.getElementById('battery-select');
   if (sel) { sel.value = s; }
   document.querySelectorAll('.batt-pill').forEach(function(b) { b.classList.remove('active'); });
   if (btn) btn.classList.add('active');
   liveCalc();
 };
 window.syncBattPills = function(val) {
-  var map = {'3S':'bp-3s','4S':'bp-4s','5S':'bp-5s','6S':'bp-6s','7S':'bp-7s','8S':'bp-8s'};
+  let map = {'3S':'bp-3s','4S':'bp-4s','5S':'bp-5s','6S':'bp-6s','7S':'bp-7s','8S':'bp-8s'};
   document.querySelectorAll('.batt-pill').forEach(function(b) {
     b.classList.remove('active');
     if (map[val] && b.classList.contains(map[val])) b.classList.add('active');
@@ -1004,7 +1004,7 @@ window.syncBattPills = function(val) {
 };
 
 window.setStyle = function(style, card) {
-  var sel = document.getElementById('f_style');
+  let sel = document.getElementById('f_style');
   if (sel) { sel.value = style; }
   document.querySelectorAll('.style-card').forEach(function(c) { c.classList.remove('active'); });
   if (card) card.classList.add('active');
@@ -1021,10 +1021,10 @@ window.syncStyleCards = function(val) {
 };
 
 window.copyCliSnippet = function(el) {
-  var txt = el.textContent || el.innerText || '';
+  let txt = el.textContent || el.innerText || '';
   if (navigator.clipboard) {
     navigator.clipboard.writeText(txt.trim()).then(function() {
-      var orig = el.style.background;
+      let orig = el.style.background;
       el.style.background = 'rgba(0,255,136,0.25)';
       setTimeout(function() { el.style.background = orig; }, 500);
       showToast('✅ CLI copied — paste in Betaflight!');
@@ -1034,8 +1034,8 @@ window.copyCliSnippet = function(el) {
 
 /* ─── INIT pills + cards on page load ─────────────────────────── */
 (function() {
-  var battSel = document.getElementById('battery-select');
+  let battSel = document.getElementById('battery-select');
   if (battSel) syncBattPills(battSel.value || '4S');
-  var styleSel = document.getElementById('f_style');
+  let styleSel = document.getElementById('f_style');
   if (styleSel) syncStyleCards(styleSel.value || 'freestyle');
 })();
