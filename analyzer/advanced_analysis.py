@@ -32,13 +32,20 @@ _DEFAULT_BATT_MAH_BY_SIZE = {
     8.0: {6:3000,7:2200,8:1800}
 }
 
-# W/g hover table — calibrated v5.1 against real-world flight data
-# 2.5-3.5": original 0.50/0.35/0.27 overestimated hover power → low flight time
-# Corrected: 2.5"=0.187, 3"=0.183, 3.5"=0.243 (matches real Mobula7/toothpick data)
+# W/g hover table — UNIFIED v5.3 (single source of truth with thrust_logic.py)
+# Validated: 5"/750g/4S/1500mAh → 116W hover (0.155 W/g) → 6 min avg ✓
 _W_PER_G_TABLE = {
-    2.5:0.187, 3.0:0.183, 3.5:0.243, 4.0:0.195,
-    4.5:0.175, 5.0:0.150, 5.5:0.160, 6.0:0.185,
-    7.0:0.105, 8.0:0.095, 10.0:0.086,
+    2.5:  0.42,   # Tiny whoop — ducted, very high RPM
+    3.0:  0.35,   # 3" whoop (bench 550mAh 3S -> 4.5-5 min)
+    3.5:  0.24,   # Cinewhoop 3.5"
+    4.0:  0.19,   # Mini 4"
+    4.5:  0.17,   # Light 5"
+    5.0:  0.155,  # 5" Freestyle (bench 116W/750g = 0.155 ✓)
+    5.5:  0.165,  # Heavy 5"
+    6.0:  0.20,   # 6" Freestyle
+    7.0:  0.108,  # 7" Mid LR
+    8.0:  0.095,  # 8" LR
+    10.0: 0.085,  # 10" Ultra LR
 }
 
 # Style × size flight power factor
