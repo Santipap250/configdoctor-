@@ -1,650 +1,234 @@
-<!doctype html>
-<html lang="th">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>เกี่ยวกับ — OBIXConfig Doctor</title>
-{% set og_title       = "เกี่ยวกับ — OBIXConfig Doctor" %}
-{% set og_description = "ที่มา วิธีใช้งาน และทีมพัฒนาของ OBIXConfig Doctor เครื่องมือ FPV Tuning สำหรับชุมชนโดรนไทย" %}
+{% set og_title       = "About — OBIXConfig Doctor v5 Pro" %}
+{% set og_description = "OBIXConfig Doctor — FPV Drone Configuration & Tuning Tool สำหรับชุมชน FPV ไทย" %}
 {% set og_url         = "https://configdoctor.onrender.com/about" %}
 {% include "partials/og_tags.html" %}
-
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-{% set nav_page = "about" %}
-
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>About — OBIXConfig Doctor</title>
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/site-theme.css') }}">
 <style>
-/* ── About Page ─────────────────────────────────────────────── */
-:root {
-  --ag: #00ff88; --ab: #00aaff; --aa: #ffb700;
-  --acard: rgba(255,255,255,0.032);
-  --aborder: rgba(255,255,255,0.07);
+/* About page extras */
+.about-logo-wrap {
+  display:flex; align-items:center; gap:20px;
+  padding:28px; background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r-xl); margin-bottom:32px;
 }
-.about-wrap {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 88px 20px 60px;
-}
+.about-logo-wrap img { height:64px; filter:drop-shadow(0 0 24px rgba(16,196,122,.4)); }
+.about-brand { font-family:var(--font-head); font-size:22px; font-weight:900; color:var(--text); letter-spacing:.04em; }
+.about-brand em { color:var(--green); font-style:normal; }
+.about-tagline { font-size:13px; color:var(--text2); margin-top:6px; line-height:1.6; }
 
-/* ── HERO ── */
-.ab-hero {
-  position: relative; text-align: center;
-  padding: 60px 0 52px; overflow: hidden;
+/* Feature grid */
+.feat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.feat-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg);
+  padding:18px 16px; transition:all var(--dur) var(--ease);
 }
-.ab-hero-bg {
-  position: absolute; inset: 0; pointer-events: none;
-  background:
-    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(0,255,136,0.06) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 30% at 80% 80%, rgba(0,170,255,0.04) 0%, transparent 60%);
+.feat-card:hover { border-color:rgba(16,196,122,0.2); transform:translateY(-2px); }
+.feat-card::before {
+  content:''; display:block; height:2px; border-radius:2px; margin-bottom:14px;
 }
-.ab-hero-grid {
-  position: absolute; inset: 0; pointer-events: none; opacity: 0.4;
-  background-image:
-    linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: radial-gradient(ellipse 90% 100% at 50% 0%, #000 20%, transparent 80%);
-}
-.ab-eyebrow {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 4px 14px; border-radius: 100px; margin-bottom: 22px;
-  border: 1px solid rgba(0,255,136,0.25); background: rgba(0,255,136,0.06);
-  font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700;
-  letter-spacing: .14em; text-transform: uppercase; color: var(--ag);
-  animation: abFadeUp .6s ease both;
-}
-.ab-eyebrow-dot {
-  width: 5px; height: 5px; border-radius: 50%; background: var(--ag);
-  animation: abPulse 2s ease-in-out infinite;
-}
-@keyframes abPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(.6)} }
-.ab-hero-title {
-  font-family: 'Orbitron', monospace; font-size: clamp(22px, 5vw, 44px);
-  font-weight: 900; line-height: 1.15; letter-spacing: -.01em;
-  margin: 0 0 14px; animation: abFadeUp .7s .1s ease both;
-}
-.ab-title-main { color: #e8f4ff; }
-.ab-title-accent {
-  background: linear-gradient(120deg, var(--ag) 0%, var(--ab) 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-.ab-hero-sub {
-  font-family: 'Sarabun', sans-serif; font-size: clamp(13px, 1.8vw, 15px);
-  color: rgba(180,210,230,0.6); max-width: 500px; margin: 0 auto 32px;
-  line-height: 1.85; animation: abFadeUp .7s .2s ease both;
-}
-.ab-version-badge {
-  display: inline-flex; align-items: center; gap: 10px;
-  padding: 7px 18px; border-radius: 10px;
-  border: 1px solid rgba(0,170,255,0.2); background: rgba(0,170,255,0.05);
-  animation: abFadeUp .7s .3s ease both;
-}
-.ab-ver-num { font-family:'Orbitron',monospace; font-size:11px; font-weight:700; color:var(--ab); letter-spacing:.06em; }
-.ab-ver-sep { color:rgba(255,255,255,0.15); }
-.ab-ver-label { font-family:'Sarabun',sans-serif; font-size:11px; color:rgba(180,210,230,0.5); }
-@keyframes abFadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+.feat-card.g::before { background:var(--green); }
+.feat-card.b::before { background:var(--blue); }
+.feat-card.a::before { background:var(--amber); }
+.feat-card.p::before { background:var(--purple); }
+.feat-card.r::before { background:var(--red); }
+.feat-card.c::before { background:var(--cyan); }
+.feat-icon { font-size:28px; margin-bottom:10px; }
+.feat-title { font-family:var(--font-head); font-size:12px; font-weight:700; letter-spacing:.08em; color:var(--text); margin-bottom:6px; }
+.feat-desc  { font-size:12px; color:var(--text2); line-height:1.65; }
 
-/* ── SECTIONS ── */
-.ab-sec { margin: 52px 0 0; }
-.ab-sec-label {
-  display: flex; align-items: center; gap: 10px;
-  font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700;
-  letter-spacing: .16em; text-transform: uppercase; color: rgba(180,210,230,0.3);
-  margin-bottom: 20px;
+/* Tech stack */
+.tech-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:8px; }
+.tech-item {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 12px; background:var(--surface);
+  border:1px solid var(--border); border-radius:var(--r-sm);
 }
-.ab-sec-label::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,rgba(255,255,255,0.06),transparent); }
+.tech-icon { font-size:18px; flex-shrink:0; }
+.tech-name { font-size:12px; font-weight:600; color:var(--text); }
+.tech-ver  { font-family:var(--font-mono); font-size:10px; color:var(--muted2); }
 
-/* ── PURPOSE GRID ── */
-.ab-purpose-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-.ab-purpose-card {
-  padding: 22px 20px; border-radius: 14px;
-  border: 1px solid var(--aborder); background: var(--acard);
-  transition: border-color .2s, transform .2s, background .2s;
-  position: relative; overflow: hidden;
+/* Disclaimer */
+.disclaimer {
+  background:var(--amber-dim); border:1px solid rgba(245,158,11,0.2);
+  border-radius:var(--r-lg); padding:16px 18px;
 }
-.ab-purpose-card::before {
-  content:''; position:absolute; top:0; left:0; right:0; height:1.5px;
-  opacity:0; transition:opacity .2s;
-}
-.ab-purpose-card:hover { transform:translateY(-3px); background:rgba(0,255,136,0.04); border-color:rgba(0,255,136,0.2); }
-.ab-purpose-card:hover::before { opacity:1; background:linear-gradient(90deg,transparent,var(--ag),transparent); }
-.ab-purpose-icon { font-size:24px; margin-bottom:12px; display:block; }
-.ab-purpose-body { font-family:'Sarabun',sans-serif; font-size:13px; color:rgba(180,210,230,0.65); line-height:1.75; margin:0; }
-.ab-purpose-body strong { color:#c8dff0; }
-
-/* ── TOOLS GRID ── */
-.ab-tools-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-.ab-tool-item {
-  display:flex; align-items:flex-start; gap:12px; padding:14px 16px;
-  border-radius:10px; border:1px solid var(--aborder); background:var(--acard);
-  transition:border-color .18s, background .18s;
-}
-.ab-tool-item:hover { border-color:rgba(0,170,255,0.25); background:rgba(0,170,255,0.04); }
-.ab-tool-icon { font-size:16px; flex-shrink:0; margin-top:1px; }
-.ab-tool-name { font-family:'Orbitron',monospace; font-size:9.5px; font-weight:700; letter-spacing:.04em; color:#b8d4e8; margin-bottom:3px; }
-.ab-tool-desc { font-family:'Sarabun',sans-serif; font-size:11.5px; color:rgba(150,180,210,0.55); line-height:1.5; }
-
-/* ── FACEBOOK COMMUNITY CARD ── */
-.ab-community-card {
-  position: relative; display: flex; align-items: center; gap: 24px;
-  padding: 28px 28px; border-radius: 18px;
-  border: 1px solid rgba(24,119,242,0.25);
-  background: linear-gradient(135deg,
-    rgba(24,119,242,0.07) 0%,
-    rgba(0,170,255,0.04) 50%,
-    rgba(0,255,136,0.03) 100%);
-  text-decoration: none; overflow: hidden;
-  transition: border-color .25s, transform .25s, box-shadow .25s;
-}
-.ab-community-card:hover {
-  border-color: rgba(24,119,242,0.5);
-  transform: translateY(-4px);
-  box-shadow: 0 20px 60px rgba(24,119,242,0.12), 0 0 0 1px rgba(24,119,242,0.15);
-}
-.ab-community-card::before {
-  content:''; position:absolute; top:0; left:0; right:0; height:1px;
-  background:linear-gradient(90deg,transparent 0%,rgba(24,119,242,0.6) 30%,rgba(0,255,136,0.4) 70%,transparent 100%);
-  animation:abShimmer 4s ease-in-out infinite;
-}
-@keyframes abShimmer {
-  0%,100%{opacity:.4;transform:scaleX(.6);transform-origin:left}
-  50%{opacity:1;transform:scaleX(1)}
-}
-.ab-fb-logo {
-  width:60px; height:60px; border-radius:50%; flex-shrink:0;
-  background:linear-gradient(145deg,#1877f2,#0d5bbf);
-  display:flex; align-items:center; justify-content:center;
-  font-size:30px; font-weight:900; color:#fff;
-  font-family:'Georgia',serif; line-height:1;
-  box-shadow:0 0 0 1px rgba(24,119,242,0.3), 0 8px 24px rgba(24,119,242,0.25);
-  transition:box-shadow .25s, transform .25s;
-  position:relative;
-}
-.ab-community-card:hover .ab-fb-logo {
-  box-shadow:0 0 0 2px rgba(24,119,242,0.6), 0 12px 32px rgba(24,119,242,0.4);
-  transform:scale(1.06);
-}
-.ab-fb-pulse {
-  position:absolute; inset:-4px; border-radius:50%;
-  border:1px solid rgba(24,119,242,0.3);
-  animation:abRipple 3s ease-in-out infinite;
-}
-@keyframes abRipple { 0%{transform:scale(1);opacity:.8} 100%{transform:scale(1.5);opacity:0} }
-.ab-comm-body { flex:1; min-width:0; }
-.ab-comm-platform {
-  font-family:'Orbitron',monospace; font-size:8.5px; font-weight:700;
-  letter-spacing:.14em; text-transform:uppercase;
-  color:rgba(24,119,242,0.7); margin-bottom:5px;
-  display:flex; align-items:center; gap:6px;
-}
-.ab-comm-platform::before {
-  content:''; width:4px; height:4px; border-radius:50%;
-  background:#1877f2; animation:abPulse 2s ease-in-out infinite;
-}
-.ab-comm-name {
-  font-family:'Orbitron',monospace; font-size:clamp(13px,2vw,17px);
-  font-weight:800; color:#e0f0ff; letter-spacing:.02em; margin-bottom:6px;
-}
-.ab-comm-desc {
-  font-family:'Sarabun',sans-serif; font-size:13px;
-  color:rgba(160,200,230,0.6); line-height:1.65;
-}
-.ab-comm-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
-.ab-comm-tag {
-  font-family:'Orbitron',monospace; font-size:8px; font-weight:700; letter-spacing:.06em;
-  padding:3px 9px; border-radius:6px;
-  border:1px solid rgba(0,170,255,0.2); background:rgba(0,170,255,0.07);
-  color:rgba(0,170,255,0.7);
-}
-.ab-comm-arrow {
-  width:36px; height:36px; border-radius:50%; flex-shrink:0;
-  border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.03);
-  display:flex; align-items:center; justify-content:center;
-  transition:border-color .25s, background .25s, transform .25s;
-}
-.ab-community-card:hover .ab-comm-arrow {
-  border-color:rgba(24,119,242,0.4); background:rgba(24,119,242,0.1); transform:translateX(4px);
-}
-.ab-comm-arrow svg { color:rgba(180,210,230,0.4); transition:color .25s; }
-.ab-community-card:hover .ab-comm-arrow svg { color:#1877f2; }
-
-/* ── DEV BOX ── */
-.ab-dev-box {
-  padding: 20px 22px; border-radius: 12px;
-  border: 1px solid rgba(176,96,255,0.15); background: rgba(176,96,255,0.04);
-  position: relative;
-}
-.ab-dev-box::before {
-  content: '// DEV NOTE'; position: absolute; top: -8px; left: 16px;
-  font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .1em;
-  color: rgba(176,96,255,0.6); background: #0a0d14; padding: 0 8px;
-}
-.ab-dev-box p {
-  font-family: 'JetBrains Mono', monospace; font-size: 12px;
-  color: rgba(160,180,210,0.6); line-height: 1.9; margin: 0;
-}
-.ab-dev-box p + p { margin-top: 4px; }
-.ab-dev-comment { color: rgba(100,160,80,0.65) !important; }
-.ab-dev-key { color: rgba(180,140,255,0.8); }
-
-/* ── FOOTER STRIP ── */
-.ab-footer-strip {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-top: 48px; padding: 16px 22px; border-radius: 12px;
-  border: 1px solid var(--aborder); background: var(--acard);
-  flex-wrap: wrap; gap: 10px;
-}
-.ab-footer-left { font-family:'Orbitron',monospace; font-size:9px; font-weight:700; letter-spacing:.1em; color:rgba(100,140,180,0.45); text-transform:uppercase; }
-.ab-footer-right { display:flex; align-items:center; gap:7px; font-family:'Sarabun',sans-serif; font-size:12px; color:rgba(120,160,200,0.4); }
-.ab-footer-dot { width:4px; height:4px; border-radius:50%; background:var(--ag); opacity:.4; }
-
-/* ── RESPONSIVE ── */
-@media (max-width: 640px) {
-  .ab-purpose-grid { grid-template-columns: 1fr; }
-  .ab-tools-grid   { grid-template-columns: 1fr; }
-  .ab-community-card { flex-direction:column; align-items:flex-start; gap:16px; padding:22px 18px; }
-  .ab-comm-arrow { display:none; }
-}
-@media (max-width: 480px) {
-  .about-wrap { padding: 80px 14px 40px; }
-}
+.disclaimer-title { font-family:var(--font-head); font-size:11px; font-weight:700; letter-spacing:.1em; color:var(--amber); margin-bottom:8px; }
+.disclaimer-body  { font-size:13px; color:var(--text2); line-height:1.7; }
 </style>
+{% set nav_page = "about" %}
 </head>
 <body>
 {% include "partials/nav.html" %}
 
-<div class="about-wrap">
+<div class="page-wrap page-wrap--narrow" style="padding-top:70px">
 
-  <!-- ── HERO ── -->
-  <section class="ab-hero">
-    <div class="ab-hero-bg" aria-hidden="true"></div>
-    <div class="ab-hero-grid" aria-hidden="true"></div>
-    <div class="ab-eyebrow">
-      <span class="ab-eyebrow-dot"></span>
-      OBIXConfig Doctor
-    </div>
-    <h1 class="ab-hero-title">
-      <span class="ab-title-main">เกี่ยวกับ</span><br>
-      <span class="ab-title-accent">OBIXConfig Doctor</span>
-    </h1>
-    <p class="ab-hero-sub">
-      เครื่องมือ FPV Tuning ที่ออกแบบโดยนักบิน เพื่อนักบิน —<br>
-      ตั้งค่า PID · Filter · Preset ได้เร็ว ปลอดภัย ไม่ต้องเดา
-    </p>
-    <div class="ab-version-badge">
-      <span class="ab-ver-num">v5.2 APEX</span>
-      <span class="ab-ver-sep">·</span>
-      <span class="ab-ver-label">19 เครื่องมือ · ฟรี 100%</span>
-      <span class="ab-ver-sep">·</span>
-      <span class="ab-ver-label">ชุมชน FPV ไทย 🇹🇭</span>
-    </div>
-  </section>
+  <!-- Hero -->
+  <div class="v5-hero v5-fade-in">
+    <div class="v5-hero-eyebrow">ℹ️ About</div>
+    <h1 class="v5-hero-title">เกี่ยวกับ <em>OBIXConfig Doctor</em></h1>
+    <p class="v5-hero-sub">เครื่องมือวิเคราะห์และปรับแต่ง configuration โดรน FPV — สร้างโดยนักบิน FPV เพื่อชุมชน FPV ไทย</p>
+  </div>
 
-  <!-- ── PURPOSE ── -->
-  <section class="ab-sec">
-    <div class="ab-sec-label">จุดประสงค์</div>
-    <div class="ab-purpose-grid">
-      <div class="ab-purpose-card">
-        <span class="ab-purpose-icon">🎯</span>
-        <p class="ab-purpose-body">ให้ผู้ใช้มี <strong>baseline ที่ปลอดภัย</strong> สำหรับทดสอบบินครั้งแรก — ไม่ต้องเริ่มจากศูนย์</p>
+  <!-- Logo block -->
+  <div class="about-logo-wrap v5-fade-in-1">
+    <img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="OBIXConfig Doctor">
+    <div>
+      <div class="about-brand">OBIX<em>Config</em> Doctor</div>
+      <div class="about-tagline">
+        FPV Drone Tuning &amp; Analysis Platform · v5.2 Pro<br>
+        พัฒนาสำหรับชุมชน FPV 🇹🇭 · ฟรี 100% · ไม่มีโฆษณา
       </div>
-      <div class="ab-purpose-card">
-        <span class="ab-purpose-icon">⚡</span>
-        <p class="ab-purpose-body">ลด<strong>เวลาตั้งค่า</strong>เริ่มต้นและความสับสน — วิเคราะห์ได้ใน 30 วินาที</p>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <span class="v5-pill g"><span class="v5-pill-dot pulse"></span>Active</span>
+        <span class="v5-pill b">Betaflight 4.4/4.5</span>
+        <span class="v5-pill neu">Open Source</span>
       </div>
-      <div class="ab-purpose-card">
-        <span class="ab-purpose-icon">📋</span>
-        <p class="ab-purpose-body">สร้าง <strong>CLI command</strong> พร้อมคัดลอกไปใช้กับ Betaflight ได้ทันที</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── TOOLS ── -->
-  <section class="ab-sec">
-    <div class="ab-sec-label">ฟีเจอร์หลัก · 19 เครื่องมือ</div>
-    <div class="ab-tools-grid">
-      <div class="ab-tool-item">
-        <span class="ab-tool-icon">📊</span>
-        <div>
-          <div class="ab-tool-name">Blackbox CSV Analyzer</div>
-          <div class="ab-tool-desc">วิเคราะห์ flight log · PID score A–D · motor imbalance</div>
-        </div>
-      </div>
-      <div class="ab-tool-item">
-        <span class="ab-tool-icon">🩺</span>
-        <div>
-          <div class="ab-tool-name">PID Symptom Advisor</div>
-          <div class="ab-tool-desc">13 อาการ → วินิจฉัยอัตโนมัติ + CLI fix</div>
-        </div>
-      </div>
-      <div class="ab-tool-item">
-        <span class="ab-tool-icon">🔬</span>
-        <div>
-          <div class="ab-tool-name">CLI Surgeon</div>
-          <div class="ab-tool-desc">วิเคราะห์ diff all / dump · ตรวจ BF 4.3–4.5</div>
-        </div>
-      </div>
-      <div class="ab-tool-item">
-        <span class="ab-tool-icon">🌀</span>
-        <div>
-          <div class="ab-tool-name">RPM Filter Calculator</div>
-          <div class="ab-tool-desc">harmonic table + dyn_notch ครบ</div>
-        </div>
-      </div>
-      <div class="ab-tool-item">
-        <span class="ab-tool-icon">⚡</span>
-        <div>
-          <div class="ab-tool-name">ESC Compatibility Checker</div>
-          <div class="ab-tool-desc">ตรวจ amperage + DShot protocol</div>
-        </div>
-      </div>
-      <div class="ab-tool-item">
-        <span class="ab-tool-icon">📈</span>
-        <div>
-          <div class="ab-tool-name">Rates Visualizer</div>
-          <div class="ab-tool-desc">ACTUAL / KISS / RC+ curve real-time</div>
-        </div>
-      </div>
-      <div class="ab-tool-item">
-        <span class="ab-tool-icon">⚖️</span>
-        <div>
-          <div class="ab-tool-name">CLI Diff Comparator</div>
-          <div class="ab-tool-desc">เปรียบ 2 config ทันที — diff highlight</div>
-        </div>
-      </div>
-      <div class="ab-tool-item">
-        <span class="ab-tool-icon">🔧</span>
-        <div>
-          <div class="ab-tool-name">Motor × Prop Recommender</div>
-          <div class="ab-tool-desc">แนะนำ KV + stator ตามสเปคโดรน</div>
-        </div>
-      </div>
-      <div class="ab-tool-item">
-        <span class="ab-tool-icon">📡</span>
-        <div>
-          <div class="ab-tool-name">VTX Suite</div>
-          <div class="ab-tool-desc">Bands, Range Calculator, SmartAudio</div>
-        </div>
-      </div>
-      <div class="ab-tool-item">
-        <span class="ab-tool-icon">🖥️</span>
-        <div>
-          <div class="ab-tool-name">OSD Designer</div>
-          <div class="ab-tool-desc">ออกแบบ layout + export ใช้งานได้ทันที</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── COMMUNITY FACEBOOK CARD ── -->
-  <section class="ab-sec">
-    <div class="ab-sec-label">ชุมชน · ติดต่อ</div>
-    <a
-      class="ab-community-card"
-      href="https://www.facebook.com/banmysanti/"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="ไปที่เพจ OBIXConfig Lab บน Facebook"
-    >
-      <div class="ab-fb-logo" aria-hidden="true">
-        <span class="ab-fb-pulse"></span>
-        f
-      </div>
-      <div class="ab-comm-body">
-        <div class="ab-comm-platform">Facebook Page</div>
-        <div class="ab-comm-name">OBIXConfig Lab</div>
-        <div class="ab-comm-desc">
-          ถามได้ แนะนำได้ — แชร์ tune, แจ้งบัค, ขอฟีเจอร์ใหม่<br>
-          ชุมชนนักบิน FPV ไทยที่นี่เลย 🚁
-        </div>
-        <div class="ab-comm-tags">
-          <span class="ab-comm-tag">FPV Thailand</span>
-          <span class="ab-comm-tag">Betaflight</span>
-          <span class="ab-comm-tag">Tune Help</span>
-          <span class="ab-comm-tag">Q&amp;A</span>
-        </div>
-      </div>
-      <div class="ab-comm-arrow" aria-hidden="true">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <path d="M5 12h14M12 5l7 7-7 7"/>
-        </svg>
-      </div>
-    </a>
-  </section>
-
-  <!-- ── DEV NOTE ── -->
-  <section class="ab-sec">
-    <div class="ab-sec-label">สำหรับนักพัฒนา</div>
-    <div class="ab-dev-box">
-      <p class="ab-dev-comment"># OBIXConfig Doctor — open architecture</p>
-      <p><span class="ab-dev-key">template</span>  — Jinja2 partial-based · แก้ได้ใน templates/partials/</p>
-      <p><span class="ab-dev-key">style</span>     — CSS variables ใน style.css · dark military cyberpunk</p>
-      <p><span class="ab-dev-key">js</span>        — static/js/index-app.js · ไม่มี framework dependency</p>
-      <p class="ab-dev-comment"># ถ้าจะเพิ่มภาษา → แนะนำใช้ base template เพื่อ DRY</p>
-    </div>
-  </section>
-
-  <!-- ── FOOTER STRIP ── -->
-  <div class="ab-footer-strip">
-    <span class="ab-footer-left">OBIXConfig Doctor · v5.2 APEX</span>
-    <div class="ab-footer-right">
-      <span class="ab-footer-dot"></span>
-      พัฒนาโดยชุมชน FPV ไทย เพื่อชุมชน FPV ไทย
     </div>
   </div>
 
-  <hr style="margin:48px 0 0;border:none;border-top:1px solid rgba(255,255,255,0.06);">
-
-  <!-- ════ SUPPORT / DONATE ════ -->
-  <section class="sup-section" id="support" aria-label="สนับสนุนโปรเจกต์">
-    <div class="sup-grid" aria-hidden="true"></div>
-    <div class="sup-orb sup-orb-a" aria-hidden="true"></div>
-    <div class="sup-orb sup-orb-b" aria-hidden="true"></div>
-
-    <div class="sup-eyebrow" data-sup-reveal>
-      <span class="sup-eyebrow-dot"></span>
-      สนับสนุนโปรเจกต์
+  <!-- What is it -->
+  <div class="v5-section-head v5-fade-in-2">
+    <span class="v5-section-head-label">🎯 คืออะไร</span>
+    <div class="v5-section-head-line"></div>
+  </div>
+  <div class="v5-card v5-card--accent v5-fade-in-2" style="margin-bottom:24px">
+    <div class="v5-card-body" style="font-size:14px;line-height:1.85;color:var(--text2)">
+      <p style="margin-bottom:12px"><strong style="color:var(--text)">OBIXConfig Doctor</strong> เป็นเว็บ tool สำหรับนักบิน FPV ที่ต้องการ setup และ tune โดรนได้อย่างถูกต้องและรวดเร็ว โดยไม่ต้องลองผิดลองถูกนาน</p>
+      <p style="margin-bottom:12px">ระบบคำนวณค่า PID, Filter, Motor และ Power จากสเปคโดรนจริง โดยอ้างอิงจาก <strong style="color:var(--text)">RCBenchmark 1520 data</strong>, Betaflight telemetry, และประสบการณ์ชุมชน FPV ไทย</p>
+      <p>เหมาะสำหรับทั้ง <span class="v5-pill g" style="font-size:10px">มือใหม่</span> ที่ต้องการจุดเริ่มต้นที่ปลอดภัย และ <span class="v5-pill b" style="font-size:10px">นักบิน Pro</span> ที่ต้องการวิเคราะห์ Build ก่อนบิน</p>
     </div>
+  </div>
 
-    <h2 class="sup-h2" data-sup-reveal>
-      <span class="sup-h2-white">เครื่องมือนี้ฟรีตลอด</span>
-      <span class="sup-h2-grad">ทำเพื่อชุมชน FPV ไทย <span class="sup-heart-pulse" aria-hidden="true">❤️</span></span>
-    </h2>
+  <!-- Features -->
+  <div class="v5-section-head v5-fade-in-2">
+    <span class="v5-section-head-label">🛠️ Features</span>
+    <div class="v5-section-head-line"></div>
+  </div>
+  <div class="feat-grid v5-fade-in-3" style="margin-bottom:32px">
+    <div class="feat-card g">
+      <div class="feat-icon">🔬</div>
+      <div class="feat-title">Drone Analyzer</div>
+      <div class="feat-desc">วิเคราะห์ PID · Filter · Motor · Power · TWR จากสเปค build</div>
+    </div>
+    <div class="feat-card b">
+      <div class="feat-icon">📊</div>
+      <div class="feat-title">Blackbox CSV Analyzer</div>
+      <div class="feat-desc">วิเคราะห์ flight log · PID quality · motor balance · battery sag</div>
+    </div>
+    <div class="feat-card a">
+      <div class="feat-icon">🩺</div>
+      <div class="feat-title">CLI Surgeon</div>
+      <div class="feat-desc">วิเคราะห์ diff all / dump ตรวจ filter, motor protocol, PID</div>
+    </div>
+    <div class="feat-card p">
+      <div class="feat-icon">💊</div>
+      <div class="feat-title">PID Symptom Advisor</div>
+      <div class="feat-desc">บอกอาการโดรน → รับคำแนะนำ PID fix ที่แม่นยำ</div>
+    </div>
+    <div class="feat-card r">
+      <div class="feat-icon">⚡</div>
+      <div class="feat-title">Quick Tune Pad</div>
+      <div class="feat-desc">เลือกอาการ → PID delta matrix + CLI พร้อม paste</div>
+    </div>
+    <div class="feat-card c">
+      <div class="feat-icon">⚙️</div>
+      <div class="feat-title">RPM Filter · Motor·Prop · ESC</div>
+      <div class="feat-desc">คำนวณ harmonic, แนะนำ motor/prop, ตรวจ ESC compatibility</div>
+    </div>
+    <div class="feat-card g">
+      <div class="feat-icon">🎮</div>
+      <div class="feat-title">FPV Training Simulator</div>
+      <div class="feat-desc">ฝึกบิน 3D ในเบราว์เซอร์ รองรับ Gamepad</div>
+    </div>
+    <div class="feat-card b">
+      <div class="feat-icon">📡</div>
+      <div class="feat-title">VTX Tools</div>
+      <div class="feat-desc">Band/Channel table · Range calculator · SmartAudio guide</div>
+    </div>
+    <div class="feat-card a">
+      <div class="feat-icon">🌐</div>
+      <div class="feat-title">Community Tools</div>
+      <div class="feat-desc">Build Card · Tuning Log · Config Leaderboard</div>
+    </div>
+  </div>
 
-    <p class="sup-desc" data-sup-reveal>
-      ถ้า OBIXConfig Doctor ช่วยให้โดรนบินดีขึ้น —
-      <strong>ค่ากาแฟสักแก้ว</strong> ก็เป็นกำลังใจมากๆ ครับ&nbsp;🙏
-    </p>
-
-    <div class="sup-card" data-sup-reveal>
-      <div class="sup-card-shimmer" aria-hidden="true"></div>
-      <div class="sup-left">
-        <p class="sup-label">เลือกจำนวน</p>
-        <div class="sup-amounts" role="group" aria-label="เลือกจำนวนที่ต้องการโอน">
-          <button class="sup-amt" data-amt="30"  onclick="supSelect(this)" type="button">
-            <span class="sup-amt-emoji">☕</span><span class="sup-amt-val">30฿</span><span class="sup-amt-tag">กาแฟ</span>
-          </button>
-          <button class="sup-amt" data-amt="50"  onclick="supSelect(this)" type="button">
-            <span class="sup-amt-emoji">🍜</span><span class="sup-amt-val">50฿</span><span class="sup-amt-tag">ข้าวกลางวัน</span>
-          </button>
-          <button class="sup-amt sup-amt-active" data-amt="100" onclick="supSelect(this)" type="button">
-            <span class="sup-amt-emoji">🚀</span><span class="sup-amt-val">100฿</span><span class="sup-amt-tag">upgrade แบต</span>
-          </button>
-          <button class="sup-amt" data-amt="0"   onclick="supSelect(this)" type="button">
-            <span class="sup-amt-emoji">💎</span><span class="sup-amt-val">ตามใจ</span><span class="sup-amt-tag">ขอบคุณมาก</span>
-          </button>
-        </div>
-        <div class="sup-rule"></div>
-        <div class="sup-info-rows">
-          <div class="sup-info-row">
-            <span class="sup-info-key">ชื่อบัญชี</span>
-            <span class="sup-info-val">นาย สันติภาพ สงฆรักษ์</span>
+  <!-- How to use -->
+  <div class="v5-section-head v5-fade-in-3">
+    <span class="v5-section-head-label">📖 วิธีใช้งาน</span>
+    <div class="v5-section-head-line"></div>
+  </div>
+  <div class="v5-card v5-fade-in-3" style="margin-bottom:24px">
+    <div class="v5-card-body">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        {% for step, icon, title, desc in [
+          ('01', '⚙️', 'กรอกสเปคโดรน', 'เลือก Preset หรือกรอกขนาดเฟรม, น้ำหนัก, battery, motor KV และ prop'),
+          ('02', '🚀', 'กด ANALYZE', 'ระบบคำนวณ PID · Filter · TWR · Flight time · ESC sizing จาก physics model'),
+          ('03', '📋', 'Copy CLI', 'คัดลอก CLI output จาก Secret Sauce หรือ Full CLI section'),
+          ('04', '✅', 'Paste ใน Betaflight', 'เปิด Betaflight → CLI tab → paste → save → reboot → ทดสอบ hover')
+        ] %}
+        <div style="display:flex;align-items:flex-start;gap:14px">
+          <div style="font-family:var(--font-head);font-size:22px;font-weight:900;color:var(--muted);flex-shrink:0;width:36px;text-align:right">{{ step }}</div>
+          <div style="font-size:20px;flex-shrink:0">{{ icon }}</div>
+          <div>
+            <div style="font-weight:600;color:var(--text);margin-bottom:3px">{{ title }}</div>
+            <div style="font-size:13px;color:var(--text2)">{{ desc }}</div>
           </div>
-          <div class="sup-info-row">
-            <span class="sup-info-key">ธนาคาร</span>
-            <span class="sup-info-val"><span class="sup-kbank-badge">K+</span> กสิกรไทย · รับทุกธนาคาร</span>
-          </div>
-          <div class="sup-info-row">
-            <span class="sup-info-key">พร้อมเพย์</span>
-            <button class="sup-reveal-btn" id="supRevealBtn" onclick="supReveal()" type="button"
-                    aria-label="คลิกเพื่อดูเลข PromptPay">
-              <span class="sup-reveal-idle">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                </svg>
-                กดดูเลข
-              </span>
-              <span class="sup-reveal-shown" aria-live="polite"></span>
-            </button>
-          </div>
         </div>
-        <div class="sup-rule"></div>
-        <div class="sup-thankyou">
-          <div class="sup-ty-star">✦</div>
-          <p class="sup-ty-body">ทุกบาทช่วยค่า server, เวลาพัฒนา<br>และทำให้เครื่องมือดีขึ้นเรื่อยๆ ครับ</p>
-        </div>
-      </div>
-
-      <div class="sup-right" aria-label="QR Code สำหรับสแกน PromptPay">
-        <div class="sup-qr-frame">
-          <span class="sup-c sup-c-tl" aria-hidden="true"></span>
-          <span class="sup-c sup-c-tr" aria-hidden="true"></span>
-          <span class="sup-c sup-c-bl" aria-hidden="true"></span>
-          <span class="sup-c sup-c-br" aria-hidden="true"></span>
-          <div class="sup-qr-halo" aria-hidden="true"></div>
-          <img src="{{ url_for('static', filename='img/support-qr.png') }}"
-               alt="QR Code พร้อมเพย์ — นาย สันติภาพ สงฆรักษ์"
-               class="sup-qr-img" loading="lazy" width="210" height="210">
-        </div>
-        <div class="sup-qr-label">
-          <span class="sup-qr-dot" aria-hidden="true"></span>
-          PromptPay · Thai QR
-        </div>
-        <p class="sup-scan-txt">
-          <svg class="sup-arrow-down" width="14" height="14" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-            <path d="M12 4v16M5 13l7 7 7-7"/>
-          </svg>
-          เปิดแอปธนาคาร → สแกน QR ได้เลย
-        </p>
-        <div class="sup-copied-pill" id="supCopiedPill" aria-live="polite" aria-atomic="true"></div>
+        {% endfor %}
       </div>
     </div>
+  </div>
 
-    <p class="sup-footnote" data-sup-reveal>
-      ไม่มีค่าธรรมเนียม · สแกนได้จากทุกแอปธนาคาร · ขอบคุณที่สนับสนุน 🙏
-    </p>
-  </section>
+  <!-- Tech Stack -->
+  <div class="v5-section-head v5-fade-in-4">
+    <span class="v5-section-head-label">🔧 Tech Stack</span>
+    <div class="v5-section-head-line"></div>
+  </div>
+  <div class="tech-grid v5-fade-in-4" style="margin-bottom:28px">
+    <div class="tech-item"><span class="tech-icon">🐍</span><div><div class="tech-name">Python</div><div class="tech-ver">3.11+</div></div></div>
+    <div class="tech-item"><span class="tech-icon">🌶️</span><div><div class="tech-name">Flask</div><div class="tech-ver">2.3.3</div></div></div>
+    <div class="tech-item"><span class="tech-icon">⚡</span><div><div class="tech-name">Gunicorn</div><div class="tech-ver">21.2.0</div></div></div>
+    <div class="tech-item"><span class="tech-icon">🎨</span><div><div class="tech-name">Jinja2</div><div class="tech-ver">3.1+</div></div></div>
+    <div class="tech-item"><span class="tech-icon">📊</span><div><div class="tech-name">Chart.js</div><div class="tech-ver">4.4.0</div></div></div>
+    <div class="tech-item"><span class="tech-icon">☁️</span><div><div class="tech-name">Render</div><div class="tech-ver">Hosting</div></div></div>
+  </div>
 
-</div><!-- /about-wrap -->
+  <!-- Disclaimer -->
+  <div class="disclaimer v5-fade-in-4">
+    <div class="disclaimer-title">⚠️ คำเตือนสำคัญ</div>
+    <div class="disclaimer-body">
+      ค่าแนะนำทั้งหมดเป็น <strong>จุดเริ่มต้น</strong> ที่ปลอดภัย — ไม่ใช่สูตรตายตัว อุปกรณ์, สภาพโดรน, การประกอบ และสไตล์การบินของแต่ละคนมีผลต่อค่าที่เหมาะสมเสมอ<br><br>
+      ทดสอบ hover ก่อนบินทุกครั้ง · ปรับ PID ทีละ 5 หน่วย · ใช้ Blackbox ยืนยันผลก่อน fine tune
+    </div>
+  </div>
 
-<!-- ════ DONATE STYLES ════ -->
-<style>
-.sup-section{--sg:#10c47a;--so:#f1b65a;--sb:rgba(255,255,255,.05);--sl:rgba(255,255,255,.06);--sm:rgba(221,231,239,.45);}
-.sup-section{position:relative;padding:80px 20px 80px;text-align:center;overflow:hidden;}
-.sup-grid{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(16,196,122,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(16,196,122,.04) 1px,transparent 1px);background-size:52px 52px;mask-image:radial-gradient(ellipse 85% 70% at 50% 50%,#000 30%,transparent 100%);}
-.sup-orb{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none;}
-.sup-orb-a{width:480px;height:480px;top:-160px;left:-120px;opacity:.2;background:radial-gradient(circle,var(--so) 0%,transparent 70%);animation:supFloat 9s ease-in-out infinite;}
-.sup-orb-b{width:380px;height:380px;bottom:-120px;right:-80px;opacity:.18;background:radial-gradient(circle,var(--sg) 0%,transparent 70%);animation:supFloat 9s ease-in-out infinite reverse;}
-@keyframes supFloat{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(10px,-28px) scale(1.06)}}
-.sup-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:5px 16px;border-radius:100px;margin-bottom:26px;border:1px solid rgba(241,182,90,.35);background:rgba(241,182,90,.07);font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--so);}
-.sup-eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--so);animation:supPulse 2s ease-in-out infinite;}
-@keyframes supPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
-.sup-h2{display:flex;flex-direction:column;align-items:center;gap:6px;margin:0 0 18px;font-family:'Sarabun',sans-serif;font-size:clamp(22px,4.5vw,40px);font-weight:800;line-height:1.2;}
-.sup-h2-white{color:#f0f6ff;}
-.sup-h2-grad{background:linear-gradient(120deg,var(--sg) 10%,var(--so) 90%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.sup-heart-pulse{display:inline-block;-webkit-text-fill-color:initial;animation:supHeart 2.4s ease-in-out infinite;}
-@keyframes supHeart{0%,100%{transform:scale(1)}15%{transform:scale(1.35)}35%{transform:scale(1)}55%{transform:scale(1.18)}}
-.sup-desc{font-family:'Sarabun',sans-serif;font-size:15px;line-height:1.75;color:var(--sm);max-width:460px;margin:0 auto 48px;}
-.sup-desc strong{color:#dde7ef;font-weight:700;}
-.sup-card{position:relative;display:grid;grid-template-columns:1fr 260px;max-width:820px;margin:0 auto 40px;border-radius:20px;border:1px solid var(--sl);background:var(--sb);backdrop-filter:blur(14px);overflow:hidden;transition:border-color .4s;}
-.sup-card:hover{border-color:rgba(241,182,90,.2);}
-.sup-card-shimmer{position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(241,182,90,.6) 40%,rgba(16,196,122,.5) 60%,transparent 100%);animation:supShimmer 4s ease-in-out infinite;pointer-events:none;}
-@keyframes supShimmer{0%,100%{opacity:.4;transform:scaleX(.5);transform-origin:left}50%{opacity:1;transform:scaleX(1)}}
-.sup-left{padding:40px 36px;display:flex;flex-direction:column;text-align:left;}
-.sup-label{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sm);margin:0 0 12px;}
-.sup-amounts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;}
-.sup-amt{flex:1;min-width:66px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:11px 10px;border-radius:11px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.025);cursor:pointer;transition:all .22s;font-family:inherit;}
-.sup-amt:hover{border-color:rgba(241,182,90,.4);transform:translateY(-2px);box-shadow:0 8px 24px rgba(241,182,90,.1);}
-.sup-amt-active,.sup-amt.sup-amt-active{border-color:var(--so)!important;background:rgba(241,182,90,.08)!important;box-shadow:0 0 0 1px rgba(241,182,90,.2),0 0 24px rgba(241,182,90,.15)!important;}
-.sup-amt-emoji{font-size:16px;line-height:1;}
-.sup-amt-val{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;color:#f0f6ff;}
-.sup-amt-tag{font-family:'Sarabun',sans-serif;font-size:10px;color:var(--sm);}
-.sup-rule{height:1px;margin:20px 0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);}
-.sup-info-rows{display:flex;flex-direction:column;gap:8px;margin-bottom:4px;}
-.sup-info-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-.sup-info-key{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--sm);min-width:76px;flex-shrink:0;}
-.sup-info-val{font-family:'Sarabun',sans-serif;font-size:13px;font-weight:600;color:#dde7ef;display:flex;align-items:center;gap:7px;}
-.sup-kbank-badge{background:#12a053;color:#fff;font-size:9px;font-weight:900;letter-spacing:.04em;padding:2px 6px;border-radius:4px;}
-.sup-reveal-btn{background:none;border:none;padding:0;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;}
-.sup-reveal-idle{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--sg);text-decoration:underline dotted;font-family:'Sarabun',sans-serif;transition:opacity .2s;}
-.sup-reveal-idle:hover{opacity:.75;}
-.sup-reveal-shown{font-family:'Orbitron',monospace;font-size:11px;color:var(--so);letter-spacing:.05em;display:none;}
-.sup-reveal-btn.done .sup-reveal-idle{display:none;}
-.sup-reveal-btn.done .sup-reveal-shown{display:inline;}
-.sup-thankyou{display:flex;align-items:flex-start;gap:10px;margin-top:8px;}
-.sup-ty-star{color:var(--so);font-size:14px;flex-shrink:0;margin-top:2px;animation:supSpin 10s linear infinite;}
-@keyframes supSpin{to{transform:rotate(360deg)}}
-.sup-ty-body{font-family:'Sarabun',sans-serif;font-size:12px;color:var(--sm);line-height:1.7;margin:0;}
-.sup-right{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px 36px 32px;border-left:1px solid var(--sl);background:linear-gradient(175deg,rgba(241,182,90,.04) 0%,rgba(16,196,122,.03) 100%);}
-.sup-qr-frame{position:relative;width:210px;height:210px;}
-.sup-c{position:absolute;width:20px;height:20px;border-color:var(--so);border-style:solid;}
-.sup-c-tl{top:-3px;left:-3px;border-width:2px 0 0 2px;border-radius:4px 0 0 0;animation:supCorner 3s ease-in-out infinite 0s;}
-.sup-c-tr{top:-3px;right:-3px;border-width:2px 2px 0 0;border-radius:0 4px 0 0;animation:supCorner 3s ease-in-out infinite .75s;}
-.sup-c-bl{bottom:-3px;left:-3px;border-width:0 0 2px 2px;border-radius:0 0 0 4px;animation:supCorner 3s ease-in-out infinite 1.5s;}
-.sup-c-br{bottom:-3px;right:-3px;border-width:0 2px 2px 0;border-radius:0 0 4px 0;animation:supCorner 3s ease-in-out infinite 2.25s;}
-@keyframes supCorner{0%,100%{opacity:.45}50%{opacity:1;filter:drop-shadow(0 0 6px rgba(241,182,90,.7))}}
-.sup-qr-halo{position:absolute;inset:-6px;border-radius:14px;animation:supHalo 4s ease-in-out infinite;pointer-events:none;}
-@keyframes supHalo{0%,100%{box-shadow:0 0 20px rgba(241,182,90,.08)}50%{box-shadow:0 0 44px rgba(241,182,90,.2),0 0 80px rgba(16,196,122,.06)}}
-.sup-qr-img{width:100%;height:100%;border-radius:10px;display:block;object-fit:contain;background:#fff;}
-.sup-qr-label{display:flex;align-items:center;gap:6px;font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--sm);}
-.sup-qr-dot{width:6px;height:6px;border-radius:50%;background:var(--sg);animation:supPulse 2s ease-in-out infinite;}
-.sup-scan-txt{font-family:'Sarabun',sans-serif;font-size:11px;color:var(--sm);display:flex;align-items:center;gap:5px;margin:0;}
-.sup-arrow-down{color:var(--sg);animation:supBounce 1.6s ease-in-out infinite;}
-@keyframes supBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
-.sup-copied-pill{height:26px;min-width:1px;font-family:'Sarabun',sans-serif;font-size:11px;color:var(--sg);display:flex;align-items:center;transition:opacity .3s;}
-.sup-footnote{font-family:'Sarabun',sans-serif;font-size:12px;color:var(--sm);opacity:.7;margin:0;letter-spacing:.02em;}
-[data-sup-reveal]{opacity:0;transform:translateY(22px);transition:opacity .65s ease,transform .65s ease;}
-[data-sup-reveal].sup-vis{opacity:1;transform:translateY(0);}
-@media(max-width:680px){
-  .sup-card{grid-template-columns:1fr;}
-  .sup-right{border-left:none;border-top:1px solid var(--sl);padding:28px 24px;}
-  .sup-left{padding:28px 24px;}
-  .sup-qr-frame{width:200px;height:200px;}
-}
-</style>
+  <div class="v5-spacer-lg"></div>
 
-<script>
-(function(){
-  'use strict';
-  var PP_NUMBER = '004-9999-117205996';
-  window.supSelect = function(btn){
-    document.querySelectorAll('.sup-amt').forEach(function(b){b.classList.remove('sup-amt-active');});
-    btn.classList.add('sup-amt-active');
-  };
-  window.supReveal = function(){
-    var btn=document.getElementById('supRevealBtn');
-    if(!btn) return;
-    btn.querySelector('.sup-reveal-shown').textContent=PP_NUMBER;
-    btn.classList.add('done');
-    if(navigator.clipboard&&navigator.clipboard.writeText){
-      navigator.clipboard.writeText(PP_NUMBER).then(function(){
-        var pill=document.getElementById('supCopiedPill');
-        if(pill){pill.textContent='✓ คัดลอกแล้ว!';setTimeout(function(){pill.textContent='';},2800);}
-      }).catch(function(){});
-    }
-  };
-  var items=document.querySelectorAll('[data-sup-reveal]');
-  if('IntersectionObserver' in window&&items.length){
-    var obs=new IntersectionObserver(function(entries){
-      entries.forEach(function(e,i){
-        if(e.isIntersecting){setTimeout(function(){e.target.classList.add('sup-vis');},i*130);obs.unobserve(e.target);}
-      });
-    },{threshold:0.12});
-    items.forEach(function(el){obs.observe(el);});
-  } else { items.forEach(function(el){el.classList.add('sup-vis');}); }
-})();
-</script>
+  <!-- Support -->
+  <div class="v5-card" style="text-align:center;margin-bottom:32px">
+    <div class="v5-card-body" style="padding:28px">
+      <div style="font-size:32px;margin-bottom:12px">☕</div>
+      <div style="font-family:var(--font-head);font-size:14px;font-weight:700;color:var(--amber);margin-bottom:8px">สนับสนุนโปรเจกต์</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:18px;line-height:1.7">
+        OBIXConfig Doctor พัฒนาโดยนักบิน FPV เพื่อชุมชน — ฟรี 100%<br>
+        หากมีประโยชน์ ช่วยสนับสนุนค่ากาแฟได้เลย
+      </div>
+      <img src="{{ url_for('static', filename='img/support-qr.png') }}" alt="PromptPay QR"
+           style="width:140px;border-radius:12px;margin:0 auto;border:1px solid var(--border)">
+      <div style="margin-top:14px">
+        <a href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener" class="v5-btn v5-btn-secondary">
+          📘 OBIXConfig Lab
+        </a>
+      </div>
+    </div>
+  </div>
 
+</div><!-- /page-wrap -->
 </body>
 </html>

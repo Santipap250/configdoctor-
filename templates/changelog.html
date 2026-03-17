@@ -1,415 +1,228 @@
-<!-- templates/changelog.html — OBIXConfig Doctor v5.1 -->
+{% set og_title       = "Changelog — OBIXConfig Doctor v5 Pro" %}
+{% set og_description = "อัปเดตและการเปลี่ยนแปลงทุก version ของ OBIXConfig Doctor" %}
+{% set og_url         = "https://configdoctor.onrender.com/changelog" %}
+{% include "partials/og_tags.html" %}
 <!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>Changelog — OBIXConfig Doctor</title>
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-{% set og_title       = "Changelog — OBIXConfig Doctor" %}
-{% set og_description = "อัปเดตและการเปลี่ยนแปลงทุก version ของ OBIXConfig Doctor" %}
-{% set og_url         = "https://configdoctor.onrender.com/changelog" %}
-{% include "partials/og_tags.html" %}
-<link rel="icon" href="{{ url_for('static',filename='favicon.ico') }}">
-{% set nav_page = "changelog" %}
-{% include "partials/nav.html" %}
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@400;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Changelog — OBIXConfig Doctor</title>
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/site-theme.css') }}">
 <style>
-:root{
-  --bg:#020509;--bg2:#040b14;--surface:#060e1c;--panel:#081428;
-  --border:rgba(0,255,136,.08);--text:#c8d8e8;--muted:#3d5470;--muted2:#7090a8;
-  --green:#00ff88;--green2:#00cc6a;--blue:#00aaff;--amber:#ffb700;--red:#ff4455;
-  --g-dim:rgba(0,255,136,.07);--b-dim:rgba(0,170,255,.07);
-  --glow-g:0 0 20px rgba(0,255,136,.25);
-  --font-d:'Orbitron',sans-serif;--font-m:'JetBrains Mono',monospace;--font-t:'Sarabun',sans-serif;
-  --r:8px;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:var(--font-t);min-height:100vh;overflow-x:hidden}
-.scan{position:fixed;inset:0;pointer-events:none;z-index:0;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,136,.012) 2px,rgba(0,255,136,.012) 4px)}
-.wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:84px 20px 80px}
-
-/* Hero */
-.hero{text-align:center;padding:40px 0 32px;border-bottom:1px solid var(--border);margin-bottom:40px}
-.hero-eye{font-family:var(--font-d);font-size:9px;letter-spacing:.22em;color:var(--green);
-  display:inline-flex;align-items:center;gap:8px;margin-bottom:12px}
-.hero-eye::before,.hero-eye::after{content:'';width:28px;height:1px;background:var(--green);opacity:.35}
-.hero h1{font-family:var(--font-d);font-size:clamp(22px,4vw,36px);font-weight:900;
-  letter-spacing:.03em;margin-bottom:8px}
-.hero h1 em{color:var(--green);font-style:normal}
-.hero-meta{font-family:var(--font-m);font-size:11px;color:var(--muted2);
-  display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:10px}
-.hero-meta .dot{width:4px;height:4px;border-radius:50%;background:var(--muted)}
-
 /* Stats strip */
-.stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:40px}
-@media(max-width:600px){.stats-strip{grid-template-columns:1fr 1fr}}
-.stat-tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;
-  padding:16px;text-align:center;position:relative;overflow:hidden}
-.stat-tile::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
-.stat-tile.g::before{background:var(--green)}
-.stat-tile.b::before{background:var(--blue)}
-.stat-tile.a::before{background:var(--amber)}
-.stat-tile.r::before{background:var(--red)}
-.stat-n{font-family:var(--font-d);font-size:28px;font-weight:900;line-height:1;margin-bottom:4px}
-.stat-tile.g .stat-n{color:var(--green)}.stat-tile.b .stat-n{color:var(--blue)}
-.stat-tile.a .stat-n{color:var(--amber)}.stat-tile.r .stat-n{color:var(--red)}
-.stat-lbl{font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--muted2);text-transform:uppercase}
+.cl-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:36px; }
+@media(max-width:600px){ .cl-stats{grid-template-columns:1fr 1fr} }
 
 /* Timeline */
-.tl{position:relative}
-.tl::before{content:'';position:absolute;left:19px;top:0;bottom:0;width:2px;
-  background:linear-gradient(to bottom,var(--green) 0%,rgba(0,255,136,.3) 60%,transparent 100%)}
-
-.ver-block{position:relative;padding-left:56px;margin-bottom:36px}
-.ver-dot{position:absolute;left:11px;top:20px;width:18px;height:18px;border-radius:50%;
-  border:2px solid var(--green);background:var(--bg);
-  box-shadow:0 0 14px rgba(0,255,136,.4);z-index:1;transition:all .2s}
-.ver-block:hover .ver-dot{box-shadow:0 0 20px rgba(0,255,136,.6)}
-.ver-dot.latest{background:var(--green);box-shadow:0 0 18px rgba(0,255,136,.6)}
-.ver-dot.b{border-color:var(--blue);box-shadow:0 0 14px rgba(0,170,255,.3)}
-.ver-dot.b.latest{background:var(--blue)}
-.ver-dot.a{border-color:var(--amber);box-shadow:0 0 14px rgba(255,183,0,.3)}
-
-.ver-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;
-  overflow:hidden;transition:border-color .2s,box-shadow .2s}
-.ver-card:hover{border-color:rgba(0,255,136,.18);box-shadow:0 4px 24px rgba(0,255,136,.05)}
-.ver-card.latest-card{border-color:rgba(0,255,136,.2);box-shadow:0 0 30px rgba(0,255,136,.06)}
-
-.ver-head{padding:20px 22px 16px;display:flex;align-items:flex-start;justify-content:space-between;
-  gap:12px;border-bottom:1px solid var(--border);cursor:pointer}
-.ver-head-l{flex:1;min-width:0}
-.ver-num{font-family:var(--font-d);font-size:18px;font-weight:900;color:var(--text);
-  display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:5px}
-.ver-badge{font-family:var(--font-d);font-size:8px;letter-spacing:.08em;padding:3px 9px;
-  border-radius:100px}
-.badge-latest{background:rgba(0,255,136,.12);border:1px solid rgba(0,255,136,.3);color:var(--green)}
-.badge-feature{background:rgba(0,170,255,.1);border:1px solid rgba(0,170,255,.25);color:var(--blue)}
-.badge-fix{background:rgba(255,183,0,.1);border:1px solid rgba(255,183,0,.25);color:var(--amber)}
-.badge-ux{background:rgba(192,64,255,.1);border:1px solid rgba(192,64,255,.25);color:#c040ff}
-.ver-name{font-size:14px;color:var(--muted2);margin-bottom:3px}
-.ver-date{font-family:var(--font-m);font-size:10px;color:var(--muted)}
-.ver-head-r{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
-.change-count{font-family:var(--font-d);font-size:9px;letter-spacing:.08em;
-  background:var(--panel);border:1px solid var(--border);border-radius:var(--r);
-  padding:5px 10px;color:var(--muted2)}
-.toggle-icon{font-size:12px;color:var(--muted);transition:transform .2s}
-
-.ver-body{padding:0 22px;max-height:0;overflow:hidden;transition:max-height .35s cubic-bezier(.4,0,.2,1),padding .35s}
-.ver-body.open{max-height:2000px;padding:18px 22px 20px}
-
-.change-cat{margin-bottom:16px}
-.cat-title{font-family:var(--font-d);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
-  margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.cat-title::after{content:'';flex:1;height:1px;background:var(--border)}
-.cat-new{color:var(--green)}.cat-fix{color:var(--amber)}.cat-ux{color:var(--blue)}.cat-break{color:var(--red)}
-
-.change-list{list-style:none;display:flex;flex-direction:column;gap:6px}
-.change-item{display:flex;gap:10px;font-size:13px;line-height:1.6;color:var(--text)}
-.ci-icon{font-size:13px;flex-shrink:0;margin-top:1px}
-.ci-body strong{color:var(--text)}
-.ci-body span{color:var(--muted2)}
-.ci-tag{font-family:var(--font-d);font-size:8px;letter-spacing:.07em;padding:2px 7px;
-  border-radius:4px;margin-left:6px;vertical-align:middle}
-.tag-new{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.2);color:var(--green)}
-.tag-fix{background:rgba(255,183,0,.1);border:1px solid rgba(255,183,0,.2);color:var(--amber)}
-.tag-ux{background:rgba(0,170,255,.1);border:1px solid rgba(0,170,255,.2);color:var(--blue)}
-
-/* Footer link */
-.repo-line{text-align:center;margin-top:40px;font-family:var(--font-m);font-size:11px;color:var(--muted);
-  display:flex;align-items:center;justify-content:center;gap:8px}
-.repo-line::before,.repo-line::after{content:'';flex:1;max-width:100px;height:1px;background:var(--border)}
-
-@media(max-width:480px){
-  .stats-strip{grid-template-columns:1fr 1fr}
-  .ver-head{flex-wrap:wrap}
-  .tl::before{left:12px}
-  .ver-block{padding-left:40px}
-  .ver-dot{left:5px}
-  .ver-num{font-size:14px}
+.cl-timeline { position:relative; padding-left:28px; }
+.cl-timeline::before {
+  content:''; position:absolute; left:9px; top:12px; bottom:0; width:1.5px;
+  background:linear-gradient(180deg,var(--green) 0%,var(--blue) 50%,rgba(255,255,255,0.06) 100%);
 }
+.cl-item { position:relative; margin-bottom:8px; }
+.cl-dot {
+  position:absolute; left:-23px; top:14px;
+  width:14px; height:14px; border-radius:50%;
+  border:2px solid var(--border); background:var(--bg);
+  z-index:1; transition:all var(--dur) var(--ease);
+}
+.cl-dot.latest { background:var(--green); border-color:var(--green); box-shadow:0 0 10px rgba(16,196,122,0.5); }
+.cl-dot.major  { background:var(--blue);  border-color:var(--blue);  box-shadow:0 0 8px rgba(74,158,255,0.4); }
+.cl-dot.minor  { background:var(--surface3); border-color:rgba(255,255,255,0.12); }
+
+.cl-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r-lg); overflow:hidden;
+  transition:border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  cursor:pointer;
+}
+.cl-card:hover { border-color:rgba(16,196,122,0.18); box-shadow:0 4px 20px rgba(0,0,0,0.3); }
+.cl-card.latest-card { border-color:rgba(16,196,122,0.22); }
+.cl-card.latest-card::before {
+  content:''; display:block; height:2px;
+  background:linear-gradient(90deg,var(--green),var(--cyan));
+}
+
+.cl-card-head {
+  display:flex; align-items:center; gap:12px;
+  padding:14px 16px; border-bottom:1px solid var(--border2);
+}
+.cl-ver {
+  font-family:var(--font-head); font-size:15px; font-weight:900;
+  letter-spacing:.04em; color:var(--text);
+}
+.cl-ver-latest { color:var(--green); }
+.cl-date {
+  font-family:var(--font-mono); font-size:11px; color:var(--muted2); margin-left:auto;
+}
+.cl-card-body { padding:14px 16px; display:none; }
+.cl-card-body.open { display:block; }
+.cl-card-foot {
+  padding:6px 16px 10px; display:flex; align-items:center; justify-content:space-between;
+}
+.cl-chevron { color:var(--muted2); font-size:12px; transition:transform .2s; margin-left:auto; }
+.cl-card.expanded .cl-chevron { transform:rotate(180deg); }
+
+/* Feature list */
+.cl-features { display:flex; flex-direction:column; gap:8px; }
+.cl-feat {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:9px 12px; border-radius:var(--r-sm);
+  font-size:13px; line-height:1.6; border:1px solid;
+}
+.cl-feat.new     { background:var(--green-dim);  border-color:rgba(16,196,122,0.18); }
+.cl-feat.fix     { background:var(--blue-dim);   border-color:rgba(74,158,255,0.18); }
+.cl-feat.perf    { background:var(--amber-dim);  border-color:rgba(245,158,11,0.18); }
+.cl-feat.break   { background:var(--red-dim);    border-color:rgba(248,113,113,0.18); }
+.cl-feat.security{ background:var(--purple-dim); border-color:rgba(167,139,250,0.18); }
+.cl-feat-ico { font-size:14px; flex-shrink:0; margin-top:1px; }
+.cl-feat-type {
+  font-family:var(--font-head); font-size:9px; font-weight:700;
+  letter-spacing:.1em; padding:2px 7px; border-radius:4px; flex-shrink:0; margin-top:2px;
+}
+.cl-feat.new .cl-feat-type      { background:var(--green-dim); color:var(--green); }
+.cl-feat.fix .cl-feat-type      { background:var(--blue-dim);  color:var(--blue); }
+.cl-feat.perf .cl-feat-type     { background:var(--amber-dim); color:var(--amber); }
+.cl-feat.break .cl-feat-type    { background:var(--red-dim);   color:var(--red); }
+.cl-feat.security .cl-feat-type { background:var(--purple-dim);color:var(--purple); }
+.cl-feat-body { flex:1; min-width:0; }
+.cl-feat-title { font-weight:600; color:var(--text); margin-bottom:3px; }
+.cl-feat-desc  { font-size:12px; color:var(--text2); }
 </style>
+{% set nav_page = "changelog" %}
 </head>
 <body>
-<div class="scan"></div>
-<div class="wrap">
+{% include "partials/nav.html" %}
 
-<div class="hero">
-  <div class="hero-eye">RELEASE HISTORY</div>
-  <h1><em>Changelog</em> — OBIXConfig</h1>
-  <div class="hero-meta">
-    <span>Branch: <strong style="color:var(--green)">{{ branch or 'main' }}</strong></span>
-    <span class="dot"></span>
-    <span>Snapshot: <strong style="color:var(--green)">{{ repo_snapshot or '2025-03' }}</strong></span>
-    <span class="dot"></span>
-    <span style="color:var(--amber)">v5.1 CURRENT</span>
+<div class="page-wrap" style="padding-top:70px">
+
+  <!-- Hero -->
+  <div class="v5-hero v5-fade-in">
+    <div class="v5-hero-eyebrow">📝 Updates</div>
+    <h1 class="v5-hero-title">Changelog · <em>Release History</em></h1>
+    <p class="v5-hero-sub">บันทึกการอัปเดตทุก version — ฟีเจอร์ใหม่, bug fixes, และการปรับปรุงประสิทธิภาพ</p>
   </div>
-</div>
 
-<div class="stats-strip">
-  <div class="stat-tile g"><div class="stat-n">24</div><div class="stat-lbl">Tools</div></div>
-  <div class="stat-tile b"><div class="stat-n">30</div><div class="stat-lbl">Routes</div></div>
-  <div class="stat-tile a"><div class="stat-n">10</div><div class="stat-lbl">Releases</div></div>
-  <div class="stat-tile r"><div class="stat-n">100%</div><div class="stat-lbl">Free</div></div>
-</div>
-
-<div class="tl">
-
-<!-- v5.1 -->
-<div class="ver-block">
-  <div class="ver-dot latest" style="border-color:var(--amber);background:var(--amber);box-shadow:0 0 18px rgba(255,183,0,.6)"></div>
-  <div class="ver-card latest-card" style="border-color:rgba(255,183,0,.25);box-shadow:0 0 30px rgba(255,183,0,.06)">
-    <div class="ver-head" onclick="toggleVer(this)">
-      <div class="ver-head-l">
-        <div class="ver-num" style="color:var(--amber)">v5.1 <span class="ver-badge badge-latest" style="background:rgba(255,183,0,.15);color:var(--amber);border:1px solid rgba(255,183,0,.3)">LATEST</span> <span class="ver-badge badge-feature">FEATURE</span></div>
-        <div class="ver-name">FPV Simulator NEO · Quick Tune Pad · Physics Accuracy</div>
-        <div class="ver-date">📅 มีนาคม 2568 (2025)</div>
-      </div>
-      <div class="ver-head-r">
-        <span class="change-count">14 changes</span>
-        <span class="toggle-icon">▾</span>
-      </div>
-    </div>
-    <div class="ver-body" style="display:block">
-      <div class="changes-list">
-        <div class="cat-title" style="color:var(--amber);border-color:rgba(255,183,0,.2)">🎮 NEW FEATURES</div>
-        <div class="change-item"><span class="ci-icon">🚁</span><div class="ci-body"><strong>FPV Simulator NEO</strong> — เกมส์ฝึกบิน 3D Cyberpunk Arena · Three.js r128 · 6 Game Modes (Tutorial / Gate Runner / Target Hunt / Hover Zone / Race Circuit / Free Fly) · Minimap · Speed Lines · 3 Camera Modes · Mobile Touch Joystick · Gamepad Support</div></div>
-        <div class="change-item"><span class="ci-icon">⚡</span><div class="ci-body"><strong>Quick Tune Pad</strong> — ติ๊กอาการบิน → PID delta matrix + CLI พร้อม paste ทันที · 13 อาการ · Conflict detection · Confidence score · Field Tips · สำหรับ Pro Pilot ในสนาม</div></div>
-
-        <div class="cat-title cat-fix">🔧 PHYSICS ENGINE FIXES</div>
-        <div class="change-item"><span class="ci-icon">⚙️</span><div class="ci-body"><strong>Thrust Accuracy v5.1</strong> — ลด _G_PER_W_BASE ~15%, _LOADED_RPM_FACTOR 0.82→0.80, _FLIGHT_VOLTAGE 4.0V→3.85V — 5" 4S 2306KV: thrust/motor=828g, TWR=4.42 ✅</div></div>
-        <div class="change-item"><span class="ci-icon">📐</span><div class="ci-body"><strong>Tip Speed Thresholds</strong> — Danger 290 m/s, Warning 265 m/s (เดิม 300/220) — ตรงกัน HUD + rule engine + advanced analysis + liveCalc ทุกจุด</div></div>
-        <div class="change-item"><span class="ci-icon">🔢</span><div class="ci-body"><strong>1S–2S Cell Support</strong> — cell clamp เดิม min=3 → min=1 รองรับ whoopies และ micro 1S-2S</div></div>
-        <div class="change-item"><span class="ci-icon">📡</span><div class="ci-body"><strong>RPM Filter Voltage Sync</strong> — rpm_filter_calc.py เปลี่ยนเป็น 3.85V × 0.80 ตรงกับ prop_logic.py</div></div>
-
-        <div class="cat-title cat-fix">🐛 BUG FIXES</div>
-        <div class="change-item"><span class="ci-icon">🔌</span><div class="ci-body"><strong>ESC Pipeline Fix</strong> — esc_recommended_a และ peak_per_motor_a ไม่ถูก expose ออกมา template → แก้ให้ดึงจาก _adv_inner ถูกต้อง</div></div>
-        <div class="change-item"><span class="ci-icon">🧭</span><div class="ci-body"><strong>fpv_trainer.html Nav Bug</strong> — nav.html ถูก include ภายใน &lt;head&gt; แทนหลัง &lt;body&gt; → layout พัง — แก้ไขแล้ว</div></div>
-        <div class="change-item"><span class="ci-icon">🔗</span><div class="ci-body"><strong>fpv/index.html Dead Links</strong> — 4 cards มี href="#" → เปลี่ยนเป็น /fpv-trainer, /app, /pid-advisor, /blackbox</div></div>
-        <div class="change-item"><span class="ci-icon">🎯</span><div class="ci-body"><strong>Preset KV Fix</strong> — 7" 6S: 1750KV→1200KV (tip speed 301→206 m/s), 7.5" 6S: 1500KV→1100KV</div></div>
-
-        <div class="cat-title cat-fix">🎨 UI FIXES</div>
-        <div class="change-item"><span class="ci-icon">📊</span><div class="ci-body"><strong>Tip Speed Gauge Label</strong> — HUD แสดง "ขีดจำกัด: 300 m/s" → แก้เป็น 290 m/s ตรงกับ threshold จริง</div></div>
-        <div class="change-item"><span class="ci-icon">🗂️</span><div class="ci-body"><strong>og_tags featureList</strong> — เพิ่ม Battery Health, Motor Thermal, Loop Analyzer, FPV Simulator NEO ใน JSON-LD structured data</div></div>
-        <div class="change-item"><span class="ci-icon">🗺️</span><div class="ci-body"><strong>Sitemap + Nav</strong> — เพิ่ม /fpv-trainer, /quick-tune ใน sitemap.xml, nav.html, drawer.html, tool dock, landing cards</div></div>
-      </div>
-    </div>
+  <!-- Stats -->
+  <div class="cl-stats v5-fade-in-1">
+    <div class="v5-stat g"><div class="v5-stat-val">5.2</div><div class="v5-stat-lbl">Latest Version</div></div>
+    <div class="v5-stat b"><div class="v5-stat-val">25+</div><div class="v5-stat-lbl">Tools</div></div>
+    <div class="v5-stat a"><div class="v5-stat-val">100+</div><div class="v5-stat-lbl">Bug Fixes</div></div>
+    <div class="v5-stat p"><div class="v5-stat-val">2023</div><div class="v5-stat-lbl">First Release</div></div>
   </div>
-</div>
 
-<!-- v5.0 -->
-<div class="ver-block">
-  <div class="ver-dot" style="border-color:var(--blue)"></div>
-  <div class="ver-card">
-    <div class="ver-head" onclick="toggleVer(this)">
-      <div class="ver-head-l">
-        <div class="ver-num">v5.0 <span class="ver-badge badge-feature">FEATURE</span> <span class="ver-badge" style="background:rgba(0,170,255,.1);color:var(--blue);border:1px solid rgba(0,170,255,.25)">MAJOR</span></div>
-        <div class="ver-name">Smart Analysis Engine — Battery Health · Motor Thermal · Loop Latency</div>
-        <div class="ver-date">📅 มกราคม 2568 (2025)</div>
-      </div>
-      <div class="ver-head-r">
-        <span class="change-count">9 changes</span>
-        <span class="toggle-icon">▸</span>
-      </div>
-    </div>
-    <div class="ver-body" style="display:none">
-      <div class="changes-list">
-        <div class="cat-title" style="color:var(--blue);border-color:rgba(0,170,255,.2)">⚙️ NEW FEATURES</div>
-        <div class="change-item"><span class="ci-icon">🔋</span><div class="ci-body"><strong>Battery Health Advisor</strong> — วิเคราะห์ Internal Resistance, Voltage Sag, Cell Balance, Health Score A–F</div></div>
-        <div class="change-item"><span class="ci-icon">🌡️</span><div class="ci-body"><strong>Motor Thermal Estimator</strong> — คำนวณ Motor Temperature จาก amp draw, stator size, airflow — แนะนำ cooling strategy</div></div>
-        <div class="change-item"><span class="ci-icon">🔁</span><div class="ci-body"><strong>Control Loop Latency Analyzer</strong> — วัด loop time, DMA overhead, filter delay — แนะนำ optimal looprate</div></div>
-        <div class="change-item"><span class="ci-icon">⚡</span><div class="ci-body"><strong>Smart Physics Engine</strong> — คำนวณ TWR, Tip Speed, ESC sizing, C-rating ด้วย prop_logic v4 จาก bench data</div></div>
-        <div class="change-item"><span class="ci-icon">🛡️</span><div class="ci-body"><strong>Security Hardening v5.0</strong> — ปิด bare except 15 จุด, division-by-zero guards, weight/motor clamp, secure_filename ทุก route</div></div>
-        <div class="change-item"><span class="ci-icon">📋</span><div class="ci-body"><strong>Build Card</strong> — สร้าง build spec card พร้อม QR code share</div></div>
-        <div class="change-item"><span class="ci-icon">📓</span><div class="ci-body"><strong>Tuning Log</strong> — บันทึก tune sessions พร้อม diff viewer</div></div>
-        <div class="change-item"><span class="ci-icon">🏆</span><div class="ci-body"><strong>Leaderboard</strong> — community config ranking + vote</div></div>
-        <div class="change-item"><span class="ci-icon">🎨</span><div class="ci-body"><strong>Apex Orbital WOW UI</strong> — redesign หน้าหลัก mission control 2-column layout, animated hex background, Live HUD, instrument column</div></div>
+  <!-- Timeline -->
+  <div class="cl-timeline v5-fade-in-2">
+
+    <!-- v5.2 -->
+    <div class="cl-item">
+      <div class="cl-dot latest"></div>
+      <div class="cl-card latest-card" onclick="toggleCard(this)">
+        <div class="cl-card-head">
+          <span class="v5-pill g"><span class="v5-pill-dot pulse"></span>LATEST</span>
+          <span class="cl-ver cl-ver-latest">v5.2 — Apex Pro</span>
+          <span class="cl-date">2025</span>
+          <span class="cl-chevron">▾</span>
+        </div>
+        <div class="cl-card-body open">
+          <div class="cl-features">
+            <div class="cl-feat security"><span class="cl-feat-ico">🔒</span><span class="cl-feat-type">SECURITY</span><div class="cl-feat-body"><div class="cl-feat-title">Security Hardening · CSRF · Rate Limiting</div><div class="cl-feat-desc">Flask-WTF CSRF protection ทุก POST · Flask-Limiter 20 req/min · CSP headers ครบถ้วน · SECRET_KEY enforcement</div></div></div>
+            <div class="cl-feat new"><span class="cl-feat-ico">⚡</span><span class="cl-feat-type">NEW</span><div class="cl-feat-body"><div class="cl-feat-title">Flask-Compress — Response Compression</div><div class="cl-feat-desc">HTML/JSON เล็กลง ~70% ด้วย gzip/brotli</div></div></div>
+            <div class="cl-feat perf"><span class="cl-feat-ico">🚀</span><span class="cl-feat-type">PERF</span><div class="cl-feat-body"><div class="cl-feat-title">SHA-256 Hash Cache for Downloads</div><div class="cl-feat-desc">ไม่ re-compute ทุก request, cache by mtime</div></div></div>
+            <div class="cl-feat fix"><span class="cl-feat-ico">🔧</span><span class="cl-feat-type">FIX</span><div class="cl-feat-body"><div class="cl-feat-title">Preset Expansion — 35+ Build Profiles</div><div class="cl-feat-desc">ครอบ 1"–12" ทุก battery S-count, 5" แยก 4S/5S/6S baseline PID</div></div></div>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- v5.1 -->
+    <div class="cl-item">
+      <div class="cl-dot major"></div>
+      <div class="cl-card" onclick="toggleCard(this)">
+        <div class="cl-card-head">
+          <span class="v5-pill b">MAJOR</span>
+          <span class="cl-ver">v5.1 — Smart Analysis</span>
+          <span class="cl-date">2025</span>
+          <span class="cl-chevron">▾</span>
+        </div>
+        <div class="cl-card-body">
+          <div class="cl-features">
+            <div class="cl-feat new"><span class="cl-feat-ico">🎮</span><span class="cl-feat-type">NEW</span><div class="cl-feat-body"><div class="cl-feat-title">FPV Training Simulator NEO</div><div class="cl-feat-desc">3D drone sim · 4 modes · Gamepad support · Tutorial + Race mode</div></div></div>
+            <div class="cl-feat new"><span class="cl-feat-ico">⚡</span><span class="cl-feat-type">NEW</span><div class="cl-feat-body"><div class="cl-feat-title">Quick Tune Pad</div><div class="cl-feat-desc">เลือกอาการ → PID delta matrix + CLI พร้อม paste</div></div></div>
+            <div class="cl-feat new"><span class="cl-feat-ico">🔋</span><span class="cl-feat-type">NEW</span><div class="cl-feat-body"><div class="cl-feat-title">Battery Health · Motor Thermal · Loop Analyzer</div><div class="cl-feat-desc">เครื่องมือวิเคราะห์ hardware ใหม่ 3 ตัว</div></div></div>
+            <div class="cl-feat fix"><span class="cl-feat-ico">🔧</span><span class="cl-feat-type">FIX</span><div class="cl-feat-body"><div class="cl-feat-title">Physics Accuracy — W/g, RPM, TWR</div><div class="cl-feat-desc">ปรับสูตรคำนวณตาม RCBenchmark 1520 real bench data</div></div></div>
+            <div class="cl-feat fix"><span class="cl-feat-ico">🛡️</span><span class="cl-feat-type">FIX</span><div class="cl-feat-body"><div class="cl-feat-title">1S–2S Build Support</div><div class="cl-feat-desc">ลบ min=3 limit, รองรับ nano whoop ขนาดเล็ก</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- v5.0 -->
+    <div class="cl-item">
+      <div class="cl-dot major"></div>
+      <div class="cl-card" onclick="toggleCard(this)">
+        <div class="cl-card-head">
+          <span class="v5-pill b">MAJOR</span>
+          <span class="cl-ver">v5.0 — Full Suite</span>
+          <span class="cl-date">2024</span>
+          <span class="cl-chevron">▾</span>
+        </div>
+        <div class="cl-card-body">
+          <div class="cl-features">
+            <div class="cl-feat new"><span class="cl-feat-ico">📊</span><span class="cl-feat-type">NEW</span><div class="cl-feat-body"><div class="cl-feat-title">Blackbox CSV Analyzer — HOT</div><div class="cl-feat-desc">วิเคราะห์ flight log · PID score · motor balance · battery sag</div></div></div>
+            <div class="cl-feat new"><span class="cl-feat-ico">🩺</span><span class="cl-feat-type">NEW</span><div class="cl-feat-body"><div class="cl-feat-title">CLI Surgeon</div><div class="cl-feat-desc">วิเคราะห์ diff all / dump — ตรวจ filter, PID, motor protocol</div></div></div>
+            <div class="cl-feat new"><span class="cl-feat-ico">🎖️</span><span class="cl-feat-type">NEW</span><div class="cl-feat-body"><div class="cl-feat-title">Military UAS Analyzer</div><div class="cl-feat-desc">วิเคราะห์โดรนทหาร 6 modules — physics + mission planning</div></div></div>
+            <div class="cl-feat new"><span class="cl-feat-ico">🌐</span><span class="cl-feat-type">NEW</span><div class="cl-feat-body"><div class="cl-feat-title">Community Features</div><div class="cl-feat-desc">Build Card · Tuning Log · Config Leaderboard</div></div></div>
+            <div class="cl-feat perf"><span class="cl-feat-ico">🔬</span><span class="cl-feat-type">PERF</span><div class="cl-feat-body"><div class="cl-feat-title">Advanced Physics — prop_logic v4</div><div class="cl-feat-desc">TWR, ESC sizing, hover throttle %, C-rating burst/continuous</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- v2.x -->
+    <div class="cl-item">
+      <div class="cl-dot minor"></div>
+      <div class="cl-card" onclick="toggleCard(this)">
+        <div class="cl-card-head">
+          <span class="v5-pill neu">LEGACY</span>
+          <span class="cl-ver">v2.x — Core Tools</span>
+          <span class="cl-date">2023–2024</span>
+          <span class="cl-chevron">▾</span>
+        </div>
+        <div class="cl-card-body">
+          <div class="cl-features">
+            <div class="cl-feat new"><span class="cl-feat-ico">🔬</span><span class="cl-feat-type">NEW</span><div class="cl-feat-body"><div class="cl-feat-title">Drone Analyzer — Core</div><div class="cl-feat-desc">PID · Filter · Motor analysis จาก frame size, weight, battery, style</div></div></div>
+            <div class="cl-feat new"><span class="cl-feat-ico">💊</span><span class="cl-feat-type">NEW</span><div class="cl-feat-body"><div class="cl-feat-title">PID Symptom Advisor · RPM Filter · Rates Visualizer</div><div class="cl-feat-desc">เครื่องมือ tuning พื้นฐาน</div></div></div>
+            <div class="cl-feat new"><span class="cl-feat-ico">📡</span><span class="cl-feat-type">NEW</span><div class="cl-feat-body"><div class="cl-feat-title">VTX Tools — Bands, Range, SmartAudio</div><div class="cl-feat-desc">ตาราง Band/Channel + คำนวณระยะสัญญาณ</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /cl-timeline -->
+
+  <!-- Footer note -->
+  <div class="v5-divider"></div>
+  <div style="text-align:center; padding:var(--sp-6) 0">
+    <p style="font-size:12px; color:var(--muted2); line-height:1.8">
+      OBIXConfig Doctor พัฒนาสำหรับชุมชน FPV 🇹🇭 · ทุก update ผ่านการทดสอบกับ Betaflight 4.4/4.5<br>
+      <a href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener" style="color:var(--green)">OBIXConfig Lab Facebook</a>
+    </p>
   </div>
-</div>
 
-<!-- v2.3 -->
-<div class="ver-block">
-  <div class="ver-dot latest"></div>
-  <div class="ver-card">
-    <div class="ver-head" onclick="toggleVer(this)">
-      <div class="ver-head-l">
-        <div class="ver-num">v2.3 <span class="ver-badge badge-feature">FEATURE</span></div>
-        <div class="ver-name">Community Edition — Build Card · Tuning Log · Leaderboard</div>
-        <div class="ver-date">📅 มีนาคม 2569 (2026)</div>
-      </div>
-      <div class="ver-head-r">
-        <span class="change-count">11 changes</span>
-        <span class="toggle-icon">▾</span>
-      </div>
-    </div>
-    <div class="ver-body open">
-      <div class="change-cat">
-        <div class="cat-title cat-new">🆕 NEW FEATURES</div>
-        <ul class="change-list">
-          <li class="change-item"><span class="ci-icon">🃏</span><div class="ci-body"><strong>Build Card Generator</strong> <span class="ci-tag tag-new">new</span><br><span>สร้างรูปสเปคโดรน 1200×628 px สวยๆ พร้อมแชร์ Facebook · LINE · Instagram ได้ทันที มี 4 theme ให้เลือก</span></div></li>
-          <li class="change-item"><span class="ci-icon">📊</span><div class="ci-body"><strong>Tuning Log</strong> <span class="ci-tag tag-new">new</span><br><span>บันทึกประวัติการ tune ทุก session · แสดง delta ∆PID ระหว่างครั้ง · filter, search, export JSON · เก็บใน localStorage ไม่ต้องล็อกอิน</span></div></li>
-          <li class="change-item"><span class="ci-icon">🏆</span><div class="ci-body"><strong>Community Leaderboard</strong> <span class="ci-tag tag-new">new</span><br><span>rank config ของชุมชน FPV ไทย · vote ให้คะแนน · ดู PID + copy CLI ของ top config · seed data 5 config จาก community</span></div></li>
-          <li class="change-item"><span class="ci-icon">⚡</span><div class="ci-body"><strong>BF Config Wizard</strong> <span class="ci-tag tag-new">new</span><br><span>7 ขั้นตอน กรอกสเปค → ได้ CLI ครบสมบูรณ์ · PID/Rates/Filter/Features · Live preview · Download .txt · BF 4.4/4.5</span></div></li>
-          <li class="change-item"><span class="ci-icon">🎯</span><div class="ci-body"><strong>Flight Style Quiz</strong> <span class="ci-tag tag-new">new</span><br><span>5 คำถาม → แนะนำ rates + preset ที่เหมาะกับสไตล์การบินของคุณ</span></div></li>
-        </ul>
-      </div>
-      <div class="change-cat">
-        <div class="cat-title cat-fix">🔧 BUG FIXES (v2.2)</div>
-        <ul class="change-list">
-          <li class="change-item"><span class="ci-icon">🐛</span><div class="ci-body"><strong>battery_logic.py</strong> — rewrite ใหม่ รองรับ '4S 1500mAh', '4s1500', '6S' ทุกรูปแบบ</div></li>
-          <li class="change-item"><span class="ci-icon">🐛</span><div class="ci-body"><strong>thrust_logic.py</strong> — คืน 0.0 (float) แทน None เมื่อ motor_load=0</div></li>
-          <li class="change-item"><span class="ci-icon">🐛</span><div class="ci-body"><strong>api/symptom</strong> — คืน HTTP 404 สำหรับ symptom ที่ไม่รู้จัก (เคย return 200+error)</div></li>
-        </ul>
-      </div>
-      <div class="change-cat">
-        <div class="cat-title cat-ux">✨ UX / DESIGN</div>
-        <ul class="change-list">
-          <li class="change-item"><span class="ci-icon">🎨</span><div class="ci-body"><strong>Changelog redesign</strong> — ใช้ OBIX HUD theme ครบ · collapsible sections · stats strip · timeline</div></li>
-          <li class="change-item"><span class="ci-icon">🧭</span><div class="ci-body"><strong>Nav drawer</strong> — เพิ่ม BF Config Wizard link + "new" badge</div></li>
-          <li class="change-item"><span class="ci-icon">🗺️</span><div class="ci-body"><strong>Sitemap</strong> — เพิ่ม /bf-wizard, /build-card, /tuning-log, /leaderboard · ครบ 24 URLs</div></li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</div>
+</div><!-- /page-wrap -->
 
-<!-- v2.2 -->
-<div class="ver-block">
-  <div class="ver-dot b"></div>
-  <div class="ver-card">
-    <div class="ver-head" onclick="toggleVer(this)">
-      <div class="ver-head-l">
-        <div class="ver-num">v2.2 <span class="ver-badge badge-feature">FEATURE</span></div>
-        <div class="ver-name">Blackbox CSV Analyzer — Flagship Release</div>
-        <div class="ver-date">📅 มีนาคม 2569 · 03/03/2026</div>
-      </div>
-      <div class="ver-head-r">
-        <span class="change-count">8 changes</span>
-        <span class="toggle-icon">▾</span>
-      </div>
-    </div>
-    <div class="ver-body">
-      <div class="change-cat">
-        <div class="cat-title cat-new">🆕 NEW</div>
-        <ul class="change-list">
-          <li class="change-item"><span class="ci-icon">📊</span><div class="ci-body"><strong>Blackbox CSV Analyzer</strong> — Upload CSV จาก BF Blackbox · PID quality score A–D · oscillation ต่อ axis · motor imbalance · battery sag · CLI fix recommendations</div></li>
-          <li class="change-item"><span class="ci-icon">🏠</span><div class="ci-body"><strong>Landing Page Redesign</strong> — Blackbox flagship card · stats bar 14 tools · hero tags · scroll reveal</div></li>
-          <li class="change-item"><span class="ci-icon">📱</span><div class="ci-body"><strong>Responsive Design</strong> — รองรับมือถือ/แท็บเล็ตครบ · overflow-x fix · iOS zoom fix</div></li>
-          <li class="change-item"><span class="ci-icon">🔍</span><div class="ci-body"><strong>SEO</strong> — JSON-LD Structured Data · sitemap 18 URLs · robots.txt · unique title tags</div></li>
-        </ul>
-      </div>
-      <div class="change-cat">
-        <div class="cat-title cat-fix">🔧 FIXES</div>
-        <ul class="change-list">
-          <li class="change-item"><span class="ci-icon">🐛</span><div class="ci-body">battery_logic error handling · thrust_logic None→0.0 · 404 status code ครบ</div></li>
-          <li class="change-item"><span class="ci-icon">🐛</span><div class="ci-body">CLI Surgeon error UX — แสดง message แทน silent fallback</div></li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- v2.1 -->
-<div class="ver-block">
-  <div class="ver-dot a"></div>
-  <div class="ver-card">
-    <div class="ver-head" onclick="toggleVer(this)">
-      <div class="ver-head-l">
-        <div class="ver-num">v2.1 <span class="ver-badge badge-feature">FEATURE</span></div>
-        <div class="ver-name">14-Tool Suite — ESC · OSD · VTX · PID Advisor</div>
-        <div class="ver-date">📅 กุมภาพันธ์ 2569</div>
-      </div>
-      <div class="ver-head-r">
-        <span class="change-count">7 changes</span>
-        <span class="toggle-icon">▾</span>
-      </div>
-    </div>
-    <div class="ver-body">
-      <ul class="change-list">
-        <li class="change-item"><span class="ci-icon">🆕</span><div class="ci-body"><strong>ESC Compatibility Checker</strong> — ตรวจ motor KV/voltage/protocol</div></li>
-        <li class="change-item"><span class="ci-icon">🆕</span><div class="ci-body"><strong>OSD Designer</strong> — drag-and-drop element layout</div></li>
-        <li class="change-item"><span class="ci-icon">🆕</span><div class="ci-body"><strong>VTX Range Calculator</strong> — คำนวณระยะตาม power/antenna</div></li>
-        <li class="change-item"><span class="ci-icon">🆕</span><div class="ci-body"><strong>SmartAudio CLI Generator</strong> — สร้าง command VTX</div></li>
-        <li class="change-item"><span class="ci-icon">🆕</span><div class="ci-body"><strong>PID Symptom Advisor</strong> — บอกอาการ → รับ set command</div></li>
-        <li class="change-item"><span class="ci-icon">🆕</span><div class="ci-body"><strong>RPM Filter Calculator</strong> — harmonic + dyn_notch</div></li>
-        <li class="change-item"><span class="ci-icon">🆕</span><div class="ci-body"><strong>CLI Diff Comparator</strong> — diff สอง dump ดู diff จริง</div></li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-<!-- v2.0 -->
-<div class="ver-block">
-  <div class="ver-dot"></div>
-  <div class="ver-card">
-    <div class="ver-head" onclick="toggleVer(this)">
-      <div class="ver-head-l">
-        <div class="ver-num">v2.0 <span class="ver-badge badge-ux">REDESIGN</span></div>
-        <div class="ver-name">OBIX HUD Theme — Dark Military Aesthetic</div>
-        <div class="ver-date">📅 มกราคม 2569</div>
-      </div>
-      <div class="ver-head-r">
-        <span class="change-count">5 changes</span>
-        <span class="toggle-icon">▾</span>
-      </div>
-    </div>
-    <div class="ver-body">
-      <ul class="change-list">
-        <li class="change-item"><span class="ci-icon">🎨</span><div class="ci-body">OBIX HUD dark theme ใหม่ทั้งหมด — Orbitron · JetBrains Mono · green/blue accent</div></li>
-        <li class="change-item"><span class="ci-icon">🔧</span><div class="ci-body">Rates Visualizer — real-time curve canvas ต่อ axis 3 สี</div></li>
-        <li class="change-item"><span class="ci-icon">🧭</span><div class="ci-body">Nav drawer redesign — grouped links · active state · mobile</div></li>
-        <li class="change-item"><span class="ci-icon">⚙️</span><div class="ci-body">Motor × Prop Recommender — แนะนำ combo จากสเปค</div></li>
-        <li class="change-item"><span class="ci-icon">📋</span><div class="ci-body">CLI Surgeon — parse diff_all · highlight ค่าผิดปกติ</div></li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-<!-- v1.x -->
-<div class="ver-block">
-  <div class="ver-dot" style="border-color:var(--muted);box-shadow:none"></div>
-  <div class="ver-card">
-    <div class="ver-head" onclick="toggleVer(this)">
-      <div class="ver-head-l">
-        <div class="ver-num" style="font-size:14px;color:var(--muted2)">v1.x — Initial Release Series</div>
-        <div class="ver-name" style="color:var(--muted)">Drone Analyzer · Battery/Thrust Logic · Basic UI</div>
-        <div class="ver-date">📅 2025</div>
-      </div>
-      <div class="ver-head-r">
-        <span class="toggle-icon">▾</span>
-      </div>
-    </div>
-    <div class="ver-body">
-      <ul class="change-list">
-        <li class="change-item"><span class="ci-icon">🚁</span><div class="ci-body">Drone Analyzer — วิเคราะห์ PID/Filter จากสเปค</div></li>
-        <li class="change-item"><span class="ci-icon">🔋</span><div class="ci-body">Battery Logic — parse 4S/6S + mAh + voltage calc</div></li>
-        <li class="change-item"><span class="ci-icon">⚡</span><div class="ci-body">Thrust/Weight calculator — TWR พร้อม class classification</div></li>
-        <li class="change-item"><span class="ci-icon">📦</span><div class="ci-body">Downloads page — diff_all templates F4/F7</div></li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-</div><!-- tl -->
-
-<div class="repo-line">configdoctor.onrender.com · OBIXConfig Lab · 🇹🇭</div>
-
-</div><!-- wrap -->
 <script>
-function toggleVer(head){
-  const body=head.nextElementSibling;
-  const icon=head.querySelector('.toggle-icon');
-  const isOpen=body.classList.contains('open');
-  body.classList.toggle('open',!isOpen);
-  if(icon)icon.style.transform=isOpen?'':'rotate(180deg)';
+function toggleCard(card){
+  var body = card.querySelector('.cl-card-body');
+  var isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  card.classList.toggle('expanded', !isOpen);
 }
-// collapse all except first on load
-document.querySelectorAll('.ver-body:not(.open)').forEach(b=>{
-  const icon=b.previousElementSibling?.querySelector('.toggle-icon');
-  if(icon)icon.style.transform='rotate(-90deg)';
-});
+// Open latest by default
+document.querySelectorAll('.latest-card').forEach(function(c){ c.classList.add('expanded'); });
 </script>
 </body>
 </html>

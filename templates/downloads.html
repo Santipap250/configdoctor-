@@ -1,168 +1,316 @@
-<!doctype html>
-<html lang="th">
-<head>
-  <meta charset="utf-8">
-  <title>ไฟล์ DIFF & DUMP — OBIXConfig Doctor</title>
-{% set og_title       = "ไฟล์ DIFF & DUMP — OBIXConfig Doctor" %}
+{% set og_title       = "CLI Diff & Dump Files — OBIXConfig Doctor" %}
 {% set og_description = "ดาวน์โหลด CLI diff all / dump สำเร็จรูปสำหรับโดรน FPV หลากหลายรุ่น แยกตาม F4 / F7" %}
 {% set og_url         = "https://configdoctor.onrender.com/downloads" %}
 {% include "partials/og_tags.html" %}
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  <style>
-    .dl-grid{ display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); margin-top:18px; }
-    .dl-card{ padding:14px; border-radius:12px; background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(255,255,255,0.005)); border:1px solid rgba(255,255,255,0.03); box-shadow:0 8px 26px rgba(0,0,0,0.45); }
-    .dl-meta{ font-size:0.85rem; color: #bfc7cd; margin-top:6px; }
-    .dl-actions{ margin-top:10px; display:flex; gap:8px; align-items:center; }
-    .btn-small{ padding:8px 10px; border-radius:8px; border:0; cursor:pointer; background:#2ecc71; color:#042; font-weight:700; text-decoration:none; }
-    .btn-download{ background:transparent; border:1px solid rgba(255,255,255,0.06); color:inherit; padding:8px 12px; border-radius:8px; text-decoration:none; }
-    pre.cli-snippet{ background:#0b0c0d; color:#dfe; padding:10px; border-radius:8px; overflow:auto; font-family: monospace; font-size:0.85rem; max-height:180px; }
-    #obixToast{ position:fixed; left:50%; transform:translateX(-50%); bottom:22px; padding:10px 14px; border-radius:999px; background:rgba(0,0,0,0.82); color:#fff; display:none; z-index:2000; }
-  </style>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CLI Files — OBIXConfig Doctor</title>
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/site-theme.css') }}">
 <style>
-  /* ── Responsive ── */
-  html,body{overflow-x:hidden}
-  input,select,button{font-size:16px;min-height:44px}
+/* ── Page-specific styles ── */
+.dl-toolbar {
+  display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+  padding:14px 0; border-bottom:1px solid var(--border2);
+  margin-bottom:20px;
+}
+.dl-toolbar-left { display:flex; gap:10px; flex:1; min-width:0; flex-wrap:wrap; }
+.dl-search-wrap {
+  flex:1; min-width:200px;
+  display:flex; align-items:center; gap:8px;
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--r-sm);
+  padding:0 12px; transition:border-color var(--dur) var(--ease);
+}
+.dl-search-wrap:focus-within { border-color:var(--border-hi); }
+.dl-search-icon { color:var(--muted2); font-size:13px; flex-shrink:0; }
+.dl-search-input {
+  background:none; border:none; outline:none; color:var(--text);
+  font-family:var(--font-body); font-size:14px; width:100%; padding:9px 0;
+}
+.dl-search-input::placeholder { color:var(--muted); }
+.dl-select {
+  padding:9px 32px 9px 12px; background:var(--surface);
+  border:1px solid var(--border); border-radius:var(--r-sm);
+  color:var(--text); font-size:13px; outline:none; cursor:pointer;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a7a8a'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 10px center;
+  transition:border-color var(--dur) var(--ease);
+}
+.dl-select:focus { border-color:var(--border-hi); }
+.dl-count { font-family:var(--font-mono); font-size:12px; color:var(--muted2); white-space:nowrap; }
+
+/* Grid */
+.dl-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(340px,1fr));
+  gap:12px;
+}
+
+/* Card */
+.dl-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg);
+  overflow:hidden; transition:all var(--dur) var(--ease);
+}
+.dl-card:hover { border-color:rgba(16,196,122,0.2); box-shadow:0 8px 28px rgba(0,0,0,0.4); }
+
+.dl-card-head {
+  display:flex; align-items:flex-start; gap:12px;
+  padding:14px 16px 12px; border-bottom:1px solid var(--border2);
+  background:rgba(255,255,255,0.015);
+}
+.dl-card-icon {
+  width:38px; height:38px; border-radius:var(--r-sm); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:16px;
+  background:var(--green-dim); border:1px solid rgba(16,196,122,0.2);
+}
+.dl-card-icon.f7 { background:var(--blue-dim); border-color:rgba(74,158,255,0.2); }
+.dl-card-name {
+  font-size:13px; font-weight:600; color:var(--text);
+  line-height:1.4; word-break:break-word;
+}
+.dl-card-meta {
+  display:flex; align-items:center; gap:8px; margin-top:5px; flex-wrap:wrap;
+}
+.dl-card-meta-item {
+  font-family:var(--font-mono); font-size:10px; color:var(--muted2);
+  display:flex; align-items:center; gap:4px;
+}
+
+/* Preview */
+.dl-preview-wrap { position:relative; }
+.dl-preview-toggle {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:8px 14px; cursor:pointer; font-size:11px; color:var(--muted2);
+  border-bottom:1px solid var(--border2);
+  background:rgba(255,255,255,0.01);
+  user-select:none; transition:color var(--dur);
+}
+.dl-preview-toggle:hover { color:var(--text); }
+.dl-preview-toggle-icon { transition:transform .2s; }
+.dl-preview-toggle[data-open="true"] .dl-preview-toggle-icon { transform:rotate(180deg); }
+.dl-preview {
+  font-family:var(--font-mono); font-size:10.5px; line-height:1.7;
+  color:var(--text2); background:rgba(0,0,0,0.25);
+  padding:12px 14px; white-space:pre-wrap; word-break:break-all;
+  max-height:180px; overflow-y:auto;
+  display:none;
+}
+.dl-preview.open { display:block; }
+
+/* Actions */
+.dl-actions {
+  display:flex; gap:8px; padding:10px 14px; align-items:center;
+  border-top:1px solid var(--border2);
+}
+.dl-btn-copy {
+  flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
+  padding:8px 14px; border-radius:var(--r-sm);
+  background:var(--green-dim); border:1px solid rgba(16,196,122,0.3);
+  color:var(--green); font-family:var(--font-head); font-size:10px;
+  font-weight:700; letter-spacing:.08em; cursor:pointer;
+  transition:all var(--dur) var(--ease);
+}
+.dl-btn-copy:hover { background:rgba(16,196,122,0.18); border-color:var(--green); }
+.dl-btn-dl {
+  display:flex; align-items:center; gap:6px;
+  padding:8px 14px; border-radius:var(--r-sm);
+  background:var(--surface2); border:1px solid var(--border);
+  color:var(--text2); font-size:12px; text-decoration:none;
+  transition:all var(--dur) var(--ease);
+}
+.dl-btn-dl:hover { border-color:var(--border-hi); color:var(--text); }
+
+/* FC badge */
+.fc-badge {
+  margin-left:auto;
+  display:inline-flex; align-items:center; padding:3px 8px;
+  border-radius:4px; font-family:var(--font-head); font-size:9px;
+  font-weight:700; letter-spacing:.08em;
+}
+.fc-badge.F4 { background:var(--green-dim); color:var(--green); border:1px solid rgba(16,196,122,0.2); }
+.fc-badge.F7 { background:var(--blue-dim);  color:var(--blue);  border:1px solid rgba(74,158,255,0.2); }
+
+/* Empty */
+.dl-empty { display:none; padding:48px 24px; text-align:center; }
+.dl-empty.show { display:block; }
+.dl-empty-icon { font-size:36px; margin-bottom:12px; }
+.dl-empty-text { color:var(--muted2); font-size:13px; }
 </style>
 {% set nav_page = "downloads" %}
 </head>
 <body>
 {% include "partials/nav.html" %}
-  <div class="container" style="padding-top:76px;">
-    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-      <h1 style="margin:0;">ค้นหาไฟล์ Diff และ Dump</h1>
 
-      <!-- search input -->
-      <div style="flex:1; min-width:220px;">
-        <input id="dlSearch" type="search" placeholder="ค้นหาไฟล์ (ชื่อ, FC, keyword)..." style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:#0d1117; color:inherit;">
+<div class="page-wrap" style="padding-top:70px">
+
+  <!-- Hero -->
+  <div class="v5-hero v5-fade-in">
+    <div class="v5-hero-eyebrow">📁 Resources</div>
+    <h1 class="v5-hero-title">CLI Diff & <em>Dump Files</em></h1>
+    <p class="v5-hero-sub">ดาวน์โหลด config สำเร็จรูปสำหรับโดรน FPV หลากหลายรุ่น — Copy CLI แล้ว paste ใน Betaflight ได้เลย</p>
+    <div class="v5-hero-meta">
+      <div class="v5-hero-meta-item">
+        <span class="v5-pill g">F4 · F7</span>
       </div>
-
-      <!-- filter by FC -->
-      <div>
-        <select id="dlFilterFC" style="padding:8px 10px; border-radius:8px; background:#0d1117; border:1px solid rgba(255,255,255,0.06); color:inherit;">
-          <option value="all">แสดงทุก FC</option>
-          {% set fcs = items|map(attribute='fc')|list|unique %}
-          {% for f in fcs %}
-            <option value="{{ f }}">{{ f }}</option>
-          {% endfor %}
-        </select>
+      <div class="v5-hero-meta-item">
+        <div class="v5-hero-meta-dot"></div>
+        {{ items|length }} ไฟล์
       </div>
-
-      <!-- download all for selected FC -->
-      <div>
-        <a id="downloadAllBtn" class="btn-download" href="#" style="display:inline-block;padding:8px 12px;border-radius:8px;">📦 ดาวน์โหลดทั้งหมด</a>
+      <div class="v5-hero-meta-item">
+        <div class="v5-hero-meta-dot"></div>
+        BF 4.3 · 4.4 · 4.5
       </div>
-    </div>
-
-    <p style="margin-top:8px; color:#9aa4b2;">ค้นหา/กรอง แล้วกด "Copy CLI" หรือ "ดาวน์โหลด" ได้ทันที</p>
-
-    <div class="dl-grid">
-      {% for it in items %}
-      <div class="dl-card" id="card-{{ loop.index }}">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div style="width:44px;height:44px;display:grid;place-items:center;border-radius:8px;background:#0d1117;border:1px solid rgba(255,255,255,0.02);font-size:20px;">
-            📄
-          </div>
-          <div style="flex:1;">
-            <div style="font-weight:700;">{{ it.fc }} — {{ it.filename }}</div>
-            <div class="dl-meta">ขนาด: {{ (it.size/1024)|round(1) }} KB • sha256: {{ it.sha }} • อัปเดต: {% if it.mtime %}{{ it.mtime|timestamp_to_datetime }}{% else %}—{% endif %}</div>
-          </div>
-        </div>
-
-        <div style="margin-top:10px;">
-          <pre id="preview-{{ loop.index }}" class="cli-snippet">Loading preview…</pre>
-        </div>
-
-        <div class="dl-actions">
-          <a class="btn-download" href="{{ url_for('download_diff', fc=it.fc, filename=it.filename) }}">⬇️ ดาวน์โหลด</a>
-          <button class="btn-small copy-cli" data-fc="{{ it.fc }}" data-fn="{{ it.filename }}" data-target="#preview-{{ loop.index }}">📋 Copy CLI</button>
-          <span style="margin-left:auto; color:#9aa4b2; font-size:0.9rem;">{{ it.fc }}</span>
-        </div>
-      </div>
-      {% endfor %}
     </div>
   </div>
 
-  <div id="obixToast">Copied</div>
+  <!-- Alert -->
+  <div class="v5-alert info v5-fade-in-1" style="margin-bottom:20px">
+    <span class="v5-alert-ico">💡</span>
+    <div>ไฟล์เหล่านี้เป็น <strong>starting point</strong> — ทดสอบ hover ก่อนเสมอ แล้วปรับ PID ตามพฤติกรรมโดรนจริง · อย่า paste โดยไม่อ่าน config ก่อน</div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="dl-toolbar v5-fade-in-2">
+    <div class="dl-toolbar-left">
+      <div class="dl-search-wrap">
+        <span class="dl-search-icon">🔍</span>
+        <input id="dlSearch" class="dl-search-input" type="search" placeholder="ค้นหา (ชื่อไฟล์, FC, drone model...)" autocomplete="off">
+      </div>
+      <select id="dlFilterFC" class="dl-select">
+        <option value="all">ทุก Flight Controller</option>
+        {% set fcs = items|map(attribute='fc')|list|unique %}
+        {% for f in fcs %}
+        <option value="{{ f }}">{{ f }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="dl-count" id="dlCount">{{ items|length }} ไฟล์</div>
+  </div>
+
+  <!-- Grid -->
+  <div class="dl-grid" id="dlGrid">
+    {% for it in items %}
+    <div class="dl-card" data-fc="{{ it.fc }}" data-name="{{ it.filename|lower }}">
+
+      <div class="dl-card-head">
+        <div class="dl-card-icon {{ it.fc }}">{{ '🟢' if it.fc == 'F4' else '🔵' }}</div>
+        <div style="flex:1;min-width:0">
+          <div class="dl-card-name">{{ it.filename }}</div>
+          <div class="dl-card-meta">
+            <div class="dl-card-meta-item">📏 {{ (it.size/1024)|round(1) }} KB</div>
+            <div class="dl-card-meta-item">🔑 {{ it.sha }}</div>
+            {% if it.mtime %}
+            <div class="dl-card-meta-item">🕐 {{ it.mtime|timestamp_to_datetime }}</div>
+            {% endif %}
+          </div>
+        </div>
+        <span class="fc-badge {{ it.fc }}">{{ it.fc }}</span>
+      </div>
+
+      <div class="dl-preview-wrap">
+        <div class="dl-preview-toggle" data-open="false" onclick="togglePreview(this)">
+          <span>▶ ดู CLI Preview</span>
+          <span class="dl-preview-toggle-icon">▾</span>
+        </div>
+        <pre class="dl-preview" data-fc="{{ it.fc }}" data-fn="{{ it.filename }}">Loading...</pre>
+      </div>
+
+      <div class="dl-actions">
+        <button class="dl-btn-copy" data-fc="{{ it.fc }}" data-fn="{{ it.filename }}">
+          📋 Copy CLI
+        </button>
+        <a class="dl-btn-dl" href="{{ url_for('download_diff', fc=it.fc, filename=it.filename) }}" download>
+          ⬇️ Download
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Empty state -->
+  <div class="dl-empty" id="dlEmpty">
+    <div class="dl-empty-icon">🔍</div>
+    <div class="dl-empty-text">ไม่พบไฟล์ที่ตรงกับคำค้นหา</div>
+  </div>
+
+</div>
+
+<div class="v5-toast" id="v5Toast"></div>
 
 <script>
-const grid = document.querySelector('.dl-grid');
-const cards = Array.from(document.querySelectorAll('.dl-card'));
-const searchInput = document.getElementById('dlSearch');
-const filterSelect = document.getElementById('dlFilterFC');
-const downloadAllBtn = document.getElementById('downloadAllBtn');
+(function(){
+  'use strict';
 
-function normalizeText(s){ return (s||'').toString().toLowerCase(); }
+  var cards   = Array.from(document.querySelectorAll('.dl-card'));
+  var search  = document.getElementById('dlSearch');
+  var fcSel   = document.getElementById('dlFilterFC');
+  var countEl = document.getElementById('dlCount');
+  var empty   = document.getElementById('dlEmpty');
 
-// initial preview fetch + copy button (เหมือนเดิม)
-cards.forEach(card=>{
-  const btn = card.querySelector('.copy-cli');
-  const preview = card.querySelector('.cli-snippet');
-  const fc = btn.getAttribute('data-fc');
-  const fn = btn.getAttribute('data-fn');
-
-  fetch(`/static/downloads/diff_all/${fc}/${fn}`)
-    .then(r => r.text())
-    .then(t => {
-      preview.textContent = t.slice(0, 4000) + (t.length > 4000 ? "\n\n... (truncated)" : "");
-    }).catch(e=>{
-      preview.textContent = "Preview not available";
+  // ── Filter ──
+  function applyFilter(){
+    var q  = (search.value || '').trim().toLowerCase();
+    var fc = fcSel.value;
+    var vis = 0;
+    cards.forEach(function(c){
+      var nm = (c.dataset.name || '').toLowerCase();
+      var cf = (c.dataset.fc  || '').toLowerCase();
+      var ok = (fc === 'all' || cf === fc.toLowerCase()) && (!q || nm.indexOf(q) >= 0 || cf.indexOf(q) >= 0);
+      c.style.display = ok ? '' : 'none';
+      if(ok) vis++;
     });
-
-  btn.addEventListener('click', async ()=>{
-    try {
-      const res = await fetch(`/static/downloads/diff_all/${fc}/${fn}`);
-      const txt = await res.text();
-      await navigator.clipboard.writeText(txt);
-      showToast("คัดลอก CLI เรียบร้อยแล้ว ✅");
-    } catch(err){
-      showToast("เกิดข้อผิดพลาดขณะคัดลอก");
-    }
-  });
-});
-
-// Filter + Search logic
-function applyFilter(){
-  const q = normalizeText(searchInput.value);
-  const fcFilter = filterSelect.value;
-
-  cards.forEach(card=>{
-    const title = normalizeText(card.querySelector('div > div > div').textContent || '');
-    const meta = normalizeText(card.querySelector('.dl-meta').textContent || '');
-    const fc = normalizeText(card.querySelector('.dl-actions span').textContent || '');
-    const matchQ = q === '' || title.includes(q) || meta.includes(q) || fc.includes(q);
-    const matchFC = (fcFilter === 'all') || (fc === fcFilter.toLowerCase());
-    card.style.display = (matchQ && matchFC) ? '' : 'none';
-  });
-
-  // update download all href
-  const sel = filterSelect.value;
-  if(sel === 'all'){
-    downloadAllBtn.href = '#';
-    downloadAllBtn.setAttribute('disabled','disabled');
-    downloadAllBtn.textContent = '📦 ดาวน์โหลดทั้งหมด';
-    downloadAllBtn.style.opacity = 0.6;
-  } else {
-    // ZIP bundles are not pre-packaged — download files individually
-    downloadAllBtn.setAttribute('disabled', 'disabled');
-    downloadAllBtn.textContent = `📥 คลิกไฟล์แต่ละไฟล์เพื่อดาวน์โหลด (${sel})`;
-    downloadAllBtn.style.opacity = 0.5;
-    downloadAllBtn.title = 'ดาวน์โหลดทีละไฟล์จากรายการด้านล่าง';
+    countEl.textContent = vis + ' ไฟล์';
+    empty.classList.toggle('show', vis === 0);
   }
-}
+  search.addEventListener('input', applyFilter);
+  fcSel.addEventListener('change', applyFilter);
 
-searchInput.addEventListener('input', applyFilter);
-filterSelect.addEventListener('change', applyFilter);
+  // ── Preview toggle (lazy load) ──
+  window.togglePreview = function(btn){
+    var open = btn.dataset.open === 'true';
+    var pre  = btn.nextElementSibling;
+    btn.dataset.open = !open;
+    btn.querySelector('span:first-child').textContent = open ? '▶ ดู CLI Preview' : '▼ ซ่อน Preview';
+    pre.classList.toggle('open', !open);
 
-// init
-applyFilter();
+    if(!open && pre.textContent === 'Loading...'){
+      var fc = pre.dataset.fc, fn = pre.dataset.fn;
+      fetch('/static/downloads/diff_all/' + fc + '/' + fn)
+        .then(function(r){ return r.text(); })
+        .then(function(t){ pre.textContent = t.slice(0,3000) + (t.length>3000?'\n... (truncated)':''); })
+        .catch(function(){ pre.textContent = 'Preview unavailable'; });
+    }
+  };
 
-function showToast(msg){
-  const t = document.getElementById('obixToast');
-  t.textContent = msg;
-  t.style.display = 'block';
-  setTimeout(()=> t.style.display='none', 2600);
-}
+  // ── Copy CLI ──
+  document.getElementById('dlGrid').addEventListener('click', function(e){
+    var btn = e.target.closest('.dl-btn-copy');
+    if(!btn) return;
+    var fc = btn.dataset.fc, fn = btn.dataset.fn;
+    fetch('/static/downloads/diff_all/' + fc + '/' + fn)
+      .then(function(r){ return r.text(); })
+      .then(function(t){
+        return navigator.clipboard.writeText(t);
+      })
+      .then(function(){
+        showToast('✅ คัดลอก CLI สำเร็จ — paste ใน Betaflight CLI');
+        btn.textContent = '✅ Copied!';
+        setTimeout(function(){ btn.innerHTML = '📋 Copy CLI'; }, 2000);
+      })
+      .catch(function(){ showToast('❌ คัดลอกไม่สำเร็จ'); });
+  });
+
+  function showToast(msg){
+    var t = document.getElementById('v5Toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 2800);
+  }
+})();
 </script>
 </body>
 </html>

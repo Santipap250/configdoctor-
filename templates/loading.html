@@ -3,305 +3,177 @@
 <head>
 <meta charset="UTF-8">
 <title>OBIXConfig Doctor</title>
-{% set og_title       = "OBIXConfig Doctor" %}
-{% set og_description = "กำลังโหลด OBIXConfig Doctor — FPV Tuning Tool" %}
-{% set og_url         = "https://configdoctor.onrender.com" %}
+{% set og_title = "OBIXConfig Doctor v5 Pro" %}
+{% set og_description = "FPV Drone Configuration & Tuning Tool — v5 Pro" %}
+{% set og_url = "https://configdoctor.onrender.com" %}
 {% include "partials/og_tags.html" %}
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Sarabun:wght@400;500&display=swap" rel="stylesheet">
-
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/site-theme.css') }}">
 <style>
-/* ── Design tokens ─────────────────────────────────────── */
-:root {
-  --g:    #10c47a;          /* green accent */
-  --g2:   rgba(16,196,122,.12);
-  --g3:   rgba(16,196,122,.06);
-  --bg:   #050a0d;
-  --text: #d4e8e0;
-  --dim:  rgba(255,255,255,.18);
-}
+html,body{height:100%;overflow:hidden}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+body::before{display:none}
 
-/* ── Reset ─────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body {
-  height: 100%; overflow: hidden;
-  background: var(--bg);
-  font-family: 'Sarabun', sans-serif;
-  -webkit-font-smoothing: antialiased;
+/* Scene */
+.scene{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.scene-ring{
+  position:absolute;top:50%;left:50%;border-radius:50%;border:1px solid rgba(16,196,122,0.07);
+  transform:translate(-50%,-50%);
 }
+.scene-ring:nth-child(1){width:160px;height:160px;animation:ringGlow 4s ease-in-out infinite}
+.scene-ring:nth-child(2){width:300px;height:300px;animation:ringGlow 4s ease-in-out .6s infinite}
+.scene-ring:nth-child(3){width:480px;height:480px;animation:ringGlow 4s ease-in-out 1.2s infinite}
+.scene-ring:nth-child(4){width:680px;height:680px;animation:ringGlow 4s ease-in-out 1.8s infinite}
+@keyframes ringGlow{0%,100%{opacity:.3;border-color:rgba(16,196,122,0.05)}50%{opacity:1;border-color:rgba(16,196,122,0.15)}}
 
-/* ── Subtle grid background ────────────────────────────── */
-body::before {
-  content: '';
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+/* Center sweep */
+.scene-sweep{
+  position:absolute;top:50%;left:50%;
+  width:600px;height:600px;
+  margin:-300px 0 0 -300px;
+  border-radius:50%;overflow:hidden;
+}
+.scene-sweep::before{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(from 0deg,transparent 0deg,rgba(16,196,122,0.18) 70deg,transparent 70deg);
+  animation:sweep 6s linear infinite;
+}
+@keyframes sweep{to{transform:rotate(360deg)}}
+
+/* Grid */
+.scene-grid{
+  position:absolute;inset:0;
   background-image:
-    linear-gradient(rgba(16,196,122,.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(16,196,122,.025) 1px, transparent 1px);
-  background-size: 48px 48px;
+    linear-gradient(rgba(16,196,122,.022) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(16,196,122,.022) 1px,transparent 1px);
+  background-size:44px 44px;
 }
 
-/* ── Single ambient glow ───────────────────────────────── */
-body::after {
-  content: '';
-  position: fixed;
-  width: 500px; height: 500px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(16,196,122,.1) 0%, transparent 65%);
-  top: 50%; left: 50%;
-  transform: translate(-50%, -60%);
-  filter: blur(80px);
-  pointer-events: none; z-index: 0;
-  animation: breathe 5s ease-in-out infinite;
+/* Content */
+.boot-wrap{
+  position:relative;z-index:10;
+  display:flex;flex-direction:column;align-items:center;gap:28px;
+  animation:fadeIn .6s var(--ease) both;
 }
-@keyframes breathe {
-  0%,100% { opacity: .7; transform: translate(-50%,-60%) scale(1); }
-  50%      { opacity: 1;  transform: translate(-50%,-60%) scale(1.08); }
-}
+@keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 
-/* ── Layout ────────────────────────────────────────────── */
-.shell {
-  position: relative; z-index: 1;
-  width: 100vw; height: 100vh;
-  display: grid;
-  place-items: center;
-}
+.boot-logo{height:56px;filter:drop-shadow(0 0 20px rgba(16,196,122,0.5))}
 
-.card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 32px;
-  padding: 48px 40px;
-  width: min(420px, 92vw);
-  background: rgba(255,255,255,.018);
-  border: 1px solid rgba(16,196,122,.1);
-  border-radius: 20px;
-  box-shadow: 0 0 60px rgba(16,196,122,.06), 0 24px 80px rgba(0,0,0,.5);
-  backdrop-filter: blur(6px);
-  animation: cardIn .5s ease both;
+.boot-brand{
+  font-family:var(--font-head);font-size:15px;font-weight:900;
+  letter-spacing:.2em;color:var(--text);text-transform:uppercase;
 }
-@keyframes cardIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+.boot-brand em{color:var(--green);font-style:normal}
 
-/* ── Drone icon ─────────────────────────────────────────── */
-.drone-icon {
-  position: relative;
-  width: 96px; height: 96px;
-  flex-shrink: 0;
-}
-.drone-icon svg {
-  animation: droneFloat 3s ease-in-out infinite;
-  filter: drop-shadow(0 0 14px rgba(16,196,122,.5));
-}
-@keyframes droneFloat {
-  0%,100% { transform: translateY(0); }
-  50%      { transform: translateY(-5px); }
-}
-
-/* Spin ring around drone */
-.drone-ring {
-  position: absolute; inset: -12px;
-  border-radius: 50%;
-  border: 1px solid rgba(16,196,122,.2);
-  border-top-color: rgba(16,196,122,.7);
-  animation: spin 2s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── Brand ──────────────────────────────────────────────── */
-.brand-wrap { text-align: center; }
-.brand-name {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 22px; font-weight: 900;
-  letter-spacing: .1em;
-  color: #e8f8f2;
-  line-height: 1;
-}
-.brand-name em { color: var(--g); font-style: normal; }
-.brand-sub {
-  display: block;
-  font-size: 11px; letter-spacing: .18em;
-  color: var(--dim); text-transform: uppercase;
-  margin-top: 8px;
-}
-
-/* ── Status ─────────────────────────────────────────────── */
-.status-area { width: 100%; }
-.status-msg {
-  font-size: 13px; color: rgba(16,196,122,.75);
-  text-align: center; min-height: 20px;
-  margin-bottom: 14px;
-  letter-spacing: .02em;
-  transition: opacity .3s;
+.boot-ver{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;
+  color:var(--muted2);margin-top:-20px;
 }
 
 /* Progress bar */
-.bar-track {
-  width: 100%; height: 3px;
-  background: rgba(255,255,255,.05);
-  border-radius: 3px;
-  overflow: hidden;
+.boot-progress-wrap{width:280px}
+.boot-progress-track{
+  height:3px;background:rgba(16,196,122,0.08);border-radius:2px;overflow:hidden;
+  margin-bottom:10px;
 }
-.bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  width: 0%;
-  background: linear-gradient(90deg, var(--g), #5af5c4);
-  transition: width .4s cubic-bezier(.4,0,.2,1);
-  position: relative;
+.boot-progress-fill{
+  height:100%;border-radius:2px;width:0%;
+  background:linear-gradient(90deg,var(--green),var(--cyan));
+  transition:width .4s var(--ease);
+  box-shadow:0 0 10px rgba(16,196,122,0.5);
 }
-.bar-fill::after {
-  content: '';
-  position: absolute; right: 0; top: 0; bottom: 0; width: 24px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.5));
-  border-radius: 3px;
+.boot-progress-text{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;
+  color:var(--muted2);text-align:center;min-height:16px;
+  transition:opacity .2s;
 }
 
-/* Ping metric */
-.ping-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  margin-top: 14px; font-size: 11px; color: var(--dim);
-  font-family: 'Orbitron', sans-serif; letter-spacing: .05em;
+/* Status pills */
+.boot-pills{
+  display:flex;gap:8px;flex-wrap:wrap;justify-content:center;
+  max-width:320px;
 }
-.ping-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: rgba(255,255,255,.15);
-  transition: background .3s, box-shadow .3s;
+.boot-pill{
+  display:flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:100px;
+  border:1px solid var(--border);background:rgba(255,255,255,0.03);
+  font-family:var(--font-head);font-size:9px;letter-spacing:.08em;color:var(--muted2);
+  transition:all .3s var(--ease);opacity:.4;
 }
-.ping-dot.alive {
-  background: var(--g);
-  box-shadow: 0 0 8px rgba(16,196,122,.6);
+.boot-pill.active{
+  border-color:rgba(16,196,122,0.3);background:var(--green-dim);
+  color:var(--green);opacity:1;
 }
-
-/* ── Version tag ─────────────────────────────────────────── */
-.ver-tag {
-  font-size: 10px; letter-spacing: .12em;
-  color: rgba(255,255,255,.12);
-  font-family: 'Orbitron', sans-serif;
+.boot-pill-dot{
+  width:4px;height:4px;border-radius:50%;background:currentColor;flex-shrink:0;
 }
+.boot-pill.active .boot-pill-dot{animation:dotPulse 1s ease-in-out infinite}
+@keyframes dotPulse{0%,100%{opacity:1}50%{opacity:.2}}
 </style>
 </head>
 <body>
+<div class="scene">
+  <div class="scene-grid"></div>
+  <div class="scene-ring"></div>
+  <div class="scene-ring"></div>
+  <div class="scene-ring"></div>
+  <div class="scene-ring"></div>
+  <div class="scene-sweep"></div>
+</div>
 
-<div class="shell">
-  <div class="card">
+<div class="boot-wrap">
+  <img src="{{ url_for('static', filename='img/obix-logo.png') }}" class="boot-logo" alt="OBIXConfig Doctor">
 
-    <!-- Drone icon -->
-    <div class="drone-icon">
-      <div class="drone-ring"></div>
-      <svg width="96" height="96" viewBox="0 0 96 96" fill="none">
-        <!-- Arms -->
-        <line x1="48" y1="48" x2="22" y2="22" stroke="rgba(16,196,122,.5)" stroke-width="2" stroke-linecap="round"/>
-        <line x1="48" y1="48" x2="74" y2="22" stroke="rgba(16,196,122,.5)" stroke-width="2" stroke-linecap="round"/>
-        <line x1="48" y1="48" x2="22" y2="74" stroke="rgba(16,196,122,.5)" stroke-width="2" stroke-linecap="round"/>
-        <line x1="48" y1="48" x2="74" y2="74" stroke="rgba(16,196,122,.5)" stroke-width="2" stroke-linecap="round"/>
-        <!-- FC body -->
-        <rect x="38" y="38" width="20" height="20" rx="4"
-              fill="rgba(16,196,122,.1)" stroke="rgba(16,196,122,.6)" stroke-width="1.5"/>
-        <circle cx="48" cy="48" r="2.5" fill="rgba(16,196,122,.9)">
-          <animate attributeName="opacity" values="1;.3;1" dur="2s" repeatCount="indefinite"/>
-        </circle>
-        <!-- Motor circles -->
-        <circle cx="22" cy="22" r="11" fill="rgba(16,196,122,.06)" stroke="rgba(16,196,122,.4)" stroke-width="1.5"/>
-        <ellipse cx="22" cy="22" rx="9" ry="2.5" fill="none" stroke="rgba(16,196,122,.6)" stroke-width="1.5">
-          <animateTransform attributeName="transform" type="rotate" from="0 22 22" to="360 22 22" dur=".4s" repeatCount="indefinite"/>
-        </ellipse>
-        <circle cx="74" cy="22" r="11" fill="rgba(16,196,122,.06)" stroke="rgba(16,196,122,.4)" stroke-width="1.5"/>
-        <ellipse cx="74" cy="22" rx="9" ry="2.5" fill="none" stroke="rgba(16,196,122,.6)" stroke-width="1.5">
-          <animateTransform attributeName="transform" type="rotate" from="360 74 22" to="0 74 22" dur=".4s" repeatCount="indefinite"/>
-        </ellipse>
-        <circle cx="22" cy="74" r="11" fill="rgba(16,196,122,.06)" stroke="rgba(16,196,122,.4)" stroke-width="1.5"/>
-        <ellipse cx="22" cy="74" rx="9" ry="2.5" fill="none" stroke="rgba(16,196,122,.6)" stroke-width="1.5">
-          <animateTransform attributeName="transform" type="rotate" from="360 22 74" to="0 22 74" dur=".4s" repeatCount="indefinite"/>
-        </ellipse>
-        <circle cx="74" cy="74" r="11" fill="rgba(16,196,122,.06)" stroke="rgba(16,196,122,.4)" stroke-width="1.5"/>
-        <ellipse cx="74" cy="74" rx="9" ry="2.5" fill="none" stroke="rgba(16,196,122,.6)" stroke-width="1.5">
-          <animateTransform attributeName="transform" type="rotate" from="0 74 74" to="360 74 74" dur=".4s" repeatCount="indefinite"/>
-        </ellipse>
-      </svg>
+  <div>
+    <div class="boot-brand">OBIX<em>Config</em> Doctor</div>
+    <div class="boot-ver">v5 Pro · FPV Tuning Platform 🇹🇭</div>
+  </div>
+
+  <div class="boot-progress-wrap">
+    <div class="boot-progress-track">
+      <div class="boot-progress-fill" id="bootBar"></div>
     </div>
+    <div class="boot-progress-text" id="bootText">กำลังเริ่มต้นระบบ...</div>
+  </div>
 
-    <!-- Brand -->
-    <div class="brand-wrap">
-      <div class="brand-name">OBIX<em>CONFIG</em> DOCTOR</div>
-      <span class="brand-sub">FPV Tuning Toolkit · v5.2</span>
-    </div>
-
-    <!-- Status -->
-    <div class="status-area">
-      <div class="status-msg" id="statusMsg">กำลังเชื่อมต่อ...</div>
-      <div class="bar-track">
-        <div class="bar-fill" id="barFill"></div>
-      </div>
-      <div style="text-align:center">
-        <span class="ping-badge">
-          <span class="ping-dot" id="pingDot"></span>
-          <span id="pingLabel">รอการตอบสนอง</span>
-        </span>
-      </div>
-    </div>
-
-    <span class="ver-tag">OBIXCONFIG LAB 🇹🇭</span>
-
+  <div class="boot-pills" id="bootPills">
+    <div class="boot-pill" data-seq="0"><span class="boot-pill-dot"></span>Physics Engine</div>
+    <div class="boot-pill" data-seq="1"><span class="boot-pill-dot"></span>PID Models</div>
+    <div class="boot-pill" data-seq="2"><span class="boot-pill-dot"></span>Filter Bank</div>
+    <div class="boot-pill" data-seq="3"><span class="boot-pill-dot"></span>Rule Engine</div>
+    <div class="boot-pill" data-seq="4"><span class="boot-pill-dot"></span>Ready</div>
   </div>
 </div>
 
 <script>
-(function () {
-  'use strict';
-
-  var fill    = document.getElementById('barFill');
-  var msg     = document.getElementById('statusMsg');
-  var dot     = document.getElementById('pingDot');
-  var label   = document.getElementById('pingLabel');
-  var attempt = 0;
-
+(function(){
   var steps = [
-    { pct: 15, text: 'กำลังปลุกเซิร์ฟเวอร์...' },
-    { pct: 35, text: 'โหลด Rule Engine...' },
-    { pct: 55, text: 'โหลด Preset Library...' },
-    { pct: 72, text: 'เตรียม Analyzer Tools...' },
-    { pct: 88, text: 'รอการตอบสนอง...' },
+    {pct:18, text:'Loading physics engine...', pill:0},
+    {pct:38, text:'Initializing PID models...', pill:1},
+    {pct:58, text:'Calibrating filter bank...', pill:2},
+    {pct:78, text:'Starting rule engine...', pill:3},
+    {pct:100, text:'Ready — Launching app...', pill:4},
   ];
-  var si = 0;
+  var bar  = document.getElementById('bootBar');
+  var txt  = document.getElementById('bootText');
+  var pills= document.querySelectorAll('.boot-pill');
+  var idx  = 0;
 
-  var stepTimer = setInterval(function () {
-    if (si >= steps.length) return;
-    var s = steps[si++];
-    fill.style.width = s.pct + '%';
-    msg.textContent  = s.text;
-  }, 900);
-
-  function ping() {
-    attempt++;
-    var t0 = Date.now();
-    fetch('/ping', { cache: 'no-store' })
-      .then(function (res) {
-        var ms = Date.now() - t0;
-        if (res.ok) {
-          clearInterval(stepTimer);
-          fill.style.width = '100%';
-          msg.textContent  = '✓ พร้อมแล้ว — กำลังเข้า...';
-          dot.classList.add('alive');
-          label.textContent = ms + 'ms';
-          setTimeout(function () {
-            window.location.replace('/landing');
-          }, 500);
-        } else {
-          label.textContent = 'retry #' + attempt;
-        }
-      })
-      .catch(function () {
-        label.textContent = 'retry #' + attempt;
-      });
+  function tick(){
+    if(idx >= steps.length) return;
+    var s = steps[idx];
+    bar.style.width = s.pct + '%';
+    txt.textContent = s.text;
+    if(pills[s.pill]) pills[s.pill].classList.add('active');
+    idx++;
+    if(idx < steps.length){
+      setTimeout(tick, 220 + Math.random()*120);
+    } else {
+      setTimeout(function(){ window.location.href = '/landing'; }, 600);
+    }
   }
-
-  ping();
-  var retryTimer = setInterval(ping, 1800);
-}());
+  setTimeout(tick, 300);
+})();
 </script>
 </body>
 </html>

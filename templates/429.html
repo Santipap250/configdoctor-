@@ -2,80 +2,46 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>429 — คำขอมากเกินไป</title>
-<meta name="robots" content="noindex, nofollow">
-<meta property="og:title" content="429 — คำขอมากเกินไป">
-<meta property="og:site_name" content="OBIXConfig Doctor">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<link rel="stylesheet" href="/static/css/style.css">
-
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>429 — Too Many Requests · OBIXConfig Doctor</title>
+<link rel="stylesheet" href="/static/css/site-theme.css">
 <style>
-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: var(--bg-color-light);
-    color: var(--text-color-light);
-}
-
-.error-card {
-    background: var(--card-color-light);
-    padding: 40px;
-    border-radius: 16px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.15);
-    text-align: center;
-    max-width: 440px;
-}
-
-.error-card h1 {
-    font-size: 72px;
-    margin-bottom: 10px;
-    color: #e67e22;
-}
-
-.error-card .icon {
-    font-size: 48px;
-    margin-bottom: 12px;
-}
-
-.error-card p {
-    font-size: 18px;
-    margin-bottom: 10px;
-}
-
-.error-card .hint {
-    font-size: 14px;
-    color: #888;
-    margin-bottom: 24px;
-}
-
-.error-card a {
-    display: inline-block;
-    padding: 10px 20px;
-    border-radius: 8px;
-    background: #007bff;
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.error-card a:hover {
-    background: #0056b3;
-}
+html,body{height:100%;overflow:hidden}
+body{display:flex;align-items:center;justify-content:center;padding:24px}
+.err-bg{position:fixed;inset:0;pointer-events:none}
+.err-ring{position:absolute;top:50%;left:50%;border-radius:50%;border:1px solid rgba(245,158,11,0.07);transform:translate(-50%,-50%);animation:rPulse 4s ease-in-out infinite}
+.err-ring:nth-child(1){width:180px;height:180px}
+.err-ring:nth-child(2){width:340px;height:340px;animation-delay:.8s}
+.err-ring:nth-child(3){width:520px;height:520px;animation-delay:1.6s}
+@keyframes rPulse{0%,100%{opacity:.5}50%{opacity:1}}
+.err-card{position:relative;z-index:2;background:rgba(11,21,32,0.95);border:1px solid rgba(245,158,11,0.18);border-radius:20px;padding:52px 44px 44px;text-align:center;max-width:460px;width:100%;backdrop-filter:blur(24px);box-shadow:0 32px 80px rgba(0,0,0,0.7),inset 0 1px 0 rgba(255,255,255,0.05);animation:fadeUp .5s var(--ease) both}
+.err-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:20px 20px 0 0;background:linear-gradient(90deg,transparent,var(--amber),var(--orange),transparent)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.err-code{font-family:var(--font-head);font-size:80px;font-weight:900;line-height:1;color:var(--amber);letter-spacing:-.04em;text-shadow:0 0 40px rgba(245,158,11,.4);margin-bottom:8px}
+.err-title{font-family:var(--font-head);font-size:15px;font-weight:700;letter-spacing:.1em;color:var(--text);margin-bottom:12px}
+.err-desc{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:20px}
+.err-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:100px;border:1px solid rgba(245,158,11,0.3);background:var(--amber-dim);color:var(--amber);font-family:var(--font-head);font-size:10px;letter-spacing:.1em;margin-bottom:28px}
+.err-timer{font-family:var(--font-mono);font-size:13px;color:var(--muted2);margin-bottom:24px;padding:10px 16px;background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.12);border-radius:8px;display:inline-block}
+.err-timer span{color:var(--amber);font-weight:700}
+.err-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 </style>
 </head>
-
-<body class="light">
-<div class="error-card">
-    <div class="icon">⏱️</div>
-    <h1>429</h1>
-    <p>คำขอมากเกินไป</p>
-    <p>ระบบถูกใช้งานบ่อยเกินไปในช่วงเวลาสั้น</p>
-    <p class="hint">กรุณารอสักครู่แล้วลองใหม่อีกครั้ง<br>
-    (Rate limit: API เปิดใช้ได้ 20 ครั้ง/นาที)</p>
-    <a href="/app">⬅ กลับหน้า ConfigDoctor</a>
+<body>
+<div class="err-bg">
+  <div class="err-ring"></div>
+  <div class="err-ring"></div>
+  <div class="err-ring"></div>
+</div>
+<div class="err-card">
+  <div class="err-tag">⏱️ RATE LIMITED</div>
+  <div class="err-code">429</div>
+  <div class="err-title">คำขอมากเกินไป</div>
+  <div class="err-desc">ระบบถูกใช้งานบ่อยเกินไปในช่วงเวลาสั้น<br>กรุณารอสักครู่แล้วลองใหม่</div>
+  <div class="err-timer">Rate limit: <span>20 req/min</span> · <span>100 req/day</span></div>
+  <div class="err-actions">
+    <a href="/app" class="v5-btn v5-btn-secondary">⬅ กลับหน้าหลัก</a>
+  </div>
 </div>
 </body>
 </html>
