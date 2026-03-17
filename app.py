@@ -90,6 +90,23 @@ except Exception as e:
     def make_advanced_report(*args, **kwargs): return {"advanced": {}}
     ADV_ANALYSIS_AVAILABLE = False
 
+# --- Security helpers / optional libs ---
+try:
+    from flask_talisman import Talisman
+    TALISMAN_AVAILABLE = True
+except Exception:
+    TALISMAN_AVAILABLE = False
+    print("WARNING: flask_talisman not installed — security headers disabled")
+
+try:
+    import bleach
+    BLEACH_AVAILABLE = True
+except Exception:
+    BLEACH_AVAILABLE = False
+    print("WARNING: bleach not installed — output sanitization disabled")
+
+from markupsafe import escape
+
 # ── Style normalizer ──────────────────────────────────────────────────────
 _STYLE_MAP = {
     "micro": "freestyle", "whoop": "freestyle", "cine": "longrange",
