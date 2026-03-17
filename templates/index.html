@@ -2088,6 +2088,509 @@ html, body { overflow-x: hidden; }
   .btn-analyze, .form-body { padding-bottom: max(env(safe-area-inset-bottom), 12px); }
 }
 
+
+/* ═══════════════════════════════════════════════════════════════════
+   MEGA REDESIGN: FLOATING TOOLS + ULTRA MISSION PANEL
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── FLOATING TOOLS POPUP ──────────────────────────────────────── */
+.ftp-overlay {
+  display: none; position: fixed; inset: 0; z-index: 890;
+  background: rgba(0,0,0,.65); backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: ftpOverlayIn .25s ease;
+}
+.ftp-overlay.open { display: block; }
+@keyframes ftpOverlayIn { from{opacity:0} to{opacity:1} }
+
+/* Floating trigger */
+.ftp-trigger {
+  position: fixed; bottom: clamp(20px,4vw,30px); right: clamp(16px,4vw,28px);
+  z-index: 891;
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 18px; border-radius: 50px;
+  background: linear-gradient(135deg, rgba(0,255,136,.18), rgba(0,170,255,.12));
+  border: 1.5px solid rgba(0,255,136,.5);
+  color: var(--green); cursor: pointer;
+  font-family: var(--font-d); font-size: 10px; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase;
+  box-shadow: 0 0 28px rgba(0,255,136,.3), 0 8px 32px rgba(0,0,0,.5);
+  transition: all .3s cubic-bezier(.4,0,.2,1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  min-height: 48px;
+}
+.ftp-trigger:hover {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 0 44px rgba(0,255,136,.45), 0 12px 40px rgba(0,0,0,.6);
+  border-color: rgba(0,255,136,.8);
+}
+.ftp-trigger.open {
+  background: linear-gradient(135deg, rgba(255,51,68,.15), rgba(255,100,0,.1));
+  border-color: rgba(255,51,68,.5); color: var(--red);
+  box-shadow: 0 0 28px rgba(255,51,68,.25), 0 8px 32px rgba(0,0,0,.5);
+}
+.ftp-trigger-icon { display: flex; align-items: center; justify-content: center; }
+.ftp-trigger-label { letter-spacing: .2em; }
+.ftp-trigger-count {
+  background: rgba(0,255,136,.15); border: 1px solid rgba(0,255,136,.3);
+  border-radius: 20px; padding: 1px 7px; font-size: 9px;
+  transition: all .3s;
+}
+.ftp-trigger.open .ftp-trigger-count {
+  background: rgba(255,51,68,.15); border-color: rgba(255,51,68,.3); color: var(--red);
+}
+
+/* Pulse ring animation on trigger */
+@keyframes ftpRing {
+  0%   { box-shadow: 0 0 0 0 rgba(0,255,136,.45), 0 0 28px rgba(0,255,136,.3), 0 8px 32px rgba(0,0,0,.5); }
+  70%  { box-shadow: 0 0 0 14px rgba(0,255,136,0), 0 0 28px rgba(0,255,136,.3), 0 8px 32px rgba(0,0,0,.5); }
+  100% { box-shadow: 0 0 0 0 rgba(0,255,136,0), 0 0 28px rgba(0,255,136,.3), 0 8px 32px rgba(0,0,0,.5); }
+}
+.ftp-trigger:not(.open):not(:hover) { animation: ftpRing 3s ease-in-out infinite; }
+
+/* Popup panel */
+.ftp-panel {
+  display: none; position: fixed;
+  bottom: calc(clamp(20px,4vw,30px) + 62px);
+  right: clamp(16px,4vw,28px);
+  width: min(520px, calc(100vw - 32px));
+  max-height: 75vh;
+  z-index: 892;
+  background: rgba(2,8,18,.97);
+  border: 1.5px solid rgba(0,255,136,.18);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,.8), 0 0 60px rgba(0,255,136,.08),
+              inset 0 1px 0 rgba(255,255,255,.06);
+  flex-direction: column;
+  animation: ftpPanelIn .3s cubic-bezier(.34,1.56,.64,1);
+}
+.ftp-panel.open { display: flex; }
+@keyframes ftpPanelIn {
+  from { opacity:0; transform: scale(.9) translateY(20px); }
+  to   { opacity:1; transform: scale(1) translateY(0); }
+}
+.ftp-panel::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background: linear-gradient(90deg, transparent, var(--green) 20%, var(--cyan) 50%, var(--blue) 80%, transparent);
+  background-size: 200% 100%; animation: sweep 4s linear infinite;
+}
+
+/* Panel header */
+.ftp-panel-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 18px; border-bottom: 1px solid rgba(255,255,255,.06);
+  background: linear-gradient(135deg,rgba(0,255,136,.05),rgba(0,170,255,.03));
+  flex-shrink: 0;
+}
+.ftp-panel-title { display: flex; align-items: center; gap: 12px; }
+.ftp-panel-icon  { font-size: 22px; filter: drop-shadow(0 0 8px rgba(0,255,136,.4)); }
+.ftp-panel-name  {
+  font-family: var(--font-d); font-size: 13px; font-weight: 800;
+  letter-spacing: .1em; color: var(--green);
+  text-shadow: 0 0 20px rgba(0,255,136,.3);
+}
+.ftp-panel-sub   { font-family: var(--font-m); font-size: 10px; color: var(--muted2); margin-top:2px; }
+.ftp-close {
+  background: none; border: 1px solid rgba(255,255,255,.1); border-radius: 8px;
+  color: var(--muted2); cursor: pointer; padding: 6px 12px; font-size: 13px;
+  transition: all .18s; min-height: 34px;
+}
+.ftp-close:hover { border-color: rgba(255,51,68,.4); color: var(--red); }
+
+/* Category tabs */
+.ftp-cats {
+  display: flex; gap: 4px; padding: 12px 14px 0; flex-wrap: nowrap;
+  overflow-x: auto; scrollbar-width: none; flex-shrink: 0;
+}
+.ftp-cats::-webkit-scrollbar { display:none; }
+.ftp-cat {
+  font-family: var(--font-d); font-size: 8.5px; font-weight: 700; letter-spacing: .1em;
+  padding: 6px 12px; border-radius: 20px; cursor: pointer; white-space: nowrap;
+  background: transparent; border: 1.5px solid rgba(255,255,255,.08); color: var(--muted2);
+  transition: all .18s; min-height: 34px; display: flex; align-items: center; gap: 5px;
+}
+.ftp-cat:hover  { border-color: rgba(255,255,255,.2); color: var(--text2); }
+.ftp-cat.act {
+  background: rgba(0,255,136,.1); border-color: rgba(0,255,136,.35); color: var(--green);
+}
+.ftp-cnt {
+  background: rgba(255,255,255,.08); border-radius: 10px; padding: 0 6px;
+  font-size: 8px;
+}
+.ftp-cat.act .ftp-cnt { background: rgba(0,255,136,.15); }
+
+/* Tool grid */
+.ftp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(clamp(88px,16vw,110px), 1fr));
+  gap: 8px; padding: 12px 14px 16px;
+  overflow-y: auto; flex: 1;
+  scrollbar-width: thin; scrollbar-color: rgba(0,255,136,.15) transparent;
+}
+.ftp-grid::-webkit-scrollbar { width: 4px; }
+.ftp-grid::-webkit-scrollbar-thumb { background: rgba(0,255,136,.15); border-radius:3px; }
+
+.ftp-tool {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: clamp(10px,2vw,14px) 8px; border-radius: 12px;
+  background: rgba(3,10,24,.8); border: 1.5px solid rgba(255,255,255,.06);
+  text-decoration: none; text-align: center;
+  transition: all .2s cubic-bezier(.4,0,.2,1);
+  gap: 5px; min-height: clamp(75px,12vw,90px);
+  position: relative; overflow: hidden;
+}
+.ftp-tool::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  opacity:0; transition:opacity .18s;
+}
+.ftp-tool:hover {
+  transform: translateY(-4px) scale(1.04);
+  box-shadow: 0 10px 28px rgba(0,0,0,.5);
+}
+.ftp-tool:hover::before { opacity:1; }
+
+.ftp-tool.g::before { background:linear-gradient(90deg,var(--green),var(--teal)); }
+.ftp-tool.b::before { background:linear-gradient(90deg,var(--blue),var(--cyan)); }
+.ftp-tool.a::before { background:linear-gradient(90deg,var(--amber),var(--red)); }
+.ftp-tool.p::before { background:linear-gradient(90deg,var(--purple),var(--blue)); }
+.ftp-tool.r::before { background:linear-gradient(90deg,var(--red),var(--pink)); }
+.ftp-tool.t::before { background:linear-gradient(90deg,var(--teal),var(--green)); }
+
+.ftp-tool.g:hover { border-color:rgba(0,255,136,.35); background:rgba(0,255,136,.05); }
+.ftp-tool.b:hover { border-color:rgba(0,170,255,.35); background:rgba(0,170,255,.05); }
+.ftp-tool.a:hover { border-color:rgba(255,185,0,.35);  background:rgba(255,185,0,.05); }
+.ftp-tool.p:hover { border-color:rgba(176,96,255,.35); background:rgba(176,96,255,.05); }
+.ftp-tool.r:hover { border-color:rgba(255,51,68,.35);  background:rgba(255,51,68,.05); }
+.ftp-tool.t:hover { border-color:rgba(0,232,208,.35);  background:rgba(0,232,208,.05); }
+
+.ftp-tool-ico  {
+  font-size: clamp(20px,4vw,24px);
+  filter: drop-shadow(0 0 6px rgba(255,255,255,.2));
+  transition: all .2s;
+}
+.ftp-tool:hover .ftp-tool-ico { transform: scale(1.15); }
+.ftp-tool-name {
+  font-family: var(--font-d); font-size: clamp(8px,1.8vw,9.5px);
+  font-weight: 700; letter-spacing: .06em; color: var(--text);
+  line-height: 1.2;
+}
+.ftp-tool-sub {
+  font-family: var(--font-m); font-size: clamp(8px,1.6vw,9px);
+  color: var(--muted2);
+}
+.ftp-badge-hot {
+  color: var(--red) !important; font-family: var(--font-d) !important;
+  letter-spacing: .08em !important; font-size: 8px !important;
+}
+.ftp-badge-new {
+  color: var(--green) !important; font-family: var(--font-d) !important;
+  letter-spacing: .08em !important; font-size: 8px !important;
+}
+.ftp-badge-v5 {
+  color: var(--purple) !important; font-family: var(--font-d) !important;
+  letter-spacing: .08em !important; font-size: 8px !important;
+}
+.ftp-tool.hidden { display: none; }
+
+/* ── MISSION PANEL — ULTRA REDESIGN ───────────────────────────── */
+
+/* Panel container */
+.mission-panel {
+  background: linear-gradient(180deg,
+    rgba(0,4,12,.97) 0%,
+    rgba(0,6,16,.98) 100%) !important;
+  border-right: 1.5px solid rgba(0,255,136,.1) !important;
+  width: clamp(260px, 28vw, 310px) !important;
+}
+@media(max-width:900px) {
+  .mission-panel { width: 100% !important; border-right: none !important; }
+}
+
+/* Panel header — ultra glow */
+.mp-header {
+  padding: 18px 18px 16px !important;
+  background: linear-gradient(135deg,
+    rgba(0,255,136,.09) 0%,
+    rgba(0,170,255,.06) 50%,
+    rgba(0,232,208,.04) 100%) !important;
+  border-bottom: 1.5px solid rgba(0,255,136,.12) !important;
+  position: relative; overflow: hidden;
+}
+.mp-header::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,255,136,.4), transparent);
+  background-size: 200% 100%; animation: sweep 4s linear infinite;
+}
+.mp-header-icon {
+  width: 42px !important; height: 42px !important;
+  border-radius: 12px !important;
+  font-size: 20px !important;
+  background: linear-gradient(135deg,rgba(0,255,136,.22),rgba(0,170,255,.14)) !important;
+  border: 1.5px solid rgba(0,255,136,.35) !important;
+  box-shadow: 0 0 20px rgba(0,255,136,.2) !important;
+  animation: iconPulse 3s ease-in-out infinite;
+}
+@keyframes iconPulse {
+  0%,100%{box-shadow:0 0 12px rgba(0,255,136,.2)}
+  50%{box-shadow:0 0 28px rgba(0,255,136,.45)}
+}
+.mp-title {
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  letter-spacing: .1em !important;
+  color: var(--text) !important;
+  text-shadow: 0 0 20px rgba(0,255,136,.25) !important;
+}
+.mp-sub { font-size: 11px !important; color: var(--text2) !important; }
+.mp-status-dot { width: 8px !important; height: 8px !important; box-shadow: 0 0 10px var(--green) !important; }
+
+/* Concept box */
+.concept-box {
+  border: 1.5px solid rgba(0,170,255,.15) !important;
+  border-radius: 12px !important;
+  background: rgba(0,170,255,.04) !important;
+}
+.concept-header {
+  font-size: 13px !important;
+  padding: 12px 14px !important;
+  min-height: 46px !important;
+}
+
+/* Form body */
+.form-body { padding: 14px 16px 80px !important; }
+
+/* Section labels */
+.fsec-label {
+  font-size: 11px !important;
+  letter-spacing: .2em !important;
+  padding: 14px 0 7px !important;
+  font-weight: 700 !important;
+  color: var(--green) !important;
+  text-shadow: 0 0 12px rgba(0,255,136,.3) !important;
+}
+.fsec-label::before {
+  width: 20px !important; height: 2px !important;
+  background: linear-gradient(90deg, var(--green), transparent) !important;
+}
+
+/* Preset category buttons */
+.preset-cat-btn {
+  padding: 5px 11px !important;
+  border-radius: 8px !important;
+  border: 1.5px solid rgba(255,255,255,.1) !important;
+  font-family: var(--font-d) !important;
+  font-size: clamp(9px,2vw,10px) !important;
+  letter-spacing: .07em !important;
+  cursor: pointer !important;
+  color: var(--muted2) !important;
+  background: rgba(255,255,255,.03) !important;
+  transition: all .2s !important;
+  min-height: 34px !important;
+}
+.preset-cat-btn:hover, .preset-cat-btn.active {
+  border-color: rgba(0,255,136,.35) !important;
+  color: var(--green) !important;
+  background: rgba(0,255,136,.06) !important;
+}
+
+/* Preset select */
+#preset-select {
+  background: rgba(0,6,18,.9) !important;
+  border: 1.5px solid rgba(0,255,136,.15) !important;
+  border-radius: 10px !important;
+  font-size: 13px !important;
+  padding: 10px 12px !important;
+}
+#preset-select:focus {
+  border-color: rgba(0,255,136,.4) !important;
+  box-shadow: 0 0 0 3px rgba(0,255,136,.08) !important;
+}
+
+/* Quick preset mini buttons */
+.pmini {
+  background: rgba(0,8,22,.8) !important;
+  border: 1.5px solid rgba(0,255,136,.12) !important;
+  border-radius: 10px !important;
+  padding: 8px 6px !important;
+  min-height: 46px !important;
+  font-size: 10px !important;
+  letter-spacing: .04em !important;
+  transition: all .2s cubic-bezier(.4,0,.2,1) !important;
+  display: flex !important; flex-direction: column !important;
+  align-items: center !important; justify-content: center !important;
+}
+.pmini:hover {
+  border-color: rgba(0,255,136,.4) !important;
+  background: rgba(0,255,136,.08) !important;
+  transform: translateY(-3px) scale(1.04) !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,.4) !important;
+}
+.pmini.active {
+  border-color: rgba(0,255,136,.5) !important;
+  background: rgba(0,255,136,.12) !important;
+  box-shadow: 0 0 14px rgba(0,255,136,.25), 0 4px 14px rgba(0,0,0,.4) !important;
+  color: var(--green) !important;
+}
+
+/* Inputs */
+input[type=number], input[type=text] {
+  background: rgba(0,6,18,.9) !important;
+  border: 1.5px solid rgba(0,255,136,.12) !important;
+  border-radius: 10px !important;
+  color: var(--text) !important;
+  font-size: clamp(14px,3vw,16px) !important;
+  padding: 11px 13px !important;
+  transition: all .2s !important;
+}
+input[type=number]:focus, input[type=text]:focus {
+  border-color: rgba(0,255,136,.45) !important;
+  box-shadow: 0 0 0 3px rgba(0,255,136,.09), 0 0 20px rgba(0,255,136,.07) !important;
+  background: rgba(0,10,26,.95) !important;
+}
+
+/* Label text */
+label {
+  font-size: 11px !important;
+  letter-spacing: .1em !important;
+  color: var(--text2) !important;
+  font-weight: 600 !important;
+  margin-bottom: 6px !important;
+  margin-top: 10px !important;
+}
+
+/* Select dropdown */
+select {
+  background: rgba(0,6,18,.9) !important;
+  border: 1.5px solid rgba(0,255,136,.12) !important;
+  border-radius: 10px !important;
+  color: var(--text) !important;
+  font-size: 14px !important;
+  padding: 11px 32px 11px 13px !important;
+  min-height: 46px !important;
+}
+select:focus {
+  border-color: rgba(0,255,136,.4) !important;
+  box-shadow: 0 0 0 3px rgba(0,255,136,.08) !important;
+}
+
+/* Battery pills */
+.batt-pill {
+  border-radius: 12px !important;
+  padding: clamp(10px,2.2vw,13px) clamp(8px,1.8vw,11px) !important;
+  min-height: 52px !important;
+  flex: 1 !important; min-width: 0 !important;
+  background: rgba(0,6,18,.85) !important;
+  border: 1.5px solid rgba(255,255,255,.08) !important;
+  transition: all .22s cubic-bezier(.4,0,.2,1) !important;
+}
+.batt-pill:hover { transform: translateY(-4px) scale(1.05) !important; box-shadow: 0 10px 24px rgba(0,0,0,.5) !important; }
+.batt-pill.active { box-shadow: 0 0 20px rgba(0,255,136,.22), 0 4px 20px rgba(0,0,0,.5) !important; }
+.batt-pill-s { font-size: 15px !important; font-weight: 900 !important; }
+.batt-pill-v { font-size: 10px !important; margin-top: 3px !important; }
+
+/* Style cards */
+.style-cards-grid { gap: 8px !important; }
+.style-card {
+  padding: 14px 6px 12px !important;
+  border-radius: 13px !important;
+  min-height: 80px !important;
+  background: rgba(0,6,18,.85) !important;
+  border: 1.5px solid rgba(255,255,255,.07) !important;
+  transition: all .22s cubic-bezier(.4,0,.2,1) !important;
+}
+.style-card:hover {
+  transform: translateY(-4px) scale(1.03) !important;
+  box-shadow: 0 12px 30px rgba(0,0,0,.55) !important;
+}
+.style-card.active {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,.45) !important;
+}
+.sc-ico  { font-size: 22px !important; }
+.sc-name { font-size: 10px !important; font-weight: 700 !important; letter-spacing: .1em !important; }
+.sc-sub  { font-size: 11px !important; color: var(--muted2) !important; margin-top: 3px !important; }
+
+/* Analyze button — maximum drama */
+.btn-analyze {
+  height: clamp(62px,14vw,72px) !important;
+  border-radius: 14px !important;
+  border: 1.5px solid rgba(0,255,136,.45) !important;
+  background: linear-gradient(135deg,
+    rgba(0,8,20,.98) 0%,
+    rgba(0,255,136,.06) 50%,
+    rgba(0,8,20,.98) 100%) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+/* Sweeping shimmer on analyze button */
+.btn-analyze::after {
+  content: '' !important;
+  position: absolute !important; top: 0 !important; left: -150% !important;
+  width: 80% !important; height: 100% !important;
+  background: linear-gradient(90deg, transparent, rgba(0,255,136,.2), transparent) !important;
+  animation: analyzeShimmer 2.5s ease-in-out infinite !important;
+}
+@keyframes analyzeShimmer {
+  0%   { left: -150%; }
+  100% { left: 200%; }
+}
+.btn-analyze:hover {
+  border-color: rgba(0,255,136,.85) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 0 40px rgba(0,255,136,.45), 0 0 80px rgba(0,255,136,.12),
+              0 14px 40px rgba(0,0,0,.65) !important;
+}
+.btn-analyze-text {
+  font-size: clamp(12px,3vw,15px) !important;
+  letter-spacing: .22em !important;
+  text-shadow: 0 0 24px rgba(0,255,136,.7) !important;
+}
+.btn-analyze-sub { font-size: clamp(9px,2vw,11px) !important; }
+.btn-analyze-badge {
+  font-size: clamp(7px,1.6vw,9px) !important;
+  background: rgba(0,255,136,.1) !important;
+  border: 1px solid rgba(0,255,136,.25) !important;
+  padding: 4px 10px !important;
+  border-radius: 7px !important;
+  text-shadow: 0 0 10px rgba(0,255,136,.4) !important;
+}
+
+/* Sticky analyze on mobile */
+@media(max-width:900px) {
+  .btn-analyze {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 60 !important;
+    margin: 0 -16px !important;
+    width: calc(100% + 32px) !important;
+    border-radius: 0 !important;
+    border-left: none !important; border-right: none !important; border-bottom: none !important;
+  }
+}
+
+/* FG grid */
+.fg {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 10px !important;
+}
+
+/* Mobile: wider panel and popup adjustments */
+@media(max-width:480px) {
+  .ftp-panel {
+    bottom: 0 !important; right: 0 !important; left: 0 !important;
+    width: 100% !important; max-height: 80vh !important;
+    border-radius: 20px 20px 0 0 !important;
+  }
+  .ftp-trigger {
+    bottom: 16px !important; right: 16px !important;
+  }
+}
+
+
 </style>
 </head>
 <body>
@@ -2122,45 +2625,80 @@ html, body { overflow-x: hidden; }
 
 <div class="page-wrap">
 
-  <!-- ── TOOL DOCK ──────────────────────────────────────────── -->
-  <div class="tool-dock" id="toolDock">
-    <div class="dock-tabs" role="tablist" aria-label="หมวดหมู่เครื่องมือ">
-      <button class="dock-tab active" data-cat="all"     onclick="dockFilter(this,'all')"    aria-pressed="true"><span class="dock-tab-dot g"></span>ALL <span class="dock-tab-count">22</span></button>
-      <button class="dock-tab"        data-cat="tune"    onclick="dockFilter(this,'tune')"   aria-pressed="false"><span class="dock-tab-dot p"></span>🩺 TUNE <span class="dock-tab-count">5</span></button>
-      <button class="dock-tab"        data-cat="hw"      onclick="dockFilter(this,'hw')"     aria-pressed="false"><span class="dock-tab-dot g"></span>⚙️ HARDWARE <span class="dock-tab-count">5</span></button>
-      <button class="dock-tab"        data-cat="data"    onclick="dockFilter(this,'data')"   aria-pressed="false"><span class="dock-tab-dot b"></span>📊 ANALYSIS <span class="dock-tab-count">4</span></button>
-      <button class="dock-tab"        data-cat="video"   onclick="dockFilter(this,'video')"  aria-pressed="false"><span class="dock-tab-dot t"></span>📡 VIDEO <span class="dock-tab-count">4</span></button>
-      <button class="dock-tab"        data-cat="explore" onclick="dockFilter(this,'explore')" aria-pressed="false"><span class="dock-tab-dot a"></span>🎮 EXPLORE <span class="dock-tab-count">5</span></button>
+  <!-- ═══════════════════════════════════════════════════════════
+       FLOATING TOOLS — POPUP LAUNCHER
+  ═══════════════════════════════════════════════════════════ -->
+  <!-- Overlay backdrop -->
+  <div class="ftp-overlay" id="ftpOverlay" onclick="closeFTP()"></div>
+
+  <!-- Floating trigger button -->
+  <button class="ftp-trigger" id="ftpTrigger" onclick="toggleFTP()" aria-label="เครื่องมือ FPV">
+    <span class="ftp-trigger-icon" id="ftpIcon">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <circle cx="5" cy="5" r="2.2" fill="currentColor"/>
+        <circle cx="17" cy="5" r="2.2" fill="currentColor"/>
+        <circle cx="5" cy="17" r="2.2" fill="currentColor"/>
+        <circle cx="17" cy="17" r="2.2" fill="currentColor"/>
+        <circle cx="11" cy="11" r="2.2" fill="currentColor" opacity=".6"/>
+      </svg>
+    </span>
+    <span class="ftp-trigger-label">TOOLS</span>
+    <span class="ftp-trigger-count">22</span>
+  </button>
+
+  <!-- Floating popup panel -->
+  <div class="ftp-panel" id="ftpPanel" role="dialog" aria-label="เครื่องมือ FPV">
+    <div class="ftp-panel-hd">
+      <div class="ftp-panel-title">
+        <span class="ftp-panel-icon">🚁</span>
+        <div>
+          <div class="ftp-panel-name">FPV TOOLKIT</div>
+          <div class="ftp-panel-sub">OBIXConfig Doctor v5.2 · 22 Tools</div>
+        </div>
+      </div>
+      <button class="ftp-close" onclick="closeFTP()" aria-label="ปิด">✕</button>
     </div>
-    <div class="dock-tools" id="dockToolsRow">
-      <!-- ── 🩺 TUNE ───────────────────────────────────── -->
-      <a href="/pid-advisor"      class="dtool p" data-cat="tune"><div class="dtool-icon">💊</div><span class="dtool-label">PID Advisor</span></a>
-      <a href="/cli_surgeon"      class="dtool a" data-cat="tune"><div class="dtool-icon">🩺</div><span class="dtool-label">CLI Surgeon</span></a>
-      <a href="/rates-visualizer" class="dtool b" data-cat="tune"><div class="dtool-icon">📈</div><span class="dtool-label">Rates Viz</span></a>
-      <a href="/quick-tune"       class="dtool t" data-cat="tune"><div class="dtool-icon">⚡</div><span class="dtool-label">Quick Tune</span><span class="dtool-badge hot">NEW</span></a>
-      <a href="/bf-wizard"        class="dtool t" data-cat="tune"><div class="dtool-icon">🧙</div><span class="dtool-label">BF Wizard</span></a>
-      <!-- ── ⚙️ HARDWARE ─────────────────────────────── -->
-      <a href="/motor-prop"       class="dtool g" data-cat="hw"><div class="dtool-icon">🧭</div><span class="dtool-label">Motor×Prop</span></a>
-      <a href="/esc-checker"      class="dtool a" data-cat="hw"><div class="dtool-icon">⚡</div><span class="dtool-label">ESC Checker</span></a>
-      <a href="/rpm-filter"       class="dtool g" data-cat="hw"><div class="dtool-icon">⚙️</div><span class="dtool-label">RPM Filter</span></a>
-      <a href="/battery-health"   class="dtool a" data-cat="hw"><div class="dtool-icon">🔋</div><span class="dtool-label">Battery Health</span><span class="dtool-badge v5">v5</span></a>
-      <a href="/motor-thermal"    class="dtool r" data-cat="hw"><div class="dtool-icon">🌡️</div><span class="dtool-label">Motor Thermal</span><span class="dtool-badge v5">v5</span></a>
-      <!-- ── 📊 ANALYSIS ────────────────────────────── -->
-      <a href="/blackbox"         class="dtool b" data-cat="data"><div class="dtool-icon">📊</div><span class="dtool-label">Blackbox</span><span class="dtool-badge hot">HOT</span></a>
-      <a href="/cli-comparator"   class="dtool a" data-cat="data"><div class="dtool-icon">⚖️</div><span class="dtool-label">CLI Diff</span></a>
-      <a href="/loop-analyzer"    class="dtool p" data-cat="data"><div class="dtool-icon">🔁</div><span class="dtool-label">Loop Analyzer</span><span class="dtool-badge v5">v5</span></a>
-      <a href="/tuning-log"       class="dtool b" data-cat="data"><div class="dtool-icon">📓</div><span class="dtool-label">Tuning Log</span></a>
-      <!-- ── 📡 VIDEO ───────────────────────────────── -->
-      <a href="/vtx"              class="dtool g" data-cat="video"><div class="dtool-icon">📡</div><span class="dtool-label">VTX Bands</span></a>
-      <a href="/vtx-range"        class="dtool b" data-cat="video"><div class="dtool-icon">🏞️</div><span class="dtool-label">VTX Range</span></a>
-      <a href="/vtx-smartaudio"   class="dtool a" data-cat="video"><div class="dtool-icon">🎙️</div><span class="dtool-label">SmartAudio</span></a>
-      <a href="/osd"              class="dtool p" data-cat="video"><div class="dtool-icon">🖥️</div><span class="dtool-label">OSD Design</span></a>
-      <!-- ── 🎮 EXPLORE ──────────────────────────────── -->
-      <a href="/flight-quiz"      class="dtool g" data-cat="explore"><div class="dtool-icon">🎯</div><span class="dtool-label">Flight Quiz</span></a>
-      <a href="/build-card"       class="dtool a" data-cat="explore"><div class="dtool-icon">🃏</div><span class="dtool-label">Build Card</span></a>
-      <a href="/leaderboard"      class="dtool a" data-cat="explore"><div class="dtool-icon">🏆</div><span class="dtool-label">Leaderboard</span></a>
-      <a href="/fpv-trainer"      class="dtool t" data-cat="explore"><div class="dtool-icon">🎮</div><span class="dtool-label">FPV Sim NEO</span><span class="dtool-badge hot">GAME</span></a>
-      <a href="/downloads"        class="dtool g" data-cat="explore"><div class="dtool-icon">📁</div><span class="dtool-label">Downloads</span></a>
+
+    <!-- Category filter tabs -->
+    <div class="ftp-cats">
+      <button class="ftp-cat act" data-fcat="all"     onclick="ftpFilter(this,'all')">ALL <span class="ftp-cnt">22</span></button>
+      <button class="ftp-cat"     data-fcat="tune"    onclick="ftpFilter(this,'tune')">🩺 TUNE <span class="ftp-cnt">5</span></button>
+      <button class="ftp-cat"     data-fcat="hw"      onclick="ftpFilter(this,'hw')">⚙️ HW <span class="ftp-cnt">5</span></button>
+      <button class="ftp-cat"     data-fcat="data"    onclick="ftpFilter(this,'data')">📊 DATA <span class="ftp-cnt">4</span></button>
+      <button class="ftp-cat"     data-fcat="video"   onclick="ftpFilter(this,'video')">📡 VIDEO <span class="ftp-cnt">4</span></button>
+      <button class="ftp-cat"     data-fcat="explore" onclick="ftpFilter(this,'explore')">🎮 MORE <span class="ftp-cnt">5</span></button>
+    </div>
+
+    <!-- Tool grid -->
+    <div class="ftp-grid" id="ftpGrid">
+      <!-- TUNE -->
+      <a href="/pid-advisor"      class="ftp-tool g" data-fcat="tune"><span class="ftp-tool-ico">💊</span><span class="ftp-tool-name">PID Advisor</span><span class="ftp-tool-sub">Symptom → Fix</span></a>
+      <a href="/cli_surgeon"      class="ftp-tool a" data-fcat="tune"><span class="ftp-tool-ico">🩺</span><span class="ftp-tool-name">CLI Surgeon</span><span class="ftp-tool-sub">Analyze Config</span></a>
+      <a href="/rates-visualizer" class="ftp-tool b" data-fcat="tune"><span class="ftp-tool-ico">📈</span><span class="ftp-tool-name">Rates Viz</span><span class="ftp-tool-sub">Live Curve</span></a>
+      <a href="/quick-tune"       class="ftp-tool t" data-fcat="tune"><span class="ftp-tool-ico">⚡</span><span class="ftp-tool-name">Quick Tune</span><span class="ftp-tool-sub ftp-badge-new">NEW</span></a>
+      <a href="/bf-wizard"        class="ftp-tool t" data-fcat="tune"><span class="ftp-tool-ico">🧙</span><span class="ftp-tool-name">BF Wizard</span><span class="ftp-tool-sub">8 Steps</span></a>
+      <!-- HARDWARE -->
+      <a href="/motor-prop"       class="ftp-tool g" data-fcat="hw"><span class="ftp-tool-ico">🧭</span><span class="ftp-tool-name">Motor×Prop</span><span class="ftp-tool-sub">Match KV</span></a>
+      <a href="/esc-checker"      class="ftp-tool a" data-fcat="hw"><span class="ftp-tool-ico">⚡</span><span class="ftp-tool-name">ESC Checker</span><span class="ftp-tool-sub">Compat</span></a>
+      <a href="/rpm-filter"       class="ftp-tool g" data-fcat="hw"><span class="ftp-tool-ico">⚙️</span><span class="ftp-tool-name">RPM Filter</span><span class="ftp-tool-sub">Harmonic</span></a>
+      <a href="/battery-health"   class="ftp-tool a" data-fcat="hw"><span class="ftp-tool-ico">🔋</span><span class="ftp-tool-name">Battery</span><span class="ftp-tool-sub ftp-badge-v5">v5</span></a>
+      <a href="/motor-thermal"    class="ftp-tool r" data-fcat="hw"><span class="ftp-tool-ico">🌡️</span><span class="ftp-tool-name">Thermal</span><span class="ftp-tool-sub ftp-badge-v5">v5</span></a>
+      <!-- DATA -->
+      <a href="/blackbox"         class="ftp-tool b" data-fcat="data"><span class="ftp-tool-ico">📊</span><span class="ftp-tool-name">Blackbox</span><span class="ftp-tool-sub ftp-badge-hot">HOT</span></a>
+      <a href="/cli-comparator"   class="ftp-tool a" data-fcat="data"><span class="ftp-tool-ico">⚖️</span><span class="ftp-tool-name">CLI Diff</span><span class="ftp-tool-sub">Compare</span></a>
+      <a href="/loop-analyzer"    class="ftp-tool p" data-fcat="data"><span class="ftp-tool-ico">🔁</span><span class="ftp-tool-name">Loop Analyzer</span><span class="ftp-tool-sub ftp-badge-v5">v5</span></a>
+      <a href="/tuning-log"       class="ftp-tool b" data-fcat="data"><span class="ftp-tool-ico">📓</span><span class="ftp-tool-name">Tuning Log</span><span class="ftp-tool-sub">Sessions</span></a>
+      <!-- VIDEO -->
+      <a href="/vtx"              class="ftp-tool g" data-fcat="video"><span class="ftp-tool-ico">📡</span><span class="ftp-tool-name">VTX Bands</span><span class="ftp-tool-sub">Table</span></a>
+      <a href="/vtx-range"        class="ftp-tool b" data-fcat="video"><span class="ftp-tool-ico">🏞️</span><span class="ftp-tool-name">VTX Range</span><span class="ftp-tool-sub">Signal</span></a>
+      <a href="/vtx-smartaudio"   class="ftp-tool a" data-fcat="video"><span class="ftp-tool-ico">🎙️</span><span class="ftp-tool-name">SmartAudio</span><span class="ftp-tool-sub">Commands</span></a>
+      <a href="/osd"              class="ftp-tool p" data-fcat="video"><span class="ftp-tool-ico">🖥️</span><span class="ftp-tool-name">OSD Design</span><span class="ftp-tool-sub">Layout</span></a>
+      <!-- EXPLORE -->
+      <a href="/flight-quiz"      class="ftp-tool g" data-fcat="explore"><span class="ftp-tool-ico">🎯</span><span class="ftp-tool-name">Flight Quiz</span><span class="ftp-tool-sub">Rates</span></a>
+      <a href="/build-card"       class="ftp-tool a" data-fcat="explore"><span class="ftp-tool-ico">🃏</span><span class="ftp-tool-name">Build Card</span><span class="ftp-tool-sub">Share</span></a>
+      <a href="/leaderboard"      class="ftp-tool a" data-fcat="explore"><span class="ftp-tool-ico">🏆</span><span class="ftp-tool-name">Leaderboard</span><span class="ftp-tool-sub">Top Builds</span></a>
+      <a href="/fpv-trainer"      class="ftp-tool t" data-fcat="explore"><span class="ftp-tool-ico">🎮</span><span class="ftp-tool-name">FPV Sim</span><span class="ftp-tool-sub ftp-badge-hot">GAME</span></a>
+      <a href="/downloads"        class="ftp-tool g" data-fcat="explore"><span class="ftp-tool-ico">📁</span><span class="ftp-tool-name">Downloads</span><span class="ftp-tool-sub">CLI Files</span></a>
     </div>
   </div>
 
@@ -4581,3 +5119,39 @@ window.OBIX = {
 
 </body>
 </html>
+/* ── FLOATING TOOLS POPUP JS ──────────────────────────────── */
+function toggleFTP() {
+  const panel   = document.getElementById('ftpPanel');
+  const overlay = document.getElementById('ftpOverlay');
+  const trigger = document.getElementById('ftpTrigger');
+  const isOpen  = panel.classList.contains('open');
+  if (isOpen) {
+    closeFTP();
+  } else {
+    panel.classList.add('open');
+    overlay.classList.add('open');
+    trigger.classList.add('open');
+    document.getElementById('ftpIcon').innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><line x1="2" y1="2" x2="16" y2="16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="16" y1="2" x2="2" y2="16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>';
+    document.getElementById('ftpTrigger').querySelector('.ftp-trigger-label').textContent = 'CLOSE';
+    panel.querySelector('.ftp-grid').scrollTop = 0;
+  }
+}
+function closeFTP() {
+  document.getElementById('ftpPanel').classList.remove('open');
+  document.getElementById('ftpOverlay').classList.remove('open');
+  const trigger = document.getElementById('ftpTrigger');
+  trigger.classList.remove('open');
+  document.getElementById('ftpIcon').innerHTML = '<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="5" cy="5" r="2.2" fill="currentColor"/><circle cx="17" cy="5" r="2.2" fill="currentColor"/><circle cx="5" cy="17" r="2.2" fill="currentColor"/><circle cx="17" cy="17" r="2.2" fill="currentColor"/><circle cx="11" cy="11" r="2.2" fill="currentColor" opacity=".6"/></svg>';
+  document.getElementById('ftpTrigger').querySelector('.ftp-trigger-label').textContent = 'TOOLS';
+}
+function ftpFilter(btn, cat) {
+  document.querySelectorAll('.ftp-cat').forEach(b => b.classList.remove('act'));
+  btn.classList.add('act');
+  document.querySelectorAll('.ftp-tool').forEach(t => {
+    if (cat === 'all') t.classList.remove('hidden');
+    else t.classList.toggle('hidden', t.dataset.fcat !== cat);
+  });
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFTP(); });
+
+
