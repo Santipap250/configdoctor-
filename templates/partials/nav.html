@@ -659,6 +659,15 @@ body.light .on-dfoot-ver       { color: #059669; }
         <span class="on-dmeta on-en">Background & how to use</span>
       </span>
     </a>
+    <a class="on-dlink {% if nav_page=='team' %}on-act{% endif %}" href="/team"
+       data-search="team ทีม developer ผู้พัฒนา ai">
+      <span class="on-ico">👥</span>
+      <span class="on-dbody">
+        <span class="on-dtitle"><span class="on-th">ทีมพัฒนา</span><span class="on-en">Team</span></span>
+        <span class="on-dmeta on-th">ผู้พัฒนา & AI Team</span>
+        <span class="on-dmeta on-en">Developers & AI partners</span>
+      </span>
+    </a>
     <a class="on-dlink {% if nav_page=='changelog' %}on-act{% endif %}" href="/changelog"
        data-search="changelog อัปเดต update history">
       <span class="on-ico g">📝</span>
@@ -708,6 +717,7 @@ body.light .on-dfoot-ver       { color: #059669; }
     {% elif nav_page == 'vtx_smartaudio'%}SMARTAUDIO
     {% elif nav_page == 'downloads'     %}DOWNLOADS
     {% elif nav_page == 'about'         %}ABOUT
+    {% elif nav_page == 'team'          %}TEAM
     {% elif nav_page == 'changelog'     %}CHANGELOG
     {% elif nav_page == 'bf_wizard'     %}BF WIZARD
     {% elif nav_page == 'build_card'    %}BUILD CARD
