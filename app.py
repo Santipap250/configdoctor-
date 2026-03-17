@@ -34,7 +34,7 @@ try:
     CSRF_AVAILABLE = True
 except ImportError:
     CSRF_AVAILABLE = False
-    print("WARNING: flask_wtf not installed — CSRF protection disabled")
+    logger.warning("flask_wtf not installed — CSRF protection disabled")
 
 # ── Compression ───────────────────────────────────────────────────────────
 try:
@@ -42,7 +42,7 @@ try:
     COMPRESS_AVAILABLE = True
 except ImportError:
     COMPRESS_AVAILABLE = False
-    print("WARNING: flask_compress not installed — response compression disabled")
+    logger.warning("flask_compress not installed — response compression disabled")
 
 # ── Rate Limiting ─────────────────────────────────────────────────────────
 try:
@@ -51,14 +51,14 @@ try:
     LIMITER_AVAILABLE = True
 except ImportError:
     LIMITER_AVAILABLE = False
-    print("WARNING: flask_limiter not installed — rate limiting disabled")
+    logger.warning("flask_limiter not installed — rate limiting disabled")
 
 # ── Optional modules ──────────────────────────────────────────────────────
 try:
     from analyzer.rule_engine import evaluate_rules
 except Exception as e:
     evaluate_rules = None
-    print("rule_engine import failed:", e)
+    logging.warning("rule_engine import failed: %s", e)
 
 try:
     from analyzer.cli_export import build_cli_diff, build_snapshot_meta
@@ -74,7 +74,7 @@ try:
 except Exception as e:
     SECRET_SAUCE_AVAILABLE = False
     def generate_secret_sauce(*args, **kwargs): return {"cli": "# secret_sauce not available", "insights": [], "params": {}}
-    print("secret_sauce import failed:", e)
+    logging.warning("secret_sauce import failed: %s", e)
 
 try:
     from logic.presets import get_preset_groups
@@ -86,7 +86,7 @@ try:
     from analyzer.advanced_analysis import make_advanced_report
     ADV_ANALYSIS_AVAILABLE = True
 except Exception as e:
-    print("advanced_analysis import failed:", e)
+    logging.warning("advanced_analysis import failed: %s", e)
     def make_advanced_report(*args, **kwargs): return {"advanced": {}}
     ADV_ANALYSIS_AVAILABLE = False
 
@@ -120,7 +120,7 @@ if not _secret:
     if os.environ.get("FLASK_DEBUG", "0") in ("1", "true", "True"):
         # local dev — ใช้ key ชั่วคราว แต่แจ้งเตือน
         _secret = "dev-only-insecure-key-do-not-use-in-production"
-        print("WARNING: SECRET_KEY not set — using insecure dev key")
+        logging.warning("SECRET_KEY not set — using insecure dev key")
     else:
         # production — crash hard เพื่อให้ fix ก่อน deploy
         sys.exit("FATAL: SECRET_KEY environment variable is not set. "
@@ -359,256 +359,250 @@ def loading():
 def ping():
     return "pong"
 
+# ── Analysis helper — extracted from index() for readability ─────────────
+def _parse_analysis_form():
+    """Parse + validate form inputs. Returns (params_dict, warnings_list)."""
+    def safe_float(x, default=0.0):
+        try: return float(x)
+        except Exception: return default
+    def safe_int(x, default=0):
+        try: return int(x)
+        except Exception: return default
+
+    preset_key  = request.form.get("preset", "").strip()
+    size        = safe_float(request.form.get("size"), 5.0)
+    battery     = request.form.get("battery", "4S")
+    style_raw   = request.form.get("style", "freestyle")
+    weight      = safe_float(request.form.get("weight"), 1000.0)
+    prop_size   = safe_float(request.form.get("prop_size"), 5.0)
+    blade_count = safe_int(request.form.get("blades"), 3)
+    prop_pitch  = safe_float(request.form.get("pitch"), 4.0)
+    battery_mAh       = safe_int(request.form.get("battery_mAh"), None)
+    motor_count       = safe_int(request.form.get("motor_count"), 4)
+    motor_kv          = safe_int(request.form.get("motor_kv"), None)
+    weight      = max(10.0, weight)
+    motor_count = max(1, motor_count)
+
+    def _optional_float(key):
+        v = request.form.get(key)
+        try: return float(v) if v not in (None, "", "None") else None
+        except Exception: return None
+
+    payload_g           = _optional_float("payload_g")
+    prop_thrust_g       = _optional_float("prop_thrust_g")
+    esc_current_limit_a = _optional_float("esc_current_limit_a")
+
+    # Preset override
+    if preset_key:
+        p = PRESETS.get(preset_key)
+        if p:
+            size        = float(p.get("size",       size))
+            battery     = p.get("battery",           battery)
+            style_raw   = p.get("style",             style_raw)
+            weight      = float(p.get("weight",      weight))
+            prop_size   = float(p.get("prop_size",   prop_size))
+            prop_pitch  = float(p.get("pitch",       prop_pitch))
+            blade_count = int(p.get("blades",        blade_count))
+
+    return dict(
+        preset_key=preset_key, size=size, battery=battery,
+        style=_normalize_style(style_raw), weight=weight,
+        prop_size=prop_size, blade_count=blade_count, prop_pitch=prop_pitch,
+        battery_mAh=battery_mAh, motor_count=motor_count, motor_kv=motor_kv,
+        payload_g=payload_g, prop_thrust_g=prop_thrust_g,
+        esc_current_limit_a=esc_current_limit_a,
+    )
+
+
+def _handle_analysis_post():
+    """Run full drone analysis from POST form data. Returns analysis dict."""
+    p = _parse_analysis_form()
+    size, battery, style = p["size"], p["battery"], p["style"]
+    weight, prop_size    = p["weight"], p["prop_size"]
+    blade_count, prop_pitch = p["blade_count"], p["prop_pitch"]
+    battery_mAh, motor_count = p["battery_mAh"], p["motor_count"]
+    motor_kv, payload_g  = p["motor_kv"], p["payload_g"]
+    prop_thrust_g        = p["prop_thrust_g"]
+    esc_current_limit_a  = p["esc_current_limit_a"]
+    preset_key           = p["preset_key"]
+
+    warnings = validate_input(size, weight, prop_size, prop_pitch, blade_count, battery)
+
+    try:
+        cls_det = detect_class_from_size(size)
+        detected_class, class_meta = (cls_det[0], cls_det[1]) if isinstance(cls_det, (tuple, list)) else (cls_det, {})
+    except Exception:
+        detected_class, class_meta = "freestyle", {}
+
+    try:
+        _cells_int = int(str(battery).upper().replace("S","").strip()) if battery else 4
+        prop_result = analyze_propeller(prop_size, prop_pitch, blade_count, style,
+                                        motor_kv=motor_kv, cells=_cells_int)
+    except Exception:
+        prop_result = {
+            "summary": "prop analysis not available",
+            "effect": {"motor_load": 0, "noise": 0, "grip": "unknown",
+                       "efficiency": "unknown", "est_g_per_w": None,
+                       "est_thrust_100w": None, "pitch_speed_kmh": None, "notes": []},
+            "recommendation": "",
+        }
+
+    try:
+        analysis = analyze_drone(size, battery, style, prop_result, weight, detected_class)
+    except Exception:
+        analysis = {"style": style, "weight_class": "unknown", "thrust_ratio": 0,
+                    "flight_time": 0, "summary": "analysis fallback", "basic_tips": []}
+
+    baseline_ctrl  = get_baseline_for_class(detected_class) or {}
+    pid_axes       = baseline_ctrl.get("pid_axes", {})
+    filter_baseline = baseline_ctrl.get("filter", {})
+    r  = pid_axes.get("roll",  {"P": 48, "I": 90, "D": 38})
+    pi = pid_axes.get("pitch", {"P": 52, "I": 90, "D": 40})
+    y  = pid_axes.get("yaw",   {"P": 40, "I": 90, "D": 0})
+    analysis["pid_baseline"] = {
+        "roll":  {"p": r["P"],  "i": r["I"],  "d": r.get("D", 0)},
+        "pitch": {"p": pi["P"], "i": pi["I"], "d": pi.get("D", 0)},
+        "yaw":   {"p": y["P"],  "i": y["I"],  "d": 0},
+    }
+    analysis["filter_baseline"] = {
+        "gyro_lpf1":  filter_baseline.get("gyro_lpf1"),
+        "gyro_lpf2":  filter_baseline.get("gyro_lpf2"),
+        "dterm_lpf1": filter_baseline.get("dterm_lpf1"),
+        "dyn_notch":  filter_baseline.get("dyn_notch"),
+        "gyro_lpf1_hz":    filter_baseline.get("gyro_lpf1"),
+        "dterm_lpf2_hz":   filter_baseline.get("dterm_lpf2"),
+        "rpm_filter":      filter_baseline.get("rpm_filter", True),
+        "anti_gravity":    filter_baseline.get("anti_gravity", 5),
+        "dyn_notch_min":   filter_baseline.get("dyn_notch_min"),
+        "dyn_notch_max":   filter_baseline.get("dyn_notch_max"),
+    }
+    analysis["baseline_notes"]   = baseline_ctrl.get("notes", "")
+    analysis["size"]             = size
+    analysis["prop_size"]        = prop_size
+    analysis["pitch"]            = prop_pitch
+    analysis["motor_kv"]         = motor_kv
+    analysis["preset_used"]      = preset_key or "custom"
+    analysis["detected_class"]   = detected_class
+    analysis["class_meta"]       = class_meta
+    analysis["baseline_control"] = baseline_ctrl
+
+    adv_block = analysis.get("advanced", {})
+    analysis["esc_recommended_a"]  = adv_block.get("esc_recommended_a")
+    analysis["hover_throttle_pct"] = adv_block.get("hover_throttle_pct")
+    analysis["tip_speed_mps"]      = (adv_block.get("tip_speed_mps") or
+                                       prop_result.get("effect", {}).get("tip_speed_mps"))
+    analysis["rpm_estimated"]      = adv_block.get("rpm_estimated")
+    analysis["c_burst"]            = adv_block.get("c_burst")
+    analysis["c_continuous"]       = adv_block.get("c_continuous")
+    analysis["c_recommended"]      = adv_block.get("c_recommended")
+    analysis["peak_per_motor_a"]   = adv_block.get("peak_per_motor_a")
+    analysis["max_power_total_w"]  = adv_block.get("max_power_total_w")
+    analysis.setdefault("style",   style)
+    analysis.setdefault("summary", analysis.get("overview", ""))
+
+    if evaluate_rules:
+        try:
+            analysis["rules"] = evaluate_rules(analysis)
+        except Exception:
+            logger.exception("Rule engine error")
+            analysis["rules"] = []
+    else:
+        analysis["rules"] = []
+
+    if ADV_ANALYSIS_AVAILABLE:
+        try:
+            adv = make_advanced_report(
+                size=float(size), weight_g=float(weight),
+                battery_s=battery, prop_result=prop_result,
+                style=style, battery_mAh=battery_mAh,
+                motor_count=motor_count,
+                measured_thrust_per_motor_g=prop_thrust_g,
+                motor_kv=motor_kv,
+                esc_current_limit_a=esc_current_limit_a,
+                blades=blade_count, payload_g=payload_g,
+            )
+            if isinstance(adv, dict):
+                analysis.update(adv)
+                _adv_inner = adv.get("advanced", {})
+                adv_power  = _adv_inner.get("power", {})
+                analysis["thrust_ratio"]          = _adv_inner.get("thrust_ratio", analysis.get("thrust_ratio", 0))
+                analysis["est_flight_time_min"]   = adv_power.get("est_flight_time_min", analysis.get("battery_est"))
+                analysis["est_flight_time_min_aggr"] = adv_power.get("est_flight_time_min_aggressive")
+                analysis["esc_recommended_a"]     = _adv_inner.get("esc_recommended_a") or adv_power.get("esc_recommended_a")
+                analysis["peak_per_motor_a"]      = _adv_inner.get("peak_per_motor_a")
+        except Exception:
+            logger.exception("Advanced analysis error")
+
+    try:
+        ft_detail = estimate_battery_runtime_detail(weight, battery, battery_mAh, style, float(size or 5.0))
+        analysis["flight_time_detail"] = ft_detail
+        analysis.setdefault("est_flight_time_min", ft_detail.get("avg_flight_min"))
+    except Exception:
+        pass
+
+    norm_warnings = []
+    for w in warnings:
+        if isinstance(w, dict):
+            norm_warnings.append({"level": w.get("level", "warning"), "msg": w.get("msg", str(w))})
+        else:
+            norm_warnings.append({"level": "warning", "msg": str(w)})
+    analysis["warnings"] = norm_warnings
+
+    effect = prop_result.get("effect", {})
+    effect.setdefault("motor_load",       0)
+    effect.setdefault("noise",            0)
+    effect.setdefault("grip",             "unknown")
+    effect.setdefault("est_g_per_w",      None)
+    effect.setdefault("pitch_speed_kmh",  None)
+    effect.setdefault("notes",            [])
+    prop_result["effect"] = effect
+    analysis["prop_result"] = prop_result
+
+    if SECRET_SAUCE_AVAILABLE:
+        try:
+            _adv = analysis.get("advanced", {})
+            sauce = generate_secret_sauce(
+                cls_key=detected_class, style=style, battery=battery,
+                size_inch=size, weight_g=weight, motor_kv=motor_kv,
+                prop_size=prop_size, pid=analysis.get("pid", {}),
+                flt=analysis.get("filter", {}),
+                rpm_estimated=_adv.get("rpm_estimated") or analysis.get("rpm_estimated"),
+                tip_speed_mps=_adv.get("tip_speed_mps") or analysis.get("tip_speed_mps"),
+            )
+            analysis["secret_sauce"] = sauce
+        except Exception:
+            logger.exception("Secret sauce error")
+            analysis["secret_sauce"] = None
+    else:
+        analysis["secret_sauce"] = None
+
+    analysis["motor_kv"] = motor_kv
+    logger.info("analysis keys: %s", list(analysis.keys()))
+    return analysis
+
+
 @app.route("/app", methods=["GET", "POST"])
 @_rate("30 per minute;300 per day")  # PATCH: rate-limit main analysis POST
 def index():
     analysis = None
 
     if request.method == "POST":
-        def safe_float(x, default=0.0):
-            try: return float(x)
-            except Exception: return default
-        def safe_int(x, default=0):
-            try: return int(x)
-            except Exception: return default
-        # ── Read inputs ───────────────────────────────────────────────
-        preset_key  = request.form.get("preset", "").strip()
-        size        = safe_float(request.form.get("size"), 5.0)
-        battery     = request.form.get("battery", "4S")
-        style_raw   = request.form.get("style", "freestyle")
-        weight      = safe_float(request.form.get("weight"), 1000.0)
-        prop_size   = safe_float(request.form.get("prop_size"), 5.0)
-        blade_count = safe_int(request.form.get("blades"), 3)
-        prop_pitch  = safe_float(request.form.get("pitch"), 4.0)
-
-        battery_mAh       = safe_int(request.form.get("battery_mAh"), None)
-        motor_count       = safe_int(request.form.get("motor_count"), 4)
-        motor_kv          = safe_int(request.form.get("motor_kv"), None)
-
-        # FIX v5.1: clamp values to prevent div/0 or illegal physics
-        weight      = max(10.0, weight)
-        motor_count = max(1, motor_count)
-
-        payload_g = None
+        # REFACTOR: logic extracted to _handle_analysis_post() for readability
         try:
-            pg = request.form.get("payload_g")
-            payload_g = float(pg) if pg not in (None, "", "None") else None
+            analysis = _handle_analysis_post()
         except Exception:
-            payload_g = None
-
-        prop_thrust_g = None
-        try:
-            pth = request.form.get("prop_thrust_g")
-            prop_thrust_g = float(pth) if pth not in (None, "", "None") else None
-        except Exception:
-            prop_thrust_g = None
-
-        esc_current_limit_a = None
-        try:
-            ecil = request.form.get("esc_current_limit_a")
-            esc_current_limit_a = float(ecil) if ecil not in (None, "", "None") else None
-        except Exception:
-            esc_current_limit_a = None
-
-        # ── Preset override ───────────────────────────────────────────
-        if preset_key:
-            p = PRESETS.get(preset_key)
-            if p:
-                size        = float(p.get("size",       size))
-                battery     = p.get("battery",           battery)
-                style_raw   = p.get("style",             style_raw)
-                weight      = float(p.get("weight",      weight))
-                prop_size   = float(p.get("prop_size",   prop_size))
-                prop_pitch  = float(p.get("pitch",       prop_pitch))
-                blade_count = int(p.get("blades",        blade_count))
-
-        style = _normalize_style(style_raw)
-
-        # ── Detect class FIRST (needed for accurate PID) ──────────────
-        try:
-            cls_det = detect_class_from_size(size)
-            detected_class, class_meta = (cls_det[0], cls_det[1]) if isinstance(cls_det, (tuple, list)) else (cls_det, {})
-        except Exception:
-            detected_class, class_meta = "freestyle", {}
-
-        # ── Validation ────────────────────────────────────────────────
-        warnings = validate_input(size, weight, prop_size, prop_pitch, blade_count, battery)
-
-        # ── Prop analysis ─────────────────────────────────────────────
-        try:
-            _cells_int = int(str(battery).upper().replace('S','').strip()) if battery else 4
-            prop_result = analyze_propeller(prop_size, prop_pitch, blade_count, style,
-                                            motor_kv=motor_kv, cells=_cells_int)
-        except Exception:
-            prop_result = {
-                "summary": "prop analysis not available",
-                "effect": {"motor_load": 0, "noise": 0, "grip": "unknown",
-                           "efficiency": "unknown", "est_g_per_w": None,
-                           "est_thrust_100w": None, "pitch_speed_kmh": None, "notes": []},
-                "recommendation": "",
-            }
-
-        # ── Core analysis (class+style aware) ────────────────────────
-        try:
-            analysis = analyze_drone(size, battery, style, prop_result, weight, detected_class)
-        except Exception:
-            analysis = {"style": style, "weight_class": "unknown", "thrust_ratio": 0,
-                        "flight_time": 0, "summary": "analysis fallback", "basic_tips": []}
-
-        # ── Baseline from presets ─────────────────────────────────────
-        baseline_ctrl  = get_baseline_for_class(detected_class) or {}
-        pid_axes       = baseline_ctrl.get("pid_axes", {})
-        filter_baseline = baseline_ctrl.get("filter", {})
-
-        # pid_baseline uses per-axis values (accurate)
-        r = pid_axes.get("roll",  {"P": 48, "I": 90, "D": 38})
-        pi = pid_axes.get("pitch", {"P": 52, "I": 90, "D": 40})
-        y = pid_axes.get("yaw",   {"P": 40, "I": 90, "D": 0})
-        analysis["pid_baseline"] = {
-            "roll":  {"p": r["P"],  "i": r["I"],  "d": r.get("D", 0)},
-            "pitch": {"p": pi["P"], "i": pi["I"], "d": pi.get("D", 0)},
-            "yaw":   {"p": y["P"],  "i": y["I"],  "d": 0},
-        }
-        analysis["filter_baseline"] = {
-            "gyro_lpf1":  filter_baseline.get("gyro_lpf1"),     # FIX: was "gyro_lpf2" (wrong key)
-            "gyro_lpf2":  filter_baseline.get("gyro_lpf2"),     # proper LPF2 key
-            "dterm_lpf1": filter_baseline.get("dterm_lpf1"),
-            "dyn_notch":  filter_baseline.get("dyn_notch"),
-            # Extended
-            "gyro_lpf1_hz":    filter_baseline.get("gyro_lpf1"),
-            "dterm_lpf2_hz":   filter_baseline.get("dterm_lpf2"),
-            "rpm_filter":      filter_baseline.get("rpm_filter", True),
-            "anti_gravity":    filter_baseline.get("anti_gravity", 5),
-            "dyn_notch_min":   filter_baseline.get("dyn_notch_min"),
-            "dyn_notch_max":   filter_baseline.get("dyn_notch_max"),
-        }
-        analysis["baseline_notes"] = baseline_ctrl.get("notes", "")
-
-        # ── Expose new v5 fields ─────────────────────────────
-        adv_block = analysis.get("advanced", {})
-        analysis["esc_recommended_a"]   = adv_block.get("esc_recommended_a")
-        analysis["hover_throttle_pct"]  = adv_block.get("hover_throttle_pct")
-        analysis["tip_speed_mps"]       = (adv_block.get("tip_speed_mps") or
-                                            prop_result.get("effect",{}).get("tip_speed_mps"))
-        analysis["rpm_estimated"]       = adv_block.get("rpm_estimated")
-        analysis["c_burst"]             = adv_block.get("c_burst")
-        analysis["c_continuous"]        = adv_block.get("c_continuous")
-        analysis["c_recommended"]       = adv_block.get("c_recommended")
-        analysis["peak_per_motor_a"]    = adv_block.get("peak_per_motor_a")
-        analysis["max_power_total_w"]   = adv_block.get("max_power_total_w")
-        analysis["preset_used"]         = preset_key or "custom"
-        analysis["detected_class"]   = detected_class
-        analysis["class_meta"]       = class_meta
-        analysis["baseline_control"] = baseline_ctrl
-
-        analysis.setdefault("style",   style)
-        analysis.setdefault("summary", analysis.get("overview", ""))
-
-        # ── Rule engine fields ────────────────────────────────────────
-        analysis["size"]      = size
-        analysis["prop_size"] = prop_size
-        analysis["pitch"]     = prop_pitch
-        analysis["motor_kv"]  = motor_kv
-
-        # ── Rule engine ───────────────────────────────────────────────
-        if evaluate_rules:
-            try:
-                analysis["rules"] = evaluate_rules(analysis)
-            except Exception:
-                logger.exception("Rule engine error")
-                analysis["rules"] = []
-        else:
-            analysis["rules"] = []
-
-        # ── Advanced analysis ─────────────────────────────────────────
-        if ADV_ANALYSIS_AVAILABLE:
-            try:
-                adv = make_advanced_report(
-                    size=float(size), weight_g=float(weight),
-                    battery_s=battery, prop_result=prop_result,
-                    style=style, battery_mAh=battery_mAh,
-                    motor_count=motor_count,
-                    measured_thrust_per_motor_g=prop_thrust_g,
-                    motor_kv=motor_kv,
-                    esc_current_limit_a=esc_current_limit_a,
-                    blades=blade_count, payload_g=payload_g,
-                )
-                if isinstance(adv, dict):
-                    analysis.update(adv)
-                    _adv_inner = adv.get("advanced", {})
-                    adv_power = _adv_inner.get("power", {})
-                    analysis["thrust_ratio"]          = _adv_inner.get("thrust_ratio", analysis.get("thrust_ratio", 0))
-                    analysis["est_flight_time_min"]   = adv_power.get("est_flight_time_min", analysis.get("battery_est"))
-                    analysis["est_flight_time_min_aggr"] = adv_power.get("est_flight_time_min_aggressive")
-                    # FIX v5.1: expose keys that template uses at top level
-                    analysis["esc_recommended_a"]     = _adv_inner.get("esc_recommended_a") or adv_power.get("esc_recommended_a")
-                    analysis["peak_per_motor_a"]      = _adv_inner.get("peak_per_motor_a")
-            except Exception:
-                logger.exception("Advanced analysis error")
-
-        # ── Flight time detail (style-aware) ─────────────────────────
-        try:
-            ft_detail = estimate_battery_runtime_detail(weight, battery, battery_mAh, style, float(size or 5.0))
-            analysis["flight_time_detail"] = ft_detail
-            # Override with style-accurate value if advanced didn't provide
-            analysis.setdefault("est_flight_time_min", ft_detail.get("avg_flight_min"))
-        except Exception:
-            pass
-
-        # ── Normalize warnings ────────────────────────────────────────
-        norm_warnings = []
-        for w in warnings:
-            if isinstance(w, dict):
-                norm_warnings.append({"level": w.get("level", "warning"), "msg": w.get("msg", str(w))})
-            else:
-                norm_warnings.append({"level": "warning", "msg": str(w)})
-        analysis["warnings"] = norm_warnings
-
-        # ── Prop result cleanup ───────────────────────────────────────
-        effect = prop_result.get("effect", {})
-        effect.setdefault("motor_load",       0)
-        effect.setdefault("noise",            0)
-        effect.setdefault("grip",             "unknown")
-        effect.setdefault("est_g_per_w",      None)
-        effect.setdefault("pitch_speed_kmh",  None)
-        effect.setdefault("notes",            [])
-        prop_result["effect"] = effect
-        analysis["prop_result"] = prop_result
-
-        # ── Secret Sauce ─────────────────────────────────────────
-        if SECRET_SAUCE_AVAILABLE:
-            try:
-                _adv = analysis.get("advanced", {})
-                sauce = generate_secret_sauce(
-                    cls_key=detected_class,
-                    style=style,
-                    battery=battery,
-                    size_inch=size,
-                    weight_g=weight,
-                    motor_kv=motor_kv,
-                    prop_size=prop_size,
-                    pid=analysis.get("pid", {}),
-                    flt=analysis.get("filter", {}),
-                    rpm_estimated=_adv.get("rpm_estimated") or analysis.get("rpm_estimated"),
-                    tip_speed_mps=_adv.get("tip_speed_mps") or analysis.get("tip_speed_mps"),
-                )
-                analysis["secret_sauce"] = sauce
-            except Exception:
-                logger.exception("Secret sauce error")
-                analysis["secret_sauce"] = None
-        else:
-            analysis["secret_sauce"] = None
-
-        # ── Expose motor_kv for template ──────────────────────────────
-        analysis["motor_kv"] = motor_kv
-
-        logger.info("analysis keys: %s", list(analysis.keys()))
-
-    return render_template("index.html", analysis=analysis,
+            logger.exception("index POST error")
+            analysis = {"warnings": [{"level": "error", "msg": "เกิดข้อผิดพลาดในการวิเคราะห์"}]}
+        return render_template("index.html", analysis=analysis,
+                               preset_groups=PRESET_GROUPS,
+                               all_presets=PRESETS)
+    # GET — render blank form
+    return render_template("index.html", analysis=None,
                            preset_groups=PRESET_GROUPS,
                            all_presets=PRESETS)
 
-# ── Standard routes ───────────────────────────────────────────────────────
+
+
 @app.route("/about")
 def about(): return render_template("about.html")
 
@@ -760,7 +754,7 @@ except Exception as e:
     SYMPTOM_ADVISOR_AVAILABLE = False
     def get_all_symptoms(): return []
     def _get_symptom_advice(sid): return {"error": "symptom_advisor not available"}
-    print("symptom_advisor import failed:", e)
+    logging.warning("symptom_advisor import failed: %s", e)
 
 @app.route('/pid-advisor')
 def pid_advisor():
@@ -832,7 +826,7 @@ try:
 except Exception as e:
     RPM_FILTER_AVAILABLE = False
     def calculate_rpm_filter(kv, battery, prop_size=5.0): return {"error": "rpm_filter_calc not available"}
-    print("rpm_filter_calc import failed:", e)
+    logging.warning("rpm_filter_calc import failed: %s", e)
 
 @app.route('/rpm-filter', methods=['GET', 'POST'])
 @_rate("30 per minute;300 per day")  # PATCH: rate-limit rpm-filter POST
@@ -866,7 +860,7 @@ try:
     from analyzer.blackbox_analyzer import analyze_blackbox_csv
     BLACKBOX_AVAILABLE = True
 except Exception as _bb_err:
-    print("blackbox_analyzer import failed:", _bb_err)
+    logging.warning("blackbox_analyzer import failed: %s", _bb_err)
     BLACKBOX_AVAILABLE = False
     def analyze_blackbox_csv(csv_text): return {"error": "blackbox_analyzer not available"}
 
