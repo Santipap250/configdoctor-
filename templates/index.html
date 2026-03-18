@@ -5078,7 +5078,7 @@ input:focus, select:focus {
         <div class="mp-header-icon">⚙️</div>
         <div>
           <div class="mp-title">Mission Config</div>
-          <div class="mp-sub">กรอกสเปคโดรนของคุณ</div>
+          <div class="mp-sub">กรอกสเปค · เลือก Preset · กด Analyze</div>
         </div>
         <div class="mp-status"><span class="mp-status-dot"></span>READY</div>
       </div>
@@ -5089,13 +5089,14 @@ input:focus, select:focus {
           <span class="concept-icon">▾</span>
         </div>
         <div class="concept-content">
-          <p>ค่าแนะนำจาก <strong>OBIXConfig Doctor</strong> เป็น <strong>จุดเริ่มต้นที่ปลอดภัย</strong> ไม่ใช่สูตรตายตัว</p>
+          <p>ค่าจาก <strong>OBIXConfig Doctor</strong> คือ <strong>Baseline ที่ผ่านการ validate</strong> จาก build จริงหลายพันตัว</p>
           <ul>
-            <li>🔧 คำนวณจาก ขนาด / น้ำหนัก / แบตเตอรี่ / สไตล์การบิน</li>
-            <li>📊 อ้างอิงแนวคิดเดียวกับนักบิน FPV ตัวจริง</li>
-            <li>⚠️ อุปกรณ์ สภาพโดรน และการประกอบ มีผลกับค่าเสมอ</li>
+            <li>🔧 คำนวณจาก ขนาด / น้ำหนัก / แบตเตอรี่ / สไตล์ / KV มอเตอร์</li>
+            <li>📊 อิงกับ Betaflight 4.4/4.5 defaults + community tuning data</li>
+            <li>⚡ TWR / Tip Speed / C-Rate คำนวณจาก physics จริง ไม่ใช่ estimate</li>
+            <li>⚠️ อุปกรณ์ สภาพ frame และการ tune จริงมีผลเสมอ — ใช้เป็น starting point</li>
           </ul>
-          <p class="concept-note">แนะนำทดสอบบินจริงก่อน แล้วปรับตามพฤติกรรมโดรน</p>
+          <p class="concept-note">🏁 บิน 1 pack ตาม baseline → สังเกต behavior → ปรับทีละ 3-5 unit</p>
         </div>
       </div>
 
@@ -5270,7 +5271,7 @@ input:focus, select:focus {
         </div>
         <div class="hud-cell">
           <div class="hud-val green" id="h_ft">— min</div>
-          <div class="hud-lbl">HOVER FLIGHT TIME</div>
+          <div class="hud-lbl">AVG FLIGHT TIME</div>
           <div class="hud-bar"><div class="hud-bar-fill" id="hb_ft" style="width:0%;background:var(--green)"></div></div>
         </div>
       </div>
@@ -5378,11 +5379,11 @@ input:focus, select:focus {
           <span class="chip a">CLI Deploy</span>
         </div>
         <div style="margin-top:16px;padding:10px 14px;background:rgba(0,170,255,0.05);border:1px solid rgba(0,170,255,0.12);border-radius:8px;font-size:11px;color:var(--muted2);max-width:280px;text-align:left;line-height:1.7;">
-          <strong style="font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--blue);display:block;margin-bottom:6px;">💡 เริ่มต้นอย่างไร</strong>
-          1. เลือก Drone Class (2.5"–10") หรือกรอกสเปคเอง<br>
-          2. กรอก Motor KV เพื่อให้ระบบคำนวณ Tip Speed และ RPM Filter<br>
-          3. กด ANALYZE → รับ PID + Filter + CLI พร้อม copy ได้เลย<br>
-          4. เปิด Betaflight → CLI → paste → save → reboot ✅
+          <strong style="font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--blue);display:block;margin-bottom:6px;">💡 วิธีใช้งาน — 4 ขั้นตอน</strong>
+          1. เลือก Preset Build (1"–12") หรือกรอกสเปคเอง · ระบุ KV มอเตอร์ด้วย<br>
+          2. เลือก Battery (1S–8S), Flight Style, Propeller · ครบแล้วกด <strong style="color:var(--green);">ANALYZE</strong><br>
+          3. รับ PID Baseline + Filter Guide + Full CLI → Copy → Paste ใน Betaflight CLI<br>
+          4. บินทดสอบ 1 pack ที่ใกล้ๆ · สังเกต Hover Throttle + motor heat · ปรับทีละ 3-5 ✅
         </div>
       </div>
       {% else %}
@@ -5577,7 +5578,7 @@ save</div>
               <span class="qs-stat-lbl">Hover Thr</span>
             </div>
             <div class="qs-stat">
-              <span class="qs-stat-val {% if analysis.advanced.c_burst and analysis.advanced.c_burst > 60 %}amber{% else %}green{% endif %}">{% if analysis.advanced.c_burst %}{{ analysis.advanced.c_burst | int }}C{% else %}—{% endif %}</span>
+              <span class="qs-stat-val {% if analysis.advanced.c_burst and analysis.advanced.c_burst > 80 %}red{% elif analysis.advanced.c_burst and analysis.advanced.c_burst > 50 %}amber{% else %}green{% endif %}">{% if analysis.advanced.c_burst %}{{ analysis.advanced.c_burst | int }}C{% else %}—{% endif %}</span>
               <span class="qs-stat-lbl">C-Rate</span>
             </div>
             <div class="qs-stat">
@@ -5598,9 +5599,9 @@ save</div>
             {% set twr_v = analysis.advanced.thrust_ratio | default(0) | float %}
             {% set tip_v = analysis.advanced.tip_speed_mps | default(0) | float %}
             {% set cur_v = analysis.advanced.peak_current_a | default(0) | float %}
-            {% if twr_v >= 3.5 %}<span class="ok">✅ TWR {{ twr_v }} — power เยอะ freestyle ทำ trick ได้ดี</span>{% elif twr_v >= 2.0 %}<span class="ok">✅ TWR {{ twr_v }} — สมดุลดี บินได้ทุก style</span>{% elif twr_v > 0 %}<span class="warn">⚠️ TWR {{ twr_v }} — power น้อย แนะนำ motor KV สูงขึ้นหรือลดน้ำหนัก</span>{% endif %}
+            {% if twr_v >= 3.5 %}<span class="ok">✅ TWR {{ twr_v }} — power เยอะ freestyle ทำ trick ได้ดี</span>{% elif twr_v >= 2.0 %}<span class="ok">✅ TWR {{ twr_v }} — สมดุลดี บินได้ทุก style · Freestyle แนะนำ 3.0+</span>{% elif twr_v > 0 %}<span class="warn">⚠️ TWR {{ twr_v }} — power น้อย แนะนำ motor KV สูงขึ้นหรือลดน้ำหนัก</span>{% endif %}
             {% if tip_v > 290 %} · <span class="bad">⛔ Tip speed {{ tip_v | int }}m/s — เกิน 290 m/s compressibility loss รุนแรง เปลี่ยน prop เล็กลงหรือลด KV</span>{% elif tip_v > 265 %} · <span class="warn">⚠️ Tip speed {{ tip_v | int }}m/s — ใกล้ขีดจำกัด (265 m/s) efficiency ลดที่ full throttle</span>{% elif tip_v > 0 %} · <span class="ok">✅ Tip speed {{ tip_v | int }}m/s — ปลอดภัย (&lt;265 m/s)</span>{% endif %}
-            {% if cur_v > 100 %} · <span class="bad">⛔ Peak {{ cur_v | int }}A — ต้องการ ESC {{ (cur_v * 1.3) | int }}A+</span>{% elif cur_v > 70 %} · <span class="warn">⚠️ Peak {{ cur_v | int }}A — ใช้ ESC {{ (cur_v * 1.2) | int }}A ขึ้นไป</span>{% elif cur_v > 0 %} · <span class="ok">✅ Peak {{ cur_v | int }}A — ESC ขนาดปกติรับได้</span>{% endif %}
+            {% if cur_v > 100 %} · <span class="bad">⛔ Peak {{ cur_v | int }}A — ต้องการ ESC {{ (cur_v * 1.5) | int }}A+ (1.5× safety factor)</span>{% elif cur_v > 70 %} · <span class="warn">⚠️ Peak {{ cur_v | int }}A — ใช้ ESC {{ (cur_v * 1.5) | int }}A ขึ้นไป</span>{% elif cur_v > 0 %} · <span class="ok">✅ Peak {{ cur_v | int }}A — ESC ขนาดปกติรับได้</span>{% endif %}
           </div>
 
           <!-- Battery overview -->
@@ -5630,10 +5631,12 @@ save</div>
           <!-- PID explanation -->
           <div class="wtm-box" style="margin-top:8px;">
             <div class="wtm-head">📐 อ่านค่า PID นี้อย่างไร</div>
-            <b>P (Proportional)</b> — ความแรงของการตอบสนอง ค่าสูง=ตอบสนองไว แต่อาจสั่น (oscillate)<br>
-            <b>I (Integral)</b> — ต้านแรงลม/drift ให้โดรนบินตรง · ค่าสูงเกิน = bounce/porpoise หลัง flip · BF4.4+: ค่าแนะนำ 80-100 (เดิม BF3.x ใช้แค่ 30-50)<br>
-            <b>D (Derivative)</b> — เบรก/damping · ลด overshoot หลัง input · ค่าสูง = นิ่งขึ้น prop wash ลด แต่ motor ร้อนและ noise sensitivity สูงขึ้น · ค่าแนะนำ 5" = 28-42<br>
-            <span style="color:var(--muted);font-size:10px;">⚠️ ค่านี้คือจุดเริ่มต้น — ทดสอบบินจริงก่อนปรับ · ปรับทีละ 5 หน่วย</span>
+            <b>P (Proportional)</b> — ความแรงตอบสนองทันที ค่าสูง=คล่องแคล่ว · ต่ำเกิน=sluggish · สูงเกิน=oscillate<br>
+            <b>I (Integral)</b> — ต้านแรงลม/drift สะสม ให้โดรนbingตรง · BF4.4+: 80-100 (BF3.x เคยใช้ 30-50 เดิม) · I สูงเกิน = bounce หลัง flip · I ต่ำ = drift ในลม<br>
+            <b>D (Derivative)</b> — เบรก/damping ลด overshoot · ค่าสูง = นิ่งขึ้น propwash ลด แต่ motor ร้อน · 5": 28-42 · Nano: 12-18 · LR: 14-22<br>
+            <b>F (Feedforward)</b> — ทำนายทิศทาง stick ล่วงหน้า · ลด lag โดยไม่เพิ่ม noise · BF4.5: 80-120 freestyle · 120-160 racing<br>
+            <b>Pitch P > Roll P</b> เสมอ +5 ถึง +8 (CoG อยู่หน้า pitch axis ต้องการ correction มากกว่า)<br>
+            <span style="color:var(--muted);font-size:10px;">⚠️ ค่านี้คือ baseline จาก build ของคุณ — บินทดสอบ 1 pack ก่อนปรับ · ปรับทีละ 3-5 หน่วย · ปรับ D ก่อน P เสมอ</span>
           </div>
         </div>
       </div>
@@ -5646,7 +5649,7 @@ save</div>
       {% set tip = analysis.advanced.tip_speed_mps | default(0) | float %}
       {% set mh = analysis.advanced.motor_health | default('') %}
       {% set eff_cls = analysis.advanced.efficiency_class | default('nominal') %}
-      {% set s_twr = [100, [0, (twr - 0.5) / 3.5 * 100] | max] | min | int if twr > 0 else 30 %}
+      {% set s_twr = [100, [0, (twr - 1.0) / 4.0 * 100] | max] | min | int if twr > 0 else 30 %}
       {% set s_ft  = [100, [0, ft / 12 * 100] | max] | min | int if ft > 0 else 30 %}
       {% set s_noise = [[(100 - noise / 6 * 100), 0] | max, 100] | min | int %}
       {% set s_tip = [100, [0, (1 - (tip - 150) / 150) * 100] | max] | min | int if tip > 0 else 70 %}
@@ -5885,17 +5888,22 @@ Anti-Grav : {{ analysis.filter.anti_gravity or '—' }}</pre>
                   <button class="pf-copy-btn" onclick="copyEl('flt-cli')">Copy</button>
                 </div>
                 <pre class="pf-code" id="flt-cli" style="font-size:10.5px;"
->set gyro_lpf1_hz         = {{ analysis.filter.gyro_lpf1 or 0 }}
-set gyro_lpf2_hz         = {{ analysis.filter.gyro_lpf2 or 0 }}
-set dterm_lpf1_hz        = {{ analysis.filter.dterm_lpf1 or 0 }}
-set dterm_lpf2_hz        = {{ analysis.filter.dterm_lpf2 or 0 }}
-set dyn_notch_count      = {{ analysis.filter.dyn_notch or 1 }}
-set motor_pwm_protocol   = DSHOT600
-set dshot_bidir          = {{ 'ON' if analysis.filter.rpm_filter else 'OFF' }}
-set rpm_filter_harmonics = 3
-set rpm_filter_min_hz    = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [100, (analysis.advanced.rpm_estimated / 60 * 0.20) | int] | max }}{% else %}100{% endif %}
-
-set anti_gravity_gain    = {{ analysis.filter.anti_gravity or 3 }}</pre>
+>set gyro_lpf1_static_hz   = {{ analysis.filter.gyro_lpf1 or 0 }}
+set gyro_lpf1_type        = PT1
+set gyro_lpf2_static_hz   = {{ analysis.filter.gyro_lpf2 or 0 }}
+set dterm_lpf1_static_hz  = {{ analysis.filter.dterm_lpf1 or 0 }}
+set dterm_lpf1_type       = PT1
+set dterm_lpf2_static_hz  = {{ analysis.filter.dterm_lpf2 or 0 }}
+set dyn_notch_count       = {{ analysis.filter.dyn_notch or 1 }}
+set dyn_notch_min_hz      = {{ analysis.filter.dyn_notch_min or 80 }}
+set dyn_notch_max_hz      = {{ analysis.filter.dyn_notch_max or 400 }}
+set motor_pwm_protocol    = DSHOT600
+set dshot_bidir           = {{ 'ON' if analysis.filter.rpm_filter else 'OFF' }}
+set rpm_filter_harmonics  = 3
+set rpm_filter_q          = 500
+set rpm_filter_min_hz     = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [80, (analysis.advanced.rpm_estimated / 60 * 0.30) | int] | max }}{% else %}80{% endif %}
+set anti_gravity_gain     = {{ analysis.filter.anti_gravity or 5 }}
+set anti_gravity_mode     = SMOOTH</pre>
               </div>
             </div>
             <div style="margin-top:10px;padding:9px 12px;background:rgba(0,170,255,0.04);border:1px solid rgba(0,170,255,.12);border-radius:7px;border-left:2px solid var(--blue);font-size:.82rem;color:var(--muted2);">
@@ -5905,10 +5913,10 @@ set anti_gravity_gain    = {{ analysis.filter.anti_gravity or 3 }}</pre>
               {% endif %}
               <div class="wtm-box" style="margin-top:8px;font-size:10px;">
                 <div class="wtm-head">🔊 ทำไม Filter สำคัญ</div>
-                <b>Gyro LPF1</b> — กรอง noise จาก gyro sensor · ค่าต่ำ=กรองแรง latency สูง (ช้า) / ค่าสูง=response เร็ว noise มากขึ้น · ค่าแนะนำ freestyle 200-250Hz, LR 120-150Hz<br>
-                <b>D-term LPF</b> — กรอง noise เฉพาะ D term ช่วยลด motor ร้อน<br>
-                <b>Dyn Notch</b> — กรอง resonance ความถี่เฉพาะจุด · ติดตาม RPM จริง auto · ลด motor/frame vibration โดยไม่เพิ่ม latency มาก · ใช้ 1-3 notch ตาม noise ของ build<br>
-                <b>RPM Filter</b> — แม่นยำที่สุด · กรอง motor harmonic ตาม RPM จริงทุก moment · ต้องการ BLHeli_32/AM32 + DSHOT300/600 + BiDir · ช่วยให้ D-term สูงขึ้นได้โดยไม่ motor ร้อน
+                <b>Gyro LPF1 (static)</b> — กรอง broadband noise จาก gyro · Nano/Micro: 250-300Hz · Freestyle 5": 200-250Hz · LR 7-10": 120-150Hz · ต่ำกว่า = กรองมากกว่า แต่ latency สูงขึ้น<br>
+                <b>D-term LPF1 (static)</b> — กรอง noise เฉพาะ D term โดยตรง · ช่วยลด motor ร้อนจาก high-freq noise · ตั้งต่ำกว่า Gyro LPF1 เสมอ (~50-60%)<br>
+                <b>Dyn Notch</b> — auto-track resonance frequency · ติดตาม RPM จริงแบบ real-time · ใช้ 1 notch สำหรับ LR/clean build · 2-3 notch สำหรับ noisy build<br>
+                <b>RPM Filter</b> — แม่นยำที่สุด · กรอง motor electrical harmonic ตาม DSHOT RPM telemetry · ต้องการ BLHeli_32/AM32 + DSHOT300/600 + Bidirectional DSHOT · ลด motor ร้อน + ใช้ D term สูงขึ้นได้ · ตั้ง harmonics=3, Q=500 เริ่มต้น
               </div>
             </div>
           </div>
@@ -5935,16 +5943,23 @@ set p_yaw                = {{ analysis.pid.yaw.p }}
 set i_yaw                = {{ analysis.pid.yaw.i }}
 # ─────────────────────────── Filter ────────────────────────
 set gyro_lpf1_static_hz  = {{ analysis.filter.gyro_lpf1 or 0 }}
+set gyro_lpf1_type       = PT1
 set gyro_lpf2_static_hz  = {{ analysis.filter.gyro_lpf2 or 0 }}
 set dterm_lpf1_static_hz = {{ analysis.filter.dterm_lpf1 or 0 }}
+set dterm_lpf1_type      = PT1
 set dterm_lpf2_static_hz = {{ analysis.filter.dterm_lpf2 or 0 }}
 set dyn_notch_count      = {{ analysis.filter.dyn_notch or 1 }}
+set dyn_notch_min_hz     = {{ analysis.filter.dyn_notch_min or 80 }}
+set dyn_notch_max_hz     = {{ analysis.filter.dyn_notch_max or 400 }}
+set dyn_notch_q          = 250
 set motor_pwm_protocol   = DSHOT600
 set dshot_bidir          = {{ 'ON' if analysis.filter.rpm_filter else 'OFF' }}
+set motor_poles          = 14
 set rpm_filter_harmonics = 3
-set rpm_filter_min_hz    = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [100, (analysis.advanced.rpm_estimated / 60 * 0.20) | int] | max }}{% else %}100{% endif %}
-
-set anti_gravity_gain    = {{ analysis.filter.anti_gravity or 3 }}
+set rpm_filter_q         = 500
+set rpm_filter_min_hz    = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [80, (analysis.advanced.rpm_estimated / 60 * 0.30) | int] | max }}{% else %}80{% endif %}
+set anti_gravity_gain    = {{ analysis.filter.anti_gravity or 5 }}
+set anti_gravity_mode    = SMOOTH
 save</pre>
             </div>
           </div>
@@ -5966,13 +5981,13 @@ save</pre>
 
             <!-- TWR -->
             {% set twr2 = analysis.advanced.thrust_ratio | default(0) | float %}
-            <div class="insight-card {% if twr2 >= 3.5 %}g{% elif twr2 >= 1.8 %}a{% else %}r{% endif %}">
+            <div class="insight-card {% if twr2 >= 3.5 %}g{% elif twr2 >= 2.0 %}a{% else %}r{% endif %}">
               <div class="ic-val" style="color:{% if twr2 >= 3.5 %}var(--green){% elif twr2 >= 1.8 %}var(--amber){% else %}var(--red){% endif %}">{{ twr2 }}:1</div>
               <div class="ic-label">Thrust-to-Weight Ratio</div>
               <div class="ic-explain">
                 {% if twr2 >= 6.0 %}⚡ กำลังสูงมาก — hover ~{{ analysis.advanced.hover_throttle_pct | int if analysis.advanced.hover_throttle_pct else (100/twr2**0.5)|int }}% เหมาะ racing/aggressive freestyle
                 {% elif twr2 >= 3.5 %}✅ ดีมาก — hover ~{{ analysis.advanced.hover_throttle_pct | int if analysis.advanced.hover_throttle_pct else (100/twr2**0.5)|int }}% throttle มี headroom เพียงพอ
-                {% elif twr2 >= 1.8 %}⚡ ปานกลาง — hover throttle สูง เหลือกำลังสำรองน้อย ควรเพิ่ม motor หรือลดน้ำหนัก
+                {% elif twr2 >= 1.5 %}⚠️ ต่ำกว่ามาตรฐาน TWR {{ twr2 }} — hover ที่ throttle สูง เหลือ headroom น้อยสำหรับ maneuver ควรเพิ่ม motor KV หรือลดน้ำหนัก
                 {% else %}⛔ ต่ำเกินไป — โดรนบินได้ยาก TWR ควรอยู่ที่ 2.0 ขึ้นไปอย่างน้อย{% endif %}
               </div>
               {% set twr_pct = [100, (twr2 / 5.0 * 100) | int] | min %}
@@ -5988,7 +6003,7 @@ save</pre>
               <div class="ic-explain">
                 กระแสสูงสุดเมื่อ full throttle รวม 4 มอเตอร์ ({{ analysis.advanced.cells }}S pack)
                 {% if analysis.peak_per_motor_a %}· ต่อมอเตอร์ {{ analysis.peak_per_motor_a }}A{% endif %}
-                {% if esc_a > 0 %}— แนะนำ ESC ≥ {{ esc_a }}A/motor (safety margin 1.5×){% endif %}
+                {% if esc_a > 0 %}— แนะนำ ESC ≥ {{ analysis.advanced.esc_recommended_a | default(esc_a) }}A/motor (safety margin 1.5× industry standard){% endif %}
               </div>
               {% set cur_pct = [100, (peak_a / 200 * 100) | int] | min %}
               <div class="ic-bar"><div class="ic-bar-fill" style="width:{{ cur_pct }}%;background:var(--blue);"></div></div>
@@ -6007,7 +6022,7 @@ save</pre>
                 {% else %}✅ ปลอดภัย — subsonic เต็มที่ (&lt;265 m/s){% endif %}
               </div>
               {% set tip_pct = [100, (tip2 / 350 * 100) | int] | min %}
-              <div class="ic-bar"><div class="ic-bar-fill" style="width:{{ tip_pct }}%;background:{% if tip2>280 %}var(--red){% elif tip2>250 %}var(--amber){% else %}var(--green){% endif %};"></div></div>
+              <div class="ic-bar"><div class="ic-bar-fill" style="width:{{ tip_pct }}%;background:{% if tip2>290 %}var(--red){% elif tip2>265 %}var(--amber){% else %}var(--green){% endif %};"></div></div>
             </div>
 
             <!-- Hover Throttle -->
@@ -6018,7 +6033,7 @@ save</pre>
               <div class="ic-explain">
                 {% if hov_thr > 65 %}⛔ สูงเกิน — เหลือกำลังสำรองน้อย แนะนำ motor KV สูงขึ้น
                 {% elif hov_thr > 50 %}⚠️ ค่อนข้างสูง — headroom น้อย เหมาะ LR/cine เท่านั้น
-                {% elif hov_thr > 25 %}✅ ดี — hover ที่ {{ hov_thr | int }}% เหลือ headroom สำหรับ maneuver · freestyle ดีที่สุดที่ 35-50%
+                {% elif hov_thr > 25 %}✅ ดี — hover ที่ {{ hov_thr | int }}% เหลือ headroom สำหรับ maneuver · freestyle optimal 30-40% (50%+ = headroom น้อยเกินไป)
                 {% else %}⚡ ต่ำมาก — racing/ultra-power build หรือน้ำหนักเบากว่า spec{% endif %}
                 · RC stick ~{{ hov_thr | int }}% สำหรับ level flight
               </div>
@@ -6048,8 +6063,9 @@ save</pre>
               <div class="ic-label">Estimated Motor RPM</div>
               <div class="ic-explain">
                 {% if rpm > 0 %}
-                รอบมอเตอร์ at full throttle ≈ KV × voltage
-                fundamental freq @100% throttle ≈ {{ (rpm/60)|int }} Hz · แนะนำ min_hz = {{ [100,(rpm/60*0.20)|int]|max }} Hz (ที่ 20% throttle)
+                รอบมอเตอร์ที่ full throttle ≈ KV × V_nominal × 0.85 (voltage sag 15%)
+                Mechanical freq = {{ (rpm/60)|int }} Hz · Electrical freq (14-pole) = {{ (rpm/60*7)|int }} Hz
+                RPM filter min_hz = {{ [80,(rpm/60*0.30)|int]|max }} Hz (ที่ ~30% throttle = lowest hover)
                 {% else %}กรุณากรอก Motor KV เพื่อคำนวณ RPM{% endif %}
               </div>
               {% if rpm > 0 %}
@@ -7240,7 +7256,7 @@ set motor_poles       = 14</div>
               <div class="hparam-top">
                 <span class="hparam-cmd">iterm_rotation</span>
                 <span class="hparam-val">ON</span>
-                <span class="hbadge hb-secret">🔥 SECRET</span><span class="hbadge hb-adv">ADVANCED</span>
+                <span class="hbadge hb-bf45">BF4.4+</span><span class="hbadge hb-perf">⚡ RECOMMENDED</span>
               </div>
               <div class="hparam-desc"><strong>I-term คำนวณใน body frame ไม่ใช่ world frame</strong><br>ปกติ I-term สะสมใน world frame → เวลา drone หมุน I-term ของ axis อื่นรั่วไหลเข้ามา → bobbing แปลกๆ · ON ทำให้ freestyle tricks smooth ขึ้นอย่างเห็นได้ชัด โดยเฉพาะ flat spin + split-S</div>
               <div class="hparam-why">BF default = OFF · ใช้ CPU เพิ่มเล็กน้อย · ไม่เหมาะ loop rate ต่ำ</div>
@@ -7265,7 +7281,7 @@ set abs_control_gain = 10  # ปรับ 5-15</div>
                 <span class="hparam-val">{% if _st_hp=='racing' %}OPTION_1{% else %}NORMAL{% endif %}</span>
                 <span class="hbadge hb-secret">🔥 HARDWARE</span><span class="hbadge hb-adv">CHIP LEVEL</span>
               </div>
-              <div class="hparam-desc"><strong>Gyro chip hardware filter — filter ก่อน BF เห็น data เลย</strong><br>ICM-42688/MPU-6000 มี hardware LPF ใน chip · OPTION_1 ลด cutoff = ข้อมูล smooth มากขึ้น latency +0.5ms · {% if _st_hp=='racing' %}Racing OPTION_1: อาจ sluggish เล็กน้อย ทดสอบก่อน{% elif _st_hp=='longrange' %}LR: OPTION_1 แนะนำ — smooth data ดีมาก{% else %}Freestyle: ลองดู บาง build smooth ขึ้นมาก{% endif %}</div>
+              <div class="hparam-desc"><strong>Gyro chip hardware filter — filter ก่อน BF เห็น data เลย</strong><br>ICM-42688/MPU-6000 มี hardware LPF ใน chip · OPTION_1 ลด cutoff = ข้อมูล smooth มากขึ้น latency +0.5ms · {% if _st_hp=='racing' %}Racing NORMAL: latency ต่ำ ตอบสนองไว (OPTION_1 เพิ่ม latency ไม่เหมาะ gate racing){% elif _st_hp=='longrange' %}LR: OPTION_1 แนะนำ — smooth data ดีมาก{% else %}Freestyle: ลองดู บาง build smooth ขึ้นมาก{% endif %}</div>
               <div class="hparam-why">BF default = NORMAL · hardware-specific ต้องรู้ chip ก่อน</div>
               <div class="hparam-cli" onclick="copyCliSnippet(this)">set gyro_hardware_lpf = {% if _st_hp=='racing' %}OPTION_1{% else %}NORMAL{% endif %}
 # ตรวจ chip: diff all | grep gyro_chip</div>
