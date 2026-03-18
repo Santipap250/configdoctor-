@@ -279,7 +279,7 @@
 
     if(!open && pre.textContent === 'Loading...'){
       var fc = pre.dataset.fc, fn = pre.dataset.fn;
-      fetch('/static/downloads/diff_all/' + fc + '/' + fn)
+      fetch('/downloads/' + encodeURIComponent(fc) + '/' + encodeURIComponent(fn))
         .then(function(r){ return r.text(); })
         .then(function(t){ pre.textContent = t.slice(0,3000) + (t.length>3000?'\n... (truncated)':''); })
         .catch(function(){ pre.textContent = 'Preview unavailable'; });
@@ -291,7 +291,7 @@
     var btn = e.target.closest('.dl-btn-copy');
     if(!btn) return;
     var fc = btn.dataset.fc, fn = btn.dataset.fn;
-    fetch('/static/downloads/diff_all/' + fc + '/' + fn)
+    fetch('/downloads/' + encodeURIComponent(fc) + '/' + encodeURIComponent(fn))
       .then(function(r){ return r.text(); })
       .then(function(t){
         return navigator.clipboard.writeText(t);
