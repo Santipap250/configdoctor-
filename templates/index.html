@@ -4958,9 +4958,234 @@ input:focus, select:focus {
   .mission-panel { width: 300px !important; }
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   RESULTS PAGE TRANSITION SYSTEM — OBIXConfig Doctor v5.2
+   กด ANALYZE → Loading Screen → หน้า Results เต็มจอ
+═══════════════════════════════════════════════════════════════ */
+
+/* ── Analyze Loading Overlay ──────────────────────────────── */
+.analyze-loader {
+  position: fixed; inset: 0; z-index: 9998;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 28px;
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s ease;
+}
+.analyze-loader.active { opacity: 1; pointer-events: all; }
+
+.al-drone {
+  position: relative;
+  width: 88px; height: 88px;
+}
+.al-ring {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: var(--green);
+  border-right-color: rgba(0,255,136,.3);
+  animation: alSpin 1s linear infinite;
+}
+.al-ring-2 {
+  position: absolute; inset: 12px; border-radius: 50%;
+  border: 1.5px solid transparent;
+  border-top-color: var(--blue);
+  border-left-color: rgba(0,170,255,.3);
+  animation: alSpin .7s linear infinite reverse;
+}
+.al-icon {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  animation: alPulse 1.2s ease-in-out infinite;
+}
+@keyframes alSpin  { to { transform: rotate(360deg); } }
+@keyframes alPulse { 0%,100%{opacity:.7;transform:scale(1)} 50%{opacity:1;transform:scale(1.08)} }
+
+.al-text {
+  font-family: var(--font-d);
+  font-size: 13px; letter-spacing: .18em;
+  color: var(--green);
+  text-transform: uppercase;
+}
+.al-bar-wrap {
+  width: 220px; height: 3px;
+  background: rgba(255,255,255,.05);
+  border-radius: 3px; overflow: hidden;
+}
+.al-bar-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--green), var(--cyan));
+  border-radius: 3px;
+  animation: alBarFill 1.8s ease-in-out infinite;
+}
+@keyframes alBarFill {
+  0%   { width: 0%;   opacity: 1; }
+  80%  { width: 100%; opacity: 1; }
+  100% { width: 100%; opacity: 0; }
+}
+.al-steps {
+  font-family: var(--font-m);
+  font-size: 10px; color: var(--muted2);
+  letter-spacing: .06em; text-align: center;
+  line-height: 1.8;
+}
+
+/* ── Results Page Mode ────────────────────────────────────── */
+/* Header bar ที่ top ของ Results page */
+.rp-topbar {
+  position: sticky; top: 0; z-index: 400;
+  display: none;                /* hidden จนกว่า results-mode */
+  align-items: center;
+  height: 52px; padding: 0 16px; gap: 12px;
+  background: rgba(0,2,8,.97);
+  backdrop-filter: blur(24px) saturate(1.5);
+  border-bottom: 1px solid rgba(0,255,136,.1);
+  flex-shrink: 0;
+}
+.rp-topbar::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--green), var(--cyan), transparent);
+  background-size: 200% 100%;
+  animation: rpSweep 6s linear infinite;
+}
+@keyframes rpSweep { 0%{background-position:100%} 100%{background-position:-100%} }
+
+.rp-back-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: none;
+  border: 1px solid rgba(0,255,136,.18);
+  border-radius: 7px;
+  padding: 5px 12px;
+  color: var(--green); font-family: var(--font-d);
+  font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  cursor: pointer; flex-shrink: 0;
+  transition: all .18s;
+}
+.rp-back-btn:hover {
+  background: rgba(0,255,136,.07);
+  border-color: rgba(0,255,136,.45);
+  box-shadow: 0 0 14px rgba(0,255,136,.2);
+}
+
+.rp-build-info {
+  flex: 1; min-width: 0;
+  display: flex; align-items: center; gap: 8px;
+  overflow: hidden;
+}
+.rp-build-class {
+  font-family: var(--font-d);
+  font-size: 9px; font-weight: 700; letter-spacing: .12em;
+  color: var(--blue);
+  background: rgba(0,170,255,.08);
+  border: 1px solid rgba(0,170,255,.2);
+  padding: 3px 9px; border-radius: 100px;
+  white-space: nowrap;
+}
+.rp-build-style {
+  font-family: var(--font-d); font-size: 9px;
+  letter-spacing: .1em; color: var(--muted2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Tab navigation */
+.rp-tabs {
+  display: flex; align-items: center; gap: 2px;
+  flex-shrink: 0;
+}
+.rp-tab {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 5px 11px;
+  font-family: var(--font-d); font-size: 9px;
+  font-weight: 700; letter-spacing: .08em;
+  color: var(--muted2);
+  cursor: pointer;
+  transition: all .18s;
+  white-space: nowrap;
+}
+.rp-tab:hover { color: var(--text2); background: rgba(255,255,255,.04); }
+.rp-tab.active {
+  color: var(--green);
+  background: rgba(0,255,136,.07);
+  border-color: rgba(0,255,136,.22);
+}
+@media(max-width: 680px) {
+  .rp-tab { padding: 4px 8px; font-size: 8px; }
+  .rp-build-style { display: none; }
+}
+@media(max-width: 480px) {
+  .rp-tabs { gap: 1px; }
+  .rp-tab { padding: 4px 6px; font-size: 7.5px; letter-spacing: .04em; }
+}
+
+/* Tab panels */
+.rp-tab-panel { display: none; }
+.rp-tab-panel.active { display: block; }
+
+/* Results scroll container */
+.rp-scroll {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 16px;
+  display: flex; flex-direction: column; gap: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,170,255,.12) transparent;
+}
+.rp-scroll::-webkit-scrollbar { width: 4px; }
+.rp-scroll::-webkit-scrollbar-thumb { background: rgba(0,170,255,.12); border-radius: 4px; }
+
+/* ── body.results-mode transforms ────────────────────────── */
+body.results-mode .app-shell          { display: none !important; }
+body.results-mode .rp-topbar          { display: flex !important; }
+body.results-mode .results-page-wrap  {
+  display: flex !important;
+  flex-direction: column;
+  min-height: calc(100vh - 52px);  /* minus top-bar */
+}
+
+/* Fade-in animation for results page */
+@keyframes rpFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+body.results-mode .rp-tab-panel.active {
+  animation: rpFadeIn .35s ease both;
+}
 </style>
 </head>
 <body>
+
+<!-- ═══ ANALYZE LOADING OVERLAY ══════════════════════════════ -->
+<div class="analyze-loader" id="analyzeLoader" role="status" aria-live="polite" aria-label="กำลังวิเคราะห์">
+  <div class="al-drone">
+    <div class="al-ring"></div>
+    <div class="al-ring-2"></div>
+    <div class="al-icon">🚁</div>
+  </div>
+  <div class="al-text" id="alText">กำลังวิเคราะห์...</div>
+  <div class="al-bar-wrap"><div class="al-bar-fill"></div></div>
+  <div class="al-steps" id="alSteps">Physics Engine · PID Calculator · Filter Optimizer</div>
+</div>
+
+<!-- ═══ RESULTS PAGE TOP BAR (shown in results-mode) ════════ -->
+<div class="rp-topbar" id="rpTopbar" role="navigation" aria-label="Results navigation">
+  <button class="rp-back-btn" onclick="exitResultsMode()" aria-label="กลับแก้ไข">
+    ◀ กลับแก้ไข
+  </button>
+  <div class="rp-build-info">
+    <span class="rp-build-class" id="rpBuildClass">—</span>
+    <span class="rp-build-style" id="rpBuildStyle">—</span>
+  </div>
+  <div class="rp-tabs" role="tablist">
+    <button class="rp-tab active" data-rptab="overview"  onclick="switchRPTab('overview',this)"  role="tab" aria-selected="true">📊 OVERVIEW</button>
+    <button class="rp-tab"        data-rptab="tune"      onclick="switchRPTab('tune',this)"      role="tab">🎛️ TUNE</button>
+    <button class="rp-tab"        data-rptab="physics"   onclick="switchRPTab('physics',this)"   role="tab">🔭 PHYSICS</button>
+    <button class="rp-tab"        data-rptab="guide"     onclick="switchRPTab('guide',this)"     role="tab">🗺️ GUIDE</button>
+  </div>
+</div>
+
 <div class="page-bg-photo" aria-hidden="true"></div>
 <div class="scan-line"></div>
 <div class="scan-line-2"></div>
@@ -5388,6 +5613,13 @@ input:focus, select:focus {
       </div>
       {% else %}
 
+      <!-- ══ RESULTS PAGE WRAPPER (shown in results-mode) ══════════════ -->
+      <div class="results-page-wrap" id="resultsPageWrap" style="display:none;">
+
+        <!-- ── OVERVIEW TAB ──────────────────────────────────────────── -->
+        <div class="rp-tab-panel active" id="rp-panel-overview" role="tabpanel">
+          <div class="rp-scroll">
+
       <!-- ══ CLI DEPLOY HERO ══ -->
       <div class="cli-deploy">
         <div class="cli-deploy-header">
@@ -5766,6 +5998,12 @@ save</div>
       </div>
       {% endif %}
 
+          </div><!-- /rp-scroll overview -->
+        </div><!-- /rp-panel-overview -->
+
+        <!-- ── TUNE TAB ─────────────────────────────────────────────── -->
+        <div class="rp-tab-panel" id="rp-panel-tune" role="tabpanel">
+          <div class="rp-scroll">
       <!-- ══ 4. CLASS BASELINE ══ -->
       {% if analysis.detected_class %}
       <div class="tpanel" style="border-left:3px solid var(--blue);">
@@ -5966,6 +6204,12 @@ save</pre>
         </div>
       </div>
 
+          </div><!-- /rp-scroll tune -->
+        </div><!-- /rp-panel-tune -->
+
+        <!-- ── PHYSICS TAB ──────────────────────────────────────────── -->
+        <div class="rp-tab-panel" id="rp-panel-physics" role="tabpanel">
+          <div class="rp-scroll">
       <!-- ══ 6. PHYSICS DEEP-DIVE ══ -->
       {% if analysis.advanced %}
       <div class="tpanel" style="border-left:3px solid var(--blue);">
@@ -6338,6 +6582,12 @@ save</pre>
         </div>
       </div>
 
+          </div><!-- /rp-scroll physics -->
+        </div><!-- /rp-panel-physics -->
+
+        <!-- ── GUIDE TAB ────────────────────────────────────────────── -->
+        <div class="rp-tab-panel" id="rp-panel-guide" role="tabpanel">
+          <div class="rp-scroll">
       <!-- ══ FLIGHT PERSONALITY ══ -->
       {% if analysis.advanced %}
       {% set _tw = analysis.advanced.thrust_ratio|default(0)|float %}
@@ -7357,6 +7607,11 @@ set vbat_pid_off  = 0</div>
         </div>
       </div>
 
+          </div><!-- /rp-scroll guide -->
+        </div><!-- /rp-panel-guide -->
+
+      </div><!-- /results-page-wrap -->
+
       {% endif %}<!-- end if analysis -->
         </div><!-- /results-col -->
       </div><!-- /main-grid -->
@@ -7365,6 +7620,197 @@ set vbat_pid_off  = 0</div>
 </div><!-- /page-wrap -->
 
 <div class="toast" id="toast">✓ copied!</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   RESULTS PAGE TRANSITION — OBIXConfig Doctor v5.2
+   เมื่อ analysis มีข้อมูล → แสดง loading → เปิด results-mode
+═══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  var hasAnalysis = false;
+
+  /* ── Detect if this page load HAS analysis results ─────── */
+  /* ใช้ OBIX.analysis flag จาก Jinja2 (set ด้านล่าง) */
+  function init() {
+    var obix = window.OBIX;
+    if (!obix) return;
+
+    if (obix.analysis) {
+      /* มี analysis → แสดง loading สั้นๆ แล้วเปิด results */
+      showLoadingThenResults();
+    } else {
+      /* ไม่มี analysis → ซ่อน results page wrap */
+      var rpw = document.getElementById('resultsPageWrap');
+      if (rpw) rpw.style.display = 'none';
+    }
+  }
+
+  /* ── Loading → Results transition ──────────────────────── */
+  function showLoadingThenResults() {
+    var loader = document.getElementById('analyzeLoader');
+    var appShell = document.querySelector('.app-shell');
+    var topbar = document.getElementById('rpTopbar');
+    var rpw = document.getElementById('resultsPageWrap');
+
+    /* Show loader immediately */
+    if (loader) loader.classList.add('active');
+    if (appShell) appShell.style.opacity = '0';
+
+    /* Update loader text with build info */
+    updateLoaderInfo();
+
+    /* After brief pause, switch to results mode */
+    setTimeout(function () {
+      /* Fade out loader */
+      if (loader) {
+        loader.style.transition = 'opacity .3s ease';
+        loader.style.opacity = '0';
+        setTimeout(function () {
+          loader.classList.remove('active');
+          loader.style.opacity = '';
+          loader.style.transition = '';
+        }, 300);
+      }
+      enterResultsMode();
+    }, 1400);
+  }
+
+  /* ── Enter results mode ─────────────────────────────────── */
+  function enterResultsMode() {
+    document.body.classList.add('results-mode');
+    var rpw = document.getElementById('resultsPageWrap');
+    if (rpw) rpw.style.display = 'flex';
+
+    /* Scroll to top */
+    window.scrollTo(0, 0);
+
+    /* Update build info in topbar */
+    updateTopbarInfo();
+  }
+
+  /* ── Exit results mode (Back button) ───────────────────── */
+  window.exitResultsMode = function () {
+    document.body.classList.remove('results-mode');
+    var rpw = document.getElementById('resultsPageWrap');
+    var appShell = document.querySelector('.app-shell');
+    if (rpw) rpw.style.display = 'none';
+    if (appShell) appShell.style.opacity = '';
+    window.scrollTo(0, 0);
+  };
+
+  /* ── Tab switching ──────────────────────────────────────── */
+  window.switchRPTab = function (tabId, btn) {
+    /* Deactivate all panels + tabs */
+    document.querySelectorAll('.rp-tab-panel').forEach(function (p) {
+      p.classList.remove('active');
+    });
+    document.querySelectorAll('.rp-tab').forEach(function (b) {
+      b.classList.remove('active');
+      b.setAttribute('aria-selected', 'false');
+    });
+
+    /* Activate selected */
+    var panel = document.getElementById('rp-panel-' + tabId);
+    if (panel) panel.classList.add('active');
+    if (btn) {
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+    }
+
+    /* Scroll panel to top */
+    if (panel) {
+      var scroll = panel.querySelector('.rp-scroll');
+      if (scroll) scroll.scrollTop = 0;
+    }
+
+    /* Re-init charts if switching to physics/overview */
+    if (tabId === 'physics' || tabId === 'overview') {
+      setTimeout(function () {
+        if (window.initCharts) window.initCharts();
+      }, 50);
+    }
+  };
+
+  /* ── Intercept form submit → show loader ────────────────── */
+  document.addEventListener('DOMContentLoaded', function () {
+    var form = document.getElementById('analyzeForm');
+    var btn  = document.getElementById('btnAnalyze');
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        /* Show loading overlay while form submits normally */
+        var loader = document.getElementById('analyzeLoader');
+        if (loader) {
+          loader.classList.add('active');
+          animateLoaderSteps();
+        }
+        if (btn) btn.disabled = true;
+        /* Let default form POST proceed */
+      });
+    }
+
+    /* Init on page load */
+    init();
+
+    /* Trigger charts after results mode loads */
+    if (window.OBIX && window.OBIX.analysis) {
+      setTimeout(function () {
+        if (window.initCharts) window.initCharts();
+        if (window.liveUpdate) window.liveUpdate();
+      }, 1600);
+    }
+  });
+
+  /* ── Animate loader step text ───────────────────────────── */
+  var _loaderSteps = [
+    'Physics Engine · PID Calculator · Filter Optimizer',
+    'คำนวณ TWR · Thrust · C-Rate · Battery...',
+    'สร้าง CLI Commands · Secret Sauce...',
+    'เตรียมผลลัพธ์...',
+  ];
+  var _stepIdx = 0;
+  function animateLoaderSteps() {
+    var el = document.getElementById('alSteps');
+    if (!el) return;
+    _stepIdx = 0;
+    var iv = setInterval(function () {
+      if (_stepIdx >= _loaderSteps.length) { clearInterval(iv); return; }
+      el.textContent = _loaderSteps[_stepIdx++];
+    }, 380);
+  }
+
+  /* ── Update loader text with build info ─────────────────── */
+  function updateLoaderInfo() {
+    var textEl = document.getElementById('alText');
+    var size  = document.getElementById('f_size');
+    var batt  = document.getElementById('battery-select');
+    var style = document.getElementById('f_style');
+    if (textEl) {
+      var sz   = size  ? (size.value  || '5') : '5';
+      var bt   = batt  ? (batt.value  || '4S') : '4S';
+      var st   = style ? (style.value || 'freestyle') : 'freestyle';
+      textEl.textContent = 'วิเคราะห์ ' + sz + '" · ' + bt + ' · ' + st + '...';
+    }
+  }
+
+  /* ── Update topbar build info ───────────────────────────── */
+  function updateTopbarInfo() {
+    var classEl = document.getElementById('rpBuildClass');
+    var styleEl = document.getElementById('rpBuildStyle');
+    /* Read from OBIX data or from DOM */
+    var obix = window.OBIX || {};
+    var buildClass = document.querySelector('.class-badge');
+    var detected   = buildClass ? buildClass.textContent.trim() : '—';
+    var styleTag   = document.querySelector('.sauce-sub');
+    var styleInfo  = styleTag ? styleTag.textContent.trim().split('·')[1] || '' : '';
+
+    if (classEl) classEl.textContent = detected || '—';
+    if (styleEl) styleEl.textContent = styleInfo.trim() || '';
+  }
+
+}());
+</script>
 
 <script>
 /* ── OBIXConfig Doctor — Jinja2 Data Bridge ─────────────────── */
