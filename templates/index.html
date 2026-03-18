@@ -4374,6 +4374,590 @@ label {
   .tpanel-body  { font-size: 13px !important; }
 }
 
+
+/* ════════════════════════════════════════════════════════════════
+   FINAL UPGRADE v1.0 — Super Analyze Button + Mobile/PC Polish
+   ════════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════
+   SUPER ANALYZE DRONE BUTTON
+   ══════════════════════════════════════════════════════ */
+.btn-analyze-super {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+  height: clamp(68px, 14vw, 80px);
+  padding: 0;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  /* Multi-layer background */
+  background: linear-gradient(135deg,
+    #003d1a 0%,
+    #001a0d 40%,
+    #002611 70%,
+    #001208 100%);
+  /* Neon border via box-shadow */
+  box-shadow:
+    0 0 0 1.5px rgba(0,255,136,.5),
+    0 0 0 3px rgba(0,255,136,.12),
+    0 0 24px rgba(0,255,136,.3),
+    0 6px 32px rgba(0,0,0,.7),
+    inset 0 1px 0 rgba(0,255,136,.15);
+  transition: all .3s cubic-bezier(.4,0,.2,1);
+  /* Prevent text selection */
+  user-select: none;
+  -webkit-user-select: none;
+  /* Touch feedback */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Background pulse animation */
+.bsa-bg-pulse {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 50%,
+    rgba(0,255,136,.15) 0%, transparent 70%);
+  animation: bsaPulse 2.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes bsaPulse {
+  0%,100% { opacity: .6; transform: scale(1); }
+  50%      { opacity: 1;  transform: scale(1.04); }
+}
+
+/* Shimmer sweep */
+.bsa-shine {
+  position: absolute; top: 0; left: -150%; width: 80%; height: 100%;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(0,255,136,.18),
+    rgba(255,255,255,.08),
+    rgba(0,255,136,.12),
+    transparent);
+  animation: bsaShine 2.2s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: 14px;
+}
+@keyframes bsaShine {
+  0%   { left: -150%; opacity: 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { left: 200%; opacity: 0; }
+}
+
+/* Content wrapper */
+.bsa-inner {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 100%; padding: 0 clamp(16px,4vw,24px);
+}
+
+/* Left side: rocket + labels */
+.bsa-left {
+  display: flex; align-items: center;
+  gap: clamp(10px,2.5vw,14px);
+}
+
+.bsa-rocket {
+  font-size: clamp(22px,5vw,30px);
+  line-height: 1; flex-shrink: 0;
+  filter: drop-shadow(0 0 10px rgba(0,255,136,.7));
+  animation: bsaRocket 3s ease-in-out infinite;
+}
+@keyframes bsaRocket {
+  0%,100% { transform: translateY(0) rotate(0deg); filter: drop-shadow(0 0 10px rgba(0,255,136,.7)); }
+  25%     { transform: translateY(-3px) rotate(-5deg); filter: drop-shadow(0 0 16px rgba(0,255,136,1)); }
+  75%     { transform: translateY(2px) rotate(3deg); }
+}
+
+.bsa-labels {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 3px;
+}
+
+.bsa-main {
+  font-family: var(--font-d, 'Orbitron', sans-serif);
+  font-size: clamp(14px,3.2vw,20px);
+  font-weight: 900;
+  letter-spacing: clamp(.08em,1.5vw,.22em);
+  color: #00ff88;
+  text-shadow:
+    0 0 20px rgba(0,255,136,.9),
+    0 0 40px rgba(0,255,136,.4),
+    0 0 80px rgba(0,255,136,.15);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.bsa-sub {
+  font-family: var(--font-m, 'JetBrains Mono', monospace);
+  font-size: clamp(10px,2vw,13px);
+  font-weight: 500;
+  color: rgba(0,255,136,.6);
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+/* Right side: badge */
+.bsa-right { flex-shrink: 0; }
+
+.bsa-badge {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(0,255,136,.1);
+  border: 1px solid rgba(0,255,136,.35);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-family: var(--font-d, 'Orbitron', sans-serif);
+  font-size: clamp(9px,1.8vw,11px);
+  font-weight: 700;
+  letter-spacing: .1em;
+  color: rgba(0,255,136,.85);
+  white-space: nowrap;
+}
+
+.bsa-badge-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #00ff88;
+  box-shadow: 0 0 8px #00ff88, 0 0 14px rgba(0,255,136,.5);
+  animation: bsaDotPulse 1.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes bsaDotPulse {
+  0%,100% { opacity: 1; box-shadow: 0 0 6px #00ff88; }
+  50%     { opacity: .5; box-shadow: 0 0 14px rgba(0,255,136,.8); }
+}
+
+/* Hover state */
+.btn-analyze-super:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow:
+    0 0 0 2px rgba(0,255,136,.8),
+    0 0 0 4px rgba(0,255,136,.2),
+    0 0 48px rgba(0,255,136,.55),
+    0 0 80px rgba(0,255,136,.15),
+    0 12px 40px rgba(0,0,0,.75),
+    inset 0 1px 0 rgba(0,255,136,.25);
+}
+.btn-analyze-super:hover .bsa-main {
+  text-shadow:
+    0 0 24px rgba(0,255,136,1),
+    0 0 48px rgba(0,255,136,.6),
+    0 0 90px rgba(0,255,136,.25);
+}
+.btn-analyze-super:hover .bsa-rocket { animation-duration: 1s; }
+
+/* Active/press */
+.btn-analyze-super:active {
+  transform: translateY(0) scale(.99);
+  box-shadow:
+    0 0 0 2px rgba(0,255,136,.6),
+    0 0 24px rgba(0,255,136,.3),
+    0 4px 16px rgba(0,0,0,.6);
+}
+
+/* Disabled while analyzing */
+.btn-analyze-super:disabled,
+.btn-analyze-super[disabled] {
+  opacity: .65; cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Mobile sticky at bottom */
+@media(max-width:960px) {
+  .btn-analyze-super {
+    position: sticky;
+    bottom: 0;
+    z-index: 60;
+    margin: 0 -16px;
+    width: calc(100% + 32px);
+    border-radius: 0;
+    border-left: none; border-right: none; border-bottom: none;
+    box-shadow:
+      0 0 0 1.5px rgba(0,255,136,.5) inset,
+      0 -4px 32px rgba(0,255,136,.25),
+      0 -16px 48px rgba(0,0,0,.6),
+      inset 0 1px 0 rgba(0,255,136,.2);
+    height: clamp(64px,13vw,72px);
+  }
+  .bsa-sub { display: none; }
+}
+@media(max-width:480px) {
+  .bsa-badge { display: none; }
+  .bsa-main { font-size: clamp(15px,4.5vw,18px) !important; letter-spacing: .1em !important; }
+  .bsa-rocket { font-size: clamp(22px,6vw,28px) !important; }
+}
+
+/* ══════════════════════════════════════════════════════
+   MOBILE/PC RESPONSIVE MASTER OVERHAUL
+   ══════════════════════════════════════════════════════ */
+
+/* ── App shell — proper breakpoints ── */
+.app-shell {
+  max-width: 1440px;
+  margin: 0 auto;
+  grid-template-columns: clamp(260px,26vw,300px) 1fr !important;
+}
+@media(max-width:960px) {
+  .app-shell { grid-template-columns: 1fr !important; }
+  .mission-panel {
+    position: static !important;
+    max-height: none !important;
+    border-right: none !important;
+    border-bottom: 1.5px solid rgba(0,255,136,.08) !important;
+  }
+}
+
+/* ── Mission panel width ── */
+.mission-panel {
+  width: clamp(260px,26vw,300px);
+}
+@media(max-width:960px) { .mission-panel { width: 100% !important; } }
+
+/* ── Form body with safe bottom padding for sticky button ── */
+.form-body {
+  padding: clamp(12px,2.5vw,16px) clamp(14px,3vw,18px) 90px !important;
+}
+@supports(padding-bottom: env(safe-area-inset-bottom)) {
+  @media(max-width:960px) {
+    .form-body {
+      padding-bottom: max(90px, calc(80px + env(safe-area-inset-bottom))) !important;
+    }
+  }
+}
+
+/* ── Top bar — full responsive ── */
+.top-bar {
+  padding: 0 clamp(12px,3vw,24px) !important;
+}
+@media(max-width:640px) {
+  .tb-nav { display: none !important; }
+  .tb-divider { display: none !important; }
+}
+
+/* ── HUD row ── */
+.live-hud {
+  grid-template-columns: repeat(4,1fr) !important;
+}
+@media(max-width:760px) {
+  .live-hud { grid-template-columns: repeat(2,1fr) !important; }
+}
+.hud-cell {
+  padding: clamp(12px,2.8vw,20px) clamp(10px,2.5vw,18px) !important;
+}
+.hud-val {
+  font-size: clamp(20px,4.5vw,28px) !important;
+  letter-spacing: -.02em !important;
+}
+.hud-lbl {
+  font-size: clamp(8px,1.8vw,10px) !important;
+  letter-spacing: .1em !important;
+}
+.hud-bar { margin-top: clamp(6px,1.5vw,10px) !important; }
+
+/* ── Main grid breakpoint ── */
+.main-grid {
+  grid-template-columns: clamp(220px,23vw,250px) 1fr !important;
+}
+@media(max-width:1100px) {
+  .main-grid { grid-template-columns: 1fr !important; }
+  .inst-col {
+    border-right: none !important;
+    border-bottom: 1.5px solid rgba(0,255,136,.06) !important;
+  }
+}
+
+/* ── Mission panel header ── */
+.mp-header {
+  padding: clamp(16px,3.5vw,22px) clamp(14px,3vw,18px) !important;
+}
+.mp-title {
+  font-size: clamp(13px,2.8vw,16px) !important;
+  font-weight: 800 !important;
+}
+.mp-sub { font-size: clamp(11px,2.2vw,13px) !important; }
+
+/* ── Section labels ── */
+.fsec-label {
+  font-size: clamp(10px,2vw,12px) !important;
+  letter-spacing: .1em !important;
+  padding: clamp(14px,3vw,18px) 0 clamp(7px,1.5vw,9px) !important;
+  font-weight: 700 !important;
+}
+
+/* ── Form labels ── */
+label {
+  font-size: clamp(11px,2.2vw,13px) !important;
+  font-weight: 600 !important;
+  letter-spacing: .04em !important;
+  margin-top: clamp(10px,2.5vw,14px) !important;
+  margin-bottom: clamp(5px,1.2vw,7px) !important;
+}
+
+/* ── Inputs ── */
+input[type=number], input[type=text], select {
+  font-size: clamp(14px,3vw,16px) !important;
+  padding: clamp(10px,2.2vw,13px) clamp(10px,2vw,14px) !important;
+  min-height: clamp(44px,10vw,50px) !important;
+  border-radius: clamp(8px,2vw,11px) !important;
+}
+input:focus, select:focus {
+  box-shadow:
+    0 0 0 3px rgba(0,255,136,.1),
+    0 0 20px rgba(0,255,136,.08) !important;
+}
+
+/* ── Battery pills ── */
+.batt-pill-row {
+  gap: clamp(4px,1vw,6px) !important;
+  flex-wrap: nowrap !important;
+}
+@media(max-width:380px) {
+  .batt-pill-row { flex-wrap: wrap !important; }
+  .batt-pill { flex: calc(33.33% - 6px) !important; min-width: 0 !important; }
+}
+.batt-pill {
+  min-height: clamp(48px,11vw,58px) !important;
+  border-radius: clamp(8px,2vw,12px) !important;
+  padding: clamp(8px,2vw,12px) clamp(4px,1.2vw,8px) !important;
+  flex: 1 !important;
+}
+.batt-pill:hover { transform: translateY(-3px) scale(1.04) !important; }
+.batt-pill-s { font-size: clamp(13px,2.8vw,16px) !important; font-weight: 900 !important; }
+.batt-pill-v { font-size: clamp(9px,1.8vw,11px) !important; }
+
+/* ── Style cards ── */
+.style-cards-grid {
+  gap: clamp(6px,1.5vw,9px) !important;
+}
+.style-card {
+  padding: clamp(12px,3vw,16px) clamp(5px,1.2vw,8px) clamp(10px,2.5vw,14px) !important;
+  border-radius: clamp(10px,2.5vw,14px) !important;
+  min-height: clamp(76px,16vw,90px) !important;
+}
+.sc-ico  { font-size: clamp(18px,4.5vw,24px) !important; }
+.sc-name {
+  font-size: clamp(9px,2vw,11px) !important;
+  font-weight: 700 !important; letter-spacing: .08em !important;
+}
+.sc-sub  { font-size: clamp(9px,1.8vw,11px) !important; }
+
+/* ── Preset mini buttons ── */
+.preset-grid-mini { gap: clamp(4px,1vw,6px) !important; }
+.pmini {
+  font-size: clamp(10px,2.2vw,12px) !important;
+  padding: clamp(7px,1.8vw,10px) clamp(4px,1vw,6px) !important;
+  min-height: clamp(42px,10vw,48px) !important;
+  border-radius: clamp(7px,1.8vw,10px) !important;
+}
+
+/* ── Preset cat buttons ── */
+.preset-cat-btn {
+  font-size: clamp(9px,2vw,11px) !important;
+  padding: clamp(5px,1.2vw,7px) clamp(10px,2.5vw,13px) !important;
+  min-height: clamp(30px,7vw,36px) !important;
+  border-radius: clamp(6px,1.5vw,8px) !important;
+}
+
+/* ── Concept box ── */
+.concept-header {
+  font-size: clamp(12px,2.6vw,14px) !important;
+  padding: clamp(10px,2.5vw,13px) clamp(12px,3vw,16px) !important;
+  min-height: clamp(44px,10vw,50px) !important;
+}
+.concept-content {
+  font-size: clamp(12px,2.5vw,14px) !important;
+  line-height: 1.7 !important;
+}
+
+/* ── fg grid (2-col form row) ── */
+.fg {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: clamp(8px,2vw,12px) !important;
+}
+@media(max-width:380px) {
+  .fg { grid-template-columns: 1fr !important; }
+}
+
+/* ── Results col ── */
+.results-col {
+  padding: clamp(12px,2.8vw,18px) !important;
+  gap: clamp(12px,2.5vw,16px) !important;
+}
+
+/* ── tpanel ── */
+.tpanel-head {
+  padding: clamp(12px,2.5vw,15px) clamp(14px,3vw,18px) !important;
+  min-height: clamp(46px,10vw,54px) !important;
+}
+.tpanel-title {
+  font-size: clamp(12px,2.6vw,15px) !important;
+  font-weight: 800 !important;
+  letter-spacing: .02em !important;
+}
+.tpanel-sub   { font-size: clamp(11px,2.1vw,13px) !important; }
+.tpanel-body  {
+  padding: clamp(13px,2.8vw,17px) clamp(14px,3vw,18px) !important;
+  font-size: clamp(13px,2.5vw,14.5px) !important;
+  line-height: 1.78 !important;
+}
+.tpanel-head-icon {
+  width: clamp(32px,7vw,40px) !important;
+  height: clamp(32px,7vw,40px) !important;
+  border-radius: clamp(8px,2vw,12px) !important;
+  font-size: clamp(14px,3.2vw,18px) !important;
+}
+
+/* ── Score ring ── */
+.score-num   { font-size: clamp(26px,5.5vw,34px) !important; }
+.score-grade { font-size: clamp(11px,2.4vw,14px) !important; }
+.score-lbl   { font-size: clamp(8px,1.6vw,10px) !important; letter-spacing: .18em !important; }
+.sb-label    { font-size: clamp(9px,1.8vw,11px) !important; font-weight: 500 !important; }
+.sb-pct      { font-size: clamp(9px,1.8vw,10px) !important; }
+.sb-track    { height: clamp(3px,0.6vw,5px) !important; }
+
+/* ── Instrument card ── */
+.inst-card-head {
+  font-size: clamp(11px,2.2vw,13px) !important;
+  font-weight: 700 !important;
+  padding: clamp(9px,2vw,12px) clamp(12px,2.5vw,14px) !important;
+  min-height: clamp(38px,8vw,44px) !important;
+}
+.inst-card-body { padding: clamp(11px,2.5vw,14px) !important; }
+.dvstat-key { font-size: clamp(8px,1.7vw,10px) !important; letter-spacing: .1em !important; font-weight: 600 !important; }
+.dvstat-val { font-size: clamp(13px,2.8vw,16px) !important; font-weight: 700 !important; }
+.chk-label  { font-size: clamp(9px,1.9vw,11px) !important; letter-spacing: .08em !important; font-weight: 600 !important; }
+.chk-val    { font-size: clamp(12px,2.5vw,14px) !important; font-weight: 700 !important; }
+.chk-item   { min-height: clamp(44px,10vw,50px) !important; border-radius: clamp(8px,2vw,10px) !important; }
+.chk-icon   { font-size: clamp(14px,3vw,17px) !important; }
+
+/* ── Empty state ── */
+.empty-state {
+  min-height: clamp(280px,40vh,440px) !important;
+  padding: clamp(32px,6vw,60px) clamp(16px,4vw,24px) !important;
+}
+.empty-hex   { font-size: clamp(56px,12vw,80px) !important; }
+.empty-title { font-size: clamp(18px,4vw,26px) !important; font-weight: 800 !important; }
+.empty-sub   { font-size: clamp(13px,2.5vw,15px) !important; line-height: 1.75 !important; }
+.chip {
+  font-size: clamp(10px,2.2vw,13px) !important;
+  padding: clamp(5px,1.2vw,7px) clamp(12px,3vw,18px) !important;
+}
+
+/* ── Warning/rule items ── */
+.warn-item, .rule-item {
+  font-size: clamp(13px,2.5vw,14.5px) !important;
+  line-height: 1.72 !important;
+  padding: clamp(10px,2.2vw,13px) clamp(12px,2.8vw,16px) !important;
+  border-radius: clamp(8px,2vw,11px) !important;
+}
+.rule-title { font-size: clamp(11px,2.2vw,13px) !important; font-weight: 700 !important; }
+.warn-icon, .rule-icon { font-size: clamp(15px,3.2vw,18px) !important; }
+
+/* ── Tab buttons ── */
+.tab-btn {
+  font-size: clamp(11px,2.2vw,13px) !important;
+  padding: clamp(7px,1.5vw,9px) clamp(12px,2.8vw,18px) !important;
+  min-height: clamp(34px,7.5vw,40px) !important;
+  border-radius: clamp(6px,1.5vw,8px) !important;
+}
+
+/* ── PID values ── */
+.pid-val { font-size: clamp(15px,3.5vw,20px) !important; font-weight: 700 !important; }
+.pid-axis { font-size: clamp(9px,1.8vw,11px) !important; font-weight: 600 !important; letter-spacing: .1em !important; }
+
+/* ── Filter values ── */
+.fval-num   { font-size: clamp(15px,3.5vw,19px) !important; font-weight: 700 !important; }
+.fval-label { font-size: clamp(9px,1.8vw,11px) !important; font-weight: 600 !important; letter-spacing: .1em !important; }
+.fval-unit  { font-size: clamp(9px,1.8vw,10px) !important; }
+.filter-grid { gap: clamp(7px,1.8vw,10px) !important; }
+
+/* ── Stat values ── */
+.qs-stat-val { font-size: clamp(18px,4vw,24px) !important; font-weight: 700 !important; }
+.qs-stat-lbl { font-size: clamp(9px,1.8vw,11px) !important; font-weight: 600 !important; letter-spacing: .1em !important; }
+.adv-stat-v  { font-size: clamp(17px,4vw,22px) !important; font-weight: 700 !important; }
+.adv-stat-l  { font-size: clamp(8px,1.6vw,10px) !important; letter-spacing: .1em !important; font-weight: 600 !important; }
+.qs-stats { padding: clamp(12px,2.5vw,16px) !important; gap: clamp(12px,3vw,20px) !important; }
+
+/* ── CLI box ── */
+.cli-box, .sauce-cli-box, pre, .pf-code {
+  font-size: clamp(10.5px,2vw,12.5px) !important;
+  line-height: 1.78 !important;
+}
+
+/* ── Sauce block ── */
+.sauce-title       { font-size: clamp(13px,2.6vw,16px) !important; font-weight: 800 !important; }
+.sauce-insight-body { font-size: clamp(12px,2.4vw,14px) !important; line-height: 1.72 !important; }
+.sparam-val        { font-size: clamp(13px,3vw,16px) !important; font-weight: 700 !important; }
+
+/* ── Insight cards ── */
+.insight-card { padding: clamp(12px,2.8vw,16px) !important; border-radius: clamp(10px,2.5vw,14px) !important; }
+
+/* ── Harm node ── */
+.harm-node-f   { font-size: clamp(20px,4.5vw,26px) !important; font-weight: 700 !important; }
+.harm-node-n   { font-size: clamp(11px,2.2vw,13px) !important; font-weight: 600 !important; }
+.harm-node-desc { font-size: clamp(11px,2.2vw,13px) !important; line-height: 1.68 !important; }
+
+/* ── Battery matrix ── */
+.bmat-num { font-size: clamp(12px,2.4vw,14px) !important; font-weight: 600 !important; }
+@media(max-width:640px) {
+  .bmat-wrap { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; }
+  .bmat-table { min-width: 560px !important; font-size: 11px !important; }
+}
+
+/* ── Floating tools ── */
+.ftp-trigger {
+  bottom: clamp(16px,4vw,28px) !important;
+  right: clamp(14px,4vw,26px) !important;
+  font-size: clamp(11px,2.2vw,13px) !important;
+  min-height: 48px !important;
+}
+@media(max-width:480px) {
+  .ftp-panel {
+    bottom: 0 !important; right: 0 !important; left: 0 !important;
+    width: 100% !important; max-height: 80vh !important;
+    border-radius: 20px 20px 0 0 !important;
+    border-left: none !important; border-right: none !important; border-bottom: none !important;
+  }
+}
+
+/* ── Toast ── */
+#toast, .toast {
+  font-size: clamp(12px,2.5vw,14px) !important;
+  padding: clamp(10px,2.2vw,12px) clamp(18px,4vw,28px) !important;
+  border-radius: clamp(8px,2vw,12px) !important;
+  max-width: calc(100vw - 32px) !important;
+  bottom: clamp(16px,4vw,28px) !important;
+}
+
+/* ── Scrollbars upgrade ── */
+::-webkit-scrollbar       { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,.15); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: rgba(0,255,136,.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,255,136,.4); }
+
+/* ── Safe area (iPhone notch/home bar) ── */
+@supports(padding: env(safe-area-inset-bottom)) {
+  body { padding-bottom: env(safe-area-inset-bottom); }
+}
+
+/* ── 360px ultra-small screens ── */
+@media(max-width:360px) {
+  .bsa-main { font-size: 14px !important; letter-spacing: .06em !important; }
+  .bsa-rocket { font-size: 20px !important; }
+  .hud-val  { font-size: 18px !important; }
+  .hud-lbl  { font-size: 8px !important; }
+  .tpanel-title { font-size: 12px !important; }
+}
+
+/* ── PC large screens ── */
+@media(min-width:1400px) {
+  .app-shell { grid-template-columns: 300px 1fr !important; }
+  .main-grid { grid-template-columns: 260px 1fr !important; }
+  .mission-panel { width: 300px !important; }
+}
+
 </style>
 </head>
 <body>
@@ -4640,20 +5224,25 @@ label {
           <div class="fsec-label">⚡ Motor KV (optional)</div>
           <div><label>Motor KV — ใช้คำนวณ RPM, tip speed, filter</label>
             <input type="number" name="motor_kv" id="f_kv" placeholder="2306" value="{{ request.form.get('motor_kv','') }}" oninput="liveCalc()"></div>
-          <button type="submit" class="btn-analyze" id="btnAnalyze">
-            <div class="btn-analyze-corner tl"></div>
-            <div class="btn-analyze-corner tr"></div>
-            <div class="btn-analyze-corner bl"></div>
-            <div class="btn-analyze-corner br"></div>
-            <div class="btn-analyze-inner">
-              <span class="btn-analyze-icon">🚀</span>
-              <div style="display:flex;flex-direction:column;align-items:flex-start;">
-                <span class="btn-analyze-text">ANALYZE DRONE</span>
-                <span class="btn-analyze-sub">Physics · PID · Filter · Power · Tune</span>
-              </div>
-              <div class="btn-analyze-sep"></div>
-              <span class="btn-analyze-badge">v5.2<br>APEX</span>
-            </div>
+          <!-- ═══ ANALYZE DRONE — SUPER CTA ═══ -->
+          <button type="submit" class="btn-analyze-super" id="btnAnalyze">
+            <span class="bsa-bg-pulse"></span>
+            <span class="bsa-shine"></span>
+            <span class="bsa-inner">
+              <span class="bsa-left">
+                <span class="bsa-rocket">🚀</span>
+                <span class="bsa-labels">
+                  <span class="bsa-main">ANALYZE DRONE</span>
+                  <span class="bsa-sub">Physics · PID · Filter · Power · Tune</span>
+                </span>
+              </span>
+              <span class="bsa-right">
+                <span class="bsa-badge">
+                  <span class="bsa-badge-dot"></span>
+                  v5.2 APEX
+                </span>
+              </span>
+            </span>
           </button>
         </form>
       </div>
@@ -6934,6 +7523,24 @@ function ftpFilter(btn, cat) {
   });
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFTP(); });
+
+/* ── ANALYZE DRONE BUTTON FEEDBACK ────────────────────────── */
+(function(){
+  var form = document.getElementById('analyzeForm');
+  var btn  = document.getElementById('btnAnalyze');
+  if (!form || !btn) return;
+  form.addEventListener('submit', function() {
+    btn.disabled = true;
+    btn.setAttribute('disabled','');
+    var mainText = btn.querySelector('.bsa-main');
+    var rocket   = btn.querySelector('.bsa-rocket');
+    var dot      = btn.querySelector('.bsa-badge-dot');
+    if (mainText) mainText.textContent = 'ANALYZING...';
+    if (rocket) { rocket.textContent = '⏳'; rocket.style.animation = 'none'; }
+    if (dot) dot.style.background = '#ffb700';
+  });
+})();
+
 
 
 /* ═══════════════════════════════════════════════════════════
