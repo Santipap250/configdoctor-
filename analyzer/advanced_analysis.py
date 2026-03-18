@@ -35,7 +35,7 @@ _DEFAULT_BATT_MAH_BY_SIZE = {
 # W/g hover table — UNIFIED v5.3 (single source of truth with thrust_logic.py)
 # Validated: 5"/750g/4S/1500mAh → 116W hover (0.155 W/g) → 6 min avg ✓
 _W_PER_G_TABLE = {
-    2.5:  0.42,   # Tiny whoop — ducted, very high RPM
+    2.5:  0.38,   # Tiny whoop — ducted, very high RPM (sync v5.3: matches thrust_logic.py)
     3.0:  0.35,   # 3" whoop (bench 550mAh 3S -> 4.5-5 min)
     3.5:  0.24,   # Cinewhoop 3.5"
     4.0:  0.19,   # Mini 4"
