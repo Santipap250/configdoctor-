@@ -1,0 +1,498 @@
+/*
+ * OBIXConfig Doctor — style-glass.css  v5.2.1
+ * ─────────────────────────────────────────────
+ * Supplemental CSS layer: readability, accessibility, mobile touch targets.
+ * Loaded after site-theme.css / style.css in any template that needs it.
+ * Does NOT replace inline styles in index.html — it augments them.
+ *
+ * Contents:
+ *  1. Font imports (DM Sans + DM Mono with swap)
+ *  2. CSS custom-property overrides for readability
+ *  3. Typography weight / size floor
+ *  4. Input & button accessibility (touch targets, focus rings)
+ *  5. Navbar dropdown (Analyzer / Tools)
+ *  6. Tab bar — Analyzer | Tune | Hardware
+ *  7. Neon glassmorphism card tokens
+ *  8. Mobile-first responsive overrides
+ *  9. Reduced-motion support
+ * 10. Print reset
+ */
+
+/* ─── 1. FONT IMPORTS ───────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=DM+Mono:wght@400;500;600&display=swap');
+
+/* ─── 2. CSS TOKENS ─────────────────────────────────────────── */
+:root {
+  /* Readable font stack (overrides theme where applied) */
+  --glass-font-sans: 'DM Sans', 'Inter', system-ui, sans-serif;
+  --glass-font-mono: 'DM Mono', 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Minimum legible sizes */
+  --glass-fz-label:  11px;
+  --glass-fz-body:   13px;
+  --glass-fz-title:  15px;
+  --glass-fz-mono:   12px;
+
+  /* Touch target */
+  --glass-touch: 44px;
+
+  /* Neon tokens */
+  --glass-neon-g:  #00FF88;
+  --glass-neon-c:  #00E8D0;
+  --glass-neon-b:  #3B82F6;
+  --glass-neon-a:  #F59E0B;
+
+  /* Surface tokens */
+  --glass-surface:  rgba(14, 18, 28, 0.85);
+  --glass-border:   rgba(255, 255, 255, 0.07);
+  --glass-border-h: rgba(0, 255, 136, 0.25);
+  --glass-radius:   14px;
+  --glass-radius-sm: 8px;
+}
+
+/* ─── 3. TYPOGRAPHY FLOOR ───────────────────────────────────── */
+/*
+ * These rules apply a minimum font-weight and size so that every page
+ * that includes style-glass.css gets improved readability regardless of
+ * inline styles in individual templates.
+ */
+
+/* Headings: always bold */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+/* Body / paragraph text: readable at all sizes */
+p, li, td, th, span.body-text {
+  font-size: max(var(--glass-fz-body), 1em);
+  line-height: 1.72;
+  font-weight: 400;
+}
+
+/* Labels: uppercase + heavier weight */
+label,
+.fsec-label,
+.form-label,
+.hud-lbl,
+.qs-stat-lbl,
+.adv-stat-l,
+.dvstat-key,
+.chk-label,
+.sb-label,
+.tpanel-sub {
+  font-weight: 600 !important;
+  font-size: max(var(--glass-fz-label), 10px) !important;
+  letter-spacing: 0.05em !important;
+}
+
+/* Panel / card titles */
+.tpanel-title,
+.inst-card-head,
+.cli-deploy-title,
+.sauce-title,
+.mp-title,
+.empty-title {
+  font-weight: 700 !important;
+  font-size: max(var(--glass-fz-title), 13px) !important;
+}
+
+/* Monospace output: always readable */
+.cli-box,
+.sauce-cli-box,
+.pf-code,
+pre,
+code {
+  font-family: var(--glass-font-mono) !important;
+  font-size: max(var(--glass-fz-mono), 11px) !important;
+  line-height: 1.8 !important;
+  font-weight: 500 !important;   /* slightly heavier than 400 for readability */
+}
+
+/* ─── 4. INPUTS & BUTTONS — accessibility ────────────────────── */
+
+/* Minimum touch target for all interactive elements */
+button,
+input[type="submit"],
+input[type="button"],
+input[type="reset"],
+.btn-analyze,
+.btn-analyze-super,
+.btn-deploy,
+.btn-small,
+.tab-btn,
+.dock-tab,
+.pmini,
+.batt-pill,
+.style-card,
+.preset-cat-btn,
+.ftp-cat,
+.ftp-trigger {
+  min-height: var(--glass-touch);
+  touch-action: manipulation;
+}
+
+/* Inputs: clear focus ring, larger tap target */
+input[type="number"],
+input[type="text"],
+input[type="email"],
+select,
+textarea {
+  min-height: var(--glass-touch);
+  font-weight: 500 !important;
+}
+
+/* Strong focus ring for keyboard navigation */
+input:focus,
+select:focus,
+textarea:focus,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--glass-neon-g);
+  outline-offset: 2px;
+}
+
+/* ─── 5. NAVBAR DROPDOWNS ───────────────────────────────────── */
+/*
+ * .navbar-dropdown — floating menu that appears under .navbar-trigger.
+ * These classes are referenced from nav.html / header.html when present.
+ */
+
+.navbar-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: var(--glass-radius-sm);
+  font-weight: 600;
+  font-size: 13px;
+  color: rgba(148, 163, 184, 0.85);
+  transition: color 0.18s, background 0.18s;
+  user-select: none;
+}
+.navbar-trigger:hover {
+  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.06);
+}
+.navbar-trigger .caret {
+  width: 10px; height: 10px; flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.navbar-trigger[aria-expanded="true"] .caret {
+  transform: rotate(180deg);
+}
+
+.navbar-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 200px;
+  background: rgba(10, 13, 22, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--glass-radius);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65), 0 0 24px rgba(0, 255, 136, 0.04);
+  z-index: 600;
+  overflow: hidden;
+  animation: dropIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.navbar-dropdown.open {
+  display: block;
+}
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.navbar-dropdown::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--glass-neon-g), transparent);
+}
+
+.navbar-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  text-decoration: none;
+  color: rgba(148, 163, 184, 0.85);
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.navbar-dropdown-item:last-child {
+  border-bottom: none;
+}
+.navbar-dropdown-item:hover {
+  background: rgba(0, 255, 136, 0.06);
+  color: #f1f5f9;
+}
+.navbar-dropdown-item .dd-icon {
+  font-size: 16px; flex-shrink: 0; width: 22px; text-align: center;
+}
+.navbar-dropdown-item .dd-label {
+  flex: 1;
+}
+.navbar-dropdown-item .dd-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(0, 255, 136, 0.1);
+  color: var(--glass-neon-g);
+  border: 1px solid rgba(0, 255, 136, 0.22);
+}
+
+/* ─── 6. TAB BAR — Analyzer | Tune | Hardware ───────────────── */
+/*
+ * .glass-tabbar — horizontal tab navigation with neon-active indicator.
+ * Add role="tablist" and use .glass-tab[data-target="panel-id"].
+ */
+
+.glass-tabbar {
+  display: flex;
+  gap: 2px;
+  padding: 8px 16px 0;
+  background: rgba(0, 4, 12, 0.97);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.glass-tabbar::-webkit-scrollbar { display: none; }
+
+.glass-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 18px 10px;
+  border-radius: 7px 7px 0 0;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(100, 116, 139, 0.85);
+  background: transparent;
+  border: 1.5px solid transparent;
+  border-bottom: none;
+  transition: color 0.18s, background 0.18s, border-color 0.18s;
+  user-select: none;
+  min-height: var(--glass-touch);
+  position: relative;
+}
+.glass-tab:hover {
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.03);
+}
+.glass-tab.active {
+  color: var(--glass-neon-g);
+  background: rgba(0, 255, 136, 0.07);
+  border-color: rgba(0, 255, 136, 0.22);
+  text-shadow: 0 0 12px rgba(0, 255, 136, 0.35);
+}
+.glass-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1.5px; left: 0; right: 0;
+  height: 1.5px;
+  background: rgba(10, 13, 22, 0.97);
+}
+
+/* Tab dot indicator */
+.glass-tab-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.glass-tab.active .glass-tab-dot {
+  box-shadow: 0 0 6px currentColor;
+}
+
+/* Tab panels */
+.glass-panel {
+  display: none;
+}
+.glass-panel.active {
+  display: block;
+  animation: panelFade 0.3s ease;
+}
+@keyframes panelFade {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── 7. GLASSMORPHISM CARD ─────────────────────────────────── */
+/*
+ * .glass-card — standalone glass card component.
+ * Use as alternative to .tpanel for new feature pages.
+ */
+
+.glass-card {
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+  transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+  position: relative;
+}
+.glass-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--glass-neon-g), var(--glass-neon-c));
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.glass-card:hover {
+  border-color: var(--glass-border-h);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.55), 0 0 16px rgba(0, 255, 136, 0.04);
+}
+.glass-card:hover::before {
+  opacity: 0.65;
+}
+
+.glass-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.04), transparent);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.glass-card-body {
+  padding: 16px 18px;
+}
+
+/* ─── 8. MOBILE-FIRST OVERRIDES ────────────────────────────── */
+
+/* Prevent iOS font-size auto-zoom on inputs */
+@media (max-width: 640px) {
+  input[type="number"],
+  input[type="text"],
+  input[type="email"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Full-width layout on phone */
+@media (max-width: 960px) {
+  .app-shell {
+    grid-template-columns: 1fr !important;
+  }
+  .mission-panel {
+    position: static !important;
+    max-height: none !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    width: 100% !important;
+  }
+  .main-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .inst-col {
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  }
+}
+
+/* HUD: 2-column grid on smaller screens */
+@media (max-width: 640px) {
+  .live-hud {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .filter-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .adv-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .chk-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+/* Safe-area insets (iPhone notch / home bar) */
+@supports (padding: env(safe-area-inset-bottom)) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .form-body {
+    padding-bottom: max(80px, calc(70px + env(safe-area-inset-bottom))) !important;
+  }
+}
+
+/* Sticky analyze button on mobile */
+@media (max-width: 960px) {
+  .btn-analyze,
+  .btn-analyze-super {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 60 !important;
+    margin: 0 -16px !important;
+    width: calc(100% + 32px) !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+  }
+}
+
+/* ─── 9. REDUCED MOTION ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .scan-line,
+  .scan-line-2,
+  .amb-orb,
+  .amb-orb-1,
+  .amb-orb-2,
+  .amb-orb-3,
+  .amb-orb-4 {
+    display: none !important;
+  }
+}
+
+/* ─── 10. PRINT RESET ───────────────────────────────────────── */
+@media print {
+  .top-bar,
+  .tool-dock,
+  .ftp-trigger,
+  .ftp-panel,
+  .scan-line,
+  .scan-line-2,
+  .amb-orb,
+  .page-bg-photo,
+  #radarCanvas,
+  #particleCanvas {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .tpanel,
+  .inst-card,
+  .glass-card {
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+}
