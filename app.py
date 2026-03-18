@@ -26,10 +26,14 @@ from analyzer.thrust_logic import (calculate_thrust_weight,
 from werkzeug.utils import secure_filename
 from analyzer.cli_surgeon import analyze_dump as cli_analyze_dump
 import os, io, time, json, hashlib, logging
+
+# ── Logger init — MUST be first before any try/except import blocks ───────
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("configdoctor")
 # ─────────────────────────────────────────────────────────────────────────────
 # RATINGS & LIKES — SQLite persistent storage
 # ─────────────────────────────────────────────────────────────────────────────
-import sqlite3, hashlib as _hashlib, threading as _threading
+import sqlite3, threading as _threading
 
 _DB_PATH = os.path.join(os.path.dirname(__file__), 'data', 'community.db')
 _db_lock = _threading.Lock()
@@ -66,7 +70,7 @@ def _ip_hash(request_obj):
         or request_obj.remote_addr
         or 'unknown'
     )
-    return _hashlib.sha256(ip.encode()).hexdigest()
+    return hashlib.sha256(ip.encode()).hexdigest()
 
 
 from datetime import datetime
@@ -77,7 +81,7 @@ try:
     CSRF_AVAILABLE = True
 except ImportError:
     CSRF_AVAILABLE = False
-    logger.warning("flask_wtf not installed — CSRF protection disabled")
+    logging.warning("flask_wtf not installed — CSRF protection disabled")
 
 # ── Compression ───────────────────────────────────────────────────────────
 try:
@@ -85,7 +89,7 @@ try:
     COMPRESS_AVAILABLE = True
 except ImportError:
     COMPRESS_AVAILABLE = False
-    logger.warning("flask_compress not installed — response compression disabled")
+    logging.warning("flask_compress not installed — response compression disabled")
 
 # ── Rate Limiting ─────────────────────────────────────────────────────────
 try:
@@ -94,7 +98,7 @@ try:
     LIMITER_AVAILABLE = True
 except ImportError:
     LIMITER_AVAILABLE = False
-    logger.warning("flask_limiter not installed — rate limiting disabled")
+    logging.warning("flask_limiter not installed — rate limiting disabled")
 
 # ── Optional modules ──────────────────────────────────────────────────────
 try:
@@ -198,8 +202,6 @@ app.config.update(
 )
 app.config['DEBUG'] = os.environ.get('FLASK_DEBUG', '0') in ('1', 'true', 'True')
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("configdoctor")
 
 # ── Init Rate Limiter ─────────────────────────────────────────────────────
 if LIMITER_AVAILABLE:
@@ -279,8 +281,8 @@ def validate_input(size, weight, prop_size, pitch, blades, battery):
         warnings.append("จำนวนใบพัด (blades) ต้องเป็นจำนวนเต็ม")
     try:
         cells = _cells_from_str(battery)
-        if cells is None or cells < 3 or cells > 8:
-            warnings.append("แบตควรอยู่ในช่วง 3S ถึง 8S")
+        if cells is None or cells < 1 or cells > 8:
+            warnings.append("แบตควรอยู่ในช่วง 1S ถึง 8S")
     except Exception:
         warnings.append("แบตรูปแบบผิด (เช่น 3S, 4S, 6S, 8S)")
     return warnings
