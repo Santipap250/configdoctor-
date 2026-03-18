@@ -621,7 +621,9 @@ def _handle_analysis_post():
     else:
         analysis["secret_sauce"] = None
 
-    analysis["motor_kv"] = motor_kv
+    analysis["motor_kv"]      = motor_kv
+    analysis["battery_mAh"]   = battery_mAh   # FIX-B: store for template use
+    analysis["weight"]         = weight         # FIX-C: store for template use
     logger.info("analysis keys: %s", list(analysis.keys()))
     return analysis
 
@@ -1224,6 +1226,7 @@ def military_uas():
 
 # ── GET /api/rating — public stats ───────────────────────────────────────
 @app.route('/api/rating', methods=['GET'])
+@_rate("60 per minute;600 per day")  # FIX-D: rate limit read endpoint
 def api_rating_get():
     try:
         with _db_lock:
