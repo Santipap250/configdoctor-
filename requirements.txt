@@ -1,17 +1,21 @@
-# OBIXConfig Doctor v5.2 — production requirements
-# ─────────────────────────────────────────────────
-# SECURITY PATCH (2024):
-#   [HIGH]   gunicorn upgraded 21.2.0 → 22.0.0  (CVE-2024-1135: HTTP Request Smuggling)
-#   [HIGH]   Werkzeug upgraded 2.3.7  → 3.0.3   (CVE-2023-46136: multipart DoS)
-#   [MEDIUM] Jinja2 pinned >=3.1.4              (CVE-2024-34064: XSS via xmlattr filter)
-# FIX v5.2: เพิ่ม Flask-WTF สำหรับ CSRF Protection ทุก POST route
-# FIX v5.2: เพิ่ม Flask-Compress ลด HTML/JSON size ~70%
-# FIX v5.1: เพิ่ม Flask-Limiter เพื่อป้องกัน API abuse/spam
+# OBIXConfig Doctor v5.2.1 — production requirements
+# ─────────────────────────────────────────────────────────
+# SECURITY PATCH (2024-2025):
+#   [HIGH]   gunicorn 22.0.0 — CVE-2024-1135 HTTP Request Smuggling fix
+#   [HIGH]   Werkzeug 3.0.3  — CVE-2023-46136 multipart DoS fix
+#   [MEDIUM] Jinja2 >=3.1.4  — CVE-2024-34064 XSS via xmlattr fix
+# v5.2.1 ADDITIONS:
+#   [HIGH]   bleach 6.0.0     — HTML sanitization for all user-supplied text
+#   [MEDIUM] Flask-Talisman 1.0.1 — CSP + security headers (graceful fallback if absent)
+#   [INFO]   itsdangerous 2.1.2   — Flask session/signing integrity
 Flask==2.3.3
 gunicorn==22.0.0
 Werkzeug==3.0.3
 python-dotenv==1.0.0
 Jinja2>=3.1.4,<4.0
+itsdangerous==2.1.2
 Flask-Limiter==3.5.0
 Flask-Compress==1.14
 Flask-WTF==1.2.1
+bleach==6.0.0
+Flask-Talisman==1.0.1
