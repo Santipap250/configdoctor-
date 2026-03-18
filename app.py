@@ -27,36 +27,6 @@ from werkzeug.utils import secure_filename
 from analyzer.cli_surgeon import analyze_dump as cli_analyze_dump
 import os, io, time, json, hashlib, logging
 
-# ── bleach — HTML sanitization for user-supplied text ──────────
-try:
-    import bleach as _bleach
-    BLEACH_AVAILABLE = True
-except ImportError:
-    BLEACH_AVAILABLE = False
-    logging.warning("bleach not installed — HTML sanitization disabled. "
-                    "Install: pip install bleach==6.0.0")
-
-_BLEACH_TAGS  = []   # strip ALL tags — CLI output is plain text
-_BLEACH_ATTRS = {}
-
-def sanitize_text_for_html(text: str) -> str:
-    """Sanitize arbitrary user/file text before rendering into HTML templates.
-    Strips all HTML tags. Falls back to html.escape if bleach is not installed."""
-    if not isinstance(text, str):
-        text = str(text)
-    if BLEACH_AVAILABLE:
-        return _bleach.clean(text, tags=_BLEACH_TAGS, attributes=_BLEACH_ATTRS, strip=True)
-    import html as _html
-    return _html.escape(text)
-
-# ── Flask-Talisman — optional secondary CSP layer ──────────────
-try:
-    from flask_talisman import Talisman as _Talisman
-    TALISMAN_AVAILABLE = True
-except ImportError:
-    TALISMAN_AVAILABLE = False
-    logging.warning("flask_talisman not installed — using manual security headers.")
-
 # ── Logger init — MUST be first before any try/except import blocks ───────
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("configdoctor")
@@ -211,22 +181,6 @@ _HASH_CACHE: dict = {}
 # ── Enable gzip/brotli compression ───────────────────────────────────────
 if COMPRESS_AVAILABLE:
     Compress(app)
-
-# ── Flask-Talisman (optional layer — manual headers in after_request remain) ──
-# Talisman is loaded here only when available; the after_request hook provides
-# equivalent headers as a fallback, so the app is always secure.
-if TALISMAN_AVAILABLE:
-    _Talisman(
-        app,
-        force_https=not FORCE_INSECURE,
-        strict_transport_security=True,
-        strict_transport_security_max_age=31536000,
-        strict_transport_security_include_subdomains=True,
-        content_security_policy=False,  # CSP is set in after_request (more flexible)
-        frame_options="SAMEORIGIN",
-        x_content_type_options=True,
-        referrer_policy="strict-origin-when-cross-origin",
-    )
 
 # ── Init CSRF protection ──────────────────────────────────────────────────
 if CSRF_AVAILABLE:
@@ -1006,8 +960,6 @@ def analyze_cli():
         dump = data.get('dump', '')
         if not dump:
             return jsonify({"error": "no dump provided"}), 400
-        # Sanitize incoming dump before processing (defense-in-depth)
-        dump = sanitize_text_for_html(str(dump))
         # Size limit
         if len(dump.encode('utf-8')) > 512_000:
             return jsonify({"error": "ไฟล์ใหญ่เกิน 512KB"}), 413
@@ -1047,9 +999,6 @@ def compare_cli():
         dump_b = data.get('dump_b', '')
         if not dump_a or not dump_b:
             return jsonify({"error": "ต้องการ dump_a และ dump_b"}), 400
-        # Sanitize both dumps before processing
-        dump_a = sanitize_text_for_html(str(dump_a))
-        dump_b = sanitize_text_for_html(str(dump_b))
         # Size limit: each dump max 512KB
         if len(dump_a.encode('utf-8')) > 512_000 or len(dump_b.encode('utf-8')) > 512_000:
             return jsonify({"error": "ไฟล์ใหญ่เกิน 512KB ต่อ dump"}), 413
