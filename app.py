@@ -206,7 +206,7 @@ app.config['DEBUG'] = os.environ.get('FLASK_DEBUG', '0') in ('1', 'true', 'True'
 # ── Init Rate Limiter ─────────────────────────────────────────────────────
 if LIMITER_AVAILABLE:
     limiter = Limiter(
-        key_func=_get_real_ip,           # FIX: use real IP via X-Forwarded-For (not Render proxy IP)
+        key_func=get_remote_address,
         app=app,
         default_limits=[],          # ไม่ limit route ทั่วไป
         storage_uri="memory://",    # ใช้ in-memory (เพียงพอสำหรับ single worker)
@@ -629,7 +629,7 @@ def _handle_analysis_post():
 
 
 @app.route("/app", methods=["GET", "POST"])
-@_rate("60 per minute;1000 per day")  # Reasonable: 60 analyses/min, 1000/day per IP
+@_rate("30 per minute;300 per day")  # PATCH: rate-limit main analysis POST
 def index():
     analysis = None
 
@@ -786,7 +786,7 @@ def _recommend_motor_prop(form):
     }
 
 @app.route('/motor-prop', methods=['GET', 'POST'])
-@_rate("60 per minute;600 per day")
+@_rate("30 per minute;300 per day")  # PATCH: rate-limit motor-prop POST
 def motor_prop():
     if request.method == 'POST':
         result = _recommend_motor_prop(request.form)
@@ -879,7 +879,7 @@ except Exception as e:
     logging.warning("rpm_filter_calc import failed: %s", e)
 
 @app.route('/rpm-filter', methods=['GET', 'POST'])
-@_rate("60 per minute;600 per day")
+@_rate("30 per minute;300 per day")  # PATCH: rate-limit rpm-filter POST
 def rpm_filter():
     result = None
     form   = {}
@@ -951,7 +951,7 @@ def fpv_trainer():
     return render_template('fpv_trainer.html')
 
 @app.route('/analyze_cli', methods=['POST'])
-@_rate("30 per minute;500 per day")
+@_rate("20 per minute;200 per day")
 def analyze_cli():
     try:
         if not request.is_json and not request.content_type.startswith('application/json'):
