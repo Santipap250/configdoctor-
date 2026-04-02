@@ -172,11 +172,15 @@ def _cells_from_str(s):
     except Exception:
         return None
 
-from werkzeug.middleware.proxy_fix import ProxyFix
 # ── Flask app ─────────────────────────────────────────────────────────────
-
 app = Flask(__name__)
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
+app.wsgi_app = ProxyFix(
+    app.wsgi_app,
+    x_for=1,
+    x_proto=1,
+    x_host=1,
+    x_port=1,
+)
 
 # SECURITY: ถ้า SECRET_KEY ไม่ถูก set ใน env จะ crash ทันที (ป้องกัน fallback key)
 _secret = os.environ.get("SECRET_KEY", "")
