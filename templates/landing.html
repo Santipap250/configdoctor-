@@ -126,6 +126,73 @@ body:not(.lang-en) .i18n-th { display:inline !important; }
 .lang-toggle.lang-en { color:var(--blue); border-color:rgba(0,168,255,.3); }
 .nav-mobile-right { display:none; align-items:center; gap:8px; }
 @media(max-width:720px) { .nav { padding:0 18px; } .nav-links { display:none; } .nav-mobile-right { display:flex !important; } }
+.top-community {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 10px 16px;
+
+  background: linear-gradient(
+    90deg,
+    rgba(0, 30, 30, 0.95),
+    rgba(0, 60, 50, 0.95)
+  );
+
+  border-bottom: 1px solid rgba(0,255,150,0.2);
+  box-shadow: 0 0 15px rgba(0,255,150,0.08);
+
+  backdrop-filter: blur(8px);
+}
+
+.top-community-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fb-icon {
+  font-size: 20px;
+}
+
+.top-community-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.top-community-text strong {
+  color: #00ffae;
+  font-size: 14px;
+}
+
+.top-community-text span {
+  font-size: 11px;
+  color: #bbb;
+}
+
+.top-join-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+
+  background: #00ffae;
+  color: #000;
+
+  font-size: 12px;
+  font-weight: bold;
+  text-decoration: none;
+
+  transition: 0.25s;
+}
+
+.top-join-btn:hover {
+  transform: scale(1.05);
+  background: #00ffaa;
+}
 
 /* ═══════════════════════════════════════
    HERO SECTION
@@ -995,7 +1062,21 @@ footer {
   </div>
 </nav>
 
-<!-- ═══════════════════════════════════════
+<div class="top-community">
+  <div class="top-community-left">
+    <div class="fb-icon">📘</div>
+    <div class="top-community-text">
+      <strong>OBIXConfigLab</strong>
+      <span>ชุมชน FPV ไทยบน Facebook</span>
+    </div>
+  </div>
+
+  <a href="https://facebook.com/yourpage" target="_blank" class="top-join-btn">
+    เข้าร่วม
+  </a>
+</div>
+
+   <!-- ═══════════════════════════════════════
      HERO
      ═══════════════════════════════════════ -->
 <section class="hero" id="heroSection">
