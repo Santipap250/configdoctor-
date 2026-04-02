@@ -258,25 +258,11 @@ function _r(v){ return Math.max(1, Math.round(v)); }
     showToast('✅ ' + key + ' โหลดแล้ว');
   };
 
-  /* ── DEBOUNCE: ป้องกัน liveCalc ทำงานทุก keystroke (ทำให้ input lag) ─────
-     input (typing) → debounce 120ms → รอหยุดพิมพ์ก่อนค่อย calc
-     change (select, button) → ทันที ไม่ delay                           ── */
-  function _debounce(fn, ms){
-    let t;
-    return function(){ clearTimeout(t); t = setTimeout(fn, ms); };
-  }
-  let _debouncedCalc = _debounce(liveCalc, 120);
-
+  /* attach liveCalc to all inputs */
   let inputs = document.querySelectorAll('input[type=number], select');
   inputs.forEach(function(el){
-    if(el.tagName === 'SELECT'){
-      // select เปลี่ยนค่าทันที ไม่ต้องรอ
-      el.addEventListener('change', liveCalc);
-    } else {
-      // number input: debounce ขณะพิมพ์, immediate เมื่อ blur หรือ Enter
-      el.addEventListener('input', _debouncedCalc);
-      el.addEventListener('change', liveCalc);
-    }
+    el.addEventListener('input', liveCalc);
+    el.addEventListener('change', liveCalc);
   });
 
   /* initial run */
