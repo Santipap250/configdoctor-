@@ -63,13 +63,20 @@ def _get_db():
     return conn
 
 
+# FIX C3: trust X-Forwarded-For only when TRUST_PROXY=1 in env
+#         ถ้าไม่ set จะใช้ remote_addr ตรงๆ ป้องกัน header spoofing bypass rate-limit/vote
+_TRUST_PROXY = os.environ.get("TRUST_PROXY", "0") in ("1", "true", "True")
+
 def _ip_hash(request_obj):
-    """SHA-256 of real client IP (respects X-Forwarded-For from Render proxy)."""
-    ip = (
-        request_obj.headers.get('X-Forwarded-For', '').split(',')[0].strip()
-        or request_obj.remote_addr
-        or 'unknown'
-    )
+    """SHA-256 of real client IP.
+    ใช้ X-Forwarded-For เฉพาะเมื่อ TRUST_PROXY=1 (ตั้งค่าใน Render env vars)
+    เพื่อป้องกัน header spoofing จาก client ทั่วไป
+    """
+    if _TRUST_PROXY:
+        ip = request_obj.headers.get('X-Forwarded-For', '').split(',')[0].strip()
+    else:
+        ip = ''
+    ip = ip or request_obj.remote_addr or 'unknown'
     return hashlib.sha256(ip.encode()).hexdigest()
 
 
@@ -151,9 +158,16 @@ def _normalize_style(s: str) -> str:
     return _STYLE_MAP.get(str(s).lower().strip(), "freestyle")
 
 def _cells_from_str(s):
+    # FIX M2: ใช้ regex แทน replace เพื่อรองรับ "4S+", "4s2p", "4S 1500mAh" ฯลฯ
+    import re as _re
     try:
-        c = int(str(s).upper().replace("S", "").strip())
-        return max(1, min(c, 8))  # FIX v5.1: min=3→1 (รองรับ 1S-2S builds)
+        m = _re.search(r'(\d+)\s*[Ss]', str(s))
+        if m:
+            c = int(m.group(1))
+            return max(1, min(c, 8))
+        # fallback: ถ้าเป็นตัวเลขล้วน
+        c = int(str(s).strip())
+        return max(1, min(c, 8))
     except Exception:
         return None
 
@@ -1033,7 +1047,11 @@ def _cleanup_osd_files(max_age_hours: int = 24) -> None:
         logger.info("OSD cleanup: removed %d old files", removed)
 
 def _timestamped_filename(prefix="obix_osd", ext="txt"):
-    return f"{prefix}-{time.strftime('%Y%m%d-%H%M%S')}.{ext}"
+    # FIX M1: เพิ่ม microseconds เพื่อให้ unique แม้ concurrent request ในวินาทีเดียวกัน
+    import uuid as _uuid
+    ts = time.strftime('%Y%m%d-%H%M%S')
+    uid = _uuid.uuid4().hex[:6]
+    return f"{prefix}-{ts}-{uid}.{ext}"
 
 def _generate_osd_text_from_model(model):
     return json.dumps(model, ensure_ascii=False, indent=2)
@@ -1086,8 +1104,10 @@ def set_security_headers(response):
     response.headers["Referrer-Policy"]        = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"]     = "geolocation=(), microphone=(), camera=()"
     # CSP: whitelist ครบทุก CDN ที่ใช้จริง
-    # PATCH: Add HSTS (1 year, includeSubDomains) — required for TLS enforcement
-    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    # FIX H4: HSTS only on HTTPS — avoid sending over HTTP (browser ignores it anyway,
+    # but some proxies/test runners may behave unexpectedly)
+    if request.is_secure or request.headers.get("X-Forwarded-Proto", "") == "https":
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     # NOTE: 'unsafe-inline' in script-src is kept for compatibility with inline JS in templates.
     # TODO (follow-up): migrate inline scripts to nonce-based CSP to remove 'unsafe-inline'.
     response.headers["Content-Security-Policy"] = (
@@ -1106,7 +1126,9 @@ def set_security_headers(response):
         "  https://*.firebaseio.com "
         "  https://*.firebasedatabase.app "
         "  wss://*.firebaseio.com "
-        "  wss://*.firebasedatabase.app; "
+        "  wss://*.firebasedatabase.app "
+        "  https://*.supabase.co "
+        "  https://*.supabase.net; "  # FIX M4: Supabase community rating API
         "frame-ancestors 'self';"
     )
     # M2: Cache static assets aggressively (1 year, cache-busted by filename)
@@ -1188,7 +1210,7 @@ def sitemap_xml():
         ("/military-uas",      "weekly",  "0.8"),
     ]
     base = "https://configdoctor.onrender.com"
-    today = datetime.utcnow().strftime("%Y-%m-%d")
+    today = datetime.now().strftime("%Y-%m-%d")  # FIX L1: utcnow() deprecated
     urls = "\n".join(
         f"""  <url>
     <loc>{base}{loc}</loc>
@@ -1226,91 +1248,104 @@ def military_uas():
 
 # ── GET /api/rating — public stats ───────────────────────────────────────
 @app.route('/api/rating', methods=['GET'])
-@_rate("60 per minute;600 per day")  # FIX-D: rate limit read endpoint
+@_rate("60 per minute;600 per day")
 def api_rating_get():
+    # FIX C4: ใช้ try/finally ทุกที่เพื่อป้องกัน connection leak
     try:
         with _db_lock:
             conn = _get_db()
-            row = conn.execute(
-                "SELECT COUNT(*) AS cnt, COALESCE(AVG(stars),0) AS avg FROM ratings"
-            ).fetchone()
-            likes_row = conn.execute("SELECT COUNT(*) AS cnt FROM likes").fetchone()
-            conn.close()
+            try:
+                row = conn.execute(
+                    "SELECT COUNT(*) AS cnt, COALESCE(AVG(stars),0) AS avg FROM ratings"
+                ).fetchone()
+                likes_row = conn.execute("SELECT COUNT(*) AS cnt FROM likes").fetchone()
+            finally:
+                conn.close()
         avg = round(row['avg'], 2) if row['cnt'] > 0 else None
         return jsonify({
             'count':  row['cnt'],
             'avg':    avg,
             'likes':  likes_row['cnt'],
         })
-    except Exception as e:
+    except Exception:
         logger.exception("api_rating_get error")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'เกิดข้อผิดพลาดกรุณาลองใหม่'}), 500
 
 
 # ── POST /api/rating — submit star (1-5) ─────────────────────────────────
 @app.route('/api/rating', methods=['POST'])
 @_rate("5 per minute;20 per day")
 def api_rating_post():
+    # FIX C4: try/finally on conn + FIX C2: ไม่ส่ง str(e) กลับ client
     try:
         data  = request.get_json(force=True) or {}
-        stars = int(data.get('stars', 0))
+        try:
+            stars = int(data.get('stars', 0))
+        except (TypeError, ValueError):
+            return jsonify({'error': 'stars must be an integer 1–5'}), 400
         if stars < 1 or stars > 5:
             return jsonify({'error': 'stars must be 1–5'}), 400
         h = _ip_hash(request)
         with _db_lock:
             conn = _get_db()
-            existing = conn.execute(
-                "SELECT id FROM ratings WHERE ip_hash = ?", (h,)
-            ).fetchone()
-            if existing:
+            try:
+                existing = conn.execute(
+                    "SELECT id FROM ratings WHERE ip_hash = ?", (h,)
+                ).fetchone()
+                if existing:
+                    return jsonify({'error': 'already_rated'}), 409
+                conn.execute(
+                    "INSERT INTO ratings (ip_hash, stars) VALUES (?, ?)", (h, stars)
+                )
+                conn.commit()
+                row = conn.execute(
+                    "SELECT COUNT(*) AS cnt, AVG(stars) AS avg FROM ratings"
+                ).fetchone()
+            finally:
                 conn.close()
-                return jsonify({'error': 'already_rated'}), 409
-            conn.execute(
-                "INSERT INTO ratings (ip_hash, stars) VALUES (?, ?)", (h, stars)
-            )
-            conn.commit()
-            row = conn.execute(
-                "SELECT COUNT(*) AS cnt, AVG(stars) AS avg FROM ratings"
-            ).fetchone()
-            conn.close()
         return jsonify({
             'ok':    True,
             'count': row['cnt'],
             'avg':   round(row['avg'], 2),
         })
-    except Exception as e:
+    except Exception:
         logger.exception("api_rating_post error")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'เกิดข้อผิดพลาดกรุณาลองใหม่'}), 500
 
 
 # ── POST /api/like — toggle like (once per IP) ───────────────────────────
 @app.route('/api/like', methods=['POST'])
 @_rate("5 per minute;10 per day")
 def api_like_post():
+    # FIX C4: try/finally on conn
     try:
         h = _ip_hash(request)
         with _db_lock:
             conn = _get_db()
-            existing = conn.execute(
-                "SELECT id FROM likes WHERE ip_hash = ?", (h,)
-            ).fetchone()
-            if existing:
+            try:
+                existing = conn.execute(
+                    "SELECT id FROM likes WHERE ip_hash = ?", (h,)
+                ).fetchone()
+                if existing:
+                    return jsonify({'error': 'already_liked'}), 409
+                conn.execute("INSERT INTO likes (ip_hash) VALUES (?)", (h,))
+                conn.commit()
+                cnt = conn.execute("SELECT COUNT(*) AS cnt FROM likes").fetchone()['cnt']
+            finally:
                 conn.close()
-                return jsonify({'error': 'already_liked'}), 409
-            conn.execute("INSERT INTO likes (ip_hash) VALUES (?)", (h,))
-            conn.commit()
-            cnt = conn.execute("SELECT COUNT(*) AS cnt FROM likes").fetchone()['cnt']
-            conn.close()
         return jsonify({'ok': True, 'likes': cnt})
-    except Exception as e:
+    except Exception:
         logger.exception("api_like_post error")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'เกิดข้อผิดพลาดกรุณาลองใหม่'}), 500
 # ─────────────────────────────────────────────────────────────────────────────
 
 
 if __name__ == "__main__":
+    # FIX L3: threaded=False ป้องกัน race condition กับ SQLite lock ใน dev
+    # production ใช้ gunicorn (Procfile) ซึ่ง single-worker + WAL อยู่แล้ว
     app.run(
         host="0.0.0.0",
         port=int(os.environ.get("PORT", 10000)),
         debug=app.config.get('DEBUG', False),
+        threaded=False,
     )
