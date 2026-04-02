@@ -14,6 +14,7 @@ jobs:
   audit:
     name: Dependency Security Audit
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -26,13 +27,14 @@ jobs:
       - name: Install pip-audit
         run: pip install pip-audit
 
-      - name: Run pip-audit (fail on Critical/High CVEs)
-        run: pip-audit -r requirements.txt --severity high
+      - name: Run pip-audit
+        run: pip-audit -r requirements.txt
 
   # ── 2. Lint + Static Analysis ─────────────────────────────────────────
   lint:
     name: Lint & Static Analysis
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -48,24 +50,22 @@ jobs:
           pip install bandit ruff
 
       - name: Run Ruff (Python linter)
-  run: ruff check . --select E,W,F,S --ignore S101,S603
+        run: ruff check . --select E,W,F,S --ignore S101,S603
 
-- name: Run Bandit (Python security linter)
-  run: |
-    bandit -r app.py analyzer/ logic/ \
-      -ll \
-      --skip B101,B603 \
-      -f txt
+      - name: Run Bandit (Python security linter)
+        run: |
+          bandit -r app.py analyzer/ logic/             -ll             --skip B101,B603             -f txt
 
   # ── 3. Tests ───────────────────────────────────────────────────────────
   test:
     name: Test Suite
     runs-on: ubuntu-latest
     needs: [audit, lint]
+
     env:
       SECRET_KEY: ci-test-secret-key-not-for-production
       FLASK_DEBUG: "0"
-      FORCE_INSECURE: "1"   # allow HTTP in CI test env
+      FORCE_INSECURE: "1"
 
     steps:
       - uses: actions/checkout@v4
@@ -81,10 +81,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          pytest tests/ -v --tb=short \
-            --cov=app --cov=analyzer --cov=logic \
-            --cov-report=term-missing \
-            --cov-fail-under=60
+          pytest tests/ -v --tb=short             --cov=app --cov=analyzer --cov=logic             --cov-report=term-missing             --cov-fail-under=60
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -97,10 +94,11 @@ jobs:
   secrets:
     name: Secret Scanning (Gitleaks)
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # full history for secret scanning
+          fetch-depth: 0
 
       - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2
