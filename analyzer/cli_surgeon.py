@@ -211,7 +211,7 @@ def basic_checks(params: Dict[str, Any]) -> List[Dict]:
 
     # --- gyro / sample rate ---
     # Keys could be gyro_sample_rate, gyro_hz
-    for k in ('gyro_sample_rate','gyro_hz','gyro_hz'):
+    for k in ('gyro_sample_rate','gyro_hz'):  # FIX H1: removed duplicate 'gyro_hz'
         if k in params:
             try:
                 g = int(params[k])
@@ -657,11 +657,14 @@ def analyze_dump(text: str) -> Dict[str, Any]:
 
     summary = f"พารามิเตอร์ที่อ่านได้: {cnt_params} รายการ · severity: {severity}"
     # return normalized structure
+    # FIX H2: strip internal keys (_raw_lines, _raw_text_sample) from public response
+    # เพื่อไม่ให้ส่ง user input ดิบทั้งหมดกลับใน JSON response (ลด size + security)
+    public_params = {k: v for k, v in params.items() if not k.startswith('_')}
     return {
         'summary': summary,
         'rules': rules,
         'fix_commands': fixes,
-        'params': {k: v for k, v in params.items()}
+        'params': public_params,
     }
 
 # ----------------------
