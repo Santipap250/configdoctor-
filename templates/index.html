@@ -3380,7 +3380,7 @@ select:focus {
 }
 
 /* Drone SVG motors */
-.drone-motor { animation:motorSpin .0s linear infinite; }
+/* drone-motor spin removed (zero-duration was no-op; motorSpinGlow below handles glow) */
 @keyframes motorSpinGlow {
   0%,100%{filter:drop-shadow(0 0 3px var(--neon-g))}
   50%{filter:drop-shadow(0 0 8px var(--neon-g))}
@@ -5431,7 +5431,7 @@ body.typing .amb-orb-4 { animation-play-state: paused !important; }
 # 🚁 OBIXConfig Doctor v5.2 — BASE TUNE
 # {{ analysis.detected_class | default('Custom') | upper }} · {{ analysis.style | upper }}
 # Frame: {{ analysis.size or '5' }}" · Prop: {{ analysis.prop_size or '5' }}"×{{ analysis.pitch or '4.0' }}p {{ request.form.get('blades','3') }}blade
-# Battery: {{ analysis.advanced.cells if analysis.advanced else '—' }}S · KV{{ analysis.motor_kv or '—' }}
+# Battery: {{ analysis.advanced.cells | default('—') if analysis.advanced else '—' }}S · KV{{ analysis.motor_kv or '—' }}
 # ══════════════════════════════════════════════════
 # ─────────────── PID ───────────────────────────────
 set p_roll               = {{ analysis.pid.roll.p }}
@@ -5456,7 +5456,7 @@ set motor_pwm_protocol   = DSHOT600
 set dshot_bidir          = {{ 'ON' if analysis.filter.rpm_filter else 'OFF' }}
 set rpm_filter_harmonics = 3
 set rpm_filter_q         = 500
-set rpm_filter_min_hz    = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [80, (analysis.advanced.rpm_estimated / 60 * 7 * 0.18) | int] | max }}{% else %}100{% endif %}
+set rpm_filter_min_hz    = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [80, (analysis.advanced.rpm_estimated * 0.15) | int] | max }}{% else %}100{% endif %}
 
 # ─────────────── Anti-Gravity ──────────────────────
 set anti_gravity_gain    = {{ analysis.filter.anti_gravity or 3 }}
@@ -5566,14 +5566,14 @@ save</div>
                   {% set twr_v = analysis.advanced.thrust_ratio %}
                   {% if twr_v < 1.5 %}red{% elif twr_v > 8.0 %}amber{% else %}green{% endif %}
                 {% endif %}">
-                {% if analysis.advanced and analysis.advanced.thrust_ratio %}{{ analysis.advanced.thrust_ratio }}:1{% else %}—{% endif %}
+                {% if analysis.advanced and analysis.advanced.thrust_ratio %}{{ analysis.advanced.thrust_ratio | round(2) }}:1{% else %}—{% endif %}
               </span>
               <span class="qs-stat-lbl">TWR</span>
             </div>
             <div class="qs-stat">
               <span class="qs-stat-val amber">
-                {% if analysis.est_flight_time_min %}{{ analysis.est_flight_time_min }} min
-                {% elif analysis.battery_est %}{{ analysis.battery_est }} min
+                {% if analysis.est_flight_time_min %}{{ analysis.est_flight_time_min | round(1) }} min
+                {% elif analysis.battery_est %}{{ analysis.battery_est | round(1) }} min
                 {% else %}—{% endif %}
               </span>
               <span class="qs-stat-lbl">Flight Time (avg)</span>
@@ -5617,7 +5617,8 @@ save</div>
             </div>
             <div class="qs-stat">
               <span class="qs-stat-val {% if analysis.advanced.efficiency_class == 'efficient' %}green{% elif analysis.advanced.efficiency_class == 'nominal' %}blue{% else %}amber{% endif %}">
-                {{ analysis.advanced.efficiency_class | default('—') | upper | truncate(6,true,'') }}
+                {%- set _ec = analysis.advanced.efficiency_class | default('') -%}
+                {%- if _ec == 'efficient' %}EFFIC{%- elif _ec == 'nominal' %}NRML{%- elif _ec %}{{ _ec | upper | truncate(5,true,'') }}{%- else %}—{%- endif -%}
               </span>
               <span class="qs-stat-lbl">Efficiency</span>
             </div>
@@ -5637,15 +5638,15 @@ save</div>
           <!-- Battery overview -->
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;">
             <div style="background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center;">
-              <div style="font-family:var(--font-m);font-size:14px;font-weight:700;color:var(--blue);">{{ analysis.advanced.cells }}S · {{ analysis.advanced.pack_voltage_nominal }}V</div>
+              <div style="font-family:var(--font-m);font-size:14px;font-weight:700;color:var(--blue);">{{ analysis.advanced.cells | default("—") }}S · {{ analysis.advanced.pack_voltage_nominal | default("—") }}V</div>
               <div style="font-family:var(--font-d);font-size:7px;color:var(--muted);letter-spacing:.08em;margin-top:2px;">BATTERY PACK</div>
             </div>
             <div style="background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center;">
-              <div style="font-family:var(--font-m);font-size:14px;font-weight:700;color:var(--green);">{{ analysis.advanced.battery_mAh_used }}mAh</div>
+              <div style="font-family:var(--font-m);font-size:14px;font-weight:700;color:var(--green);">{{ analysis.advanced.battery_mAh_used | default("—") }}mAh</div>
               <div style="font-family:var(--font-d);font-size:7px;color:var(--muted);letter-spacing:.08em;margin-top:2px;">CAPACITY</div>
             </div>
             <div style="background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center;">
-              <div style="font-family:var(--font-m);font-size:14px;font-weight:700;color:var(--amber);">{{ analysis.advanced.battery_wh }}Wh</div>
+              <div style="font-family:var(--font-m);font-size:14px;font-weight:700;color:var(--amber);">{{ analysis.advanced.battery_wh | default("—") }}Wh</div>
               <div style="font-family:var(--font-d);font-size:7px;color:var(--muted);letter-spacing:.08em;margin-top:2px;">ENERGY</div>
             </div>
           </div>
@@ -5740,7 +5741,7 @@ save</div>
                 {% elif total_score >= 55 %}BUILD ปานกลาง — ควรปรับสเปคก่อนบิน aggressive
                 {% else %}BUILD ต้องปรับปรุง — มีความเสี่ยงหลายจุด ตรวจสอบ Warnings{% endif %}
               </strong>
-              TWR {{ twr }}:1 · Flight time ~{{ ft | int }} นาที
+              TWR {{ twr | round(2) }}:1 · Flight time ~{{ ft | round(1) if ft > 0 else '—' }} นาที
               {% if noise >= 5 %} · ⚠️ Noise สูง ควร balance prop{% endif %}
               {% if tip > 270 %} · ⚠️ Tip speed ใกล้ขีดจำกัด ({{ tip | int }} m/s){% endif %}
             </div>
@@ -5931,7 +5932,7 @@ set motor_pwm_protocol    = DSHOT600
 set dshot_bidir           = {{ 'ON' if analysis.filter.rpm_filter else 'OFF' }}
 set rpm_filter_harmonics  = 3
 set rpm_filter_q          = 500
-set rpm_filter_min_hz     = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [80, (analysis.advanced.rpm_estimated / 60 * 0.30) | int] | max }}{% else %}80{% endif %}
+set rpm_filter_min_hz     = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [80, (analysis.advanced.rpm_estimated * 0.15) | int] | max }}{% else %}80{% endif %}
 set anti_gravity_gain     = {{ analysis.filter.anti_gravity or 5 }}
 set anti_gravity_mode     = SMOOTH</pre>
               </div>
@@ -5959,9 +5960,9 @@ set anti_gravity_mode     = SMOOTH</pre>
                 <button class="pf-copy-btn" onclick="copyEl('fullcli-box')">Copy All</button>
               </div>
               <pre class="pf-code" id="fullcli-box" style="font-size:10px;line-height:1.7;"
-># ══ OBIXConfig Doctor ══ {{ analysis.detected_class }} · {{ analysis.style | capitalize }}
-# Build: {{ analysis.prop_size or '5' }}" prop · {{ analysis.advanced.cells if analysis.advanced else '4' }}S · KV{{ analysis.motor_kv or '—' }}
-# Score: {{ analysis.advanced.efficiency_class | default('nominal') | capitalize }} · TWR {{ analysis.advanced.thrust_ratio if analysis.advanced else '—' }}
+># ══ OBIXConfig Doctor ══ {{ analysis.detected_class | default('Custom') }} · {{ analysis.style | capitalize }}
+# Build: {{ analysis.prop_size or '5' }}" prop · {{ analysis.advanced.cells | default('4') if analysis.advanced else '4' }}S · KV{{ analysis.motor_kv or '—' }}
+# Score: {{ analysis.advanced.efficiency_class | default('nominal') | capitalize }} · TWR {{ analysis.advanced.thrust_ratio | round(2) if analysis.advanced and analysis.advanced.thrust_ratio else '—' }}
 # ─────────────────────────── PID ───────────────────────────
 set p_roll               = {{ analysis.pid.roll.p }}
 set i_roll               = {{ analysis.pid.roll.i }}
@@ -5987,7 +5988,7 @@ set dshot_bidir          = {{ 'ON' if analysis.filter.rpm_filter else 'OFF' }}
 set motor_poles          = 14
 set rpm_filter_harmonics = 3
 set rpm_filter_q         = 500
-set rpm_filter_min_hz    = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [80, (analysis.advanced.rpm_estimated / 60 * 0.30) | int] | max }}{% else %}80{% endif %}
+set rpm_filter_min_hz    = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [80, (analysis.advanced.rpm_estimated * 0.15) | int] | max }}{% else %}80{% endif %}
 set anti_gravity_gain    = {{ analysis.filter.anti_gravity or 5 }}
 set anti_gravity_mode    = SMOOTH
 save</pre>
@@ -6012,7 +6013,7 @@ save</pre>
             <!-- TWR -->
             {% set twr2 = analysis.advanced.thrust_ratio | default(0) | float %}
             <div class="insight-card {% if twr2 >= 3.5 %}g{% elif twr2 >= 2.0 %}a{% else %}r{% endif %}">
-              <div class="ic-val" style="color:{% if twr2 >= 3.5 %}var(--green){% elif twr2 >= 1.8 %}var(--amber){% else %}var(--red){% endif %}">{{ twr2 }}:1</div>
+              <div class="ic-val" style="color:{% if twr2 >= 3.5 %}var(--green){% elif twr2 >= 1.8 %}var(--amber){% else %}var(--red){% endif %}">{{ twr2 | round(2) }}:1</div>
               <div class="ic-label">Thrust-to-Weight Ratio</div>
               <div class="ic-explain">
                 {% if twr2 >= 6.0 %}⚡ กำลังสูงมาก — hover ~{{ analysis.advanced.hover_throttle_pct | int if analysis.advanced.hover_throttle_pct else (100/twr2**0.5)|int }}% เหมาะ racing/aggressive freestyle
@@ -6027,7 +6028,7 @@ save</pre>
             <!-- Peak Current -->
             {% set peak_a = analysis.advanced.peak_current_a | default(0) | float %}
             {% set esc_a = analysis.esc_recommended_a | default(0) | int %}
-            <div class="insight-card {% if peak_a > 0 and esc_a > 0 and peak_a < esc_a * 4 %}g{% else %}a{% endif %}">
+            <div class="insight-card {% if peak_a > 0 %}{% if esc_a > 0 and peak_a < esc_a * 4 %}g{% else %}a{% endif %}{% else %}a{% endif %}">
               <div class="ic-val" style="color:var(--blue)">{{ peak_a }}A</div>
               <div class="ic-label">Peak Current (Total)</div>
               <div class="ic-explain">
@@ -6112,7 +6113,7 @@ save</pre>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
               <span style="font-family:var(--font-d);font-size:8px;letter-spacing:.12em;color:var(--muted2);">KV × VOLTAGE INDEX (loaded RPM estimate)</span>
               <span style="font-family:var(--font-m);font-size:13px;font-weight:700;color:var(--blue);">
-                {{ analysis.advanced.rpm_estimated | default(0) | int | string | replace(',', ',') }} RPM
+                {{ '{:,}'.format(analysis.advanced.rpm_estimated | default(0) | int) }} RPM
               </span>
             </div>
             {% set kvv = analysis.motor_kv * analysis.advanced.pack_voltage_nominal %}
