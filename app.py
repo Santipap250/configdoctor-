@@ -266,13 +266,13 @@ def validate_input(size, weight, prop_size, pitch, blades, battery):
         if prop_size > (size + 4):
             warnings.append("ขนาดใบพัดดูใหญ่กว่าปกติสำหรับเฟรมที่ระบุ")
     except Exception:
-        pass
+        logger.debug("suppressed exception", exc_info=True)
     try:
         pitch = float(pitch)
         if not (1.5 <= pitch <= 8.0):
             warnings.append("Pitch ใบพัดอยู่นอกช่วงที่ใช้ทั่วไป")
     except Exception:
-        pass
+        logger.debug("suppressed exception", exc_info=True)
     try:
         blades = int(blades)
         if blades not in (2, 3, 4):
@@ -583,7 +583,7 @@ def _handle_analysis_post():
         analysis["flight_time_detail"] = ft_detail
         analysis.setdefault("est_flight_time_min", ft_detail.get("avg_flight_min"))
     except Exception:
-        pass
+        logger.debug("suppressed exception", exc_info=True)
 
     norm_warnings = []
     for w in warnings:
@@ -975,13 +975,13 @@ def analyze_cli():
             result["motor_protocol"] = params.get("motor_pwm_protocol")
             result["dshot_bidir"]    = params.get("dshot_bidir")
         except Exception:
-            pass
+            logger.debug("suppressed exception", exc_info=True)
         # Enrich with firmware version detection
         try:
             from analyzer.cli_surgeon import detect_firmware_version
             result['firmware'] = detect_firmware_version(dump)
         except Exception:
-            pass
+            logger.debug("suppressed exception", exc_info=True)
         return jsonify(result)
     except Exception as e:
         logger.exception("analyze_cli error")
@@ -1028,7 +1028,7 @@ def _cleanup_osd_files(max_age_hours: int = 24) -> None:
                 os.remove(fp)
                 removed += 1
         except Exception:
-            pass
+            logger.debug("suppressed exception", exc_info=True)
     if removed:
         logger.info("OSD cleanup: removed %d old files", removed)
 
