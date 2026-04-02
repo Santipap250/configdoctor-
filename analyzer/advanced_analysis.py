@@ -59,9 +59,13 @@ _STYLE_FACTORS = {
 
 
 def _cells_from_str(s):
+    # FIX: regex handles "4S+", "4s2p", "4S 1500mAh", plain "4", etc.
+    import re as _re
     try:
-        c = int(str(s).upper().replace("S","").strip())
-        return max(1, min(c,8))  # FIX v5.1: min=3→1 (รองรับ 1S-2S builds)
+        m = _re.search(r'(\d+)\s*[Ss]', str(s))
+        if m:
+            return max(1, min(int(m.group(1)), 8))
+        return max(1, min(int(str(s).strip()), 8))
     except Exception:
         return 4
 
@@ -375,10 +379,12 @@ def make_advanced_report(
         }
         return {"advanced": advanced}
 
-    except Exception as e:
+    except Exception:
+        import logging as _log
+        _log.getLogger("configdoctor").exception("make_advanced_report error")
         return {"advanced":{
             "power":{},"thrust_ratio":0,"twr_note":"","kv_suggestion":"",
-            "prop_notes":[],"warnings_advanced":[f"advanced wrapper error: {e}"],
+            "prop_notes":[],"warnings_advanced":["ไม่สามารถคำนวณขั้นสูงได้ — กรอกข้อมูลให้ครบ"],
             "_diagnostics":{}
         }}
 
