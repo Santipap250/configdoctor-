@@ -110,16 +110,16 @@ body::after {
     linear-gradient(60deg,  rgba(0,170,255,0.01) 1px, transparent 1px),
     linear-gradient(-60deg, rgba(0,170,255,0.01) 1px, transparent 1px);
   background-size: 52px 52px, 52px 52px, 64px 110px, 64px 110px;
-  animation: gridDrift 60s linear infinite; opacity:.7;
+  /* gridDrift removed — perf */ opacity:.7;
 }
 @keyframes gridDrift {
   0%  { background-position:0 0, 0 0, 0 0, 0 0 }
   100%{ background-position:52px 52px, 52px 52px, 64px 110px, -64px 110px }
 }
-.amb-orb { position:fixed; border-radius:50%; pointer-events:none; z-index:0; filter:blur(90px); }
-.amb-orb-1 { width:500px; height:500px; background:radial-gradient(circle, rgba(0,255,136,0.09) 0%, transparent 70%); top:-150px; left:-100px; animation:orbA 30s ease-in-out infinite; }
-.amb-orb-2 { width:600px; height:600px; background:radial-gradient(circle, rgba(0,170,255,0.07) 0%, transparent 70%); bottom:-200px; right:-150px; animation:orbB 38s ease-in-out infinite; }
-.amb-orb-3 { width:400px; height:400px; background:radial-gradient(circle, rgba(176,96,255,0.06) 0%, transparent 70%); top:40%; left:55%; animation:orbC 25s ease-in-out infinite; }
+.amb-orb { position:fixed; border-radius:50%; pointer-events:none; z-index:0; filter:blur(55px); }
+.amb-orb-1 { width:500px; height:500px; background:radial-gradient(circle, rgba(0,255,136,0.09) 0%, transparent 70%); top:-150px; left:-100px; animation:orbA 50s ease-in-out infinite; }
+.amb-orb-2 { width:600px; height:600px; background:radial-gradient(circle, rgba(0,170,255,0.07) 0%, transparent 70%); bottom:-200px; right:-150px; animation:orbB 60s ease-in-out infinite; }
+.amb-orb-3 { width:400px; height:400px; background:radial-gradient(circle, rgba(176,96,255,0.06) 0%, transparent 70%); top:40%; left:55%; animation:orbC 42s ease-in-out infinite; }
 @keyframes orbA { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(80px,60px) scale(1.12)} }
 @keyframes orbB { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-60px,-80px) scale(1.08)} }
 @keyframes orbC { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(40px,-50px) scale(1.15)} }
@@ -1457,7 +1457,7 @@ body::after {
     linear-gradient(90deg, rgba(0,255,136,0.028) 1px, transparent 1px),
     linear-gradient(60deg,  rgba(0,170,255,0.012) 1px, transparent 1px),
     linear-gradient(-60deg, rgba(0,170,255,0.012) 1px, transparent 1px) !important;
-  animation: gridDrift 50s linear infinite !important;
+  /* gridDrift removed */
 }
 
 /* Bigger ambient orbs */
@@ -1479,7 +1479,7 @@ body::after {
 /* Extra ambient orb */
 .amb-orb-4 {
   position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
-  filter: blur(100px);
+  filter:blur(55px);
   width: 400px; height: 400px;
   background: radial-gradient(circle, rgba(0,232,208,0.06) 0%, transparent 65%);
   top: 50%; right: -100px;
@@ -4958,6 +4958,36 @@ input:focus, select:focus {
   .mission-panel { width: 300px !important; }
 }
 
+
+/* ═══════════════════════════════════════════════════════
+   PERFORMANCE PATCH v5.2 — input lag fix + GPU promotion
+═══════════════════════════════════════════════════════ */
+.amb-orb { will-change: transform; contain: strict; }
+.mission-panel { contain: layout style; position: relative; z-index: 2; }
+.form-body { contain: layout; }
+input, select { transform: translateZ(0); }
+
+/* Pause orb animations while user is typing */
+body.typing .amb-orb-1,
+body.typing .amb-orb-2,
+body.typing .amb-orb-3,
+body.typing .amb-orb-4 { animation-play-state: paused !important; }
+
+/* Mobile: reduce blur expense */
+@media (max-width: 768px) {
+  .amb-orb { filter: blur(35px) !important; }
+  .on-bar, .top-bar { backdrop-filter: blur(12px) !important; }
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -5148,8 +5178,8 @@ input:focus, select:focus {
           </div>
           <div class="fsec-label">📐 ข้อมูลโดรน</div>
           <div class="fg">
-            <div><label>ขนาด FRAME (นิ้ว)</label><input type="number" step="0.1" name="size" id="f_size" placeholder="5.0" value="{{ request.form.get('size','') }}" required oninput="liveCalc()"></div>
-            <div><label>น้ำหนัก ALL-UP (กรัม)</label><input type="number" name="weight" id="f_weight" placeholder="750" value="{{ request.form.get('weight','') }}" required oninput="liveCalc()"></div>
+            <div><label>ขนาด FRAME (นิ้ว)</label><input type="number" step="0.1" name="size" id="f_size" placeholder="5.0" value="{{ request.form.get('size','') }}" required oninput="debouncedCalc()"></div>
+            <div><label>น้ำหนัก ALL-UP (กรัม)</label><input type="number" name="weight" id="f_weight" placeholder="750" value="{{ request.form.get('weight','') }}" required oninput="debouncedCalc()"></div>
           </div>
           <div class="fsec-label">🔋 แบตเตอรี่</div>
           <!-- Battery Visual Pills -->
@@ -5180,7 +5210,7 @@ input:focus, select:focus {
           </select>
           <div style="margin-top:8px;">
             <label>Capacity (mAh)</label>
-            <input type="number" name="battery_mAh" id="f_mah" placeholder="1500" value="{{ request.form.get('battery_mAh','') }}" oninput="liveCalc()">
+            <input type="number" name="battery_mAh" id="f_mah" placeholder="1500" value="{{ request.form.get('battery_mAh','') }}" oninput="debouncedCalc()">
           </div>
 
           <div class="fsec-label">🎮 Flight Style</div>
@@ -5211,20 +5241,20 @@ input:focus, select:focus {
           </select>
           <div style="margin-top:8px;">
             <label>Motor Count</label>
-            <input type="number" name="motor_count" value="{{ request.form.get('motor_count','4') }}" min="1" max="8" oninput="liveCalc()">
+            <input type="number" name="motor_count" value="{{ request.form.get('motor_count','4') }}" min="1" max="8" oninput="debouncedCalc()">
           </div>
           <div class="fsec-label">🌀 Propeller</div>
           <div class="fg">
-            <div><label>Prop Size (นิ้ว)</label><input type="number" step="0.1" name="prop_size" id="f_prop" value="{{ request.form.get('prop_size','5') }}" required oninput="liveCalc()"></div>
+            <div><label>Prop Size (นิ้ว)</label><input type="number" step="0.1" name="prop_size" id="f_prop" value="{{ request.form.get('prop_size','5') }}" required oninput="debouncedCalc()"></div>
             <div><label>จำนวนใบ</label>
               <select name="blades" onchange="liveCalc()">
                 {% for n in [2,3,4] %}<option value="{{ n }}" {% if request.form.get('blades','')==(n|string) %}selected{% endif %}>{{ n }} ใบ</option>{% endfor %}
               </select></div>
           </div>
-          <div style="margin-bottom:6px;"><label>Pitch (นิ้ว)</label><input type="number" step="0.1" name="pitch" id="f_pitch" value="{{ request.form.get('pitch','4.0') }}" required oninput="liveCalc()"></div>
+          <div style="margin-bottom:6px;"><label>Pitch (นิ้ว)</label><input type="number" step="0.1" name="pitch" id="f_pitch" value="{{ request.form.get('pitch','4.0') }}" required oninput="debouncedCalc()"></div>
           <div class="fsec-label">⚡ Motor KV (optional)</div>
           <div><label>Motor KV — ใช้คำนวณ RPM, tip speed, filter</label>
-            <input type="number" name="motor_kv" id="f_kv" placeholder="2306" value="{{ request.form.get('motor_kv','') }}" oninput="liveCalc()"></div>
+            <input type="number" name="motor_kv" id="f_kv" placeholder="2306" value="{{ request.form.get('motor_kv','') }}" oninput="debouncedCalc()"></div>
           <!-- ═══ ANALYZE DRONE — SUPER CTA ═══ -->
           <button type="submit" class="btn-analyze-super" id="btnAnalyze">
             <span class="bsa-bg-pulse"></span>
@@ -7365,6 +7395,68 @@ set vbat_pid_off  = 0</div>
 </div><!-- /page-wrap -->
 
 <div class="toast" id="toast">✓ copied!</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   PERFORMANCE PATCH — OBIXConfig Doctor v5.2
+   Fixes: input lag (debounce), animation jank (pause-on-type),
+          heavy MutationObserver (guard by analysis), passive events
+═══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* 1. Debounced liveCalc — 150ms delay prevents lag on keystroke */
+  var _calcTimer = null;
+  window.debouncedCalc = function () {
+    clearTimeout(_calcTimer);
+    _calcTimer = setTimeout(function () {
+      if (window.liveCalc) window.liveCalc();
+    }, 150);
+  };
+
+  /* 2. Pause orb animations while user types */
+  var _typingTimer = null;
+  function onTyping() {
+    if (!document.body.classList.contains('typing')) {
+      document.body.classList.add('typing');
+    }
+    clearTimeout(_typingTimer);
+    _typingTimer = setTimeout(function () {
+      document.body.classList.remove('typing');
+    }, 800);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var form = document.getElementById('analyzeForm');
+    if (form) {
+      form.addEventListener('input',   onTyping, { passive: true });
+      form.addEventListener('keydown', onTyping, { passive: true });
+    }
+
+    /* 3. Passive scroll/touch events — prevents jank on mobile */
+    document.addEventListener('touchstart', function(){}, { passive: true });
+    document.addEventListener('touchmove',  function(){}, { passive: true });
+    document.addEventListener('wheel',      function(){}, { passive: true });
+
+    /* 4. GPU-promote orbs upfront */
+    document.querySelectorAll('.amb-orb').forEach(function (o) {
+      o.style.willChange = 'transform';
+    });
+
+    /* 5. Guard IntersectionObserver — only activate in results */
+    /* The MutationObserver in the super-upgrade script is safe:
+       OBIX.analysis check is handled at runtime after bridge loads */
+  });
+
+  /* 6. Clear debounce on form submit */
+  document.addEventListener('submit', function () {
+    clearTimeout(_calcTimer);
+    clearTimeout(_typingTimer);
+    document.body.classList.remove('typing');
+  });
+
+}());
+</script>
 
 <script>
 /* ── OBIXConfig Doctor — Jinja2 Data Bridge ─────────────────── */

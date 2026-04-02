@@ -1052,7 +1052,7 @@
 
 <!-- Advice data from backend -->
 <script>
-const ADVICE_MAP = {{ advice_json | safe }};
+const ADVICE_MAP = {{ advice_json | tojson }};
 const ALL_SYMPTOMS = {{ symptoms | tojson }};
 const SYMPTOM_MAP = {};
 ALL_SYMPTOMS.forEach(function(s){ SYMPTOM_MAP[s.id] = s; });
