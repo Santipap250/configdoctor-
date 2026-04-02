@@ -26,7 +26,6 @@ from analyzer.thrust_logic import (calculate_thrust_weight,
 from werkzeug.utils import secure_filename
 from analyzer.cli_surgeon import analyze_dump as cli_analyze_dump
 import os, io, time, json, hashlib, logging
-from werkzeug.middleware.proxy_fix import ProxyFix
 
 # ── Logger init — MUST be first before any try/except import blocks ───────
 logging.basicConfig(level=logging.INFO)
@@ -174,13 +173,6 @@ def _cells_from_str(s):
 
 # ── Flask app ─────────────────────────────────────────────────────────────
 app = Flask(__name__)
-app.wsgi_app = ProxyFix(
-    app.wsgi_app,
-    x_for=1,
-    x_proto=1,
-    x_host=1,
-    x_port=1,
-)
 
 # SECURITY: ถ้า SECRET_KEY ไม่ถูก set ใน env จะ crash ทันที (ป้องกัน fallback key)
 _secret = os.environ.get("SECRET_KEY", "")
