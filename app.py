@@ -26,6 +26,7 @@ from analyzer.thrust_logic import (calculate_thrust_weight,
 from werkzeug.utils import secure_filename
 from analyzer.cli_surgeon import analyze_dump as cli_analyze_dump
 import os, io, time, json, hashlib, logging
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # ── Logger init — MUST be first before any try/except import blocks ───────
 logging.basicConfig(level=logging.INFO)
