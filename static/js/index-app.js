@@ -55,22 +55,71 @@ function _r(v){ return Math.max(1, Math.round(v)); }
     let maxRPM = kv > 0 ? kv * cells * 3.85 * 0.80 : 0;
     let tipSpeed = kv > 0 ? (Math.PI * prop * 0.0254 * maxRPM) / 60 : 0;
 
-    let _THRUST_4S = {2.5:130,3:170,3.5:280,4:400,4.5:540,5:730,5.5:760,6:720,7:640,7.5:620,8:680,10:700};
-    function _interpT(v,t){let ks=Object.keys(t).map(Number).sort(function(a,b){return a-b;});if(v<=ks[0])return t[ks[0]];if(v>=ks[ks.length-1])return t[ks[ks.length-1]];for(let i=0;i<ks.length-1;i++){if(v>=ks[i]&&v<=ks[i+1]){let r=(v-ks[i])/(ks[i+1]-ks[i]);return t[ks[i]]*(1-r)+t[ks[i+1]]*r;}}return t[ks[Math.floor(ks.length/2)]];}
-    let cellScale = cells<=4 ? (0.55+cells*0.1125) : (1.0+(cells-4)*0.18);
-    let totalThrust = _interpT(prop,_THRUST_4S) * cellScale * 4;
-    let twr = weight > 0 ? Math.min(totalThrust / weight, 9.0) : 0;
+    /* ── Physics tables (mirror prop_logic.py + advanced_analysis.py) ── */
+    // Max power per motor at 4S reference (W) — from prop_logic._MAX_PWR_BY_SIZE
+    let _MAX_PWR_4S = {2.5:65,3:80,3.5:115,4:195,4.5:270,5:385,5.5:430,6:460,7:330,8:390,10:460};
+    // Max thrust per motor at 4S hover (g) — calibrated from bench data
+    let _THRUST_4S  = {2.5:130,3:170,3.5:280,4:400,4.5:540,5:730,5.5:760,6:720,7:640,7.5:620,8:680,10:700};
 
-    let peakW = kv > 0 ? Math.min(cells * 4.2 * kv / 220, 750) * 4 : cells * 35 * 4;
-    let hoverThrottle = twr > 0 ? Math.sqrt(1/twr) : 0.5;
-    let hoverCurrent = (peakW / (volt + 0.001)) * hoverThrottle * hoverThrottle;
-    let ftMin = hoverCurrent > 0 ? Math.min(30, (mah / 1000 * 0.8) / (hoverCurrent * 0.75 + 0.5) * 60) : 0;
-    let ftSafe = Math.max(0, ftMin);
+    function _interpT(v,t){
+      let ks=Object.keys(t).map(Number).sort(function(a,b){return a-b;});
+      if(v<=ks[0])return t[ks[0]];
+      if(v>=ks[ks.length-1])return t[ks[ks.length-1]];
+      for(let i=0;i<ks.length-1;i++){
+        if(v>=ks[i]&&v<=ks[i+1]){
+          let r=(v-ks[i])/(ks[i+1]-ks[i]);
+          return t[ks[i]]*(1-r)+t[ks[i+1]]*r;
+        }
+      }
+      return t[ks[Math.floor(ks.length/2)]];
+    }
 
-    let peakCurrentTotal = peakW / (volt + 0.001);
-    let cBurst = mah > 0 ? Math.min(200, peakCurrentTotal / (mah/1000)) : 0;
-
+    /* TWR — use KV-aware formula when KV is available (matches backend prop_logic) */
     let motorCount = 4;
+    let totalThrust, cellScale;
+    if(kv > 0) {
+      // KV-aware: RPM × prop_size → tip speed → thrust estimate
+      // Simpler: scale _THRUST_4S by cells (cell efficiency factor)
+      let cellEff = 1.0 + (cells - 4) * 0.055;   // +5.5% per cell (matches _cells_eff_factor)
+      let effMax  = Math.max(0.40, 0.55 - (prop - 5.0) * 0.015);  // eff @ max throttle
+      let maxPwr  = Math.min(_interpT(prop, _MAX_PWR_4S) * (1 + (cells-4)/4.0*0.22), 1000);
+      // g/W estimate: med pitch 3-blade = 4.7, scaled by size and voltage
+      let gPerW   = 4.7 * (0.9 + prop * 0.02) * cellEff;
+      let thrPerMotor = gPerW * effMax * maxPwr;
+      totalThrust = thrPerMotor * motorCount;
+    } else {
+      // No KV: use simpler table
+      cellScale = cells<=4 ? (0.55+cells*0.1125) : (1.0+(cells-4)*0.18);
+      totalThrust = _interpT(prop, _THRUST_4S) * cellScale * motorCount;
+    }
+    let twr = weight > 0 ? Math.min(totalThrust / weight, 12.0) : 0;
+
+    /* Peak power — FIX: use empirical table (was cells*4.2*kv/220 = 2× too low) */
+    let maxPwrMotor = Math.min(_interpT(prop, _MAX_PWR_4S) * (1 + (cells-4)/4.0*0.22), 1000);
+    let peakW = maxPwrMotor * motorCount;   // total system peak W
+
+    /* Hover throttle: stick% = sqrt(1/TWR) × 100 (quadratic thrust model) */
+    let hoverThrottle = twr > 0 ? Math.sqrt(1/twr) : 0.5;
+
+    /* Hover current from W/g model (matches advanced_analysis.py _W_PER_G_TABLE) */
+    let _WPG = {2.5:0.38,3:0.35,3.5:0.24,4:0.19,4.5:0.17,5:0.155,5.5:0.165,6:0.20,7:0.108,8:0.095,10:0.085};
+    let wPerG     = _interpT(prop, _WPG);
+    let hoverW    = wPerG * weight;
+
+    /* Style avg power factor (matches advanced_analysis.py _STYLE_FACTORS) */
+    let _SF = {freestyle:1.55, racing:2.00, longrange:1.05};
+    let sf  = _SF[style] || 1.55;
+    let avgW = hoverW * sf;
+
+    /* Flight time: usable Wh / avgW × 60 */
+    let packV   = cells * 3.7;
+    let battWh  = (mah / 1000) * packV;
+    let usableWh = battWh * 0.85;
+    let ftSafe  = avgW > 0 ? Math.min(30, Math.max(0, Math.round((usableWh / avgW) * 60 * 10)/10)) : 0;
+
+    let hoverCurrent = packV > 0 ? hoverW / packV : 0;
+    let peakCurrentTotal = packV > 0 ? peakW / packV : 0;
+    let cBurst = mah > 0 ? Math.min(200, Math.round(peakCurrentTotal / (mah/1000) * 10)/10) : 0;
     let escA = Math.max(20, Math.ceil((peakCurrentTotal / motorCount) * 1.5 / 5) * 5);
 
     /* ── HUD ── */
@@ -93,7 +142,7 @@ function _r(v){ return Math.max(1, Math.round(v)); }
     let hbRpm = g('hb_rpm');
     if(hbRpm){ hbRpm.style.width = Math.min(100,maxRPM/80000*100)+'%'; }
 
-    let ftDisp = ftSafe > 0 ? ftSafe.toFixed(1)+' min' : '— min';
+    let ftDisp = ftSafe > 0.1 ? ftSafe.toFixed(1)+' min' : '— min';
     let ftColor = ftSafe > 6 ? 'green' : ftSafe > 3 ? 'amber' : ftSafe > 0 ? 'red' : '';
     sv('h_ft', ftDisp);
     let ftEl = g('h_ft'); if(ftEl){ sc(ftEl,''); if(ftColor) ftEl.classList.add(ftColor); }
@@ -258,11 +307,18 @@ function _r(v){ return Math.max(1, Math.round(v)); }
     showToast('✅ ' + key + ' โหลดแล้ว');
   };
 
-  /* attach liveCalc to all inputs */
+  /* ── Debounce: prevent liveCalc firing every keystroke (causes input lag) ── */
+  function _debounce(fn, ms){ let t; return function(){ clearTimeout(t); t = setTimeout(fn, ms); }; }
+  let _debouncedCalc = _debounce(liveCalc, 120);
+
   let inputs = document.querySelectorAll('input[type=number], select');
   inputs.forEach(function(el){
-    el.addEventListener('input', liveCalc);
-    el.addEventListener('change', liveCalc);
+    if(el.tagName === 'SELECT'){
+      el.addEventListener('change', liveCalc);      // select: immediate
+    } else {
+      el.addEventListener('input',  _debouncedCalc); // typing: debounced 120ms
+      el.addEventListener('change', liveCalc);       // blur/enter: immediate
+    }
   });
 
   /* initial run */
