@@ -191,7 +191,7 @@ def analyze_propeller(prop_size, prop_pitch, blade_count, style,
             if p_in <= 3 and motor_kv < 2000:
                 notes.append(f"Prop ≤3\" + KV {motor_kv} ต่ำ — อาจแรงไม่พอ")
     except Exception:
-        pass
+        pass  # note generation failure — non-critical
 
     # Style recommendation
     if style == "racing":

@@ -49,12 +49,12 @@ def _as_number_if_possible(s: str):
         try:
             return int(s)
         except Exception:
-            pass
+            pass  # expected: value parse failure — continue
     if re.match(r'^-?\d+\.\d+$', s):
         try:
             return float(s)
         except Exception:
-            pass
+            pass  # expected: value parse failure — continue
     return s
 
 def parse_dump(text: str) -> Dict[str, Any]:
@@ -184,7 +184,7 @@ def basic_checks(params: Dict[str, Any]) -> List[Dict]:
                         'ตั้งค่า failsafe_throttle ให้อยู่ในระดับที่ทำให้มอเตอร์หยุดหมุนหรือทรงตัวขึ้นกับ action ที่ต้องการ'
                     )
             except Exception:
-                pass
+                pass  # expected: value parse failure — continue
 
     # --- looptime ---
     if 'looptime' in params:
@@ -207,7 +207,7 @@ def basic_checks(params: Dict[str, Any]) -> List[Dict]:
                     'ลด looptime หากต้องการ latency ต่ำลง (ตรวจสอบว่า ESC/CPU รองรับ)'
                 )
         except Exception:
-            pass
+            pass  # expected: value parse failure — continue
 
     # --- gyro / sample rate ---
     # Keys could be gyro_sample_rate, gyro_hz
@@ -224,7 +224,7 @@ def basic_checks(params: Dict[str, Any]) -> List[Dict]:
                         'พิจารณาใช้ค่า gyro/sample rate ที่เหมาะสมกับ looptime และ firmware'
                     )
             except Exception:
-                pass
+                pass  # expected: value parse failure — continue
 
     # ── PID extremes ──
     # BF4.4/4.5: I-term ปกติ = 80-100, P ปกติ max ~80, D ปกติ max ~60
@@ -591,7 +591,7 @@ def suggest_cli_fixes(rules: List[Dict], params: Dict[str, Any]) -> List[str]:
                     newv = round(cur * 0.8, 3)
                     push_set(possible_key, newv)
                 except Exception:
-                    pass
+                    pass  # expected: value parse failure — continue
         elif rid == 'no_failsafe':
             # provide example conservative failsafe
             push_set('failsafe_delay', 10)
@@ -606,7 +606,7 @@ def suggest_cli_fixes(rules: List[Dict], params: Dict[str, Any]) -> List[str]:
                     newv = max(1000, int(cur * 0.9))
                     push_set('failsafe_throttle', newv)
                 except Exception:
-                    pass
+                    pass  # expected: value parse failure — continue
         elif rid == 'looptime_low':
             # suggest changing to 1000 (conservative)
             if 'looptime' in params:
@@ -722,7 +722,7 @@ def detect_firmware_version(text: str) -> dict:
             if parts[0] > 4 or (parts[0] == 4 and parts[1] >= 4):
                 is_modern_bf = True
         except Exception:
-            pass
+            pass  # expected: value parse failure — continue
 
     return {
         'type':         fw_type,
@@ -800,7 +800,7 @@ def compare_dumps(dump_a: str, dump_b: str) -> dict:
                     direction = '↑ เพิ่มขึ้น' if diff_val > 0 else '↓ ลดลง'
                     explain += f' ({direction} {abs(diff_val):.1f})'
                 except Exception:
-                    pass
+                    pass  # expected: value parse failure — continue
                 changed.append((k, va, vb, explain))
             else:
                 same.append((k, va))

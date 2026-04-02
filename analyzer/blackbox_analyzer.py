@@ -769,7 +769,7 @@ def analyze_blackbox_csv(csv_text: str) -> Dict[str, Any]:
             # BF time unit: µs → s
             duration_s = round(raw_dur / 1_000_000.0, 1) if raw_dur > 1000 else round(raw_dur, 1)
         except Exception:
-            pass
+            pass  # duration parse failure — non-critical
 
     # ── Run analysis modules ──────────────────────────────────
     osc_data     = _analyze_oscillations(rows, cols)
