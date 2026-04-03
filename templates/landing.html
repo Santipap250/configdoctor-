@@ -1065,6 +1065,30 @@ section { padding:90px 24px; position:relative; z-index:2; }
   }
    }
 
+.sub-title {
+  display: block;
+  margin-top: 10px;
+
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
+  font-weight: 700;
+  letter-spacing: 0.15em;
+
+  background: linear-gradient(90deg, #00ffae, #00e5ff, #00ffae);
+  background-size: 200%;
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  text-shadow: 0 0 20px rgba(0,255,157,0.3);
+
+  animation: glowFlow 4s linear infinite;
+}
+
+@keyframes glowFlow {
+  0% { background-position: 0%; }
+  100% { background-position: 200%; }
+}
+
 /* Like/Rating widgets */
 .love-widget { margin-top:28px; display:flex; flex-direction:column; align-items:center; gap:14px; }
 .like-btn { display:inline-flex; align-items:center; gap:8px; padding:12px 24px; background:rgba(255,255,255,.04); border:1.5px solid rgba(255,255,255,.12); border-radius:50px; cursor:pointer; font-family:var(--font-d); font-size:.7rem; font-weight:700; letter-spacing:.08em; color:rgba(255,255,255,.65); transition:all .25s; }
