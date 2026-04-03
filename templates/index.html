@@ -4988,6 +4988,187 @@ body.typing .amb-orb-4 { animation-play-state: paused !important; }
   }
 }
 
+
+/* ═══════════════════════════════════════════════════
+   RESULT PANEL — CLEAN v5.3
+   6 blocks: Snapshot · CLI · Sauce · PID/Filter · Checks · Tips
+═══════════════════════════════════════════════════ */
+
+/* ── Result card base ── */
+.r-card {
+  background: rgba(10,13,22,.92);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  position: relative;
+  animation: panelReveal .4s cubic-bezier(.4,0,.2,1) both;
+}
+.r-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  opacity:.7; border-radius:14px 14px 0 0;
+}
+.r-card--green::before  { background: linear-gradient(90deg,var(--green),var(--cyan)); }
+.r-card--blue::before   { background: linear-gradient(90deg,var(--blue),var(--cyan)); }
+.r-card--amber::before  { background: linear-gradient(90deg,var(--amber),var(--red)); }
+.r-card--purple::before { background: linear-gradient(90deg,var(--purple),var(--blue)); }
+
+.r-card-hd {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  background: rgba(255,255,255,.02);
+}
+.r-card-icon {
+  width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+  background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08);
+}
+.r-card-title {
+  font-family: var(--font-sans, var(--font-d)); font-size: 12px; font-weight: 700;
+  letter-spacing: .04em; color: var(--text, #e2e8f0);
+}
+.r-card-sub {
+  font-family: var(--font-mono, var(--font-m)); font-size: 9px;
+  color: var(--s-muted, var(--muted2)); margin-top: 2px;
+}
+.r-card-body { padding: 14px 16px; }
+.r-card-body--notop { padding-top: 12px; }
+
+/* ── Verdict badge ── */
+.r-verdict {
+  margin-left: auto; flex-shrink: 0;
+  font-family: var(--font-mono, var(--font-m)); font-size: 10px; font-weight: 700;
+  letter-spacing: .06em; padding: 4px 12px; border-radius: 100px; border: 1px solid;
+}
+.r-verdict--ok   { color: var(--green); border-color: rgba(0,255,136,.3); background: rgba(0,255,136,.07); }
+.r-verdict--warn { color: var(--amber); border-color: rgba(255,183,0,.3); background: rgba(255,183,0,.06); }
+.r-verdict--bad  { color: var(--red);   border-color: rgba(255,68,85,.3);  background: rgba(255,68,85,.06); }
+
+/* ── Snapshot grid ── */
+.snap-grid {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 10px;
+}
+@media(max-width:480px) { .snap-grid { grid-template-columns: repeat(2,1fr); } }
+.snap-cell {
+  background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06);
+  border-radius: 10px; padding: 10px 8px; text-align: center; transition: border-color .2s;
+}
+.snap-cell:hover { border-color: rgba(255,255,255,.12); }
+.snap-val {
+  font-family: var(--font-mono, var(--font-m)); font-size: 20px; font-weight: 700;
+  color: #e2e8f0; line-height: 1.1;
+}
+.snap-unit { font-size: 11px; color: var(--s-muted, var(--muted2)); font-weight: 400; }
+.snap-lbl {
+  font-family: var(--font-sans, var(--font-d)); font-size: 9px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--s-muted, var(--muted2));
+  margin: 4px 0 2px;
+}
+.snap-hint { font-size: 10px; color: var(--s-muted, var(--muted)); line-height: 1.3; }
+
+/* Snapshot stat color classes */
+.sc-green { color: var(--green) !important; }
+.sc-amber { color: var(--amber) !important; }
+.sc-red   { color: var(--red)   !important; }
+.sc-blue  { color: var(--blue, var(--cyan))  !important; }
+
+/* ── Snapshot insight line ── */
+.snap-insight {
+  padding: 8px 12px; border-radius: 8px; font-size: 12px; line-height: 1.55;
+  background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); margin-bottom: 8px;
+}
+.si-ok   { color: var(--green); }
+.si-warn { color: var(--amber); }
+.si-bad  { color: var(--red);   }
+
+/* ── Battery mini row ── */
+.snap-batt {
+  display: flex; flex-wrap: wrap; gap: 6px 14px;
+  font-size: 11px; padding: 7px 10px;
+  background: rgba(255,255,255,.02); border: 1px solid rgba(255,255,255,.05); border-radius: 8px;
+}
+.sb-item { display: flex; align-items: center; gap: 5px; }
+.sb-k { color: var(--s-muted, var(--muted2)); font-size: 10px; }
+.sb-v { font-family: var(--font-mono, var(--font-m)); font-weight: 600; }
+.sb-sep { color: rgba(255,255,255,.12); }
+
+/* ── PID note box ── */
+.pid-note {
+  margin-top: 10px; padding: 9px 12px;
+  background: rgba(255,255,255,.02); border: 1px solid rgba(255,255,255,.06);
+  border-radius: 8px; font-size: 12px; color: var(--text2, var(--muted2)); line-height: 1.6;
+}
+
+/* ── Check rows ── */
+.check-banner {
+  padding: 8px 12px; border-radius: 8px; border: 1px solid; font-size: 12px; font-weight: 700;
+  margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+}
+.check-danger { color: var(--red); border-color: rgba(255,68,85,.3); background: rgba(255,68,85,.07); }
+.check-row {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 8px 10px; border-radius: 8px; border: 1px solid;
+  margin-bottom: 6px; font-size: 12px; line-height: 1.55;
+  transition: background .15s;
+}
+.check-row:hover { filter: brightness(1.08); }
+.check-row.check-danger, .check-row.check-critical {
+  color: var(--red); border-color: rgba(255,68,85,.2); background: rgba(255,68,85,.05);
+}
+.check-row.check-warning {
+  color: var(--amber); border-color: rgba(255,183,0,.18); background: rgba(255,183,0,.04);
+}
+.check-row.check-info {
+  color: var(--text2, var(--muted2)); border-color: rgba(255,255,255,.06); background: rgba(255,255,255,.02);
+}
+.check-ico { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.check-suggest {
+  font-size: 11px; color: var(--s-muted, var(--muted2)); margin-top: 3px; line-height: 1.5;
+}
+
+/* ── Tuning tips ── */
+.tip-block {
+  display: flex; gap: 10px; padding: 11px 13px; border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.07); background: rgba(255,255,255,.025);
+  margin-bottom: 8px; transition: border-color .18s;
+}
+.tip-block:hover { border-color: rgba(255,255,255,.14); }
+.tip-block.tip-g { border-left: 2px solid var(--green); }
+.tip-block.tip-b { border-left: 2px solid var(--blue, var(--cyan)); }
+.tip-block.tip-a { border-left: 2px solid var(--amber); }
+.tip-block.tip-r { border-left: 2px solid var(--red); }
+.tip-num {
+  font-family: var(--font-mono, var(--font-m)); font-size: 11px; font-weight: 700;
+  color: rgba(255,255,255,.2); flex-shrink: 0; margin-top: 1px;
+}
+.tip-content { flex: 1; min-width: 0; }
+.tip-title {
+  font-family: var(--font-sans, var(--font-d)); font-size: 12px; font-weight: 700;
+  color: var(--text, #e2e8f0); margin-bottom: 4px;
+}
+.tip-desc {
+  font-size: 12px; color: var(--text2, var(--muted2)); line-height: 1.6; margin-bottom: 7px;
+}
+.tip-cli {
+  font-family: var(--font-mono, var(--font-m)); font-size: 10.5px; line-height: 1.7;
+  background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.07); border-radius: 7px;
+  padding: 7px 10px; color: #8ecae6; cursor: pointer; white-space: pre;
+  overflow-x: auto; transition: border-color .15s;
+}
+.tip-cli:hover { border-color: rgba(0,255,136,.3); }
+.tip-cli:active { background: rgba(0,255,136,.06); }
+
+/* ── Mobile responsive ── */
+@media(max-width:640px) {
+  .r-card-hd { padding: 11px 13px; }
+  .r-card-body { padding: 12px 13px; }
+  .snap-grid { grid-template-columns: repeat(3,1fr); gap: 6px; }
+  .snap-val { font-size: 16px; }
+  .snap-batt { gap: 5px 10px; }
+}
 </style>
 </head>
 <body>
@@ -5397,43 +5578,185 @@ body.typing .amb-orb-4 { animation-play-state: paused !important; }
         <!-- ── RESULTS COL ───────────────────────────────────── -->
         <div class="results-col">
 
+
+      {# ═══════════════════════════════════════════════════════
+         RESULTS — CLEAN v5.3  (ปรับใหม่: 6 ส่วนสำคัญ)
+         ตัดส่วนซ้ำซ้อน + ปรับ layout ให้อ่านง่ายขึ้น
+      ═══════════════════════════════════════════════════════ #}
+
       {% if not analysis %}
-      <!-- Empty state -->
+      <!-- ── EMPTY STATE ── -->
       <div class="empty-state">
         <div class="empty-hex">🚁</div>
         <div class="empty-title">Awaiting Mission Data</div>
-        <p class="empty-sub">กรอกสเปคโดรนด้านซ้าย แล้วกด ANALYZE เพื่อรับผลการวิเคราะห์จาก backend</p>
-        <div class="empty-chips">
-          <span class="chip g">PID Baseline</span>
-          <span class="chip b">Filter Guide</span>
-          <span class="chip a">CLI Deploy</span>
+        <p class="empty-sub">กรอกสเปคโดรนด้านซ้าย แล้วกด <strong style="color:var(--n-g)">ANALYZE</strong></p>
+        <div style="margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:300px;">
+          <div style="background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.15);border-radius:8px;padding:10px 6px;text-align:center;">
+            <div style="font-size:18px;margin-bottom:4px;">🎯</div>
+            <div style="font-family:var(--font-sans);font-size:10px;font-weight:700;color:var(--n-g);">PID TUNE</div>
+          </div>
+          <div style="background:rgba(0,170,255,.06);border:1px solid rgba(0,170,255,.15);border-radius:8px;padding:10px 6px;text-align:center;">
+            <div style="font-size:18px;margin-bottom:4px;">🔊</div>
+            <div style="font-family:var(--font-sans);font-size:10px;font-weight:700;color:var(--n-b);">FILTER</div>
+          </div>
+          <div style="background:rgba(0,232,208,.06);border:1px solid rgba(0,232,208,.15);border-radius:8px;padding:10px 6px;text-align:center;">
+            <div style="font-size:18px;margin-bottom:4px;">📋</div>
+            <div style="font-family:var(--font-sans);font-size:10px;font-weight:700;color:var(--n-c);">CLI</div>
+          </div>
         </div>
-        <div style="margin-top:16px;padding:10px 14px;background:rgba(0,170,255,0.05);border:1px solid rgba(0,170,255,0.12);border-radius:8px;font-size:11px;color:var(--muted2);max-width:280px;text-align:left;line-height:1.7;">
-          <strong style="font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--blue);display:block;margin-bottom:6px;">💡 วิธีใช้งาน — 4 ขั้นตอน</strong>
-          1. เลือก Preset Build (1"–12") หรือกรอกสเปคเอง · ระบุ KV มอเตอร์ด้วย<br>
-          2. เลือก Battery (1S–8S), Flight Style, Propeller · ครบแล้วกด <strong style="color:var(--green);">ANALYZE</strong><br>
-          3. รับ PID Baseline + Filter Guide + Full CLI → Copy → Paste ใน Betaflight CLI<br>
-          4. บินทดสอบ 1 pack ที่ใกล้ๆ · สังเกต Hover Throttle + motor heat · ปรับทีละ 3-5 ✅
+        <div style="margin-top:16px;font-size:12px;color:var(--s-muted);line-height:1.75;max-width:260px;text-align:left;">
+          1. เลือก Preset หรือกรอกสเปคเอง<br>
+          2. เลือก Battery · Style · Prop<br>
+          3. กด <strong style="color:var(--n-g)">ANALYZE</strong> → รับ PID + Filter + CLI<br>
+          4. Copy → Paste ใน Betaflight CLI → Save
         </div>
       </div>
+
       {% else %}
 
-      <!-- ══ CLI DEPLOY HERO ══ -->
+      {# ──── Computed vars (used across multiple blocks) ──── #}
+      {% set adv = analysis.advanced or {} %}
+      {% set twr_v = adv.thrust_ratio | default(0) | float %}
+      {% set ft_v  = adv.est_flight_time_min | default(analysis.battery_est | default(0)) | float %}
+      {% set tip_v = adv.tip_speed_mps | default(0) | float %}
+      {% set cur_v = adv.peak_current_a | default(0) | float %}
+      {% set hov_v = adv.hover_throttle_pct | default(0) | float %}
+      {% set esc_v = adv.esc_recommended_a | default(0) | int %}
+      {% set cb_v  = adv.c_burst | default(0) | float %}
+      {% set rpm_v = adv.rpm_estimated | default(0) | int %}
+      {% set cls   = analysis.detected_class | default('Custom') %}
+      {% set sty   = analysis.style | default('freestyle') %}
+
+      {# ══════════════════════════════════════════════════════
+         BLOCK 1 — QUICK SNAPSHOT: ค่าสำคัญ 6 ตัว + verdict
+      ══════════════════════════════════════════════════════ #}
+      <div class="r-card r-card--green">
+        <div class="r-card-hd">
+          <div class="r-card-icon">📊</div>
+          <div>
+            <div class="r-card-title">Build Snapshot</div>
+            <div class="r-card-sub">{{ cls }} · {{ sty | capitalize }} · {{ adv.cells | default('—') }}S {% if analysis.motor_kv %}· KV{{ analysis.motor_kv }}{% endif %}</div>
+          </div>
+          {# Overall verdict badge #}
+          {% if twr_v >= 2.0 and tip_v <= 290 and (ft_v >= 4 or ft_v == 0) %}
+            <span class="r-verdict r-verdict--ok">✅ READY</span>
+          {% elif twr_v >= 1.5 %}
+            <span class="r-verdict r-verdict--warn">⚡ CHECK</span>
+          {% else %}
+            <span class="r-verdict r-verdict--bad">⚠️ REVIEW</span>
+          {% endif %}
+        </div>
+        <div class="r-card-body">
+
+          {# 6-cell stat grid #}
+          <div class="snap-grid">
+            {# TWR #}
+            <div class="snap-cell">
+              <div class="snap-val {% if twr_v >= 3.0 %}sc-green{% elif twr_v >= 1.8 %}sc-amber{% elif twr_v > 0 %}sc-red{% endif %}">
+                {{ twr_v | round(2) if twr_v > 0 else '—' }}<span class="snap-unit">:1</span>
+              </div>
+              <div class="snap-lbl">TWR</div>
+              <div class="snap-hint">
+                {% if twr_v >= 3.5 %}กำลังดีมาก{% elif twr_v >= 2.0 %}สมดุลดี{% elif twr_v > 0 %}power น้อย{% endif %}
+              </div>
+            </div>
+            {# Flight Time #}
+            <div class="snap-cell">
+              <div class="snap-val {% if ft_v >= 7 %}sc-green{% elif ft_v >= 4 %}sc-amber{% elif ft_v > 0 %}sc-red{% endif %}">
+                {{ ft_v | round(1) if ft_v > 0 else '—' }}<span class="snap-unit"> min</span>
+              </div>
+              <div class="snap-lbl">เวลาบิน</div>
+              <div class="snap-hint">{{ 'avg ' + sty[:4] }}</div>
+            </div>
+            {# Tip Speed #}
+            <div class="snap-cell">
+              <div class="snap-val {% if tip_v > 290 %}sc-red{% elif tip_v > 265 %}sc-amber{% elif tip_v > 0 %}sc-green{% endif %}">
+                {{ tip_v | int if tip_v > 0 else '—' }}<span class="snap-unit"> m/s</span>
+              </div>
+              <div class="snap-lbl">Tip Speed</div>
+              <div class="snap-hint">
+                {% if tip_v > 290 %}⛔ เกินขีด{% elif tip_v > 265 %}⚡ ใกล้ขีด{% elif tip_v > 0 %}✅ ปลอดภัย{% endif %}
+              </div>
+            </div>
+            {# Hover Throttle #}
+            <div class="snap-cell">
+              <div class="snap-val {% if hov_v > 65 %}sc-red{% elif hov_v > 50 %}sc-amber{% elif hov_v > 0 %}sc-green{% endif %}">
+                {{ hov_v | int if hov_v > 0 else '—' }}<span class="snap-unit">%</span>
+              </div>
+              <div class="snap-lbl">Hover Stick</div>
+              <div class="snap-hint">{% if hov_v > 65 %}headroom น้อย{% elif hov_v > 0 %}ดี{% endif %}</div>
+            </div>
+            {# ESC #}
+            <div class="snap-cell">
+              <div class="snap-val sc-blue">
+                {{ esc_v if esc_v > 0 else '—' }}<span class="snap-unit">A</span>
+              </div>
+              <div class="snap-lbl">ESC ≥</div>
+              <div class="snap-hint">แนะนำต่ำสุด</div>
+            </div>
+            {# C-Rate #}
+            <div class="snap-cell">
+              <div class="snap-val {% if cb_v > 80 %}sc-red{% elif cb_v > 50 %}sc-amber{% elif cb_v > 0 %}sc-green{% endif %}">
+                {{ cb_v | int if cb_v > 0 else '—' }}<span class="snap-unit">C</span>
+              </div>
+              <div class="snap-lbl">C-Rate</div>
+              <div class="snap-hint">{% if cb_v > 80 %}แบต HV{% elif cb_v > 50 %}แบตดี{% elif cb_v > 0 %}ปกติ{% endif %}</div>
+            </div>
+          </div>
+
+          {# One-line key insight #}
+          {% if adv %}
+          <div class="snap-insight">
+            {% if tip_v > 290 %}
+              <span class="si-bad">⛔ Tip speed {{ tip_v | int }}m/s เกิน 290 m/s — ลด KV หรือเปลี่ยน prop เล็กลง</span>
+            {% elif twr_v < 1.5 and twr_v > 0 %}
+              <span class="si-warn">⚠️ TWR {{ twr_v | round(2) }} ต่ำเกินไป — เพิ่ม motor KV หรือลดน้ำหนัก</span>
+            {% elif cb_v > 80 %}
+              <span class="si-warn">⚠️ C-Rate {{ cb_v | int }}C สูง — ใช้แบต HV quality หรือเพิ่ม mAh</span>
+            {% elif cur_v > 100 %}
+              <span class="si-warn">⚠️ Peak {{ cur_v | int }}A — ต้องการ ESC {{ (cur_v * 1.5) | int }}A+ (safety 1.5×)</span>
+            {% elif twr_v >= 2.0 and tip_v <= 265 and ft_v >= 4 %}
+              <span class="si-ok">✅ Build สมดุลดี — TWR {{ twr_v | round(2) }} · Tip speed ปลอดภัย · พร้อมบิน</span>
+            {% elif twr_v >= 2.0 %}
+              <span class="si-ok">✅ TWR {{ twr_v | round(2) }} ดี — เวลาบิน ~{{ ft_v | round(1) }} นาที</span>
+            {% else %}
+              <span class="si-ok">📊 {{ analysis.summary | truncate(80) }}</span>
+            {% endif %}
+          </div>
+          {% endif %}
+
+          {# Battery row #}
+          {% if adv and adv.cells %}
+          <div class="snap-batt">
+            <span class="sb-item"><span class="sb-k">แบต</span><span class="sb-v sc-blue">{{ adv.cells }}S · {{ adv.pack_voltage_nominal | default('—') }}V</span></span>
+            <span class="sb-sep">|</span>
+            <span class="sb-item"><span class="sb-k">ความจุ</span><span class="sb-v sc-green">{{ adv.battery_mAh_used | default('—') }} mAh</span></span>
+            <span class="sb-sep">|</span>
+            <span class="sb-item"><span class="sb-k">พลังงาน</span><span class="sb-v sc-amber">{{ adv.battery_wh | default('—') }} Wh</span></span>
+            <span class="sb-sep">|</span>
+            <span class="sb-item"><span class="sb-k">Hover W</span><span class="sb-v">{{ adv.hover_power_w | int if adv.hover_power_w else '—' }}W</span></span>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+
+      {# ══════════════════════════════════════════════════════
+         BLOCK 2 — CLI DEPLOY (Base Tune)
+      ══════════════════════════════════════════════════════ #}
       <div class="cli-deploy">
         <div class="cli-deploy-header">
           <div class="cli-deploy-icon">⚡</div>
           <div>
             <div class="cli-deploy-title">BETAFLIGHT CLI — READY TO DEPLOY</div>
-            <div class="cli-deploy-sub">{{ analysis.detected_class | default('Custom') }} · {{ analysis.style | capitalize }} · Copy → Paste → Save</div>
+            <div class="cli-deploy-sub">{{ cls }} · {{ sty | capitalize }} · Copy → Paste → Save</div>
           </div>
+          <span style="margin-left:auto;font-family:var(--font-mono);font-size:9px;color:var(--n-g);padding:3px 10px;border:1px solid rgba(0,255,136,.25);border-radius:100px;background:rgba(0,255,136,.06);">BASE TUNE</span>
         </div>
-        <div class="cli-box" id="quickCLIBox"># ══════════════════════════════════════════════════
-# 🚁 OBIXConfig Doctor v5.2 — BASE TUNE
-# {{ analysis.detected_class | default('Custom') | upper }} · {{ analysis.style | upper }}
-# Frame: {{ analysis.size or '5' }}" · Prop: {{ analysis.prop_size or '5' }}"×{{ analysis.pitch or '4.0' }}p {{ request.form.get('blades','3') }}blade
-# Battery: {{ analysis.advanced.cells | default('—') if analysis.advanced else '—' }}S · KV{{ analysis.motor_kv or '—' }}
-# ══════════════════════════════════════════════════
-# ─────────────── PID ───────────────────────────────
+        <div class="cli-box" id="quickCLIBox"># ══ OBIXConfig Doctor — BASE TUNE ══
+# {{ cls | upper }} · {{ sty | upper }} · {{ adv.cells | default('—') }}S · KV{{ analysis.motor_kv or '—' }}
+# Frame {{ analysis.size or '5' }}" · Prop {{ analysis.prop_size or '5' }}"×{{ analysis.pitch or '4.0' }}p
+# ── PID ────────────────────────────────────────
 set p_roll               = {{ analysis.pid.roll.p }}
 set i_roll               = {{ analysis.pid.roll.i }}
 set d_roll               = {{ analysis.pid.roll.d }}
@@ -5443,7 +5766,7 @@ set d_pitch              = {{ analysis.pid.pitch.d }}
 set p_yaw                = {{ analysis.pid.yaw.p }}
 set i_yaw                = {{ analysis.pid.yaw.i }}
 set d_yaw                = 0
-# ─────────────── Filter ────────────────────────────
+# ── Filter ─────────────────────────────────────
 set gyro_lpf1_static_hz  = {{ analysis.filter.gyro_lpf1 or 0 }}
 set gyro_lpf1_type       = PT1
 set dterm_lpf1_static_hz = {{ analysis.filter.dterm_lpf1 or 0 }}
@@ -5451,31 +5774,27 @@ set dterm_lpf1_type      = PT1
 set dyn_notch_count      = {{ analysis.filter.dyn_notch or 1 }}
 set dyn_notch_min_hz     = {{ analysis.filter.dyn_notch_min or 80 }}
 set dyn_notch_max_hz     = {{ analysis.filter.dyn_notch_max or 400 }}
-# ─────────────── Motor / ESC ───────────────────────
+# ── Motor / ESC ────────────────────────────────
 set motor_pwm_protocol   = DSHOT600
 set dshot_bidir          = {{ 'ON' if analysis.filter.rpm_filter else 'OFF' }}
+set motor_poles          = 14
 set rpm_filter_harmonics = 3
 set rpm_filter_q         = 500
-set rpm_filter_min_hz    = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [80, (analysis.advanced.rpm_estimated * 0.15) | int] | max }}{% else %}100{% endif %}
-
-# ─────────────── Anti-Gravity ──────────────────────
+set rpm_filter_min_hz    = {% if adv and adv.rpm_estimated %}{{ [80, (adv.rpm_estimated * 0.15) | int] | max }}{% else %}100{% endif %}
 set anti_gravity_gain    = {{ analysis.filter.anti_gravity or 3 }}
 set anti_gravity_mode    = SMOOTH
-set anti_gravity_cutoff  = 30
-# ══════════════════════════════════════════════════
-# ⚠️ นี่คือ BASE TUNE — ดู SECRET SAUCE ด้านล่างสำหรับ
-#    Advanced CLI: feedforward / d_min / TPA / vbat_sag
-# ══════════════════════════════════════════════════
 save</div>
         <div class="cli-footer">
           <button class="btn-deploy" onclick="copyEl('quickCLIBox');showToast('⚡ CLI COPIED — PASTE IN BETAFLIGHT!')">
-            ⚡ COPY ALL — DEPLOY TO BETAFLIGHT
+            ⚡ COPY & DEPLOY
           </button>
           <button class="btn-sm" onclick="copyEl('quickCLIBox')">📋</button>
         </div>
       </div>
 
-      <!-- ══ SECRET SAUCE BLOCK ══ -->
+      {# ══════════════════════════════════════════════════════
+         BLOCK 3 — SECRET SAUCE (ถ้ามี)
+      ══════════════════════════════════════════════════════ #}
       {% if analysis.secret_sauce %}
       {% set ss = analysis.secret_sauce %}
       <div class="sauce-block">
@@ -5483,406 +5802,81 @@ save</div>
           <div class="sauce-icon">🔥</div>
           <div>
             <div class="sauce-title">SECRET SAUCE — ADVANCED TUNE</div>
-            <div class="sauce-sub">{{ analysis.detected_class | upper }} · {{ analysis.style | upper }} · {{ analysis.advanced.cells | default('—') if analysis.advanced else '—' }}S · KV{{ analysis.motor_kv or '—' }} · คำนวณเฉพาะ build นี้</div>
+            <div class="sauce-sub">{{ cls | upper }} · {{ sty | upper }} · {{ adv.cells | default('—') }}S · KV{{ analysis.motor_kv or '—' }} · คำนวณเฉพาะ build นี้</div>
           </div>
-          <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
+          <div style="margin-left:auto;">
             <span class="sauce-badge">🔒 EXCLUSIVE</span>
-            <span style="font-family:var(--font-d);font-size:6px;color:var(--muted);letter-spacing:.06em;">ไม่มีที่ไหนในไทย</span>
           </div>
         </div>
-        <!-- Tabs -->
         <div class="sauce-tabs">
-          <div class="sauce-tab active" onclick="sauceTab(0,this)">⚡ CLI CODE</div>
-          <div class="sauce-tab" onclick="sauceTab(1,this)">🧠 INSIGHTS</div>
-          <div class="sauce-tab" onclick="sauceTab(2,this)">📊 PARAMS</div>
+          <div class="sauce-tab active" onclick="sauceTab(0,this)">⚡ CLI</div>
+          <div class="sauce-tab" onclick="sauceTab(1,this)">🧠 Insights</div>
+          <div class="sauce-tab" onclick="sauceTab(2,this)">📊 Params</div>
         </div>
-        <!-- Tab 0: CLI -->
         <div id="sauce-panel-0" style="display:block;">
           <div class="sauce-cli-box" id="sauceCLIBox">{{ ss.cli }}</div>
           <script>document.addEventListener('DOMContentLoaded',function(){ if(window.highlightSauceCLI) window.highlightSauceCLI(); });</script>
           <div class="sauce-footer">
-            <button class="btn-sauce" onclick="copyEl('sauceCLIBox');showToast('🔥 SECRET SAUCE COPIED!')">
-              🔥 COPY SECRET SAUCE
-            </button>
+            <button class="btn-sauce" onclick="copyEl('sauceCLIBox');showToast('🔥 SECRET SAUCE COPIED!')">🔥 COPY</button>
             <button class="btn-sm" onclick="copyEl('sauceCLIBox')">📋</button>
-            <span style="font-family:var(--font-d);font-size:7px;color:var(--muted);letter-spacing:.06em;margin-left:auto;">ใส่หลัง PID · paste → save</span>
+            <span style="font-family:var(--font-mono);font-size:9px;color:var(--s-muted);margin-left:auto;">ใส่หลัง Base Tune → save</span>
           </div>
         </div>
-        <!-- Tab 1: Insights -->
         <div id="sauce-panel-1" style="display:none;">
           <div class="sauce-insights">
-            {% if ss.insights %}
-              {% for ins in ss.insights %}
-              <div class="sauce-insight">
-                <div class="sauce-insight-icon">{{ ins.icon }}</div>
-                <div>
-                  <div class="sauce-insight-title">{{ ins.title }}</div>
-                  <div class="sauce-insight-body">{{ ins.body }}</div>
-                </div>
+            {% if ss.insights %}{% for ins in ss.insights %}
+            <div class="sauce-insight">
+              <div class="sauce-insight-icon">{{ ins.icon }}</div>
+              <div>
+                <div class="sauce-insight-title">{{ ins.title }}</div>
+                <div class="sauce-insight-body">{{ ins.body }}</div>
               </div>
-              {% endfor %}
-            {% else %}
-              <div style="padding:10px;color:var(--muted);font-size:11px;">ไม่มี insights</div>
+            </div>
+            {% endfor %}{% else %}
+            <div style="padding:10px;color:var(--s-muted);font-size:11px;">ไม่มี insights</div>
             {% endif %}
           </div>
         </div>
-        <!-- Tab 2: Params -->
         <div id="sauce-panel-2" style="display:none;">
           {% if ss.params %}
           <div class="sauce-params-grid">
-            {% for k,v in ss.params.items() %}
-            <div class="sparam">
-              <span class="sparam-key">{{ k | upper | replace('_',' ') }}</span>
-              <span class="sparam-val">{{ v }}</span>
-            </div>
-            {% endfor %}
-          </div>
-          {% endif %}
-          <div style="padding:8px 14px;font-family:var(--font-d);font-size:7.5px;color:var(--muted);letter-spacing:.06em;line-height:1.8;border-top:1px solid rgba(255,100,0,0.1);">
-            ⚠️ ค่าเหล่านี้คำนวณจาก build ของคุณเท่านั้น — ไม่ใช่ค่า generic · ทดสอบบินในพื้นที่ปลอดภัยก่อนเสมอ
-          </div>
+            {% for k,v in ss.params.items() %}<div class="sparam"><span class="sparam-key">{{ k | upper | replace('_',' ') }}</span><span class="sparam-val">{{ v }}</span></div>{% endfor %}
+          </div>{% endif %}
+          <div style="padding:8px 14px;font-size:9px;color:var(--s-muted);border-top:1px solid rgba(255,100,0,.1);">⚠️ ค่าเหล่านี้คำนวณจาก build ของคุณเท่านั้น — ทดสอบบินในพื้นที่ปลอดภัยก่อนเสมอ</div>
         </div>
       </div>
       {% endif %}
 
-      <!-- ══ 1. MISSION SUMMARY ══ -->
-      <div class="tpanel">
-        <div class="tpanel-head">
-          <div class="tpanel-head-icon" style="background:var(--g-dim);border-color:rgba(0,255,136,0.2);">🧾</div>
+      {# ══════════════════════════════════════════════════════
+         BLOCK 4 — PID + FILTER + FULL CLI (tabbed)
+      ══════════════════════════════════════════════════════ #}
+      <div class="r-card r-card--blue">
+        <div class="r-card-hd">
+          <div class="r-card-icon">🎯</div>
           <div>
-            <div class="tpanel-title">Mission Summary</div>
-            <div class="tpanel-sub">{{ analysis.detected_class | default('—') }} · {{ analysis.style | capitalize }}</div>
+            <div class="r-card-title">{{ sty | capitalize }} Tuning</div>
+            <div class="r-card-sub">{{ cls }} · BF 4.4/4.5 · คัดลอก paste ใน CLI</div>
           </div>
         </div>
-        <div class="tpanel-body">
-          <div class="qs-stats">
-            <div class="qs-stat">
-              <span class="qs-stat-val blue">{{ analysis.detected_class | default('—') }}</span>
-              <span class="qs-stat-lbl">Class</span>
-            </div>
-            <div class="qs-stat">
-              <span class="qs-stat-val
-                {% if analysis.advanced and analysis.advanced.thrust_ratio %}
-                  {% set twr_v = analysis.advanced.thrust_ratio %}
-                  {% if twr_v < 1.5 %}red{% elif twr_v > 8.0 %}amber{% else %}green{% endif %}
-                {% endif %}">
-                {% if analysis.advanced and analysis.advanced.thrust_ratio %}{{ analysis.advanced.thrust_ratio | round(2) }}:1{% else %}—{% endif %}
-              </span>
-              <span class="qs-stat-lbl">TWR</span>
-            </div>
-            <div class="qs-stat">
-              <span class="qs-stat-val amber">
-                {% if analysis.est_flight_time_min %}{{ analysis.est_flight_time_min | round(1) }} min
-                {% elif analysis.battery_est %}{{ analysis.battery_est | round(1) }} min
-                {% else %}—{% endif %}
-              </span>
-              <span class="qs-stat-lbl">Flight Time (avg)</span>
-            </div>
-            <div class="qs-stat">
-              <span class="qs-stat-val
-                {% if analysis.advanced and analysis.advanced.hover_power_w %}
-                  {% if analysis.advanced.hover_power_w > 300 %}red{% elif analysis.advanced.hover_power_w > 150 %}amber{% else %}green{% endif %}
-                {% endif %}">
-                {% if analysis.advanced and analysis.advanced.hover_power_w %}{{ analysis.advanced.hover_power_w | int }}W{% else %}—{% endif %}
-              </span>
-              <span class="qs-stat-lbl">Hover Power</span>
-            </div>
-          </div>
-
-          {% if analysis.advanced %}
-          <div class="qs-stats-6" style="margin:8px 0;">
-            <div class="qs-stat">
-              <span class="qs-stat-val {% if analysis.advanced.peak_current_a and analysis.advanced.peak_current_a > 100 %}red{% elif analysis.advanced.peak_current_a and analysis.advanced.peak_current_a > 70 %}amber{% else %}green{% endif %}">
-                {% if analysis.advanced.peak_current_a %}{{ analysis.advanced.peak_current_a | int }}A{% else %}—{% endif %}
-              </span>
-              <span class="qs-stat-lbl">Peak Current</span>
-            </div>
-            <div class="qs-stat">
-              <span class="qs-stat-val {% if analysis.advanced.tip_speed_mps and analysis.advanced.tip_speed_mps > 290 %}red{% elif analysis.advanced.tip_speed_mps and analysis.advanced.tip_speed_mps > 265 %}amber{% else %}green{% endif %}">
-                {% if analysis.advanced.tip_speed_mps %}{{ analysis.advanced.tip_speed_mps | int }}m/s{% else %}—{% endif %}
-              </span>
-              <span class="qs-stat-lbl">Tip Speed</span>
-            </div>
-            <div class="qs-stat">
-              <span class="qs-stat-val amber">{% if analysis.advanced.hover_throttle_pct %}{{ analysis.advanced.hover_throttle_pct | int }}%{% else %}—{% endif %}</span>
-              <span class="qs-stat-lbl">Hover Thr</span>
-            </div>
-            <div class="qs-stat">
-              <span class="qs-stat-val {% if analysis.advanced.c_burst and analysis.advanced.c_burst > 80 %}red{% elif analysis.advanced.c_burst and analysis.advanced.c_burst > 50 %}amber{% else %}green{% endif %}">{% if analysis.advanced.c_burst %}{{ analysis.advanced.c_burst | int }}C{% else %}—{% endif %}</span>
-              <span class="qs-stat-lbl">C-Rate</span>
-            </div>
-            <div class="qs-stat">
-              <span class="qs-stat-val blue">{% if analysis.advanced.rpm_estimated %}{{ (analysis.advanced.rpm_estimated / 1000) | round(1) }}k{% else %}—{% endif %}</span>
-              <span class="qs-stat-lbl">RPM Est</span>
-            </div>
-            <div class="qs-stat">
-              <span class="qs-stat-val {% if analysis.advanced.efficiency_class == 'efficient' %}green{% elif analysis.advanced.efficiency_class == 'nominal' %}blue{% else %}amber{% endif %}">
-                {%- set _ec = analysis.advanced.efficiency_class | default('') -%}
-                {%- if _ec == 'efficient' %}EFFIC{%- elif _ec == 'nominal' %}NRML{%- elif _ec %}{{ _ec | upper | truncate(5,true,'') }}{%- else %}—{%- endif -%}
-              </span>
-              <span class="qs-stat-lbl">Efficiency</span>
-            </div>
-          </div>
-
-          <!-- WHAT THIS MEANS -->
-          <div class="wtm-box">
-            <div class="wtm-head">💡 WHAT THIS MEANS FOR YOUR BUILD</div>
-            {% set twr_v = analysis.advanced.thrust_ratio | default(0) | float %}
-            {% set tip_v = analysis.advanced.tip_speed_mps | default(0) | float %}
-            {% set cur_v = analysis.advanced.peak_current_a | default(0) | float %}
-            {% if twr_v >= 3.5 %}<span class="ok">✅ TWR {{ twr_v | round(2) }} — power เยอะ freestyle ทำ trick ได้ดี</span>{% elif twr_v >= 2.0 %}<span class="ok">✅ TWR {{ twr_v | round(2) }} — สมดุลดี บินได้ทุก style · Freestyle แนะนำ 3.0+</span>{% elif twr_v > 0 %}<span class="warn">⚠️ TWR {{ twr_v | round(2) }} — power น้อย แนะนำ motor KV สูงขึ้นหรือลดน้ำหนัก</span>{% endif %}
-            {% if tip_v > 290 %} · <span class="bad">⛔ Tip speed {{ tip_v | int }}m/s — เกิน 290 m/s compressibility loss รุนแรง เปลี่ยน prop เล็กลงหรือลด KV</span>{% elif tip_v > 265 %} · <span class="warn">⚠️ Tip speed {{ tip_v | int }}m/s — ใกล้ขีดจำกัด (265 m/s) efficiency ลดที่ full throttle</span>{% elif tip_v > 0 %} · <span class="ok">✅ Tip speed {{ tip_v | int }}m/s — ปลอดภัย (&lt;265 m/s)</span>{% endif %}
-            {% if cur_v > 100 %} · <span class="bad">⛔ Peak {{ cur_v | int }}A — ต้องการ ESC {{ (cur_v * 1.5) | int }}A+ (1.5× safety factor)</span>{% elif cur_v > 70 %} · <span class="warn">⚠️ Peak {{ cur_v | int }}A — ใช้ ESC {{ (cur_v * 1.5) | int }}A ขึ้นไป</span>{% elif cur_v > 0 %} · <span class="ok">✅ Peak {{ cur_v | int }}A — ESC ขนาดปกติรับได้</span>{% endif %}
-          </div>
-
-          <!-- Battery overview -->
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;">
-            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center;">
-              <div style="font-family:var(--font-m);font-size:14px;font-weight:700;color:var(--blue);">{{ analysis.advanced.cells | default("—") }}S · {{ analysis.advanced.pack_voltage_nominal | default("—") }}V</div>
-              <div style="font-family:var(--font-d);font-size:7px;color:var(--muted);letter-spacing:.08em;margin-top:2px;">BATTERY PACK</div>
-            </div>
-            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center;">
-              <div style="font-family:var(--font-m);font-size:14px;font-weight:700;color:var(--green);">{{ analysis.advanced.battery_mAh_used | default("—") }}mAh</div>
-              <div style="font-family:var(--font-d);font-size:7px;color:var(--muted);letter-spacing:.08em;margin-top:2px;">CAPACITY</div>
-            </div>
-            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center;">
-              <div style="font-family:var(--font-m);font-size:14px;font-weight:700;color:var(--amber);">{{ analysis.advanced.battery_wh | default("—") }}Wh</div>
-              <div style="font-family:var(--font-d);font-size:7px;color:var(--muted);letter-spacing:.08em;margin-top:2px;">ENERGY</div>
-            </div>
-          </div>
-          {% endif %}
-
-          <div class="qs-summary-box">
-            💡 {{ analysis.summary }}
-            {% if analysis.class_meta and analysis.class_meta.description %}
-            <br><span style="font-size:.8rem;color:var(--muted);margin-top:3px;display:block;">{{ analysis.class_meta.description }}</span>
-            {% endif %}
-          </div>
-
-          <!-- PID explanation -->
-          <div class="wtm-box" style="margin-top:8px;">
-            <div class="wtm-head">📐 อ่านค่า PID นี้อย่างไร</div>
-            <b>P (Proportional)</b> — ความแรงตอบสนองทันที ค่าสูง=คล่องแคล่ว · ต่ำเกิน=sluggish · สูงเกิน=oscillate<br>
-            <b>I (Integral)</b> — ต้านแรงลม/drift สะสม ให้โดรนบินตรง · BF4.4+: 80-100 (BF3.x เคยใช้ 30-50 เดิม) · I สูงเกิน = bounce หลัง flip · I ต่ำ = drift ในลม<br>
-            <b>D (Derivative)</b> — เบรก/damping ลด overshoot · ค่าสูง = นิ่งขึ้น propwash ลด แต่ motor ร้อน · 5": 28-42 · Nano: 12-18 · LR: 14-22<br>
-            <b>F (Feedforward)</b> — ทำนายทิศทาง stick ล่วงหน้า · ลด lag โดยไม่เพิ่ม noise · BF4.5: 80-120 freestyle · 120-160 racing<br>
-            <b>Pitch P > Roll P</b> เสมอ +5 ถึง +8 (CoG อยู่หน้า pitch axis ต้องการ correction มากกว่า)<br>
-            <span style="color:var(--muted);font-size:10px;">⚠️ ค่านี้คือ baseline จาก build ของคุณ — บินทดสอบ 1 pack ก่อนปรับ · ปรับทีละ 3-5 หน่วย · ปรับ D ก่อน P เสมอ</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- ══ 1b. BUILD INTELLIGENCE SCORE ══ -->
-      {% if analysis.advanced %}
-      {% set twr = analysis.advanced.thrust_ratio | default(0) | float %}
-      {%- set _ft_raw = analysis.advanced.est_flight_time_min | default(0) | float -%}
-      {%- set _ft_fallback = analysis.battery_est | default(0) | float -%}
-      {% set ft = _ft_raw if _ft_raw > 0 else _ft_fallback %}
-      {% set noise = analysis.prop_result.effect.noise | default(3) | float if analysis.prop_result else 3 %}
-      {% set tip = analysis.advanced.tip_speed_mps | default(0) | float %}
-      {% set mh = analysis.advanced.motor_health | default('') %}
-      {% set eff_cls = analysis.advanced.efficiency_class | default('nominal') %}
-      {% set s_twr = [100, [0, (twr - 1.0) / 4.0 * 100] | max] | min | int if twr > 0 else 30 %}
-      {% set s_ft  = [100, [0, ft / 12 * 100] | max] | min | int if ft > 0 else 30 %}
-      {% set s_noise = [[(100 - noise / 6 * 100), 0] | max, 100] | min | int %}
-      {% set s_tip = [100, [0, (1 - (tip - 150) / 150) * 100] | max] | min | int if tip > 0 else 70 %}
-      {% set s_motor = 85 if '✅' in mh else (55 if '⚡' in mh else 30) %}
-      {% set s_eff = 85 if eff_cls == 'efficient' else (65 if eff_cls == 'nominal' else 40) %}
-      {% set total_score = ((s_twr * 0.25 + s_ft * 0.20 + s_noise * 0.15 + s_tip * 0.20 + s_motor * 0.10 + s_eff * 0.10)) | int %}
-      {% set grade = 'S' if total_score >= 92 else ('A+' if total_score >= 85 else ('A' if total_score >= 78 else ('B+' if total_score >= 70 else ('B' if total_score >= 60 else ('C' if total_score >= 45 else 'D'))))) %}
-      {% set grade_color = '#00ff88' if total_score >= 78 else ('#f1b65a' if total_score >= 55 else '#f87171') %}
-      {% set circ = 339.3 %}
-      {% set dash_offset = circ - (total_score / 100 * circ) %}
-
-      <div class="tpanel" style="border-left:3px solid {{ grade_color }};">
-        <div class="tpanel-head">
-          <div class="tpanel-head-icon" style="background:rgba(0,255,136,.08);border-color:rgba(0,255,136,.2);">🧠</div>
-          <div>
-            <div class="tpanel-title">Build Intelligence Score</div>
-            <div class="tpanel-sub">วิเคราะห์ 6 มิติ · TWR · Flight time · Noise · Tip speed · Motor · Efficiency</div>
-          </div>
-        </div>
-        <div class="tpanel-body">
-          <div class="biq-wrap">
-            <div class="biq-ring-wrap">
-              <svg class="biq-ring-svg" viewBox="0 0 120 120" width="120" height="120">
-                <circle class="biq-ring-bg" cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="10"/>
-                <circle cx="60" cy="60" r="54" fill="none"
-                  stroke="{{ grade_color }}" stroke-width="10" stroke-linecap="round"
-                  stroke-dasharray="{{ circ }}" stroke-dashoffset="{{ dash_offset }}"
-                  id="score-ring-circle"
-                  transform="rotate(-90 60 60)"
-                  style="filter:drop-shadow(0 0 5px {{ grade_color }}66);transition:stroke-dashoffset 1s cubic-bezier(.2,.8,.3,1)"/>
-              </svg>
-              <div class="biq-center">
-                <div class="biq-score-num" style="color:{{ grade_color }};">{{ total_score }}</div>
-                <div class="biq-grade" style="color:{{ grade_color }};">{{ grade }}</div>
-                <div class="biq-label">BUILD SCORE</div>
-              </div>
-            </div>
-            <div class="biq-bars">
-              {% for label, val, w in [('TWR', s_twr, 0.25), ('Flight Time', s_ft, 0.20), ('Low Noise', s_noise, 0.15), ('Tip Speed', s_tip, 0.20), ('Motor', s_motor, 0.10), ('Efficiency', s_eff, 0.10)] %}
-              <div class="biq-bar-row">
-                <span class="biq-bar-label">{{ label }}</span>
-                <div class="biq-bar-track"><div class="biq-bar-fill" style="width:{{ val }}%;background:{% if val>=70 %}var(--green){% elif val>=45 %}var(--amber){% else %}var(--red){% endif %};"></div></div>
-                <span class="biq-bar-val">{{ val }}%</span>
-              </div>
-              {% endfor %}
-            </div>
-          </div>
-
-          <!-- Verdict -->
-          <div class="verdict-banner {% if total_score >= 78 %}good{% elif total_score >= 55 %}warn{% else %}bad{% endif %}" style="margin-top:12px;">
-            <div class="verdict-ico">{% if total_score >= 78 %}🚀{% elif total_score >= 55 %}⚡{% else %}⚠️{% endif %}</div>
-            <div class="verdict-text">
-              <strong>
-                {% if total_score >= 92 %}BUILD ระดับ WORLD CLASS — ทุกมิติอยู่ในเกณฑ์ยอดเยี่ยม
-                {% elif total_score >= 85 %}BUILD ยอดเยี่ยม — สมดุลดีเยี่ยม พร้อมบิน
-                {% elif total_score >= 78 %}BUILD ดีมาก — เหมาะกับ {{ analysis.style | capitalize }}
-                {% elif total_score >= 70 %}BUILD ดี — มีจุดที่ควรปรับปรุงเล็กน้อย
-                {% elif total_score >= 55 %}BUILD ปานกลาง — ควรปรับสเปคก่อนบิน aggressive
-                {% else %}BUILD ต้องปรับปรุง — มีความเสี่ยงหลายจุด ตรวจสอบ Warnings{% endif %}
-              </strong>
-              TWR {{ twr | round(2) }}:1 · Flight time ~{{ ft | round(1) if ft > 0 else '—' }} นาที
-              {% if noise >= 5 %} · ⚠️ Noise สูง ควร balance prop{% endif %}
-              {% if tip > 270 %} · ⚠️ Tip speed ใกล้ขีดจำกัด ({{ tip | int }} m/s){% endif %}
-            </div>
-          </div>
-
-          <div style="margin-top:8px;font-size:9px;color:var(--muted);font-family:var(--font-d);letter-spacing:.05em;">
-            คำนวณจาก: TWR 25% · Flight Time 20% · Noise 15% · Tip Speed 20% · Motor 10% · Efficiency 10%
-          </div>
-        </div>
-      </div>
-      {% endif %}
-
-      <!-- ══ 2. WARNINGS ══ -->
-      {% if analysis.warnings %}
-      <div class="tpanel" style="border-left:3px solid var(--red);">
-        <div class="tpanel-head">
-          <div class="tpanel-head-icon" style="background:var(--r-dim);border-color:rgba(255,68,85,0.2);">🚨</div>
-          <div><div class="tpanel-title">Input Warnings</div><div class="tpanel-sub">{{ analysis.warnings|length }} รายการ</div></div>
-        </div>
-        <div class="tpanel-body">
-          <div class="alert-list">
-            {% for w in analysis.warnings %}
-            <div class="alert-item {{ w.level }}">
-              <span class="alert-ico">{% if w.level=='danger' %}❌{% elif w.level=='warning' %}⚠️{% else %}ℹ️{% endif %}</span>
-              <span>{{ w.msg }}</span>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
-      {% endif %}
-
-      <!-- ══ 3. SMART RULE CHECKS ══ -->
-      {% if analysis.rules %}
-      <div class="tpanel" style="border-left:3px solid var(--amber);">
-        <div class="tpanel-head">
-          <div class="tpanel-head-icon" style="background:var(--a-dim);border-color:rgba(255,183,0,0.2);">🛠️</div>
-          <div><div class="tpanel-title">Smart Checks</div><div class="tpanel-sub">{{ analysis.rules|length }} ผลการตรวจ</div></div>
-        </div>
-        <div class="tpanel-body">
-          <div class="alert-list">
-            {% for r in analysis.rules %}
-            <div class="alert-item {{ r.level }}">
-              <span class="alert-ico">{% if r.level=='danger' %}❌{% elif r.level=='warning' %}⚠️{% else %}✅{% endif %}</span>
-              <div>
-                <strong>{{ r.msg }}</strong>
-                {% if r.suggestion %}<div style="font-size:.8rem;color:var(--muted2);margin-top:3px;">→ {{ r.suggestion }}</div>{% endif %}
-              </div>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
-      {% endif %}
-
-      <!-- ══ 4. CLASS BASELINE ══ -->
-      {% if analysis.detected_class %}
-      <div class="tpanel" style="border-left:3px solid var(--blue);">
-        <div class="tpanel-head">
-          <div class="tpanel-head-icon" style="background:var(--b-dim);border-color:rgba(0,170,255,0.2);">🔎</div>
-          <div>
-            <div class="tpanel-title">
-              Class Baseline — <span class="class-badge">{{ analysis.detected_class }}</span>
-            </div>
-            <div class="tpanel-sub">
-              {% if analysis.class_meta and analysis.class_meta.description %}{{ analysis.class_meta.description }}{% endif %}
-              · BF4.4/4.5 verified
-            </div>
-          </div>
-        </div>
-        <div class="tpanel-body">
-          <div class="pf-grid">
-            <div class="pf-box">
-              <div class="pf-box-head">
-                <span class="pf-box-title">🎯 PID Baseline</span>
-                <button class="pf-copy-btn" onclick="copyEl('pid-bl')">Copy</button>
-              </div>
-              <pre class="pf-code" id="pid-bl"
->ROLL   P={{ analysis.pid_baseline.roll.p }}  I={{ analysis.pid_baseline.roll.i }}  D={{ analysis.pid_baseline.roll.d }}
-PITCH  P={{ analysis.pid_baseline.pitch.p }} I={{ analysis.pid_baseline.pitch.i }} D={{ analysis.pid_baseline.pitch.d }}
-YAW    P={{ analysis.pid_baseline.yaw.p }}  I={{ analysis.pid_baseline.yaw.i }}</pre>
-            </div>
-            <div class="pf-box">
-              <div class="pf-box-head">
-                <span class="pf-box-title">🔊 Filter Baseline</span>
-                <button class="pf-copy-btn" onclick="copyEl('flt-bl')">Copy</button>
-              </div>
-              <pre class="pf-code" id="flt-bl"
->Gyro LPF1 : {{ analysis.filter_baseline.gyro_lpf1 or '—' }} Hz
-Gyro LPF2 : {{ analysis.filter_baseline.gyro_lpf2 or 'OFF' }}
-DTerm LPF1: {{ analysis.filter_baseline.dterm_lpf1 or '—' }} Hz
-Dyn Notch : {{ analysis.filter_baseline.dyn_notch or '—' }} ตัว
-RPM Filter: {{ 'ON' if analysis.filter_baseline.rpm_filter else 'OFF' }}
-Anti-Grav : {{ analysis.filter_baseline.anti_gravity or '—' }}</pre>
-            </div>
-          </div>
-          {% if analysis.baseline_notes %}
-          <div style="margin-top:8px;font-size:.78rem;color:var(--muted);font-style:italic;">📝 {{ analysis.baseline_notes }}</div>
-          {% endif %}
-        </div>
-      </div>
-      {% endif %}
-
-      <!-- ══ 5. STYLE TUNING + FULL CLI ══ -->
-      <div class="tpanel">
-        <div class="tpanel-head">
-          <div class="tpanel-head-icon" style="background:var(--g-dim);border-color:rgba(0,255,136,0.2);">⚙️</div>
-          <div>
-            <div class="tpanel-title">{{ analysis.style | capitalize }} Tuning — Full CLI</div>
-            <div class="tpanel-sub">Class × Style · คัดลอกไป paste ใน Betaflight CLI</div>
-          </div>
-        </div>
-        <div class="tpanel-body">
+        <div class="r-card-body r-card-body--notop">
           <div class="tab-row">
-            <button class="tab-btn active" onclick="switchTab(this,'t-pid')">🎯 PID</button>
-            <button class="tab-btn" onclick="switchTab(this,'t-filter')">🔊 Filter</button>
-            <button class="tab-btn" onclick="switchTab(this,'t-fullcli')">📋 Full CLI</button>
+            <button class="tab-btn active" onclick="switchTab(this,'tp-pid')">🎯 PID</button>
+            <button class="tab-btn" onclick="switchTab(this,'tp-filter')">🔊 Filter</button>
+            <button class="tab-btn" onclick="switchTab(this,'tp-fullcli')">📋 Full CLI</button>
           </div>
 
-          <!-- PID tab -->
-          <div id="t-pid" class="tab-pane active">
+          <!-- PID -->
+          <div id="tp-pid" class="tab-pane active">
             <div class="pf-grid">
               <div class="pf-box">
-                <div class="pf-box-head">
-                  <span class="pf-box-title">⚙️ PID แนะนำ</span>
-                  <button class="pf-copy-btn" onclick="copyEl('pid-main')">Copy</button>
-                </div>
-                <pre class="pf-code" id="pid-main"
->ROLL   P={{ analysis.pid.roll.p }}  I={{ analysis.pid.roll.i }}  D={{ analysis.pid.roll.d }}
+                <div class="pf-box-head"><span class="pf-box-title">⚙️ PID Values</span><button class="pf-copy-btn" onclick="copyEl('r-pid-main')">Copy</button></div>
+                <pre class="pf-code" id="r-pid-main">ROLL   P={{ analysis.pid.roll.p }}  I={{ analysis.pid.roll.i }}  D={{ analysis.pid.roll.d }}
 PITCH  P={{ analysis.pid.pitch.p }} I={{ analysis.pid.pitch.i }} D={{ analysis.pid.pitch.d }}
 YAW    P={{ analysis.pid.yaw.p }}  I={{ analysis.pid.yaw.i }}</pre>
               </div>
               <div class="pf-box">
-                <div class="pf-box-head">
-                  <span class="pf-box-title">📟 BF CLI set</span>
-                  <button class="pf-copy-btn" onclick="copyEl('pid-cli')">Copy</button>
-                </div>
-                <pre class="pf-code" id="pid-cli" style="font-size:10.5px;"
->set p_roll  = {{ analysis.pid.roll.p }}
+                <div class="pf-box-head"><span class="pf-box-title">📟 CLI set</span><button class="pf-copy-btn" onclick="copyEl('r-pid-cli')">Copy</button></div>
+                <pre class="pf-code" id="r-pid-cli" style="font-size:10.5px;">set p_roll  = {{ analysis.pid.roll.p }}
 set i_roll  = {{ analysis.pid.roll.i }}
 set d_roll  = {{ analysis.pid.roll.d }}
 set p_pitch = {{ analysis.pid.pitch.p }}
@@ -5892,80 +5886,55 @@ set p_yaw   = {{ analysis.pid.yaw.p }}
 set i_yaw   = {{ analysis.pid.yaw.i }}</pre>
               </div>
             </div>
-            <div style="margin-top:10px;padding:9px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:7px;font-size:.82rem;color:var(--muted2);">
-              💡 {{ analysis.extra_tips[0] if analysis.extra_tips else '' }}<br>
-              <span style="color:var(--muted);font-size:.78rem;">Pitch P สูงกว่า Roll ~5-8% เสมอ (เพราะ CoG อยู่ด้านหน้า) · BF4.4/4.5: I ควรอยู่ที่ 80-100</span>
+            <div class="pid-note">
+              💡 {{ analysis.extra_tips[0] if analysis.extra_tips else 'Baseline สำหรับ ' + sty + ' style' }}<br>
+              <span style="font-size:11px;color:var(--s-muted);">Pitch P > Roll P เสมอ ~+5–8 · I = 80–100 (BF4.4+) · ปรับ D ก่อน P · ทีละ 3–5 หน่วย</span>
             </div>
           </div>
 
-          <!-- Filter tab -->
-          <div id="t-filter" class="tab-pane">
+          <!-- Filter -->
+          <div id="tp-filter" class="tab-pane">
             <div class="pf-grid">
               <div class="pf-box">
-                <div class="pf-box-head">
-                  <span class="pf-box-title">🧠 Filter Summary</span>
-                  <button class="pf-copy-btn" onclick="copyEl('flt-main')">Copy</button>
-                </div>
-                <pre class="pf-code" id="flt-main"
->Gyro LPF1 : {{ analysis.filter.gyro_lpf1 or '—' }} Hz
+                <div class="pf-box-head"><span class="pf-box-title">🧠 Filter</span><button class="pf-copy-btn" onclick="copyEl('r-flt-main')">Copy</button></div>
+                <pre class="pf-code" id="r-flt-main">Gyro LPF1 : {{ analysis.filter.gyro_lpf1 or '—' }} Hz
 Gyro LPF2 : {{ analysis.filter.gyro_lpf2 or 'OFF' }}
 DTerm LPF1: {{ analysis.filter.dterm_lpf1 or '—' }} Hz
-DTerm LPF2: {{ analysis.filter.dterm_lpf2 or 'OFF' }}
 Dyn Notch : {{ analysis.filter.dyn_notch or '—' }} ตัว
-RPM Filter: {{ 'ON (แนะนำ)' if analysis.filter.rpm_filter else 'OFF' }}
+RPM Filter: {{ 'ON ✅' if analysis.filter.rpm_filter else 'OFF' }}
 Anti-Grav : {{ analysis.filter.anti_gravity or '—' }}</pre>
               </div>
               <div class="pf-box">
-                <div class="pf-box-head">
-                  <span class="pf-box-title">📟 BF CLI set</span>
-                  <button class="pf-copy-btn" onclick="copyEl('flt-cli')">Copy</button>
-                </div>
-                <pre class="pf-code" id="flt-cli" style="font-size:10.5px;"
->set gyro_lpf1_static_hz   = {{ analysis.filter.gyro_lpf1 or 0 }}
-set gyro_lpf1_type        = PT1
-set gyro_lpf2_static_hz   = {{ analysis.filter.gyro_lpf2 or 0 }}
-set dterm_lpf1_static_hz  = {{ analysis.filter.dterm_lpf1 or 0 }}
-set dterm_lpf1_type       = PT1
-set dterm_lpf2_static_hz  = {{ analysis.filter.dterm_lpf2 or 0 }}
-set dyn_notch_count       = {{ analysis.filter.dyn_notch or 1 }}
-set dyn_notch_min_hz      = {{ analysis.filter.dyn_notch_min or 80 }}
-set dyn_notch_max_hz      = {{ analysis.filter.dyn_notch_max or 400 }}
-set motor_pwm_protocol    = DSHOT600
-set dshot_bidir           = {{ 'ON' if analysis.filter.rpm_filter else 'OFF' }}
-set rpm_filter_harmonics  = 3
-set rpm_filter_q          = 500
-set rpm_filter_min_hz     = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [80, (analysis.advanced.rpm_estimated * 0.15) | int] | max }}{% else %}80{% endif %}
-set anti_gravity_gain     = {{ analysis.filter.anti_gravity or 5 }}
-set anti_gravity_mode     = SMOOTH</pre>
+                <div class="pf-box-head"><span class="pf-box-title">📟 CLI set</span><button class="pf-copy-btn" onclick="copyEl('r-flt-cli')">Copy</button></div>
+                <pre class="pf-code" id="r-flt-cli" style="font-size:10.5px;">set gyro_lpf1_static_hz  = {{ analysis.filter.gyro_lpf1 or 0 }}
+set gyro_lpf1_type       = PT1
+set dterm_lpf1_static_hz = {{ analysis.filter.dterm_lpf1 or 0 }}
+set dterm_lpf1_type      = PT1
+set dyn_notch_count      = {{ analysis.filter.dyn_notch or 1 }}
+set dyn_notch_min_hz     = {{ analysis.filter.dyn_notch_min or 80 }}
+set dyn_notch_max_hz     = {{ analysis.filter.dyn_notch_max or 400 }}
+set motor_pwm_protocol   = DSHOT600
+set dshot_bidir          = {{ 'ON' if analysis.filter.rpm_filter else 'OFF' }}
+set rpm_filter_harmonics = 3
+set rpm_filter_q         = 500
+set rpm_filter_min_hz    = {% if adv and adv.rpm_estimated %}{{ [80,(adv.rpm_estimated * 0.15)|int]|max }}{% else %}80{% endif %}
+set anti_gravity_gain    = {{ analysis.filter.anti_gravity or 5 }}</pre>
               </div>
             </div>
-            <div style="margin-top:10px;padding:9px 12px;background:rgba(0,170,255,0.04);border:1px solid rgba(0,170,255,.12);border-radius:7px;border-left:2px solid var(--blue);font-size:.82rem;color:var(--muted2);">
-              🔊 <strong style="color:var(--text);">แนะนำ RPM Filter:</strong> ต้องใช้ BLHeli_32 / AM32 + DSHOT Bidir — ลด motor noise ได้มาก ช่วย D term ไม่สั่น
-              {% if analysis.filter.dyn_notch and analysis.filter.gyro_lpf1 %}
-              <br>📐 Dyn Notch {{ analysis.filter.dyn_notch }} ตัว + Gyro LPF1 {{ analysis.filter.gyro_lpf1 }}Hz เหมาะกับ {{ analysis.detected_class | default('') }} build
-              {% endif %}
-              <div class="wtm-box" style="margin-top:8px;font-size:10px;">
-                <div class="wtm-head">🔊 ทำไม Filter สำคัญ</div>
-                <b>Gyro LPF1 (static)</b> — กรอง broadband noise จาก gyro · Nano/Micro: 250-300Hz · Freestyle 5": 200-250Hz · LR 7-10": 120-150Hz · ต่ำกว่า = กรองมากกว่า แต่ latency สูงขึ้น<br>
-                <b>D-term LPF1 (static)</b> — กรอง noise เฉพาะ D term โดยตรง · ช่วยลด motor ร้อนจาก high-freq noise · ตั้งต่ำกว่า Gyro LPF1 เสมอ (~50-60%)<br>
-                <b>Dyn Notch</b> — auto-track resonance frequency · ติดตาม RPM จริงแบบ real-time · ใช้ 1 notch สำหรับ LR/clean build · 2-3 notch สำหรับ noisy build<br>
-                <b>RPM Filter</b> — แม่นยำที่สุด · กรอง motor electrical harmonic ตาม DSHOT RPM telemetry · ต้องการ BLHeli_32/AM32 + DSHOT300/600 + Bidirectional DSHOT · ลด motor ร้อน + ใช้ D term สูงขึ้นได้ · ตั้ง harmonics=3, Q=500 เริ่มต้น
-              </div>
+            <div class="pid-note">
+              🔊 RPM Filter ต้องใช้ <strong>BLHeli_32 / AM32 + DSHOT Bidir</strong> · ลด motor noise มาก<br>
+              <span style="font-size:11px;color:var(--s-muted);">Gyro LPF1: Nano 250–300Hz · 5" 200Hz · LR 120–150Hz · DTerm ≈ 55% ของ Gyro</span>
             </div>
           </div>
 
-          <!-- Full CLI tab -->
-          <div id="t-fullcli" class="tab-pane">
+          <!-- Full CLI -->
+          <div id="tp-fullcli" class="tab-pane">
             <div class="pf-box">
-              <div class="pf-box-head">
-                <span class="pf-box-title">📋 Full CLI — Paste ใน Betaflight</span>
-                <button class="pf-copy-btn" onclick="copyEl('fullcli-box')">Copy All</button>
-              </div>
-              <pre class="pf-code" id="fullcli-box" style="font-size:10px;line-height:1.7;"
-># ══ OBIXConfig Doctor ══ {{ analysis.detected_class | default('Custom') }} · {{ analysis.style | capitalize }}
-# Build: {{ analysis.prop_size or '5' }}" prop · {{ analysis.advanced.cells | default('4') if analysis.advanced else '4' }}S · KV{{ analysis.motor_kv or '—' }}
-# Score: {{ analysis.advanced.efficiency_class | default('nominal') | capitalize }} · TWR {{ analysis.advanced.thrust_ratio | round(2) if analysis.advanced and analysis.advanced.thrust_ratio else '—' }}
-# ─────────────────────────── PID ───────────────────────────
+              <div class="pf-box-head"><span class="pf-box-title">📋 Full CLI</span><button class="pf-copy-btn" onclick="copyEl('r-fullcli')">Copy All</button></div>
+              <pre class="pf-code" id="r-fullcli" style="font-size:10px;line-height:1.7;"># ══ OBIXConfig Doctor ══ {{ cls }} · {{ sty | capitalize }}
+# {{ analysis.prop_size or '5' }}" prop · {{ adv.cells | default('4') }}S · KV{{ analysis.motor_kv or '—' }}
+# TWR {{ adv.thrust_ratio | round(2) if adv and adv.thrust_ratio else '—' }} · Eff {{ adv.efficiency_class | default('nominal') | capitalize }}
+# ─── PID ───────────────────────────────────────
 set p_roll               = {{ analysis.pid.roll.p }}
 set i_roll               = {{ analysis.pid.roll.i }}
 set d_roll               = {{ analysis.pid.roll.d }}
@@ -5974,7 +5943,8 @@ set i_pitch              = {{ analysis.pid.pitch.i }}
 set d_pitch              = {{ analysis.pid.pitch.d }}
 set p_yaw                = {{ analysis.pid.yaw.p }}
 set i_yaw                = {{ analysis.pid.yaw.i }}
-# ─────────────────────────── Filter ────────────────────────
+set d_yaw                = 0
+# ─── Filter ────────────────────────────────────
 set gyro_lpf1_static_hz  = {{ analysis.filter.gyro_lpf1 or 0 }}
 set gyro_lpf1_type       = PT1
 set gyro_lpf2_static_hz  = {{ analysis.filter.gyro_lpf2 or 0 }}
@@ -5985,12 +5955,13 @@ set dyn_notch_count      = {{ analysis.filter.dyn_notch or 1 }}
 set dyn_notch_min_hz     = {{ analysis.filter.dyn_notch_min or 80 }}
 set dyn_notch_max_hz     = {{ analysis.filter.dyn_notch_max or 400 }}
 set dyn_notch_q          = 250
+# ─── Motor / ESC ───────────────────────────────
 set motor_pwm_protocol   = DSHOT600
 set dshot_bidir          = {{ 'ON' if analysis.filter.rpm_filter else 'OFF' }}
 set motor_poles          = 14
 set rpm_filter_harmonics = 3
 set rpm_filter_q         = 500
-set rpm_filter_min_hz    = {% if analysis.advanced and analysis.advanced.rpm_estimated %}{{ [80, (analysis.advanced.rpm_estimated * 0.15) | int] | max }}{% else %}80{% endif %}
+set rpm_filter_min_hz    = {% if adv and adv.rpm_estimated %}{{ [80,(adv.rpm_estimated*0.15)|int]|max }}{% else %}80{% endif %}
 set anti_gravity_gain    = {{ analysis.filter.anti_gravity or 5 }}
 set anti_gravity_mode    = SMOOTH
 save</pre>
@@ -5999,1398 +5970,197 @@ save</pre>
         </div>
       </div>
 
-      <!-- ══ 6. PHYSICS DEEP-DIVE ══ -->
-      {% if analysis.advanced %}
-      <div class="tpanel" style="border-left:3px solid var(--blue);">
-        <div class="tpanel-head">
-          <div class="tpanel-head-icon" style="background:var(--b-dim);border-color:rgba(0,170,255,.2);">🔭</div>
+      {# ══════════════════════════════════════════════════════
+         BLOCK 5 — CHECKS & WARNINGS (รวมใน 1 card)
+      ══════════════════════════════════════════════════════ #}
+      {% set has_issues = (analysis.warnings and analysis.warnings|length > 0) or (analysis.rules and analysis.rules|length > 0) %}
+      {% if has_issues %}
+      <div class="r-card r-card--amber">
+        <div class="r-card-hd">
+          <div class="r-card-icon">🛠️</div>
           <div>
-            <div class="tpanel-title">Physics Deep-Dive</div>
-            <div class="tpanel-sub">วิเคราะห์ฟิสิกส์เชิงลึก · คำอธิบายที่เข้าใจได้</div>
+            <div class="r-card-title">Checks & Warnings</div>
+            <div class="r-card-sub">
+              {% if analysis.warnings %}{{ analysis.warnings|length }} input issue{% if analysis.warnings|length > 1 %}s{% endif %}{% endif %}
+              {% if analysis.warnings and analysis.rules %} · {% endif %}
+              {% if analysis.rules %}{{ analysis.rules|length }} smart check{% if analysis.rules|length > 1 %}s{% endif %}{% endif %}
+            </div>
           </div>
         </div>
-        <div class="tpanel-body">
-          <div class="insight-grid">
+        <div class="r-card-body">
+          {% set danger_count = namespace(n=0) %}
+          {% if analysis.warnings %}{% for w in analysis.warnings %}{% if w.level=='danger' %}{% set danger_count.n = danger_count.n + 1 %}{% endif %}{% endfor %}{% endif %}
+          {% if analysis.rules %}{% for r in analysis.rules %}{% if r.level in ('danger','critical') %}{% set danger_count.n = danger_count.n + 1 %}{% endif %}{% endfor %}{% endif %}
+          {% if danger_count.n > 0 %}
+          <div class="check-banner check-danger">⛔ {{ danger_count.n }} critical issue — ต้องแก้ก่อนบิน</div>
+          {% endif %}
 
-            <!-- TWR -->
-            {% set twr2 = analysis.advanced.thrust_ratio | default(0) | float %}
-            <div class="insight-card {% if twr2 >= 3.5 %}g{% elif twr2 >= 2.0 %}a{% else %}r{% endif %}">
-              <div class="ic-val" style="color:{% if twr2 >= 3.5 %}var(--green){% elif twr2 >= 1.8 %}var(--amber){% else %}var(--red){% endif %}">{{ twr2 | round(2) }}:1</div>
-              <div class="ic-label">Thrust-to-Weight Ratio</div>
-              <div class="ic-explain">
-                {% if twr2 >= 6.0 %}⚡ กำลังสูงมาก — hover ~{{ analysis.advanced.hover_throttle_pct | int if analysis.advanced.hover_throttle_pct else (100/(twr2**0.5 if twr2 > 0 else 1))|int }}% เหมาะ racing/aggressive freestyle
-                {% elif twr2 >= 3.5 %}✅ ดีมาก — hover ~{{ analysis.advanced.hover_throttle_pct | int if analysis.advanced.hover_throttle_pct else (100/(twr2**0.5 if twr2 > 0 else 1))|int }}% throttle มี headroom เพียงพอ
-                {% elif twr2 >= 1.5 %}⚠️ ต่ำกว่ามาตรฐาน TWR {{ twr2 }} — hover ที่ throttle สูง เหลือ headroom น้อยสำหรับ maneuver ควรเพิ่ม motor KV หรือลดน้ำหนัก
-                {% else %}⛔ ต่ำเกินไป — โดรนบินได้ยาก TWR ควรอยู่ที่ 2.0 ขึ้นไปอย่างน้อย{% endif %}
-              </div>
-              {% set twr_pct = [100, (twr2 / 5.0 * 100) | int] | min %}
-              <div class="ic-bar"><div class="ic-bar-fill" style="width:{{ twr_pct }}%;background:{% if twr2>=2.5 %}var(--green){% elif twr2>=1.5 %}var(--amber){% else %}var(--red){% endif %};"></div></div>
-            </div>
-
-            <!-- Peak Current -->
-            {% set peak_a = analysis.advanced.peak_current_a | default(0) | float %}
-            {% set esc_a = analysis.esc_recommended_a | default(0) | int %}
-            <div class="insight-card {% if peak_a > 0 %}{% if esc_a > 0 and peak_a < esc_a * 4 %}g{% else %}a{% endif %}{% else %}a{% endif %}">
-              <div class="ic-val" style="color:var(--blue)">{{ peak_a }}A</div>
-              <div class="ic-label">Peak Current (Total)</div>
-              <div class="ic-explain">
-                กระแสสูงสุดเมื่อ full throttle รวม 4 มอเตอร์ ({{ analysis.advanced.cells }}S pack)
-                {% if analysis.peak_per_motor_a %}· ต่อมอเตอร์ {{ analysis.peak_per_motor_a }}A{% endif %}
-                {% if esc_a > 0 %}— แนะนำ ESC ≥ {{ analysis.advanced.esc_recommended_a | default(esc_a) }}A/motor (safety margin 1.5× industry standard){% endif %}
-              </div>
-              {% set cur_pct = [100, (peak_a / 200 * 100) | int] | min %}
-              <div class="ic-bar"><div class="ic-bar-fill" style="width:{{ cur_pct }}%;background:var(--blue);"></div></div>
-            </div>
-
-            <!-- Tip Speed -->
-            {% set tip2 = analysis.advanced.tip_speed_mps | default(0) | float %}
-            <div class="insight-card {% if tip2 > 290 %}r{% elif tip2 > 265 %}a{% else %}g{% endif %}">
-              <div class="ic-val" style="color:{% if tip2>290 %}var(--red){% elif tip2>265 %}var(--amber){% else %}var(--green){% endif %}">{{ tip2 | int }} m/s</div>
-              <div class="ic-label">Prop Tip Speed</div>
-              <div class="ic-explain">
-                ปลายใบพัดวิ่งด้วยความเร็ว {{ tip2 | int }} m/s
-                ({{ (tip2/343*100)|int }}% ความเร็วเสียง)
-                {% if tip2 > 290 %}⚠️ เกิน 290 m/s — compressibility loss รุนแรง เสียงดังมาก ลด KV หรือเลือก prop เล็กลง
-                {% elif tip2 > 265 %}⚡ ใกล้ขีดจำกัด (265 m/s) — efficiency ลดที่ full throttle ควร balance prop ให้ดี
-                {% else %}✅ ปลอดภัย — subsonic เต็มที่ (&lt;265 m/s){% endif %}
-              </div>
-              {% set tip_pct = [100, (tip2 / 350 * 100) | int] | min %}
-              <div class="ic-bar"><div class="ic-bar-fill" style="width:{{ tip_pct }}%;background:{% if tip2>290 %}var(--red){% elif tip2>265 %}var(--amber){% else %}var(--green){% endif %};"></div></div>
-            </div>
-
-            <!-- Hover Throttle -->
-            {% set hov_thr = analysis.advanced.hover_throttle_pct | default(0) | float %}
-            <div class="insight-card {% if hov_thr > 65 %}r{% elif hov_thr > 50 %}a{% elif hov_thr > 0 %}g{% endif %}">
-              <div class="ic-val" style="color:{% if hov_thr>65 %}var(--red){% elif hov_thr>50 %}var(--amber){% else %}var(--green){% endif %}">{% if hov_thr > 0 %}{{ hov_thr | int }}%{% else %}—{% endif %}</div>
-              <div class="ic-label">Hover Throttle</div>
-              <div class="ic-explain">
-                {% if hov_thr > 65 %}⛔ สูงเกิน — เหลือกำลังสำรองน้อย แนะนำ motor KV สูงขึ้น
-                {% elif hov_thr > 50 %}⚠️ ค่อนข้างสูง — headroom น้อย เหมาะ LR/cine เท่านั้น
-                {% elif hov_thr > 25 %}✅ ดี — hover ที่ {{ hov_thr | int }}% เหลือ headroom สำหรับ maneuver · freestyle optimal 30-40% (50%+ = headroom น้อยเกินไป)
-                {% else %}⚡ ต่ำมาก — racing/ultra-power build หรือน้ำหนักเบากว่า spec{% endif %}
-                · RC stick ~{{ hov_thr | int }}% สำหรับ level flight
-              </div>
-              <div class="ic-bar"><div class="ic-bar-fill" style="width:{{ [100, hov_thr|int]|min }}%;background:{% if hov_thr>65 %}var(--red){% elif hov_thr>50 %}var(--amber){% else %}var(--green){% endif %};"></div></div>
-            </div>
-
-            <!-- C-Rating -->
-            {% set cb = analysis.advanced.c_burst | default(0) | float %}
-            {% set cc = analysis.advanced.c_continuous | default(0) | float %}
-            <div class="insight-card {% if cb > 80 %}r{% elif cb > 50 %}a{% else %}g{% endif %}">
-              <div class="ic-val" style="color:{% if cb>80 %}var(--red){% elif cb>50 %}var(--amber){% else %}var(--green){% endif %}">{{ cb | int }}C</div>
-              <div class="ic-label">C-Rating Required (Burst)</div>
-              <div class="ic-explain">
-                แบตต้องรองรับ {{ cb | int }}C burst / {{ cc | int }}C continuous
-                {% if cb > 80 %}⚠️ C สูงมาก — ควรใช้แบต HV quality หรือเพิ่ม mAh
-                {% elif cb > 50 %}ต้องการแบตคุณภาพดี
-                {% else %}C-rate ปกติ — แบต 50-80C burst / 30-50C continuous รองรับได้{% endif %}
-              </div>
-              {% set c_pct = [100, (cb / 120 * 100) | int] | min %}
-              <div class="ic-bar"><div class="ic-bar-fill" style="width:{{ c_pct }}%;background:{% if cb>80 %}var(--red){% elif cb>50 %}var(--amber){% else %}var(--green){% endif %};"></div></div>
-            </div>
-
-            <!-- RPM -->
-            {% set rpm = analysis.advanced.rpm_estimated | default(0) | int %}
-            <div class="insight-card g">
-              <div class="ic-val" style="color:var(--amber)">{{ "{:,}".format(rpm) if rpm > 0 else "—" }}</div>
-              <div class="ic-label">Estimated Motor RPM</div>
-              <div class="ic-explain">
-                {% if rpm > 0 %}
-                รอบมอเตอร์ที่ full throttle ≈ KV × V_nominal × 0.85 (voltage sag 15%)
-                Mechanical freq = {{ (rpm/60)|int }} Hz · Electrical freq (14-pole) = {{ (rpm/60*7)|int }} Hz
-                RPM filter min_hz = {{ [80,(rpm/60*0.30)|int]|max }} Hz (ที่ ~30% throttle = lowest hover)
-                {% else %}กรุณากรอก Motor KV เพื่อคำนวณ RPM{% endif %}
-              </div>
-              {% if rpm > 0 %}
-              {% set rpm_pct = [100, (rpm / 50000 * 100) | int] | min %}
-              <div class="ic-bar"><div class="ic-bar-fill" style="width:{{ rpm_pct }}%;background:var(--amber);"></div></div>
-              {% endif %}
-            </div>
-
-          </div><!-- /insight-grid -->
-
-          <!-- KV Gauge -->
-          {% if analysis.motor_kv and analysis.advanced %}
-          <div style="margin-top:12px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <span style="font-family:var(--font-d);font-size:8px;letter-spacing:.12em;color:var(--muted2);">KV × VOLTAGE INDEX (loaded RPM estimate)</span>
-              <span style="font-family:var(--font-m);font-size:13px;font-weight:700;color:var(--blue);">
-                {{ '{:,}'.format(analysis.advanced.rpm_estimated | default(0) | int) }} RPM
-              </span>
-            </div>
-            {% set kvv = analysis.motor_kv * analysis.advanced.pack_voltage_nominal %}
-            {% set kvv_pct = [100, (kvv / 60000 * 100) | int] | min %}
-            <div class="kv-bar-outer">
-              <div class="kv-bar-fill" style="width:{{ kvv_pct }}%;background:linear-gradient(90deg,var(--green),var(--blue));"></div>
-              <div class="kv-needle" style="left:{{ kvv_pct }}%;"></div>
-            </div>
-            <div class="kv-labels">
-              <span>Low KV LR</span>
-              <span>Mid Freestyle</span>
-              <span>High Racing</span>
-            </div>
-            {% if analysis.advanced.kv_suggestion %}
-            <div style="margin-top:6px;font-size:11px;color:var(--muted2);">💡 {{ analysis.advanced.kv_suggestion }}</div>
-            {% endif %}
+          {# Input warnings #}
+          {% if analysis.warnings %}
+          {% for w in analysis.warnings %}
+          <div class="check-row check-{{ w.level }}">
+            <span class="check-ico">{% if w.level=='danger' %}⛔{% elif w.level=='warning' %}⚠️{% else %}ℹ️{% endif %}</span>
+            <span>{{ w.msg }}</span>
           </div>
+          {% endfor %}
+          {% endif %}
+
+          {# Smart rules — show only danger/warning, collapse info #}
+          {% if analysis.rules %}
+          {% set shown_rules = namespace(n=0) %}
+          {% for r in analysis.rules %}{% if r.level in ('danger','critical','warning') %}
+          <div class="check-row check-{{ r.level }}">
+            <span class="check-ico">{% if r.level in ('danger','critical') %}⛔{% else %}⚠️{% endif %}</span>
+            <div>
+              <strong style="font-size:12px;">{{ r.msg }}</strong>
+              {% if r.suggestion %}<div class="check-suggest">→ {{ r.suggestion }}</div>{% endif %}
+            </div>
+          </div>
+          {% set shown_rules.n = shown_rules.n + 1 %}
+          {% endif %}{% endfor %}
+          {# Info rules collapsed #}
+          {% set info_rules = analysis.rules | selectattr('level','equalto','info') | list %}
+          {% if info_rules %}
+          <details style="margin-top:6px;">
+            <summary style="font-size:11px;color:var(--s-muted);cursor:pointer;padding:4px 0;">ℹ️ {{ info_rules|length }} info — คลิกดู</summary>
+            {% for r in info_rules %}
+            <div class="check-row check-info" style="margin-top:4px;">
+              <span class="check-ico">ℹ️</span>
+              <div>{{ r.msg }}{% if r.suggestion %}<div class="check-suggest">→ {{ r.suggestion }}</div>{% endif %}</div>
+            </div>
+            {% endfor %}
+          </details>
+          {% endif %}
           {% endif %}
         </div>
       </div>
-
-      <!-- ══ 7. POWER ANALYSIS ══ -->
-      <div class="tpanel">
-        <div class="tpanel-head">
-          <div class="tpanel-head-icon" style="background:var(--a-dim);border-color:rgba(255,183,0,.2);">⚡</div>
-          <div>
-            <div class="tpanel-title">Power Analysis</div>
-            <div class="tpanel-sub">กำลัง · กระแส · แบต · อายุการบิน</div>
-          </div>
-        </div>
-        <div class="tpanel-body">
-          <div class="tab-row">
-            <button class="tab-btn active" onclick="switchTab(this,'t-power')">⚡ Power</button>
-            <button class="tab-btn" onclick="switchTab(this,'t-radar')">🕸️ Radar</button>
-            <button class="tab-btn" onclick="switchTab(this,'t-kv')">🔩 KV Guide</button>
-          </div>
-
-          <!-- Power tab -->
-          <div id="t-power" class="tab-pane active">
-            <div class="metric-grid">
-              <div class="metric-card">
-                <span class="metric-val green">{{ analysis.advanced.hover_power_w | int if analysis.advanced.hover_power_w else '—' }}W</span>
-                <span class="metric-lbl">Hover Power</span>
-              </div>
-              <div class="metric-card">
-                <span class="metric-val amber">{{ analysis.advanced.avg_power_w | int if analysis.advanced.avg_power_w else '—' }}W</span>
-                <span class="metric-lbl">Avg Power (style)</span>
-              </div>
-              <div class="metric-card">
-                <span class="metric-val red">{{ analysis.advanced.max_power_total_w | int if analysis.advanced.max_power_total_w else '—' }}W</span>
-                <span class="metric-lbl">Peak Power</span>
-              </div>
-              <div class="metric-card">
-                <span class="metric-val blue">{{ analysis.advanced.hover_current_a | round(1) if analysis.advanced.hover_current_a else '—' }}A</span>
-                <span class="metric-lbl">Hover Current</span>
-              </div>
-              <div class="metric-card">
-                <span class="metric-val {% if analysis.advanced.motor_health %}{% if '🔥' in analysis.advanced.motor_health or '⚠️' in analysis.advanced.motor_health %}amber{% elif '✅' in analysis.advanced.motor_health %}green{% else %}blue{% endif %}{% endif %}">
-                  {{ analysis.advanced.motor_health | default('—') }}</span>
-                <span class="metric-lbl">Motor Health</span>
-              </div>
-              <div class="metric-card">
-                <span class="metric-val {% if analysis.advanced.battery_health %}{% if '⚠️' in analysis.advanced.battery_health or '🔥' in analysis.advanced.battery_health %}amber{% elif '✅' in analysis.advanced.battery_health %}green{% else %}blue{% endif %}{% endif %}">
-                  {{ analysis.advanced.battery_health | default('—') }}</span>
-                <span class="metric-lbl">Battery Health</span>
-              </div>
-            </div>
-
-            <!-- TWR gauge bar -->
-            {% if analysis.advanced.thrust_ratio %}
-            {% set twr_pct = [(analysis.advanced.thrust_ratio / 8.0 * 100) | int, 100] | min %}
-            <div style="margin-top:12px;">
-              <div style="display:flex;justify-content:space-between;font-family:var(--font-d);font-size:8px;letter-spacing:.08em;color:var(--muted);margin-bottom:5px;">
-                <span>Thrust-to-Weight Ratio</span><span>{{ analysis.advanced.thrust_ratio | round(2) }}:1</span>
-              </div>
-              <div style="height:8px;background:rgba(255,255,255,0.04);border-radius:4px;overflow:hidden;position:relative;">
-                <div style="position:absolute;top:0;bottom:0;left:45%;width:1px;background:rgba(255,255,255,.12);"></div>
-                <div style="position:absolute;top:0;bottom:0;left:62.5%;width:1px;background:rgba(255,255,255,.12);"></div>
-                <div style="height:100%;border-radius:4px;width:{{ twr_pct }}%;background:{% if analysis.advanced.thrust_ratio < 1.5 %}var(--red){% elif analysis.advanced.thrust_ratio > 8.0 %}var(--amber){% else %}var(--green){% endif %};"></div>
-              </div>
-              <div style="display:flex;justify-content:space-between;font-family:var(--font-m);font-size:8px;color:var(--muted);margin-top:3px;">
-                <span>1.0</span><span style="color:var(--muted2);">2.0 LR</span><span style="color:var(--muted2);">4.0 Free</span><span>8.0+</span>
-              </div>
-            </div>
-            {% endif %}
-
-            {% if analysis.advanced.recommendations %}
-            <div style="margin-top:12px;">
-              <div style="font-family:var(--font-d);font-size:9px;color:var(--green);letter-spacing:.12em;margin-bottom:6px;">RECOMMENDATIONS</div>
-              {% for r in analysis.advanced.recommendations %}
-              <div style="font-size:.83rem;color:var(--muted2);padding:5px 0;border-bottom:1px solid var(--border);">💡 {{ r }}</div>
-              {% endfor %}
-            </div>
-            {% endif %}
-
-            <!-- Power chart -->
-            <div style="margin-top:12px;height:110px;">
-              <canvas id="thrustChart"></canvas>
-            </div>
-          </div>
-
-          <!-- Radar tab -->
-          <div id="t-radar" class="tab-pane">
-            <div class="radar-wrap">
-              <div style="max-width:220px;margin:0 auto;">
-                <canvas id="radarChart" width="220" height="220"></canvas>
-              </div>
-              <div class="radar-legend">
-                <div class="radar-leg-item"><div class="radar-leg-dot" style="background:#00ff88;"></div><span>Power (TWR {{ analysis.advanced.thrust_ratio | default('—') | round(2) }}:1)</span></div>
-                <div class="radar-leg-item"><div class="radar-leg-dot" style="background:#58a6ff;"></div><span>Flight Time ({{ analysis.advanced.est_flight_time_min | default(0) | int }} min)</span></div>
-                <div class="radar-leg-item"><div class="radar-leg-dot" style="background:#a78bfa;"></div><span>Low Noise</span></div>
-                <div class="radar-leg-item"><div class="radar-leg-dot" style="background:#f1b65a;"></div><span>Tip Safety ({{ analysis.advanced.tip_speed_mps | default(0) | int }} m/s)</span></div>
-                <div class="radar-leg-item"><div class="radar-leg-dot" style="background:#f87171;"></div><span>Motor Health</span></div>
-                <div class="radar-leg-item"><div class="radar-leg-dot" style="background:#2dd4bf;"></div><span>Efficiency</span></div>
-                {% set twr3 = analysis.advanced.thrust_ratio | default(0) | float %}
-                <div style="margin-top:10px;font-size:.73rem;color:var(--muted2);line-height:1.5;">
-                  Build Profile: <strong style="color:var(--text);">{{ analysis.detected_class | capitalize }}</strong> · {{ analysis.style | capitalize }}<br>
-                  {% if twr3 >= 3.5 %}เหมาะกับ aggressive freestyle / racing{% elif twr3 >= 2.0 %}เหมาะกับ freestyle ทั่วไป{% else %}เหมาะกับ long range / cinematic{% endif %}
-                </div>
-              </div>
-            </div>
-            <!-- Radar data for JS -->
-            {% set twr3 = analysis.advanced.thrust_ratio | default(0) | float %}
-            {% set ft3  = analysis.advanced.est_flight_time_min | default(0) | float %}
-            {% set no3  = analysis.prop_result.effect.noise | default(3) | float if analysis.prop_result else 3 %}
-            {% set tp3  = analysis.advanced.tip_speed_mps | default(0) | float %}
-            {% set mh3  = analysis.advanced.motor_health | default('') %}
-            {% set ef3  = analysis.advanced.efficiency_class | default('nominal') %}
-            {% set r_power  = [100, [0, (twr3 - 0.5) / 3.5 * 100] | max] | min | int %}
-            {% set r_flight = [100, [0, ft3 / 12 * 100] | max] | min | int %}
-            {% set r_noise  = [100, [0, 100 - no3 / 6 * 100] | max] | min | int %}
-            {% set r_tip    = [100, [0, (1 - (tp3 - 150) / 150) * 100] | max] | min | int if tp3 > 0 else 70 %}
-            {% set r_motor  = 85 if '✅' in mh3 else (55 if '⚡' in mh3 else 30) %}
-            {% set r_eff    = 85 if ef3 == 'efficient' else (65 if ef3 == 'nominal' else 40) %}
-            <div id="radarData" style="display:none;"
-              data-power="{{ r_power }}"
-              data-flight="{{ r_flight }}"
-              data-noise="{{ r_noise }}"
-              data-tip="{{ r_tip }}"
-              data-motor="{{ r_motor }}"
-              data-eff="{{ r_eff }}">
-            </div>
-          </div>
-
-          <!-- KV Guide tab -->
-          <div id="t-kv" class="tab-pane">
-            <div style="padding:8px 0;">
-              <div style="font-family:var(--font-d);font-size:9px;color:var(--muted);letter-spacing:.12em;margin-bottom:6px;">KV SUGGESTION</div>
-              <div style="font-family:var(--font-m);font-size:20px;font-weight:700;color:var(--blue);">{{ analysis.advanced.kv_suggestion | default('—') }}</div>
-            </div>
-            <div style="margin-top:10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
-              <div style="padding:7px 10px;border-bottom:1px solid var(--border);font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--muted);">KV REFERENCE TABLE</div>
-              {% for row in [('3S','2300–2800','4–5"','Micro / Budget'),('4S','1800–2500','5–6"','Freestyle'),('6S','1300–2000','5–6"','Performance'),('6S','900–1500','7–10"','Long Range'),('7S–8S','900–1500','6–8"','High Voltage')] %}
-              <div style="display:grid;grid-template-columns:50px 90px 60px 1fr;gap:6px;padding:6px 10px;border-bottom:1px solid rgba(0,200,255,.04);font-family:var(--font-m);font-size:10.5px;">
-                <span style="color:var(--amber);">{{ row[0] }}</span>
-                <span style="color:var(--blue);">{{ row[1] }} KV</span>
-                <span style="color:var(--green);">{{ row[2] }}</span>
-                <span style="color:var(--muted2);">{{ row[3] }}</span>
-              </div>
-              {% endfor %}
-            </div>
-            {% if analysis.advanced.prop_notes %}
-            <div style="margin-top:10px;">
-              <div style="font-family:var(--font-d);font-size:9px;color:var(--muted);letter-spacing:.12em;margin-bottom:6px;">PROP NOTES</div>
-              {% for n in analysis.advanced.prop_notes %}
-              <div style="font-size:.83rem;color:var(--muted2);padding:3px 0;">• {{ n }}</div>
-              {% endfor %}
-            </div>
-            {% endif %}
-            <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
-              <button class="btn-small" onclick="copyAdvJSON()">📋 Copy JSON</button>
-              <a class="btn-small" href="{{ url_for('downloads_index') }}">📂 DIFF Files</a>
-            </div>
-            <pre id="advJSON" style="display:none;">{{ analysis.advanced | tojson(indent=2) }}</pre>
-          </div>
-        </div>
-      </div>
       {% endif %}
 
-      <!-- ══ 8. PROPELLER ANALYSIS ══ -->
-      {% if analysis.prop_result %}
-      {% set eff = analysis.prop_result.effect %}
-      <div class="tpanel" style="border-left:3px solid var(--green);">
-        <div class="tpanel-head">
-          <div class="tpanel-head-icon" style="background:var(--g-dim);border-color:rgba(0,255,136,0.2);">🌀</div>
+      {# ══════════════════════════════════════════════════════
+         BLOCK 6 — TUNING TIPS (style-specific, brief)
+      ══════════════════════════════════════════════════════ #}
+      {% set _Pr = analysis.pid.roll.p | int %}
+      {% set _Dr = analysis.pid.roll.d | int %}
+      <div class="r-card r-card--purple">
+        <div class="r-card-hd">
+          <div class="r-card-icon">{% if sty=='racing' %}🏁{% elif sty=='longrange' %}🛸{% else %}🌀{% endif %}</div>
           <div>
-            <div class="tpanel-title">Propeller Analysis</div>
-            <div class="tpanel-sub">{{ analysis.prop_result.summary | default('—') }}</div>
+            <div class="r-card-title">{{ sty | capitalize }} — Quick Tune Tips</div>
+            <div class="r-card-sub">{{ cls }} · {{ adv.cells | default('—') }}S · คลิก CLI เพื่อ copy</div>
           </div>
         </div>
-        <div class="tpanel-body">
-          <div class="metric-grid" style="grid-template-columns:1fr 1fr 1fr;">
-            <div class="metric-card">
-              <span class="metric-val {% if eff.noise and eff.noise > 4 %}red{% elif eff.noise and eff.noise > 2 %}amber{% else %}green{% endif %}">{{ eff.noise | default('—') }}/6</span>
-              <span class="metric-lbl">Noise Level</span>
-              <span class="metric-sub">ต่ำ = ดี</span>
-            </div>
-            <div class="metric-card">
-              <span class="metric-val amber">{{ eff.pitch_speed_kmh | default('—') }}{% if eff.pitch_speed_kmh %} km/h{% endif %}</span>
-              <span class="metric-lbl">Pitch Speed</span>
-            </div>
-            <div class="metric-card">
-              <span class="metric-val blue">{{ eff.motor_load | default('—') }}/6</span>
-              <span class="metric-lbl">Motor Load</span>
-              <span class="metric-sub">ต่ำ = ประหยัด</span>
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
-            <div style="padding:5px 12px;border-radius:100px;font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.08em;background:var(--g-dim);border:1px solid rgba(0,255,136,0.25);color:var(--green);">{{ eff.grip | default('—') }}</div>
-            <div style="padding:5px 12px;border-radius:100px;font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.08em;background:var(--b-dim);border:1px solid rgba(0,170,255,0.25);color:var(--blue);">{{ eff.efficiency | default('—') }}</div>
-          </div>
-          {% if analysis.prop_result.recommendation %}
-          <div style="font-size:.82rem;color:var(--muted2);padding:8px 0 2px;">💡 {{ analysis.prop_result.recommendation }}</div>
-          {% endif %}
-          <!-- Prop noise radar -->
-          <div style="margin-top:12px;height:130px;">
-            <canvas id="noiseChart"></canvas>
-          </div>
-        </div>
-      </div>
-      {% endif %}
+        <div class="r-card-body">
 
-      <!-- ══ 9. PRESET SELECTOR ══ -->
-      <div class="tpanel" style="border-left:3px solid var(--amber);">
-        <div class="tpanel-head">
-          <div class="tpanel-head-icon" style="background:var(--a-dim);border-color:rgba(255,183,0,0.2);">🎛️</div>
-          <div>
-            <div class="tpanel-title">CLI Preset Profiles</div>
-            <div class="tpanel-sub">เลือก profile → copy CLI → paste Betaflight</div>
-          </div>
-        </div>
-        <div class="tpanel-body">
-          <div class="ptab-row">
-            <button class="ptab active" data-preset="beginner" onclick="selectPreset('beginner',this)">🟢 Beginner</button>
-            <button class="ptab" data-preset="freestyle" onclick="selectPreset('freestyle',this)">🔵 Freestyle</button>
-            <button class="ptab" data-preset="racing" onclick="selectPreset('racing',this)">🔴 Racing</button>
-            <button class="ptab" data-preset="longrange" onclick="selectPreset('longrange',this)">🟣 LR</button>
-            <button class="ptab" data-preset="cinematic" onclick="selectPreset('cinematic',this)">🟡 Cine</button>
-          </div>
-          <div class="preset-card">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-              <div class="pic-badge" id="picBadge">🟢 SAFE</div>
+          {# Tip 1: PID starting point — always shown #}
+          <div class="tip-block tip-g">
+            <div class="tip-num">01</div>
+            <div class="tip-content">
+              <div class="tip-title">🎯 จุดเริ่มต้น PID ที่ถูกต้อง</div>
+              <div class="tip-desc">ค่านี้คือ baseline จาก {{ cls }} build — บินก่อน 1 pack แล้วค่อยปรับ · Pitch P ต้องสูงกว่า Roll +5–8 เสมอ</div>
+              <div class="tip-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set p_roll  = {{ _Pr }}   # baseline
+set p_pitch = {{ (_Pr + 6) | int }}   # pitch +6 (CoG compensation)
+set d_roll  = {{ _Dr }}   # ปรับ D ก่อน P ถ้ามี propwash</div>
             </div>
-            <div style="font-family:var(--font-d);font-size:10px;font-weight:700;color:var(--text);" id="picTitle">Beginner</div>
-            <div style="font-size:11px;color:var(--muted2);margin-top:3px;margin-bottom:10px;line-height:1.5;" id="picDesc">—</div>
-            <div class="pic-stats" id="picStats"></div>
-            <div id="picTips" style="margin-bottom:10px;"></div>
           </div>
-          <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn-small" onclick="copyEl('cliOutput');showToast('✓ CLI copied!')">📋 Copy CLI</button>
-          </div>
-          <pre id="cliOutput" style="margin-top:8px;max-height:180px;overflow-y:auto;"></pre>
-        </div>
-      </div>
 
-      <!-- ══ FLIGHT PERSONALITY ══ -->
-      {% if analysis.advanced %}
-      {% set _tw = analysis.advanced.thrust_ratio|default(0)|float %}
-      {% set _ft = analysis.advanced.est_flight_time_min|default(0)|float %}
-      {% set _tp = analysis.advanced.tip_speed_mps|default(0)|float %}
-      {% set _cl = analysis.advanced.cells|default(4)|int %}
-      {% set _sy = analysis.style|default('freestyle') %}
-      {% set _sz = analysis.size|default(5)|float %}
-      {% if _tw >= 7.0 %}
-        {% set _pn='MONSTER POWER' %}{% set _pe='⚡' %}{% set _pc='#ff3344' %}
-        {% set _pd='กำลังล้นเหลือ — เพดานสูงมาก เหมาะนักบิน pro ที่ต้องการทุกมิลลิวินาที' %}
-        {% set _pt=['HIGH POWER','AGGRESSIVE','EXPERT ONLY'] %}
-      {% elif _sy=='racing' and _tw>=4.0 %}
-        {% set _pn='RACE MACHINE' %}{% set _pe='🏁' %}{% set _pc='#ff8800' %}
-        {% set _pd='ตอบสนองรวดเร็ว กำลังพุ่ง — เหมาะ gate racing และ speed run' %}
-        {% set _pt=['FAST RESPONSE','LOW DRAG','RACE READY'] %}
-      {% elif _sy=='freestyle' and _tw>=4.0 %}
-        {% set _pn='PUNCHY FREESTYLE' %}{% set _pe='🚀' %}{% set _pc='#00ff88' %}
-        {% set _pd='Freestyle ระดับ A+ — flip/roll คมกริบ กำลังมี headroom ล้นเหลือ' %}
-        {% set _pt=['FREESTYLE','PUNCHY','4S OPTIMIZED'] %}
-      {% elif _sy=='freestyle' and _tw>=2.8 %}
-        {% set _pn='SMOOTH FREESTYLE' %}{% set _pe='🌀' %}{% set _pc='#00aaff' %}
-        {% set _pd='สมดุลระหว่างกำลังและ flight time — เหมาะ freestyle ทั่วไปและ cinewhoop' %}
-        {% set _pt=['SMOOTH','BALANCED','CINE OK'] %}
-      {% elif _sy=='longrange' and _ft>=18 %}
-        {% set _pn='ENDURANCE EXPLORER' %}{% set _pe='🛸' %}{% set _pc='#b060ff' %}
-        {% set _pd='Flight time ยาว สมรรถนะดี — เหมาะ long range, mapping, การถ่ายภาพ' %}
-        {% set _pt=['LONG RANGE','EFFICIENT','GPS READY'] %}
-      {% elif _sy=='longrange' %}
-        {% set _pn='EFFICIENT CRUISER' %}{% set _pe='🌐' %}{% set _pc='#00d4ff' %}
-        {% set _pd='ประหยัดพลังงาน เหมาะ FPV ระยะไกล exploration และ terrain following' %}
-        {% set _pt=['LONG RANGE','CRUISING','ECO MODE'] %}
-      {% elif _sz<=3.0 %}
-        {% set _pn='MICRO RIPPER' %}{% set _pe='🐝' %}{% set _pc='#ffbb00' %}
-        {% set _pd='เล็กแต่ดุ — บินในพื้นที่แคบได้ เหมาะ indoor / proximity flying' %}
-        {% set _pt=['MICRO','INDOOR OK','AGILE'] %}
-      {% else %}
-        {% set _pn='BALANCED BUILDER' %}{% set _pe='⚖️' %}{% set _pc='#34d399' %}
-        {% set _pd='All-rounder ที่ดี — ใช้งานได้หลายสถานการณ์ เหมาะนักบินทุกระดับ' %}
-        {% set _pt=['VERSATILE','ALL-ROUND','BEGINNER FRIENDLY'] %}
-      {% endif %}
-
-      <div class="tpanel pers-wrap" style="border:1.5px solid {{ _pc }}28; border-left:3px solid {{ _pc }};">
-        <div class="pers-glow" style="background:{{ _pc }};"></div>
-        <div class="pers-top">
-          <div class="pers-emoji" style="color:{{ _pc }};">{{ _pe }}</div>
-          <div class="pers-info">
-            <div class="pers-eyebrow" style="color:{{ _pc }};">FLIGHT PERSONALITY · วิเคราะห์จาก BUILD ของคุณ</div>
-            <div class="pers-name" style="color:{{ _pc }};">{{ _pn }}</div>
-            <div class="pers-desc">{{ _pd }}</div>
-            <div class="pers-tags">
-              {% for _t in _pt %}
-              <span class="pers-tag" style="color:{{ _pc }};border-color:{{ _pc }}38;background:{{ _pc }}12;">{{ _t }}</span>
-              {% endfor %}
+          {# Style-specific tips #}
+          {% if sty == 'freestyle' %}
+          <div class="tip-block tip-b">
+            <div class="tip-num">02</div>
+            <div class="tip-content">
+              <div class="tip-title">🌀 แก้ Propwash ให้ถูกจุด</div>
+              <div class="tip-desc">Propwash หลัง flip มักเกิดจาก D ไม่พอ ไม่ใช่ P สูง — เพิ่ม D ทีละ +2 จนหาย แล้วแตะ motor ต้อง "อุ่น" ไม่ "ร้อนมือ"</div>
+              <div class="tip-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set d_roll  = {{ (_Dr+2)|int }}  # +2 จาก baseline
+set d_pitch = {{ (_Dr+4)|int }}  # pitch D > roll D เสมอ</div>
             </div>
           </div>
-        </div>
-        <div class="pers-row">
-          <div class="pers-cell">
-            <div class="pers-v" style="color:{% if _tw>=4 %}var(--green){% elif _tw>=2.5 %}var(--amber){% else %}var(--red){% endif %};">{{ _tw|round(1) }}</div>
-            <div class="pers-l">TWR RATIO</div>
-          </div>
-          <div class="pers-cell">
-            <div class="pers-v" style="color:var(--blue);">{{ _ft|int }}</div>
-            <div class="pers-l">FLIGHT MIN</div>
-          </div>
-          <div class="pers-cell">
-            <div class="pers-v" style="color:{% if _tp>290 %}var(--red){% elif _tp>265 %}var(--amber){% else %}var(--green){% endif %};">{{ _tp|int }}</div>
-            <div class="pers-l">TIP m/s</div>
-          </div>
-          <div class="pers-cell">
-            <div class="pers-v" style="color:var(--amber);">{{ _cl }}S</div>
-            <div class="pers-l">BATTERY</div>
-          </div>
-        </div>
-      </div>
-      {% endif %}
-
-      <!-- ══ WHAT-IF OPTIMIZER ══ -->
-      {% if analysis.advanced %}
-      {% set _w2 = analysis.weight|default(750)|float %}
-      {% set _tw2= analysis.advanced.thrust_ratio|default(0)|float %}
-      {% set _ft2= analysis.advanced.est_flight_time_min|default(0)|float %}
-      {% set _kv2= analysis.motor_kv|default(0)|int %}
-      {% set _mh2= analysis.battery_mAh|default(1500)|int %}
-      {% set _cl2= analysis.advanced.cells|default(4)|int %}
-      {% set _sz2= analysis.size|default(5)|float %}
-      {% set _sy2= analysis.style|default('freestyle') %}
-      {% set _rf2= analysis.filter.rpm_filter if analysis.filter else false %}
-      <div class="tpanel" style="border-left:3px solid var(--blue);">
-        <div class="tpanel-head">
-          <div class="tpanel-head-icon" style="background:var(--b-dim);border-color:rgba(0,170,255,.2);">🔮</div>
-          <div>
-            <div class="tpanel-title">WHAT-IF OPTIMIZER — ถ้าปรับแค่นี้ จะได้อะไร?</div>
-            <div class="tpanel-sub">การเปลี่ยนเล็กๆ ที่ยกระดับ build ของคุณอย่างมีนัยสำคัญ</div>
-          </div>
-        </div>
-        <div class="tpanel-body">
-          <div class="wi-grid">
-
-            {% if _ft2 < 9 and _mh2 < 2200 %}
-            <div class="wi-card cg">
-              <div class="wi-icon">🔋</div>
-              <div class="wi-title">ใช้แบต {{ (_mh2*1.33)|int }}mAh</div>
-              <div class="wi-delta" style="color:var(--green);">+{{ (_ft2*0.28)|round(1) }} นาที</div>
-              <div class="wi-sub">เพิ่ม capacity 33%<br>น้ำหนักเพิ่ม ~{{ (_mh2*0.033*0.75)|int }}g</div>
-            </div>
-            {% endif %}
-
-            {% if _w2 > 450 %}
-            <div class="wi-card cb">
-              <div class="wi-icon">⚖️</div>
-              <div class="wi-title">ลดน้ำหนัก {{ (_w2*0.08)|int }}g</div>
-              <div class="wi-delta" style="color:var(--blue);">TWR +{{ ((_tw2/(1-0.08))-_tw2)|round(2) }}</div>
-              <div class="wi-sub">ลด 8% → TWR ดีขึ้น<br>frame เบา / ถอด LED</div>
-            </div>
-            {% endif %}
-
-            {% if _kv2>0 and _cl2==4 and _kv2>2600 %}
-            <div class="wi-card ca">
-              <div class="wi-icon">🌡️</div>
-              <div class="wi-title">ลด KV → 2306</div>
-              <div class="wi-delta" style="color:var(--amber);">Motor เย็นลง</div>
-              <div class="wi-sub">KV สูงเกิน 4S<br>→ motor ร้อน, tip speed สูง</div>
-            </div>
-            {% elif _kv2>0 and _cl2>=6 and _kv2>1600 and _sz2>=7 %}
-            <div class="wi-card ca">
-              <div class="wi-icon">✈️</div>
-              <div class="wi-title">ลด KV → 1200</div>
-              <div class="wi-delta" style="color:var(--amber);">Tip Speed ↓</div>
-              <div class="wi-sub">7\"+ 6S: KV ต่ำ<br>→ ปลอดภัย, efficient ขึ้น</div>
-            </div>
-            {% elif _kv2>0 and _cl2==4 and _kv2<1900 %}
-            <div class="wi-card cg">
-              <div class="wi-icon">⚡</div>
-              <div class="wi-title">เพิ่ม KV → 2206</div>
-              <div class="wi-delta" style="color:var(--green);">TWR ดีขึ้น</div>
-              <div class="wi-sub">KV ต่ำสำหรับ 4S<br>→ 2206+ ให้กำลังมากกว่า</div>
-            </div>
-            {% endif %}
-
-            {% if not _rf2 %}
-            <div class="wi-card cg">
-              <div class="wi-icon">🔊</div>
-              <div class="wi-title">เปิด RPM Filter</div>
-              <div class="wi-delta" style="color:var(--green);">Noise ลด</div>
-              <div class="wi-sub">BLHeli32 + DSHOT300<br>motor เย็นขึ้น, video smooth</div>
-            </div>
-            {% endif %}
-
-            {% if _sy2=='freestyle' %}
-            <div class="wi-card cb">
-              <div class="wi-icon">🎯</div>
-              <div class="wi-title">ปรับ Rates</div>
-              <div class="wi-delta" style="color:var(--blue);">Feel ดีขึ้น</div>
-              <div class="wi-sub">RC Rate 1.0 / Expo 0.58<br>Super Rate 0.74</div>
-            </div>
-            {% elif _sy2=='longrange' %}
-            <div class="wi-card cg">
-              <div class="wi-icon">📡</div>
-              <div class="wi-title">ตั้ง GPS Rescue</div>
-              <div class="wi-delta" style="color:var(--green);">Safe RTH</div>
-              <div class="wi-sub">min_sats=8, alt=30m<br>ปลอดภัยเมื่อสัญญาณหาย</div>
-            </div>
-            {% elif _sy2=='racing' %}
-            <div class="wi-card ca">
-              <div class="wi-icon">🏁</div>
-              <div class="wi-title">ลด Filter Delay</div>
-              <div class="wi-delta" style="color:var(--amber);">Latency ลด</div>
-              <div class="wi-sub">Gyro LPF1 PT2 @ 250Hz<br>DTerm LPF1 → 150Hz</div>
-            </div>
-            {% endif %}
-
-          </div>
-        </div>
-      </div>
-      {% endif %}
-
-      <!-- ══ PRO TUNING TRIX ══ -->
-      {% if analysis %}
-      {% set _sy3= analysis.style|default('freestyle') %}
-      {% set _sz3= analysis.size|default(5)|float %}
-      {% set _cl3= (analysis.advanced.cells|default(4)|int) if analysis.advanced else 4 %}
-      {% set _Pr = analysis.pid.roll.p|default(48)|int %}
-      {% set _Dr = analysis.pid.roll.d|default(38)|int %}
-      {% set _Ir = analysis.pid.roll.i|default(90)|int %}
-      {% set _rpm3= (analysis.advanced.rpm_estimated|default(0)|int) if analysis.advanced else 0 %}
-      <div class="tpanel" style="border-left:3px solid var(--purple);">
-        <div class="tpanel-head">
-          <div class="tpanel-head-icon" style="background:rgba(176,96,255,.08);border-color:rgba(176,96,255,.22);">🔥</div>
-          <div>
-            <div class="tpanel-title">PRO TUNING TRIX — เทคนิคเฉพาะ {{ analysis.detected_class|default('Build') }} ของคุณ</div>
-            <div class="tpanel-sub">เลือกมาเฉพาะ build นี้ · มือใหม่อ่านได้ · มือเก่าเอาไปใช้ได้เลย</div>
-          </div>
-        </div>
-        <div class="tpanel-body">
-          <div class="trix-badge" style="background:rgba(176,96,255,.08);color:var(--purple);border:1px solid rgba(176,96,255,.2);">
-            🎖️ PERSONALIZED · {{ analysis.detected_class|default('CUSTOM')|upper }} · {{ _sy3|upper }} · {{ _cl3 }}S
-          </div>
-          <div class="trix-list">
-
-            <!-- TIP 01: PID Starting Point — ทุก build -->
-            <div class="trix-item tg">
-              <div class="trix-n">01</div>
-              <div class="trix-body">
-                <div class="trix-title"><span class="trix-ico">🎯</span>จุดเริ่มต้น PID ที่ถูกต้อง <span class="ttag pro">PRO TIP</span></div>
-                <div class="trix-desc">
-                  ค่านี้คือ baseline ที่คำนวณจาก class + style ของ build คุณ <strong style="color:var(--green);">อย่าเพิ่งปรับ</strong> — บินตามนี้ก่อน 1 pack แล้วสังเกต behavior<br>
-                  <strong>Pitch P ต้องสูงกว่า Roll P เสมอ +5 ถึง +8</strong> เพราะ CoG ของโดรนอยู่ด้านหน้า pitch axis ต้องการ correction มากกว่า roll<br>
-                  <span style="color:var(--muted2);font-size:10px;">มือใหม่: P สูง = สั่น (oscillate) / P ต่ำ = ช้า ไม่ตอบสนอง · เริ่มต้นที่นี่เสมอ</span>
-                </div>
-                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set p_roll  = {{ _Pr }}   # baseline สำหรับ build นี้
-set p_pitch = {{ (_Pr + 6) | int }}   # pitch ต้องสูงกว่า roll +5-8 เสมอ
-set d_roll  = {{ _Dr | int }}   # ปรับ D ก่อน P ถ้ามี propwash</div>
-              </div>
-            </div>
-
-            <!-- TIP 02: Style-specific main -->
-            {% if _sy3=='freestyle' %}
-            <div class="trix-item ta">
-              <div class="trix-n">02</div>
-              <div class="trix-body">
-                <div class="trix-title"><span class="trix-ico">🌀</span>แก้ Propwash ให้ถูกจุด <span class="ttag hot">FIX COMMON</span></div>
-                <div class="trix-desc">
-                  Propwash หลัง flip/roll มักเกิดเพราะ <strong>D term ไม่พอ</strong> ไม่ใช่ P สูงเกิน — เพิ่ม D roll/pitch ทีละ +2 จนหาย<br>
-                  หลังปรับ แตะ motor หลังบิน 2 pack — ต้อง "อุ่น" ไม่ใช่ "ร้อนมือ" ถ้าร้อน = D สูงเกิน<br>
-                  <span style="color:var(--amber);">ถ้าเพิ่ม D แล้ว motor ร้อน → เปิด RPM filter ก่อนแทนการลด D</span>
-                </div>
-                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set d_roll  = {{ (_Dr+2) | int }}  # +2 จาก baseline (ทดลอง)
-set d_pitch = {{ (_Dr+4) | int }}  # pitch D สูงกว่า roll ~2 เสมอ</div>
-              </div>
-            </div>
-            <div class="trix-item tb">
-              <div class="trix-n">03</div>
-              <div class="trix-body">
-                <div class="trix-title"><span class="trix-ico">⚡</span>Feedforward — ความ snappy ของ stick <span class="ttag new">BF4.5</span></div>
-                <div class="trix-desc">
-                  FF ให้โดรนตอบสนอง stick ทันทีก่อนที่ error จะเกิด เหมาะมากสำหรับ freestyle<br>
-                  100-120 = snappy · ถ้ามี nose kick เมื่อ input เร็ว → ลด FF 10 · <strong>Jitter reduction เปิดไว้เสมอถ้าใช้ TBS/ELRS</strong><br>
-                  <span style="color:var(--muted2);font-size:10px;">มือใหม่: FF เพิ่มทีละ 10 แล้วบินทดสอบ punch out สั้นๆ</span>
-                </div>
-                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set feedforward_roll  = 110  # 100-130 freestyle
+          <div class="tip-block tip-a">
+            <div class="tip-num">03</div>
+            <div class="tip-content">
+              <div class="tip-title">⚡ Feedforward — stick feel snappy</div>
+              <div class="tip-desc">FF ทำให้โดรนตอบสนอง stick ก่อน error เกิด · 100–120 = snappy · ถ้า nose kick ลด 10</div>
+              <div class="tip-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set feedforward_roll  = 110
 set feedforward_pitch = 110
-set feedforward_yaw   = 80   # yaw FF ต่ำกว่าเสมอ
-set feedforward_jitter_factor = 7  # ลด noise จาก link</div>
-              </div>
+set feedforward_yaw   = 80</div>
             </div>
-            <div class="trix-item tp">
-              <div class="trix-n">04</div>
-              <div class="trix-body">
-                <div class="trix-title"><span class="trix-ico">🎮</span>Rates สำหรับ Freestyle — จุดเริ่มต้นที่ดี</div>
-                <div class="trix-desc">
-                  Rates กำหนด max rotation speed และความรู้สึกของ stick<br>
-                  RC Rate 1.0 + Expo 0.58 = center smooth, ปลาย stick precise ให้ ~670°/s max<br>
-                  <span style="color:var(--muted2);font-size:10px;">มือใหม่: อย่าเพิ่ง Super Rate สูง — เริ่มที่ 0.60-0.70 แล้วค่อยเพิ่มทีละ 0.05</span>
-                </div>
-                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set roll_rc_rate  = 100  # 1.0
-set roll_expo     = 58   # center smooth
-set roll_srate    = 74   # super rate ~670°/s</div>
-              </div>
+          </div>
+          <div class="tip-block tip-r">
+            <div class="tip-num">04</div>
+            <div class="tip-content">
+              <div class="tip-title">📉 TPA — ลด P อัตโนมัติที่ throttle สูง</div>
+              <div class="tip-desc">Full throttle → airflow สูง → P oscillate · TPA ลด P เองเมื่อ throttle เกิน breakpoint</div>
+              <div class="tip-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set tpa_rate       = 65
+set tpa_breakpoint = 1300</div>
             </div>
-            <div class="trix-item ta">
-              <div class="trix-n">05</div>
-              <div class="trix-body">
-                <div class="trix-title"><span class="trix-ico">📉</span>TPA — ลด P อัตโนมัติที่ throttle สูง <span class="ttag warn">IMPORTANT</span></div>
-                <div class="trix-desc">
-                  Full throttle → airflow เพิ่ม → P term overshoots → สั่น TPA ลด P โดยอัตโนมัติเมื่อ throttle สูง<br>
-                  เริ่มที่ 0.65 / breakpoint 1300 (≈30%) — P ลด 65% เมื่อ throttle เกิน 30%<br>
-                  <span style="color:var(--muted2);font-size:10px;">มือใหม่: ตั้งค่านี้แล้วลืมไปได้เลย มันทำงานเองอัตโนมัติ</span>
-                </div>
-                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set tpa_rate       = 65    # ลด P 65% ที่ full throttle
-set tpa_breakpoint = 1300  # เริ่มลดที่ ~30% throttle</div>
-              </div>
-            </div>
+          </div>
 
-            {% elif _sy3=='racing' %}
-            <div class="trix-item tr">
-              <div class="trix-n">02</div>
-              <div class="trix-body">
-                <div class="trix-title"><span class="trix-ico">🏁</span>Race Tune — ลด Filter Latency ทุกชั้น <span class="ttag hot">RACE CRITICAL</span></div>
-                <div class="trix-desc">
-                  Racing ต้องการ loop latency ต่ำสุด — filter แต่ละชั้นเพิ่ม delay<br>
-                  Gyro LPF1 PT2 @ 250Hz / DTerm LPF1 ลดลง → total delay ลด ~1ms<br>
-                  <span style="color:var(--muted2);font-size:10px;">มือใหม่: ลด filter = noise มากขึ้น ต้องมี RPM filter ช่วย หรือ motor + prop คุณภาพสูง</span>
-                </div>
-                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set gyro_lpf1_type  = PT2
-set gyro_lpf1_hz    = 250
-set dterm_lpf1_type = PT2
-set dterm_lpf1_hz   = 150</div>
-              </div>
+          {% elif sty == 'racing' %}
+          <div class="tip-block tip-b">
+            <div class="tip-num">02</div>
+            <div class="tip-content">
+              <div class="tip-title">🏁 ลด Filter Latency — race critical</div>
+              <div class="tip-desc">Racing ต้องการ loop latency ต่ำสุด · PT2 ที่ 250Hz ลด delay ~1ms ต่อชั้น</div>
+              <div class="tip-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set gyro_lpf1_type  = PT2
+set gyro_lpf1_static_hz = 250
+set dterm_lpf1_type = PT2</div>
             </div>
-            <div class="trix-item ta">
-              <div class="trix-n">03</div>
-              <div class="trix-body">
-                <div class="trix-title"><span class="trix-ico">⚡</span>P สูงกว่า Freestyle ได้ สำหรับ Race <span class="ttag pro">PRO</span></div>
-                <div class="trix-desc">
-                  Race prop มี inertia น้อย → ตอบสนอง P ได้เร็ว ไม่ oscillate ง่าย<br>
-                  เพิ่ม P roll/pitch ได้ถึง 60-70 · ลด D ลง (noise น้อย, ไม่ต้องการ damping มาก)
-                </div>
-                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set p_roll  = {{ [_Pr+8, 65]|min }}
-set p_pitch = {{ [_Pr+13, 70]|min }}
-set d_roll  = {{ [_Dr-4, 26]|max }}  # ลด D สำหรับ race</div>
-              </div>
-            </div>
-            <div class="trix-item tb">
-              <div class="trix-n">04</div>
-              <div class="trix-body">
-                <div class="trix-title"><span class="trix-ico">🎮</span>Race Rates — Precision + Speed</div>
-                <div class="trix-desc">Racing ต้องการ rates ที่ center precise แต่ปลาย stick ไว — Expo ต่ำกว่า freestyle (ตอบสนองตรงกว่า)</div>
-                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set roll_rc_rate = 100
-set roll_expo    = 20    # ตอบสนองตรงกว่า
-set roll_srate   = 85    # ~900°/s สำหรับ hairpin</div>
-              </div>
-            </div>
-            <div class="trix-item tg">
-              <div class="trix-n">05</div>
-              <div class="trix-body">
-                <div class="trix-title"><span class="trix-ico">🔁</span>I-Term Relax — ลด bounce หลัง hard corner</div>
-                <div class="trix-desc">
-                  Hard cornering สะสม I term → bounce กลับหลัง flip I-term relax ล้าง I ขณะ stick movement รวดเร็ว<br>
-                  <span style="color:var(--muted2);font-size:10px;">มือใหม่: ตั้งค่านี้แล้วลืมได้เลย ช่วยได้มากโดยไม่ต้องปรับอื่น</span>
-                </div>
-                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set iterm_relax        = RPY
+          </div>
+          <div class="tip-block tip-a">
+            <div class="tip-num">03</div>
+            <div class="tip-content">
+              <div class="tip-title">⚡ I-Term Relax — ลด bounce หลัง corner</div>
+              <div class="tip-desc">Hard corner สะสม I → bounce หลัง flip · Relax ล้าง I ขณะ stick เคลื่อนเร็ว</div>
+              <div class="tip-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set iterm_relax        = RPY
 set iterm_relax_type   = SETPOINT
 set iterm_relax_cutoff = 15</div>
-              </div>
             </div>
-
-            {% else %}{# longrange #}
-            <div class="trix-item tp">
-              <div class="trix-n">02</div>
-              <div class="trix-body">
-                <div class="trix-title"><span class="trix-ico">🌬️</span>I Term — ต้านแรงลม คือหัวใจของ Long Range <span class="ttag warn">LR KEY</span></div>
-                <div class="trix-desc">
-                  I term สำคัญที่สุดสำหรับ LR — ต้านแรงลมและป้องกัน drift ขณะบินระยะไกล<br>
-                  แนะนำ <strong style="color:var(--purple);">I roll/pitch = 85-100</strong> · ถ้าบินลมแรง เพิ่มได้ถึง 120<br>
-                  <span style="color:var(--muted2);font-size:10px;">ถ้า bounce หลัง flip → ลด I 10 หรือเพิ่ม iterm_relax_cutoff</span>
-                </div>
-                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set i_roll           = {{ _Ir }}   # baseline LR
-set i_pitch          = {{ _Ir }}
-set iterm_relax_cutoff = 10  # ลด LR bounce</div>
-              </div>
-            </div>
-            <div class="trix-item tg">
-              <div class="trix-n">03</div>
-              <div class="trix-body">
-                <div class="trix-title"><span class="trix-ico">🛸</span>Throttle Curve สำหรับ Long Range</div>
-                <div class="trix-desc">
-                  LR ต้องการ throttle smooth ไม่กระตุก — linear response ดีที่สุดสำหรับ cruise ระยะไกล<br>
-                  Hover ที่ 30-35% throttle = efficiency สูงสุด ไม่ควรบินที่ 50%+ นาน
-                </div>
-                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set throttle_mid  = 50
-set throttle_expo = 0
-set throttle_limit_type    = SCALE
-set throttle_limit_percent = 90</div>
-              </div>
-            </div>
-            <div class="trix-item tb">
-              <div class="trix-n">04</div>
-              <div class="trix-body">
-                <div class="trix-title"><span class="trix-ico">📡</span>GPS Rescue — ต้องตั้งทุกครั้งที่บิน LR <span class="ttag hot">SAFETY</span></div>
-                <div class="trix-desc">
-                  LR ไม่มี GPS rescue = เสี่ยงมาก link หาย → โดรนหาย<br>
-                  <strong style="color:var(--blue);">Test GPS rescue ทุกครั้งก่อนบินไกล</strong> — arm แล้วทดสอบที่ความสูงต่ำ 5-10m ก่อนเสมอ
-                </div>
-                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set gps_rescue_min_sats   = 8
-set gps_rescue_return_alt = 30
-set gps_rescue_ascend_rate = 500
-set gps_rescue_ground_speed = 500</div>
-              </div>
-            </div>
-            <div class="trix-item ta">
-              <div class="trix-n">05</div>
-              <div class="trix-body">
-                <div class="trix-title"><span class="trix-ico">🔋</span>Battery Sag Compensation</div>
-                <div class="trix-desc">
-                  LR บินนาน → แบตสาก → thrust เปลี่ยน → PID เสียสมดุล<br>
-                  Voltage compensation ปรับ motor output ตาม voltage อัตโนมัติ — ทำให้ feel คงที่ตลอด pack
-                </div>
-                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set vbat_pid_gain = ON   # BF4.4+
-set vbat_pid_off  = 0</div>
-              </div>
-            </div>
-            {% endif %}
-
-            <!-- TIP COMMON: RPM Filter -->
-            <div class="trix-item tc">
-              <div class="trix-n">06</div>
-              <div class="trix-body">
-                <div class="trix-title"><span class="trix-ico">🔊</span>RPM Filter — ลด Motor Noise ได้ผลดีที่สุด <span class="ttag new">BF4.4+</span></div>
-                <div class="trix-desc">
-                  RPM filter ใช้ telemetry จาก ESC บล็อก noise ที่ความถี่ motor โดยตรง ผลลัพธ์ดีกว่า notch filter คงที่มาก<br>
-                  ต้องใช้ <strong style="color:var(--cyan);">BLHeli32 / AM32 + DSHOT300+</strong> — เปิด DSHOT Bidir ใน BF Configurator ก่อน<br>
-                  <span style="color:var(--muted2);font-size:10px;">มือใหม่: เปิด 2 ค่านี้ แล้วไปที่ BF Configurator → Filters tab → เปิด RPM Filter ON</span>
-                </div>
-                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set dshot_bidir          = ON
-set rpm_filter_harmonics = 3
-set rpm_filter_min_hz    = {{ [80, (_rpm3 / 60 * 0.20)|int]|max if _rpm3 else 100 }}
-set motor_poles          = 14  # ตรวจสอบจาก motor spec</div>
-              </div>
-            </div>
-
-            <!-- TIP COMMON: Blackbox -->
-            <div class="trix-item tb">
-              <div class="trix-n">07</div>
-              <div class="trix-body">
-                <div class="trix-title"><span class="trix-ico">📊</span>Blackbox — เครื่องมือ Tune ที่แม่นที่สุด <span class="ttag pro">ADVANCED</span></div>
-                <div class="trix-desc">
-                  อ่าน PID จาก Blackbox graph แม่นกว่า "รู้สึก" เสมอ<br>
-                  • P oscillation = high-freq vibration บน gyro trace หลัง input<br>
-                  • D term noise = noise ที่ high throttle บน D trace<br>
-                  • Propwash = low-freq oscillation หลัง flip สังเกตที่ axis ที่เกิด<br>
-                  <strong><a href="/blackbox" style="color:var(--cyan);text-decoration:none;">→ ใช้ Blackbox Analyzer ใน ConfigDoctor ได้เลย</a></strong>
-                </div>
-                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set blackbox_sample_rate = MEDIUM
-set blackbox_device      = SPIFLASH</div>
-              </div>
-            </div>
-
           </div>
-        </div>
-      </div>
-      {% endif %}
-
-      <!-- ══ TUNING ROADMAP ══ -->
-      {% if analysis %}
-      {% set _htp= (analysis.advanced.hover_throttle_pct|int) if analysis.advanced and analysis.advanced.hover_throttle_pct else 50 %}
-      {% set _Pr2= analysis.pid.roll.p|default(48)|int %}
-      {% set _Dr2= analysis.pid.roll.d|default(38)|int %}
-      {% set _rpm4= ((analysis.advanced.rpm_estimated|default(0)|int)) if analysis.advanced else 0 %}
-      <div class="tpanel" style="border-left:3px solid var(--green);">
-        <div class="tpanel-head">
-          <div class="tpanel-head-icon" style="background:var(--g-dim);border-color:rgba(0,255,136,.2);">🗺️</div>
-          <div>
-            <div class="tpanel-title">TUNING ROADMAP — ลำดับขั้นตอนที่ถูกต้อง</div>
-            <div class="tpanel-sub">บิน step ตามลำดับ · อย่าข้าม · อย่า rush · ปรับทีละอย่าง</div>
+          <div class="tip-block tip-r">
+            <div class="tip-num">04</div>
+            <div class="tip-content">
+              <div class="tip-title">🎮 Race Rates — Precision + Speed</div>
+              <div class="tip-desc">Center precise แต่ปลาย stick ไว · Expo ต่ำกว่า freestyle = ตอบสนองตรง</div>
+              <div class="tip-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set roll_rc_rate = 100
+set roll_expo    = 20
+set roll_srate   = 85</div>
+            </div>
           </div>
-        </div>
-        <div class="tpanel-body">
-          <div class="rmap">
 
-            <div class="rs">
-              <div class="rs-dot done"></div>
-              <div class="rs-card">
-                <div class="rs-step">STEP 01 · PRE-FLIGHT CHECK</div>
-                <div class="rs-title" style="color:var(--green);">✅ โหลด Baseline CLI</div>
-                <div class="rs-desc">Copy Full CLI ด้านบน → paste ใน Betaflight CLI → <code style="color:var(--cyan);">save</code> → reboot<br>ตรวจสอบ motor direction + props ติดถูกทิศ + arm ทดสอบ spin ช้าๆ</div>
-                <div class="rs-cli">paste → save → reboot → ตรวจ motor spin direction</div>
-              </div>
+          {% else %}{# longrange / default #}
+          <div class="tip-block tip-b">
+            <div class="tip-num">02</div>
+            <div class="tip-content">
+              <div class="tip-title">🛸 Filter สำหรับ LR — กรองมากขึ้น</div>
+              <div class="tip-desc">LR prop ใหญ่ vibration ต่ำกว่า · LPF ต่ำลงได้ = กรองดีขึ้น + motor เย็น</div>
+              <div class="tip-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set gyro_lpf1_static_hz  = {{ [100, (analysis.filter.gyro_lpf1 or 150) - 30] | max }}
+set dterm_lpf1_static_hz = {{ [60, (analysis.filter.dterm_lpf1 or 100) - 20] | max }}</div>
             </div>
-
-            <div class="rs">
-              <div class="rs-dot active"></div>
-              <div class="rs-card" style="border-color:rgba(255,187,0,.18);">
-                <div class="rs-step">STEP 02 · FIRST HOVER</div>
-                <div class="rs-title" style="color:var(--amber);">⭕ Hover Test — สังเกตอย่างละเอียด</div>
-                <div class="rs-desc">
-                  Hover ที่ความสูง 1-2m เป็นเวลา 30 วินาที สังเกต 3 อย่าง:<br>
-                  • Hover throttle ควรอยู่ที่ ~<strong style="color:var(--amber);">{{ _htp }}%</strong> — ถ้า >60% = โดรนหนักเกิน<br>
-                  • มีสั่น/vibration ผิดปกติ? → prop imbalance หรือ P สูงเกิน<br>
-                  • โดรน drift? → ปกติเล็กน้อย ถ้า drift แรง = arm bent
-                </div>
-              </div>
-            </div>
-
-            <div class="rs">
-              <div class="rs-dot open"></div>
-              <div class="rs-card">
-                <div class="rs-step">STEP 03 · TUNE P TERM</div>
-                <div class="rs-title">P Term — หา Oscillation</div>
-                <div class="rs-desc">
-                  บิน punch out สั้นๆ หรือ figure-8 แล้วสัมผัส arm — มีสั่น high-freq = P สูงเกิน<br>
-                  ลด P ลง 3-5 ทีละครั้ง บินทดสอบ 1 pack แล้วประเมิน · ถ้า sluggish = P ต่ำเกิน เพิ่ม 3
-                </div>
-                <div class="rs-cli">set p_roll = {{ _Pr2 }}  → ลอง ±3-5 แล้วบินทดสอบ</div>
-              </div>
-            </div>
-
-            <div class="rs">
-              <div class="rs-dot open"></div>
-              <div class="rs-card">
-                <div class="rs-step">STEP 04 · TUNE D TERM</div>
-                <div class="rs-title">D Term — Propwash & Motor Temp</div>
-                <div class="rs-desc">
-                  บิน flip/roll เร็วๆ แล้วดู propwash — ถ้ามี เพิ่ม D ทีละ +2<br>
-                  หลังบิน 2 pack แตะ motor — ต้องอุ่น ไม่ร้อนมือ ถ้าร้อน = D สูงเกิน<br>
-                  <strong>D tune สำคัญกว่า P tune สำหรับ freestyle</strong>
-                </div>
-                <div class="rs-cli">set d_roll = {{ _Dr2 }}  → ลอง +2 ถ้ามี propwash</div>
-              </div>
-            </div>
-
-            <div class="rs">
-              <div class="rs-dot open"></div>
-              <div class="rs-card">
-                <div class="rs-step">STEP 05 · FILTER TUNE</div>
-                <div class="rs-title">RPM Filter & Notch</div>
-                <div class="rs-desc">
-                  เปิด RPM filter (ต้องมี BLHeli32 + DSHOT Bidir) → บินและสังเกต motor temp<br>
-                  ถ้า motor เย็นลงหลังเปิด = filter ทำงาน → สามารถลด Gyro LPF1 Hz ลงได้<br>
-                  ใช้ <a href="/blackbox" style="color:var(--cyan);text-decoration:none;">Blackbox Analyzer</a> ยืนยันผลก่อน tune ต่อ
-                </div>
-                <div class="rs-cli">set dshot_bidir = ON
-set rpm_filter_harmonics = 3</div>
-              </div>
-            </div>
-
-            <div class="rs">
-              <div class="rs-dot open"></div>
-              <div class="rs-card">
-                <div class="rs-step">STEP 06 · FINE TUNE</div>
-                <div class="rs-title">Feedforward + Rates + TPA</div>
-                <div class="rs-desc">
-                  P/D/Filter OK แล้ว → ปรับ feel ของ stick ตาม preference<br>
-                  Feedforward 100-120 สำหรับ snappy feel · Rates ตาม style ส่วนตัว<br>
-                  TPA 0.65 ลด P ที่ throttle สูง → ลด prop wash ที่ full throttle
-                </div>
-                <div class="rs-cli">set feedforward_roll = 110
-set tpa_rate         = 65</div>
-              </div>
-            </div>
-
           </div>
-          <div class="rmap-tip">
-            💡 <strong style="color:var(--green);">กฎทอง:</strong> ปรับ<strong>ทีละอย่าง</strong> เท่านั้น — บิน 1 pack → ประเมิน → ปรับ<br>อย่าปรับหลายค่าพร้อมกัน มิฉะนั้นจะไม่รู้ว่าอะไรที่ช่วยหรืออะไรที่ทำให้แย่ลง
+          <div class="tip-block tip-a">
+            <div class="tip-num">03</div>
+            <div class="tip-content">
+              <div class="tip-title">🌬️ I-term Wind Rejection</div>
+              <div class="tip-desc">LR ต้องการ I สูงเพื่อต้านลม · ถ้า drift ในลม เพิ่ม I roll/pitch ทีละ 5</div>
+              <div class="tip-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set i_roll  = {{ analysis.pid.roll.i }}   # 85-100 LR
+set i_pitch = {{ analysis.pid.pitch.i }}  # > 80 เพื่อต้านลม</div>
+            </div>
           </div>
-        </div>
-      </div>
-      {% endif %}
-
-
-      <!-- ══════════════════════════════════════════════
-           11. SECRET FORMULA LAB — EXCLUSIVE PHYSICS
-      ══════════════════════════════════════════════ -->
-      {% if analysis and analysis.advanced %}
-      {% set _kv_fl  = analysis.motor_kv|default(0)|int %}
-      {% set _cl_fl  = analysis.advanced.cells|default(4)|int %}
-      {% set _vn_fl  = analysis.advanced.pack_voltage_nominal|default(14.8)|float %}
-      {% set _vld_fl = _vn_fl * 0.82 %}
-      {% set _rpm_fl = (_kv_fl * _vld_fl)|int if _kv_fl>0 else 0 %}
-      {% set _pd_fl  = analysis.prop_size|default(5)|float %}
-      {% set _wt_fl  = analysis.weight|default(750)|float %}
-      {% set _twr_fl = analysis.advanced.thrust_ratio|default(0)|float %}
-      {% set _mah_fl = analysis.advanced.battery_mAh_used|default(1500)|float %}
-      {% set _tip_fl = analysis.advanced.tip_speed_mps|default(0)|float %}
-      {% set _hpw_fl = analysis.advanced.hover_power_w|default(0)|float %}
-      {% set _hth_fl = analysis.advanced.hover_throttle_pct|default(50)|float %}
-      {% set _glpf_fl= analysis.filter.gyro_lpf1|default(200)|int %}
-      {% set _dlpf_fl= analysis.filter.dterm_lpf1|default(110)|int %}
-      {% set _dr_fl  = analysis.pid.roll.d|default(38)|int %}
-
-      <div class="tpanel" style="border-left:3px solid var(--cyan);">
-        <div class="tpanel-head">
-          <div class="tpanel-head-icon" style="background:rgba(0,212,255,.07);border-color:rgba(0,212,255,.25);">🧪</div>
-          <div>
-            <div class="tpanel-title" style="color:var(--cyan);">SECRET FORMULA LAB</div>
-            <div class="tpanel-sub">สูตรฟิสิกส์จริง · คำนวณจาก spec ของ build นี้ · ไม่มีที่ไหนในไทย</div>
+          <div class="tip-block tip-r">
+            <div class="tip-num">04</div>
+            <div class="tip-content">
+              <div class="tip-title">🔋 ประหยัดแบต — throttle limit</div>
+              <div class="tip-desc">LR ไม่ต้องการ 100% throttle · limit 70–80% ลด motor heat เพิ่มเวลาบิน</div>
+              <div class="tip-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set throttle_limit_percent = 80
+set throttle_limit_type    = SCALE</div>
+            </div>
           </div>
-          <span class="ttag hot" style="margin-left:auto;flex-shrink:0;">🔬 EXCLUSIVE</span>
-        </div>
-        <div class="tpanel-body">
-          <div class="formula-lab-grid">
-
-            <!-- 1: Prop Tip Speed -->
-            <div class="formula-card fc-g">
-              <div class="formula-name">🌀 PROP TIP SPEED — สูตรจริง</div>
-              <div class="formula-eq">v = π × D(m) × N / 60</div>
-              {% if _rpm_fl>0 %}<div class="formula-result fr-g">{{ _tip_fl|int }} m/s <span style="font-size:10px;color:var(--muted2)">({{ (_tip_fl/343*100)|int }}% speed of sound)</span></div>{% endif %}
-              <div class="formula-var-list">
-                <div class="formula-var"><span class="fv-sym">D</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--green)">{{ (_pd_fl*0.0254)|round(4) }}m ({{ _pd_fl }}")</span></div>
-                <div class="formula-var"><span class="fv-sym">N</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--amber)">{{ '{:,}'.format(_rpm_fl) if _rpm_fl>0 else '—' }} RPM</span></div>
-              </div>
-              <div class="formula-desc">⚠️ ขีดจำกัด <strong>290 m/s</strong> = compressibility loss · 265 m/s = warning zone · เกินนี้เสียงดังแต่ thrust ลด</div>
-            </div>
-
-            <!-- 2: Hover Throttle -->
-            <div class="formula-card fc-b">
-              <div class="formula-name">⚖️ HOVER THROTTLE — สูตรแม่นยำ</div>
-              <div class="formula-eq">THR% = (1/√TWR) × 100</div>
-              {% if _hth_fl>0 %}<div class="formula-result fr-b">{{ _hth_fl|int }}% throttle</div>{% endif %}
-              <div class="formula-var-list">
-                <div class="formula-var"><span class="fv-sym">TWR</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--blue)">{{ _twr_fl }} (thrust/weight)</span></div>
-              </div>
-              <div class="formula-desc">💡 ดีสุด: 30-40% = freestyle power · 40-55% = LR efficient · >60% = หนักเกิน ควรปรับ spec</div>
-            </div>
-
-            <!-- 3: Loaded RPM -->
-            {% if _kv_fl>0 %}
-            <div class="formula-card fc-g">
-              <div class="formula-name">⚡ LOADED MOTOR RPM</div>
-              <div class="formula-eq">N_load = KV × V_nom × 0.82</div>
-              <div class="formula-result fr-g">{{ '{:,}'.format(_rpm_fl) }} RPM</div>
-              <div class="formula-var-list">
-                <div class="formula-var"><span class="fv-sym">KV</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--green)">{{ _kv_fl }}</span></div>
-                <div class="formula-var"><span class="fv-sym">V_nom</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--amber)">{{ _vn_fl }}V ({{ _cl_fl }}S)</span></div>
-                <div class="formula-var"><span class="fv-sym">η</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--cyan)">0.82 (load factor)</span></div>
-              </div>
-              <div class="formula-desc">0.82 = empirical load factor จาก back-EMF + copper loss · No-load RPM = {{ (_kv_fl*_vn_fl)|int }} (ทางทฤษฎี)</div>
-            </div>
-            {% endif %}
-
-            <!-- 4: RPM Filter Min Hz -->
-            {% if _rpm_fl>0 %}
-            {% set _fmin = ((_kv_fl * _vn_fl * 0.70 * 14) / 120)|int %}
-            <div class="formula-card fc-p">
-              <div class="formula-name">🔊 RPM FILTER MIN HZ — สูตรที่ถูกต้อง</div>
-              <div class="formula-eq">f_min = KV × V_sag × poles / 120</div>
-              <div class="formula-result fr-p">{{ _fmin }} Hz</div>
-              <div class="formula-var-list">
-                <div class="formula-var"><span class="fv-sym">V_sag</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--purple)">{{ (_vn_fl*0.70)|round(1) }}V (70% V_nom)</span></div>
-                <div class="formula-var"><span class="fv-sym">poles</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--purple)">14 (มาตรฐาน FPV)</span></div>
-              </div>
-              <div class="formula-desc">🎯 ใช้ V_sag (70%) เพราะ filter ต้องทำงานตั้งแต่ throttle ต่ำสุด · GUI ใช้ค่า default 100Hz ซึ่งอาจเกินจริงสำหรับ KV นี้</div>
-              <div class="formula-cli" onclick="copyCliSnippet(this)">set rpm_filter_min_hz = {{ _fmin }}
-set motor_poles       = 14</div>
-            </div>
-            {% endif %}
-
-            <!-- 5: D-term Heat Index -->
-            {% set _noise_fl = analysis.prop_result.effect.noise|default(3)|float if analysis.prop_result else 3 %}
-            {% set _dhi = (_dr_fl * _dr_fl * _noise_fl / 1000)|round(2) %}
-            <div class="formula-card fc-a">
-              <div class="formula-name">🌡️ D-TERM HEAT INDEX (DHI) — ไม่มีที่ไหนเปิดเผย</div>
-              <div class="formula-eq">DHI = D² × noise_idx / 1000</div>
-              <div class="formula-result" style="color:{% if _dhi>5 %}var(--red){% elif _dhi>2.5 %}var(--amber){% else %}var(--green){% endif %}">DHI = {{ _dhi }}</div>
-              <div class="formula-var-list">
-                <div class="formula-var"><span class="fv-sym">D</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--amber)">{{ _dr_fl }} (D roll)</span></div>
-                <div class="formula-var"><span class="fv-sym">noise</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--amber)">{{ _noise_fl }}/6</span></div>
-              </div>
-              <div class="formula-desc">{% if _dhi>5 %}⛔ DHI สูงมาก — motor จะร้อนแม้บินสั้น → เปิด RPM filter หรือลด D{% elif _dhi>2.5 %}⚠️ DHI ปานกลาง — balance prop ก่อน ตรวจ motor temp หลัง 2 pack{% else %}✅ DHI ต่ำ — D-term ไม่เป็นภาระ motor มากนัก{% endif %}</div>
-            </div>
-
-            <!-- 6: Power Loading -->
-            {% if _hpw_fl>0 %}
-            {% set _tot_thr = (_wt_fl * _twr_fl)|int %}
-            {% set _pl = (_tot_thr / _hpw_fl)|round(1) %}
-            <div class="formula-card fc-b">
-              <div class="formula-name">💡 POWER LOADING (g/W) — Efficiency จริง</div>
-              <div class="formula-eq">PL = Thrust(g) / Hover_Power(W)</div>
-              <div class="formula-result fr-b">{{ _pl }} g/W</div>
-              <div class="formula-var-list">
-                <div class="formula-var"><span class="fv-sym">Thrust</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--blue)">{{ _tot_thr }}g</span></div>
-                <div class="formula-var"><span class="fv-sym">Hover W</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--blue)">{{ _hpw_fl|int }}W</span></div>
-              </div>
-              <div class="formula-desc">{% if _pl>8 %}✅ Excellent — สุดยอด efficiency เหมือน premium racing build{% elif _pl>5 %}⚡ Good — สมดุลดีระหว่างกำลังและเวลาบิน{% else %}⚠️ Low efficiency — ลอง pitch สูงขึ้น หรือ 3-blade prop{% endif %}</div>
-            </div>
-            {% endif %}
-
-            <!-- 7: Filter Delay Chain -->
-            {% set _gd = (1 / (2 * 3.14159 * _glpf_fl) * 1000)|round(2) %}
-            {% set _dd = (1 / (2 * 3.14159 * _dlpf_fl) * 1000)|round(2) %}
-            {% set _td = (_gd + _dd + 0.3)|round(2) %}
-            <div class="formula-card fc-p">
-              <div class="formula-name">⏱️ FILTER DELAY CHAIN — total latency</div>
-              <div class="formula-eq">τ = Σ [1/(2π×f_c)] × 1000 ms</div>
-              <div class="formula-result fr-p">{{ _td }} ms total</div>
-              <div class="formula-var-list">
-                <div class="formula-var"><span class="fv-sym">Gyro</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--purple)">{{ _gd }}ms ({{ _glpf_fl }}Hz)</span></div>
-                <div class="formula-var"><span class="fv-sym">DTerm</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--purple)">{{ _dd }}ms ({{ _dlpf_fl }}Hz)</span></div>
-                <div class="formula-var"><span class="fv-sym">Notch</span><span class="fv-eq">=</span><span class="fv-live" style="color:var(--purple)">~0.3ms</span></div>
-              </div>
-              <div class="formula-desc">{% if _td<1.0 %}✅ Latency ต่ำมาก — racing build ชั้นยอด{% elif _td<2.0 %}✅ Latency ดี — freestyle/racing เหมาะสม{% else %}⚠️ Latency สูง — ลอง LPF1 ที่ความถี่สูงขึ้น{% endif %}</div>
-            </div>
-
-            <!-- 8: Build Efficiency Index (BEI) — OBIX Exclusive -->
-            {% set _wkg = _wt_fl / 1000 %}
-            {% set _bei = ((_twr_fl * _twr_fl * (_mah_fl ** 0.5)) / _wkg)|round(1) if _wkg>0 else 0 %}
-            <div class="formula-card fc-g">
-              <div class="formula-name">🏆 BUILD EFFICIENCY INDEX (BEI) — สูตรลับ OBIXDoctor</div>
-              <div class="formula-eq">BEI = TWR² × √mAh / Weight(kg)</div>
-              <div class="formula-result fr-g">BEI = {{ _bei }}</div>
-              <div class="formula-desc">
-                สูตรนี้สร้างโดย OBIX Doctor รวม power + flight time + น้ำหนักในมิติเดียว<br>
-                {% if _bei>500 %}🚀 WORLD CLASS — top 5% ของ FPV community
-                {% elif _bei>300 %}✅ EXCELLENT — intermediate ถึง pro level
-                {% elif _bei>150 %}⚡ GOOD — standard FPV build
-                {% else %}⚠️ BUDGET — มีพื้นที่ปรับปรุง spec{% endif %}
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-      {% endif %}
-
-      <!-- ══════════════════════════════════════════════
-           12. MULTI-S BATTERY MATRIX
-      ══════════════════════════════════════════════ -->
-      {% if analysis and analysis.advanced %}
-      {% set _kv_bm = analysis.motor_kv|default(0)|int %}
-      {% set _wt_bm = analysis.weight|default(750)|float %}
-      {% set _sz_bm = analysis.size|default(5)|float %}
-      {% set _pd_bm = analysis.prop_size|default(5)|float %}
-      {% set _cs_bm = analysis.advanced.cells|default(4)|int %}
-      {% set _mh_bm = analysis.advanced.battery_mAh_used|default(1500)|float %}
-
-      <div class="tpanel" style="border-left:3px solid var(--amber);">
-        <div class="tpanel-head">
-          <div class="tpanel-head-icon" style="background:rgba(255,185,0,.07);border-color:rgba(255,185,0,.25);">🔋</div>
-          <div>
-            <div class="tpanel-title" style="color:var(--amber);">MULTI-S BATTERY MATRIX</div>
-            <div class="tpanel-sub">Build นี้บน 3S–8S · วิเคราะห์ทุก S · หา optimal configuration</div>
-          </div>
-        </div>
-        <div class="tpanel-body" style="padding:0;">
-          <div class="bmat-wrap">
-            <table class="bmat-table">
-              <thead>
-                <tr>
-                  <th style="text-align:left;">BATTERY</th>
-                  <th>VOLTAGE</th>
-                  <th>RPM (est)</th>
-                  <th>TWR</th>
-                  <th>TIP SPEED</th>
-                  <th>FLIGHT TIME</th>
-                  <th>ESC MIN</th>
-                  <th>VERDICT</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for sc in [3,4,5,6,7,8] %}
-                {% set vn  = sc * 3.7 %}
-                {% set vld = vn * 0.82 %}
-                {% set rpm_e = (_kv_bm * vld)|int if _kv_bm>0 else 0 %}
-                {% set tip_e = (3.14159 * _pd_bm * 0.0254 * rpm_e / 60)|int if rpm_e>0 else 0 %}
-                {% set cscale = (0.55+sc*0.1125) if sc<=4 else (1.0+(sc-4)*0.18) %}
-                {% set thr4s  = 730 %}
-                {% set twr_e  = (thr4s * cscale * 4 / _wt_bm)|round(2) if _wt_bm>0 else 0 %}
-                {% set pkw    = (_kv_bm/220*vn)|round(0)|int*4 if _kv_bm>0 else sc*35*4 %}
-                {% set hthr   = (1/twr_e**0.5) if twr_e>0 else 0.5 %}
-                {% set ia     = pkw / vn %}
-                {% set ft_e   = ((_mh_bm/1000*0.8)/(ia*hthr*hthr*0.75+0.5)*60)|round(1) if ia>0 else 0 %}
-                {% set esc_e  = ([20, ((pkw/vn/4)*1.5/5)|round(0)|int*5]|max) %}
-                <tr class="bmat-row {% if sc==_cs_bm %}bm-current{% endif %}">
-                  <td>
-                    <span class="bmat-s-badge bm-{{ sc }}s">{{ sc }}S</span>
-                    {% if sc==_cs_bm %}<span style="font-family:var(--font-d);font-size:6.5px;color:var(--cyan);margin-left:6px;">◀ NOW</span>{% endif %}
-                  </td>
-                  <td><span class="bmat-num" style="color:var(--text2);">{{ vn }}V</span></td>
-                  <td>
-                    {% if rpm_e>0 %}
-                    <span class="bmat-num" style="color:{% if rpm_e>50000 %}var(--red){% elif rpm_e>35000 %}var(--amber){% else %}var(--text){% endif %}">{{ '{:,}'.format(rpm_e) }}</span>
-                    {% else %}<span style="color:var(--muted2)">กรอก KV</span>{% endif %}
-                  </td>
-                  <td><span class="bmat-num" style="color:{% if twr_e>=3.5 %}var(--green){% elif twr_e>=2.0 %}var(--amber){% else %}var(--red){% endif %}">{{ twr_e }}:1</span></td>
-                  <td>
-                    {% if tip_e>0 %}
-                    <span class="bmat-num" style="color:{% if tip_e>290 %}var(--red){% elif tip_e>265 %}var(--amber){% else %}var(--green){% endif %}">{{ tip_e }} m/s</span>
-                    {% else %}<span style="color:var(--muted2)">—</span>{% endif %}
-                  </td>
-                  <td><span class="bmat-num" style="color:{% if ft_e>10 %}var(--green){% elif ft_e>5 %}var(--amber){% else %}var(--red){% endif %}">{{ ft_e }} min</span></td>
-                  <td><span class="bmat-num" style="color:var(--blue)">{{ esc_e }}A+</span></td>
-                  <td>
-                    {% if tip_e>290 %}<span class="bmat-pill danger">⛔ Tip !</span>
-                    {% elif twr_e<2.0 %}<span class="bmat-pill warn">⚠️ Low TWR</span>
-                    {% elif twr_e>=3.5 and ft_e>=5 and (tip_e<265 or tip_e==0) %}
-                      {% if sc==_cs_bm %}<span class="bmat-pill opt">⭐ OPTIMAL</span>
-                      {% else %}<span class="bmat-pill ok">✅ Good</span>{% endif %}
-                    {% elif twr_e>=2.0 %}<span class="bmat-pill ok">✅ OK</span>
-                    {% else %}<span class="bmat-pill warn">⚠️ Check</span>{% endif %}
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-          <div class="bmat-note">
-            💡 <strong style="color:var(--text)">Build {{ _sz_bm }}" · {{ _wt_bm|int }}g</strong>
-            {% if _kv_bm>0 %} · KV {{ _kv_bm }}
-              {% if _cs_bm==4 and _kv_bm>2500 %} — 4S เหมาะที่สุด · 6S ควรใช้ KV 1500-1800
-              {% elif _cs_bm==6 and _kv_bm>2000 %} — ⚠️ KV สูงเกินสำหรับ 6S → tip speed อาจเกิน 290m/s
-              {% elif _cs_bm>=7 %} — High voltage build · ESC ต้องรองรับ {{ _cs_bm*4.2 }}V max
-              {% else %} — balanced ดีกับ {{ _cs_bm }}S{% endif %}
-            {% else %} — กรอก Motor KV เพื่อดู RPM + Tip Speed ใน Matrix{% endif %}
-          </div>
-          <div class="bmat-legend">
-            <div class="bml-item"><span class="bmat-pill opt">⭐ OPTIMAL</span> เหมาะที่สุด</div>
-            <div class="bml-item"><span class="bmat-pill ok">✅ Good</span> ใช้ได้</div>
-            <div class="bml-item"><span class="bmat-pill warn">⚠️ Check</span> มีจุดระวัง</div>
-            <div class="bml-item"><span class="bmat-pill danger">⛔ Danger</span> ไม่แนะนำ</div>
-          </div>
-        </div>
-      </div>
-      {% endif %}
-
-      <!-- ══════════════════════════════════════════════
-           13. MOTOR HARMONIC MAP
-      ══════════════════════════════════════════════ -->
-      {% if analysis and analysis.advanced and analysis.motor_kv %}
-      {% set _rpm_hm  = analysis.advanced.rpm_estimated|default(0)|int %}
-      {% set _bl_hm   = request.form.get('blades','3')|int %}
-      {% set _glpf_hm = analysis.filter.gyro_lpf1|default(200)|int %}
-
-      <div class="tpanel" style="border-left:3px solid var(--purple);">
-        <div class="tpanel-head">
-          <div class="tpanel-head-icon" style="background:rgba(176,96,255,.07);border-color:rgba(176,96,255,.25);">🎵</div>
-          <div>
-            <div class="tpanel-title" style="color:var(--purple);">MOTOR HARMONIC MAP</div>
-            <div class="tpanel-sub">Resonance prediction · Filter placement · Frame vibration analysis</div>
-          </div>
-        </div>
-        <div class="tpanel-body">
-          {% if _rpm_hm>0 %}
-          {% set _f1 = (_rpm_hm / 60)|int %}
-          {% set _f2 = (_rpm_hm / 60 * 2)|int %}
-          {% set _f3 = (_rpm_hm / 60 * 3)|int %}
-          {% set _fp = (_rpm_hm / 60 * _bl_hm)|int %}
-          {% set _fr = 190 %}
-          <div class="harm-grid">
-
-            <div class="harm-node">
-              <div class="harm-node-n">🎵 Fundamental (1×)</div>
-              <div class="harm-node-f">{{ _f1 }}<span class="harm-node-u"> Hz</span></div>
-              <div class="harm-node-flt">Dyn Notch covers</div>
-              <div class="harm-bar-w"><div class="harm-bar-f" style="width:{{ [100,(_f1/600*100)|int]|min }}%"></div></div>
-              <span class="harm-risk {% if _f1<80 %}hr-lo{% elif _f1<200 %}hr-med{% else %}hr-hi{% endif %}">{% if _f1<80 %}LOW{% elif _f1<200 %}MEDIUM{% else %}HIGH{% endif %}</span>
-              <div class="harm-node-desc">RPM ÷ 60 = Hz · rpm_filter_min_hz ต้องต่ำกว่านี้</div>
-            </div>
-
-            <div class="harm-node">
-              <div class="harm-node-n">🎶 2nd Harmonic</div>
-              <div class="harm-node-f">{{ _f2 }}<span class="harm-node-u"> Hz</span></div>
-              <div class="harm-node-flt">RPM Filter H=2</div>
-              <div class="harm-bar-w"><div class="harm-bar-f" style="width:{{ [100,(_f2/600*100)|int]|min }}%;background:linear-gradient(90deg,var(--blue),var(--purple))"></div></div>
-              <span class="harm-risk {% if _f2<150 %}hr-lo{% elif _f2<350 %}hr-med{% else %}hr-hi{% endif %}">{% if _f2<150 %}LOW{% elif _f2<350 %}MEDIUM{% else %}HIGH PRIORITY{% endif %}</span>
-              <div class="harm-node-desc">2nd harmonic มักแรงที่สุดใน PMSM · สำคัญมากกว่า F1</div>
-            </div>
-
-            <div class="harm-node">
-              <div class="harm-node-n">🎸 3rd Harmonic</div>
-              <div class="harm-node-f">{{ _f3 }}<span class="harm-node-u"> Hz</span></div>
-              <div class="harm-node-flt">RPM Filter H=3</div>
-              <div class="harm-bar-w"><div class="harm-bar-f" style="width:{{ [100,(_f3/600*100)|int]|min }}%;background:linear-gradient(90deg,var(--amber),var(--red))"></div></div>
-              <span class="harm-risk {% if _f3>400 %}hr-hi{% else %}hr-med{% endif %}">{% if _f3>400 %}ABOVE LPF{% else %}WATCH{% endif %}</span>
-              <div class="harm-node-desc">ตั้ง harmonics=3 ครอบทั้ง 3 ชั้น · H3 อาจเกิน Gyro LPF cutoff</div>
-            </div>
-
-            <div class="harm-node">
-              <div class="harm-node-n">🌀 Prop Vibration ({{ _bl_hm }} blade)</div>
-              <div class="harm-node-f">{{ _fp }}<span class="harm-node-u"> Hz</span></div>
-              <div class="harm-node-flt">{{ _bl_hm }} × fundamental</div>
-              <div class="harm-bar-w"><div class="harm-bar-f" style="width:{{ [100,(_fp/600*100)|int]|min }}%;background:linear-gradient(90deg,var(--teal),var(--green))"></div></div>
-              <span class="harm-risk {% if (_fp-_fr)|abs<30 %}hr-hi{% else %}hr-lo{% endif %}">{% if (_fp-_fr)|abs<30 %}⚠️ NEAR FRAME RES!{% else %}OK{% endif %}</span>
-              <div class="harm-node-desc">ถ้าใกล้ frame resonance (~{{ _fr }}Hz) จะเกิด sympathetic vibration รุนแรง</div>
-            </div>
-
-            <div class="harm-node">
-              <div class="harm-node-n">🏗️ Frame Resonance (est)</div>
-              <div class="harm-node-f">~{{ _fr }}<span class="harm-node-u"> Hz</span></div>
-              <div class="harm-node-flt">Dyn Notch จับอัตโนมัติ</div>
-              <div class="harm-bar-w"><div class="harm-bar-f" style="width:{{ [100,(_fr/600*100)|int]|min }}%;background:rgba(255,255,255,.2)"></div></div>
-              <span class="harm-risk hr-med">STATIC</span>
-              <div class="harm-node-desc">Carbon frame ส่วนใหญ่ 180-220Hz · ถ้าตรงกับ prop freq = ปัญหา</div>
-            </div>
-
-            <div class="harm-node">
-              <div class="harm-node-n">📉 Gyro LPF1 Cutoff</div>
-              <div class="harm-node-f">{{ _glpf_hm }}<span class="harm-node-u"> Hz</span></div>
-              <div class="harm-node-flt">ความถี่เกินนี้ถูก block</div>
-              <div class="harm-bar-w"><div class="harm-bar-f" style="width:{{ [100,(_glpf_hm/600*100)|int]|min }}%;background:linear-gradient(90deg,var(--cyan),rgba(0,200,255,.3))"></div></div>
-              <span class="harm-risk hr-lo">FILTER LINE</span>
-              <div class="harm-node-desc">Harmonics เกิน {{ _glpf_hm }}Hz ถูก block ก่อน PID loop</div>
-            </div>
-
-          </div>
-          <div class="harm-explain">
-            <strong style="color:var(--purple)">🎵 Summary:</strong>
-            F1={{ _f1 }}Hz · F2={{ _f2 }}Hz · F3={{ _f3 }}Hz · Prop={{ _fp }}Hz · Frame~{{ _fr }}Hz<br>
-            {% if (_fp-_fr)|abs<30 %}⚠️ <strong style="color:var(--red)">CRITICAL: Prop freq ({{ _fp }}Hz) ใกล้ Frame resonance (~{{ _fr }}Hz) — อาจเกิด sympathetic vibration รุนแรง!</strong> ลองเปลี่ยน prop จำนวนใบ หรือใส่ motor damper<br>{% endif %}
-            ✅ <code>set rpm_filter_harmonics = 3</code> ครอบ F1+F2+F3 ·
-            Dyn notch จัดการ frame resonance อัตโนมัติ
-          </div>
-          {% else %}
-          <div style="padding:20px;text-align:center;color:var(--muted2);font-size:11px;">🎵 กรอก <strong style="color:var(--text)">Motor KV</strong> เพื่อดู Harmonic Map</div>
           {% endif %}
-        </div>
-      </div>
-      {% endif %}
 
-      <!-- ══════════════════════════════════════════════
-           14. HIDDEN BETAFLIGHT PARAMETERS
-      ══════════════════════════════════════════════ -->
-      {% if analysis %}
-      {% set _st_hp  = analysis.style|default('freestyle') %}
-      {% set _sz_hp  = analysis.size|default(5)|float %}
-      {% set _cl_hp  = (analysis.advanced.cells|default(4)|int) if analysis.advanced else 4 %}
-      {% set _twr_hp = (analysis.advanced.thrust_ratio|default(0)|float) if analysis.advanced else 0 %}
-
-      <div class="tpanel" style="border-left:3px solid var(--red);">
-        <div class="tpanel-head">
-          <div class="tpanel-head-icon" style="background:rgba(255,51,68,.07);border-color:rgba(255,51,68,.25);">🕵️</div>
-          <div>
-            <div class="tpanel-title" style="color:var(--red);">HIDDEN BETAFLIGHT PARAMETERS</div>
-            <div class="tpanel-sub">99% ของนักบินไม่รู้จัก · ไม่มีใน GUI · unlock ประสิทธิภาพที่ซ่อนอยู่</div>
-          </div>
-        </div>
-        <div class="tpanel-body">
-          <div class="secret-alert">
-            <span class="secret-alert-ico">⚠️</span>
-            <span class="secret-alert-text">ทดสอบทีละ parameter · hover test ก่อนเสมอ · backup config ก่อนเปลี่ยน · parameters เหล่านี้ไม่อยู่ใน documentation อย่างเป็นทางการ</span>
-          </div>
-          <div class="hparam-list">
-
-            <div class="hparam-item hp-g">
-              <div class="hparam-top">
-                <span class="hparam-cmd">thrust_linear</span>
-                <span class="hparam-val">{% if _twr_hp>5 %}35{% elif _twr_hp>3 %}25{% else %}20{% endif %}</span>
-                <span class="hbadge hb-secret">🔥 SECRET</span><span class="hbadge hb-bf45">BF4.4+</span>
-              </div>
-              <div class="hparam-desc"><strong>Linearize throttle response ตาม motor physics ที่แท้จริง</strong><br>Motor จริงไม่ linear: thrust ∝ (throttle)² · parameter นี้ compensate ให้ stick ตอบสนองตรงขึ้น ค่า {{ 25 if _twr_hp>3 else 20 }}-40 เหมาะ build นี้ · ค่าสูง = ปลาย stick ดุขึ้น center นิ่งขึ้น</div>
-              <div class="hparam-why">BF default = 0 (ปิด) · ถ้าตั้งผิดจะ sluggish หรือ twitchy มาก</div>
-              <div class="hparam-cli" onclick="copyCliSnippet(this)">set thrust_linear = {% if _twr_hp>5 %}35{% elif _twr_hp>3 %}25{% else %}20{% endif %}</div>
-            </div>
-
-            <div class="hparam-item hp-b">
-              <div class="hparam-top">
-                <span class="hparam-cmd">iterm_rotation</span>
-                <span class="hparam-val">ON</span>
-                <span class="hbadge hb-bf45">BF4.4+</span><span class="hbadge hb-perf">⚡ RECOMMENDED</span>
-              </div>
-              <div class="hparam-desc"><strong>I-term คำนวณใน body frame ไม่ใช่ world frame</strong><br>ปกติ I-term สะสมใน world frame → เวลา drone หมุน I-term ของ axis อื่นรั่วไหลเข้ามา → bobbing แปลกๆ · ON ทำให้ freestyle tricks smooth ขึ้นอย่างเห็นได้ชัด โดยเฉพาะ flat spin + split-S</div>
-              <div class="hparam-why">BF default = OFF · ใช้ CPU เพิ่มเล็กน้อย · ไม่เหมาะ loop rate ต่ำ</div>
-              <div class="hparam-cli" onclick="copyCliSnippet(this)">set iterm_rotation = ON</div>
-            </div>
-
-            <div class="hparam-item hp-a">
-              <div class="hparam-top">
-                <span class="hparam-cmd">abs_control</span>
-                <span class="hparam-val">{% if _st_hp=='racing' %}OFF{% else %}ON{% endif %}</span>
-                <span class="hbadge hb-perf">⚡ PERF</span><span class="hbadge hb-bf45">BF4.3+</span>
-              </div>
-              <div class="hparam-desc"><strong>Absolute Control — ลด heading drift ที่ hover และขณะมีลม</strong><br>เพิ่ม small correction เมื่อ drone drift จาก target heading โดยไม่รอ P term · {% if _st_hp=='freestyle' %}Freestyle: โดรนอยู่นิ่ง hover แม่น flat spin precise{% elif _st_hp=='longrange' %}LR: ต้านลม drift ดีขึ้นโดยไม่ต้องเพิ่ม I{% else %}Racing: แนะนำปิด — latency เพิ่มเล็กน้อย{% endif %}</div>
-              <div class="hparam-why">BF default = OFF · gain สูงเกิน = wobble ที่ yaw</div>
-              <div class="hparam-cli" onclick="copyCliSnippet(this)">set abs_control      = {% if _st_hp=='racing' %}OFF{% else %}ON{% endif %}
-set abs_control_gain = 10  # ปรับ 5-15</div>
-            </div>
-
-            <div class="hparam-item hp-p">
-              <div class="hparam-top">
-                <span class="hparam-cmd">gyro_hardware_lpf</span>
-                <span class="hparam-val">{% if _st_hp=='racing' %}OPTION_1{% else %}NORMAL{% endif %}</span>
-                <span class="hbadge hb-secret">🔥 HARDWARE</span><span class="hbadge hb-adv">CHIP LEVEL</span>
-              </div>
-              <div class="hparam-desc"><strong>Gyro chip hardware filter — filter ก่อน BF เห็น data เลย</strong><br>ICM-42688/MPU-6000 มี hardware LPF ใน chip · OPTION_1 ลด cutoff = ข้อมูล smooth มากขึ้น latency +0.5ms · {% if _st_hp=='racing' %}Racing NORMAL: latency ต่ำ ตอบสนองไว (OPTION_1 เพิ่ม latency ไม่เหมาะ gate racing){% elif _st_hp=='longrange' %}LR: OPTION_1 แนะนำ — smooth data ดีมาก{% else %}Freestyle: ลองดู บาง build smooth ขึ้นมาก{% endif %}</div>
-              <div class="hparam-why">BF default = NORMAL · hardware-specific ต้องรู้ chip ก่อน</div>
-              <div class="hparam-cli" onclick="copyCliSnippet(this)">set gyro_hardware_lpf = {% if _st_hp=='racing' %}OPTION_1{% else %}NORMAL{% endif %}
-# ตรวจ chip: diff all | grep gyro_chip</div>
-            </div>
-
-            <div class="hparam-item hp-c">
-              <div class="hparam-top">
-                <span class="hparam-cmd">ff_interpolate_sp</span>
-                <span class="hparam-val">{% if _st_hp=='racing' %}AVERAGED_2{% else %}AVERAGED_4{% endif %}</span>
-                <span class="hbadge hb-bf45">BF4.4+</span><span class="hbadge hb-perf">FF QUALITY</span>
-              </div>
-              <div class="hparam-desc"><strong>Feedforward interpolation algorithm — ละเอียดกว่า GUI toggle</strong><br>AVERAGED_2 = fast · AVERAGED_4 = smooth แต่ช้า 1 frame · {% if _st_hp=='racing' %}AVERAGED_2: gate clipping accurate{% elif _st_hp=='freestyle' %}AVERAGED_4: flip/roll smooth ขึ้นชัดเจน{% else %}AVERAGED_4: punch smooth กำจัด RC link noise{% endif %}</div>
-              <div class="hparam-why">BF default = AVERAGED_2 · GUI เลือกได้แค่ ON/OFF</div>
-              <div class="hparam-cli" onclick="copyCliSnippet(this)">set ff_interpolate_sp = {% if _st_hp=='racing' %}AVERAGED_2{% else %}AVERAGED_4{% endif %}</div>
-            </div>
-
-            <div class="hparam-item hp-r">
-              <div class="hparam-top">
-                <span class="hparam-cmd">motor_output_limit</span>
-                <span class="hparam-val">{% if _twr_hp>6 %}85{% elif _twr_hp>4 %}95{% else %}100{% endif %}</span>
-                <span class="hbadge hb-secret">🔥 SECRET</span><span class="hbadge hb-perf">THERMAL</span>
-              </div>
-              <div class="hparam-desc"><strong>Hard cap บน motor output — ป้องกัน motor ร้อน ลด peak current</strong><br>{% if _twr_hp>6 %}TWR {{ _twr_hp }} สูงมาก — 85% output ยัง {{ (_twr_hp*0.85)|round(1) }}:1 TWR เพียงพอ motor เย็นลง ประหยัดแบต{% elif _twr_hp>4 %}TWR {{ _twr_hp }} — 95% ยังมีกำลังพอ ลด peak temp{% else %}TWR ปกติ — ไม่แนะนำ limit สำหรับ build นี้{% endif %}</div>
-              <div class="hparam-why">BF default = 100% · ลด output แต่ PID compensate — feel ไม่เปลี่ยน</div>
-              {% if _twr_hp>4 %}
-              <div class="hparam-cli" onclick="copyCliSnippet(this)">set motor_output_limit = {% if _twr_hp>6 %}85{% else %}95{% endif %}</div>
-              {% endif %}
-            </div>
-
-            <div class="hparam-item hp-a">
-              <div class="hparam-top">
-                <span class="hparam-cmd">vbat_pid_gain</span>
-                <span class="hparam-val">ON</span>
-                <span class="hbadge hb-bf45">BF4.4+</span>
-              </div>
-              <div class="hparam-desc"><strong>Scale PID gain ตาม battery voltage แบบ real-time</strong><br>แบตสาก → voltage ลด → motor output น้อยลง → PID compensate มากขึ้น → feel เปลี่ยน · vbat_pid_gain=ON ทำให้ BF scale P/I/D ตาม voltage อัตโนมัติ → feel คงที่ตลอด pack · <strong style="color:var(--amber)">สำคัญมากสำหรับ {{ _cl_hp }}S pack ที่ sag มาก</strong></div>
-              <div class="hparam-why">BF default = OFF · ต้อง voltage sensor ทำงานถูกต้อง</div>
-              <div class="hparam-cli" onclick="copyCliSnippet(this)">set vbat_pid_gain = ON
-set vbat_pid_off  = 0</div>
-            </div>
-
-            <div class="hparam-item hp-p">
-              <div class="hparam-top">
-                <span class="hparam-cmd">dyn_notch_q</span>
-                <span class="hparam-val">{% if _sz_hp<=4 %}250{% elif _sz_hp<=6 %}300{% else %}350{% endif %}</span>
-                <span class="hbadge hb-adv">Q FACTOR</span>
-              </div>
-              <div class="hparam-desc"><strong>Q factor ของ Dynamic Notch filter — ความแหลมของ notch</strong><br>Q สูง = notch แคบ กรองแม่น แต่ถ้า freq เคลื่อน → พลาด · Q ต่ำ = กว้างกว่า latency สูงขึ้น · {% if _sz_hp<=4 %}Micro/Mini: Q 200-250 vibration freq เคลื่อนเร็ว{% elif _sz_hp<=6 %}5-6": Q 250-350 สมดุล{% else %}7-10" LR: Q 350+ prop ใหญ่ freq คงที่{% endif %}</div>
-              <div class="hparam-why">BF default Q=300 · ต้อง Blackbox ยืนยัน</div>
-              <div class="hparam-cli" onclick="copyCliSnippet(this)">set dyn_notch_q = {% if _sz_hp<=4 %}250{% elif _sz_hp<=6 %}300{% else %}350{% endif %}</div>
-            </div>
-
-          </div>
-          <div style="margin-top:12px;padding:10px 12px;background:rgba(255,51,68,.04);border:1px solid rgba(255,51,68,.12);border-radius:8px;font-size:10px;color:var(--muted2);line-height:1.7;">
-            🔴 <strong style="color:var(--red)">Reminder:</strong> Parameters เหล่านี้ไม่อยู่ใน official documentation · เปิดทีละตัว · hover test ทุกครั้ง · ถ้าพฤติกรรมแปลก = revert ทันที
-          </div>
-        </div>
-      </div>
-      {% endif %}
-
-      <!-- ══ 10. DONATE ══ -->
-      <div class="donate-panel">
-        <div class="donate-title">☕ สนับสนุนโปรเจกต์</div>
-        <div class="donate-sub">OBIXConfig Doctor พัฒนาโดยนักบิน FPV เพื่อชุมชน — ฟรี 100%<br>หากมีประโยชน์ ช่วยสนับสนุนค่ากาแฟได้เลย ☕</div>
-        <div class="amt-row">
-          <button class="amt-btn">฿50</button>
-          <button class="amt-btn selected">฿100</button>
-          <button class="amt-btn">฿200</button>
-          <button class="amt-btn">฿500</button>
-        </div>
-        <div class="qr-wrap">
-          <img src="{{ url_for('static', filename='img/support-qr.png') }}" alt="PromptPay QR">
         </div>
       </div>
 
-      {% endif %}<!-- end if analysis -->
+
+      {% endif %}{# end if not analysis / else #}
         </div><!-- /results-col -->
       </div><!-- /main-grid -->
     </div><!-- /stage -->
