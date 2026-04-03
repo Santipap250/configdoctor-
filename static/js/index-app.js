@@ -1012,13 +1012,19 @@ function toggleTheme(){
   };
   let origLiveCalc = window.liveCalc;
   if(origLiveCalc) {
-    window.liveCalc = function(){
-      origLiveCalc();
-      ['h_twr','h_tip','h_rpm','h_ft'].forEach(function(id){
-        let el = document.getElementById(id);
-        if(el) flash(id, el.textContent);
-      });
-    };
+    let flashTimer;
+
+window.liveCalc = function () {
+  origLiveCalc();
+
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => {
+    ['h_twr', 'h_tip', 'h_rpm', 'h_ft'].forEach(function(id) {
+      let el = document.getElementById(id);
+      if (el) flash(id, el.textContent);
+    });
+  }, 250);
+};
   }
 })();
 
