@@ -190,7 +190,7 @@ function _r(v){ return Math.max(1, Math.round(v)); }
         valEl.className = 'chk-val ' + (status==='ok'?'green':status==='warn'?'amber':'red');
       }
     }
-    if(kv > 0 && tipSpeed > 0) setChk(0, tipSpeed>300?'bad':tipSpeed>250?'warn':'ok', Math.round(tipSpeed)+' m/s');
+    if(kv > 0 && tipSpeed > 0) setChk(0, tipSpeed>300?'bad':tipSpeed>250?'warn'functionunction'ok', Math.round(tipSpeed)+' m/s');
     else setChk(0, 'ok', 'กรอก KV');
     setChk(1, cBurst>80?'bad':cBurst>50?'warn':'ok', mah>0?Math.round(cBurst)+'C req':'—');
     setChk(2, twr<1.2?'bad':twr<2.0?'warn':'ok', twr>0?twr.toFixed(2)+':1':'—');
@@ -308,8 +308,17 @@ function _r(v){ return Math.max(1, Math.round(v)); }
   };
 
   /* ── Debounce: prevent liveCalc firing every keystroke (causes input lag) ── */
-  function _debounce(fn, ms){ let t; return function(){ clearTimeout(t); t = setTimeout(fn, ms); }; }
-  let _debouncedCalc = _debounce(liveCalc, 120);
+  function _debounce(fn, ms = 500) {
+  let timer;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      requestAnimationFrame(() => fn.apply(this, args));
+    }, ms);
+  };
+}
+
+const _debouncedCalc = _debounce(liveCalc, 500);
 
   let inputs = document.querySelectorAll('input[type=number], select');
   inputs.forEach(function(el){
