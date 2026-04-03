@@ -980,7 +980,7 @@ footer {
     <button class="lang-toggle" onclick="toggleLang()" id="langBtn">
       <span id="langIcon">🇹🇭</span><span id="langLabel">TH</span>
     </button>
-    <a class="nav-cta" href="/app">
+    <a class="nav-cta" href="{{ url_for('motor_prop') }}">
       <span class="i18n-th">เริ่มวิเคราะห์ →</span>
       <span class="i18n-en">Analyze →</span>
     </a>
@@ -989,7 +989,7 @@ footer {
     <button class="lang-toggle" onclick="toggleLang()" id="langBtnMobile" style="padding:5px 9px;font-size:.68rem">
       <span id="langIconMobile">🇹🇭</span><span id="langLabelMobile">TH</span>
     </button>
-    <a class="nav-cta" href="/app" style="padding:6px 14px;font-size:.72rem">
+    <a class="nav-cta" href="{{ url_for('motor_prop') }}" style="padding:6px 14px;font-size:.72rem">
       <span class="i18n-th">วิเคราะห์ →</span><span class="i18n-en">Analyze →</span>
     </a>
   </div>
