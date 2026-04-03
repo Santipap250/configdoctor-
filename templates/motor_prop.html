@@ -1,624 +1,572 @@
-{# templates/motor_prop.html — OBIXConfig Doctor v2.3 #}
+{# templates/motor_prop.html — OBIXConfig Doctor v5.3 PRO #}
 <!doctype html>
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<title>Motor × Prop Command Center — OBIXConfig Doctor</title>
-{% set og_title       = "Motor × Prop Command Center — OBIXConfig Doctor" %}
-{% set og_description = "วิเคราะห์ Motor · Prop · TWR · กระแส · เวลาบิน แบบ real-time พร้อม Motor Database และ CLI Export" %}
+<title>Motor × Prop Lab — OBIXConfig Doctor</title>
+{% set og_title       = "Motor × Prop Lab — OBIXConfig Doctor" %}
+{% set og_description = "วิเคราะห์ Motor · Prop · TWR · Tip Speed · C-Rate · ESC แบบ real-time พร้อม Motor Database + CLI Export" %}
 {% set og_url         = "https://configdoctor.onrender.com/motor-prop" %}
 {% set nav_page       = "motor_prop" %}
 {% include "partials/og_tags.html" %}
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@400;600&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=DM+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-/* ═══════════════════════════════════════════════════════════
-   OBIX MOTOR COMMAND CENTER — Design Tokens
-═══════════════════════════════════════════════════════════ */
-:root{
-  --bg:      #020509;
-  --bg2:     #040b14;
-  --panel:   #06101e;
-  --panel2:  #081428;
-  --border:  rgba(0,255,136,0.09);
-  --borderB: rgba(0,170,255,0.13);
-  --green:   #00ff88;
-  --blue:    #00aaff;
-  --amber:   #ffb700;
-  --red:     #ff4455;
-  --muted:   #4a6070;
-  --muted2:  #2a3f52;
-  --text:    #c8dce8;
-  --font-d:  'Orbitron',sans-serif;
-  --font-m:  'JetBrains Mono',monospace;
-  --font-t:  'Sarabun',sans-serif;
-  --glow-g:  0 0 24px rgba(0,255,136,.28);
-  --glow-b:  0 0 24px rgba(0,170,255,.28);
-  --glow-a:  0 0 24px rgba(255,183,0,.28);
-  --glow-r:  0 0 24px rgba(255,68,85,.28);
+/* ═══════════════════════════════════════════════
+   MOTOR × PROP LAB v5.3 — Design System
+═══════════════════════════════════════════════ */
+:root {
+  /* Surfaces */
+  --bg:      #060810;
+  --bg2:     #090c14;
+  --panel:   rgba(10,13,22,0.92);
+  --panel2:  rgba(14,18,28,0.88);
+  --border:  rgba(255,255,255,0.07);
+  --border-g: rgba(0,255,136,0.18);
+  --border-b: rgba(0,170,255,0.18);
+  --border-a: rgba(255,183,0,0.18);
+  /* Neon palette */
+  --green:  #00ff88;
+  --blue:   #3b82f6;
+  --cyan:   #00d4ff;
+  --amber:  #f59e0b;
+  --red:    #ef4444;
+  --purple: #8b5cf6;
+  /* Text */
+  --text:   #e2e8f0;
+  --text2:  #94a3b8;
+  --muted:  #475569;
+  /* Fonts */
+  --fs: 'DM Sans', system-ui, sans-serif;
+  --fm: 'DM Mono', 'JetBrains Mono', monospace;
+  /* Glows */
+  --glow-g: 0 0 20px rgba(0,255,136,.25), 0 0 60px rgba(0,255,136,.07);
+  --glow-b: 0 0 20px rgba(59,130,246,.25);
+  --glow-a: 0 0 20px rgba(245,158,11,.25);
+  --glow-r: 0 0 20px rgba(239,68,68,.25);
+  /* Radius */
+  --r:  10px;
+  --r2: 14px;
+  --r3: 18px;
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{overflow-x:hidden}
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:var(--font-t);
-  font-size:14px;
-  min-height:100vh;
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html,body { overflow-x:hidden; }
+body {
+  font-family: var(--fs);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
-/* ── Scanline BG ── */
-body::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background:repeating-linear-gradient(
-    0deg,transparent,transparent 2px,rgba(0,255,136,.012) 2px,rgba(0,255,136,.012) 4px
-  );
-}
-/* ambient glow */
-body::after{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+/* Background */
+body::before {
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
   background:
-    radial-gradient(ellipse 60% 40% at 20% 10%, rgba(0,255,136,.04) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 30% at 80% 80%, rgba(0,170,255,.04) 0%, transparent 70%);
+    radial-gradient(ellipse 70% 50% at 5% 0%, rgba(0,255,136,.055) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 95% 90%, rgba(59,130,246,.05) 0%, transparent 55%),
+    linear-gradient(160deg, #060810 0%, #08090f 100%);
+}
+body::after {
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image: radial-gradient(circle at 1px 1px, rgba(0,255,136,.022) 1px, transparent 0);
+  background-size: 32px 32px;
 }
 
-/* ── PAGE WRAPPER ── */
-.page{position:relative;z-index:1;max-width:1380px;margin:0 auto;padding:72px 16px 60px;}
+/* ── Layout ──────────────────────────────────── */
+.page { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:72px 16px 60px; }
 
-/* ═══════════════════════════════════════════════════════════
-   HERO HEADER
-═══════════════════════════════════════════════════════════ */
-.mc-hero{
-  padding:32px 0 24px;
-  display:flex;align-items:flex-end;justify-content:space-between;gap:20px;
-  border-bottom:1px solid var(--border);
-  flex-wrap:wrap;
+/* Header */
+.lab-header {
+  padding: 28px 0 22px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-end; justify-content: space-between; gap:16px; flex-wrap:wrap;
 }
-.mc-hero-left{}
-.mc-eyebrow{
-  font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.18em;
-  color:var(--green);text-transform:uppercase;
-  display:flex;align-items:center;gap:8px;margin-bottom:10px;
+.lab-eyebrow {
+  font-family:var(--fm); font-size:10px; letter-spacing:.16em; font-weight:600;
+  color:var(--green); text-transform:uppercase; display:flex; align-items:center; gap:8px; margin-bottom:10px;
 }
-.mc-eyebrow-dot{
-  width:6px;height:6px;border-radius:50%;background:var(--green);
-  box-shadow:var(--glow-g);
-  animation:dotPulse 2s ease-in-out infinite;
+.lab-dot {
+  width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:var(--glow-g);
+  animation: dotPulse 2s ease-in-out infinite;
 }
-@keyframes dotPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
-.mc-title{
-  font-family:var(--font-d);font-size:clamp(22px,3.5vw,40px);
-  font-weight:900;letter-spacing:.04em;line-height:1.1;
-  color:#fff;
+@keyframes dotPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.65)} }
+.lab-title {
+  font-family:var(--fs); font-size:clamp(24px,3.5vw,42px); font-weight:800; letter-spacing:-.02em;
+  color:#fff; line-height:1.1;
 }
-.mc-title span{color:var(--green);text-shadow:var(--glow-g);}
-.mc-subtitle{
-  margin-top:8px;font-size:13px;color:var(--muted);line-height:1.6;
+.lab-title em { color:var(--green); font-style:normal; }
+.lab-sub { font-size:13px; color:var(--text2); margin-top:7px; line-height:1.65; max-width:480px; }
+.lab-badges { display:flex; gap:7px; flex-wrap:wrap; margin-top:12px; }
+.lbadge {
+  font-family:var(--fm); font-size:10px; font-weight:600; letter-spacing:.06em;
+  padding:3px 11px; border-radius:100px; border:1px solid;
 }
-.mc-hero-badges{
-  display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;
+.lbadge.g { color:var(--green); border-color:rgba(0,255,136,.25); background:rgba(0,255,136,.06); }
+.lbadge.b { color:var(--cyan);  border-color:rgba(0,212,255,.25); background:rgba(0,212,255,.06); }
+.lbadge.a { color:var(--amber); border-color:rgba(245,158,11,.25); background:rgba(245,158,11,.06); }
+.lbadge.p { color:var(--purple); border-color:rgba(139,92,246,.25); background:rgba(139,92,246,.06); }
+.back-btn {
+  display:inline-flex; align-items:center; gap:7px;
+  font-family:var(--fm); font-size:10px; font-weight:600; letter-spacing:.08em;
+  color:var(--muted); text-decoration:none;
+  border:1px solid rgba(255,255,255,.1); border-radius:8px; padding:8px 14px;
+  transition:.18s; white-space:nowrap;
 }
-.mc-badge{
-  font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.1em;
-  padding:4px 12px;border-radius:100px;
-  border:1px solid;
-}
-.mc-badge.g{color:var(--green);border-color:rgba(0,255,136,.25);background:rgba(0,255,136,.06);}
-.mc-badge.b{color:var(--blue);border-color:rgba(0,170,255,.25);background:rgba(0,170,255,.06);}
-.mc-badge.a{color:var(--amber);border-color:rgba(255,183,0,.25);background:rgba(255,183,0,.06);}
+.back-btn:hover { color:var(--text); border-color:rgba(255,255,255,.2); }
 
-.mc-hero-back a{
-  display:inline-flex;align-items:center;gap:7px;
-  font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.12em;
-  color:var(--muted);text-decoration:none;
-  border:1px solid var(--muted2);border-radius:7px;padding:8px 14px;
-  transition:.18s;
-}
-.mc-hero-back a:hover{color:var(--text);border-color:rgba(255,255,255,.15);}
-.mc-hero-back a svg{width:13px;height:13px;}
-
-/* ═══════════════════════════════════════════════════════════
-   MAIN LAYOUT — 3-column on desktop
-═══════════════════════════════════════════════════════════ */
-.mc-layout{
+/* ── Grid layout ─────────────────────────────── */
+.lab-grid {
   display:grid;
-  grid-template-columns:320px 1fr 280px;
-  gap:18px;
-  margin-top:22px;
-  align-items:start;
+  grid-template-columns: 300px 1fr;
+  gap: 16px;
+  margin-top: 20px;
+  align-items: start;
 }
-@media(max-width:1100px){
-  .mc-layout{grid-template-columns:300px 1fr;}
-  .mc-col-right{grid-column:1/-1;}
-}
-@media(max-width:720px){
-  .mc-layout{grid-template-columns:1fr;}
-}
+@media(max-width:960px) { .lab-grid { grid-template-columns:1fr; } }
 
-/* ── Panel base ── */
-.mc-panel{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:14px;
-  overflow:hidden;
-  position:relative;
+/* ── Panel base ──────────────────────────────── */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: border-color .2s;
 }
-.mc-panel::before{
-  content:'';position:absolute;inset:0;pointer-events:none;border-radius:14px;
-  background:linear-gradient(135deg,rgba(0,255,136,.025) 0%,transparent 60%);
+.card:hover { border-color: rgba(255,255,255,.12); }
+.card-hd {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap:10px;
+  background: rgba(255,255,255,.02);
 }
-.mc-panel-hd{
-  padding:13px 16px 11px;
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  gap:10px;
+.card-title {
+  font-family:var(--fs); font-size:12px; font-weight:700; letter-spacing:.04em;
+  color:var(--text); text-transform:uppercase;
+  display:flex; align-items:center; gap:7px;
 }
-.mc-panel-title{
-  font-family:var(--font-d);font-size:9.5px;font-weight:700;letter-spacing:.15em;
-  color:var(--green);text-transform:uppercase;
-  display:flex;align-items:center;gap:7px;
+.card-title-icon { font-size:14px; }
+.card-badge-pill {
+  font-family:var(--fm); font-size:9px; font-weight:600; letter-spacing:.08em;
+  padding:2px 9px; border-radius:100px; border:1px solid;
 }
-.mc-panel-title svg{width:12px;height:12px;}
-.mc-panel-body{padding:16px;}
+.card-body { padding:16px; }
 
-/* ═══════════════════════════════════════════════════════════
-   COLUMN LEFT — INPUTS
-═══════════════════════════════════════════════════════════ */
-.mp-field{margin-bottom:16px;}
-.mp-field-label{
-  font-family:var(--font-d);font-size:8.5px;letter-spacing:.12em;font-weight:700;
-  color:var(--muted);text-transform:uppercase;
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:7px;
+/* ── LEFT COLUMN: Inputs ─────────────────────── */
+
+/* Preset grid */
+.preset-grid {
+  display: grid; grid-template-columns: repeat(4,1fr); gap:6px; margin-bottom:4px;
 }
-.mp-field-label span.val{
-  color:var(--green);font-size:11px;letter-spacing:.05em;
-  font-family:var(--font-m);
+.preset-btn {
+  padding:8px 4px; border-radius:9px; border:1px solid var(--border);
+  background:none; cursor:pointer; text-align:center; transition:.18s;
+  display:flex; flex-direction:column; align-items:center; gap:2px;
 }
+.preset-btn:hover { border-color:rgba(0,255,136,.3); background:rgba(0,255,136,.04); }
+.preset-btn.active { border-color:var(--green); background:rgba(0,255,136,.09); box-shadow:var(--glow-g); }
+.pb-size { font-family:var(--fm); font-size:13px; font-weight:700; color:var(--text); }
+.pb-name { font-family:var(--fs); font-size:9px; font-weight:600; letter-spacing:.05em; color:var(--muted); text-transform:uppercase; }
+.preset-btn.active .pb-name { color:var(--green); }
+
+/* Field */
+.mp-field { margin-bottom:14px; }
+.mp-field:last-child { margin-bottom:0; }
+.mp-label {
+  font-family:var(--fs); font-size:10px; font-weight:700; letter-spacing:.05em;
+  color:var(--text2); text-transform:uppercase;
+  display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;
+}
+.mp-label .lval { font-family:var(--fm); font-size:12px; color:var(--green); letter-spacing:.03em; }
 
 /* Slider */
-.mp-slider-wrap{position:relative;}
-input[type=range]{
-  -webkit-appearance:none;appearance:none;
-  width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;
-  background:var(--muted2);
-  transition:background .15s;
+input[type=range] {
+  -webkit-appearance:none; appearance:none;
+  width:100%; height:3px; border-radius:2px; outline:none; cursor:pointer;
+  background:rgba(255,255,255,.08);
+  position:relative;
 }
-input[type=range]::-webkit-slider-thumb{
+input[type=range]::-webkit-slider-thumb {
   -webkit-appearance:none;
-  width:16px;height:16px;border-radius:50%;
-  background:var(--green);box-shadow:var(--glow-g);
-  border:2px solid var(--bg);
-  cursor:pointer;transition:transform .15s;
+  width:16px; height:16px; border-radius:50%;
+  background:var(--green); box-shadow:0 0 8px rgba(0,255,136,.5);
+  border:2px solid var(--bg); cursor:pointer; transition:transform .15s;
 }
-input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.2);}
-input[type=range]::-moz-range-thumb{
-  width:16px;height:16px;border-radius:50%;
-  background:var(--green);box-shadow:var(--glow-g);
-  border:2px solid var(--bg);cursor:pointer;
+input[type=range]:hover::-webkit-slider-thumb { transform:scale(1.2); }
+input[type=range]::-moz-range-thumb {
+  width:15px; height:15px; border-radius:50%; border:2px solid var(--bg);
+  background:var(--green); cursor:pointer;
 }
-.slider-track-fill{
-  position:absolute;left:0;top:50%;height:4px;
-  background:linear-gradient(90deg,var(--green),var(--blue));
-  border-radius:2px;transform:translateY(-50%);
-  pointer-events:none;transition:width .1s;
+.slider-wrap { position:relative; }
+.slider-track { position:absolute; left:0; top:50%; height:3px; border-radius:2px; transform:translateY(-50%); pointer-events:none; transition:width .08s; background:linear-gradient(90deg,var(--green),var(--cyan)); }
+
+/* Number input */
+.num-input {
+  width:100%; background:rgba(255,255,255,.05); border:1px solid var(--border);
+  border-radius:8px; padding:8px 12px; color:var(--text); font-family:var(--fm);
+  font-size:14px; outline:none; transition:border-color .18s;
+}
+.num-input:focus { border-color:rgba(0,255,136,.4); background:rgba(0,255,136,.04); }
+
+/* Segment */
+.seg { display:flex; gap:0; border-radius:9px; overflow:hidden; border:1px solid var(--border); }
+.seg-btn {
+  flex:1; padding:7px 4px; background:none; border:none; cursor:pointer;
+  font-family:var(--fs); font-size:11px; font-weight:600; color:var(--muted);
+  transition:.18s; text-align:center;
+}
+.seg-btn:hover { color:var(--text); background:rgba(255,255,255,.05); }
+.seg-btn.active { background:rgba(0,255,136,.12); color:var(--green); }
+
+/* ── RIGHT COLUMN: Dashboard ─────────────────── */
+.right-col { display:flex; flex-direction:column; gap:14px; }
+
+/* KV + Stator hero cards */
+.hero-stats {
+  display: grid; grid-template-columns: repeat(3,1fr); gap:10px;
+}
+@media(max-width:500px) { .hero-stats { grid-template-columns: 1fr 1fr; } }
+.hstat {
+  background: var(--panel2); border:1px solid var(--border); border-radius:var(--r);
+  padding:12px; position:relative; overflow:hidden; transition:border-color .2s;
+}
+.hstat::after {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:var(--hstat-color, var(--green)); opacity:.7;
+}
+.hstat:hover { border-color:rgba(255,255,255,.14); }
+.hstat-label { font-family:var(--fs); font-size:9px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text2); margin-bottom:6px; }
+.hstat-val { font-family:var(--fm); font-size:18px; font-weight:700; color:var(--text); line-height:1.1; }
+.hstat-val.lg { font-size:13px; font-weight:600; }
+.hstat-sub { font-size:10px; color:var(--muted); margin-top:4px; }
+.flash-anim { animation: numFlash .28s ease; }
+@keyframes numFlash { 0%{opacity:.35;transform:scale(.94)} 100%{opacity:1;transform:scale(1)} }
+
+/* TWR ring gauge */
+.twr-wrap {
+  display:flex; align-items:center; gap:20px; padding:4px 0;
+  flex-wrap:wrap;
+}
+.twr-ring-svg { flex-shrink:0; }
+.twr-center { font-family:var(--fm); text-anchor:middle; dominant-baseline:central; }
+.twr-right { flex:1; min-width:150px; display:flex; flex-direction:column; gap:10px; }
+.twr-zone-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:var(--fm); font-size:11px; font-weight:700; letter-spacing:.06em;
+  padding:6px 14px; border-radius:100px; border:1px solid; transition:.3s;
+}
+.twr-verdict { font-size:12px; color:var(--text2); line-height:1.55; }
+
+/* Bar gauge */
+.bar-g { margin-bottom:12px; }
+.bar-g:last-child { margin-bottom:0; }
+.bar-g-hd { display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; }
+.bar-g-label { font-family:var(--fs); font-size:10px; font-weight:600; color:var(--text2); }
+.bar-g-val { font-family:var(--fm); font-size:11px; color:var(--text); }
+.bar-track { height:5px; background:rgba(255,255,255,.06); border-radius:3px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:3px; transition:width .5s cubic-bezier(.4,0,.2,1); position:relative; }
+
+/* Tip speed gauge */
+.tip-gauge-wrap { padding:4px 0; }
+.tip-gauge-track {
+  height:10px; background:linear-gradient(90deg, rgba(0,255,136,.3) 0%, rgba(0,255,136,.3) 50%, rgba(245,158,11,.4) 75%, rgba(239,68,68,.5) 100%);
+  border-radius:5px; position:relative; overflow:visible;
+}
+.tip-gauge-needle {
+  position:absolute; top:-5px; bottom:-5px; width:3px; border-radius:2px;
+  background:#fff; box-shadow:0 0 8px rgba(255,255,255,.8); transition:left .4s cubic-bezier(.4,0,.2,1);
+  transform:translateX(-50%);
+}
+.tip-gauge-labels { display:flex; justify-content:space-between; margin-top:5px; font-family:var(--fm); font-size:9px; color:var(--muted); }
+.tip-status { font-family:var(--fs); font-size:12px; font-weight:600; margin-top:8px; padding:8px 12px; border-radius:8px; border:1px solid; }
+
+/* Flight time timeline */
+.ft-timeline { display:flex; height:30px; border-radius:8px; overflow:hidden; border:1px solid var(--border); }
+.ft-seg { display:flex; align-items:center; justify-content:center; font-family:var(--fm); font-size:9px; font-weight:700; transition:width .5s cubic-bezier(.4,0,.2,1); overflow:hidden; }
+
+/* Motor DB cards */
+.mdb-card {
+  padding:10px 13px; border-radius:var(--r); border:1px solid var(--border);
+  background:var(--panel2); cursor:pointer; transition:.18s; margin-bottom:7px;
+}
+.mdb-card:hover { border-color:rgba(0,255,136,.22); background:rgba(0,255,136,.04); }
+.mdb-card.sel { border-color:var(--green); background:rgba(0,255,136,.07); box-shadow:var(--glow-g); }
+.mdb-name { font-family:var(--fm); font-size:12px; font-weight:600; color:var(--text); margin-bottom:3px; }
+.mdb-specs { font-size:11px; color:var(--text2); line-height:1.5; }
+.mdb-tag {
+  display:inline-block; font-family:var(--fs); font-size:9px; font-weight:600; letter-spacing:.05em;
+  padding:1px 7px; border-radius:100px; border:1px solid; margin-top:4px; margin-right:3px;
 }
 
-/* Segment selector */
-.mp-seg{display:flex;gap:0;border-radius:9px;overflow:hidden;border:1px solid var(--border);}
-.mp-seg-btn{
-  flex:1;padding:8px 4px;
-  font-family:var(--font-d);font-size:8px;font-weight:700;letter-spacing:.1em;
-  background:none;border:none;color:var(--muted);cursor:pointer;
-  transition:.18s;text-align:center;text-transform:uppercase;
+/* Warning / tip items */
+.warn-item {
+  display:flex; align-items:flex-start; gap:8px;
+  padding:9px 12px; border-radius:9px; border:1px solid; margin-bottom:7px;
+  font-size:12px; line-height:1.55;
 }
-.mp-seg-btn:hover{color:var(--text);background:rgba(255,255,255,.04);}
-.mp-seg-btn.active{background:rgba(0,255,136,.12);color:var(--green);}
-
-/* Quick-fill presets */
-.preset-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px;}
-.preset-btn{
-  padding:7px 4px;border-radius:8px;
-  border:1px solid var(--border);background:none;
-  font-family:var(--font-d);font-size:7.5px;font-weight:700;letter-spacing:.08em;
-  color:var(--muted);cursor:pointer;text-align:center;transition:.18s;
-}
-.preset-btn .pb-size{display:block;font-size:11px;color:var(--text);margin-bottom:2px;}
-.preset-btn:hover{border-color:rgba(0,255,136,.3);color:var(--green);background:rgba(0,255,136,.05);}
-.preset-btn.active{border-color:var(--green);color:var(--green);background:rgba(0,255,136,.1);box-shadow:var(--glow-g);}
-
-/* ═══════════════════════════════════════════════════════════
-   COLUMN MIDDLE — LIVE DASHBOARD
-═══════════════════════════════════════════════════════════ */
-
-/* ── TWR Arc Gauge ── */
-.twr-gauge-wrap{
-  display:flex;flex-direction:column;align-items:center;
-  padding:22px 16px 14px;
-  position:relative;
-}
-.twr-gauge-svg{width:200px;height:110px;overflow:visible;}
-.twr-track{fill:none;stroke:var(--muted2);stroke-width:10;stroke-linecap:round;}
-.twr-fill{
-  fill:none;stroke-width:10;stroke-linecap:round;
-  stroke:var(--green);
-  transition:stroke-dashoffset .7s cubic-bezier(.4,0,.2,1),stroke .4s;
-  filter:drop-shadow(0 0 6px var(--green));
-}
-.twr-labels{font-family:var(--font-d);font-size:9px;fill:var(--muted);}
-.twr-val{
-  font-family:var(--font-d);font-size:34px;font-weight:900;
-  fill:#fff;text-anchor:middle;dominant-baseline:central;
-}
-.twr-unit{font-family:var(--font-d);font-size:9px;fill:var(--muted);text-anchor:middle;}
-.twr-verdict{
-  margin-top:10px;font-family:var(--font-d);font-size:11px;font-weight:700;
-  letter-spacing:.1em;padding:5px 16px;border-radius:100px;
-  border:1px solid;transition:.3s;
+.tip-item {
+  padding:9px 12px; border-radius:9px; border-left:2px solid;
+  background:rgba(255,255,255,.025); margin-bottom:7px; font-size:12px; line-height:1.55;
 }
 
-/* ── Metric cards grid ── */
-.metric-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);
-  gap:10px;padding:0 16px 16px;
+/* CLI box */
+.cli-box {
+  background:rgba(0,0,0,.45); border:1px solid rgba(0,255,136,.12); border-radius:10px;
+  padding:14px; font-family:var(--fm); font-size:11.5px; line-height:1.75;
+  color:#8ecae6; overflow-x:auto; position:relative;
 }
-@media(max-width:500px){.metric-grid{grid-template-columns:repeat(2,1fr);}}
-.mc-metric{
-  background:var(--panel2);border:1px solid var(--border);
-  border-radius:11px;padding:12px;
-  position:relative;overflow:hidden;
-  transition:border-color .2s;
+.cli-c { color:rgba(0,255,136,.55); }
+.cli-k { color:var(--cyan); }
+.cli-v { color:var(--amber); }
+.cli-copy-btn {
+  position:absolute; top:10px; right:10px; font-family:var(--fs); font-size:10px; font-weight:700;
+  padding:5px 12px; border-radius:7px; border:1px solid rgba(0,255,136,.25);
+  background:rgba(0,255,136,.08); color:var(--green); cursor:pointer; transition:.18s; letter-spacing:.04em;
 }
-.mc-metric:hover{border-color:rgba(0,255,136,.2);}
-.mc-metric::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,var(--accent-col,var(--green)),transparent);
-  opacity:.6;
-}
-.mc-m-label{
-  font-family:var(--font-d);font-size:7.5px;letter-spacing:.13em;
-  color:var(--muted);text-transform:uppercase;margin-bottom:7px;
-}
-.mc-m-value{
-  font-family:var(--font-m);font-size:20px;font-weight:600;
-  color:#fff;line-height:1;
-  transition:color .3s;
-}
-.mc-m-value.flash{animation:numFlash .3s ease;}
-@keyframes numFlash{0%{opacity:.4;transform:scale(.95)}100%{opacity:1;transform:scale(1)}}
-.mc-m-unit{font-size:11px;color:var(--muted);margin-left:3px;}
-.mc-m-sub{font-size:10px;color:var(--muted);margin-top:4px;}
+.cli-copy-btn:hover { background:rgba(0,255,136,.15); border-color:rgba(0,255,136,.4); }
+.cli-copy-btn.ok { color:var(--amber); border-color:rgba(245,158,11,.3); background:rgba(245,158,11,.07); }
 
-/* ── Bar gauges ── */
-.bar-gauges{padding:0 16px 16px;}
-.bar-gauge{margin-bottom:14px;}
-.bar-gauge-hd{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-bottom:5px;
+/* Compare section */
+.cmp-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
+.cmp-label { font-size:9px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); margin-bottom:3px; }
+.cmp-select {
+  width:100%; background:var(--panel2); color:var(--text); border:1px solid var(--border);
+  border-radius:7px; padding:6px 8px; font-family:var(--fm); font-size:11px; cursor:pointer; outline:none;
 }
-.bar-gauge-label{font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--muted);}
-.bar-gauge-val{font-family:var(--font-m);font-size:11px;color:var(--text);}
-.bar-track{height:5px;background:var(--muted2);border-radius:3px;overflow:hidden;}
-.bar-fill{
-  height:100%;border-radius:3px;
-  transition:width .5s cubic-bezier(.4,0,.2,1);
-  position:relative;
+.cmp-select:focus { border-color:rgba(0,255,136,.35); }
+.cmp-result {
+  font-size:11px; color:var(--text2); line-height:1.65;
+  padding:10px 12px; background:var(--panel2); border:1px solid var(--border); border-radius:8px; min-height:55px;
 }
-.bar-fill::after{
-  content:'';position:absolute;right:0;top:0;bottom:0;width:4px;
-  background:inherit;filter:brightness(1.8);border-radius:2px;
+.cmp-btn {
+  width:100%; padding:10px; border-radius:9px; border:1px solid rgba(0,255,136,.3);
+  background:rgba(0,255,136,.07); color:var(--green); font-family:var(--fs); font-size:11px; font-weight:700;
+  cursor:pointer; transition:.18s; margin-top:10px; letter-spacing:.04em;
 }
+.cmp-btn:hover { background:rgba(0,255,136,.14); border-color:rgba(0,255,136,.45); }
 
-/* ── Prop visual diagram ── */
-.prop-diagram-wrap{
-  display:flex;justify-content:center;align-items:center;
-  padding:16px;
+/* Physics row */
+.physics-row {
+  display:grid; grid-template-columns: repeat(2,1fr); gap:8px;
 }
-.prop-svg{overflow:visible;}
-.prop-blade{
-  fill:rgba(0,255,136,.15);stroke:var(--green);stroke-width:1;
-  transform-origin:50px 50px;
-  filter:drop-shadow(0 0 4px rgba(0,255,136,.3));
-}
-.prop-hub{fill:var(--panel2);stroke:var(--green);stroke-width:1.5;}
-.prop-center{fill:var(--green);filter:drop-shadow(0 0 6px var(--green));}
-.prop-ring{fill:none;stroke:rgba(0,255,136,.15);stroke-width:1;stroke-dasharray:4 3;}
+@media(max-width:480px) { .physics-row { grid-template-columns:1fr; } }
+.prow-item { display:flex; justify-content:space-between; align-items:center; padding:7px 10px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:8px; }
+.prow-label { font-size:11px; color:var(--text2); }
+.prow-val { font-family:var(--fm); font-size:12px; font-weight:600; }
 
-/* ── CLI output ── */
-.cli-block{
-  background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:10px;
-  padding:14px;font-family:var(--font-m);font-size:11.5px;line-height:1.7;
-  color:#8dc4e0;overflow-x:auto;
-  position:relative;
-}
-.cli-comment{color:rgba(0,255,136,.5);}
-.cli-cmd{color:#c8dce8;}
-.cli-val{color:var(--amber);}
-.copy-btn{
-  position:absolute;top:10px;right:10px;
-  font-family:var(--font-d);font-size:8px;font-weight:700;letter-spacing:.1em;
-  padding:5px 12px;border-radius:6px;
-  border:1px solid rgba(0,255,136,.25);background:rgba(0,255,136,.07);
-  color:var(--green);cursor:pointer;transition:.18s;
-}
-.copy-btn:hover{background:rgba(0,255,136,.14);border-color:rgba(0,255,136,.4);}
-.copy-btn.copied{color:var(--amber);border-color:rgba(255,183,0,.3);}
+/* Scrollbar */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(255,255,255,.1); border-radius:2px; }
+::-webkit-scrollbar-thumb:hover { background:rgba(0,255,136,.25); }
 
-/* ═══════════════════════════════════════════════════════════
-   COLUMN RIGHT — Motor DB + Tips
-═══════════════════════════════════════════════════════════ */
-.motor-card{
-  padding:11px 14px;border-radius:10px;
-  border:1px solid var(--border);background:var(--panel2);
-  cursor:pointer;transition:.18s;margin-bottom:8px;
-  position:relative;
+/* Mobile */
+@media(max-width:640px) {
+  .hero-stats { grid-template-columns:repeat(2,1fr) !important; }
+  .twr-wrap { flex-direction:column; align-items:center; }
+  .physics-row { grid-template-columns:1fr !important; }
+  .preset-grid { grid-template-columns:repeat(4,1fr); }
 }
-.motor-card:hover{border-color:rgba(0,255,136,.25);background:rgba(0,255,136,.04);}
-.motor-card.selected{border-color:var(--green);background:rgba(0,255,136,.08);box-shadow:var(--glow-g);}
-.mc-name{font-family:var(--font-m);font-size:12px;font-weight:600;color:#fff;margin-bottom:4px;}
-.mc-specs{font-size:10.5px;color:var(--muted);line-height:1.6;}
-.mc-tag{
-  display:inline-block;font-family:var(--font-d);font-size:7px;letter-spacing:.08em;
-  padding:2px 7px;border-radius:100px;margin-top:5px;
-  border:1px solid;
+@media(max-width:400px) {
+  .preset-grid { grid-template-columns:repeat(2,1fr); }
 }
 
-.tip-item{
-  padding:10px 13px;border-radius:9px;
-  border-left:2px solid;background:var(--panel2);
-  margin-bottom:8px;font-size:12px;line-height:1.55;
-}
+/* Section divider */
+.section-label { font-family:var(--fs); font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid var(--border); }
 
-/* ── Warning badge ── */
-.warn-badge{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:7px 12px;border-radius:8px;
-  font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.1em;
-  margin-bottom:8px;width:100%;
+/* Toast */
+#mpToast {
+  position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+  background:rgba(0,10,20,.95); border:1px solid rgba(0,255,136,.3); border-radius:10px;
+  padding:10px 22px; font-family:var(--fs); font-size:12px; font-weight:600;
+  color:var(--green); z-index:9999; pointer-events:none;
+  opacity:0; transition:opacity .25s; white-space:nowrap;
 }
-
-/* ── Prop compare ── */
-.compare-toggle{
-  display:flex;align-items:center;gap:10px;
-  padding:11px 14px;border-radius:9px;
-  border:1px dashed rgba(0,255,136,.2);background:rgba(0,255,136,.03);
-  cursor:pointer;font-size:12px;color:var(--muted);
-  transition:.18s;margin-bottom:16px;
-}
-.compare-toggle:hover{border-color:rgba(0,255,136,.4);color:var(--text);}
-.compare-section{display:none;}
-.compare-section.open{display:block;}
-
-/* ── Flight time timeline ── */
-.flight-timeline{
-  display:flex;align-items:center;gap:0;height:28px;
-  border-radius:8px;overflow:hidden;margin:10px 0;
-  border:1px solid var(--border);
-}
-.ft-seg{height:100%;display:flex;align-items:center;justify-content:center;
-  font-family:var(--font-d);font-size:8px;font-weight:700;
-  transition:width .6s cubic-bezier(.4,0,.2,1);
-  position:relative;overflow:hidden;
-}
-.ft-label{position:relative;z-index:1;white-space:nowrap;padding:0 6px;}
-
-/* ── Responsive ── */
-@media(max-width:720px){
-  .mc-hero{padding:20px 0 18px;}
-  .twr-gauge-svg{width:160px;height:88px;}
-  .metric-grid{grid-template-columns:repeat(2,1fr);}
-  .preset-grid{grid-template-columns:repeat(4,1fr);}
-  .mc-panel-body{padding:12px;}
-}
-@media(max-width:420px){
-  .preset-grid{grid-template-columns:repeat(2,1fr);}
-  .metric-grid{grid-template-columns:1fr 1fr;}
-}
+#mpToast.show { opacity:1; }
 </style>
 </head>
 <body>
-
 {% include "partials/nav.html" %}
+<div id="mpToast"></div>
 
 <div class="page">
 
-  <!-- ── HERO ── -->
-  <div class="mc-hero">
-    <div class="mc-hero-left">
-      <div class="mc-eyebrow">
-        <span class="mc-eyebrow-dot"></span>
-        OBIX · MOTOR × PROP COMMAND CENTER
+  <!-- ══ HEADER ══ -->
+  <div class="lab-header">
+    <div>
+      <div class="lab-eyebrow">
+        <span class="lab-dot"></span>
+        OBIX · MOTOR × PROP LAB v5.3
       </div>
-      <h1 class="mc-title">
-        Motor × Prop<br>
-        <span>Analyzer</span>
-      </h1>
-      <p class="mc-subtitle">
-        วิเคราะห์ TWR · KV · สเตเตอร์ · กระแส · เวลาบิน แบบ real-time<br>
-        พร้อม Motor Database + Prop Diagram + CLI Export ครบวงจร
-      </p>
-      <div class="mc-hero-badges">
-        <span class="mc-badge g">Real-time Calc</span>
-        <span class="mc-badge b">Motor DB</span>
-        <span class="mc-badge a">CLI Ready</span>
+      <h1 class="lab-title">Motor × Prop<br><em>Analyzer</em></h1>
+      <p class="lab-sub">วิเคราะห์ TWR · KV · Tip Speed · ESC · C-Rate · เวลาบิน แบบ real-time พร้อม Motor DB 30+ ตัว + CLI Export</p>
+      <div class="lab-badges">
+        <span class="lbadge g">Live Calc</span>
+        <span class="lbadge b">Tip Speed</span>
+        <span class="lbadge a">ESC Sizing</span>
+        <span class="lbadge p">Motor DB</span>
       </div>
     </div>
-    <div class="mc-hero-back">
-      <a href="/app">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
-        กลับหน้าหลัก
-      </a>
-    </div>
+    <a class="back-btn" href="/app">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      กลับหน้าหลัก
+    </a>
   </div>
 
-  <!-- ── MAIN LAYOUT ── -->
-  <div class="mc-layout">
+  <!-- ══ MAIN GRID ══ -->
+  <div class="lab-grid">
 
-    <!-- ════════ COL LEFT: INPUTS ════════ -->
-    <div class="mc-col-left">
+    <!-- ════ LEFT: INPUTS ════ -->
+    <div class="left-col">
 
       <!-- Quick Presets -->
-      <div class="mc-panel" style="margin-bottom:14px;">
-        <div class="mc-panel-hd">
-          <div class="mc-panel-title">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
-            Quick Presets
-          </div>
-          <span style="font-size:10px;color:var(--muted);font-family:var(--font-m);">กดเลือกโดรน</span>
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-hd">
+          <div class="card-title"><span class="card-title-icon">⚡</span> Quick Presets</div>
+          <span style="font-family:var(--fm);font-size:10px;color:var(--muted);">กดเลือก</span>
         </div>
-        <div class="mc-panel-body" style="padding:12px;">
+        <div class="card-body" style="padding:12px;">
           <div class="preset-grid" id="presetGrid">
             <button class="preset-btn" data-preset="whoop">
-              <span class="pb-size">2.5"</span>WHOOP
+              <span class="pb-size">2.5"</span><span class="pb-name">Whoop</span>
             </button>
             <button class="preset-btn" data-preset="micro3">
-              <span class="pb-size">3"</span>MICRO
+              <span class="pb-size">3"</span><span class="pb-name">Micro</span>
             </button>
             <button class="preset-btn" data-preset="cine">
-              <span class="pb-size">3.5"</span>CINE
+              <span class="pb-size">3.5"</span><span class="pb-name">Cine</span>
             </button>
             <button class="preset-btn" data-preset="mini">
-              <span class="pb-size">4"</span>MINI
+              <span class="pb-size">4"</span><span class="pb-name">Mini</span>
             </button>
             <button class="preset-btn active" data-preset="freestyle5">
-              <span class="pb-size">5"</span>FREESTYLE
+              <span class="pb-size">5"</span><span class="pb-name">Freestyle</span>
             </button>
             <button class="preset-btn" data-preset="heavy6">
-              <span class="pb-size">6"</span>HEAVY
+              <span class="pb-size">6"</span><span class="pb-name">Heavy</span>
             </button>
             <button class="preset-btn" data-preset="lr7">
-              <span class="pb-size">7"</span>LONG RNG
+              <span class="pb-size">7"</span><span class="pb-name">Long Rng</span>
             </button>
             <button class="preset-btn" data-preset="lr10">
-              <span class="pb-size">10"</span>ULTRA LR
+              <span class="pb-size">10"</span><span class="pb-name">Ultra LR</span>
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Main Inputs -->
-      <div class="mc-panel">
-        <div class="mc-panel-hd">
-          <div class="mc-panel-title">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
-            Mission Parameters
-          </div>
+      <!-- Mission Parameters -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title"><span class="card-title-icon">🎛️</span> Mission Parameters</div>
         </div>
-        <div class="mc-panel-body">
+        <div class="card-body">
 
-          <!-- Drone Size -->
+          <!-- Frame size -->
           <div class="mp-field">
-            <div class="mp-field-label">
-              ขนาดโดรน (frame)
-              <span class="val" id="v_size">5.0"</span>
-            </div>
-            <div class="mp-slider-wrap">
+            <div class="mp-label">ขนาดเฟรม<span class="lval" id="v_size">5.0"</span></div>
+            <div class="slider-wrap">
               <input type="range" id="s_size" min="2" max="10" step="0.5" value="5">
-              <div class="slider-track-fill" id="tf_size"></div>
+              <div class="slider-track" id="tf_size"></div>
             </div>
           </div>
 
-          <!-- Weight -->
+          <!-- AUW -->
           <div class="mp-field">
-            <div class="mp-field-label">
-              น้ำหนักบินจริง (AUW)
-              <span class="val" id="v_weight">750 g</span>
-            </div>
-            <div class="mp-slider-wrap">
-              <input type="range" id="s_weight" min="50" max="2000" step="10" value="750">
-              <div class="slider-track-fill" id="tf_weight"></div>
+            <div class="mp-label">น้ำหนัก AUW<span class="lval" id="v_weight">750 g</span></div>
+            <div class="slider-wrap">
+              <input type="range" id="s_weight" min="50" max="3000" step="10" value="750">
+              <div class="slider-track" id="tf_weight"></div>
             </div>
           </div>
 
-          <!-- Battery -->
+          <!-- Battery S -->
           <div class="mp-field">
-            <div class="mp-field-label">
-              Battery
-              <span class="val" id="v_battery">4S</span>
-            </div>
-            <div class="mp-seg" id="seg_battery">
-              <button class="mp-seg-btn" data-val="3">3S</button>
-              <button class="mp-seg-btn active" data-val="4">4S</button>
-              <button class="mp-seg-btn" data-val="5">5S</button>
-              <button class="mp-seg-btn" data-val="6">6S</button>
-              <button class="mp-seg-btn" data-val="7">7S</button>
-              <button class="mp-seg-btn" data-val="8">8S</button>
+            <div class="mp-label">Battery<span class="lval" id="v_battery">4S</span></div>
+            <div class="seg" id="seg_battery">
+              <button class="seg-btn" data-val="1">1S</button>
+              <button class="seg-btn" data-val="2">2S</button>
+              <button class="seg-btn" data-val="3">3S</button>
+              <button class="seg-btn active" data-val="4">4S</button>
+              <button class="seg-btn" data-val="5">5S</button>
+              <button class="seg-btn" data-val="6">6S</button>
+              <button class="seg-btn" data-val="7">7S</button>
+              <button class="seg-btn" data-val="8">8S</button>
             </div>
           </div>
 
           <!-- mAh -->
           <div class="mp-field">
-            <div class="mp-field-label">
-              Capacity (mAh)
-              <span class="val" id="v_mah">1500 mAh</span>
+            <div class="mp-label">Capacity<span class="lval" id="v_mah">1500 mAh</span></div>
+            <div class="slider-wrap">
+              <input type="range" id="s_mah" min="250" max="8000" step="50" value="1500">
+              <div class="slider-track" id="tf_mah"></div>
             </div>
-            <div class="mp-slider-wrap">
-              <input type="range" id="s_mah" min="250" max="6000" step="50" value="1500">
-              <div class="slider-track-fill" id="tf_mah"></div>
+          </div>
+
+          <!-- Motor KV -->
+          <div class="mp-field">
+            <div class="mp-label">Motor KV <span style="font-size:9px;font-weight:400;color:var(--muted);">(สำคัญ — คำนวณ Tip Speed)</span><span class="lval" id="v_kv">2306 KV</span></div>
+            <div class="slider-wrap">
+              <input type="range" id="s_kv" min="500" max="20000" step="50" value="2306">
+              <div class="slider-track" id="tf_kv"></div>
             </div>
           </div>
 
           <!-- Prop Size -->
           <div class="mp-field">
-            <div class="mp-field-label">
-              ขนาดใบพัด (prop)
-              <span class="val" id="v_prop">5.0"</span>
-            </div>
-            <div class="mp-slider-wrap">
-              <input type="range" id="s_prop" min="2" max="10" step="0.5" value="5">
-              <div class="slider-track-fill" id="tf_prop"></div>
+            <div class="mp-label">Prop Size<span class="lval" id="v_prop">5.0"</span></div>
+            <div class="slider-wrap">
+              <input type="range" id="s_prop" min="2" max="12" step="0.5" value="5">
+              <div class="slider-track" id="tf_prop"></div>
             </div>
           </div>
 
           <!-- Pitch -->
           <div class="mp-field">
-            <div class="mp-field-label">
-              Pitch
-              <span class="val" id="v_pitch">4.3</span>
-            </div>
-            <div class="mp-slider-wrap">
-              <input type="range" id="s_pitch" min="2" max="7" step="0.1" value="4.3">
-              <div class="slider-track-fill" id="tf_pitch"></div>
+            <div class="mp-label">Pitch<span class="lval" id="v_pitch">4.3"</span></div>
+            <div class="slider-wrap">
+              <input type="range" id="s_pitch" min="1.5" max="7" step="0.1" value="4.3">
+              <div class="slider-track" id="tf_pitch"></div>
             </div>
           </div>
 
           <!-- Blades -->
           <div class="mp-field">
-            <div class="mp-field-label">
-              จำนวนใบ
-              <span class="val" id="v_blades">3 ใบ</span>
-            </div>
-            <div class="mp-seg" id="seg_blades">
-              <button class="mp-seg-btn" data-val="2">2 ใบ</button>
-              <button class="mp-seg-btn active" data-val="3">3 ใบ</button>
-              <button class="mp-seg-btn" data-val="4">4 ใบ</button>
+            <div class="mp-label">ใบพัด<span class="lval" id="v_blades">3 ใบ</span></div>
+            <div class="seg" id="seg_blades">
+              <button class="seg-btn" data-val="2">2 ใบ</button>
+              <button class="seg-btn active" data-val="3">3 ใบ</button>
+              <button class="seg-btn" data-val="4">4 ใบ</button>
             </div>
           </div>
 
           <!-- Style -->
           <div class="mp-field">
-            <div class="mp-field-label">สไตล์การบิน</div>
-            <div class="mp-seg" id="seg_style">
-              <button class="mp-seg-btn active" data-val="freestyle">FREE</button>
-              <button class="mp-seg-btn" data-val="racing">RACE</button>
-              <button class="mp-seg-btn" data-val="longrange">LR</button>
-              <button class="mp-seg-btn" data-val="cinematic">CINE</button>
+            <div class="mp-label">สไตล์การบิน</div>
+            <div class="seg" id="seg_style">
+              <button class="seg-btn active" data-val="freestyle">FREE</button>
+              <button class="seg-btn" data-val="racing">RACE</button>
+              <button class="seg-btn" data-val="longrange">LR</button>
+              <button class="seg-btn" data-val="cinematic">CINE</button>
             </div>
           </div>
 
           <!-- Motor count -->
           <div class="mp-field" style="margin-bottom:0;">
-            <div class="mp-field-label">
-              จำนวนมอเตอร์
-              <span class="val" id="v_motors">4 ตัว</span>
-            </div>
-            <div class="mp-seg" id="seg_motors">
-              <button class="mp-seg-btn" data-val="2">2</button>
-              <button class="mp-seg-btn active" data-val="4">4</button>
-              <button class="mp-seg-btn" data-val="6">6</button>
-              <button class="mp-seg-btn" data-val="8">8</button>
+            <div class="mp-label">มอเตอร์<span class="lval" id="v_motors">4 ตัว</span></div>
+            <div class="seg" id="seg_motors">
+              <button class="seg-btn" data-val="2">2</button>
+              <button class="seg-btn active" data-val="4">4</button>
+              <button class="seg-btn" data-val="6">6</button>
+              <button class="seg-btn" data-val="8">8</button>
             </div>
           </div>
 
@@ -626,805 +574,871 @@ input[type=range]::-moz-range-thumb{
       </div>
     </div>
 
-    <!-- ════════ COL MIDDLE: LIVE DASHBOARD ════════ -->
-    <div class="mc-col-mid">
+    <!-- ════ RIGHT: DASHBOARD ════ -->
+    <div class="right-col">
 
-      <!-- TWR Gauge Panel -->
-      <div class="mc-panel" style="margin-bottom:14px;">
-        <div class="mc-panel-hd">
-          <div class="mc-panel-title">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 14 L8 2 M4 6 L8 2 L12 6"/></svg>
-            Thrust-to-Weight Ratio
+      <!-- ── Hero Metrics ── -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title"><span class="card-title-icon">📊</span> Live Telemetry</div>
+          <span style="font-family:var(--fm);font-size:10px;color:var(--green);animation:dotPulse 1.5s ease-in-out infinite;">● LIVE</span>
+        </div>
+        <div class="card-body">
+          <div class="hero-stats">
+            <div class="hstat" style="--hstat-color:var(--green);">
+              <div class="hstat-label">KV Range</div>
+              <div class="hstat-val" id="m_kv">—</div>
+              <div class="hstat-sub" id="m_kv_sub">—</div>
+            </div>
+            <div class="hstat" style="--hstat-color:var(--cyan);">
+              <div class="hstat-label">Stator แนะนำ</div>
+              <div class="hstat-val lg" id="m_stator">—</div>
+              <div class="hstat-sub" id="m_stator_sub">—</div>
+            </div>
+            <div class="hstat" style="--hstat-color:var(--amber);">
+              <div class="hstat-label">Hover Current</div>
+              <div class="hstat-val" id="m_current">—<span style="font-size:11px;color:var(--muted)"> A</span></div>
+              <div class="hstat-sub" id="m_current_sub">—</div>
+            </div>
+            <div class="hstat" style="--hstat-color:var(--green);">
+              <div class="hstat-label">Total Thrust</div>
+              <div class="hstat-val" id="m_thrust">—<span style="font-size:11px;color:var(--muted)"> g</span></div>
+              <div class="hstat-sub" id="m_thrust_sub">—</div>
+            </div>
+            <div class="hstat" style="--hstat-color:var(--cyan);">
+              <div class="hstat-label">เวลาบิน (avg)</div>
+              <div class="hstat-val" id="m_flight">—<span style="font-size:11px;color:var(--muted)"> min</span></div>
+              <div class="hstat-sub" id="m_flight_sub">—</div>
+            </div>
+            <div class="hstat" style="--hstat-color:var(--amber);">
+              <div class="hstat-label">Hover Power</div>
+              <div class="hstat-val" id="m_power">—<span style="font-size:11px;color:var(--muted)"> W</span></div>
+              <div class="hstat-sub" id="m_power_sub">—</div>
+            </div>
           </div>
-          <span id="twrZone" style="font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.1em;padding:3px 10px;border-radius:100px;border:1px solid;transition:.3s;">—</span>
-        </div>
 
-        <div class="twr-gauge-wrap">
-          <svg class="twr-gauge-svg" viewBox="0 0 200 110" id="twrSvg">
-            <!-- Background arc -->
-            <path class="twr-track" d="M 18 100 A 82 82 0 0 1 182 100"
-                  stroke-dasharray="258" stroke-dashoffset="0"/>
-            <!-- Zone markers -->
-            <text x="12" y="106" font-family="Orbitron,sans-serif" font-size="8" fill="#2a3f52">0</text>
-            <text x="58" y="28" font-family="Orbitron,sans-serif" font-size="8" fill="#2a3f52">1.5</text>
-            <text x="95" y="18" font-family="Orbitron,sans-serif" font-size="8" fill="#2a3f52">2.0</text>
-            <text x="135" y="28" font-family="Orbitron,sans-serif" font-size="8" fill="#2a3f52">3.0</text>
-            <text x="178" y="106" font-family="Orbitron,sans-serif" font-size="8" fill="#2a3f52">4+</text>
-            <!-- Fill arc -->
-            <path class="twr-fill" id="twrArc"
-                  d="M 18 100 A 82 82 0 0 1 182 100"
-                  stroke-dasharray="258" stroke-dashoffset="258"/>
-            <!-- Value text -->
-            <text class="twr-val" id="twrVal" x="100" y="82">0.0</text>
-            <text class="twr-unit" id="twrUnitTxt" x="100" y="97">TWR</text>
-          </svg>
-          <div class="twr-verdict" id="twrVerdict">กำลังคำนวณ...</div>
+          <!-- Physics row: Hover%, ESC, C-Rate -->
+          <div class="physics-row" style="margin-top:10px;">
+            <div class="prow-item">
+              <span class="prow-label">🕹️ Hover Throttle</span>
+              <span class="prow-val" id="m_hover_thr" style="color:var(--amber);">—</span>
+            </div>
+            <div class="prow-item">
+              <span class="prow-label">⚡ ESC แนะนำ</span>
+              <span class="prow-val" id="m_esc" style="color:var(--green);">—</span>
+            </div>
+            <div class="prow-item">
+              <span class="prow-label">🔋 C-Rate (burst)</span>
+              <span class="prow-val" id="m_cburst" style="color:var(--cyan);">—</span>
+            </div>
+            <div class="prow-item">
+              <span class="prow-label">🌀 Prop RPM</span>
+              <span class="prow-val" id="m_rpm" style="color:var(--purple);">—</span>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <!-- Prop Diagram -->
-        <div style="border-top:1px solid var(--border);padding:14px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;">
-          <div class="prop-diagram-wrap" style="padding:0;">
-            <svg class="prop-svg" id="propDiagram" width="100" height="100" viewBox="0 0 100 100">
-              <circle class="prop-ring" cx="50" cy="50" r="44"/>
-              <circle class="prop-ring" cx="50" cy="50" r="28"/>
-              <g id="propBlades"></g>
-              <circle class="prop-hub" cx="50" cy="50" r="9"/>
-              <circle class="prop-center" cx="50" cy="50" r="3.5"/>
+      <!-- ── TWR Gauge + Prop ── -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title"><span class="card-title-icon">⚖️</span> Thrust-to-Weight Ratio</div>
+          <span class="card-badge-pill" id="twrZone" style="color:var(--green);border-color:rgba(0,255,136,.25);background:rgba(0,255,136,.06);">—</span>
+        </div>
+        <div class="card-body">
+          <div class="twr-wrap">
+            <!-- SVG ring gauge -->
+            <svg class="twr-ring-svg" viewBox="0 0 180 100" width="180" height="100">
+              <!-- Track arc -->
+              <path fill="none" stroke="rgba(255,255,255,.06)" stroke-width="10" stroke-linecap="round"
+                d="M 16 90 A 74 74 0 0 1 164 90"/>
+              <!-- Color zones -->
+              <path fill="none" stroke="rgba(239,68,68,.25)" stroke-width="10"
+                stroke-dasharray="84 148" stroke-dashoffset="0" stroke-linecap="butt"
+                d="M 16 90 A 74 74 0 0 1 164 90"/>
+              <path fill="none" stroke="rgba(245,158,11,.22)" stroke-width="10"
+                stroke-dasharray="59 173" stroke-dashoffset="-84" stroke-linecap="butt"
+                d="M 16 90 A 74 74 0 0 1 164 90"/>
+              <path fill="none" stroke="rgba(0,255,136,.2)" stroke-width="10"
+                stroke-dasharray="60 172" stroke-dashoffset="-143" stroke-linecap="butt"
+                d="M 16 90 A 74 74 0 0 1 164 90"/>
+              <!-- Fill arc -->
+              <path id="twrArc" fill="none" stroke="var(--green)" stroke-width="10" stroke-linecap="round"
+                stroke-dasharray="232" stroke-dashoffset="232"
+                d="M 16 90 A 74 74 0 0 1 164 90"
+                style="transition:stroke-dashoffset .6s cubic-bezier(.4,0,.2,1),stroke .35s;filter:drop-shadow(0 0 8px var(--green))"/>
+              <!-- Labels -->
+              <text x="10" y="100" font-family="DM Mono,monospace" font-size="8" fill="#475569">0</text>
+              <text x="50" y="25" font-family="DM Mono,monospace" font-size="8" fill="#475569">1.5</text>
+              <text x="84" y="15" font-family="DM Mono,monospace" font-size="8" fill="#475569">2.5</text>
+              <text x="122" y="25" font-family="DM Mono,monospace" font-size="8" fill="#475569">4.0</text>
+              <text x="164" y="100" font-family="DM Mono,monospace" font-size="8" fill="#475569">6+</text>
+              <!-- Value -->
+              <text id="twrValTxt" class="twr-center" x="90" y="76" font-family="DM Mono,monospace" font-size="26" font-weight="700" fill="#fff">—</text>
+              <text class="twr-center" x="90" y="93" font-family="DM Sans,sans-serif" font-size="9" fill="#475569">TWR</text>
             </svg>
-          </div>
-          <div style="flex:1;min-width:150px;">
-            <div style="font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--muted);margin-bottom:10px;">PROP PHYSICS</div>
-            <div style="display:flex;flex-direction:column;gap:6px;">
-              <div style="display:flex;justify-content:space-between;font-size:11.5px;">
-                <span style="color:var(--muted);">Pitch Speed</span>
-                <span style="font-family:var(--font-m);color:var(--green);" id="pitchSpeed">—</span>
-              </div>
-              <div style="display:flex;justify-content:space-between;font-size:11.5px;">
-                <span style="color:var(--muted);">Disk Loading</span>
-                <span style="font-family:var(--font-m);color:var(--blue);" id="diskLoad">—</span>
-              </div>
-              <div style="display:flex;justify-content:space-between;font-size:11.5px;">
-                <span style="color:var(--muted);">g/W (eff)</span>
-                <span style="font-family:var(--font-m);color:var(--amber);" id="gPerW">—</span>
-              </div>
-              <div style="display:flex;justify-content:space-between;font-size:11.5px;">
-                <span style="color:var(--muted);">Pitch/Size</span>
-                <span style="font-family:var(--font-m);" id="pitchRatio">—</span>
+
+            <div class="twr-right">
+              <div class="twr-zone-badge" id="twrBadge">—</div>
+              <div class="twr-verdict" id="twrVerdict">คำนวณ...</div>
+              <!-- Prop diagram inline -->
+              <div style="display:flex;align-items:center;gap:12px;margin-top:4px;">
+                <svg id="propDiagram" width="70" height="70" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(0,255,136,.1)" stroke-width="1" stroke-dasharray="4 3"/>
+                  <circle cx="50" cy="50" r="28" fill="none" stroke="rgba(0,255,136,.07)" stroke-width="1"/>
+                  <g id="propBlades"></g>
+                  <circle cx="50" cy="50" r="9" fill="rgba(10,13,22,.9)" stroke="rgba(0,255,136,.4)" stroke-width="1.5"/>
+                  <circle cx="50" cy="50" r="3.5" fill="var(--green)" style="filter:drop-shadow(0 0 4px var(--green))"/>
+                </svg>
+                <div style="display:flex;flex-direction:column;gap:5px;font-size:11px;">
+                  <div style="display:flex;justify-content:space-between;gap:14px;"><span style="color:var(--text2);">Pitch Speed</span><span style="font-family:var(--fm);color:var(--green);" id="pitchSpeed">—</span></div>
+                  <div style="display:flex;justify-content:space-between;gap:14px;"><span style="color:var(--text2);">g/W (eff)</span><span style="font-family:var(--fm);color:var(--amber);" id="gPerW">—</span></div>
+                  <div style="display:flex;justify-content:space-between;gap:14px;"><span style="color:var(--text2);">Pitch/Size</span><span style="font-family:var(--fm);" id="pitchRatio">—</span></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Metric Cards -->
-      <div class="mc-panel" style="margin-bottom:14px;">
-        <div class="mc-panel-hd">
-          <div class="mc-panel-title">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="9" width="4" height="6" rx="1"/><rect x="6" y="5" width="4" height="10" rx="1"/><rect x="11" y="1" width="4" height="14" rx="1"/></svg>
-            Live Telemetry
-          </div>
-          <span style="font-size:9px;color:var(--green);font-family:var(--font-m);letter-spacing:.05em;animation:dotPulse 1.5s ease-in-out infinite;">● LIVE</span>
+      <!-- ── Tip Speed Gauge ── -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title"><span class="card-title-icon">🌀</span> Prop Tip Speed</div>
+          <span style="font-family:var(--fm);font-size:12px;font-weight:700;" id="tipSpeedVal">— m/s</span>
         </div>
-
-        <div class="metric-grid">
-          <div class="mc-metric" style="--accent-col:var(--green);">
-            <div class="mc-m-label">KV Range</div>
-            <div class="mc-m-value flash" id="m_kv">—</div>
-            <div class="mc-m-sub" id="m_kv_sub">—</div>
-          </div>
-          <div class="mc-metric" style="--accent-col:var(--blue);">
-            <div class="mc-m-label">Stator แนะนำ</div>
-            <div class="mc-m-value" style="font-size:13px;" id="m_stator">—</div>
-            <div class="mc-m-sub" id="m_stator_sub">—</div>
-          </div>
-          <div class="mc-metric" style="--accent-col:var(--amber);">
-            <div class="mc-m-label">กระแส (ประมาณ)</div>
-            <div class="mc-m-value" id="m_current">—<span class="mc-m-unit">A</span></div>
-            <div class="mc-m-sub" id="m_current_sub">—</div>
-          </div>
-          <div class="mc-metric" style="--accent-col:var(--green);">
-            <div class="mc-m-label">Thrust รวม</div>
-            <div class="mc-m-value" id="m_thrust">—<span class="mc-m-unit">g</span></div>
-            <div class="mc-m-sub" id="m_thrust_sub">—</div>
-          </div>
-          <div class="mc-metric" style="--accent-col:#00ddaa;">
-            <div class="mc-m-label">เวลาบิน (ประมาณ)</div>
-            <div class="mc-m-value" id="m_flight">—<span class="mc-m-unit">min</span></div>
-            <div class="mc-m-sub" id="m_flight_sub">—</div>
-          </div>
-          <div class="mc-metric" style="--accent-col:var(--amber);">
-            <div class="mc-m-label">กำลังบิน (ประมาณ)</div>
-            <div class="mc-m-value" id="m_power">—<span class="mc-m-unit">W</span></div>
-            <div class="mc-m-sub" id="m_power_sub">—</div>
-          </div>
-        </div>
-
-        <!-- Bar Gauges -->
-        <div class="bar-gauges">
-          <div class="bar-gauge">
-            <div class="bar-gauge-hd">
-              <span class="bar-gauge-label">⚡ Motor Load</span>
-              <span class="bar-gauge-val" id="bg_load_val">—</span>
+        <div class="card-body">
+          <div class="tip-gauge-wrap">
+            <div class="tip-gauge-track" id="tipTrack">
+              <div class="tip-gauge-needle" id="tipNeedle" style="left:10%;"></div>
             </div>
-            <div class="bar-track">
-              <div class="bar-fill" id="bg_load" style="width:0%;background:linear-gradient(90deg,var(--green),var(--amber));"></div>
+            <div class="tip-gauge-labels">
+              <span>0</span><span>100</span><span style="color:var(--amber);">265</span><span style="color:var(--red);">290</span><span>350 m/s</span>
             </div>
           </div>
-          <div class="bar-gauge">
-            <div class="bar-gauge-hd">
-              <span class="bar-gauge-label">🔊 Noise Level</span>
-              <span class="bar-gauge-val" id="bg_noise_val">—</span>
-            </div>
-            <div class="bar-track">
-              <div class="bar-fill" id="bg_noise" style="width:0%;background:linear-gradient(90deg,var(--blue),var(--red));"></div>
-            </div>
-          </div>
-          <div class="bar-gauge">
-            <div class="bar-gauge-hd">
-              <span class="bar-gauge-label">🌡️ Motor Heat Index</span>
-              <span class="bar-gauge-val" id="bg_heat_val">—</span>
-            </div>
-            <div class="bar-track">
-              <div class="bar-fill" id="bg_heat" style="width:0%;background:linear-gradient(90deg,#00aaff,#ffb700,#ff4455);"></div>
-            </div>
-          </div>
-          <div class="bar-gauge" style="margin-bottom:0;">
-            <div class="bar-gauge-hd">
-              <span class="bar-gauge-label">⚙️ Efficiency (g/W)</span>
-              <span class="bar-gauge-val" id="bg_eff_val">—</span>
-            </div>
-            <div class="bar-track">
-              <div class="bar-fill" id="bg_eff" style="width:0%;background:linear-gradient(90deg,var(--amber),var(--green));"></div>
-            </div>
+          <div class="tip-status" id="tipStatus" style="color:var(--muted);border-color:var(--border);background:rgba(255,255,255,.02);">
+            กรอก Motor KV เพื่อคำนวณ Tip Speed
           </div>
         </div>
       </div>
 
-      <!-- Flight Time Timeline -->
-      <div class="mc-panel" style="margin-bottom:14px;">
-        <div class="mc-panel-hd">
-          <div class="mc-panel-title">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"/><path d="M8 5v4l2.5 1.5"/></svg>
-            Flight Time Breakdown
+      <!-- ── Bar Gauges ── -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title"><span class="card-title-icon">📈</span> Build Health</div>
+        </div>
+        <div class="card-body">
+          <div class="bar-g">
+            <div class="bar-g-hd"><span class="bar-g-label">⚡ Motor Load</span><span class="bar-g-val" id="bg_load_v">—</span></div>
+            <div class="bar-track"><div class="bar-fill" id="bg_load" style="width:0%;background:linear-gradient(90deg,var(--green),var(--amber));"></div></div>
+          </div>
+          <div class="bar-g">
+            <div class="bar-g-hd"><span class="bar-g-label">🔊 Noise Level</span><span class="bar-g-val" id="bg_noise_v">—</span></div>
+            <div class="bar-track"><div class="bar-fill" id="bg_noise" style="width:0%;background:linear-gradient(90deg,var(--cyan),var(--red));"></div></div>
+          </div>
+          <div class="bar-g">
+            <div class="bar-g-hd"><span class="bar-g-label">🌡️ Motor Heat Index</span><span class="bar-g-val" id="bg_heat_v">—</span></div>
+            <div class="bar-track"><div class="bar-fill" id="bg_heat" style="width:0%;background:linear-gradient(90deg,#00aaff,var(--amber),var(--red));"></div></div>
+          </div>
+          <div class="bar-g" style="margin-bottom:0;">
+            <div class="bar-g-hd"><span class="bar-g-label">⚙️ Efficiency (g/W)</span><span class="bar-g-val" id="bg_eff_v">—</span></div>
+            <div class="bar-track"><div class="bar-fill" id="bg_eff" style="width:0%;background:linear-gradient(90deg,var(--amber),var(--green));"></div></div>
           </div>
         </div>
-        <div class="mc-panel-body">
-          <div class="flight-timeline" id="flightTimeline">
-            <div class="ft-seg" id="ft_cruise" style="background:rgba(0,255,136,.18);color:var(--green);width:50%">
-              <span class="ft-label" id="ft_cruise_lbl">Cruise</span>
+      </div>
+
+      <!-- ── Flight Time Timeline ── -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title"><span class="card-title-icon">⏱️</span> Flight Time Breakdown</div>
+          <span style="font-family:var(--fm);font-size:12px;font-weight:700;color:var(--green);" id="ft_total">— min</span>
+        </div>
+        <div class="card-body">
+          <div class="ft-timeline">
+            <div class="ft-seg" id="ft_cruise" style="background:rgba(0,255,136,.15);color:var(--green);width:55%;min-width:0;">
+              <span id="ft_cruise_lbl" style="padding:0 6px;font-size:9px;">Cruise</span>
             </div>
-            <div class="ft-seg" id="ft_punch" style="background:rgba(255,183,0,.18);color:var(--amber);width:30%">
-              <span class="ft-label" id="ft_punch_lbl">Punch</span>
+            <div class="ft-seg" id="ft_punch" style="background:rgba(245,158,11,.15);color:var(--amber);width:30%;min-width:0;">
+              <span id="ft_punch_lbl" style="padding:0 6px;font-size:9px;">Punch</span>
             </div>
-            <div class="ft-seg" id="ft_reserve" style="background:rgba(255,68,85,.18);color:var(--red);width:20%">
-              <span class="ft-label" id="ft_reserve_lbl">Reserve</span>
+            <div class="ft-seg" id="ft_reserve" style="background:rgba(239,68,68,.15);color:var(--red);width:15%;min-width:0;">
+              <span id="ft_reserve_lbl" style="padding:0 6px;font-size:9px;">Rsrv</span>
             </div>
           </div>
-          <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:6px;">
-            <span>0 min</span>
-            <span id="ft_total_lbl" style="color:var(--text);font-family:var(--font-m);">— min total</span>
+          <div style="display:flex;justify-content:space-between;font-family:var(--fm);font-size:9px;color:var(--muted);margin-top:5px;">
+            <span>0 min</span><span id="ft_aggr_lbl" style="color:var(--text2);">Aggressive: —</span>
           </div>
           <div id="warningArea" style="margin-top:10px;"></div>
         </div>
       </div>
 
-      <!-- CLI Export -->
-      <div class="mc-panel">
-        <div class="mc-panel-hd">
-          <div class="mc-panel-title">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="14" height="10" rx="2"/><path d="M5 7l2 2-2 2M9 11h2"/></svg>
-            CLI Export
-          </div>
+      <!-- ── CLI Export ── -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title"><span class="card-title-icon">💻</span> Betaflight CLI</div>
         </div>
-        <div class="mc-panel-body">
-          <div class="cli-block" id="cliBlock">
-            <span class="cli-comment" id="cli_line1"># ...</span><br>
-            <span id="cli_line2"></span><br>
-            <span id="cli_line3"></span><br>
-            <span id="cli_line4"></span><br>
-            <span id="cli_line5"></span><br>
-            <span id="cli_line6"></span><br>
-            <span class="cli-comment"># ──────────────────</span><br>
-            <span id="cli_line7"></span><br>
-            <span id="cli_line8"></span><br>
-            <span class="cli-cmd">save</span>
-            <button class="copy-btn" id="copyCliBtn" onclick="copyCLI()">📋 COPY</button>
+        <div class="card-body">
+          <div class="cli-box" id="cliBox">
+            <span id="cli_c1" class="cli-c"># ...</span><br>
+            <span id="cli_c2" class="cli-c"></span><br>
+            <span id="cli_c3" class="cli-c"></span><br>
+            <span id="cli_c4" class="cli-c"></span><br>
+            <span class="cli-c"># ─────────────────────────────</span><br>
+            <span id="cli_1"></span><br>
+            <span id="cli_2"></span><br>
+            <span id="cli_3"></span><br>
+            <span id="cli_4"></span><br>
+            <span id="cli_5"></span><br>
+            <span id="cli_6"></span><br>
+            <span class="cli-k">save</span>
+            <button class="cli-copy-btn" id="cliCopyBtn" onclick="copyCLI()">📋 COPY</button>
           </div>
         </div>
       </div>
 
-    </div>
+      <!-- 2-col: Motor DB + Tips -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
 
-    <!-- ════════ COL RIGHT: MOTOR DB + TIPS ════════ -->
-    <div class="mc-col-right">
-
-      <!-- Motor Recommendation DB -->
-      <div class="mc-panel" style="margin-bottom:14px;">
-        <div class="mc-panel-hd">
-          <div class="mc-panel-title">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="2"/></svg>
-            Motor Database
+        <!-- Motor DB -->
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-title"><span class="card-title-icon">🔩</span> Motor DB</div>
+            <span id="motorCount" style="font-family:var(--fm);font-size:10px;color:var(--muted);"></span>
           </div>
-          <span id="motorMatchCount" style="font-family:var(--font-d);font-size:8px;color:var(--muted);"></span>
+          <div class="card-body" id="motorList" style="max-height:320px;overflow-y:auto;padding:12px;">
+            <!-- Populated by JS -->
+          </div>
         </div>
-        <div class="mc-panel-body" style="max-height:360px;overflow-y:auto;" id="motorList">
-          <!-- Populated by JS -->
+
+        <!-- Tips + Warnings -->
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-title"><span class="card-title-icon">💡</span> Analysis</div>
+          </div>
+          <div class="card-body" id="tipsArea" style="max-height:320px;overflow-y:auto;padding:12px;">
+            <!-- Populated by JS -->
+          </div>
         </div>
+
       </div>
 
-      <!-- Recommendation Tips -->
-      <div class="mc-panel" style="margin-bottom:14px;">
-        <div class="mc-panel-hd">
-          <div class="mc-panel-title">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="6" r="4"/><path d="M8 10v4M6 14h4"/></svg>
-            Analysis & Tips
-          </div>
+      <!-- ── Prop A vs B Compare ── -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title"><span class="card-title-icon">↔️</span> Prop A vs B Compare</div>
         </div>
-        <div class="mc-panel-body" id="tipsArea">
-          <!-- Populated by JS -->
-        </div>
-      </div>
+        <div class="card-body">
+          <div style="font-family:var(--fm);font-size:10px;letter-spacing:.08em;color:var(--green);margin-bottom:6px;">CONFIG A (ค่าปัจจุบัน)</div>
+          <div style="font-family:var(--fm);font-size:11px;padding:8px 10px;background:rgba(0,255,136,.05);border:1px solid rgba(0,255,136,.1);border-radius:7px;margin-bottom:12px;" id="compareA">—</div>
 
-      <!-- Prop Compare -->
-      <div class="mc-panel">
-        <div class="mc-panel-hd">
-          <div class="mc-panel-title">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M8 3v10"/></svg>
-            Prop A vs B Compare
-          </div>
-        </div>
-        <div class="mc-panel-body">
-          <p style="font-size:11.5px;color:var(--muted);margin-bottom:12px;line-height:1.6;">
-            เปรียบเทียบ 2 ชุด Prop แบบ side-by-side
-          </p>
-
-          <!-- A = ค่าปัจจุบัน -->
-          <div style="margin-bottom:10px;">
-            <div style="font-family:var(--font-d);font-size:8px;letter-spacing:.12em;color:var(--green);margin-bottom:6px;">CONFIG A (ปัจจุบัน)</div>
-            <div style="font-family:var(--font-m);font-size:11px;color:var(--text);padding:8px;background:rgba(0,255,136,.05);border:1px solid rgba(0,255,136,.12);border-radius:7px;" id="compareA">—</div>
-          </div>
-
-          <!-- B = ปรับเองได้ -->
-          <div style="margin-bottom:12px;">
-            <div style="font-family:var(--font-d);font-size:8px;letter-spacing:.12em;color:var(--amber);margin-bottom:6px;">CONFIG B (เปรียบเทียบ)</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
-              <div>
-                <div style="font-size:9px;color:var(--muted);margin-bottom:3px;">Prop Size</div>
-                <select id="cmp_prop" style="width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 7px;font-family:var(--font-m);font-size:11px;">
-                  <option value="4">4"</option><option value="4.5">4.5"</option>
-                  <option value="5" selected>5"</option><option value="5.5">5.5"</option>
-                  <option value="6">6"</option><option value="7">7"</option>
-                </select>
-              </div>
-              <div>
-                <div style="font-size:9px;color:var(--muted);margin-bottom:3px;">Blades</div>
-                <select id="cmp_blades" style="width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 7px;font-family:var(--font-m);font-size:11px;">
-                  <option value="2">2 ใบ</option><option value="3" selected>3 ใบ</option><option value="4">4 ใบ</option>
-                </select>
-              </div>
-              <div>
-                <div style="font-size:9px;color:var(--muted);margin-bottom:3px;">Pitch</div>
-                <select id="cmp_pitch" style="width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 7px;font-family:var(--font-m);font-size:11px;">
-                  <option value="2.5">2.5</option><option value="3">3.0</option><option value="3.5">3.5</option>
-                  <option value="4">4.0</option><option value="4.3" selected>4.3</option><option value="4.5">4.5</option>
-                  <option value="5">5.0</option><option value="5.5">5.5</option><option value="6">6.0</option>
-                </select>
-              </div>
-              <div>
-                <div style="font-size:9px;color:var(--muted);margin-bottom:3px;">KV</div>
-                <select id="cmp_style" style="width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 7px;font-family:var(--font-m);font-size:11px;">
-                  <option value="freestyle" selected>Freestyle</option>
-                  <option value="racing">Racing</option>
-                  <option value="longrange">Long Range</option>
-                </select>
-              </div>
+          <div style="font-family:var(--fm);font-size:10px;letter-spacing:.08em;color:var(--amber);margin-bottom:8px;">CONFIG B (ปรับเปรียบเทียบ)</div>
+          <div class="cmp-grid">
+            <div>
+              <div class="cmp-label">Prop Size</div>
+              <select id="cmp_prop" class="cmp-select">
+                <option value="3">3"</option><option value="3.5">3.5"</option>
+                <option value="4">4"</option><option value="4.5">4.5"</option>
+                <option value="5" selected>5"</option><option value="5.5">5.5"</option>
+                <option value="6">6"</option><option value="7">7"</option><option value="8">8"</option>
+              </select>
+            </div>
+            <div>
+              <div class="cmp-label">Blades</div>
+              <select id="cmp_blades" class="cmp-select">
+                <option value="2">2 ใบ</option><option value="3" selected>3 ใบ</option><option value="4">4 ใบ</option>
+              </select>
+            </div>
+            <div>
+              <div class="cmp-label">Pitch</div>
+              <select id="cmp_pitch" class="cmp-select">
+                <option value="2.5">2.5</option><option value="3">3.0</option><option value="3.5">3.5</option>
+                <option value="4">4.0</option><option value="4.3" selected>4.3</option><option value="4.5">4.5</option>
+                <option value="5">5.0</option><option value="5.5">5.5</option><option value="6">6.0</option>
+              </select>
+            </div>
+            <div>
+              <div class="cmp-label">สไตล์</div><!-- FIX: was labelled "KV" but is Style -->
+              <select id="cmp_style" class="cmp-select">
+                <option value="freestyle" selected>Freestyle</option>
+                <option value="racing">Racing</option>
+                <option value="longrange">Long Range</option>
+              </select>
             </div>
           </div>
-
-          <div id="compareResult" style="font-size:11px;color:var(--muted);line-height:1.6;padding:10px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;min-height:60px;">
-            ปรับค่า B แล้วกด Compare
-          </div>
-          <button onclick="runCompare()" style="margin-top:10px;width:100%;padding:10px;border-radius:9px;border:1px solid rgba(0,255,136,.3);background:rgba(0,255,136,.07);color:var(--green);font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.12em;cursor:pointer;transition:.18s;"
-            onmouseover="this.style.background='rgba(0,255,136,.14)'"
-            onmouseout="this.style.background='rgba(0,255,136,.07)'">
-            ⚡ COMPARE A vs B
-          </button>
+          <div class="cmp-result" id="compareResult">ปรับค่า B แล้วกด Compare</div>
+          <button class="cmp-btn" onclick="runCompare()">⚡ COMPARE A vs B</button>
         </div>
       </div>
 
-    </div>
-  </div>
-</div>
+    </div><!-- /right-col -->
+  </div><!-- /lab-grid -->
+</div><!-- /page -->
 
 <script>
-/* ═══════════════════════════════════════════════════════════
-   MOTOR × PROP COMMAND CENTER — Brain
-═══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   MOTOR × PROP LAB v5.3 — Brain
+   Physics tables mirror prop_logic.py exactly
+═══════════════════════════════════════════════ */
+'use strict';
 
-// ── Motor Database (real popular motors) ───────────────────
+// ── Physics tables (from prop_logic.py) ────────
+const _GPW = {  // base g/W by pitch bucket × blades
+  low:  {2:6.2, 3:5.4, 4:4.6},
+  med:  {2:5.4, 3:4.7, 4:3.9},
+  high: {2:4.6, 3:3.9, 4:3.2},
+};
+const _SIZE_EFF = {2.5:.70,3:.77,3.5:.82,4:.88,4.5:.94,5:1.0,5.5:1.03,6:1.06,6.5:1.07,7:1.08,7.5:1.09,8:1.11,10:1.14};
+const _MAX_PWR  = {2.5:65,3:80,3.5:115,4:195,4.5:270,5:385,5.5:430,6:460,7:330,8:390,10:460};
+const _W_PER_G  = {2.5:.38,3:.35,3.5:.24,4:.19,4.5:.17,5:.155,5.5:.165,6:.20,7:.108,8:.095,10:.085};
+const _EFF_MAX  = {2.5:.64,3:.62,4:.60,5:.55,6:.52,7:.48,8:.44,10:.40};
+const FLT_V     = 3.85;   // V/cell average flight
+const LOAD_F    = 0.80;   // RPM load factor
+
+function _interp(val, tbl) {
+  const ks = Object.keys(tbl).map(Number).sort((a,b)=>a-b);
+  if (val <= ks[0]) return tbl[ks[0]];
+  if (val >= ks[ks.length-1]) return tbl[ks[ks.length-1]];
+  for (let i=0;i<ks.length-1;i++) {
+    if (val >= ks[i] && val <= ks[i+1]) {
+      const r = (val-ks[i])/(ks[i+1]-ks[i]);
+      return tbl[ks[i]] + r*(tbl[ks[i+1]]-tbl[ks[i]]);
+    }
+  }
+  return tbl[ks[Math.floor(ks.length/2)]];
+}
+function _pitchBucket(p) { return p<3.5?'low':p<=4.5?'med':'high'; }
+function _bladeClamp(b)   { return [2,3,4].includes(b)?b:3; }
+function _cellsEff(c)     { return 1.0+(c-4)*0.015; }
+
+// ── Motor Database (30+ motors, Thai community favourites) ──
 const MOTOR_DB = [
-  // whoop / micro
-  {name:'Happymodel EX1103', kv:[6000,8000], stator:'1103', cells:[1,2,3], styles:['freestyle','racing'], size:[2,3], tags:['whoop','indoor']},
-  {name:'BetaFPV 1102 18000KV', kv:[16000,20000], stator:'1102', cells:[1,2], styles:['freestyle'], size:[2,2.5], tags:['whoop']},
-  {name:'Emax RS1306 4000KV', kv:[3500,4500], stator:'1306', cells:[3], styles:['freestyle','racing'], size:[3,3.5], tags:['micro']},
-  // 3-4"
-  {name:'GEPRC GR2204.5 2550KV', kv:[2300,2800], stator:'2204', cells:[4,5], styles:['freestyle','cinematic'], size:[3.5,4.5], tags:['cine','micro']},
-  {name:'T-Motor F40 Pro IV 2400KV', kv:[2200,2600], stator:'2306', cells:[4,5], styles:['freestyle','racing'], size:[4,5], tags:['5inch']},
-  {name:'Diatone Mamba 2306 2450KV', kv:[2200,2700], stator:'2306', cells:[4,5,6], styles:['freestyle','racing'], size:[4,5], tags:['5inch']},
-  // 5" Freestyle
-  {name:'Brotherhobby Tornado T5 2306 2450KV', kv:[2200,2700], stator:'2306', cells:[4,5], styles:['freestyle'], size:[4.5,5.5], tags:['5inch','freestyle']},
-  {name:'EMAX ECO II 2306 2400KV', kv:[2200,2600], stator:'2306', cells:[4], styles:['freestyle','cinematic'], size:[4.5,5.5], tags:['5inch','budget']},
-  {name:'iFlight XING2 2306 2450KV', kv:[2200,2700], stator:'2306', cells:[4,5], styles:['freestyle'], size:[4.5,5.5], tags:['5inch']},
+  // Whoop / Nano
+  {name:'Happymodel EX1103 6000KV', kv:[5500,7000], stator:'1103', cells:[1,2,3], sizes:[2,3], tags:['whoop','indoor'], best:'freestyle'},
+  {name:'BetaFPV 1102 18000KV',     kv:[15000,20000],stator:'1102', cells:[1,2],   sizes:[1.5,2.5], tags:['whoop','1S'], best:'freestyle'},
+  {name:'iFlight XING 1404 3800KV', kv:[3500,4200], stator:'1404', cells:[2,3],   sizes:[2.5,3.5], tags:['micro'], best:'freestyle'},
+  // 3–4"
+  {name:'Emax RS1306 4000KV',       kv:[3500,4500], stator:'1306', cells:[3],     sizes:[3,3.5],  tags:['micro'], best:'racing'},
+  {name:'GEPRC GR2204.5 2550KV',    kv:[2300,2800], stator:'2204', cells:[4,5],   sizes:[3.5,4.5],tags:['cine','micro'], best:'cinematic'},
+  {name:'T-Motor F30A 2300KV',      kv:[2100,2500], stator:'2306', cells:[4],     sizes:[4,5],    tags:['4inch'], best:'freestyle'},
+  // 5" 4S
+  {name:'T-Motor F40 Pro IV 2400KV',kv:[2200,2600], stator:'2306', cells:[4,5],   sizes:[4.5,5.5],tags:['5inch','popular'], best:'freestyle'},
+  {name:'Diatone Mamba 2306 2450KV',kv:[2200,2700], stator:'2306', cells:[4,5,6], sizes:[4.5,5.5],tags:['5inch'], best:'freestyle'},
+  {name:'iFlight XING2 2306 2450KV',kv:[2200,2700], stator:'2306', cells:[4,5],   sizes:[4.5,5.5],tags:['5inch'], best:'freestyle'},
+  {name:'EMAX ECO II 2306 2400KV',  kv:[2200,2600], stator:'2306', cells:[4],     sizes:[4.5,5.5],tags:['5inch','budget'], best:'freestyle'},
+  {name:'BrotherHobby Tornado T5 2306',kv:[2200,2700],stator:'2306',cells:[4,5],  sizes:[4.5,5.5],tags:['5inch'], best:'freestyle'},
+  // 5" Racing
+  {name:'Helixx 2207 2500KV',       kv:[2300,2700], stator:'2207', cells:[4,5],   sizes:[4.5,5.5],tags:['race','5inch'], best:'racing'},
+  {name:'EMAX LS2207 2300KV',       kv:[2100,2500], stator:'2207', cells:[4],     sizes:[5,5.5],  tags:['race'], best:'racing'},
+  {name:'RaceKraft 2207 2500KV',    kv:[2300,2700], stator:'2207', cells:[4,5],   sizes:[4.5,5.5],tags:['race'], best:'racing'},
   // 5" 6S
-  {name:'T-Motor F40 Pro IV 1750KV', kv:[1500,2000], stator:'2306', cells:[6], styles:['freestyle'], size:[5,5.5], tags:['5inch','6S']},
-  {name:'GEPRC SPEEDX2 2306 1750KV', kv:[1500,1900], stator:'2306', cells:[6], styles:['freestyle','racing'], size:[5,5.5], tags:['5inch','6S']},
-  {name:'iFlight XING2 2306 1755KV', kv:[1500,2000], stator:'2306', cells:[6], styles:['freestyle'], size:[5,5.5], tags:['6S']},
-  // Racing 5"
-  {name:'Helixx 2207 2500KV', kv:[2300,2700], stator:'2207', cells:[4,5], styles:['racing'], size:[4.5,5.5], tags:['race','5inch']},
-  {name:'EMAX LS2207 2300KV', kv:[2100,2500], stator:'2207', cells:[4], styles:['racing'], size:[5,5.5], tags:['race','5inch']},
-  // 6" + Long Range
-  {name:'T-Motor Air40 1950KV', kv:[1700,2200], stator:'2408', cells:[4,5,6], styles:['freestyle','longrange'], size:[5.5,6.5], tags:['6inch']},
-  {name:'GEPRC GR2510 1380KV', kv:[1200,1500], stator:'2510', cells:[6], styles:['longrange','cinematic'], size:[6,7], tags:['LR','6inch']},
+  {name:'T-Motor F40 Pro IV 1750KV',kv:[1500,2000], stator:'2306', cells:[6],     sizes:[5,5.5],  tags:['5inch','6S'], best:'freestyle'},
+  {name:'GEPRC SPEEDX2 2306 1750KV',kv:[1500,1900], stator:'2306', cells:[6],     sizes:[5,5.5],  tags:['5inch','6S'], best:'freestyle'},
+  {name:'iFlight XING2 2306 1755KV',kv:[1500,2000], stator:'2306', cells:[6],     sizes:[5,5.5],  tags:['6S'], best:'freestyle'},
+  {name:'Nazgul Evoque 2306 1750KV',kv:[1550,1950], stator:'2306', cells:[6],     sizes:[5,5.5],  tags:['6S','popular'], best:'freestyle'},
+  // 6" + LR
+  {name:'T-Motor Air40 1950KV',     kv:[1700,2200], stator:'2408', cells:[4,5,6], sizes:[5.5,6.5],tags:['6inch'], best:'freestyle'},
+  {name:'GEPRC GR2510 1380KV',      kv:[1200,1500], stator:'2510', cells:[6],     sizes:[6,7],    tags:['LR','6inch'], best:'longrange'},
+  {name:'iFlight XING-E 2208 1800KV',kv:[1600,2000],stator:'2208', cells:[5,6],   sizes:[5.5,6.5],tags:['6inch'], best:'freestyle'},
   // 7" LR
-  {name:'T-Motor Air 40 2408 1950KV', kv:[1200,1700], stator:'2408', cells:[4,5,6], styles:['longrange'], size:[6,7.5], tags:['LR','7inch']},
-  {name:'iFlight XING-E 2810 900KV', kv:[750,1000], stator:'2810', cells:[6,7,8], styles:['longrange'], size:[7,10], tags:['LR','7inch']},
+  {name:'T-Motor Air 40 2408 1200KV',kv:[1000,1400],stator:'2408', cells:[4,5,6], sizes:[6,7.5],  tags:['LR','7inch'], best:'longrange'},
+  {name:'iFlight XING-E 2810 900KV',kv:[750,1050],  stator:'2810', cells:[6,7,8], sizes:[7,10],   tags:['LR','7inch'], best:'longrange'},
+  {name:'GEPRC GR2812 900KV',       kv:[750,1050],  stator:'2812', cells:[6,7],   sizes:[7,8],    tags:['LR'], best:'longrange'},
   // 10" Ultra LR
-  {name:'T-Motor Air 2814 770KV', kv:[650,900], stator:'2814', cells:[6,7,8], styles:['longrange'], size:[8,10], tags:['LR','10inch']},
-  {name:'SunnySky X2814 900KV', kv:[750,1050], stator:'2814', cells:[6,7,8], styles:['longrange'], size:[8,10], tags:['LR','ultraLR']},
+  {name:'T-Motor Air 2814 770KV',   kv:[650,900],   stator:'2814', cells:[6,7,8], sizes:[8,10],   tags:['LR','10inch'], best:'longrange'},
+  {name:'SunnySky X2814 900KV',     kv:[750,1050],  stator:'2814', cells:[6,7,8], sizes:[8,10],   tags:['LR','ultraLR'], best:'longrange'},
+  {name:'GARTT ML5010 380KV',       kv:[300,450],   stator:'5010', cells:[6,8],   sizes:[10,15],  tags:['heavylift'], best:'longrange'},
+  // Special
+  {name:'Speedybee Master 2306 2450KV',kv:[2200,2700],stator:'2306',cells:[4,5],  sizes:[4.5,5.5],tags:['popular','🇹🇭'], best:'freestyle'},
+  {name:'Foxeer Predator 2306 1750KV', kv:[1500,2000],stator:'2306',cells:[6],    sizes:[5,5.5],  tags:['6S','🇹🇭'], best:'freestyle'},
 ];
 
-// ── Presets ────────────────────────────────────────────────
+// ── Presets ─────────────────────────────────────
 const PRESETS = {
-  whoop:     {size:2.5, weight:80,   cells:3, mah:300,  prop:2.5, blades:2, pitch:2.0, style:'freestyle', motors:4},
-  micro3:    {size:3.0, weight:140,  cells:3, mah:450,  prop:3.0, blades:2, pitch:2.5, style:'freestyle', motors:4},
-  cine:      {size:3.5, weight:320,  cells:4, mah:850,  prop:3.5, blades:2, pitch:2.5, style:'cinematic', motors:4},
-  mini:      {size:4.0, weight:420,  cells:4, mah:1100, prop:4.0, blades:3, pitch:3.5, style:'freestyle', motors:4},
-  freestyle5:{size:5.0, weight:750,  cells:4, mah:1500, prop:5.0, blades:3, pitch:4.3, style:'freestyle', motors:4},
-  heavy6:    {size:6.0, weight:1050, cells:6, mah:2200, prop:6.0, blades:3, pitch:4.5, style:'freestyle', motors:4},
-  lr7:       {size:7.0, weight:1100, cells:6, mah:3000, prop:7.0, blades:2, pitch:3.5, style:'longrange', motors:4},
-  lr10:      {size:10.0,weight:1400, cells:6, mah:5000, prop:10.0,blades:2, pitch:3.5, style:'longrange', motors:4},
+  whoop:     {size:2.5, weight:80,   cells:3, mah:300,  prop:2.5, pitch:2.0, blades:2, kv:5000,  style:'freestyle', motors:4},
+  micro3:    {size:3.0, weight:140,  cells:3, mah:450,  prop:3.0, pitch:2.5, blades:2, kv:3500,  style:'freestyle', motors:4},
+  cine:      {size:3.5, weight:320,  cells:4, mah:850,  prop:3.5, pitch:2.5, blades:2, kv:2500,  style:'cinematic', motors:4},
+  mini:      {size:4.0, weight:420,  cells:4, mah:1100, prop:4.0, pitch:3.5, blades:3, kv:2500,  style:'freestyle', motors:4},
+  freestyle5:{size:5.0, weight:750,  cells:4, mah:1500, prop:5.0, pitch:4.3, blades:3, kv:2306,  style:'freestyle', motors:4},
+  heavy6:    {size:6.0, weight:1050, cells:6, mah:2200, prop:6.0, pitch:4.5, blades:3, kv:1750,  style:'freestyle', motors:4},
+  lr7:       {size:7.0, weight:1100, cells:6, mah:3000, prop:7.0, pitch:3.5, blades:2, kv:1200,  style:'longrange', motors:4},
+  lr10:      {size:10., weight:1400, cells:6, mah:5000, prop:10., pitch:3.5, blades:2, kv:800,   style:'longrange', motors:4},
 };
 
-// ── State ──────────────────────────────────────────────────
-let S = { size:5, weight:750, cells:4, mah:1500, prop:5, blades:3, pitch:4.3, style:'freestyle', motors:4 };
+// ── State ───────────────────────────────────────
+let S = {size:5,weight:750,cells:4,mah:1500,prop:5,pitch:4.3,blades:3,kv:2306,style:'freestyle',motors:4};
+let lastR = null;
 
-// ── Efficiency table (g/W) ─────────────────────────────────
-const G_PER_W = {
-  low:{2:6.5,3:5.8,4:5.0},
-  med:{2:5.8,3:5.0,4:4.2},
-  high:{2:5.0,3:4.2,4:3.5}
-};
-const SIZE_SCALE = {2.5:.70,3:.78,3.5:.83,4:.88,4.5:.93,5:1,5.5:1.04,6:1.08,7:1.14,7.5:1.18,8:1.22,10:1.30};
-const RPM_MAP = {2.5:28000,3:24000,3.5:20000,4:17000,4.5:15000,5:13000,5.5:12000,6:11000,7:9500,8:8000,10:6500};
-
-function nearestKey(map, val) {
-  return Object.keys(map).map(Number).reduce((a,b)=>Math.abs(b-val)<Math.abs(a-val)?b:a);
-}
-function pitchBucket(p){ return p<3.5?'low':p<=4.5?'med':'high'; }
-
-// ── Main Calculate ─────────────────────────────────────────
+// ── Calculate ───────────────────────────────────
 function calculate() {
-  const {size, weight, cells, mah, prop, blades, pitch, style, motors} = S;
-  const vCell = 3.7, packV = cells * vCell;
+  const {size,weight,cells,mah,prop,pitch,blades,kv,style,motors} = S;
+  const packV = cells * 3.7;
+  const motorsN = Math.max(1, motors);
 
-  // KV
-  const kvMap = prop<=3.5
-    ? {3:4000,4:3500,5:3000,6:2600,7:2200,8:2000}
-    : prop<=4.5
-    ? {3:3500,4:3000,5:2600,6:2200,7:2000,8:1800}
-    : prop<=5.5
-    ? {3:3000,4:2500,5:2000,6:1700,7:1500,8:1200}
-    : prop<=7
-    ? {3:2600,4:2200,5:1800,6:1500,7:1200,8:1000}
-    : {3:2200,4:1800,5:1500,6:1200,7:1000,8:900};
-  const nc = nearestKey(kvMap, cells);
-  const baseKv = kvMap[cells]||kvMap[nc];
+  // ── KV recommendation ───────────────────────
+  const kvMap = prop<=3.5?{3:4000,4:3500,5:3000,6:2600,7:2200,8:2000}
+              : prop<=4.5?{3:3500,4:3000,5:2600,6:2200,7:2000,8:1800}
+              : prop<=5.5?{3:3000,4:2500,5:2000,6:1700,7:1500,8:1200}
+              : prop<=7  ?{3:2600,4:2200,5:1800,6:1500,7:1200,8:1000}
+              :            {3:2200,4:1800,5:1500,6:1200,7:1000,8:900};
+  const availC = Object.keys(kvMap).map(Number);
+  const nearC  = availC.reduce((a,b)=>Math.abs(b-cells)<Math.abs(a-cells)?b:a);
+  const baseKv = kvMap[cells]||kvMap[nearC];
   const kvLo = Math.round(baseKv*.75), kvHi = Math.round(baseKv*1.25);
+  const stator  = prop<=3.5?'1104–1407':prop<=4.5?'1407–1806':prop<=5.5?'1806–2207':prop<=7?'2207–2408':'2506–2814';
+  const statorS = prop<=3.5?'micro/whoop':prop<=4.5?'3–4" light':prop<=5.5?'5" standard':prop<=7?'6" heavy':'7–10"';
 
-  // Stator
-  const stator = prop<=3.5?'1104–1407':prop<=4.5?'1407–1806':prop<=5.5?'1806–2207':prop<=7?'2207–2408':'2506–2814';
-  const statorSub = prop<=3.5?'micro/whoop':prop<=4.5?'light 3–4"':prop<=5.5?'5" standard':prop<=7?'6" heavy':'7–10"';
+  // ── Prop physics (prop_logic.py exact) ──────
+  const sScale  = _interp(prop, _SIZE_EFF);
+  const vFactor = _cellsEff(cells);
+  const bClamp  = _bladeClamp(blades);
+  const baseGpW = (_GPW[_pitchBucket(pitch)]||_GPW.med)[bClamp] || 4.7;
+  const gPerW   = +(baseGpW * sScale * vFactor).toFixed(2);
+  const maxPwr  = Math.min(_interp(prop, _MAX_PWR) * (1 + (cells-4)/4*0.22), 1000);
+  const effMax  = _interp(prop, _EFF_MAX);
+  const maxThrMotor = Math.round(gPerW * effMax * maxPwr);
 
-  // TWR
-  const twrTarget = style==='racing'?2.2:style==='cinematic'?1.5:style==='longrange'?1.6:2.0;
-  const totalThrust = weight * twrTarget;
-  const thrPerMotor = totalThrust / motors;
-  const twr = parseFloat((totalThrust/weight).toFixed(2));
-
-  // Power
-  const stylePowerPerKg = style==='racing'?700:style==='cinematic'?320:style==='longrange'?280:520;
-  const estPowerW = stylePowerPerKg * (weight/1000);
-  const estCurrent = parseFloat((estPowerW/packV).toFixed(1));
-
-  // Prop physics
-  const sizeScale = SIZE_SCALE[nearestKey(SIZE_SCALE, prop)] || 1;
-  const gPerWBase = (G_PER_W[pitchBucket(pitch)]||{})[Math.min(4,Math.max(2,blades))]||5;
-  const gPerW = parseFloat((gPerWBase * sizeScale).toFixed(2));
-  const propCm = prop * 2.54;
+  // ── RPM & Tip Speed ─────────────────────────
+  const vFlight = cells * FLT_V;
+  const rpmEst  = kv > 0 ? kv * vFlight * LOAD_F : _interp(prop, {2.5:28000,3:24000,4:17000,5:13000,6:11000,7:9500,8:8000,10:6500}) * 0.80;
+  const propM   = prop * 0.0254;
+  const tipSpeed = Math.round(Math.PI * propM * rpmEst / 60);
+  const pitchSpeedKmh = +((rpmEst * pitch * 0.0254 / 60) * 3.6).toFixed(1);
+  const propCm   = prop * 2.54;
   const diskArea = Math.PI * (propCm/2)**2;
-  const rpmEst = (RPM_MAP[nearestKey(RPM_MAP, prop)]||12000) * 0.70;
-  const pitchSpeedMs = (rpmEst * pitch * 2.54) / (100*60);
-  const pitchSpeedKmh = parseFloat((pitchSpeedMs*3.6).toFixed(1));
-  const diskLoad = parseFloat((gPerW*100/Math.max(1,diskArea)).toFixed(2));
-  const pitchRatio = parseFloat((pitch/prop).toFixed(2));
+  const diskLoad = +((gPerW * 100 / Math.max(1,diskArea))).toFixed(2);
+  const pitchRatio = +(pitch/prop).toFixed(2);
 
-  // Flight time
-  const bWhAh = (mah/1000)*packV*0.85;
-  const avgPower = estPowerW * 1.1;
-  const flightMin = Math.max(0, Math.round((bWhAh/Math.max(.1,avgPower))*60));
-  const cruisePct = 55, punchPct = 30, reservePct = 15;
+  // ── TWR ────────────────────────────────────
+  const totalThrust = maxThrMotor * motorsN;
+  const twr = +(Math.min(totalThrust / Math.max(1,weight), 12)).toFixed(2);
+  const hoverThrPct = twr > 0 ? Math.round(Math.sqrt(1/twr)*100) : 50;
 
-  // Load & noise (0–6)
-  let motorLoad = (pitch>=4.5?3:pitch>=3.5?2:1) + (blades>=4?3:blades===3?2:1);
-  let noiseScore = motorLoad;
-  const heatIdx = Math.min(100, Math.round((motorLoad/6)*100 * (cells>=6?1.15:1)));
+  // ── Power ──────────────────────────────────
+  const wPerG = _interp(prop, _W_PER_G);
+  const hoverW = wPerG * weight;
+  const sfMap  = {freestyle:1.55,racing:2.00,longrange:1.05,cinematic:1.25};
+  const sf     = sfMap[style] || 1.55;
+  const avgW   = hoverW * sf;
+  const peakW  = maxPwr * motorsN;
 
-  // Warnings
-  const warnings = [];
-  if(pitchRatio > 0.9) warnings.push({lvl:'warn', msg:`Pitch/Size ratio ${pitchRatio} สูง — เสี่ยง motor โหลดหนักและเสียงดัง`});
-  if(prop>5.5 && pitch>4.5) warnings.push({lvl:'warn', msg:'ใบพัดใหญ่ + pitch สูง — ตรวจสอบกำลัง motor ให้เพียงพอ'});
-  if(cells>=7 && baseKv>1600) warnings.push({lvl:'danger', msg:`ระวัง KV ${baseKv} สูงบน ${cells}S — อาจทำให้ motor ร้อน`});
-  if(twr < 1.3) warnings.push({lvl:'warn', msg:'TWR ต่ำมาก — โดรนอาจยกตัวลำบากหรือ sag มาก'});
-  if(flightMin < 3) warnings.push({lvl:'warn', msg:'เวลาบินสั้นมาก — ลองเพิ่ม mAh หรือลด AUW'});
+  // ── Flight time ────────────────────────────
+  const battWh   = (mah/1000) * packV;
+  const usableWh = battWh * 0.85;
+  const ftMin    = avgW > 0.1 ? Math.max(0, Math.round((usableWh/avgW)*60*10)/10) : 0;
+  const ftAggr   = avgW > 0.1 ? Math.max(0, Math.round((usableWh/(avgW*1.35))*60*10)/10) : 0;
 
-  // Tips
+  // ── Current ────────────────────────────────
+  const hoverCurr = packV > 0 ? +(hoverW/packV).toFixed(1) : 0;
+  const peakCurr  = packV > 0 ? +(peakW/packV).toFixed(1)  : 0;
+
+  // ── C-Rate ─────────────────────────────────
+  const cBurst = mah > 0 ? +(peakCurr / (mah/1000)).toFixed(1) : null;
+  const cCont  = mah > 0 ? +((hoverCurr/(mah/1000))*sf).toFixed(1) : null;
+
+  // ── ESC sizing ─────────────────────────────
+  const escRaw = (peakW / motorsN) / packV * 1.5;
+  const escMin = _interp(prop, {2.5:15,3:20,3.5:20,4:25,5:30,6:35,7:40,10:45});
+  const escSizes = [15,20,25,30,35,40,45,50,60,70,80,100];
+  const escA = escSizes.find(s=>s>=Math.max(escRaw,escMin)) || 100;
+
+  // ── Load / Noise scores ─────────────────────
+  const pitchScore = pitch>=4.5?3:pitch>=3.5?2:1;
+  const bladeScore = blades>=4?3:blades===3?2:1;
+  const motorLoad  = pitchScore + bladeScore;
+  const noiseScore = motorLoad;
+  const heatIdx    = Math.min(100, Math.round((motorLoad/6)*100 * (cells>=6?1.15:1)));
+
+  // ── Warnings ───────────────────────────────
+  const warns = [];
+  if(tipSpeed > 290) warns.push({lvl:'danger', msg:`Tip speed ${tipSpeed} m/s เกิน 290 m/s — compressibility loss รุนแรง ลด KV หรือ prop เล็กลง`});
+  else if(tipSpeed > 265) warns.push({lvl:'warn', msg:`Tip speed ${tipSpeed} m/s ใกล้ขีดจำกัด (265 m/s) — efficiency ลดที่ full throttle`});
+  if(pitchRatio > 0.9) warns.push({lvl:'warn', msg:`Pitch/Size ratio ${pitchRatio} สูง — motor โหลดหนัก เสียงดัง`});
+  if(cells>=7 && baseKv>1600) warns.push({lvl:'danger', msg:`KV ${baseKv} สูงบน ${cells}S — อาจทำให้ motor ร้อน`});
+  if(twr < 1.3) warns.push({lvl:'warn', msg:'TWR ต่ำมาก — โดรนยกตัวลำบาก แนะนำ motor KV สูงขึ้น'});
+  if(ftMin < 3) warns.push({lvl:'warn', msg:'เวลาบินสั้น — ลองเพิ่ม mAh หรือลด AUW'});
+  if(cBurst && cBurst > 80) warns.push({lvl:'danger', msg:`C-Rate burst ${cBurst}C สูงมาก — ต้องการแบต HV quality`});
+
+  // ── Tips ───────────────────────────────────
   const tips = [];
-  if(style==='freestyle') tips.push({type:'g', msg:'Freestyle: TWR 1.8–2.2 และ 3 ใบ pitch 4.0–4.5 เป็น sweet spot'});
-  if(style==='racing') tips.push({type:'b', msg:'Racing: TWR 2.0–2.5+ Grip สูง pitch 4.5+ ตอบสนองไว'});
-  if(style==='longrange') tips.push({type:'a', msg:'Long Range: 2 ใบ pitch 3.0–3.5 ลด noise และ กินไฟต่ำสุด'});
-  if(style==='cinematic') tips.push({type:'b', msg:'Cinematic: TWR 1.5–1.8 3 ใบ pitch 3.0–3.8 smooth ที่สุด'});
-  if(thrPerMotor < 200) tips.push({type:'g', msg:'Motor โหลดต่ำ — อาจ overpower สำหรับ frame ขนาดนี้'});
-  if(thrPerMotor > 600) tips.push({type:'r', msg:'Motor โหลดสูง — เลือก stator ใหญ่ขึ้น หรือ prop ใหญ่ขึ้น'});
-  tips.push({type:'m', msg:`แบต ${cells}S ${mah}mAh → ประมาณ ${flightMin} นาที (${style})`});
+  const styleTips = {
+    freestyle:'🌀 Freestyle sweet spot: 3 ใบ pitch 4.0–4.5, TWR 1.8–2.5',
+    racing:   '🏁 Racing: TWR 2.0–2.5+ pitch 4.5+ grip สูง ตอบสนองไว',
+    longrange:'🛸 Long Range: 2 ใบ pitch 3.0–3.5 ประหยัดไฟ noise ต่ำ',
+    cinematic:'🎥 Cinematic: TWR 1.5–1.8 3 ใบ pitch 3.0–3.8 smooth'
+  };
+  if(styleTips[style]) tips.push({type:'b',msg:styleTips[style]});
+  tips.push({type:'g',msg:`แนะนำ KV: ${kvLo}–${kvHi} · Stator: ${stator}`});
+  tips.push({type:'a',msg:`Hover: ~${hoverThrPct}% stick · ESC: ≥${escA}A · C-Rate: ${cBurst||'?'}C burst`});
+  if(kv > 0) {
+    const rpmK = Math.round(rpmEst/1000*10)/10;
+    tips.push({type:'p',msg:`RPM ≈ ${rpmK}k · Tip speed = ${tipSpeed} m/s · Pitch speed = ${pitchSpeedKmh} km/h`});
+  }
+  tips.push({type:'m',msg:`${cells}S ${mah}mAh → ~${ftMin} นาที (${style})`});
 
-  // Motor DB match
-  const matchedMotors = MOTOR_DB.filter(m => {
-    const kvOk = m.kv[0] <= kvHi && m.kv[1] >= kvLo;
-    const sizeOk = size >= m.size[0]-0.5 && size <= m.size[1]+0.5;
+  // ── Motor DB match ──────────────────────────
+  const matched = MOTOR_DB.filter(m => {
+    const kvOk   = m.kv[0] <= kvHi*1.1 && m.kv[1] >= kvLo*0.9;
+    const sizeOk = size >= m.sizes[0]-0.5 && size <= m.sizes[1]+0.5;
     const cellOk = m.cells.includes(cells) || m.cells.some(c=>Math.abs(c-cells)<=1);
     return kvOk && sizeOk && cellOk;
-  }).slice(0,5);
+  }).sort((a,b)=>{
+    const aOk = a.best===style?1:0, bOk = b.best===style?1:0;
+    return bOk-aOk;
+  }).slice(0,6);
 
-  // CLI
-  const throttlePct = style==='freestyle'?90:style==='racing'?100:70;
-  const filterHz = cells>=6?120:100;
+  // ── CLI ────────────────────────────────────
+  const throttleLimit = style==='freestyle'?90:style==='racing'?100:70;
+  const protocol      = cells>=6?'DSHOT600':'DSHOT300';
+  const gyroHz        = cells>=6?120:100;
+  const rpmMinHz      = Math.max(80, Math.round(rpmEst*0.15));
 
   return {
-    kv:`${kvLo}–${kvHi}`, kvSub:`${cells}S · ${style}`,
-    stator, statorSub,
-    current:estCurrent, currentSub:`${cells}S · ${Math.round(estPowerW)}W`,
-    thrust:Math.round(totalThrust), thrustSub:`${Math.round(thrPerMotor)}g/motor`,
-    flightMin, flightSub:`${mah}mAh · ${cells}S`,
-    power:Math.round(estPowerW), powerSub:`${Math.round(estPowerW/motors)}W/motor`,
-    twr, twrTarget,
-    gPerW, pitchSpeedKmh, diskLoad, pitchRatio,
-    motorLoad:Math.round((motorLoad/6)*100),
-    noiseScore:Math.round((noiseScore/6)*100),
+    kvRange:`${kvLo}–${kvHi}`, kvSub:`${cells}S ${style}`,
+    stator, statorS,
+    hoverCurr, peakCurr, currentSub:`${Math.round(hoverW)}W hover`,
+    totalThrust, thrustSub:`${Math.round(maxThrMotor)}g/motor`,
+    ftMin, ftAggr, flightSub:`${mah}mAh · ${cells}S`,
+    hoverW:Math.round(hoverW), powerSub:`${Math.round(hoverW/motorsN)}W/motor`,
+    hoverThrPct, escA, cBurst, cCont,
+    rpmEst: Math.round(rpmEst),
+    tipSpeed, pitchSpeedKmh, diskLoad, pitchRatio, gPerW,
+    motorLoad: Math.round((motorLoad/6)*100),
+    noiseScore: Math.round((noiseScore/6)*100),
     heatIdx,
-    effPct:Math.min(100,Math.round(gPerW/7*100)),
-    loadLabel:motorLoad<3?'เบา':motorLoad<5?'ปานกลาง':'หนัก',
-    noiseLabel:noiseScore<3?'เงียบ':noiseScore<5?'ปานกลาง':'ดัง',
-    heatLabel:heatIdx<40?'เย็น':heatIdx<65?'อุ่น':heatIdx<80?'ร้อน':'ร้อนมาก',
-    effLabel:gPerW>=5.5?'สูงมาก':gPerW>=4.5?'ดี':gPerW>=3.5?'กลาง':'ต่ำ',
-    cruisePct, punchPct, reservePct,
-    cruiseMin:Math.round(flightMin*cruisePct/100),
-    punchMin:Math.round(flightMin*punchPct/100),
-    reserveMin:Math.round(flightMin*reservePct/100),
-    warnings, tips, matchedMotors,
-    throttlePct, filterHz,
-    styl:style, cells, prop, blades, pitch,
+    effPct: Math.min(100,Math.round(gPerW/7*100)),
+    loadLbl: motorLoad<3?'เบา':motorLoad<5?'ปานกลาง':'หนัก',
+    noiseLbl: noiseScore<3?'เงียบ':noiseScore<5?'ปานกลาง':'ดัง',
+    heatLbl:  heatIdx<40?'เย็น':heatIdx<65?'อุ่น':heatIdx<80?'ร้อน':'ร้อนมาก',
+    effLbl:   gPerW>=5.5?'สูงมาก':gPerW>=4.5?'ดี':gPerW>=3.5?'กลาง':'ต่ำ',
+    twr, hoverThrPct,
+    warns, tips, matched,
+    throttleLimit, protocol, gyroHz, rpmMinHz,
+    cells, prop, blades, pitch, style,
   };
 }
 
-// ── Render ─────────────────────────────────────────────────
-let lastR = null;
+// ── Render ──────────────────────────────────────
 function render() {
   const R = calculate();
   lastR = R;
 
-  // TWR gauge
-  const twrArc = document.getElementById('twrArc');
-  const arcLen = 258;
-  const maxTwr = 4.0;
-  const pct = Math.min(1, R.twr / maxTwr);
-  twrArc.style.strokeDashoffset = arcLen * (1 - pct);
-  const twrColor = R.twr < 1.5 ? 'var(--red)' : R.twr < 1.8 ? 'var(--amber)' : R.twr <= 2.5 ? 'var(--green)' : 'var(--blue)';
-  twrArc.style.stroke = twrColor;
-  twrArc.style.filter = `drop-shadow(0 0 8px ${R.twr<1.5?'#ff4455':R.twr<1.8?'#ffb700':'#00ff88'})`;
-  document.getElementById('twrVal').textContent = R.twr.toFixed(2);
-  const twrV = document.getElementById('twrVerdict');
-  const twrZ = document.getElementById('twrZone');
-  if(R.twr < 1.3){
-    twrV.textContent='⚠ ไม่เพียงพอ'; twrV.style.cssText='color:var(--red);border-color:rgba(255,68,85,.3);background:rgba(255,68,85,.08);';
-    twrZ.textContent='UNDER'; twrZ.style.cssText='color:var(--red);border-color:rgba(255,68,85,.3);background:rgba(255,68,85,.06);';
-  } else if(R.twr < 1.7){
-    twrV.textContent='ⓘ พอบินได้ (LR/Cine)'; twrV.style.cssText='color:var(--amber);border-color:rgba(255,183,0,.3);background:rgba(255,183,0,.08);';
-    twrZ.textContent='CRUISER'; twrZ.style.cssText='color:var(--amber);border-color:rgba(255,183,0,.3);background:rgba(255,183,0,.06);';
-  } else if(R.twr <= 2.5){
-    twrV.textContent='✓ SWEET SPOT'; twrV.style.cssText='color:var(--green);border-color:rgba(0,255,136,.3);background:rgba(0,255,136,.08);';
-    twrZ.textContent='OPTIMAL'; twrZ.style.cssText='color:var(--green);border-color:rgba(0,255,136,.3);background:rgba(0,255,136,.06);';
-  } else {
-    twrV.textContent='⚡ OVER POWERED'; twrV.style.cssText='color:var(--blue);border-color:rgba(0,170,255,.3);background:rgba(0,170,255,.08);';
-    twrZ.textContent='BEAST'; twrZ.style.cssText='color:var(--blue);border-color:rgba(0,170,255,.3);background:rgba(0,170,255,.06);';
+  // Hero metrics
+  flash('m_kv',      R.kvRange);    setEl('m_kv_sub',     R.kvSub);
+  setEl('m_stator',  R.stator);     setEl('m_stator_sub', R.statorS);
+  flash('m_current', R.hoverCurr+'A'); setEl('m_current_sub', R.currentSub);
+  flash('m_thrust',  R.totalThrust.toLocaleString()+'g'); setEl('m_thrust_sub', R.thrustSub);
+  flash('m_flight',  R.ftMin+'min'); setEl('m_flight_sub', R.flightSub);
+  flash('m_power',   R.hoverW+'W'); setEl('m_power_sub', R.powerSub);
+  // Physics row
+  setColorEl('m_hover_thr', R.hoverThrPct+'%', R.hoverThrPct>65?'red':R.hoverThrPct>50?'amber':'green');
+  setColorEl('m_esc',   R.escA+'A',             R.escA>=60?'amber':'green');
+  setColorEl('m_cburst',R.cBurst?(R.cBurst+'C'):'—', R.cBurst&&R.cBurst>80?'red':R.cBurst&&R.cBurst>50?'amber':'cyan');
+  setColorEl('m_rpm',  (Math.round(R.rpmEst/100)/10)+'k RPM', 'purple');
+
+  // TWR arc
+  const ARC_LEN = 232, maxTWR = 6.0;
+  const twrPct  = Math.min(1, R.twr / maxTWR);
+  const arc = document.getElementById('twrArc');
+  if(arc){
+    arc.style.strokeDashoffset = ARC_LEN * (1 - twrPct);
+    const col = R.twr<1.3?'var(--red)':R.twr<1.7?'var(--amber)':R.twr<=3.5?'var(--green)':'var(--cyan)';
+    arc.style.stroke = col;
+    arc.style.filter = `drop-shadow(0 0 8px ${col})`;
   }
+  setEl('twrValTxt', R.twr.toFixed(2));
+  const [bText, bColor, bBg, verdict] = R.twr<1.3
+    ? ['UNDER',  'var(--red)',   'rgba(239,68,68,.08)',   '⚠️ ไม่เพียงพอ — TWR ต่ำเกินไป มอเตอร์ หรือ KV สูงขึ้น']
+    : R.twr<1.7
+    ? ['CRUISER','var(--amber)', 'rgba(245,158,11,.08)',  '✓ LR / Cine — hover ใช้ throttle สูง headroom น้อย']
+    : R.twr<=3.5
+    ? ['OPTIMAL','var(--green)', 'rgba(0,255,136,.08)',   '✅ Sweet Spot — hover ~'+R.hoverThrPct+'% throttle เหลือ headroom ดี']
+    : R.twr<=6.0
+    ? ['PUNCHY', 'var(--cyan)',  'rgba(0,212,255,.08)',   '⚡ Over-powered — กำลังสูง เหมาะ racing/aggressive freestyle']
+    : ['BEAST',  'var(--purple)','rgba(139,92,246,.08)',  '🚀 MONSTER — TWR สูงมาก ระวัง oscillation ต้องการ PID ที่ดี'];
+  const badge = document.getElementById('twrBadge');
+  if(badge){ badge.textContent=bText; badge.style.color=bColor; badge.style.borderColor=bColor+'44'; badge.style.background=bBg; }
+  const zone = document.getElementById('twrZone');
+  if(zone){ zone.textContent=bText; zone.style.color=bColor; zone.style.borderColor=bColor+'44'; zone.style.background=bBg; }
+  setEl('twrVerdict', verdict);
 
   // Prop diagram
   drawProp(S.blades, S.prop);
-
-  // Physics
-  setEl('pitchSpeed', `${R.pitchSpeedKmh} km/h`);
-  setEl('diskLoad',   `${R.diskLoad} g/cm²`);
-  setEl('gPerW',      `${R.gPerW} g/W`);
+  setEl('pitchSpeed', R.pitchSpeedKmh+' km/h');
+  setEl('gPerW',      R.gPerW+' g/W');
   const prEl = document.getElementById('pitchRatio');
-  prEl.textContent = `${R.pitchRatio}`;
-  prEl.style.color = R.pitchRatio > 0.9 ? 'var(--red)' : R.pitchRatio > 0.75 ? 'var(--amber)' : 'var(--green)';
+  if(prEl){ prEl.textContent=R.pitchRatio; prEl.style.color=R.pitchRatio>0.9?'var(--red)':R.pitchRatio>0.75?'var(--amber)':'var(--green)'; }
 
-  // Metrics
-  flashEl('m_kv', R.kv);    setEl('m_kv_sub', R.kvSub);
-  setEl('m_stator', R.stator);  setEl('m_stator_sub', R.statorSub);
-  flashEl('m_current', R.current); setEl('m_current_sub', R.currentSub);
-  flashEl('m_thrust', R.thrust.toLocaleString()); setEl('m_thrust_sub', R.thrustSub);
-  flashEl('m_flight', R.flightMin); setEl('m_flight_sub', R.flightSub);
-  flashEl('m_power', R.power); setEl('m_power_sub', R.powerSub);
+  // Tip speed gauge
+  const tipVal = document.getElementById('tipSpeedVal');
+  if(tipVal) tipVal.textContent = S.kv>0 ? R.tipSpeed+' m/s' : '— m/s';
+  const needle = document.getElementById('tipNeedle');
+  if(needle && S.kv>0) { needle.style.left = Math.min(95,Math.max(2, R.tipSpeed/350*100))+'%'; }
+  const tipSt = document.getElementById('tipStatus');
+  if(tipSt && S.kv>0){
+    if(R.tipSpeed>290){
+      tipSt.textContent='⛔ DANGER: '+R.tipSpeed+'m/s — เกิน 290 m/s compressibility loss รุนแรง ลด KV หรือ prop เล็กลง';
+      tipSt.style.cssText='color:var(--red);border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.06);';
+    } else if(R.tipSpeed>265){
+      tipSt.textContent='⚠️ WARNING: '+R.tipSpeed+'m/s — ใกล้ขีดจำกัด (265m/s) efficiency drop ที่ full throttle';
+      tipSt.style.cssText='color:var(--amber);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.06);';
+    } else {
+      tipSt.textContent='✅ SAFE: '+R.tipSpeed+'m/s — ปลอดภัย subsonic (&lt;265 m/s)';
+      tipSt.style.cssText='color:var(--green);border-color:rgba(0,255,136,.25);background:rgba(0,255,136,.05);';
+    }
+  } else if(tipSt && S.kv===0){
+    tipSt.textContent='กรอก Motor KV เพื่อคำนวณ Tip Speed';
+    tipSt.style.cssText='color:var(--muted);border-color:var(--border);background:rgba(255,255,255,.02);';
+  }
 
   // Bar gauges
-  setBar('bg_load',  R.motorLoad,  R.loadLabel + ` (${R.motorLoad}%)`);
-  setBar('bg_noise', R.noiseScore, R.noiseLabel + ` (${R.noiseScore}%)`);
-  setBar('bg_heat',  R.heatIdx,    R.heatLabel + ` (${R.heatIdx}%)`);
-  setBar('bg_eff',   R.effPct,     R.effLabel + ` (${R.gPerW} g/W)`);
+  setBar('bg_load',  R.motorLoad,  R.loadLbl+` (${R.motorLoad}%)`);
+  setBar('bg_noise', R.noiseScore, R.noiseLbl+` (${R.noiseScore}%)`);
+  setBar('bg_heat',  R.heatIdx,    R.heatLbl+` (${R.heatIdx}%)`);
+  setBar('bg_eff',   R.effPct,     R.effLbl+` (${R.gPerW} g/W)`);
 
   // Flight timeline
-  const total = Math.max(1, R.flightMin);
-  setEl('ft_cruise_lbl',  `${R.cruiseMin}m`);
-  setEl('ft_punch_lbl',   `${R.punchMin}m`);
-  setEl('ft_reserve_lbl', `${R.reserveMin}m`);
-  setEl('ft_total_lbl',   `${R.flightMin} min total`);
-  document.getElementById('ft_cruise').style.width  = (R.cruisePct)+'%';
-  document.getElementById('ft_punch').style.width   = (R.punchPct)+'%';
-  document.getElementById('ft_reserve').style.width = (R.reservePct)+'%';
+  const total = Math.max(1, R.ftMin);
+  const cpct = 55, ppct = 30, rpct = 15;
+  setEl('ft_cruise_lbl',  Math.round(total*cpct/100)+'m');
+  setEl('ft_punch_lbl',   Math.round(total*ppct/100)+'m');
+  setEl('ft_reserve_lbl', Math.round(total*rpct/100)+'m');
+  setEl('ft_total',       R.ftMin+' min');
+  setEl('ft_aggr_lbl',    'Aggressive: '+(R.ftAggr||'—')+' min');
+  document.getElementById('ft_cruise').style.width  = cpct+'%';
+  document.getElementById('ft_punch').style.width   = ppct+'%';
+  document.getElementById('ft_reserve').style.width = rpct+'%';
 
   // Warnings
-  const wArea = document.getElementById('warningArea');
-  wArea.innerHTML = R.warnings.map(w=>`
-    <div class="warn-badge" style="color:${w.lvl==='danger'?'var(--red)':'var(--amber)'};
-      border-color:${w.lvl==='danger'?'rgba(255,68,85,.25)':'rgba(255,183,0,.2)'};
-      background:${w.lvl==='danger'?'rgba(255,68,85,.06)':'rgba(255,183,0,.05)'};">
-      ${w.lvl==='danger'?'⛔':'⚠'} ${w.msg}
+  document.getElementById('warningArea').innerHTML = R.warns.map(w=>`
+    <div class="warn-item" style="color:${w.lvl==='danger'?'var(--red)':'var(--amber)'};border-color:${w.lvl==='danger'?'rgba(239,68,68,.25)':'rgba(245,158,11,.2)'};background:${w.lvl==='danger'?'rgba(239,68,68,.05)':'rgba(245,158,11,.04)'};">
+      <span>${w.lvl==='danger'?'⛔':'⚠️'}</span>
+      <span>${w.msg}</span>
     </div>`).join('');
 
   // CLI
-  const cli = buildCLI(R);
-  document.getElementById('cli_line1').textContent = cli[0];
-  document.getElementById('cli_line2').innerHTML   = cli[1];
-  document.getElementById('cli_line3').innerHTML   = cli[2];
-  document.getElementById('cli_line4').innerHTML   = cli[3];
-  document.getElementById('cli_line5').innerHTML   = cli[4];
-  document.getElementById('cli_line6').innerHTML   = cli[5];
-  document.getElementById('cli_line7').innerHTML   = cli[6];
-  document.getElementById('cli_line8').innerHTML   = cli[7];
+  renderCLI(R);
 
-  // Motor DB
-  renderMotors(R.matchedMotors);
-
-  // Tips
-  renderTips(R.tips, R.warnings);
+  // Motor DB + Tips
+  renderMotors(R.matched);
+  renderTips(R.tips);
 
   // Compare A
-  setEl('compareA', `${S.prop}" · ${S.blades}ใบ · Pitch ${S.pitch} · ${S.style} → ${R.gPerW}g/W · ${R.pitchSpeedKmh}km/h`);
+  setEl('compareA', `${S.prop}" · ${S.blades}ใบ · P${S.pitch} · ${S.style} → ${R.gPerW}g/W · ${R.pitchSpeedKmh}km/h · tip ${R.tipSpeed}m/s`);
 }
 
-function buildCLI(R) {
-  const klass = (t,v)=>`<span class="cli-${t}">${v}</span>`;
-  return [
-    `# OBIX Motor×Prop — ${R.styl.toUpperCase()} ${R.cells}S · Prop ${R.prop}" ${R.blades}b P${R.pitch}`,
-    `${klass('comment','# Stator: ')}${klass('val',R.stator)} (${R.statorSub}) · KV ${klass('val',R.kv)}`,
-    `${klass('comment','# TWR: ')}${klass('val',R.twr.toFixed(2))} · Thrust ${klass('val',R.thrust+'g')} (${R.thrustSub})`,
-    `${klass('comment','# Flight: ')}~${klass('val',R.flightMin+'min')} · Current ~${klass('val',R.current+'A')} · ${R.power}W`,
-    `${klass('cmd','set throttle_limit_percent')} = ${klass('val',R.throttlePct)}`,
-    `${klass('cmd','set motor_pwm_protocol')} = ${klass('val',R.cells>=6?'DSHOT600':'DSHOT300')}`,
-    `${klass('cmd','set dshot_bidir')} = ${klass('val','ON')}`,
-    `${klass('cmd','set gyro_lpf1_static_hz')} = ${klass('val',R.filterHz)}`,
-  ];
-}
-
-function drawProp(blades, size) {
-  const g = document.getElementById('propBlades');
-  g.innerHTML = '';
-  const cx=50, cy=50;
-  const r = Math.min(42, 10+size*3.8);
-  const angleStep = 360/blades;
-  for(let i=0;i<blades;i++){
-    const ang = (i*angleStep - 90) * Math.PI/180;
-    const x1=cx, y1=cy;
-    const x2=cx+r*Math.cos(ang), y2=cy+r*Math.sin(ang);
-    const nx=-Math.sin(ang)*8, ny=Math.cos(ang)*8;
-    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-    const w = blades<=2?10:blades===3?8:6;
-    path.setAttribute('d',`M${x1},${y1} C${x1+nx*0.5},${y1+ny*0.5} ${x2-nx*0.3+nx*w/r},${y2-ny*0.3+ny*w/r} ${x2},${y2} C${x2-nx},${y2-ny} ${x1-nx*0.3},${y1-ny*0.3} ${x1},${y1}Z`);
-    path.setAttribute('class','prop-blade');
-    path.style.fill=`rgba(0,255,136,${0.1+i*0.02})`;
-    path.style.stroke='var(--green)';
-    path.style.strokeWidth='1';
-    path.style.filter='drop-shadow(0 0 3px rgba(0,255,136,.3))';
-    g.appendChild(path);
-  }
-  // spin animation
-  g.style.transformOrigin='50px 50px';
-  g.style.animation='propSpin 3s linear infinite';
+function renderCLI(R) {
+  const K = (v)=>`<span class="cli-k">${v}</span>`;
+  const V = (v)=>`<span class="cli-v">${v}</span>`;
+  const C = (v)=>`<span class="cli-c">${v}</span>`;
+  setHTML('cli_c1', C(`# OBIX Motor×Prop — ${R.style.toUpperCase()} ${R.cells}S · Prop ${R.prop}" ${R.blades}ใบ P${R.pitch}`));
+  setHTML('cli_c2', C(`# KV: ${R.kvRange} · Stator: ${R.stator} · ESC: ≥${R.escA}A`));
+  setHTML('cli_c3', C(`# TWR: ${R.twr} · Hover: ${R.hoverThrPct}% · Flight: ~${R.ftMin}min`));
+  setHTML('cli_c4', C(`# Tip: ${R.tipSpeed}m/s · g/W: ${R.gPerW} · RPM: ~${Math.round(R.rpmEst/100)/10}k`));
+  setHTML('cli_1',  `${K('set throttle_limit_percent')} = ${V(R.throttleLimit)}`);
+  setHTML('cli_2',  `${K('set throttle_limit_type')}    = ${V('SCALE')}`);
+  setHTML('cli_3',  `${K('set motor_pwm_protocol')}     = ${V(R.protocol)}`);
+  setHTML('cli_4',  `${K('set dshot_bidir')}            = ${V('ON')}`);
+  setHTML('cli_5',  `${K('set motor_poles')}            = ${V(14)}`);
+  setHTML('cli_6',  `${K('set rpm_filter_min_hz')}      = ${V(R.rpmMinHz)}`);
 }
 
 function renderMotors(motors) {
   const list = document.getElementById('motorList');
-  const cnt  = document.getElementById('motorMatchCount');
-  cnt.textContent = motors.length ? `${motors.length} ตัวตรงสเปค` : 'ไม่พบในฐานข้อมูล';
+  const cnt  = document.getElementById('motorCount');
+  if(!list) return;
+  cnt.textContent = motors.length ? `${motors.length} ตรงสเปค` : '';
+  if(!motors.length){
+    list.innerHTML = '<p style="color:var(--muted);font-size:11px;padding:6px 0;">ลองปรับ prop size หรือ cells</p>';
+    return;
+  }
+  const tagCol = {popular:'var(--green)',race:'var(--red)',LR:'var(--purple)',whoop:'var(--cyan)','🇹🇭':'var(--amber)'};
   list.innerHTML = motors.map(m=>`
-    <div class="motor-card">
-      <div class="mc-name">${m.name}</div>
-      <div class="mc-specs">
-        KV ${m.kv[0].toLocaleString()}–${m.kv[1].toLocaleString()} · Stator ${m.stator}<br>
-        cells: ${m.cells.join('/')}S · size ${m.size[0]}–${m.size[1]}"
-      </div>
-      <div>
-        ${m.tags.map(t=>`<span class="mc-tag" style="color:var(--green);border-color:rgba(0,255,136,.2);">${t}</span>`).join(' ')}
-      </div>
-    </div>`).join('') || '<p style="color:var(--muted);font-size:12px;padding:8px 0;">ลองปรับ KV range หรือ prop size</p>';
+    <div class="mdb-card" onclick="this.classList.toggle('sel')">
+      <div class="mdb-name">${m.name}</div>
+      <div class="mdb-specs">KV ${m.kv[0].toLocaleString()}–${m.kv[1].toLocaleString()} · ${m.stator}<br>${m.cells.join('/')}S · ${m.sizes[0]}–${m.sizes[1]}"</div>
+      <div>${m.tags.map(t=>`<span class="mdb-tag" style="color:${tagCol[t]||'var(--green)'};border-color:${tagCol[t]||'var(--green)'}33;">${t}</span>`).join('')}</div>
+    </div>`).join('');
 }
 
-function renderTips(tips, warns) {
-  const colors = {g:'var(--green)',b:'var(--blue)',a:'var(--amber)',r:'var(--red)',m:'var(--muted)'};
-  const bc = {g:'rgba(0,255,136,.18)',b:'rgba(0,170,255,.18)',a:'rgba(255,183,0,.18)',r:'rgba(255,68,85,.18)',m:'rgba(255,255,255,.1)'};
-  document.getElementById('tipsArea').innerHTML =
-    tips.map(t=>`<div class="tip-item" style="border-color:${colors[t.type]||'var(--muted)'};background:rgba(0,0,0,.2);">
-      ${t.msg}</div>`).join('');
+function renderTips(tips) {
+  const area = document.getElementById('tipsArea');
+  if(!area) return;
+  const tc = {g:'var(--green)',b:'var(--cyan)',a:'var(--amber)',r:'var(--red)',p:'var(--purple)',m:'var(--muted)'};
+  area.innerHTML = tips.map(t=>`
+    <div class="tip-item" style="border-color:${tc[t.type]||'var(--muted)'};color:var(--text2);">${t.msg}</div>`).join('');
 }
 
-function runCompare(){
+// ── Prop diagram ────────────────────────────────
+function drawProp(blades, size) {
+  const g = document.getElementById('propBlades'); if(!g) return;
+  g.innerHTML=''; const cx=50,cy=50;
+  const r = Math.min(42, 10+size*3.4);
+  for(let i=0;i<blades;i++){
+    const ang=(i*360/blades-90)*Math.PI/180;
+    const x2=cx+r*Math.cos(ang), y2=cy+r*Math.sin(ang);
+    const nx=-Math.sin(ang)*8, ny=Math.cos(ang)*8;
+    const w=blades<=2?10:blades===3?8:6;
+    const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d',`M${cx},${cy} C${cx+nx*.5},${cy+ny*.5} ${x2-nx*.3+nx*w/r},${y2-ny*.3+ny*w/r} ${x2},${y2} C${x2-nx},${y2-ny} ${cx-nx*.3},${cy-ny*.3} ${cx},${cy}Z`);
+    p.setAttribute('fill',`rgba(0,255,136,${0.12+i*0.02})`);
+    p.setAttribute('stroke','rgba(0,255,136,.5)'); p.setAttribute('stroke-width','1');
+    p.style.filter='drop-shadow(0 0 3px rgba(0,255,136,.3))';
+    g.appendChild(p);
+  }
+  g.style.transformOrigin='50px 50px';
+  g.style.animation='propSpin 3s linear infinite';
+}
+
+// ── Compare ─────────────────────────────────────
+function runCompare() {
   if(!lastR) return;
   const cp = parseFloat(document.getElementById('cmp_prop').value);
   const cb = parseInt(document.getElementById('cmp_blades').value);
   const cpt= parseFloat(document.getElementById('cmp_pitch').value);
-  const css= document.getElementById('cmp_style').value;
-
-  const sB = S.pitch, bB = S.blades, pB = S.prop, stB = S.style;
-  S.pitch=cpt; S.blades=cb; S.prop=cp; S.style=css;
+  const cst= document.getElementById('cmp_style').value;
+  const bk = {size:S.size,weight:S.weight,cells:S.cells,mah:S.mah,prop:S.prop,pitch:S.pitch,blades:S.blades,kv:S.kv,style:S.style,motors:S.motors};
+  S.prop=cp; S.blades=cb; S.pitch=cpt; S.style=cst;
   const Rb = calculate();
-  S.pitch=sB; S.blades=bB; S.prop=pB; S.style=stB;
-
+  Object.assign(S, bk);
   const Ra = lastR;
-  const diff = (a,b,inv=false) => {
-    const d = b-a; const good = inv?(d<0):(d>0);
-    return `<span style="color:${Math.abs(d)<0.01?'var(--muted)':good?'var(--green)':'var(--red)'}">${d>0?'+':''}${typeof a==='number'&&!Number.isInteger(a)?d.toFixed(2):Math.round(d)}</span>`;
+  const diff=(a,b,inv=false)=>{
+    const d=b-a, good=inv?(d<0):(d>0);
+    return `<span style="color:${Math.abs(d)<0.01?'var(--muted)':good?'var(--green)':'var(--red)'};">${d>0?'+':''}${Number.isInteger(a)?Math.round(d):d.toFixed(2)}</span>`;
   };
-
-  document.getElementById('compareResult').innerHTML = `
-    <div style="font-family:var(--font-d);font-size:8px;letter-spacing:.1em;color:var(--amber);margin-bottom:8px;">Δ A→B</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;">
-      <span style="color:var(--muted);">g/W eff</span>
-      <span><b>${Ra.gPerW}</b> → <b style="color:${Rb.gPerW>Ra.gPerW?'var(--green)':'var(--red)'}">${Rb.gPerW}</b> ${diff(Ra.gPerW,Rb.gPerW)}</span>
-      <span style="color:var(--muted);">Pitch Speed</span>
-      <span><b>${Ra.pitchSpeedKmh}</b> → <b>${Rb.pitchSpeedKmh}</b> km/h ${diff(Ra.pitchSpeedKmh,Rb.pitchSpeedKmh)}</span>
-      <span style="color:var(--muted);">Motor Load</span>
-      <span><b>${Ra.motorLoad}%</b> → <b>${Rb.motorLoad}%</b> ${diff(Ra.motorLoad,Rb.motorLoad,true)}</span>
-      <span style="color:var(--muted);">Noise</span>
-      <span><b>${Ra.noiseScore}%</b> → <b>${Rb.noiseScore}%</b> ${diff(Ra.noiseScore,Rb.noiseScore,true)}</span>
-      <span style="color:var(--muted);">Heat</span>
-      <span><b>${Ra.heatIdx}%</b> → <b>${Rb.heatIdx}%</b> ${diff(Ra.heatIdx,Rb.heatIdx,true)}</span>
-    </div>
-    <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:10.5px;color:var(--muted);">
-      Config B: ${cp}" ${cb}ใบ Pitch ${cpt} (${css})
+  document.getElementById('compareResult').innerHTML=`
+    <div style="font-family:var(--fm);font-size:9px;letter-spacing:.1em;color:var(--amber);margin-bottom:8px;">Δ A → B (${cp}" ${cb}ใบ P${cpt} ${cst})</div>
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:11px;">
+      <span style="color:var(--muted);">g/W</span><span>${Ra.gPerW} → <b style="color:${Rb.gPerW>Ra.gPerW?'var(--green)':'var(--red)'}">${Rb.gPerW}</b> ${diff(Ra.gPerW,Rb.gPerW)}</span>
+      <span style="color:var(--muted);">Tip Speed</span><span>${Ra.tipSpeed} → <b style="color:${Rb.tipSpeed<Ra.tipSpeed?'var(--green)':'var(--amber)'}">${Rb.tipSpeed}</b> m/s ${diff(Ra.tipSpeed,Rb.tipSpeed,true)}</span>
+      <span style="color:var(--muted);">Motor Load</span><span>${Ra.motorLoad}% → ${Rb.motorLoad}% ${diff(Ra.motorLoad,Rb.motorLoad,true)}</span>
+      <span style="color:var(--muted);">Noise</span><span>${Ra.noiseScore}% → ${Rb.noiseScore}% ${diff(Ra.noiseScore,Rb.noiseScore,true)}</span>
+      <span style="color:var(--muted);">Heat</span><span>${Ra.heatIdx}% → ${Rb.heatIdx}% ${diff(Ra.heatIdx,Rb.heatIdx,true)}</span>
+      <span style="color:var(--muted);">Pitch Speed</span><span>${Ra.pitchSpeedKmh} → ${Rb.pitchSpeedKmh} km/h ${diff(Ra.pitchSpeedKmh,Rb.pitchSpeedKmh)}</span>
     </div>`;
 }
 
-// ── Helpers ────────────────────────────────────────────────
-function setEl(id, val){ const e=document.getElementById(id); if(e) e.textContent=val; }
-function flashEl(id, val){
-  const e=document.getElementById(id);
-  if(!e) return;
-  const unit = e.querySelector('.mc-m-unit');
-  const ut = unit?.textContent||'';
-  if(unit) unit.remove();
-  e.textContent = val;
-  if(ut){ const u=document.createElement('span'); u.className='mc-m-unit'; u.textContent=ut; e.appendChild(u); }
-  e.classList.remove('flash'); void e.offsetWidth; e.classList.add('flash');
-}
-function setBar(id, pct, label){
-  const el=document.getElementById(id);
-  const vl=document.getElementById(id+'_val');
-  if(el) el.style.width=Math.min(100,pct)+'%';
-  if(vl) vl.textContent=label;
+// ── CLI Copy ─────────────────────────────────────
+function copyCLI() {
+  const box = document.getElementById('cliBox'); if(!box) return;
+  const btn = document.getElementById('cliCopyBtn');
+  const text = box.innerText.replace(/📋 COPY/g,'').trim();
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='✅ Copied!'; btn.classList.add('ok');
+    setTimeout(()=>{ btn.textContent='📋 COPY'; btn.classList.remove('ok'); }, 2200);
+    showToast('⚡ CLI copied — paste in Betaflight!');
+  });
 }
 
-// ── Slider wiring ──────────────────────────────────────────
-function updateSlider(inputId, trackId, labelId, fmt){
-  const el=document.getElementById(inputId);
-  const tf=document.getElementById(trackId);
-  const vl=document.getElementById(labelId);
-  const min=parseFloat(el.min), max=parseFloat(el.max), val=parseFloat(el.value);
-  const pct=((val-min)/(max-min))*100;
-  tf.style.width=pct+'%';
-  vl.textContent=fmt(val);
-  return val;
+function showToast(msg) {
+  const t=document.getElementById('mpToast'); if(!t) return;
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
 }
-function wireSlider(inputId, trackId, labelId, fmt, key){
-  const el=document.getElementById(inputId);
-  el.addEventListener('input',()=>{ S[key]=parseFloat(el.value); updateSlider(inputId,trackId,labelId,fmt); render(); });
-  updateSlider(inputId,trackId,labelId,fmt);
+
+// ── Helpers ──────────────────────────────────────
+function setEl(id,v){ const e=document.getElementById(id); if(e) e.textContent=v; }
+function setHTML(id,v){ const e=document.getElementById(id); if(e) e.innerHTML=v; }
+function setColorEl(id,v,col){
+  const e=document.getElementById(id); if(!e) return;
+  e.textContent=v;
+  const c={'red':'var(--red)','amber':'var(--amber)','green':'var(--green)','cyan':'var(--cyan)','purple':'var(--purple)'};
+  e.style.color=c[col]||col;
 }
-function wireSeg(segId, labelId, fmt, key){
-  const seg=document.getElementById(segId);
-  seg.querySelectorAll('.mp-seg-btn').forEach(btn=>{
+function flash(id,v){
+  const e=document.getElementById(id); if(!e) return;
+  const u=e.querySelector('span'); const ut=u?.textContent||'';
+  if(u) u.remove(); e.textContent=v; e.classList.remove('flash-anim');
+  void e.offsetWidth; e.classList.add('flash-anim');
+  if(ut){ const s=document.createElement('span'); s.textContent=ut; e.appendChild(s); }
+}
+function setBar(id,pct,lbl){
+  const f=document.getElementById(id); const v=document.getElementById(id+'_v');
+  if(f) f.style.width=Math.min(100,Math.max(0,pct))+'%';
+  if(v) v.textContent=lbl;
+}
+
+// ── Slider wiring ─────────────────────────────────
+function wireSlider(sid,tid,vid,fmt,key){
+  const el=document.getElementById(sid);
+  const tf=document.getElementById(tid);
+  function upd(){
+    const v=parseFloat(el.value);
+    const min=parseFloat(el.min),max=parseFloat(el.max);
+    const pct=((v-min)/(max-min))*100;
+    if(tf) tf.style.width=pct+'%';
+    setEl(vid,fmt(v));
+    S[key]=v;
+  }
+  el.addEventListener('input',()=>{ upd(); render(); });
+  upd();
+}
+function wireSeg(sid,vid,fmt,key){
+  const seg=document.getElementById(sid);
+  seg.querySelectorAll('.seg-btn').forEach(btn=>{
     btn.addEventListener('click',()=>{
-      seg.querySelectorAll('.mp-seg-btn').forEach(b=>b.classList.remove('active'));
+      seg.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
-      S[key]=isNaN(Number(btn.dataset.val))?btn.dataset.val:Number(btn.dataset.val);
-      if(labelId) setEl(labelId, fmt(S[key]));
+      S[key]=isNaN(+btn.dataset.val)?btn.dataset.val:+btn.dataset.val;
+      if(vid) setEl(vid,fmt(S[key]));
       render();
     });
   });
 }
 
-function copyCLI(){
-  const lines = [];
-  ['cli_line1','cli_line2','cli_line3','cli_line4','cli_line5','cli_line6','cli_line7','cli_line8'].forEach(id=>{
-    const e=document.getElementById(id); if(e) lines.push(e.textContent);
-  });
-  lines.push('save');
-  navigator.clipboard.writeText(lines.join('\n')).then(()=>{
-    const btn=document.getElementById('copyCliBtn');
-    btn.textContent='✅ Copied!'; btn.classList.add('copied');
-    setTimeout(()=>{ btn.textContent='📋 COPY'; btn.classList.remove('copied'); },2200);
-  });
-}
-
-// ── Presets ────────────────────────────────────────────────
+// ── Preset wiring ─────────────────────────────────
 document.getElementById('presetGrid').querySelectorAll('.preset-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     const p=PRESETS[btn.dataset.preset]; if(!p) return;
-    document.getElementById('presetGrid').querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
-    S = {...S,...p, cells:p.cells};
-    // Update sliders
-    ['size','weight','mah','prop','pitch'].forEach(k=>{
-      const el=document.getElementById('s_'+k); if(el){ el.value=S[k]; }
+    Object.assign(S, p);
+    // Sync sliders
+    [['s_size','tf_size','v_size',v=>v+'"','size'],
+     ['s_weight','tf_weight','v_weight',v=>v+' g','weight'],
+     ['s_mah','tf_mah','v_mah',v=>v+' mAh','mah'],
+     ['s_prop','tf_prop','v_prop',v=>v+'"','prop'],
+     ['s_pitch','tf_pitch','v_pitch',v=>parseFloat(v).toFixed(1)+'"','pitch'],
+     ['s_kv','tf_kv','v_kv',v=>Math.round(v)+' KV','kv']
+    ].forEach(([sid,tid,vid,fmt,key])=>{
+      const el=document.getElementById(sid); if(!el) return;
+      el.value=S[key];
+      const min=parseFloat(el.min),max=parseFloat(el.max),val=S[key];
+      const tf=document.getElementById(tid); if(tf) tf.style.width=((val-min)/(max-min))*100+'%';
+      setEl(vid,fmt(val));
     });
-    updateSlider('s_size',  'tf_size',  'v_size',  v=>v+'"');
-    updateSlider('s_weight','tf_weight','v_weight',v=>v+' g');
-    updateSlider('s_mah',   'tf_mah',   'v_mah',   v=>v+' mAh');
-    updateSlider('s_prop',  'tf_prop',  'v_prop',  v=>v+'"');
-    updateSlider('s_pitch', 'tf_pitch', 'v_pitch', v=>parseFloat(v).toFixed(1));
-    // Update segs
-    ['seg_battery','seg_blades','seg_style','seg_motors'].forEach(sid=>{
+    // Sync segs
+    [{sid:'seg_battery',key:'cells',vid:'v_battery',fmt:v=>v+'S'},
+     {sid:'seg_blades', key:'blades',vid:'v_blades', fmt:v=>v+' ใบ'},
+     {sid:'seg_style',  key:'style', vid:null,        fmt:v=>v},
+     {sid:'seg_motors', key:'motors',vid:'v_motors',  fmt:v=>v+' ตัว'}
+    ].forEach(({sid,key,vid,fmt})=>{
       const seg=document.getElementById(sid); if(!seg) return;
-      const key = sid==='seg_battery'?'cells':sid==='seg_blades'?'blades':sid==='seg_style'?'style':'motors';
-      seg.querySelectorAll('.mp-seg-btn').forEach(b=>{
-        b.classList.toggle('active', b.dataset.val==String(S[key]));
-      });
-      const lbl={seg_battery:'v_battery',seg_blades:'v_blades',seg_style:null,seg_motors:'v_motors'}[sid];
-      const fmt={seg_battery:v=>v+'S',seg_blades:v=>v+' ใบ',seg_motors:v=>v+' ตัว'}[sid];
-      if(lbl&&fmt) setEl(lbl,fmt(S[key]));
+      seg.querySelectorAll('.seg-btn').forEach(b=>b.classList.toggle('active',b.dataset.val==String(S[key])));
+      if(vid) setEl(vid,fmt(S[key]));
     });
     render();
+    showToast('✅ Preset loaded: '+btn.querySelector('.pb-name').textContent);
   });
 });
 
-// ── Init ───────────────────────────────────────────────────
-wireSlider('s_size',  'tf_size',  'v_size',  v=>v+'"',      'size');
-wireSlider('s_weight','tf_weight','v_weight',v=>v+' g',     'weight');
-wireSlider('s_mah',   'tf_mah',   'v_mah',   v=>v+' mAh',  'mah');
-wireSlider('s_prop',  'tf_prop',  'v_prop',  v=>v+'"',      'prop');
-wireSlider('s_pitch', 'tf_pitch', 'v_pitch', v=>parseFloat(v).toFixed(1), 'pitch');
+// ── Init ──────────────────────────────────────────
+wireSlider('s_size',  'tf_size',  'v_size',   v=>v+'"',                'size');
+wireSlider('s_weight','tf_weight','v_weight', v=>v+' g',               'weight');
+wireSlider('s_mah',   'tf_mah',   'v_mah',   v=>v+' mAh',             'mah');
+wireSlider('s_kv',    'tf_kv',    'v_kv',    v=>Math.round(v)+' KV',  'kv');
+wireSlider('s_prop',  'tf_prop',  'v_prop',   v=>v+'"',                'prop');
+wireSlider('s_pitch', 'tf_pitch', 'v_pitch',  v=>parseFloat(v).toFixed(1)+'"', 'pitch');
 wireSeg('seg_battery','v_battery',v=>v+'S','cells');
 wireSeg('seg_blades', 'v_blades', v=>v+' ใบ','blades');
 wireSeg('seg_style',  null,       v=>v,'style');
 wireSeg('seg_motors', 'v_motors', v=>v+' ตัว','motors');
 
 // Prop spin keyframe
-const st=document.createElement('style');
-st.textContent=`@keyframes propSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`;
-document.head.appendChild(st);
+const _st=document.createElement('style');
+_st.textContent='@keyframes propSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}';
+document.head.appendChild(_st);
 
 render();
 </script>
-
 </body>
 </html>
