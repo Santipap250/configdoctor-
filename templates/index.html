@@ -5483,7 +5483,7 @@ save</div>
           <div class="sauce-icon">🔥</div>
           <div>
             <div class="sauce-title">SECRET SAUCE — ADVANCED TUNE</div>
-            <div class="sauce-sub">{{ analysis.detected_class | upper }} · {{ analysis.style | upper }} · {{ analysis.advanced.cells if analysis.advanced else '—' }}S · KV{{ analysis.motor_kv or '—' }} · คำนวณเฉพาะ build นี้</div>
+            <div class="sauce-sub">{{ analysis.detected_class | upper }} · {{ analysis.style | upper }} · {{ analysis.advanced.cells | default('—') if analysis.advanced else '—' }}S · KV{{ analysis.motor_kv or '—' }} · คำนวณเฉพาะ build นี้</div>
           </div>
           <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
             <span class="sauce-badge">🔒 EXCLUSIVE</span>
@@ -5581,7 +5581,7 @@ save</div>
             <div class="qs-stat">
               <span class="qs-stat-val
                 {% if analysis.advanced and analysis.advanced.hover_power_w %}
-                  {% if analysis.advanced.hover_power_w > 300 %}red{% elif analysis.advanced.hover_power_w > 150 %}amber{% endif %}
+                  {% if analysis.advanced.hover_power_w > 300 %}red{% elif analysis.advanced.hover_power_w > 150 %}amber{% else %}green{% endif %}
                 {% endif %}">
                 {% if analysis.advanced and analysis.advanced.hover_power_w %}{{ analysis.advanced.hover_power_w | int }}W{% else %}—{% endif %}
               </span>
@@ -5630,7 +5630,7 @@ save</div>
             {% set twr_v = analysis.advanced.thrust_ratio | default(0) | float %}
             {% set tip_v = analysis.advanced.tip_speed_mps | default(0) | float %}
             {% set cur_v = analysis.advanced.peak_current_a | default(0) | float %}
-            {% if twr_v >= 3.5 %}<span class="ok">✅ TWR {{ twr_v }} — power เยอะ freestyle ทำ trick ได้ดี</span>{% elif twr_v >= 2.0 %}<span class="ok">✅ TWR {{ twr_v }} — สมดุลดี บินได้ทุก style · Freestyle แนะนำ 3.0+</span>{% elif twr_v > 0 %}<span class="warn">⚠️ TWR {{ twr_v }} — power น้อย แนะนำ motor KV สูงขึ้นหรือลดน้ำหนัก</span>{% endif %}
+            {% if twr_v >= 3.5 %}<span class="ok">✅ TWR {{ twr_v | round(2) }} — power เยอะ freestyle ทำ trick ได้ดี</span>{% elif twr_v >= 2.0 %}<span class="ok">✅ TWR {{ twr_v | round(2) }} — สมดุลดี บินได้ทุก style · Freestyle แนะนำ 3.0+</span>{% elif twr_v > 0 %}<span class="warn">⚠️ TWR {{ twr_v | round(2) }} — power น้อย แนะนำ motor KV สูงขึ้นหรือลดน้ำหนัก</span>{% endif %}
             {% if tip_v > 290 %} · <span class="bad">⛔ Tip speed {{ tip_v | int }}m/s — เกิน 290 m/s compressibility loss รุนแรง เปลี่ยน prop เล็กลงหรือลด KV</span>{% elif tip_v > 265 %} · <span class="warn">⚠️ Tip speed {{ tip_v | int }}m/s — ใกล้ขีดจำกัด (265 m/s) efficiency ลดที่ full throttle</span>{% elif tip_v > 0 %} · <span class="ok">✅ Tip speed {{ tip_v | int }}m/s — ปลอดภัย (&lt;265 m/s)</span>{% endif %}
             {% if cur_v > 100 %} · <span class="bad">⛔ Peak {{ cur_v | int }}A — ต้องการ ESC {{ (cur_v * 1.5) | int }}A+ (1.5× safety factor)</span>{% elif cur_v > 70 %} · <span class="warn">⚠️ Peak {{ cur_v | int }}A — ใช้ ESC {{ (cur_v * 1.5) | int }}A ขึ้นไป</span>{% elif cur_v > 0 %} · <span class="ok">✅ Peak {{ cur_v | int }}A — ESC ขนาดปกติรับได้</span>{% endif %}
           </div>
@@ -5663,7 +5663,7 @@ save</div>
           <div class="wtm-box" style="margin-top:8px;">
             <div class="wtm-head">📐 อ่านค่า PID นี้อย่างไร</div>
             <b>P (Proportional)</b> — ความแรงตอบสนองทันที ค่าสูง=คล่องแคล่ว · ต่ำเกิน=sluggish · สูงเกิน=oscillate<br>
-            <b>I (Integral)</b> — ต้านแรงลม/drift สะสม ให้โดรนbingตรง · BF4.4+: 80-100 (BF3.x เคยใช้ 30-50 เดิม) · I สูงเกิน = bounce หลัง flip · I ต่ำ = drift ในลม<br>
+            <b>I (Integral)</b> — ต้านแรงลม/drift สะสม ให้โดรนบินตรง · BF4.4+: 80-100 (BF3.x เคยใช้ 30-50 เดิม) · I สูงเกิน = bounce หลัง flip · I ต่ำ = drift ในลม<br>
             <b>D (Derivative)</b> — เบรก/damping ลด overshoot · ค่าสูง = นิ่งขึ้น propwash ลด แต่ motor ร้อน · 5": 28-42 · Nano: 12-18 · LR: 14-22<br>
             <b>F (Feedforward)</b> — ทำนายทิศทาง stick ล่วงหน้า · ลด lag โดยไม่เพิ่ม noise · BF4.5: 80-120 freestyle · 120-160 racing<br>
             <b>Pitch P > Roll P</b> เสมอ +5 ถึง +8 (CoG อยู่หน้า pitch axis ต้องการ correction มากกว่า)<br>
@@ -5675,7 +5675,9 @@ save</div>
       <!-- ══ 1b. BUILD INTELLIGENCE SCORE ══ -->
       {% if analysis.advanced %}
       {% set twr = analysis.advanced.thrust_ratio | default(0) | float %}
-      {% set ft = analysis.advanced.est_flight_time_min | default(0) | float %}
+      {%- set _ft_raw = analysis.advanced.est_flight_time_min | default(0) | float -%}
+      {%- set _ft_fallback = analysis.battery_est | default(0) | float -%}
+      {% set ft = _ft_raw if _ft_raw > 0 else _ft_fallback %}
       {% set noise = analysis.prop_result.effect.noise | default(3) | float if analysis.prop_result else 3 %}
       {% set tip = analysis.advanced.tip_speed_mps | default(0) | float %}
       {% set mh = analysis.advanced.motor_health | default('') %}
@@ -6016,8 +6018,8 @@ save</pre>
               <div class="ic-val" style="color:{% if twr2 >= 3.5 %}var(--green){% elif twr2 >= 1.8 %}var(--amber){% else %}var(--red){% endif %}">{{ twr2 | round(2) }}:1</div>
               <div class="ic-label">Thrust-to-Weight Ratio</div>
               <div class="ic-explain">
-                {% if twr2 >= 6.0 %}⚡ กำลังสูงมาก — hover ~{{ analysis.advanced.hover_throttle_pct | int if analysis.advanced.hover_throttle_pct else (100/twr2**0.5)|int }}% เหมาะ racing/aggressive freestyle
-                {% elif twr2 >= 3.5 %}✅ ดีมาก — hover ~{{ analysis.advanced.hover_throttle_pct | int if analysis.advanced.hover_throttle_pct else (100/twr2**0.5)|int }}% throttle มี headroom เพียงพอ
+                {% if twr2 >= 6.0 %}⚡ กำลังสูงมาก — hover ~{{ analysis.advanced.hover_throttle_pct | int if analysis.advanced.hover_throttle_pct else (100/(twr2**0.5 if twr2 > 0 else 1))|int }}% เหมาะ racing/aggressive freestyle
+                {% elif twr2 >= 3.5 %}✅ ดีมาก — hover ~{{ analysis.advanced.hover_throttle_pct | int if analysis.advanced.hover_throttle_pct else (100/(twr2**0.5 if twr2 > 0 else 1))|int }}% throttle มี headroom เพียงพอ
                 {% elif twr2 >= 1.5 %}⚠️ ต่ำกว่ามาตรฐาน TWR {{ twr2 }} — hover ที่ throttle สูง เหลือ headroom น้อยสำหรับ maneuver ควรเพิ่ม motor KV หรือลดน้ำหนัก
                 {% else %}⛔ ต่ำเกินไป — โดรนบินได้ยาก TWR ควรอยู่ที่ 2.0 ขึ้นไปอย่างน้อย{% endif %}
               </div>
@@ -6171,12 +6173,12 @@ save</pre>
                 <span class="metric-lbl">Hover Current</span>
               </div>
               <div class="metric-card">
-                <span class="metric-val {% if '⚠️' in (analysis.advanced.motor_health or '') %}amber{% elif '✅' in (analysis.advanced.motor_health or '') %}green{% endif %}">
+                <span class="metric-val {% if analysis.advanced.motor_health %}{% if '🔥' in analysis.advanced.motor_health or '⚠️' in analysis.advanced.motor_health %}amber{% elif '✅' in analysis.advanced.motor_health %}green{% else %}blue{% endif %}{% endif %}">
                   {{ analysis.advanced.motor_health | default('—') }}</span>
                 <span class="metric-lbl">Motor Health</span>
               </div>
               <div class="metric-card">
-                <span class="metric-val {% if '⚠️' in (analysis.advanced.battery_health or '') %}amber{% elif '✅' in (analysis.advanced.battery_health or '') %}green{% endif %}">
+                <span class="metric-val {% if analysis.advanced.battery_health %}{% if '⚠️' in analysis.advanced.battery_health or '🔥' in analysis.advanced.battery_health %}amber{% elif '✅' in analysis.advanced.battery_health %}green{% else %}blue{% endif %}{% endif %}">
                   {{ analysis.advanced.battery_health | default('—') }}</span>
                 <span class="metric-lbl">Battery Health</span>
               </div>
@@ -6187,7 +6189,7 @@ save</pre>
             {% set twr_pct = [(analysis.advanced.thrust_ratio / 8.0 * 100) | int, 100] | min %}
             <div style="margin-top:12px;">
               <div style="display:flex;justify-content:space-between;font-family:var(--font-d);font-size:8px;letter-spacing:.08em;color:var(--muted);margin-bottom:5px;">
-                <span>Thrust-to-Weight Ratio</span><span>{{ analysis.advanced.thrust_ratio }}:1</span>
+                <span>Thrust-to-Weight Ratio</span><span>{{ analysis.advanced.thrust_ratio | round(2) }}:1</span>
               </div>
               <div style="height:8px;background:rgba(255,255,255,0.04);border-radius:4px;overflow:hidden;position:relative;">
                 <div style="position:absolute;top:0;bottom:0;left:45%;width:1px;background:rgba(255,255,255,.12);"></div>
@@ -6222,7 +6224,7 @@ save</pre>
                 <canvas id="radarChart" width="220" height="220"></canvas>
               </div>
               <div class="radar-legend">
-                <div class="radar-leg-item"><div class="radar-leg-dot" style="background:#00ff88;"></div><span>Power (TWR {{ analysis.advanced.thrust_ratio | default('—') }}:1)</span></div>
+                <div class="radar-leg-item"><div class="radar-leg-dot" style="background:#00ff88;"></div><span>Power (TWR {{ analysis.advanced.thrust_ratio | default('—') | round(2) }}:1)</span></div>
                 <div class="radar-leg-item"><div class="radar-leg-dot" style="background:#58a6ff;"></div><span>Flight Time ({{ analysis.advanced.est_flight_time_min | default(0) | int }} min)</span></div>
                 <div class="radar-leg-item"><div class="radar-leg-dot" style="background:#a78bfa;"></div><span>Low Noise</span></div>
                 <div class="radar-leg-item"><div class="radar-leg-dot" style="background:#f1b65a;"></div><span>Tip Safety ({{ analysis.advanced.tip_speed_mps | default(0) | int }} m/s)</span></div>
@@ -6581,8 +6583,8 @@ save</pre>
                   <span style="color:var(--muted2);font-size:10px;">มือใหม่: P สูง = สั่น (oscillate) / P ต่ำ = ช้า ไม่ตอบสนอง · เริ่มต้นที่นี่เสมอ</span>
                 </div>
                 <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set p_roll  = {{ _Pr }}   # baseline สำหรับ build นี้
-set p_pitch = {{ _Pr + 6 }}   # pitch ต้องสูงกว่า roll +5-8 เสมอ
-set d_roll  = {{ _Dr }}   # ปรับ D ก่อน P ถ้ามี propwash</div>
+set p_pitch = {{ (_Pr + 6) | int }}   # pitch ต้องสูงกว่า roll +5-8 เสมอ
+set d_roll  = {{ _Dr | int }}   # ปรับ D ก่อน P ถ้ามี propwash</div>
               </div>
             </div>
 
@@ -6597,8 +6599,8 @@ set d_roll  = {{ _Dr }}   # ปรับ D ก่อน P ถ้ามี propwa
                   หลังปรับ แตะ motor หลังบิน 2 pack — ต้อง "อุ่น" ไม่ใช่ "ร้อนมือ" ถ้าร้อน = D สูงเกิน<br>
                   <span style="color:var(--amber);">ถ้าเพิ่ม D แล้ว motor ร้อน → เปิด RPM filter ก่อนแทนการลด D</span>
                 </div>
-                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set d_roll  = {{ _Dr+2 }}  # +2 จาก baseline (ทดลอง)
-set d_pitch = {{ _Dr+4 }}  # pitch D สูงกว่า roll ~2 เสมอ</div>
+                <div class="trix-cli" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.textContent)">set d_roll  = {{ (_Dr+2) | int }}  # +2 จาก baseline (ทดลอง)
+set d_pitch = {{ (_Dr+4) | int }}  # pitch D สูงกว่า roll ~2 เสมอ</div>
               </div>
             </div>
             <div class="trix-item tb">
