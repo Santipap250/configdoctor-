@@ -878,6 +878,192 @@ section { padding:90px 24px; position:relative; z-index:2; }
   .lnd-team-row { flex-direction:column; align-items:center; }
   .lnd-team-btn { width:100%; max-width:280px; justify-content:center; }
 }
+.hero-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:14px;
+}
+
+.hero-actions a{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  transform-style:preserve-3d;
+}
+
+/* เอฟเฟกต์แสงวิ่ง */
+.hero-actions a::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:-120%;
+  width:70%;
+  height:100%;
+  background:linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,.18),
+    transparent
+  );
+  transform:skewX(-18deg);
+  transition:left .55s ease;
+  z-index:1;
+}
+
+.hero-actions a:hover::before{
+  left:140%;
+}
+
+/* เอฟเฟกต์วงแสงด้านหลัง */
+.hero-actions a::after{
+  content:'';
+  position:absolute;
+  inset:-2px;
+  border-radius:inherit;
+  opacity:0;
+  transition:opacity .28s ease, transform .28s ease;
+  z-index:-1;
+  transform:scale(.92);
+}
+
+.hero-actions a:hover::after{
+  opacity:1;
+  transform:scale(1.04);
+}
+
+/* ปุ่มหลัก: เริ่มวิเคราะห์โดรน */
+.btn-primary{
+  padding:15px 34px;
+  border-radius:14px;
+  background:linear-gradient(135deg,#00ff9d 0%, #00d98b 100%);
+  color:#02130c;
+  border:1px solid rgba(0,255,157,.35);
+  box-shadow:
+    0 0 0 1px rgba(0,255,157,.18),
+    0 12px 30px rgba(0,255,157,.22),
+    inset 0 1px 0 rgba(255,255,255,.22);
+  transition:all .22s ease;
+}
+
+.btn-primary::after{
+  background:radial-gradient(circle, rgba(0,255,157,.35), transparent 70%);
+}
+
+.btn-primary:hover{
+  transform:translateY(-4px) scale(1.02);
+  box-shadow:
+    0 0 0 1px rgba(0,255,157,.35),
+    0 18px 40px rgba(0,255,157,.35),
+    0 0 34px rgba(0,255,157,.28);
+}
+
+/* Blackbox */
+.btn-secondary{
+  padding:15px 26px;
+  border-radius:14px;
+  background:rgba(0,168,255,.08);
+  border:1px solid rgba(0,168,255,.22);
+  box-shadow:
+    0 10px 24px rgba(0,168,255,.12),
+    inset 0 1px 0 rgba(255,255,255,.06);
+  transition:all .22s ease;
+}
+
+.btn-secondary::after{
+  background:radial-gradient(circle, rgba(0,168,255,.28), transparent 72%);
+}
+
+.btn-secondary:hover{
+  transform:translateY(-4px);
+  border-color:rgba(0,168,255,.45);
+  background:rgba(0,168,255,.14);
+  box-shadow:
+    0 16px 34px rgba(0,168,255,.22),
+    0 0 26px rgba(0,168,255,.18);
+}
+
+/* CONFIG LAB */
+.btn-knowledge{
+  padding:15px 24px;
+  border-radius:14px;
+  background:rgba(157,78,221,.08);
+  border:1px solid rgba(157,78,221,.22);
+  box-shadow:
+    0 10px 24px rgba(157,78,221,.12),
+    inset 0 1px 0 rgba(255,255,255,.06);
+  transition:all .22s ease;
+}
+
+.btn-knowledge::after{
+  background:radial-gradient(circle, rgba(157,78,221,.28), transparent 72%);
+}
+
+.btn-knowledge:hover{
+  transform:translateY(-4px);
+  border-color:rgba(157,78,221,.45);
+  background:rgba(157,78,221,.14);
+  box-shadow:
+    0 16px 34px rgba(157,78,221,.22),
+    0 0 26px rgba(157,78,221,.18);
+}
+
+/* ทีมพัฒนา */
+.lnd-team-btn{
+  min-width:240px;
+  padding:14px 22px !important;
+  border-radius:14px !important;
+  background:rgba(255,255,255,.045) !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  box-shadow:
+    0 10px 24px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.04);
+  transition:all .22s ease !important;
+}
+
+.lnd-team-btn::after{
+  background:radial-gradient(circle, rgba(255,204,0,.22), transparent 72%);
+}
+
+.lnd-team-btn:hover{
+  transform:translateY(-4px) !important;
+  border-color:rgba(255,204,0,.35) !important;
+  background:rgba(255,204,0,.06) !important;
+  box-shadow:
+    0 16px 34px rgba(255,204,0,.14),
+    0 0 28px rgba(255,204,0,.14);
+}
+
+.lnd-team-btn:hover .lnd-team-btn-icon{
+  transform:rotate(-8deg) scale(1.08);
+  background:rgba(255,204,0,.12);
+  color:#ffcc00;
+}
+
+.lnd-team-btn-icon{
+  transition:all .25s ease;
+}
+
+/* กดแล้วเด้งเล็กน้อย */
+.hero-actions a:active{
+  transform:translateY(0) scale(.98);
+}
+
+/* มือถือ */
+@media(max-width:720px){
+  .hero-actions{
+    flex-direction:column;
+    width:100%;
+  }
+
+  .hero-actions a{
+    width:100%;
+    justify-content:center;
+  }
+
+  .lnd-team-btn{
+    min-width:100%;
+  }
+   }
 
 /* Like/Rating widgets */
 .love-widget { margin-top:28px; display:flex; flex-direction:column; align-items:center; gap:14px; }
@@ -1062,14 +1248,14 @@ footer {
           <span>📚 CONFIG LAB</span>
           <span class="btn-knowledge-badge">ติดตาม</span>
         </a>
-        <a href="/team" class="lnd-team-btn" style="height:auto;padding:9px 16px;">
-          <span class="lnd-team-btn-icon" style="font-size:1.1rem;">👥</span>
-          <span>
-            <span class="lnd-team-btn-label i18n-th" style="font-size:0.7rem;">ทีมพัฒนา</span>
-            <span class="lnd-team-btn-label i18n-en" style="font-size:0.7rem;">Meet the Team</span>
-            <span class="lnd-team-btn-sub i18n-th">ผู้สร้าง &amp; AI partners</span>
-            <span class="lnd-team-btn-sub i18n-en">Creators &amp; AI partners</span>
-          </span>
+        <a href="/team" class="lnd-team-btn">
+  <span class="lnd-team-btn-icon">👥</span>
+  <span>
+    <span class="lnd-team-btn-label i18n-th">ทีมพัฒนา</span>
+    <span class="lnd-team-btn-label i18n-en">Meet the Team</span>
+    <span class="lnd-team-btn-sub i18n-th">ผู้สร้าง &amp; AI partners</span>
+    <span class="lnd-team-btn-sub i18n-en">Creators &amp; AI partners</span>
+  </span>
         </a>
       </div>
 
