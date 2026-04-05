@@ -24,6 +24,7 @@ from analyzer.thrust_logic import (calculate_thrust_weight,
                                     estimate_battery_runtime,
                                     estimate_battery_runtime_detail)
 from werkzeug.utils import secure_filename
+from werkzeug.middleware.proxy_fix import ProxyFix
 from analyzer.cli_surgeon import analyze_dump as cli_analyze_dump
 import os, io, time, json, hashlib, logging
 
@@ -174,6 +175,10 @@ def _cells_from_str(s):
 # ── Flask app ─────────────────────────────────────────────────────────────
 app = Flask(__name__)
 
+# RENDER FIX: trust one hop of X-Forwarded-For/Proto from Render's proxy
+# Without this, remote_addr is always 127.0.0.1 → ALL users share one rate-limit bucket
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+
 # SECURITY: ถ้า SECRET_KEY ไม่ถูก set ใน env จะ crash ทันที (ป้องกัน fallback key)
 _secret = os.environ.get("SECRET_KEY", "")
 if not _secret:
@@ -219,12 +224,15 @@ app.config['DEBUG'] = os.environ.get('FLASK_DEBUG', '0') in ('1', 'true', 'True'
 
 # ── Init Rate Limiter ─────────────────────────────────────────────────────
 if LIMITER_AVAILABLE:
+    # Use Redis if REDIS_URL is set in env (Render Redis add-on), else fall back to in-memory
+    storage_uri = os.getenv("REDIS_URL", "memory://")
     limiter = Limiter(
         key_func=get_remote_address,
         app=app,
-        default_limits=[],          # ไม่ limit route ทั่วไป
-        storage_uri="memory://",    # ใช้ in-memory (เพียงพอสำหรับ single worker)
+        default_limits=[],          # No blanket limit — apply per-route only
+        storage_uri=storage_uri,
     )
+    logger.info("Rate limiter storage: %s", "redis" if storage_uri != "memory://" else "memory")
     def _rate(limit_str):
         """Decorator shortcut สำหรับ rate limit"""
         return limiter.limit(limit_str)
@@ -643,8 +651,8 @@ def _handle_analysis_post():
 
 
 @app.route("/app", methods=["GET", "POST"])
-@_rate("30 per minute;300 per day")  # PATCH: rate-limit main analysis POST
 def index():
+    # HTML page — NEVER rate-limit. Only /api/* endpoints are limited.
     analysis = None
 
     if request.method == "POST":
@@ -800,7 +808,6 @@ def _recommend_motor_prop(form):
     }
 
 @app.route('/motor-prop', methods=['GET', 'POST'])
-@_rate("30 per minute;300 per day")  # PATCH: rate-limit motor-prop POST
 def motor_prop():
     if request.method == 'POST':
         result = _recommend_motor_prop(request.form)
@@ -893,7 +900,6 @@ except Exception as e:
     logging.warning("rpm_filter_calc import failed: %s", e)
 
 @app.route('/rpm-filter', methods=['GET', 'POST'])
-@_rate("30 per minute;300 per day")  # PATCH: rate-limit rpm-filter POST
 def rpm_filter():
     result = None
     form   = {}
@@ -1136,12 +1142,30 @@ def set_security_headers(response):
         response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
     return response
 
+# ── /api/analyze — rate-limited JSON API (used by JS fetch, not the HTML form) ──
+@app.route("/api/analyze", methods=["POST"])
+@_rate("20 per minute")
+def api_analyze():
+    """JSON endpoint for AJAX form submission.
+    Returns the full analysis dict as JSON.
+    The HTML form at /app still works via traditional POST (not rate-limited).
+    """
+    try:
+        analysis = _handle_analysis_post()
+        return jsonify(analysis)
+    except Exception:
+        logger.exception("api_analyze error")
+        return jsonify({"error": "เกิดข้อผิดพลาดในการวิเคราะห์ กรุณาลองใหม่"}), 500
+
+
 # ── Error handlers ─────────────────────────────────────────────────────────
 @app.errorhandler(404)
 def page_not_found(e): return render_template("404.html"), 404
 
 @app.errorhandler(500)
-def internal_server_error(e): return render_template("500.html"), 500
+def internal_server_error(e):
+    app.logger.exception("Unhandled server error")
+    return render_template("500.html"), 500
 
 @app.errorhandler(429)
 def rate_limit_exceeded(e):
@@ -1341,6 +1365,14 @@ def api_like_post():
 
 
 if __name__ == "__main__":
+    # ── Startup template validation ─────────────────────────────────────────
+    try:
+        from jinja2 import Environment, FileSystemLoader as _FL
+        _env = Environment(loader=_FL("templates"))
+        _env.get_template("index.html")
+        logger.info("Startup: template validation passed ✓")
+    except Exception as _te:
+        logger.error("Startup: template validation FAILED — %s", _te)
     # FIX L3: threaded=False ป้องกัน race condition กับ SQLite lock ใน dev
     # production ใช้ gunicorn (Procfile) ซึ่ง single-worker + WAL อยู่แล้ว
     app.run(
