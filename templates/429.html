@@ -1,47 +1,180 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="robots" content="noindex,nofollow">
-<title>429 — Too Many Requests · OBIXConfig Doctor</title>
-<link rel="stylesheet" href="/static/css/site-theme.css">
-<style>
-html,body{height:100%;overflow:hidden}
-body{display:flex;align-items:center;justify-content:center;padding:24px}
-.err-bg{position:fixed;inset:0;pointer-events:none}
-.err-ring{position:absolute;top:50%;left:50%;border-radius:50%;border:1px solid rgba(245,158,11,0.07);transform:translate(-50%,-50%);animation:rPulse 4s ease-in-out infinite}
-.err-ring:nth-child(1){width:180px;height:180px}
-.err-ring:nth-child(2){width:340px;height:340px;animation-delay:.8s}
-.err-ring:nth-child(3){width:520px;height:520px;animation-delay:1.6s}
-@keyframes rPulse{0%,100%{opacity:.5}50%{opacity:1}}
-.err-card{position:relative;z-index:2;background:rgba(11,21,32,0.95);border:1px solid rgba(245,158,11,0.18);border-radius:20px;padding:52px 44px 44px;text-align:center;max-width:460px;width:100%;backdrop-filter:blur(24px);box-shadow:0 32px 80px rgba(0,0,0,0.7),inset 0 1px 0 rgba(255,255,255,0.05);animation:fadeUp .5s var(--ease) both}
-.err-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:20px 20px 0 0;background:linear-gradient(90deg,transparent,var(--amber),var(--orange),transparent)}
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-.err-code{font-family:var(--font-head);font-size:80px;font-weight:900;line-height:1;color:var(--amber);letter-spacing:-.04em;text-shadow:0 0 40px rgba(245,158,11,.4);margin-bottom:8px}
-.err-title{font-family:var(--font-head);font-size:15px;font-weight:700;letter-spacing:.1em;color:var(--text);margin-bottom:12px}
-.err-desc{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:20px}
-.err-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:100px;border:1px solid rgba(245,158,11,0.3);background:var(--amber-dim);color:var(--amber);font-family:var(--font-head);font-size:10px;letter-spacing:.1em;margin-bottom:28px}
-.err-timer{font-family:var(--font-mono);font-size:13px;color:var(--muted2);margin-bottom:24px;padding:10px 16px;background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.12);border-radius:8px;display:inline-block}
-.err-timer span{color:var(--amber);font-weight:700}
-.err-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>429 — Too Many Requests · OBIXConfig Doctor</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:     #060c14;
+      --panel:  rgba(255,255,255,0.03);
+      --border: rgba(255,183,0,0.18);
+      --amber:  #ffb700;
+      --muted:  rgba(200,215,255,0.45);
+      --muted2: rgba(200,215,255,0.28);
+      --font-d: 'JetBrains Mono', monospace;
+      --font-s: 'Sarabun', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: rgba(200,215,255,0.85);
+      font-family: var(--font-s);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 36px;
+      max-width: 460px;
+      width: 100%;
+      text-align: center;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 60px rgba(255,183,0,0.06);
+    }
+    .icon { font-size: 52px; line-height: 1; margin-bottom: 18px; }
+    .code {
+      font-family: var(--font-d);
+      font-size: 11px;
+      letter-spacing: .14em;
+      color: var(--amber);
+      margin-bottom: 10px;
+      opacity: .7;
+    }
+    h1 {
+      font-family: var(--font-d);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--amber);
+      margin-bottom: 10px;
+      letter-spacing: -.01em;
+    }
+    .sub {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+    .note {
+      background: rgba(255,183,0,0.06);
+      border: 1px solid rgba(255,183,0,0.15);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: var(--muted2);
+      line-height: 1.65;
+      margin-bottom: 28px;
+      text-align: left;
+    }
+    .note strong { color: var(--amber); font-family: var(--font-d); font-size: 10px; letter-spacing:.08em; }
+    .countdown {
+      font-family: var(--font-d);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--amber);
+      margin-bottom: 6px;
+      letter-spacing: -.02em;
+    }
+    .countdown-lbl {
+      font-size: 11px;
+      color: var(--muted2);
+      margin-bottom: 24px;
+      font-family: var(--font-d);
+      letter-spacing: .06em;
+    }
+    .btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      font-family: var(--font-d);
+      font-size: 11px;
+      letter-spacing: .1em;
+      padding: 10px 22px;
+      border-radius: 8px;
+      border: 1px solid;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all .2s;
+    }
+    .btn-primary {
+      background: rgba(255,183,0,0.10);
+      border-color: rgba(255,183,0,0.40);
+      color: var(--amber);
+    }
+    .btn-primary:hover { background: rgba(255,183,0,0.18); }
+    .btn-ghost {
+      background: transparent;
+      border-color: rgba(255,255,255,0.1);
+      color: var(--muted);
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.2); color: rgba(200,215,255,0.7); }
+    .btn-primary[disabled] { opacity: .45; pointer-events: none; }
+    footer {
+      margin-top: 32px;
+      font-size: 11px;
+      color: var(--muted2);
+      font-family: var(--font-d);
+      letter-spacing: .06em;
+    }
+  </style>
 </head>
 <body>
-<div class="err-bg">
-  <div class="err-ring"></div>
-  <div class="err-ring"></div>
-  <div class="err-ring"></div>
-</div>
-<div class="err-card">
-  <div class="err-tag">⏱️ RATE LIMITED</div>
-  <div class="err-code">429</div>
-  <div class="err-title">คำขอมากเกินไป</div>
-  <div class="err-desc">ระบบถูกใช้งานบ่อยเกินไปในช่วงเวลาสั้น<br>กรุณารอสักครู่แล้วลองใหม่</div>
-  <div class="err-timer">Rate limit: <span>20 req/min</span> · <span>100 req/day</span></div>
-  <div class="err-actions">
-    <a href="/app" class="v5-btn v5-btn-secondary">⬅ กลับหน้าหลัก</a>
+  <div class="card">
+    <div class="icon">⏳</div>
+    <div class="code">HTTP 429 — TOO MANY REQUESTS</div>
+    <h1>Slow down, pilot</h1>
+    <p class="sub">
+      คุณส่งคำขอมากเกินไปในช่วงเวลาสั้น<br>
+      กรุณารอสักครู่แล้วลองใหม่
+    </p>
+
+    <div class="note">
+      <strong>📌 หมายเหตุ</strong><br>
+      Rate limit นี้ใช้กับ <strong>API endpoint</strong> เท่านั้น ไม่ใช่การ refresh หน้าปกติ<br>
+      ถ้าคุณแค่ browse ทั่วไปและเห็นหน้านี้ แสดงว่า script หรือ automation กำลังส่งคำขอซ้ำเร็วเกินไป
+    </div>
+
+    <div class="countdown" id="countdown">60</div>
+    <div class="countdown-lbl">วินาทีก่อนลองใหม่ได้</div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="retryBtn" disabled onclick="goBack()">
+        ⟳ &nbsp;ลองใหม่
+      </button>
+      <a href="/app" class="btn btn-ghost">← กลับหน้าหลัก</a>
+    </div>
   </div>
-</div>
+
+  <footer>OBIXConfig Doctor · configdoctor.onrender.com</footer>
+
+  <script>
+    var sec = 60;
+    var countEl  = document.getElementById('countdown');
+    var retryBtn = document.getElementById('retryBtn');
+    var timer = setInterval(function () {
+      sec--;
+      countEl.textContent = sec > 0 ? sec : '0';
+      if (sec <= 0) {
+        clearInterval(timer);
+        retryBtn.disabled = false;
+        countEl.style.color = '#00ff88';
+        countEl.textContent = '✓';
+      }
+    }, 1000);
+    function goBack() {
+      // Go back to previous page; if no history fall back to /app
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = '/app';
+      }
+    }
+  </script>
 </body>
 </html>

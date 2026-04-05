@@ -1,45 +1,173 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="robots" content="noindex,nofollow">
-<title>500 — Server Error · OBIXConfig Doctor</title>
-<link rel="stylesheet" href="/static/css/site-theme.css">
-<style>
-html,body{height:100%;overflow:hidden}
-body{display:flex;align-items:center;justify-content:center;padding:24px}
-.err-bg{position:fixed;inset:0;pointer-events:none}
-.err-ring{position:absolute;top:50%;left:50%;border-radius:50%;border:1px solid rgba(248,113,113,0.06);transform:translate(-50%,-50%);animation:rPulse 5s ease-in-out infinite}
-.err-ring:nth-child(1){width:180px;height:180px}
-.err-ring:nth-child(2){width:340px;height:340px;animation-delay:.8s}
-.err-ring:nth-child(3){width:520px;height:520px;animation-delay:1.6s}
-@keyframes rPulse{0%,100%{opacity:.5}50%{opacity:1}}
-.err-card{position:relative;z-index:2;background:rgba(11,21,32,0.95);border:1px solid rgba(248,113,113,0.18);border-radius:20px;padding:52px 44px 44px;text-align:center;max-width:440px;width:100%;backdrop-filter:blur(24px);box-shadow:0 32px 80px rgba(0,0,0,0.7),inset 0 1px 0 rgba(255,255,255,0.05);animation:fadeUp .5s var(--ease) both}
-.err-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:20px 20px 0 0;background:linear-gradient(90deg,transparent,var(--red),var(--orange),transparent)}
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-.err-code{font-family:var(--font-head);font-size:80px;font-weight:900;line-height:1;color:var(--red);letter-spacing:-.04em;text-shadow:0 0 40px rgba(248,113,113,.4);margin-bottom:8px}
-.err-title{font-family:var(--font-head);font-size:15px;font-weight:700;letter-spacing:.1em;color:var(--text);margin-bottom:12px}
-.err-desc{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:28px}
-.err-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:100px;border:1px solid rgba(248,113,113,0.3);background:var(--red-dim);color:var(--red);font-family:var(--font-head);font-size:10px;letter-spacing:.1em;margin-bottom:28px}
-.err-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>500 — System Error · OBIXConfig Doctor</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:    #060c14;
+      --panel: rgba(255,255,255,0.03);
+      --red:   #ff4455;
+      --muted: rgba(200,215,255,0.45);
+      --muted2:rgba(200,215,255,0.28);
+      --font-d:'JetBrains Mono', monospace;
+      --font-s:'Sarabun', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: rgba(200,215,255,0.85);
+      font-family: var(--font-s);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid rgba(255,68,85,0.18);
+      border-radius: 16px;
+      padding: 40px 36px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 60px rgba(255,68,85,0.05);
+    }
+    .icon { font-size: 52px; line-height: 1; margin-bottom: 18px; }
+    .code {
+      font-family: var(--font-d);
+      font-size: 11px;
+      letter-spacing: .14em;
+      color: var(--red);
+      margin-bottom: 10px;
+      opacity: .7;
+    }
+    h1 {
+      font-family: var(--font-d);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--red);
+      margin-bottom: 10px;
+      letter-spacing: -.01em;
+    }
+    .sub {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+    .checklist {
+      background: rgba(255,68,85,0.05);
+      border: 1px solid rgba(255,68,85,0.12);
+      border-radius: 8px;
+      padding: 14px 18px;
+      text-align: left;
+      margin-bottom: 28px;
+    }
+    .checklist-title {
+      font-family: var(--font-d);
+      font-size: 9px;
+      letter-spacing: .12em;
+      color: var(--red);
+      opacity: .7;
+      margin-bottom: 10px;
+    }
+    .chk-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 6px;
+    }
+    .chk-item:last-child { margin-bottom: 0; }
+    .chk-item .ico { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+    .btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      font-family: var(--font-d);
+      font-size: 11px;
+      letter-spacing: .1em;
+      padding: 10px 22px;
+      border-radius: 8px;
+      border: 1px solid;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all .2s;
+      display: inline-block;
+    }
+    .btn-primary {
+      background: rgba(255,68,85,0.10);
+      border-color: rgba(255,68,85,0.35);
+      color: var(--red);
+    }
+    .btn-primary:hover { background: rgba(255,68,85,0.18); }
+    .btn-ghost {
+      background: transparent;
+      border-color: rgba(255,255,255,0.1);
+      color: var(--muted);
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.2); color: rgba(200,215,255,0.7); }
+    footer {
+      margin-top: 32px;
+      font-size: 11px;
+      color: var(--muted2);
+      font-family: var(--font-d);
+      letter-spacing: .06em;
+    }
+  </style>
 </head>
 <body>
-<div class="err-bg">
-  <div class="err-ring"></div>
-  <div class="err-ring"></div>
-  <div class="err-ring"></div>
-</div>
-<div class="err-card">
-  <div class="err-tag">🔥 INTERNAL ERROR</div>
-  <div class="err-code">500</div>
-  <div class="err-title">เกิดข้อผิดพลาดภายในระบบ</div>
-  <div class="err-desc">Server พบปัญหาที่ไม่คาดคิด<br>กรุณาลองใหม่ หรือแจ้งผู้พัฒนา</div>
-  <div class="err-actions">
-    <a href="/app" class="v5-btn v5-btn-primary" style="--green:var(--red);--green-dim:var(--red-dim)">🔄 ลองใหม่</a>
-    <a href="/landing" class="v5-btn v5-btn-secondary">↩ หน้าหลัก</a>
+  <div class="card">
+    <div class="icon">🛑</div>
+    <div class="code">HTTP 500 — INTERNAL SERVER ERROR</div>
+    <h1>Analysis system hiccup</h1>
+    <p class="sub">
+      ระบบวิเคราะห์พบข้อผิดพลาดชั่วคราว<br>
+      ไม่มีข้อมูลของคุณรั่วไหล — กรุณาลองใหม่อีกครั้ง
+    </p>
+
+    <div class="checklist">
+      <div class="checklist-title">🔧 สิ่งที่คุณทำได้</div>
+      <div class="chk-item">
+        <span class="ico">🔄</span>
+        <span>กด <strong>ลองใหม่</strong> ด้านล่าง — ส่วนใหญ่แก้ได้ใน 1 ครั้ง</span>
+      </div>
+      <div class="chk-item">
+        <span class="ico">⚙️</span>
+        <span>ถ้ายังไม่ได้ ลองเปลี่ยน Preset หรือตรวจสอบค่าที่กรอก เช่น KV หรือน้ำหนักโดรน</span>
+      </div>
+      <div class="chk-item">
+        <span class="ico">💬</span>
+        <span>ถ้าเกิดซ้ำหลายครั้ง แจ้งทีมงานได้ที่ GitHub Issues</span>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="retryAnalysis()">
+        ⟳ &nbsp;ลองใหม่
+      </button>
+      <a href="/app" class="btn btn-ghost">← กลับหน้าหลัก</a>
+    </div>
   </div>
-</div>
+
+  <footer>OBIXConfig Doctor · configdoctor.onrender.com</footer>
+
+  <script>
+    function retryAnalysis() {
+      // Go back to previous page (the form); if no history just go to /app
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = '/app';
+      }
+    }
+  </script>
 </body>
 </html>
