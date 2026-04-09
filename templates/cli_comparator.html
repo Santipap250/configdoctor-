@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() if csrf_token is defined else '' }}">
 <title>CLI Diff Comparator — OBIXConfig Doctor</title>
 {% set og_title       = "CLI Diff Comparator — OBIXConfig Doctor" %}
 {% set og_description = "เปรียบเทียบ 2 CLI config: Risk Score, Flight Profile, Symptom Prediction, Parameter Guide 90+ ค่า" %}
@@ -1286,7 +1287,10 @@ async function doCompare(){
   if(!a||!b){ toast('⚠️ กรุณาวาง Config ทั้ง 2 ชุดก่อน'); return }
   $('loading').style.display='block';
   $('results').style.display='none';
-  const csrf=(document.cookie.match(/csrf_token=([^;]+)/)||[])[1]||'';
+  /* FIX: read CSRF from meta tag (consistent with blackbox.html / cli_surgeon.html)
+     fallback to cookie for compatibility */
+  const csrf = document.querySelector('meta[name="csrf-token"]')?.content ||
+               (document.cookie.match(/csrf_token=([^;]+)/)||[])[1] || '';
   try{
     const res=await fetch('/compare_cli',{
       method:'POST',
