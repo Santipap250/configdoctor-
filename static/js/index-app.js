@@ -424,31 +424,10 @@ window.highlightSauceCLI = function() {
 })();
 
 /* ─── PRESET SELECT (dropdown sync) ─────────────────────────── */
-let presetMap = {
-  "2.5_micro":   {size:2.5,  weight:80,   battery:"3S", prop_size:2.5, pitch:2.0, blades:"2", style:"freestyle"},
-  "3_whoop":     {size:3.0,  weight:120,  battery:"3S", prop_size:3.0, pitch:2.0, blades:"2", style:"freestyle"},
-  "3.5_cine":    {size:3.5,  weight:350,  battery:"4S", prop_size:3.5, pitch:2.5, blades:"2", style:"longrange"},
-  "4_mini":      {size:4.0,  weight:420,  battery:"4S", prop_size:4.0, pitch:3.0, blades:"2", style:"freestyle"},
-  "5_freestyle": {size:5.0,  weight:750,  battery:"4S", prop_size:5.0, pitch:4.0, blades:"3", style:"freestyle"},
-  "6_heavy5":    {size:6.0,  weight:850,  battery:"6S", prop_size:6.0, pitch:4.0, blades:"3", style:"freestyle"},
-  "7_midlr":     {size:7.0,  weight:1100, battery:"6S", prop_size:7.0, pitch:3.5, blades:"2", style:"longrange"},
-  "7.5_midlr":   {size:7.5,  weight:1200, battery:"6S", prop_size:7.5, pitch:3.0, blades:"2", style:"longrange"},
-  "8_lr":        {size:8.0,  weight:1500, battery:"6S", prop_size:8.0, pitch:3.5, blades:"2", style:"longrange"},
-  "10_lr":       {size:10.0, weight:1500, battery:"6S", prop_size:10.0,pitch:4.5, blades:"2", style:"longrange"}
-};
-(function(){
-  function sf(sel,v){ let el=document.querySelector(sel); if(el) el.value=v; }
-  let ps = document.getElementById('preset-select');
-  if(ps) ps.addEventListener('change', function(){
-    let p = presetMap[this.value]; if(!p) return;
-    sf('input[name="size"]',p.size); sf('input[name="weight"]',p.weight);
-    sf('select[name="battery"]',p.battery); sf('input[name="prop_size"]',p.prop_size);
-    sf('input[name="pitch"]',p.pitch); sf('select[name="blades"]',p.blades);
-    sf('select[name="style"]',p.style);
-    liveCalc();
-    showToast('✓ โหลด preset แล้ว');
-  });
-})();
+/* NOTE: presetMap removed — PRESETS_LIVE above (43 entries) already handles
+   the #preset-select change event via window.onPresetSelect / applyPreset().
+   Having two listeners caused: (a) liveCalc called twice per change,
+   (b) data inconsistency — e.g. 5_freestyle weight was 750 here vs 720 in PRESETS_LIVE. */
 
 /* ═══════════════════════════════════════════════════════════
    PRESET CLI PROFILES
@@ -1007,21 +986,22 @@ function toggleTheme(){
       el.style.filter = '';
     }, 120);
   };
-  let origLiveCalc = window.liveCalc;
-  if(origLiveCalc) {
-    let flashTimer;
-
-window.liveCalc = function () {
-  origLiveCalc();
-
-  clearTimeout(flashTimer);
-  flashTimer = setTimeout(() => {
-    ['h_twr', 'h_tip', 'h_rpm', 'h_ft'].forEach(function(id) {
-      let el = document.getElementById(id);
-      if (el) flash(id, el.textContent);
-    });
-  }, 250);
-};
+  /* FIX: Use guard flag to prevent re-wrapping on bfcache restore or double-load.
+     Named function expression prevents chained recursion if script runs twice. */
+  if (!window.__liveCalcFlashWrapped && typeof window.liveCalc === 'function') {
+    window.__liveCalcFlashWrapped = true;
+    const _coreCalc = window.liveCalc;
+    let _flashTimer;
+    window.liveCalc = function obixLiveCalcWithFlash() {
+      _coreCalc();
+      clearTimeout(_flashTimer);
+      _flashTimer = setTimeout(function() {
+        ['h_twr', 'h_tip', 'h_rpm', 'h_ft'].forEach(function(id) {
+          let el = document.getElementById(id);
+          if (el) flash(id, el.textContent);
+        });
+      }, 250);
+    };
   }
 })();
 
