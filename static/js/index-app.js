@@ -931,6 +931,7 @@ function renderRadar(){
   btn.dataset.particlesBound = '1';
 
   btn.addEventListener('click', function(e){
+    if(btn.disabled) return; // skip burst after locked
     const colors = ['#00ff88','#00aaff','#00e5ff','#00cc6a','#ffffff'];
 
     for(let i=0; i<22; i++){
