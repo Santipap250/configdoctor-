@@ -6451,25 +6451,6 @@ function ftpFilter(btn, cat) {
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFTP(); });
 
-/* ── ANALYZE DRONE BUTTON FEEDBACK ────────────────────────── */
-(function(){
-  var form = document.getElementById('analyzeForm');
-  var btn  = document.getElementById('btnAnalyze');
-  if (!form || !btn) return;
-  form.addEventListener('submit', function() {
-    btn.disabled = true;
-    btn.setAttribute('disabled','');
-    var mainText = btn.querySelector('.bsa-main');
-    var rocket   = btn.querySelector('.bsa-rocket');
-    var dot      = btn.querySelector('.bsa-badge-dot');
-    if (mainText) mainText.textContent = 'ANALYZING...';
-    if (rocket) { rocket.textContent = '⏳'; rocket.style.animation = 'none'; }
-    if (dot) dot.style.background = '#ffb700';
-  });
-})();
-
-
-
 /* ═══════════════════════════════════════════════════════════
    QUANTUM TELEMETRY STATION — JavaScript Engine
    ═══════════════════════════════════════════════════════════ */
