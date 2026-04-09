@@ -92,7 +92,7 @@ _STYLE_ADJUST = {
 
 def _cells_from_str(s):
     try: return max(1, min(int(str(s).upper().replace("S","").strip()), 8))
-    except: return 4
+    except Exception: return 4
 
 def _pick_baseline_key(cls_key, battery="4S"):
     cells = _cells_from_str(str(battery or "4S"))
@@ -177,7 +177,7 @@ PRESETS: Dict[str, Dict[str, Any]] = {
 
 def detect_class_from_size(size):
     try: s = float(size)
-    except: return "freestyle", DRONE_CLASSES["freestyle"]
+    except Exception: return "freestyle", DRONE_CLASSES["freestyle"]
     for cls, meta in DRONE_CLASSES.items():
         lo, hi = meta["size_range"]
         if lo <= s <= hi: return cls, meta
