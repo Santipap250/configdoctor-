@@ -925,14 +925,19 @@ function renderRadar(){
 
 /* ─── PARTICLE BURST ON ANALYZE ──────────────────────────────── */
 (function(){
-  let btn = document.querySelector('.btn-analyze');
-  if(!btn) return;
+  let btn = document.getElementById('btnAnalyze');
+  if(!btn || btn.dataset.particlesBound === '1') return;
+
+  btn.dataset.particlesBound = '1';
+
   btn.addEventListener('click', function(e){
     const colors = ['#00ff88','#00aaff','#00e5ff','#00cc6a','#ffffff'];
+
     for(let i=0; i<22; i++){
       let spark = document.createElement('div');
       let color = colors[Math.floor(Math.random()*colors.length)];
       let size = 3 + Math.random()*4;
+
       spark.style.cssText = [
         'position:fixed',
         'left:'+e.clientX+'px',
@@ -945,20 +950,24 @@ function renderRadar(){
         'z-index:9999',
         'box-shadow:0 0 '+(size*2)+'px '+color
       ].join(';');
+
       document.body.appendChild(spark);
+
       let angle = (i/22)*Math.PI*2 + Math.random()*0.3;
       let dist = 50 + Math.random()*80;
       let tx = Math.cos(angle)*dist;
       let ty = Math.sin(angle)*dist;
-      let dur = 500+Math.random()*400;
+
       spark.animate(
-        [{transform:'translate(0,0) scale(1)',opacity:1},
-         {transform:'translate('+tx+'px,'+ty+'px) scale(0)',opacity:0}],
-        {duration:dur, easing:'cubic-bezier(0,.9,.57,1)'}
-      ).onfinish = function(){ this.effect.target.remove(); };
+        [
+          {transform:'translate(0,0) scale(1)', opacity:1},
+          {transform:'translate('+tx+'px,'+ty+'px) scale(0)', opacity:0}
+        ],
+        {duration:600, easing:'cubic-bezier(0,.9,.57,1)'}
+      ).onfinish = function(){
+        this.effect.target.remove();
+      };
     }
-    btn.style.boxShadow = '0 0 40px rgba(0,255,136,0.6)';
-    setTimeout(function(){ btn.style.boxShadow = ''; }, 700);
   });
 })();
 
@@ -1112,38 +1121,38 @@ window.copyCliSnippet = function(el) {
   if (window.__analyzeBound) return;
   window.__analyzeBound = true;
 
-  var form = document.getElementById('analyzeForm');
-  var submitBtn = document.getElementById('btnAnalyze');
-  if (!form || !submitBtn) return;
+  const form = document.getElementById('analyzeForm');
+  const btn  = document.getElementById('btnAnalyze');
 
-  var submitting = false;
-  var origBtnHtml = submitBtn.innerHTML;
-  var _debounceTimer = null;
+  if (!form || !btn) return;
 
-  function _guardedSubmit(e) {
-    if (submitting) {
+  let locked = false;
+  const original = btn.innerHTML;
+
+  form.addEventListener('submit', function (e) {
+    if (locked) {
       e.preventDefault();
-      return;
+      e.stopImmediatePropagation();
+      return false;
     }
 
-    clearTimeout(_debounceTimer);
-    _debounceTimer = setTimeout(function () {
-      submitting = true;
-      submitBtn.disabled = true;
-      submitBtn.style.opacity = '0.60';
-      submitBtn.innerHTML =
-        '<span style="font-size:13px;vertical-align:middle;">⏳</span>&nbsp;กำลังวิเคราะห์…';
-    }, 80);
-  }
+    locked = true;
 
-  form.addEventListener('submit', _guardedSubmit);
+    btn.disabled = true;
+    btn.setAttribute('aria-disabled', 'true');
+    btn.style.pointerEvents = 'none';
+    btn.style.opacity = '0.6';
+    btn.innerHTML = '⏳ กำลังวิเคราะห์…';
+  }, true);
 
   window.addEventListener('pageshow', function (ev) {
     if (ev.persisted) {
-      submitting = false;
-      submitBtn.disabled = false;
-      submitBtn.style.opacity = '';
-      submitBtn.innerHTML = origBtnHtml;
+      locked = false;
+      btn.disabled = false;
+      btn.removeAttribute('aria-disabled');
+      btn.style.pointerEvents = '';
+      btn.style.opacity = '';
+      btn.innerHTML = original;
     }
   });
 })();
