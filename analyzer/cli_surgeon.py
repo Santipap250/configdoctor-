@@ -688,7 +688,7 @@ set serialrx_provider = CRSF
             with open(sys.argv[1], 'r', encoding='utf8') as f:
                 txt = f.read()
         except Exception as e:
-            print("Cannot read file:", e)
+            print("Cannot read file:", e, file=sys.stderr)
             sys.exit(1)
     out = analyze_dump(txt)
     print(json.dumps(out, ensure_ascii=False, indent=2))
