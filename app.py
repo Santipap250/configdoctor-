@@ -26,7 +26,8 @@ from analyzer.thrust_logic import (calculate_thrust_weight,
 from werkzeug.utils import secure_filename
 from werkzeug.middleware.proxy_fix import ProxyFix
 from analyzer.cli_surgeon import analyze_dump as cli_analyze_dump
-import os, io, time, json, hashlib, logging
+import os, io, re, time, json, hashlib, logging
+from datetime import datetime
 
 # ── Logger init — MUST be first before any try/except import blocks ───────
 logging.basicConfig(level=logging.INFO)
@@ -80,8 +81,6 @@ def _ip_hash(request_obj):
     ip = ip or request_obj.remote_addr or 'unknown'
     return hashlib.sha256(ip.encode()).hexdigest()
 
-
-from datetime import datetime
 
 # ── CSRF Protection ───────────────────────────────────────────────────────
 try:
@@ -160,9 +159,8 @@ def _normalize_style(s: str) -> str:
 
 def _cells_from_str(s):
     # FIX M2: ใช้ regex แทน replace เพื่อรองรับ "4S+", "4s2p", "4S 1500mAh" ฯลฯ
-    import re as _re
     try:
-        m = _re.search(r'(\d+)\s*[Ss]', str(s))
+        m = re.search(r'(\d+)\s*[Ss]', str(s))
         if m:
             c = int(m.group(1))
             return max(1, min(c, 8))
@@ -517,8 +515,11 @@ def _handle_analysis_post():
     try:
         analysis = analyze_drone(size, battery, style, prop_result, weight, detected_class)
     except Exception:
-        analysis = {"style": style, "weight_class": "unknown", "thrust_ratio": 0,
-                    "flight_time": 0, "summary": "analysis fallback", "basic_tips": []}
+        analysis = {
+            "style": style, "weight_class": "unknown", "thrust_ratio": 0,
+            "flight_time": 0, "battery_est": 0, "est_flight_time_min": 0,
+            "summary": "analysis fallback", "basic_tips": [],
+        }
 
     baseline_ctrl  = get_baseline_for_class(detected_class) or {}
     pid_axes       = baseline_ctrl.get("pid_axes", {})
@@ -829,31 +830,28 @@ except Exception as e:
 
 @app.route('/pid-advisor')
 def pid_advisor():
-    import json as _json
     symptoms_list = get_all_symptoms()
     # Build advice dict keyed by id for JS
     advice_dict = {}
     for s in symptoms_list:
         advice_dict[s['id']] = _get_symptom_advice(s['id'])
-    advice_json = _json.dumps(advice_dict, ensure_ascii=False)
+    advice_json = json.dumps(advice_dict, ensure_ascii=False)
     return render_template('pid_advisor.html', symptoms=symptoms_list, advice_json=advice_json)
 
 # ── Quick Tune Pad ───────────────────────────────────────────────────────────
 @app.route('/quick-tune')
 def quick_tune():
-    import json as _json
     symptoms_list = get_all_symptoms()
     advice_dict = {}
     for s in symptoms_list:
         advice_dict[s['id']] = _get_symptom_advice(s['id'])
-    advice_json = _json.dumps(advice_dict, ensure_ascii=False)
+    advice_json = json.dumps(advice_dict, ensure_ascii=False)
     return render_template('quick_tune.html', symptoms=symptoms_list, advice_json=advice_json)
 
 @app.route('/api/symptom/<symptom_id>')
 def api_symptom(symptom_id):
     # SECURITY: allow only alphanumeric + underscore IDs
-    import re as _re
-    if not _re.match(r'^[a-zA-Z0-9_]{1,80}$', str(symptom_id)):
+    if not re.match(r'^[a-zA-Z0-9_]{1,80}$', str(symptom_id)):
         return jsonify({"error": "invalid symptom ID"}), 400
     advice = _get_symptom_advice(symptom_id)
     # FIX v2.2: คืน 404 สำหรับ unknown symptom ID
