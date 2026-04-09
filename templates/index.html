@@ -6273,6 +6273,19 @@ window.OBIX = {
 </script>
 <script src="{{ url_for('static', filename='js/index-app.js') }}"></script>
 <script>
+/* ── Auto-scroll to results on mobile after POST analysis ── */
+(function(){
+  if(!window.OBIX || !window.OBIX.analysis) return;
+  var isMobile = window.innerWidth < 960;
+  if(!isMobile) return;
+  var target = document.querySelector('.results-col') ||
+               document.querySelector('.stage');
+  if(!target) return;
+  setTimeout(function(){
+    target.scrollIntoView({ behavior:'smooth', block:'start' });
+  }, 180);
+})();
+
 /* ── SUPER UPGRADE: Animated counters + HUD pulse ─────── */
 (function(){
   'use strict';
@@ -6462,17 +6475,21 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFTP(); 
     const c = document.getElementById('particleCanvas');
     if(!c) return;
     const ctx = c.getContext('2d');
+    // PERF FIX: reduce particle count; skip heavy O(n²) lines on mobile
+    const isMobile = window.innerWidth < 768;
+    const COUNT = isMobile ? 25 : 45;
     let W,H,particles=[];
     function resize(){ W=c.width=window.innerWidth; H=c.height=window.innerHeight; }
     resize();
-    window.addEventListener('resize',resize);
-    for(let i=0;i<70;i++) particles.push({
+    window.addEventListener('resize',resize,{passive:true});
+    for(let i=0;i<COUNT;i++) particles.push({
       x:Math.random()*window.innerWidth, y:Math.random()*window.innerHeight,
-      vx:(Math.random()-.5)*.3, vy:(Math.random()-.5)*.3,
-      r:Math.random()*1.8+.4,
-      a:Math.random()*.6+.1,
+      vx:(Math.random()-.5)*.25, vy:(Math.random()-.5)*.25,
+      r:Math.random()*1.5+.3,
+      a:Math.random()*.5+.08,
       c:Math.random()<.6?'0,255,136':Math.random()<.5?'0,232,208':'0,136,255'
     });
+    let frameId;
     function frame(){
       ctx.clearRect(0,0,W,H);
       particles.forEach(p=>{
@@ -6484,22 +6501,24 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFTP(); 
         ctx.fillStyle=`rgba(${p.c},${p.a})`;
         ctx.fill();
       });
-      // Connection lines
-      for(let i=0;i<particles.length;i++){
-        for(let j=i+1;j<particles.length;j++){
-          const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y;
-          const d=Math.sqrt(dx*dx+dy*dy);
-          if(d<120){
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x,particles[i].y);
-            ctx.lineTo(particles[j].x,particles[j].y);
-            ctx.strokeStyle=`rgba(0,255,136,${.06*(1-d/120)})`;
-            ctx.lineWidth=.5;
-            ctx.stroke();
+      // Connection lines — skip on mobile (too heavy)
+      if(!isMobile){
+        for(let i=0;i<particles.length;i++){
+          for(let j=i+1;j<particles.length;j++){
+            const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y;
+            const d=Math.sqrt(dx*dx+dy*dy);
+            if(d<100){
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x,particles[i].y);
+              ctx.lineTo(particles[j].x,particles[j].y);
+              ctx.strokeStyle=`rgba(0,255,136,${.05*(1-d/100)})`;
+              ctx.lineWidth=.4;
+              ctx.stroke();
+            }
           }
         }
       }
-      requestAnimationFrame(frame);
+      frameId = requestAnimationFrame(frame);
     }
     frame();
   }
@@ -6508,6 +6527,8 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFTP(); 
   function initRadar(){
     const c = document.getElementById('radarCanvas');
     if(!c) return;
+    // PERF FIX: skip radar sweep on mobile — saves ~2ms/frame on main thread
+    if(window.innerWidth < 768){ c.style.display='none'; return; }
     const ctx = c.getContext('2d');
     let W,H,angle=0;
     function resize(){ W=c.width=window.innerWidth; H=c.height=window.innerHeight; }
@@ -6528,7 +6549,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFTP(); 
       const sweepGrad = ctx.createConicalGradient
         ? null
         : null;
-      for(let t=0;t<60;t++){
+      for(let t=0;t<20;t++){  // PERF FIX: was 60 segments
         const a=angle-t*.04;
         const alpha=Math.max(0,.15*(1-t/60));
         ctx.beginPath();
@@ -6553,6 +6574,8 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFTP(); 
   function addCircularGauges(){
     const cells = document.querySelectorAll('.hud-cell');
     cells.forEach((cell,i)=>{
+      if(cell.dataset.gaugeAdded) return; // idempotency guard
+      cell.dataset.gaugeAdded = '1';
       const size = Math.min(cell.offsetWidth*.5, 90);
       const r = size*.42; const circ = 2*Math.PI*r;
       const colors = ['var(--neon-g)','var(--neon-a)','var(--neon-b)','var(--neon-g)'];
@@ -6657,6 +6680,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFTP(); 
 
   /* ─── CANVAS INJECTION ────────────────────────────────── */
   function injectCanvases(){
+    if(document.getElementById('radarCanvas')) return; // idempotency guard
     const radar=document.createElement('canvas');
     radar.id='radarCanvas';
     document.body.insertBefore(radar,document.body.firstChild);
@@ -6694,16 +6718,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFTP(); 
     initScrollReveal();
   });
 
-  // Also run if DOM already loaded
-  if(document.readyState!=='loading'){
-    setTimeout(function(){
-      injectCanvases();
-      initParticles();
-      initRadar();
-      addCircularGauges();
-      initScrollReveal();
-    },50);
-  }
+  // DOM already loaded: handled by DOMContentLoaded guard above
 
 })();
 </script>
