@@ -1157,3 +1157,134 @@ window.copyCliSnippet = function(el) {
     }
   });
 })();
+
+
+/* ═══════════════════════════════════════════════════════════
+   CONFIG WIZARD — Size Chip Selector
+═══════════════════════════════════════════════════════════ */
+window.setSizeChip = function(chip) {
+  // Deactivate all chips
+  document.querySelectorAll('.sz-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+
+  var sz    = parseFloat(chip.dataset.sz  || 5.0);
+  var w     = parseFloat(chip.dataset.w   || 720);
+  var prop  = parseFloat(chip.dataset.prop  || sz);
+  var pitch = parseFloat(chip.dataset.pitch || 4.0);
+  var kv    = parseInt(chip.dataset.kv || 0);
+
+  // Update hidden form fields
+  var setVal = function(id, v) { var el = document.getElementById(id); if(el) el.value = v; };
+  setVal('f_size',   sz);
+  setVal('f_prop',   prop);
+  setVal('f_pitch',  pitch);
+  setVal('f_weight', w);
+
+  // Update visible inputs
+  var setVis = function(id, v) { var el = document.getElementById(id); if(el) el.value = v; };
+  setVis('f_weight_vis',  w);
+  setVis('f_prop_vis',    prop);
+  setVis('f_pitch_vis',   pitch);
+  if(kv) setVis('f_kv', kv);
+
+  // Update prop display
+  var disp = document.getElementById('sz_prop_disp');
+  if(disp) disp.textContent = prop + '"×' + pitch + 'p';
+
+  // Trigger live calc
+  if(window.liveCalc) liveCalc();
+};
+
+/* Sync size chip on page load if form has pre-filled value */
+(function(){
+  var sizeEl = document.getElementById('f_size');
+  if(!sizeEl || !sizeEl.value) return;
+  var sz = parseFloat(sizeEl.value);
+  var best = null, bestDiff = 99;
+  document.querySelectorAll('.sz-chip').forEach(function(c){
+    var d = Math.abs(parseFloat(c.dataset.sz) - sz);
+    if(d < bestDiff){ bestDiff = d; best = c; }
+  });
+  if(best && bestDiff < 0.5){
+    document.querySelectorAll('.sz-chip').forEach(c => c.classList.remove('active'));
+    best.classList.add('active');
+  }
+  // Update prop display
+  var propEl = document.getElementById('f_prop');
+  var pitchEl = document.getElementById('f_pitch');
+  var disp = document.getElementById('sz_prop_disp');
+  if(disp && propEl && pitchEl) disp.textContent = propEl.value + '"×' + pitchEl.value + 'p';
+})();
+
+/* ═══════════════════════════════════════════════════════════
+   RESULTS — Expandable Explanations
+═══════════════════════════════════════════════════════════ */
+window.toggleStatExp = function(id) {
+  var el = document.getElementById(id);
+  if(!el) return;
+  var isOpen = el.style.display === 'block';
+  // Close all stat-exp
+  document.querySelectorAll('.stat-exp').forEach(function(e){ e.style.display='none'; });
+  if(!isOpen) el.style.display = 'block';
+};
+
+window.togglePidTip = function(id) {
+  var el = document.getElementById(id);
+  if(!el) return;
+  var isOpen = el.style.display === 'block';
+  document.querySelectorAll('.pid-tip-box').forEach(function(e){ e.style.display='none'; });
+  if(!isOpen) el.style.display = 'block';
+};
+
+window.toggleFltTip = function(id) {
+  var el = document.getElementById(id);
+  if(!el) return;
+  var isOpen = el.style.display === 'block';
+  document.querySelectorAll('.flt-tip-box').forEach(function(e){ e.style.display='none'; });
+  if(!isOpen) el.style.display = 'block';
+};
+
+/* ═══════════════════════════════════════════════════════════
+   mAh hint updater
+═══════════════════════════════════════════════════════════ */
+(function(){
+  function updateMahHint(){
+    var mahEl  = document.getElementById('f_mah');
+    var battEl = document.getElementById('battery-select');
+    var hint   = document.getElementById('mah_hint');
+    if(!mahEl || !battEl || !hint) return;
+
+    var mah   = parseInt(mahEl.value) || 1500;
+    var cells = parseInt((battEl.value||'4S').replace(/[Ss]/,'')) || 4;
+    var wt    = parseFloat((document.getElementById('f_weight')||{}).value) || 720;
+
+    // Rough flight time estimate: usable Wh / avg_power * 60
+    var packV    = cells * 3.7;
+    var wh       = (mah / 1000) * packV * 0.85;
+    var wPerG    = cells <= 2 ? 0.38 : cells <= 3 ? 0.32 : cells <= 4 ? 0.20 : cells <= 6 ? 0.16 : 0.14;
+    var hoverW   = wPerG * wt;
+    var avgW     = hoverW * 1.55;
+    var ft       = avgW > 1 ? Math.round((wh / avgW) * 60 * 10) / 10 : 0;
+    hint.textContent = ft > 0 ? '≈ ' + ft + ' min' : '';
+  }
+  var mahEl  = document.getElementById('f_mah');
+  var battEl = document.getElementById('battery-select');
+  if(mahEl)  mahEl.addEventListener('input', updateMahHint);
+  if(battEl) battEl.addEventListener('change', updateMahHint);
+  updateMahHint();
+})();
+
+/* Prop/pitch sync from advanced inputs */
+(function(){
+  var propVis  = document.getElementById('f_prop_vis');
+  var pitchVis = document.getElementById('f_pitch_vis');
+  function syncPropDisp(){
+    var disp = document.getElementById('sz_prop_disp');
+    if(!disp) return;
+    var p  = (propVis  && propVis.value)  ? propVis.value  : (document.getElementById('f_prop')||{}).value  || '5.0';
+    var pi = (pitchVis && pitchVis.value) ? pitchVis.value : (document.getElementById('f_pitch')||{}).value || '4.0';
+    disp.textContent = p + '"×' + pi + 'p';
+  }
+  if(propVis)  propVis.addEventListener('input', syncPropDisp);
+  if(pitchVis) pitchVis.addEventListener('input', syncPropDisp);
+})();
