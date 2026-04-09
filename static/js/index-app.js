@@ -1114,7 +1114,7 @@ window.copyCliSnippet = function(el) {
   window.__analyzeBound = true;
 
   var form      = document.getElementById('analyzeForm');
-  var submitBtn = document.querySelector('.btn-analyze');
+  var submitBtn = document.getElementById('btnAnalyze');
   if (!form || !submitBtn) return;
 
   var submitting    = false;
