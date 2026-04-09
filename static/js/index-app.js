@@ -1109,60 +1109,41 @@ window.copyCliSnippet = function(el) {
 (function () {
   'use strict';
 
-  // Idempotency guard — never bind twice
   if (window.__analyzeBound) return;
   window.__analyzeBound = true;
 
-  var form      = document.getElementById('analyzeForm');
+  var form = document.getElementById('analyzeForm');
   var submitBtn = document.getElementById('btnAnalyze');
   if (!form || !submitBtn) return;
 
-  var submitting    = false;
-  var controller    = null;
-  var origBtnHtml   = submitBtn.innerHTML;
-
-  // Debounce helper — prevents rapid repeated calls (e.g. Enter key held down)
+  var submitting = false;
+  var origBtnHtml = submitBtn.innerHTML;
   var _debounceTimer = null;
+
   function _guardedSubmit(e) {
     if (submitting) {
       e.preventDefault();
       return;
     }
 
-    // Clear any pending debounce
     clearTimeout(_debounceTimer);
     _debounceTimer = setTimeout(function () {
-      // Abort any in-flight fetch (future AJAX upgrade)
-      if (controller) {
-        try { controller.abort(); } catch (_) {}
-      }
-      controller = typeof AbortController !== 'undefined'
-        ? new AbortController()
-        : null;
-
-      submitting        = true;
+      submitting = true;
       submitBtn.disabled = true;
       submitBtn.style.opacity = '0.60';
       submitBtn.innerHTML =
-        '<span style="font-size:13px;vertical-align:middle;">⏳</span>' +
-        '&nbsp;กำลังวิเคราะห์…';
-
-      // Traditional form POST — page will reload; no need to manually re-enable.
-      // On page-load the button is always fresh.
-    }, 80); // 80 ms debounce on submit
+        '<span style="font-size:13px;vertical-align:middle;">⏳</span>&nbsp;กำลังวิเคราะห์…';
+    }, 80);
   }
 
   form.addEventListener('submit', _guardedSubmit);
 
-  // Safety valve: if user navigates back and bfcache restores the page,
-  // reset the submitting state so the form works again.
   window.addEventListener('pageshow', function (ev) {
     if (ev.persisted) {
-      submitting          = false;
-      submitBtn.disabled  = false;
+      submitting = false;
+      submitBtn.disabled = false;
       submitBtn.style.opacity = '';
       submitBtn.innerHTML = origBtnHtml;
     }
   });
-
 })();
