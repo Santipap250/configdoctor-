@@ -6881,13 +6881,20 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeFTP(); 
   }
 
   /* ─── INIT ────────────────────────────────────────────── */
-  document.addEventListener('DOMContentLoaded',function(){
+  (function(){
+  function _init(){
     injectCanvases();
     initParticles();
     initRadar();
     addCircularGauges();
     initScrollReveal();
-  });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _init);
+  } else {
+    _init(); // script is at bottom of body — DOM already ready
+  }
+})();
 
   // DOM already loaded: handled by DOMContentLoaded guard above
 
