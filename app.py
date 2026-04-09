@@ -391,22 +391,17 @@ def analyze_drone(size, battery, style, prop_result, weight, detected_class=None
         analysis["extra_tips"] = ["Long Range — P/D ต่ำ นิ่ง I สูงเพื่อ wind rejection"]
 
     # ── TWR (rough fallback) ───────────────────────────────────────────
-analysis["thrust_ratio"] = None
-try:
-    motor_load = prop_result.get("effect", {}).get("motor_load", 0) if isinstance(prop_result, dict) else None
-    if motor_load is not None and weight is not None:
+    try:
+        motor_load = prop_result.get("effect", {}).get("motor_load", 0) if isinstance(prop_result, dict) else 0
         analysis["thrust_ratio"] = calculate_thrust_weight(motor_load, float(weight))
-except Exception:
-    logger.debug("thrust_ratio calc failed", exc_info=True)
+    except Exception:
+        analysis["thrust_ratio"] = 0
 
-# ── Flight time (style-aware) ──────────────────────────────────────
-analysis["battery_est"] = None
-try:
-    analysis["battery_est"] = estimate_battery_runtime(
-        weight, battery, style=style, size_inch=float(size or 5.0)
-    )
-except Exception:
-    logger.debug("battery_est calc failed", exc_info=True)
+    # ── Flight time (style-aware) ──────────────────────────────────────
+    try:
+        analysis["battery_est"] = estimate_battery_runtime(weight, battery, style=style, size_inch=float(size or 5.0))
+    except Exception:
+        analysis["battery_est"] = 0
 
     return analysis
 
@@ -598,23 +593,11 @@ def _handle_analysis_post():
                 analysis.update(adv)
                 _adv_inner = adv.get("advanced", {})
                 adv_power  = _adv_inner.get("power", {})
-                adv_tr = _adv_inner.get("thrust_ratio")
-if adv_tr is not None:
-    analysis["thrust_ratio"] = adv_tr
-elif analysis.get("thrust_ratio") is None:
-    analysis["thrust_ratio"] = None
-
-adv_ft = adv_power.get("est_flight_time_min")
-if adv_ft is not None and adv_ft != 0:
-    analysis["est_flight_time_min"] = adv_ft
-elif analysis.get("battery_est") not in (None, 0):
-    analysis["est_flight_time_min"] = analysis["battery_est"]
-else:
-    analysis["est_flight_time_min"] = None
-
-analysis["est_flight_time_min_aggr"] = adv_power.get("est_flight_time_min_aggressive")
-analysis["esc_recommended_a"] = _adv_inner.get("esc_recommended_a") or adv_power.get("esc_recommended_a")
-analysis["peak_per_motor_a"] = _adv_inner.get("peak_per_motor_a")
+                analysis["thrust_ratio"]          = _adv_inner.get("thrust_ratio", analysis.get("thrust_ratio", 0))
+                analysis["est_flight_time_min"]   = adv_power.get("est_flight_time_min", analysis.get("battery_est"))
+                analysis["est_flight_time_min_aggr"] = adv_power.get("est_flight_time_min_aggressive")
+                analysis["esc_recommended_a"]     = _adv_inner.get("esc_recommended_a") or adv_power.get("esc_recommended_a")
+                analysis["peak_per_motor_a"]      = _adv_inner.get("peak_per_motor_a")
         except Exception:
             logger.exception("Advanced analysis error")
 
