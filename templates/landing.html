@@ -1212,6 +1212,402 @@ footer {
   .orb,.hero-hex,.hero-radar { display:none !important; }
   [data-reveal] { opacity:1 !important; transform:none !important; transition:none !important; }
 }
+
+/* ═══════════════════════════════════════
+   RADIAL ORBIT MENU — TOP LEFT
+═══════════════════════════════════════ */
+.orbix-orbit-launcher{
+  position:fixed;
+  top:74px;
+  left:14px;
+  z-index:1200;
+}
+
+.orbix-orbit-btn{
+  position:relative;
+  width:58px;
+  height:58px;
+  border:none;
+  border-radius:20px;
+  cursor:pointer;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  background:linear-gradient(145deg, rgba(2,10,22,.96), rgba(0,255,136,.08));
+  border:1px solid rgba(0,255,136,.22);
+  box-shadow:
+    0 10px 28px rgba(0,0,0,.45),
+    0 0 0 1px rgba(255,255,255,.03) inset,
+    0 0 24px rgba(0,255,136,.12);
+  backdrop-filter:blur(18px) saturate(1.5);
+  -webkit-backdrop-filter:blur(18px) saturate(1.5);
+  transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+
+.orbix-orbit-btn:hover{
+  transform:translateY(-2px) scale(1.04);
+  border-color:rgba(0,255,136,.42);
+  box-shadow:
+    0 14px 34px rgba(0,0,0,.52),
+    0 0 0 1px rgba(0,255,136,.12) inset,
+    0 0 30px rgba(0,255,136,.2);
+}
+
+.orbix-orbit-btn-core{
+  position:relative;
+  z-index:2;
+  font-size:22px;
+  color:#00ff88;
+  text-shadow:0 0 14px rgba(0,255,136,.55);
+}
+
+.orbix-orbit-btn-rings{
+  position:absolute;
+  inset:-40%;
+  background:
+    radial-gradient(circle, rgba(0,255,136,.18) 0%, transparent 58%),
+    radial-gradient(circle, transparent 46%, rgba(0,212,255,.12) 47%, transparent 48%);
+  animation:orbixPulse 2.8s ease-in-out infinite;
+  pointer-events:none;
+}
+
+.orbix-orbit-btn-label{
+  position:absolute;
+  bottom:5px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:2;
+  font-family:var(--font-d);
+  font-size:8px;
+  letter-spacing:.14em;
+  color:rgba(255,255,255,.78);
+}
+
+@keyframes orbixPulse{
+  0%,100%{transform:scale(1);opacity:.5}
+  50%{transform:scale(1.08);opacity:1}
+}
+
+.orbix-orbit-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.34);
+  backdrop-filter:blur(3px);
+  -webkit-backdrop-filter:blur(3px);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .24s ease;
+  z-index:1100;
+}
+
+.orbix-orbit-backdrop.open{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.orbix-orbit-panel{
+  position:fixed;
+  top:84px;
+  left:14px;
+  width:min(92vw, 430px);
+  height:min(92vw, 430px);
+  border-radius:34px;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(0,255,136,.08), transparent 36%),
+    radial-gradient(circle at 20% 20%, rgba(0,212,255,.08), transparent 26%),
+    linear-gradient(180deg, rgba(2,10,22,.98), rgba(0,6,14,.95));
+  border:1px solid rgba(0,255,136,.14);
+  box-shadow:
+    0 28px 64px rgba(0,0,0,.62),
+    0 0 0 1px rgba(255,255,255,.02) inset,
+    0 0 36px rgba(0,255,136,.08);
+  backdrop-filter:blur(22px) saturate(1.6);
+  -webkit-backdrop-filter:blur(22px) saturate(1.6);
+  overflow:hidden;
+  opacity:0;
+  pointer-events:none;
+  transform:translateY(-12px) scale(.97);
+  transition:transform .3s cubic-bezier(.16,1,.3,1), opacity .3s ease;
+  z-index:1150;
+}
+
+.orbix-orbit-panel.open{
+  opacity:1;
+  pointer-events:auto;
+  transform:translateY(0) scale(1);
+}
+
+.orbix-orbit-panel::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(135deg, rgba(0,255,136,.05), transparent 34%),
+    radial-gradient(circle at center, transparent 42%, rgba(0,255,136,.05) 43%, transparent 44%);
+  pointer-events:none;
+}
+
+.orbix-orbit-panel::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg, transparent, rgba(0,255,136,.06), transparent);
+  height:2px;
+  animation:orbixScan 5.2s linear infinite;
+  pointer-events:none;
+}
+
+@keyframes orbixScan{
+  0%{transform:translateY(-10px);opacity:0}
+  12%{opacity:.9}
+  100%{transform:translateY(430px);opacity:0}
+}
+
+.orbix-orbit-head{
+  position:relative;
+  z-index:2;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  padding:16px 16px 8px;
+}
+
+.orbix-orbit-kicker{
+  font-family:var(--font-m);
+  font-size:10px;
+  letter-spacing:.18em;
+  color:rgba(0,255,136,.72);
+  margin-bottom:6px;
+}
+
+.orbix-orbit-title{
+  font-family:var(--font-d);
+  font-size:16px;
+  font-weight:900;
+  letter-spacing:.06em;
+  color:#fff;
+}
+
+.orbix-orbit-close{
+  width:36px;
+  height:36px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.03);
+  color:var(--text);
+  cursor:pointer;
+  transition:all .2s ease;
+}
+
+.orbix-orbit-close:hover{
+  border-color:rgba(0,255,136,.28);
+  background:rgba(0,255,136,.08);
+  transform:rotate(10deg);
+}
+
+.orbix-orbit-sub{
+  position:relative;
+  z-index:2;
+  padding:0 16px 10px;
+  font-size:11px;
+  line-height:1.55;
+  color:rgba(150,184,212,.88);
+}
+
+.orbix-orbit-wheel{
+  position:absolute;
+  inset:78px 12px 12px 12px;
+  z-index:2;
+}
+
+.orbix-node{
+  position:absolute;
+  width:74px;
+  min-height:74px;
+  border-radius:20px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  padding:10px 8px;
+  text-decoration:none;
+  text-align:center;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.06);
+  box-shadow:0 10px 22px rgba(0,0,0,.28);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  transition:
+    transform .45s cubic-bezier(.16,1,.3,1),
+    opacity .25s ease,
+    border-color .2s ease,
+    box-shadow .2s ease,
+    background .2s ease;
+  opacity:0;
+  pointer-events:none;
+  transform:translate(-50%,-50%) scale(.18);
+}
+
+.orbix-orbit-panel.open .orbix-node{
+  opacity:1;
+  pointer-events:auto;
+  transform:translate(-50%,-50%) scale(1);
+}
+
+.orbix-node:hover{
+  transform:translate(-50%,-50%) scale(1.08);
+  border-color:rgba(0,255,136,.28);
+  box-shadow:0 14px 28px rgba(0,0,0,.42);
+}
+
+.orbix-node::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:20px;
+  background:linear-gradient(135deg, rgba(255,255,255,.1), transparent 52%);
+  opacity:.55;
+  pointer-events:none;
+}
+
+.orbix-node-icon{
+  position:relative;
+  z-index:2;
+  font-size:19px;
+  line-height:1;
+}
+
+.orbix-node-title{
+  position:relative;
+  z-index:2;
+  font-family:var(--font-d);
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.04em;
+  color:#fff;
+}
+
+.orbix-node-sub{
+  position:relative;
+  z-index:2;
+  font-size:8px;
+  line-height:1.2;
+  color:rgba(150,184,212,.82);
+}
+
+.orbix-node-badge{
+  position:absolute;
+  top:-7px;
+  right:-7px;
+  z-index:3;
+  padding:3px 7px;
+  border-radius:999px;
+  font-family:var(--font-d);
+  font-size:7px;
+  letter-spacing:.08em;
+  border:1px solid transparent;
+  color:#fff;
+}
+
+.orbix-node.g .orbix-node-badge{ background:rgba(0,255,136,.14); border-color:rgba(0,255,136,.18); color:#00ff88; }
+.orbix-node.b .orbix-node-badge{ background:rgba(0,170,255,.14); border-color:rgba(0,170,255,.18); color:#59c8ff; }
+.orbix-node.a .orbix-node-badge{ background:rgba(255,185,0,.14); border-color:rgba(255,185,0,.18); color:#ffcf4d; }
+.orbix-node.r .orbix-node-badge{ background:rgba(255,51,68,.14); border-color:rgba(255,51,68,.18); color:#ff6673; }
+.orbix-node.p .orbix-node-badge{ background:rgba(176,96,255,.14); border-color:rgba(176,96,255,.18); color:#c79bff; }
+.orbix-node.t .orbix-node-badge{ background:rgba(0,232,208,.14); border-color:rgba(0,232,208,.18); color:#48f0df; }
+
+.orbix-orbit-core{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:112px;
+  height:112px;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  background:radial-gradient(circle, rgba(0,255,136,.14), rgba(0,255,136,.04) 40%, rgba(0,0,0,.1) 72%);
+  border:1px solid rgba(0,255,136,.18);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.03) inset,
+    0 0 30px rgba(0,255,136,.08);
+  z-index:1;
+}
+
+.orbix-orbit-core-ring{
+  position:absolute;
+  inset:-12px;
+  border-radius:50%;
+  border:1px dashed rgba(0,255,136,.18);
+  animation:orbixSpin 11s linear infinite;
+}
+
+@keyframes orbixSpin{
+  to{transform:rotate(360deg);}
+}
+
+.orbix-orbit-core-label{
+  font-family:var(--font-d);
+  font-size:18px;
+  font-weight:900;
+  letter-spacing:.08em;
+  color:#00ff88;
+  text-shadow:0 0 18px rgba(0,255,136,.45);
+}
+
+.orbix-orbit-core-sub{
+  font-family:var(--font-m);
+  font-size:8px;
+  letter-spacing:.16em;
+  color:rgba(255,255,255,.6);
+}
+
+@media(max-width:720px){
+  .orbix-orbit-launcher{
+    top:68px;
+    left:12px;
+  }
+
+  .orbix-orbit-btn{
+    width:52px;
+    height:52px;
+    border-radius:18px;
+  }
+
+  .orbix-orbit-panel{
+    width:min(94vw, 360px);
+    height:min(94vw, 360px);
+  }
+
+  .orbix-node{
+    width:64px;
+    min-height:64px;
+    border-radius:18px;
+    padding:8px 6px;
+  }
+
+  .orbix-node-title{
+    font-size:8px;
+  }
+
+  .orbix-node-sub{
+    font-size:7px;
+  }
+
+  .orbix-orbit-core{
+    width:92px;
+    height:92px;
+  }
+
+  .orbix-orbit-core-label{
+    font-size:16px;
+  }
+                                                         }
 </style>
 </head>
 <body>
@@ -1239,6 +1635,44 @@ footer {
 <canvas id="particleCanvas" aria-hidden="true"></canvas>
 
 <!-- ═══════════════════════════════════════
+     OBIX ORBIT MENU — RADIAL EXPLOSION
+═══════════════════════════════════════ -->
+<div class="orbix-orbit-launcher">
+  <button class="orbix-orbit-btn" id="orbixOrbitBtn"
+          type="button"
+          aria-label="Open tools menu"
+          aria-expanded="false"
+          onclick="orbixToggleOrbit()">
+    <span class="orbix-orbit-btn-core">◎</span>
+    <span class="orbix-orbit-btn-rings"></span>
+    <span class="orbix-orbit-btn-label">TOOLS</span>
+  </button>
+
+  <div class="orbix-orbit-backdrop" id="orbixOrbitBackdrop" onclick="orbixToggleOrbit()"></div>
+
+  <div class="orbix-orbit-panel" id="orbixOrbitPanel" aria-hidden="true">
+    <div class="orbix-orbit-head">
+      <div>
+        <div class="orbix-orbit-kicker">OBIX COMMAND RING</div>
+        <div class="orbix-orbit-title">All Functions</div>
+      </div>
+      <button class="orbix-orbit-close" type="button" onclick="orbixToggleOrbit()" aria-label="Close menu">✕</button>
+    </div>
+
+    <div class="orbix-orbit-sub">
+      เมนูวงกลมแตกออก · แตะไอคอนเพื่อเข้าใช้ฟังก์ชัน · รวมเครื่องมือหลักทั้งหมดไว้ในจุดเดียว
+    </div>
+
+    <div class="orbix-orbit-wheel" id="orbixOrbitWheel" aria-label="All tools radial menu"></div>
+
+    <div class="orbix-orbit-core">
+      <div class="orbix-orbit-core-ring"></div>
+      <div class="orbix-orbit-core-label">OBIX</div>
+      <div class="orbix-orbit-core-sub">Tap a node</div>
+    </div>
+  </div>
+</div>
+   <!-- ═══════════════════════════════════════
      NAV
      ═══════════════════════════════════════ -->
 <nav class="nav" aria-label="Main navigation">
@@ -2929,6 +3363,137 @@ window.switchMode = function(mode) {
     });
     localStorage.setItem('obix_lang', lang);
   }
+})();
+</script>
+<script>
+(function(){
+  'use strict';
+
+  const ORBIX_ITEMS = [
+    { ring:1, icon:'📋', title:'Analyzer',       sub:'PID · Filter · Loop',      href:'/app',             badge:'CORE',  tone:'g' },
+    { ring:1, icon:'📊', title:'Blackbox',       sub:'Flight trace',              href:'/blackbox',        badge:'DATA',  tone:'b' },
+    { ring:1, icon:'🩺', title:'CLI Surgeon',    sub:'diff all doctor',           href:'/cli_surgeon',     badge:'CLI',   tone:'g' },
+    { ring:1, icon:'⚡', title:'Wizard',          sub:'Setup flow',                href:'/bf-wizard',       badge:'SETUP', tone:'a' },
+    { ring:1, icon:'💊', title:'PID Advisor',     sub:'Tune by symptom',           href:'/pid-advisor',     badge:'PID',   tone:'p' },
+    { ring:1, icon:'🚀', title:'Quick Tune',      sub:'Fast fixes',                href:'/quick-tune',      badge:'FAST',  tone:'t' },
+
+    { ring:2, icon:'🛠️', title:'Motor × Prop',    sub:'Pairing guide',             href:'/motor_prop',      badge:'PAIR',  tone:'g' },
+    { ring:2, icon:'🎯', title:'RPM Filter',      sub:'KV + prop calc',            href:'/rpm-filter',      badge:'RPM',   tone:'b' },
+    { ring:2, icon:'🔋', title:'Battery Health',  sub:'Sag & stress',              href:'/battery-health',  badge:'BAT',   tone:'a' },
+    { ring:2, icon:'🌡️', title:'Motor Thermal',   sub:'Heat risk',                 href:'/motor-thermal',   badge:'HEAT',  tone:'r' },
+    { ring:2, icon:'🧠', title:'Loop Analyzer',   sub:'Latency check',             href:'/loop-analyzer',   badge:'LOOP',  tone:'p' },
+    { ring:2, icon:'🎚️', title:'Rates Visualizer',sub:'Expo preview',              href:'/rates-visualizer', badge:'RATES', tone:'t' },
+    { ring:2, icon:'↔️', title:'CLI Comparator',  sub:'Config compare',            href:'/cli-comparator',  badge:'DIFF',  tone:'g' },
+    { ring:2, icon:'🖥️', title:'OSD Designer',    sub:'HUD layout',                href:'/osd',             badge:'HUD',   tone:'b' },
+
+    { ring:3, icon:'📡', title:'VTX',             sub:'Band & power',              href:'/vtx',             badge:'RF',    tone:'a' },
+    { ring:3, icon:'📶', title:'VTX Range',       sub:'Range estimate',            href:'/vtx-range',       badge:'RANGE', tone:'b' },
+    { ring:3, icon:'🔊', title:'SmartAudio',      sub:'VTX protocol',              href:'/vtx-smartaudio',  badge:'VTX',   tone:'p' },
+    { ring:3, icon:'🎯', title:'Flight Quiz',     sub:'Find your style',           href:'/flight-quiz',     badge:'QUIZ',  tone:'g' },
+    { ring:3, icon:'🪪', title:'Build Card',      sub:'Share spec',                href:'/build-card',      badge:'CARD',  tone:'a' },
+    { ring:3, icon:'📝', title:'Tuning Log',      sub:'Save sessions',             href:'/tuning-log',      badge:'LOG',   tone:'t' },
+    { ring:3, icon:'🏆', title:'Leaderboard',     sub:'Community rank',            href:'/leaderboard',     badge:'RANK',  tone:'p' },
+    { ring:3, icon:'🚁', title:'FPV Hub',         sub:'Knowledge center',          href:'/fpv',             badge:'HUB',   tone:'g' },
+    { ring:3, icon:'ℹ️', title:'About',           sub:'Project info',              href:'/about',           badge:'INFO',  tone:'b' },
+    { ring:3, icon:'👥', title:'Team',            sub:'Creators & AI',             href:'/team',            badge:'TEAM',  tone:'a' },
+    { ring:3, icon:'🧾', title:'Changelog',       sub:'Recent changes',            href:'/changelog',       badge:'NEWS',  tone:'r' },
+    { ring:3, icon:'🎖️', title:'Military UAS',    sub:'Educational',               href:'/military-uas',    badge:'UAS',   tone:'p' },
+    { ring:3, icon:'⬇️', title:'Downloads',       sub:'Saved files',               href:'/downloads',       badge:'FILES', tone:'t' }
+  ];
+
+  const panel = document.getElementById('orbixOrbitPanel');
+  const btn = document.getElementById('orbixOrbitBtn');
+  const backdrop = document.getElementById('orbixOrbitBackdrop');
+  const wheel = document.getElementById('orbixOrbitWheel');
+
+  if (!panel || !btn || !backdrop || !wheel) return;
+
+  function buildOrbixMenu() {
+    wheel.innerHTML = '';
+
+    const rect = wheel.getBoundingClientRect();
+    const size = Math.min(rect.width, rect.height);
+    const cx = size / 2;
+    const cy = size / 2;
+
+    const ringConfig = {
+      1: { radius: size * 0.18, start: -90, itemSize: 74 },
+      2: { radius: size * 0.31, start: -112, itemSize: 70 },
+      3: { radius: size * 0.42, start: -134, itemSize: 66 }
+    };
+
+    const groups = {
+      1: ORBIX_ITEMS.filter(x => x.ring === 1),
+      2: ORBIX_ITEMS.filter(x => x.ring === 2),
+      3: ORBIX_ITEMS.filter(x => x.ring === 3)
+    };
+
+    [1, 2, 3].forEach(ring => {
+      const items = groups[ring];
+      const cfg = ringConfig[ring];
+      const count = items.length;
+      if (!count) return;
+
+      items.forEach((item, idx) => {
+        const angle = (cfg.start + (360 / count) * idx) * Math.PI / 180;
+        const x = cx + Math.cos(angle) * cfg.radius;
+        const y = cy + Math.sin(angle) * cfg.radius;
+
+        const a = document.createElement('a');
+        a.className = `orbix-node ${item.tone}`;
+        a.href = item.href;
+        a.setAttribute('aria-label', item.title);
+        a.style.left = `${x}px`;
+        a.style.top = `${y}px`;
+        a.style.transitionDelay = `${idx * 28}ms`;
+
+        a.innerHTML = `
+          <span class="orbix-node-badge">${item.badge}</span>
+          <span class="orbix-node-icon">${item.icon}</span>
+          <span class="orbix-node-title">${item.title}</span>
+          <span class="orbix-node-sub">${item.sub}</span>
+        `;
+
+        wheel.appendChild(a);
+      });
+    });
+  }
+
+  function setOpen(open) {
+    panel.classList.toggle('open', open);
+    backdrop.classList.toggle('open', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    panel.setAttribute('aria-hidden', open ? 'false' : 'true');
+    document.body.style.overflow = open ? 'hidden' : '';
+  }
+
+  window.orbixToggleOrbit = function () {
+    const next = !panel.classList.contains('open');
+    setOpen(next);
+  };
+
+  function onResize() {
+    buildOrbixMenu();
+  }
+
+  window.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') setOpen(false);
+  });
+
+  document.addEventListener('click', function (e) {
+    const inside = panel.contains(e.target) || btn.contains(e.target);
+    if (!inside && panel.classList.contains('open')) setOpen(false);
+  });
+
+  if (window.ResizeObserver) {
+    const ro = new ResizeObserver(buildOrbixMenu);
+    ro.observe(panel);
+  } else {
+    window.addEventListener('resize', onResize, { passive: true });
+  }
+
+  buildOrbixMenu();
+  setOpen(false);
 })();
 </script>
 </body>
