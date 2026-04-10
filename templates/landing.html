@@ -2274,6 +2274,8 @@ footer {
 }
 
 </style>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/drone3d.css') }}">
 </head>
 <body>
 
@@ -2896,6 +2898,161 @@ footer {
   </div>
 </div>
 
+
+
+
+<!-- ═══ 3D DRONE VIEWER ═══ -->
+<section id="drone-3d">
+  <div class="d3-inner">
+
+    <!-- Header -->
+    <div class="d3-header">
+      <div class="d3-eyebrow">⬡ &nbsp;3D DRONE VIEWER</div>
+      <h2 class="d3-title">
+        <span class="i18n-th">โดรน FPV แบบ<br><em>Real-Time 3D</em></span>
+        <span class="i18n-en">FPV Drone in<br><em>Real-Time 3D</em></span>
+      </h2>
+      <p class="d3-sub">
+        <span class="i18n-th">หมุน · ซูม · สำรวจทุก component — แบบ interactive HUD</span>
+        <span class="i18n-en">Rotate · Zoom · Explore every component — full interactive HUD</span>
+      </p>
+    </div>
+
+    <!-- Stage: canvas + panel -->
+    <div class="d3-stage">
+
+      <!-- Canvas -->
+      <div class="d3-canvas-wrap">
+        <!-- Loading overlay -->
+        <div class="d3-loading">
+          <div class="d3-loading-ring"></div>
+          <div class="d3-loading-text">INITIALISING · 3D ENGINE</div>
+        </div>
+        <!-- Scanline overlay -->
+        <div class="d3-scanlines"></div>
+        <!-- Corner brackets -->
+        <div class="d3-corner d3-corner--tl"></div>
+        <div class="d3-corner d3-corner--tr"></div>
+        <div class="d3-corner d3-corner--bl"></div>
+        <div class="d3-corner d3-corner--br"></div>
+        <!-- Top HUD bar -->
+        <div class="d3-hud-top">
+          <span class="d3-hud-label">OBIX · FPV-QUAD · SIM</span>
+          <span class="d3-hud-status">
+            <span class="d3-hud-dot"></span>LIVE
+          </span>
+        </div>
+        <!-- Crosshair -->
+        <div class="d3-crosshair"></div>
+        <!-- Bottom HUD hints -->
+        <div class="d3-hud-bot">
+          <span class="d3-hud-hint">
+            <span>🖱 <span class="i18n-th">ลาก = หมุน</span><span class="i18n-en">Drag = rotate</span></span>
+            <span>⚲ <span class="i18n-th">เลื่อน = ซูม</span><span class="i18n-en">Scroll = zoom</span></span>
+          </span>
+        </div>
+        <!-- Three.js canvas -->
+        <canvas></canvas>
+      </div>
+
+      <!-- Side panel -->
+      <div class="d3-panel">
+
+        <!-- Telemetry -->
+        <div class="d3-card">
+          <div class="d3-card-label">📡 Telemetry</div>
+          <div class="d3-telem">
+            <div class="d3-telem-row">
+              <span class="d3-telem-key">Voltage</span>
+              <span class="d3-telem-val" id="d3Voltage">16.1V</span>
+            </div>
+            <div class="d3-telem-row">
+              <span class="d3-telem-key">Throttle</span>
+              <span class="d3-telem-val" id="d3Throttle">45%</span>
+            </div>
+            <div class="d3-telem-row">
+              <span class="d3-telem-key">RSSI</span>
+              <span class="d3-telem-val" id="d3Rssi">89%</span>
+            </div>
+            <div class="d3-telem-row">
+              <span class="d3-telem-key">Temp</span>
+              <span class="d3-telem-val" id="d3Temp">32°C</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Motor RPMs -->
+        <div class="d3-card">
+          <div class="d3-card-label">⚙️ Motors</div>
+          <div class="d3-motors-grid">
+            <div class="d3-motor-item">
+              <div class="d3-motor-id">M1 <span class="d3-motor-rpm" data-m="0">12.0k</span></div>
+              <div class="d3-motor-bar"><div class="d3-motor-fill" data-m="0" style="width:20%"></div></div>
+            </div>
+            <div class="d3-motor-item">
+              <div class="d3-motor-id">M2 <span class="d3-motor-rpm" data-m="1">12.0k</span></div>
+              <div class="d3-motor-bar"><div class="d3-motor-fill" data-m="1" style="width:20%"></div></div>
+            </div>
+            <div class="d3-motor-item">
+              <div class="d3-motor-id">M3 <span class="d3-motor-rpm" data-m="2">12.0k</span></div>
+              <div class="d3-motor-bar"><div class="d3-motor-fill" data-m="2" style="width:20%"></div></div>
+            </div>
+            <div class="d3-motor-item">
+              <div class="d3-motor-id">M4 <span class="d3-motor-rpm" data-m="3">12.0k</span></div>
+              <div class="d3-motor-bar"><div class="d3-motor-fill" data-m="3" style="width:20%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Attitude -->
+        <div class="d3-card">
+          <div class="d3-card-label">✈️ Attitude</div>
+          <div class="d3-attitude">
+            <div class="d3-att-item">
+              <div class="d3-att-val" id="d3Roll">0°</div>
+              <div class="d3-att-lbl">ROLL</div>
+            </div>
+            <div class="d3-att-item">
+              <div class="d3-att-val" id="d3Pitch">0°</div>
+              <div class="d3-att-lbl">PITCH</div>
+            </div>
+            <div class="d3-att-item">
+              <div class="d3-att-val" id="d3Yaw">0°</div>
+              <div class="d3-att-lbl">YAW</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Color theme -->
+        <div class="d3-card">
+          <div class="d3-card-label">🎨 Theme</div>
+          <div class="d3-colors">
+            <div class="d3-color-btn active" data-theme="cyan"   title="Cyan" style="background:#00e5ff22;border-color:#00e5ff66;color:#00e5ff;box-shadow:0 0 8px #00e5ff44"></div>
+            <div class="d3-color-btn"        data-theme="green"  title="Green" style="background:#00ff9d22;border-color:#00ff9d66;color:#00ff9d;box-shadow:0 0 8px #00ff9d44"></div>
+            <div class="d3-color-btn"        data-theme="gold"   title="Gold" style="background:#ffcc0022;border-color:#ffcc0066;color:#ffcc00;box-shadow:0 0 8px #ffcc0044"></div>
+            <div class="d3-color-btn"        data-theme="purple" title="Purple" style="background:#b060ff22;border-color:#b060ff66;color:#b060ff;box-shadow:0 0 8px #b060ff44"></div>
+            <div class="d3-color-btn"        data-theme="red"    title="Red" style="background:#ff224422;border-color:#ff224466;color:#ff2244;box-shadow:0 0 8px #ff224444"></div>
+          </div>
+        </div>
+
+        <!-- Build spec -->
+        <div class="d3-card">
+          <div class="d3-card-label">📋 Build Spec</div>
+          <div class="d3-spec-list">
+            <div class="d3-spec-row"><span class="d3-spec-k">Frame</span><span class="d3-spec-v">5" X-quad</span></div>
+            <div class="d3-spec-row"><span class="d3-spec-k">Motor</span><span class="d3-spec-v">2306 2450KV</span></div>
+            <div class="d3-spec-row"><span class="d3-spec-k">Props</span><span class="d3-spec-v">5×4.3×3 HQ</span></div>
+            <div class="d3-spec-row"><span class="d3-spec-k">Battery</span><span class="d3-spec-v">4S 1500mAh</span></div>
+            <div class="d3-spec-row"><span class="d3-spec-k">FC</span><span class="d3-spec-v">F7 + BF 4.5</span></div>
+          </div>
+        </div>
+
+      </div><!-- /d3-panel -->
+    </div><!-- /d3-stage -->
+  </div><!-- /d3-inner -->
+</section>
+
+<div class="neon-divider"></div>
 
 <!-- ═══════════════════════════════════════════════════════════════
      TOOL HUB — รวมเครื่องมือทั้งหมด
@@ -4620,5 +4777,9 @@ window.switchMode = function(mode) {
   }
 })();
 </script>
+
+<!-- ═══ 3D Drone Viewer scripts ═══ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="{{ url_for('static', filename='js/drone3d.js') }}"></script>
 </body>
 </html>
