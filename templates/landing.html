@@ -2274,8 +2274,6 @@ footer {
 }
 
 </style>
-
-<link rel="stylesheet" href="{{ url_for('static', filename='css/drone3d.css') }}">
 </head>
 <body>
 
@@ -2900,159 +2898,643 @@ footer {
 
 
 
+<!-- ═══════════════════════════════════════════════════════════════
+     3D DRONE VIEWER — Self-contained, CSS embedded inline
+     ═══════════════════════════════════════════════════════════════ -->
+<style>
+/* ── 3D Drone Viewer ── */
+#drone-3d{padding:80px 24px 72px;position:relative;z-index:2;overflow:hidden}
+#drone-3d::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:700px;height:700px;pointer-events:none;
+  background:radial-gradient(ellipse at center,rgba(0,229,255,.06) 0%,rgba(0,168,255,.025) 40%,transparent 70%)}
+.d3-inner{max-width:1100px;margin:0 auto}
+.d3-header{text-align:center;margin-bottom:40px}
+.d3-eyebrow{display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--font-d);font-size:.62rem;font-weight:700;letter-spacing:.22em;
+  text-transform:uppercase;color:#00e5ff;margin-bottom:14px}
+.d3-eyebrow::before,.d3-eyebrow::after{content:'';width:24px;height:1px;background:currentColor;opacity:.4}
+.d3-title{font-family:var(--font-d);font-size:clamp(1.4rem,3vw,2.2rem);font-weight:900;
+  line-height:1.15;color:#fff;margin-bottom:10px}
+.d3-title em{color:#00e5ff;font-style:normal}
+.d3-sub{font-size:.9rem;color:rgba(122,154,180,.8);line-height:1.7;max-width:480px;margin:0 auto}
+/* Stage layout */
+.d3-stage{display:grid;grid-template-columns:1fr 250px;gap:18px;align-items:start}
+@media(max-width:840px){.d3-stage{grid-template-columns:1fr}}
+/* Canvas wrapper — CRITICAL: explicit height */
+.d3-canvas-wrap{
+  position:relative;border-radius:14px;overflow:hidden;
+  background:#010810;
+  border:1px solid rgba(0,229,255,.14);
+  box-shadow:0 0 0 1px rgba(0,229,255,.05),0 20px 60px rgba(0,0,0,.6);
+  height:0;padding-bottom:56.25%;/* 16:9 */
+  cursor:grab}
+.d3-canvas-wrap:active{cursor:grabbing}
+.d3-canvas-wrap canvas{
+  position:absolute;top:0;left:0;
+  width:100%!important;height:100%!important;
+  display:block}
+/* HUD corner brackets */
+.d3-corner{position:absolute;width:18px;height:18px;pointer-events:none;z-index:5}
+.d3-corner-tl{top:10px;left:10px;border-top:1.5px solid rgba(0,229,255,.75);border-left:1.5px solid rgba(0,229,255,.75)}
+.d3-corner-tr{top:10px;right:10px;border-top:1.5px solid rgba(0,229,255,.75);border-right:1.5px solid rgba(0,229,255,.75)}
+.d3-corner-bl{bottom:10px;left:10px;border-bottom:1.5px solid rgba(0,229,255,.75);border-left:1.5px solid rgba(0,229,255,.75)}
+.d3-corner-br{bottom:10px;right:10px;border-bottom:1.5px solid rgba(0,229,255,.75);border-right:1.5px solid rgba(0,229,255,.75)}
+/* Scanlines */
+.d3-scanlines{position:absolute;inset:0;pointer-events:none;z-index:4;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,229,255,.007) 3px,rgba(0,229,255,.007) 4px)}
+/* HUD top bar */
+.d3-hud-top{position:absolute;top:0;left:0;right:0;padding:9px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:linear-gradient(180deg,rgba(1,8,16,.75),transparent);z-index:6;pointer-events:none}
+.d3-hud-lbl{font-family:var(--font-m);font-size:.56rem;letter-spacing:.16em;color:rgba(0,229,255,.65)}
+.d3-hud-live{display:flex;align-items:center;gap:5px;
+  font-family:var(--font-m);font-size:.56rem;letter-spacing:.1em;color:rgba(0,229,255,.6)}
+.d3-hud-dot{width:5px;height:5px;border-radius:50%;background:#00e5ff;
+  animation:d3blink 2s ease-in-out infinite}
+@keyframes d3blink{0%,100%{opacity:1}50%{opacity:.2}}
+/* HUD bottom bar */
+.d3-hud-bot{position:absolute;bottom:0;left:0;right:0;padding:9px 14px;
+  display:flex;align-items:center;
+  background:linear-gradient(0deg,rgba(1,8,16,.75),transparent);z-index:6;pointer-events:none}
+.d3-hud-hint{font-family:var(--font-m);font-size:.54rem;letter-spacing:.06em;
+  color:rgba(122,154,180,.5);display:flex;gap:14px}
+/* Loading overlay */
+.d3-loading{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:14px;
+  background:#010810;z-index:10;
+  transition:opacity .5s,visibility .5s}
+.d3-loading.gone{opacity:0;visibility:hidden;pointer-events:none}
+.d3-spin{width:38px;height:38px;border-radius:50%;
+  border:2px solid rgba(0,229,255,.12);border-top-color:#00e5ff;
+  animation:d3spin .85s linear infinite}
+@keyframes d3spin{to{transform:rotate(360deg)}}
+.d3-load-txt{font-family:var(--font-m);font-size:.6rem;letter-spacing:.14em;
+  color:rgba(0,229,255,.5);animation:d3fade 1.2s ease-in-out infinite alternate}
+@keyframes d3fade{from{opacity:.35}to{opacity:1}}
+/* Error state */
+.d3-error{position:absolute;inset:0;display:none;flex-direction:column;
+  align-items:center;justify-content:center;gap:10px;background:#010810;z-index:9}
+.d3-error.show{display:flex}
+.d3-error-ico{font-size:32px}
+.d3-error-txt{font-family:var(--font-m);font-size:.65rem;letter-spacing:.1em;color:rgba(122,154,180,.6);text-align:center;max-width:260px;line-height:1.7}
+/* Panel */
+.d3-panel{display:flex;flex-direction:column;gap:10px}
+@media(max-width:840px){
+  .d3-panel{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+}
+/* Cards */
+.d3-card{background:rgba(5,15,28,.85);border:1px solid rgba(0,229,255,.1);
+  border-radius:11px;padding:13px 13px 11px;
+  backdrop-filter:blur(14px);position:relative;overflow:hidden}
+.d3-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,229,255,.3),transparent)}
+.d3-clabel{font-family:var(--font-d);font-size:.56rem;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:rgba(0,229,255,.55);
+  margin-bottom:9px;display:flex;align-items:center;gap:5px}
+.d3-clabel::after{content:'';flex:1;height:1px;background:rgba(0,229,255,.08)}
+/* Telemetry rows */
+.d3-trows{display:flex;flex-direction:column;gap:6px}
+.d3-tr{display:flex;justify-content:space-between;align-items:center}
+.d3-tk{font-family:var(--font-m);font-size:.6rem;color:rgba(122,154,180,.6)}
+.d3-tv{font-family:var(--font-m);font-size:.68rem;font-weight:600;
+  color:#00e5ff;transition:color .3s}
+.d3-tv.warn{color:#ffcc00}.d3-tv.hot{color:#ff3355}
+/* Motor grid */
+.d3-mgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.d3-mitem{display:flex;flex-direction:column;gap:4px}
+.d3-mid{font-family:var(--font-m);font-size:.56rem;color:rgba(122,154,180,.6);
+  display:flex;justify-content:space-between}
+.d3-mrpm{font-family:var(--font-m);font-size:.62rem;color:#00e5ff;font-weight:600}
+.d3-mbar{height:3px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden}
+.d3-mfill{height:100%;border-radius:2px;width:20%;
+  background:linear-gradient(90deg,#00e5ff,#0088ff);
+  transition:width .25s;box-shadow:0 0 5px rgba(0,229,255,.5)}
+/* Attitude */
+.d3-att{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center}
+.d3-av{font-family:var(--font-m);font-size:.78rem;font-weight:700;color:#fff;
+  line-height:1;margin-bottom:2px;min-width:0}
+.d3-al{font-family:var(--font-d);font-size:.47rem;letter-spacing:.14em;color:rgba(0,229,255,.5)}
+/* Theme buttons */
+.d3-themes{display:flex;gap:7px;flex-wrap:wrap}
+.d3-tbtn{width:24px;height:24px;border-radius:5px;cursor:pointer;
+  border:1.5px solid transparent;
+  transition:transform .15s,border-color .15s,box-shadow .15s}
+.d3-tbtn:hover{transform:scale(1.18)}
+.d3-tbtn.on{border-color:rgba(255,255,255,.9)!important}
+/* Spec */
+.d3-spec{display:flex;flex-direction:column;gap:5px}
+.d3-sr{display:flex;justify-content:space-between;gap:6px;
+  font-size:.68rem;border-bottom:1px solid rgba(255,255,255,.04);padding-bottom:4px}
+.d3-sr:last-child{border-bottom:none;padding-bottom:0}
+.d3-sk{color:rgba(122,154,180,.6);font-size:.6rem}
+.d3-sv{font-family:var(--font-m);font-size:.65rem;color:#cce4f6;font-weight:600;text-align:right}
+</style>
 
-<!-- ═══ 3D DRONE VIEWER ═══ -->
 <section id="drone-3d">
   <div class="d3-inner">
 
-    <!-- Header -->
     <div class="d3-header">
       <div class="d3-eyebrow">⬡ &nbsp;3D DRONE VIEWER</div>
       <h2 class="d3-title">
-        <span class="i18n-th">โดรน FPV แบบ<br><em>Real-Time 3D</em></span>
-        <span class="i18n-en">FPV Drone in<br><em>Real-Time 3D</em></span>
+        <span class="i18n-th">โดรน FPV แบบ <em>Real-Time 3D</em></span>
+        <span class="i18n-en">FPV Drone in <em>Real-Time 3D</em></span>
       </h2>
       <p class="d3-sub">
-        <span class="i18n-th">หมุน · ซูม · สำรวจทุก component — แบบ interactive HUD</span>
-        <span class="i18n-en">Rotate · Zoom · Explore every component — full interactive HUD</span>
+        <span class="i18n-th">ลาก · ซูม · สำรวจทุก component แบบ interactive HUD</span>
+        <span class="i18n-en">Drag · Zoom · Explore every component with interactive HUD</span>
       </p>
     </div>
 
-    <!-- Stage: canvas + panel -->
     <div class="d3-stage">
 
       <!-- Canvas -->
-      <div class="d3-canvas-wrap">
-        <!-- Loading overlay -->
-        <div class="d3-loading">
-          <div class="d3-loading-ring"></div>
-          <div class="d3-loading-text">INITIALISING · 3D ENGINE</div>
+      <div class="d3-canvas-wrap" id="d3Wrap">
+        <div class="d3-loading" id="d3Loading">
+          <div class="d3-spin"></div>
+          <div class="d3-load-txt">INITIALISING · 3D ENGINE</div>
         </div>
-        <!-- Scanline overlay -->
+        <div class="d3-error" id="d3Error">
+          <div class="d3-error-ico">⚠️</div>
+          <div class="d3-error-txt">WebGL ไม่รองรับในเบราว์เซอร์นี้<br>ลอง Chrome/Firefox บน desktop</div>
+        </div>
         <div class="d3-scanlines"></div>
-        <!-- Corner brackets -->
-        <div class="d3-corner d3-corner--tl"></div>
-        <div class="d3-corner d3-corner--tr"></div>
-        <div class="d3-corner d3-corner--bl"></div>
-        <div class="d3-corner d3-corner--br"></div>
-        <!-- Top HUD bar -->
+        <div class="d3-corner d3-corner-tl"></div>
+        <div class="d3-corner d3-corner-tr"></div>
+        <div class="d3-corner d3-corner-bl"></div>
+        <div class="d3-corner d3-corner-br"></div>
         <div class="d3-hud-top">
-          <span class="d3-hud-label">OBIX · FPV-QUAD · SIM</span>
-          <span class="d3-hud-status">
-            <span class="d3-hud-dot"></span>LIVE
-          </span>
+          <span class="d3-hud-lbl">OBIX · FPV-QUAD · SIM</span>
+          <span class="d3-hud-live"><span class="d3-hud-dot"></span>LIVE</span>
         </div>
-        <!-- Crosshair -->
-        <div class="d3-crosshair"></div>
-        <!-- Bottom HUD hints -->
         <div class="d3-hud-bot">
-          <span class="d3-hud-hint">
+          <div class="d3-hud-hint">
             <span>🖱 <span class="i18n-th">ลาก = หมุน</span><span class="i18n-en">Drag = rotate</span></span>
             <span>⚲ <span class="i18n-th">เลื่อน = ซูม</span><span class="i18n-en">Scroll = zoom</span></span>
-          </span>
+            <span>📱 Pinch = zoom</span>
+          </div>
         </div>
-        <!-- Three.js canvas -->
-        <canvas></canvas>
+        <canvas id="d3Canvas"></canvas>
       </div>
 
       <!-- Side panel -->
       <div class="d3-panel">
 
-        <!-- Telemetry -->
         <div class="d3-card">
-          <div class="d3-card-label">📡 Telemetry</div>
-          <div class="d3-telem">
-            <div class="d3-telem-row">
-              <span class="d3-telem-key">Voltage</span>
-              <span class="d3-telem-val" id="d3Voltage">16.1V</span>
-            </div>
-            <div class="d3-telem-row">
-              <span class="d3-telem-key">Throttle</span>
-              <span class="d3-telem-val" id="d3Throttle">45%</span>
-            </div>
-            <div class="d3-telem-row">
-              <span class="d3-telem-key">RSSI</span>
-              <span class="d3-telem-val" id="d3Rssi">89%</span>
-            </div>
-            <div class="d3-telem-row">
-              <span class="d3-telem-key">Temp</span>
-              <span class="d3-telem-val" id="d3Temp">32°C</span>
-            </div>
+          <div class="d3-clabel">📡 Telemetry</div>
+          <div class="d3-trows">
+            <div class="d3-tr"><span class="d3-tk">Voltage</span><span class="d3-tv" id="d3V">16.1V</span></div>
+            <div class="d3-tr"><span class="d3-tk">Throttle</span><span class="d3-tv" id="d3T">45%</span></div>
+            <div class="d3-tr"><span class="d3-tk">RSSI</span><span class="d3-tv" id="d3R">89%</span></div>
+            <div class="d3-tr"><span class="d3-tk">Temp</span><span class="d3-tv" id="d3Tm">32°C</span></div>
           </div>
         </div>
 
-        <!-- Motor RPMs -->
         <div class="d3-card">
-          <div class="d3-card-label">⚙️ Motors</div>
-          <div class="d3-motors-grid">
-            <div class="d3-motor-item">
-              <div class="d3-motor-id">M1 <span class="d3-motor-rpm" data-m="0">12.0k</span></div>
-              <div class="d3-motor-bar"><div class="d3-motor-fill" data-m="0" style="width:20%"></div></div>
-            </div>
-            <div class="d3-motor-item">
-              <div class="d3-motor-id">M2 <span class="d3-motor-rpm" data-m="1">12.0k</span></div>
-              <div class="d3-motor-bar"><div class="d3-motor-fill" data-m="1" style="width:20%"></div></div>
-            </div>
-            <div class="d3-motor-item">
-              <div class="d3-motor-id">M3 <span class="d3-motor-rpm" data-m="2">12.0k</span></div>
-              <div class="d3-motor-bar"><div class="d3-motor-fill" data-m="2" style="width:20%"></div></div>
-            </div>
-            <div class="d3-motor-item">
-              <div class="d3-motor-id">M4 <span class="d3-motor-rpm" data-m="3">12.0k</span></div>
-              <div class="d3-motor-bar"><div class="d3-motor-fill" data-m="3" style="width:20%"></div></div>
-            </div>
+          <div class="d3-clabel">⚙️ Motors</div>
+          <div class="d3-mgrid">
+            <div class="d3-mitem"><div class="d3-mid">M1<span class="d3-mrpm" id="d3rpm0">12.0k</span></div><div class="d3-mbar"><div class="d3-mfill" id="d3mf0"></div></div></div>
+            <div class="d3-mitem"><div class="d3-mid">M2<span class="d3-mrpm" id="d3rpm1">12.0k</span></div><div class="d3-mbar"><div class="d3-mfill" id="d3mf1"></div></div></div>
+            <div class="d3-mitem"><div class="d3-mid">M3<span class="d3-mrpm" id="d3rpm2">12.0k</span></div><div class="d3-mbar"><div class="d3-mfill" id="d3mf2"></div></div></div>
+            <div class="d3-mitem"><div class="d3-mid">M4<span class="d3-mrpm" id="d3rpm3">12.0k</span></div><div class="d3-mbar"><div class="d3-mfill" id="d3mf3"></div></div></div>
           </div>
         </div>
 
-        <!-- Attitude -->
         <div class="d3-card">
-          <div class="d3-card-label">✈️ Attitude</div>
-          <div class="d3-attitude">
-            <div class="d3-att-item">
-              <div class="d3-att-val" id="d3Roll">0°</div>
-              <div class="d3-att-lbl">ROLL</div>
-            </div>
-            <div class="d3-att-item">
-              <div class="d3-att-val" id="d3Pitch">0°</div>
-              <div class="d3-att-lbl">PITCH</div>
-            </div>
-            <div class="d3-att-item">
-              <div class="d3-att-val" id="d3Yaw">0°</div>
-              <div class="d3-att-lbl">YAW</div>
-            </div>
+          <div class="d3-clabel">✈️ Attitude</div>
+          <div class="d3-att">
+            <div><div class="d3-av" id="d3Roll">0°</div><div class="d3-al">ROLL</div></div>
+            <div><div class="d3-av" id="d3Pitch">0°</div><div class="d3-al">PITCH</div></div>
+            <div><div class="d3-av" id="d3Yaw">0°</div><div class="d3-al">YAW</div></div>
           </div>
         </div>
 
-        <!-- Color theme -->
         <div class="d3-card">
-          <div class="d3-card-label">🎨 Theme</div>
-          <div class="d3-colors">
-            <div class="d3-color-btn active" data-theme="cyan"   title="Cyan" style="background:#00e5ff22;border-color:#00e5ff66;color:#00e5ff;box-shadow:0 0 8px #00e5ff44"></div>
-            <div class="d3-color-btn"        data-theme="green"  title="Green" style="background:#00ff9d22;border-color:#00ff9d66;color:#00ff9d;box-shadow:0 0 8px #00ff9d44"></div>
-            <div class="d3-color-btn"        data-theme="gold"   title="Gold" style="background:#ffcc0022;border-color:#ffcc0066;color:#ffcc00;box-shadow:0 0 8px #ffcc0044"></div>
-            <div class="d3-color-btn"        data-theme="purple" title="Purple" style="background:#b060ff22;border-color:#b060ff66;color:#b060ff;box-shadow:0 0 8px #b060ff44"></div>
-            <div class="d3-color-btn"        data-theme="red"    title="Red" style="background:#ff224422;border-color:#ff224466;color:#ff2244;box-shadow:0 0 8px #ff224444"></div>
+          <div class="d3-clabel">🎨 Theme</div>
+          <div class="d3-themes">
+            <div class="d3-tbtn on" data-th="cyan"   style="background:rgba(0,229,255,.18);border-color:rgba(0,229,255,.5);box-shadow:0 0 8px rgba(0,229,255,.3)" title="Cyan"></div>
+            <div class="d3-tbtn"    data-th="green"  style="background:rgba(0,255,157,.18);border-color:rgba(0,255,157,.4)" title="Green"></div>
+            <div class="d3-tbtn"    data-th="gold"   style="background:rgba(255,204,0,.18);border-color:rgba(255,204,0,.4)" title="Gold"></div>
+            <div class="d3-tbtn"    data-th="purple" style="background:rgba(176,96,255,.18);border-color:rgba(176,96,255,.4)" title="Purple"></div>
+            <div class="d3-tbtn"    data-th="red"    style="background:rgba(255,34,68,.18);border-color:rgba(255,34,68,.4)" title="Red"></div>
           </div>
         </div>
 
-        <!-- Build spec -->
         <div class="d3-card">
-          <div class="d3-card-label">📋 Build Spec</div>
-          <div class="d3-spec-list">
-            <div class="d3-spec-row"><span class="d3-spec-k">Frame</span><span class="d3-spec-v">5" X-quad</span></div>
-            <div class="d3-spec-row"><span class="d3-spec-k">Motor</span><span class="d3-spec-v">2306 2450KV</span></div>
-            <div class="d3-spec-row"><span class="d3-spec-k">Props</span><span class="d3-spec-v">5×4.3×3 HQ</span></div>
-            <div class="d3-spec-row"><span class="d3-spec-k">Battery</span><span class="d3-spec-v">4S 1500mAh</span></div>
-            <div class="d3-spec-row"><span class="d3-spec-k">FC</span><span class="d3-spec-v">F7 + BF 4.5</span></div>
+          <div class="d3-clabel">📋 Build Spec</div>
+          <div class="d3-spec">
+            <div class="d3-sr"><span class="d3-sk">Frame</span><span class="d3-sv">5" X-quad</span></div>
+            <div class="d3-sr"><span class="d3-sk">Motor</span><span class="d3-sv">2306 2450KV</span></div>
+            <div class="d3-sr"><span class="d3-sk">Props</span><span class="d3-sv">5×4.3×3 HQ</span></div>
+            <div class="d3-sr"><span class="d3-sk">Battery</span><span class="d3-sv">4S 1500mAh</span></div>
+            <div class="d3-sr"><span class="d3-sk">FC</span><span class="d3-sv">F7 + BF 4.5</span></div>
           </div>
         </div>
 
-      </div><!-- /d3-panel -->
-    </div><!-- /d3-stage -->
-  </div><!-- /d3-inner -->
+      </div>
+    </div>
+  </div>
 </section>
 
 <div class="neon-divider"></div>
+
+<!-- Three.js + Drone3D -->
+<script>
+(function(){
+  /* ── load Three.js then init ── */
+  var s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+  s.onload  = function(){ initDrone3D(); };
+  s.onerror = function(){
+    var err = document.getElementById('d3Error');
+    var ld  = document.getElementById('d3Loading');
+    if(ld)  ld.classList.add('gone');
+    if(err){ err.querySelector('.d3-error-txt').textContent='ไม่สามารถโหลด Three.js — ตรวจสอบ internet connection'; err.classList.add('show');}
+  };
+  document.head.appendChild(s);
+
+  /* ════════════════════════════════════════════
+     DRONE 3D ENGINE
+  ════════════════════════════════════════════ */
+  function initDrone3D(){
+    var canvas = document.getElementById('d3Canvas');
+    var wrap   = document.getElementById('d3Wrap');
+    if(!canvas || !wrap) return;
+
+    /* WebGL check */
+    try {
+      var test = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if(!test) throw new Error('no webgl');
+    } catch(e){
+      document.getElementById('d3Loading').classList.add('gone');
+      document.getElementById('d3Error').classList.add('show');
+      return;
+    }
+
+    /* ── Config ── */
+    var CFG = {
+      autoSpeed:    0.0035,
+      damping:      0.072,
+      minDist:      2.5,
+      maxDist:      9.5,
+      fov:          50,
+      idleResume:   1800,   /* ms */
+      telemMs:      110,
+      motorIdleRPM: 12000,
+      motorMaxRPM:  44000,
+    };
+
+    /* ── Color themes ── */
+    var THEMES = {
+      cyan:   { frame:0x061420, arm:0x0a1e30, motor:0x0d1e28, motorE:0x00e5ff, prop:0x00ccee, propE:0x00e5ff, l1:0x00e5ff, l2:0x0088ff, l3:0x00ffcc },
+      green:  { frame:0x061a0c, arm:0x0a200f, motor:0x0d1e10, motorE:0x00ff9d, prop:0x00dd88, propE:0x00ff9d, l1:0x00ff9d, l2:0x00cc66, l3:0x00ffcc },
+      gold:   { frame:0x1a1400, arm:0x201800, motor:0x1e1500, motorE:0xffcc00, prop:0xffaa00, propE:0xffcc00, l1:0xffcc00, l2:0xff8800, l3:0xffee66 },
+      purple: { frame:0x130a20, arm:0x180d28, motor:0x14091e, motorE:0xb060ff, prop:0xaa44ff, propE:0xcc77ff, l1:0xb060ff, l2:0x7722ff, l3:0xff44cc },
+      red:    { frame:0x1e0608, arm:0x240a0c, motor:0x1e0608, motorE:0xff2244, prop:0xff3355, propE:0xff4466, l1:0xff2244, l2:0xff6600, l3:0xff0066 },
+    };
+    var curTheme = 'cyan';
+
+    /* ── State ── */
+    var sph   = {th:0.45, ph:1.18, r:5.4};
+    var sphT  = {th:0.45, ph:1.18, r:5.4};
+    var drag  = false;
+    var lastX = 0, lastY = 0;
+    var lastTouch = 0;
+    var pinch0 = 0;
+    var autoOn  = true;
+    var lastInt = 0;
+    var frameId, telemId;
+    var props   = [];
+    var mLights = [];
+    var drone, scene, camera, renderer;
+    var prevT   = 0;
+
+    /* ── Three init ── */
+    var W = wrap.clientWidth;
+    var H = wrap.clientHeight;
+
+    renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true, alpha:false, powerPreference:'high-performance'});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+    renderer.setSize(W, H, false);
+    renderer.setClearColor(0x010810,1);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+
+    scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x010810, 0.04);
+
+    camera = new THREE.PerspectiveCamera(CFG.fov, W/H, 0.1, 80);
+
+    /* ── Lights ── */
+    scene.add(new THREE.AmbientLight(0x040d18, 1.0));
+    var dir = new THREE.DirectionalLight(0x4488cc, 0.5);
+    dir.position.set(3,6,4);
+    scene.add(dir);
+
+    var T = THEMES[curTheme];
+    [[1,1],[-1,1],[1,-1],[-1,-1]].forEach(function(p,i){
+      var pl = new THREE.PointLight([T.l1,T.l2,T.l3,T.l1][i], 1.8, 3.4);
+      pl.position.set(p[0]*1.05, 0.12, p[1]*1.05);
+      scene.add(pl);
+      mLights.push(pl);
+    });
+    var topL = new THREE.PointLight(T.l2, 0.7, 6);
+    topL.position.set(0,2,0);
+    scene.add(topL);
+
+    /* ── Grid ── */
+    var grid = new THREE.GridHelper(12,16,0x001a33,0x001a33);
+    grid.position.y = -1.4;
+    scene.add(grid);
+
+    /* ── Ground reflection ── */
+    var gm = new THREE.Mesh(
+      new THREE.PlaneGeometry(10,10),
+      new THREE.MeshStandardMaterial({color:0x000d1a,metalness:0.9,roughness:0.6,transparent:true,opacity:0.45})
+    );
+    gm.rotation.x = -Math.PI/2;
+    gm.position.y = -1.4;
+    scene.add(gm);
+
+    /* ── Stars ── */
+    (function(){
+      var n=380, pos=new Float32Array(n*3);
+      for(var i=0;i<n;i++){
+        var r=22+Math.random()*18, th=Math.random()*Math.PI*2, ph=Math.acos(2*Math.random()-1);
+        pos[i*3]=r*Math.sin(ph)*Math.cos(th);
+        pos[i*3+1]=r*Math.sin(ph)*Math.sin(th);
+        pos[i*3+2]=r*Math.cos(ph);
+      }
+      var geo=new THREE.BufferGeometry();
+      geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+      scene.add(new THREE.Points(geo,new THREE.PointsMaterial({color:0x88aacc,size:0.04,transparent:true,opacity:0.5,sizeAttenuation:true})));
+    })();
+
+    /* ── Build drone ── */
+    buildDrone();
+
+    /* ── Helpers ── */
+    function lerp(a,b,t){ return a+(b-a)*t; }
+    function clamp(v,lo,hi){ return Math.max(lo,Math.min(hi,v)); }
+    function s2c(s){
+      var sp=Math.sin(s.ph);
+      return {x:s.r*sp*Math.sin(s.th), y:s.r*Math.cos(s.ph), z:s.r*sp*Math.cos(s.th)};
+    }
+
+    function buildDrone(){
+      if(drone) scene.remove(drone);
+      props=[];
+      var T=THEMES[curTheme];
+      drone=new THREE.Group();
+
+      var fMat=new THREE.MeshStandardMaterial({color:T.frame,emissive:new THREE.Color(T.motorE).multiplyScalar(0.04),emissiveIntensity:1,metalness:0.88,roughness:0.22});
+      var aMat=new THREE.MeshStandardMaterial({color:T.arm,emissive:new THREE.Color(T.motorE).multiplyScalar(0.05),emissiveIntensity:1,metalness:0.9,roughness:0.2});
+      var mMat=new THREE.MeshStandardMaterial({color:T.motor,emissive:T.motorE,emissiveIntensity:0.95,metalness:0.96,roughness:0.14});
+      var pMat=new THREE.MeshStandardMaterial({color:T.prop,emissive:T.propE,emissiveIntensity:0.65,metalness:0.25,roughness:0.45,transparent:true,opacity:0.88});
+      var ledM=new THREE.MeshBasicMaterial({color:T.motorE,transparent:true,opacity:0.95});
+      var stkM=new THREE.MeshStandardMaterial({color:0x0a1520,emissive:T.motorE,emissiveIntensity:0.08,metalness:0.7,roughness:0.3});
+      var camM=new THREE.MeshStandardMaterial({color:0x050e18,emissive:0x001122,emissiveIntensity:0.9,metalness:0.9,roughness:0.2});
+      var haloM=new THREE.MeshBasicMaterial({color:T.motorE,transparent:true,opacity:0.1,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending});
+
+      /* Top/bottom plates */
+      drone.add(mk(new THREE.BoxGeometry(.7,.06,.7),fMat,0,.08,0));
+      drone.add(mk(new THREE.BoxGeometry(.65,.05,.65),fMat,0,-.08,0));
+
+      /* FC/ESC stack */
+      drone.add(mk(new THREE.BoxGeometry(.36,.28,.36),stkM,0,.04,0));
+
+      /* PCB strips */
+      var sMat=new THREE.MeshBasicMaterial({color:T.motorE,transparent:true,opacity:0.65});
+      [-.06,0,.06].forEach(function(z){
+        drone.add(mk(new THREE.BoxGeometry(.38,.012,.012),sMat,0,.19,z));
+      });
+
+      /* Cap */
+      drone.add(mk(new THREE.CylinderGeometry(.044,.044,.12,8),new THREE.MeshStandardMaterial({color:0x102030,metalness:.8,roughness:.3}),.16,.12,.08));
+
+      /* FPV camera body */
+      var cb=mk(new THREE.BoxGeometry(.13,.15,.09),camM,0,.1,.42);
+      cb.rotation.x=THREE.MathUtils.degToRad(30);
+      drone.add(cb);
+
+      /* Lens */
+      var ln=mk(new THREE.CylinderGeometry(.042,.048,.055,12),new THREE.MeshStandardMaterial({color:0x001020,emissive:0x002244,emissiveIntensity:2.5,metalness:1,roughness:.04}),0,.1,.48);
+      ln.rotation.x=Math.PI/2;
+      drone.add(ln);
+
+      /* Camera mount */
+      drone.add(mk(new THREE.BoxGeometry(.17,.035,.035),fMat,0,.02,.36));
+
+      /* 4 Arms + motors + props */
+      [[1,1],[−1,1],[1,−1],[−1,−1]].forEach(function(d,i){
+        var ang=Math.atan2(d[0],d[1]);
+        /* Arm */
+        var arm=mk(new THREE.BoxGeometry(.065,.04,.98),aMat,d[0]*.42,0,d[1]*.42);
+        arm.rotation.y=ang;
+        drone.add(arm);
+        /* Motor position */
+        var mx=d[0]*.86, mz=d[1]*.86;
+        /* Motor can */
+        drone.add(mk(new THREE.CylinderGeometry(.098,.092,.1,12),mMat,mx,.04,mz));
+        /* Motor ring */
+        var rng=mk(new THREE.TorusGeometry(.098,.011,8,24),mMat,mx,-.01,mz);
+        drone.add(rng);
+        /* LED */
+        drone.add(mk(new THREE.SphereGeometry(.02,6,6),ledM,mx,.1,mz));
+        /* Prop group */
+        var pg=new THREE.Group();
+        pg.position.set(mx,.12,mz);
+        /* 2 blades */
+        for(var b=0;b<2;b++){
+          var bl=mk(new THREE.BoxGeometry(.52,.01,.062),pMat.clone(),0,0,0);
+          bl.rotation.y=b*Math.PI;
+          bl.rotation.z=THREE.MathUtils.degToRad(3);
+          pg.add(bl);
+        }
+        /* Hub */
+        pg.add(mk(new THREE.CylinderGeometry(.042,.042,.02,10),mMat,0,0,0));
+        /* Glow disc */
+        var gd=mk(new THREE.CircleGeometry(.52,16),haloM.clone(),0,.005,0);
+        pg.add(gd);
+        drone.add(pg);
+        props.push({g:pg, dir:i%2===0?1:-1, spd:.2});
+
+        /* Halo under motor */
+        var hal=mk(new THREE.CircleGeometry(.2,16),haloM.clone(),mx,.09,mz);
+        hal.rotation.x=-Math.PI/2;
+        drone.add(hal);
+      });
+
+      /* VTX antenna */
+      drone.add(mk(new THREE.CylinderGeometry(.011,.011,.48,6),new THREE.MeshStandardMaterial({color:0x1a2030,metalness:.7,roughness:.4}),.14,.46,-.27));
+      drone.add(mk(new THREE.SphereGeometry(.02,6,6),new THREE.MeshBasicMaterial({color:T.motorE,transparent:true,opacity:.9}),.18,.71,-.3));
+
+      /* LED body strips */
+      [[-0.24,0],[0.24,0],[0,-0.24],[0,0.24]].forEach(function(p){
+        drone.add(mk(new THREE.BoxGeometry(.26,.009,.009),new THREE.MeshBasicMaterial({color:T.motorE,transparent:true,opacity:.75}),p[0],-.115,p[1]));
+      });
+
+      /* Standoffs */
+      [[.25,.25],[-.25,.25],[.25,-.25],[-.25,-.25]].forEach(function(p){
+        drone.add(mk(new THREE.CylinderGeometry(.02,.02,.18,6),new THREE.MeshStandardMaterial({color:0x0d1a24,metalness:.8,roughness:.3}),p[0],-.2,p[1]));
+      });
+
+      drone.position.y=0.22;
+      scene.add(drone);
+
+      /* Update motor light colors */
+      var cols=[T.l1,T.l2,T.l3,T.l1];
+      mLights.forEach(function(pl,i){ pl.color.setHex(cols[i%cols.length]); });
+      topL.color.setHex(T.l2);
+    }
+
+    function mk(geo,mat,x,y,z){
+      var m=new THREE.Mesh(geo,mat);
+      if(arguments.length>3) m.position.set(x,y,z);
+      return m;
+    }
+
+    /* ── Render loop ── */
+    function animate(t){
+      frameId=requestAnimationFrame(animate);
+      var dt=Math.min((t-prevT)/16.67,3);
+      prevT=t;
+
+      if(autoOn && !drag) sphT.th+=CFG.autoSpeed*dt;
+      if(!drag && t-lastInt>CFG.idleResume) autoOn=true;
+
+      sph.th=lerp(sph.th,sphT.th,CFG.damping*dt*6);
+      sph.ph=lerp(sph.ph,sphT.ph,CFG.damping*dt*6);
+      sph.r =lerp(sph.r, sphT.r, CFG.damping*dt*6);
+      sph.ph=clamp(sph.ph,.22,2.5);
+      sph.r =clamp(sph.r,CFG.minDist,CFG.maxDist);
+
+      var cp=s2c(sph);
+      camera.position.set(cp.x,cp.y,cp.z);
+      camera.lookAt(0,.14,0);
+
+      /* Prop spin */
+      var ts=t*.001;
+      props.forEach(function(p){ p.g.rotation.y+=p.dir*p.spd*dt; });
+
+      /* Light pulse */
+      mLights.forEach(function(pl,i){ pl.intensity=1.6+Math.sin(ts*3.1+i*1.57)*.3; });
+
+      /* Attitude readout */
+      var ro=document.getElementById('d3Roll'), pi=document.getElementById('d3Pitch'), ya=document.getElementById('d3Yaw');
+      if(ro){ var r=(sph.th%(Math.PI*2)-Math.PI)*180/Math.PI; ro.textContent=r.toFixed(1)+'°'; }
+      if(pi){ var p2=(sph.ph-Math.PI/2)*180/Math.PI; pi.textContent=p2.toFixed(1)+'°'; }
+      if(ya){ var y=(sph.th*2%(Math.PI*2)-Math.PI)*180/Math.PI; ya.textContent=y.toFixed(1)+'°'; }
+
+      renderer.render(scene,camera);
+    }
+
+    /* ── Telemetry ── */
+    var _thr=45, _vol=16.1, _rss=89, _tmp=32;
+    function telem(){
+      _thr=clamp(_thr+(Math.random()-.48)*3.5,28,95);
+      _vol=clamp(_vol+(Math.random()-.52)*.04,14.4,16.8);
+      _rss=clamp(_rss+(Math.random()-.5)*2.5,68,99);
+      _tmp=clamp(_tmp+(Math.random()-.49)*.8,28,55);
+      var v=document.getElementById('d3V'), th=document.getElementById('d3T'),
+          r=document.getElementById('d3R'), tm=document.getElementById('d3Tm');
+      if(v){ v.textContent=_vol.toFixed(1)+'V'; v.className='d3-tv'+(_vol<14.8?' warn':''); }
+      if(th) th.textContent=Math.round(_thr)+'%';
+      if(r){ r.textContent=Math.round(_rss)+'%'; r.className='d3-tv'+(_rss<76?' warn':''); }
+      if(tm){ tm.textContent=Math.round(_tmp)+'°C'; tm.className='d3-tv'+(_tmp>48?' hot':_tmp>42?' warn':''); }
+      for(var i=0;i<4;i++){
+        var base=CFG.motorIdleRPM+(_thr/100)*(CFG.motorMaxRPM-CFG.motorIdleRPM);
+        var rpm=Math.round(base+(Math.random()-.5)*700);
+        var pct=((rpm-CFG.motorIdleRPM)/(CFG.motorMaxRPM-CFG.motorIdleRPM)*100);
+        var mf=document.getElementById('d3mf'+i), mr=document.getElementById('d3rpm'+i);
+        if(mf) mf.style.width=clamp(pct,0,100)+'%';
+        if(mr) mr.textContent=(rpm/1000).toFixed(1)+'k';
+        if(props[i]) props[i].spd=0.09+(_thr/100)*.35;
+      }
+    }
+
+    /* ── Events ── */
+    function down(e){
+      drag=true; autoOn=false; lastInt=performance.now();
+      var c=e.touches?e.touches[0]:e;
+      lastX=c.clientX; lastY=c.clientY;
+    }
+    function move(e){
+      if(!drag) return;
+      var c=e.touches?e.touches[0]:e;
+      var dx=c.clientX-lastX, dy=c.clientY-lastY;
+      lastX=c.clientX; lastY=c.clientY;
+      sphT.th-=dx*.009; sphT.ph+=dy*.009;
+      lastInt=performance.now();
+    }
+    function up(){ drag=false; lastInt=performance.now(); }
+    function wheel(e){ e.preventDefault(); sphT.r+=e.deltaY*.004; lastInt=performance.now(); }
+    function tstart(e){
+      if(e.touches.length===2){
+        var dx=e.touches[0].clientX-e.touches[1].clientX, dy=e.touches[0].clientY-e.touches[1].clientY;
+        pinch0=Math.sqrt(dx*dx+dy*dy);
+      }
+    }
+    function tmove(e){
+      if(e.touches.length===2){
+        var dx=e.touches[0].clientX-e.touches[1].clientX, dy=e.touches[0].clientY-e.touches[1].clientY;
+        var d=Math.sqrt(dx*dx+dy*dy);
+        sphT.r+=((pinch0-d)*.012);
+        pinch0=d;
+      }
+      e.preventDefault();
+    }
+
+    wrap.addEventListener('mousedown',down,{passive:true});
+    wrap.addEventListener('mousemove',move,{passive:true});
+    wrap.addEventListener('mouseup',up,{passive:true});
+    wrap.addEventListener('mouseleave',up,{passive:true});
+    wrap.addEventListener('touchstart',down,{passive:true});
+    wrap.addEventListener('touchstart',tstart,{passive:true});
+    wrap.addEventListener('touchmove',move,{passive:false});
+    wrap.addEventListener('touchmove',tmove,{passive:false});
+    wrap.addEventListener('touchend',up,{passive:true});
+    wrap.addEventListener('wheel',wheel,{passive:false});
+    wrap.addEventListener('contextmenu',function(e){e.preventDefault();});
+
+    /* Color theme buttons */
+    document.querySelectorAll('.d3-tbtn').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        curTheme=btn.dataset.th;
+        buildDrone();
+        document.querySelectorAll('.d3-tbtn').forEach(function(b){ b.classList.toggle('on',b.dataset.th===curTheme); });
+      });
+    });
+
+    /* Resize */
+    var ro2=new ResizeObserver(function(){
+      var W2=wrap.clientWidth, H2=wrap.clientHeight;
+      if(!W2||!H2) return;
+      renderer.setSize(W2,H2,false);
+      camera.aspect=W2/H2;
+      camera.updateProjectionMatrix();
+    });
+    ro2.observe(wrap);
+
+    /* Init camera */
+    var cp0=s2c(sph); camera.position.set(cp0.x,cp0.y,cp0.z); camera.lookAt(0,.14,0);
+
+    /* Show canvas, start */
+    setTimeout(function(){
+      document.getElementById('d3Loading').classList.add('gone');
+    }, 500);
+    telemId=setInterval(telem,CFG.telemMs);
+    telem();
+    animate(0);
+
+    window.addEventListener('beforeunload',function(){
+      if(frameId) cancelAnimationFrame(frameId);
+      if(telemId) clearInterval(telemId);
+      ro2.disconnect();
+      renderer.dispose();
+    });
+  }/* end initDrone3D */
+})();
+</script>
 
 <!-- ═══════════════════════════════════════════════════════════════
      TOOL HUB — รวมเครื่องมือทั้งหมด
@@ -4777,9 +5259,5 @@ window.switchMode = function(mode) {
   }
 })();
 </script>
-
-<!-- ═══ 3D Drone Viewer scripts ═══ -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="{{ url_for('static', filename='js/drone3d.js') }}"></script>
 </body>
 </html>
