@@ -1611,6 +1611,7 @@ footer {
   .orbix-orbit-core-label{
     font-size:16px;
   }
+ 
    @media (max-width: 720px) {
   .orbix-orbit-launcher {
     top: 68px;
@@ -1631,8 +1632,8 @@ footer {
     border-radius: 28px;
   }
 
-  .orbix-orbit-wheel {
-    inset: 72px 10px 10px 10px;
+  .orbix-orbit-wheel{
+  inset:clamp(70px, 9vw, 110px) 12px 12px 12px;
   }
 
   .orbix-node {
@@ -1655,9 +1656,9 @@ footer {
     display: none;
   }
 
-  .orbix-orbit-core {
-    width: 78px;
-    height: 78px;
+  .orbix-orbit-core{
+  width:clamp(70px, 9vw, 120px);
+  height:clamp(70px, 9vw, 120px);
   }
 
   .orbix-orbit-core-label {
