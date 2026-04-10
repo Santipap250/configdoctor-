@@ -363,24 +363,24 @@ def analyze_drone(size, battery, style, prop_result, weight, detected_class=None
     analysis["pid"] = pid
 
     # ── Filter: comprehensive output ───────────────────────────────────
-    analysis["filter"] = {
-        # ชื่อ key ตรงกับค่าจริง (แก้ bug เดิมที่ใส่ LPF1 ไว้ใน key ชื่อ LPF2)
-        "gyro_lpf1":         flt_raw.get("gyro_lpf1"),
-        "gyro_lpf2":         flt_raw.get("gyro_lpf2"),
-        "dterm_lpf1":        flt_raw.get("dterm_lpf1"),
-        "dterm_lpf2":        flt_raw.get("dterm_lpf2"),
-        "dyn_notch":         flt_raw.get("dyn_notch_count", 2),
-        # Extended keys (backward compat + new)
-        "gyro_lpf1_hz":      flt_raw.get("gyro_lpf1"),
-        "gyro_lpf2_hz":      flt_raw.get("gyro_lpf2"),
-        "dterm_lpf1_hz":     flt_raw.get("dterm_lpf1"),
-        "dterm_lpf2_hz":     flt_raw.get("dterm_lpf2"),
-        "dyn_notch_count":   flt_raw.get("dyn_notch_count", 2),
-        "dyn_notch_min":     flt_raw.get("dyn_notch_min"),
-        "dyn_notch_max":     flt_raw.get("dyn_notch_max"),
-        "rpm_filter":        flt_raw.get("rpm_filter", True),
-        "anti_gravity":      flt_raw.get("anti_gravity", 5),
+    _flt = {
+        "gyro_lpf1":       flt_raw.get("gyro_lpf1"),
+        "gyro_lpf2":       flt_raw.get("gyro_lpf2"),
+        "dterm_lpf1":      flt_raw.get("dterm_lpf1"),
+        "dterm_lpf2":      flt_raw.get("dterm_lpf2"),
+        "dyn_notch_count": flt_raw.get("dyn_notch_count", 2),
+        "dyn_notch_min":   flt_raw.get("dyn_notch_min"),
+        "dyn_notch_max":   flt_raw.get("dyn_notch_max"),
+        "rpm_filter":      flt_raw.get("rpm_filter", True),
+        "anti_gravity":    flt_raw.get("anti_gravity", 5),
     }
+    # Hz aliases — backward compat for templates that reference _hz keys
+    _flt["gyro_lpf1_hz"]  = _flt["gyro_lpf1"]
+    _flt["gyro_lpf2_hz"]  = _flt["gyro_lpf2"]
+    _flt["dterm_lpf1_hz"] = _flt["dterm_lpf1"]
+    _flt["dterm_lpf2_hz"] = _flt["dterm_lpf2"]
+    _flt["dyn_notch"]     = _flt["dyn_notch_count"]  # short alias
+    analysis["filter"] = _flt
 
     # ── Style tips ─────────────────────────────────────────────────────
     if style == "freestyle":
