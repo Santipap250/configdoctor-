@@ -122,49 +122,270 @@ body:not(.lang-en) .i18n-th { display:inline !important; }
 }
 
 /* ═══════════════════════════════════════
-   NAV
+   NAV — MEGA HUD v2.0
    ═══════════════════════════════════════ */
 .nav {
   position:fixed; top:0; left:0; right:0; z-index:var(--z-nav);
   display:flex; align-items:center; justify-content:space-between;
-  padding:0 32px; height:60px;
-  background:rgba(1,6,8,.9); backdrop-filter:blur(28px) saturate(1.8);
-  border-bottom:1px solid rgba(0,255,157,.08);
+  padding:0 28px; height:60px;
+  background:rgba(1,6,8,.92); backdrop-filter:blur(32px) saturate(2);
+  border-bottom:1px solid rgba(0,255,157,.07);
+  transition:height .25s ease, background .25s ease;
 }
+.nav.scrolled { height:52px; background:rgba(1,4,6,.97); }
+/* animated sweep line */
 .nav::after {
   content:''; position:absolute; bottom:0; left:0; right:0; height:1px;
-  background:linear-gradient(90deg,transparent,var(--green) 25%,var(--cyan) 50%,var(--green) 75%,transparent);
+  background:linear-gradient(90deg,transparent,var(--green) 20%,var(--cyan) 50%,var(--blue) 80%,transparent);
   background-size:200% 100%; animation:navSweep 8s linear infinite;
 }
-@keyframes navSweep { 0%{background-position:100%} 100%{background-position:-100%} }
-.nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
-.nav-logo img { height:30px; filter:drop-shadow(0 0 8px rgba(0,255,157,.5)); }
-.nav-logo-text { font-family:var(--font-d); font-size:.68rem; font-weight:900; color:var(--green); letter-spacing:.14em; }
-.nav-logo-sub { font-family:var(--font-m); font-size:.58rem; color:var(--muted2); letter-spacing:.06em; }
-.nav-links { display:flex; gap:4px; align-items:center; }
-.nav-link { padding:6px 12px; font-family:var(--font-d); font-size:.62rem; letter-spacing:.08em; color:var(--muted2); text-decoration:none; border-radius:6px; transition:all .18s; }
-.nav-link:hover { color:var(--text); background:rgba(0,255,157,.05); }
-.nav-link.highlight { color:var(--gold); }
-.nav-cta {
-  padding:7px 18px; background:var(--green); color:#000;
-  font-family:var(--font-d); font-weight:900; font-size:.65rem; letter-spacing:.1em;
-  border-radius:7px; text-decoration:none; margin-left:6px;
-  box-shadow:0 0 20px rgba(0,255,157,.35);
-  transition:all .18s; position:relative; overflow:hidden;
+/* top micro accent */
+.nav::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,255,157,.15) 50%,transparent);
 }
-.nav-cta::before { content:''; position:absolute; top:0; left:-100%; width:60%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent); transition:left .35s; }
-.nav-cta:hover::before { left:140%; }
-.nav-cta:hover { filter:brightness(1.1); transform:translateY(-1px); box-shadow:0 0 30px rgba(0,255,157,.5); }
+@keyframes navSweep { 0%{background-position:100%} 100%{background-position:-100%} }
+
+/* ── LOGO ── */
+.nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; flex-shrink:0; }
+.nav-logo img { height:28px; filter:drop-shadow(0 0 8px rgba(0,255,157,.55)); transition:filter .2s; }
+.nav-logo:hover img { filter:drop-shadow(0 0 14px rgba(0,255,157,.9)); }
+.nav-logo-text { font-family:var(--font-d); font-size:.66rem; font-weight:900; color:var(--green); letter-spacing:.15em; line-height:1.1; }
+.nav-logo-sub { font-family:var(--font-m); font-size:.54rem; color:var(--muted2); letter-spacing:.06em; }
+/* blinking status dot */
+.nav-logo-dot {
+  width:6px; height:6px; border-radius:50%; background:var(--green);
+  box-shadow:0 0 6px var(--green); animation:dotPulse 2s ease-in-out infinite;
+  flex-shrink:0;
+}
+@keyframes dotPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+
+/* ── MAIN LINKS CONTAINER ── */
+.nav-links { display:flex; gap:2px; align-items:center; flex:1; justify-content:center; }
+
+/* ── NAV GROUP (dropdown trigger) ── */
+.nav-group { position:relative; }
+.nav-group-btn {
+  display:flex; align-items:center; gap:5px;
+  padding:6px 11px; font-family:var(--font-d); font-size:.61rem; letter-spacing:.08em;
+  color:var(--muted2); background:transparent; border:none; cursor:pointer;
+  border-radius:7px; transition:all .18s; white-space:nowrap;
+}
+.nav-group-btn .ng-icon { font-size:.85rem; }
+.nav-group-btn .ng-arrow {
+  font-size:.55rem; opacity:.5; transition:transform .2s, opacity .2s;
+  margin-left:1px; line-height:1;
+}
+.nav-group-btn:hover { color:var(--text); background:rgba(0,255,157,.05); }
+.nav-group-btn:hover .ng-arrow { opacity:.9; transform:translateY(1px); }
+.nav-group:hover .nav-group-btn,
+.nav-group-btn[aria-expanded="true"] {
+  color:var(--green); background:rgba(0,255,157,.06);
+}
+.nav-group:hover .nav-group-btn .ng-arrow,
+.nav-group-btn[aria-expanded="true"] .ng-arrow { transform:rotate(180deg); opacity:1; }
+
+/* group color accents on hover */
+.nav-group.tune .nav-group-btn:hover  { color:var(--green); }
+.nav-group.hw   .nav-group-btn:hover  { color:var(--cyan); }
+.nav-group.analysis .nav-group-btn:hover { color:var(--gold); }
+.nav-group.video .nav-group-btn:hover { color:var(--blue); }
+.nav-group.explore .nav-group-btn:hover { color:var(--purple); }
+
+/* ── DROPDOWN PANEL ── */
+.nav-dropdown {
+  position:absolute; top:calc(100% + 8px); left:50%; transform:translateX(-50%);
+  min-width:230px;
+  background:rgba(3,10,18,.97); backdrop-filter:blur(28px);
+  border:1px solid rgba(0,255,157,.1);
+  border-radius:12px; padding:8px;
+  opacity:0; visibility:hidden; pointer-events:none;
+  transform:translateX(-50%) translateY(-6px);
+  transition:opacity .18s ease, transform .18s ease, visibility .18s;
+  box-shadow:0 16px 48px rgba(0,0,0,.7), 0 0 0 1px rgba(0,255,157,.04), inset 0 1px 0 rgba(255,255,255,.03);
+}
+/* Top accent stripe per group */
+.nav-dropdown::before {
+  content:''; position:absolute; top:0; left:16px; right:16px; height:1px;
+  border-radius:1px;
+}
+.tune   .nav-dropdown::before { background:linear-gradient(90deg,transparent,var(--green),transparent); }
+.hw     .nav-dropdown::before { background:linear-gradient(90deg,transparent,var(--cyan),transparent); }
+.analysis .nav-dropdown::before { background:linear-gradient(90deg,transparent,var(--gold),transparent); }
+.video  .nav-dropdown::before { background:linear-gradient(90deg,transparent,var(--blue),transparent); }
+.explore .nav-dropdown::before { background:linear-gradient(90deg,transparent,var(--purple),transparent); }
+
+.nav-group:hover .nav-dropdown,
+.nav-group-btn[aria-expanded="true"] + .nav-dropdown {
+  opacity:1; visibility:visible; pointer-events:auto;
+  transform:translateX(-50%) translateY(0);
+}
+/* dropdown header label */
+.nav-dd-header {
+  padding:4px 10px 6px;
+  font-family:var(--font-d); font-size:.52rem; letter-spacing:.14em;
+  color:rgba(255,255,255,.22); text-transform:uppercase;
+  border-bottom:1px solid rgba(255,255,255,.04); margin-bottom:4px;
+}
+/* each dropdown item */
+.nav-dd-item {
+  display:flex; align-items:center; gap:9px;
+  padding:7px 10px; border-radius:8px; text-decoration:none;
+  color:var(--muted2); font-family:var(--font-t); font-size:.82rem;
+  transition:all .14s; position:relative; overflow:hidden;
+}
+.nav-dd-item::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:2px;
+  border-radius:2px; transform:scaleY(0); transition:transform .15s;
+}
+.nav-dd-item:hover { color:var(--text); background:rgba(255,255,255,.04); }
+.nav-dd-item:hover::before { transform:scaleY(1); }
+.tune    .nav-dd-item:hover::before { background:var(--green); }
+.hw      .nav-dd-item:hover::before { background:var(--cyan); }
+.analysis .nav-dd-item:hover::before { background:var(--gold); }
+.video   .nav-dd-item:hover::before { background:var(--blue); }
+.explore .nav-dd-item:hover::before { background:var(--purple); }
+.nav-dd-icon { font-size:1rem; flex-shrink:0; width:20px; text-align:center; }
+.nav-dd-label { flex:1; font-weight:600; font-size:.8rem; }
+.nav-dd-hint  { font-size:.68rem; color:var(--muted); font-family:var(--font-m); }
+.nav-dd-badge {
+  font-size:.55rem; font-family:var(--font-d); letter-spacing:.08em;
+  padding:1px 5px; border-radius:3px; font-weight:700; flex-shrink:0;
+}
+.ddb-hot  { background:rgba(255,204,0,.15); color:var(--gold); border:1px solid rgba(255,204,0,.25); }
+.ddb-new  { background:rgba(0,255,157,.12); color:var(--green); border:1px solid rgba(0,255,157,.22); }
+.ddb-game { background:rgba(157,78,221,.15); color:var(--purple); border:1px solid rgba(157,78,221,.25); }
+
+/* ── DIRECT LINKS (non-group) ── */
+.nav-direct {
+  padding:6px 11px; font-family:var(--font-d); font-size:.61rem; letter-spacing:.08em;
+  color:var(--muted2); text-decoration:none; border-radius:7px; transition:all .18s;
+  white-space:nowrap;
+}
+.nav-direct:hover { color:var(--text); background:rgba(0,255,157,.05); }
+.nav-direct.hl-gold { color:var(--gold); }
+.nav-direct.hl-gold:hover { background:rgba(255,204,0,.07); color:var(--gold); filter:brightness(1.15); }
+
+/* ── RIGHT SIDE ── */
+.nav-right { display:flex; align-items:center; gap:6px; flex-shrink:0; }
 .lang-toggle {
-  display:inline-flex; align-items:center; gap:5px; padding:5px 11px;
+  display:inline-flex; align-items:center; gap:5px; padding:5px 10px;
   background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:6px;
-  color:var(--text); font-family:var(--font-d); font-size:.6rem; letter-spacing:.06em;
+  color:var(--text); font-family:var(--font-d); font-size:.59rem; letter-spacing:.06em;
   cursor:pointer; transition:all .2s;
 }
 .lang-toggle:hover { background:rgba(255,255,255,.08); border-color:rgba(0,255,157,.2); }
 .lang-toggle.lang-en { color:var(--blue); border-color:rgba(0,168,255,.3); }
-.nav-mobile-right { display:none; align-items:center; gap:8px; }
-@media(max-width:720px) { .nav { padding:0 18px; } .nav-links { display:none; } .nav-mobile-right { display:flex !important; } }
+.nav-cta {
+  padding:7px 16px; background:var(--green); color:#000;
+  font-family:var(--font-d); font-weight:900; font-size:.64rem; letter-spacing:.1em;
+  border-radius:7px; text-decoration:none;
+  box-shadow:0 0 18px rgba(0,255,157,.35);
+  transition:all .18s; position:relative; overflow:hidden; white-space:nowrap;
+}
+.nav-cta::before { content:''; position:absolute; top:0; left:-100%; width:55%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent); transition:left .32s; }
+.nav-cta:hover::before { left:140%; }
+.nav-cta:hover { filter:brightness(1.1); transform:translateY(-1px); box-shadow:0 0 28px rgba(0,255,157,.55); }
+
+/* ── HAMBURGER ── */
+.nav-hamburger {
+  display:none; flex-direction:column; justify-content:center; align-items:center;
+  gap:5px; width:36px; height:36px; cursor:pointer; background:transparent;
+  border:1px solid rgba(0,255,157,.15); border-radius:7px; padding:0; transition:all .2s;
+}
+.nav-hamburger:hover { border-color:rgba(0,255,157,.4); background:rgba(0,255,157,.05); }
+.nav-hamburger span {
+  display:block; width:18px; height:1.5px; background:var(--green);
+  border-radius:2px; transition:all .28s cubic-bezier(.68,-.6,.32,1.6);
+  transform-origin:center;
+}
+.nav-hamburger.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
+.nav-hamburger.open span:nth-child(2) { opacity:0; transform:scaleX(0); }
+.nav-hamburger.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
+
+/* ── MOBILE MENU ── */
+.nav-mobile-menu {
+  position:fixed; top:60px; left:0; right:0; z-index:calc(var(--z-nav) - 1);
+  background:rgba(1,6,10,.98); backdrop-filter:blur(28px);
+  border-bottom:1px solid rgba(0,255,157,.1);
+  overflow:hidden; max-height:0; transition:max-height .38s cubic-bezier(.4,0,.2,1);
+}
+.nav-mobile-menu.open { max-height:90dvh; overflow-y:auto; }
+.nmm-inner { padding:16px 20px 24px; }
+/* mobile group */
+.nmm-group { margin-bottom:4px; border-radius:10px; overflow:hidden; }
+.nmm-group-btn {
+  display:flex; align-items:center; gap:9px; width:100%;
+  padding:11px 14px; background:rgba(255,255,255,.03); border:none;
+  border-bottom:1px solid rgba(255,255,255,.04); cursor:pointer;
+  color:var(--text); font-family:var(--font-d); font-size:.7rem; letter-spacing:.08em;
+  border-radius:10px; transition:background .15s;
+}
+.nmm-group-btn:hover { background:rgba(255,255,255,.06); }
+.nmm-group-btn .nmm-arr { margin-left:auto; font-size:.7rem; transition:transform .2s; color:var(--muted); }
+.nmm-group.open .nmm-arr { transform:rotate(90deg); }
+.nmm-items {
+  max-height:0; overflow:hidden;
+  transition:max-height .3s ease;
+  background:rgba(0,0,0,.25);
+}
+.nmm-group.open .nmm-items { max-height:600px; }
+.nmm-item {
+  display:flex; align-items:center; gap:10px;
+  padding:9px 18px 9px 22px; text-decoration:none;
+  color:var(--muted2); font-size:.82rem; font-family:var(--font-t);
+  border-bottom:1px solid rgba(255,255,255,.03); transition:all .14s;
+}
+.nmm-item:last-child { border-bottom:none; }
+.nmm-item:hover { color:var(--text); background:rgba(0,255,157,.04); padding-left:26px; }
+.nmm-item-icon { font-size:.95rem; width:20px; text-align:center; flex-shrink:0; }
+.nmm-item-label { font-weight:600; }
+.nmm-item-badge {
+  margin-left:auto; font-size:.55rem; font-family:var(--font-d); letter-spacing:.06em;
+  padding:2px 6px; border-radius:3px; font-weight:700;
+}
+/* mobile divider & direct links */
+.nmm-divider { height:1px; background:rgba(255,255,255,.05); margin:12px 0; }
+.nmm-direct-row { display:flex; flex-wrap:wrap; gap:8px; padding:4px 0; }
+.nmm-direct-link {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:7px 14px; background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.07); border-radius:7px;
+  text-decoration:none; color:var(--muted2);
+  font-family:var(--font-d); font-size:.62rem; letter-spacing:.06em;
+  transition:all .15s;
+}
+.nmm-direct-link:hover { background:rgba(0,255,157,.07); border-color:rgba(0,255,157,.2); color:var(--green); }
+.nmm-direct-link.highlight { color:var(--gold); border-color:rgba(255,204,0,.2); }
+/* mobile cta */
+.nmm-cta-row { margin-top:14px; }
+.nmm-cta {
+  display:block; width:100%; padding:13px;
+  background:var(--green); color:#000; text-decoration:none; text-align:center;
+  font-family:var(--font-d); font-weight:900; font-size:.75rem; letter-spacing:.12em;
+  border-radius:9px; box-shadow:0 0 24px rgba(0,255,157,.3); transition:all .18s;
+}
+.nmm-cta:hover { filter:brightness(1.1); box-shadow:0 0 32px rgba(0,255,157,.5); }
+/* scan-line fx on mobile menu */
+.nmm-scanline {
+  position:absolute; left:0; right:0; height:1px; pointer-events:none;
+  background:rgba(0,255,157,.07); animation:scanline 4s linear infinite;
+}
+@keyframes scanline { 0%{top:0} 100%{top:100%} }
+
+/* ── DESKTOP vs MOBILE visibility ── */
+@media(max-width:960px) {
+  .nav { padding:0 18px; }
+  .nav-links { display:none; }
+  .nav-right .lang-toggle { display:none; } /* hide lang on mobile — inside mobile menu */
+  .nav-hamburger { display:flex; }
+}
+@media(min-width:961px) {
+  .nav-mobile-menu { display:none; }
+  .nav-hamburger { display:none; }
+}
+/* old class kept for JS compatibility */
+.nav-mobile-right { display:none; }
 
 /* ═══════════════════════════════════════
    HERO SECTION
@@ -1239,39 +1460,318 @@ footer {
 <canvas id="particleCanvas" aria-hidden="true"></canvas>
 
 <!-- ═══════════════════════════════════════
-     NAV
+     NAV — MEGA HUD v2.0
      ═══════════════════════════════════════ -->
-<nav class="nav" aria-label="Main navigation">
-  <a class="nav-logo" href="/landing">
+<nav class="nav" id="mainNav" aria-label="Main navigation">
+
+  <!-- LOGO -->
+  <a class="nav-logo" href="/landing" aria-label="OBIXConfig Doctor Home">
     <img src="{{ url_for('static', filename='img/obix-logo.png') }}" alt="OBIX">
     <div>
       <div class="nav-logo-text">OBIX CONFIG DOCTOR</div>
       <div class="nav-logo-sub">FPV Tuning Platform 🇹🇭 · v5.2</div>
     </div>
+    <div class="nav-logo-dot" title="System Online"></div>
   </a>
-  <div class="nav-links">
-    <a class="nav-link highlight" href="/blackbox">📊 Blackbox</a>
-    <a class="nav-link" href="/bf-wizard">⚡ Wizard</a>
-    <a class="nav-link" href="/leaderboard">🏆 Rank</a>
-    <a class="nav-link" href="/pid-advisor">PID</a>
-    <a class="nav-link" href="{{ url_for('about') }}">About</a>
-    <button class="lang-toggle" onclick="toggleLang()" id="langBtn">
+
+  <!-- CENTER: MEGA LINKS (desktop) -->
+  <div class="nav-links" role="menubar">
+
+    <!-- 🩺 TUNE -->
+    <div class="nav-group tune" role="none">
+      <button class="nav-group-btn" aria-haspopup="true" aria-expanded="false" role="menuitem">
+        <span class="ng-icon">🩺</span> TUNE <span class="ng-arrow">▾</span>
+      </button>
+      <div class="nav-dropdown" role="menu">
+        <div class="nav-dd-header">PID · Filter · Setup</div>
+        <a class="nav-dd-item" href="/app" role="menuitem">
+          <span class="nav-dd-icon">🚀</span>
+          <span class="nav-dd-label">Drone Analyzer</span>
+          <span class="nav-dd-hint">Main PID + Physics</span>
+        </a>
+        <a class="nav-dd-item" href="/pid-advisor" role="menuitem">
+          <span class="nav-dd-icon">🩺</span>
+          <span class="nav-dd-label">PID Advisor</span>
+          <span class="nav-dd-hint">Symptom → Fix</span>
+        </a>
+        <a class="nav-dd-item" href="/quick-tune" role="menuitem">
+          <span class="nav-dd-icon">⚡</span>
+          <span class="nav-dd-label">Quick Tune Pad</span>
+          <span class="nav-dd-hint">PID delta + CLI</span>
+          <span class="nav-dd-badge ddb-new">NEW</span>
+        </a>
+        <a class="nav-dd-item" href="/rates-visualizer" role="menuitem">
+          <span class="nav-dd-icon">📈</span>
+          <span class="nav-dd-label">Rates Visualizer</span>
+          <span class="nav-dd-hint">Live curve</span>
+        </a>
+        <a class="nav-dd-item" href="/rpm-filter" role="menuitem">
+          <span class="nav-dd-icon">🔔</span>
+          <span class="nav-dd-label">RPM Filter</span>
+          <span class="nav-dd-hint">Harmonic Hz</span>
+        </a>
+        <a class="nav-dd-item" href="/bf-wizard" role="menuitem">
+          <span class="nav-dd-icon">🧙</span>
+          <span class="nav-dd-label">BF Config Wizard</span>
+          <span class="nav-dd-hint">7 steps → CLI</span>
+          <span class="nav-dd-badge ddb-new">NEW</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ⚙️ HARDWARE -->
+    <div class="nav-group hw" role="none">
+      <button class="nav-group-btn" aria-haspopup="true" aria-expanded="false" role="menuitem">
+        <span class="ng-icon">⚙️</span> HW <span class="ng-arrow">▾</span>
+      </button>
+      <div class="nav-dropdown" role="menu">
+        <div class="nav-dd-header">Motor · ESC · Battery</div>
+        <a class="nav-dd-item" href="/motor-prop" role="menuitem">
+          <span class="nav-dd-icon">🧭</span>
+          <span class="nav-dd-label">Motor × Prop</span>
+          <span class="nav-dd-hint">KV + stator lab</span>
+        </a>
+        <a class="nav-dd-item" href="/esc-checker" role="menuitem">
+          <span class="nav-dd-icon">⚡</span>
+          <span class="nav-dd-label">ESC Checker</span>
+          <span class="nav-dd-hint">Protocol + sizing</span>
+        </a>
+        <a class="nav-dd-item" href="/motor-thermal" role="menuitem">
+          <span class="nav-dd-icon">🌡️</span>
+          <span class="nav-dd-label">Motor Thermal</span>
+          <span class="nav-dd-hint">Winding temp est.</span>
+        </a>
+        <a class="nav-dd-item" href="/battery-health" role="menuitem">
+          <span class="nav-dd-icon">🔋</span>
+          <span class="nav-dd-label">Battery Health</span>
+          <span class="nav-dd-hint">IR · Sag · Score</span>
+        </a>
+        <a class="nav-dd-item" href="/loop-analyzer" role="menuitem">
+          <span class="nav-dd-icon">🔁</span>
+          <span class="nav-dd-label">Loop Analyzer</span>
+          <span class="nav-dd-hint">Stick→Prop latency</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 📊 ANALYSIS -->
+    <div class="nav-group analysis" role="none">
+      <button class="nav-group-btn" aria-haspopup="true" aria-expanded="false" role="menuitem">
+        <span class="ng-icon">📊</span> ANALYZE <span class="ng-arrow">▾</span>
+      </button>
+      <div class="nav-dropdown" role="menu">
+        <div class="nav-dd-header">Flight Data · Config</div>
+        <a class="nav-dd-item" href="/blackbox" role="menuitem">
+          <span class="nav-dd-icon">📊</span>
+          <span class="nav-dd-label">Blackbox Analyzer</span>
+          <span class="nav-dd-hint">CSV → PID score</span>
+          <span class="nav-dd-badge ddb-hot">HOT</span>
+        </a>
+        <a class="nav-dd-item" href="/cli_surgeon" role="menuitem">
+          <span class="nav-dd-icon">🩻</span>
+          <span class="nav-dd-label">CLI Surgeon</span>
+          <span class="nav-dd-hint">diff all / dump</span>
+        </a>
+        <a class="nav-dd-item" href="/cli-comparator" role="menuitem">
+          <span class="nav-dd-icon">⚖️</span>
+          <span class="nav-dd-label">CLI Comparator</span>
+          <span class="nav-dd-hint">Compare 2 configs</span>
+        </a>
+        <a class="nav-dd-item" href="/build-card" role="menuitem">
+          <span class="nav-dd-icon">🃏</span>
+          <span class="nav-dd-label">Build Card</span>
+          <span class="nav-dd-hint">Share to Social</span>
+          <span class="nav-dd-badge ddb-new">NEW</span>
+        </a>
+        <a class="nav-dd-item" href="/tuning-log" role="menuitem">
+          <span class="nav-dd-icon">📋</span>
+          <span class="nav-dd-label">Tuning Log</span>
+          <span class="nav-dd-hint">Log PID sessions</span>
+          <span class="nav-dd-badge ddb-new">NEW</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 📡 VIDEO -->
+    <div class="nav-group video" role="none">
+      <button class="nav-group-btn" aria-haspopup="true" aria-expanded="false" role="menuitem">
+        <span class="ng-icon">📡</span> VIDEO <span class="ng-arrow">▾</span>
+      </button>
+      <div class="nav-dropdown" role="menu">
+        <div class="nav-dd-header">VTX · OSD · RF</div>
+        <a class="nav-dd-item" href="/vtx" role="menuitem">
+          <span class="nav-dd-icon">📡</span>
+          <span class="nav-dd-label">VTX Bands</span>
+          <span class="nav-dd-hint">Band/Channel table</span>
+        </a>
+        <a class="nav-dd-item" href="/vtx-range" role="menuitem">
+          <span class="nav-dd-icon">🏞️</span>
+          <span class="nav-dd-label">VTX Range</span>
+          <span class="nav-dd-hint">Signal estimator</span>
+        </a>
+        <a class="nav-dd-item" href="/vtx-smartaudio" role="menuitem">
+          <span class="nav-dd-icon">🎙️</span>
+          <span class="nav-dd-label">SmartAudio</span>
+          <span class="nav-dd-hint">Commands ref</span>
+        </a>
+        <a class="nav-dd-item" href="/osd" role="menuitem">
+          <span class="nav-dd-icon">🖥️</span>
+          <span class="nav-dd-label">OSD Designer</span>
+          <span class="nav-dd-hint">Layout editor</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 🎮 EXPLORE -->
+    <div class="nav-group explore" role="none">
+      <button class="nav-group-btn" aria-haspopup="true" aria-expanded="false" role="menuitem">
+        <span class="ng-icon">🎮</span> EXPLORE <span class="ng-arrow">▾</span>
+      </button>
+      <div class="nav-dropdown" role="menu">
+        <div class="nav-dd-header">Sim · Community</div>
+        <a class="nav-dd-item" href="/fpv-trainer" role="menuitem">
+          <span class="nav-dd-icon">🎮</span>
+          <span class="nav-dd-label">FPV Simulator NEO</span>
+          <span class="nav-dd-hint">3D drone · Race</span>
+          <span class="nav-dd-badge ddb-game">GAME</span>
+        </a>
+        <a class="nav-dd-item" href="/flight-quiz" role="menuitem">
+          <span class="nav-dd-icon">🎯</span>
+          <span class="nav-dd-label">Flight Style Quiz</span>
+          <span class="nav-dd-hint">5Q → rates rec.</span>
+          <span class="nav-dd-badge ddb-new">NEW</span>
+        </a>
+        <a class="nav-dd-item" href="/leaderboard" role="menuitem">
+          <span class="nav-dd-icon">🏆</span>
+          <span class="nav-dd-label">Config Leaderboard</span>
+          <span class="nav-dd-hint">Vote · rank · copy</span>
+          <span class="nav-dd-badge ddb-new">NEW</span>
+        </a>
+        <a class="nav-dd-item" href="{{ url_for('about') }}" role="menuitem">
+          <span class="nav-dd-icon">ℹ️</span>
+          <span class="nav-dd-label">About</span>
+          <span class="nav-dd-hint">Project info</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Direct quick links -->
+    <a class="nav-direct hl-gold" href="/blackbox">📊 Blackbox</a>
+    <a class="nav-direct" href="/leaderboard">🏆 Rank</a>
+
+  </div><!-- /nav-links -->
+
+  <!-- RIGHT: Lang + CTA + Hamburger -->
+  <div class="nav-right">
+    <button class="lang-toggle" onclick="toggleLang()" id="langBtn" aria-label="Toggle language">
       <span id="langIcon">🇹🇭</span><span id="langLabel">TH</span>
     </button>
-    <a class="nav-cta" href="{{ url_for('motor_prop') }}">
+    <a class="nav-cta" href="/app">
       <span class="i18n-th">เริ่มวิเคราะห์ →</span>
       <span class="i18n-en">Analyze →</span>
     </a>
-  </div>
-  <div class="nav-mobile-right">
-    <button class="lang-toggle" onclick="toggleLang()" id="langBtnMobile" style="padding:5px 9px;font-size:.68rem">
-      <span id="langIconMobile">🇹🇭</span><span id="langLabelMobile">TH</span>
+    <!-- Hamburger -->
+    <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navMobileMenu">
+      <span></span><span></span><span></span>
     </button>
-    <a class="nav-cta" href="{{ url_for('motor_prop') }}" style="padding:6px 14px;font-size:.72rem">
-      <span class="i18n-th">วิเคราะห์ →</span><span class="i18n-en">Analyze →</span>
-    </a>
   </div>
+
 </nav>
+
+<!-- ═══ MOBILE MENU ═══ -->
+<div class="nav-mobile-menu" id="navMobileMenu" role="dialog" aria-label="Mobile navigation">
+  <div class="nmm-scanline" aria-hidden="true"></div>
+  <div class="nmm-inner">
+
+    <!-- 🩺 TUNE -->
+    <div class="nmm-group" data-nmm-group>
+      <button class="nmm-group-btn" aria-expanded="false">
+        <span>🩺</span><span>TUNE — PID · Filter · Setup</span><span class="nmm-arr">›</span>
+      </button>
+      <div class="nmm-items">
+        <a class="nmm-item" href="/app"><span class="nmm-item-icon">🚀</span><span class="nmm-item-label">Drone Analyzer</span></a>
+        <a class="nmm-item" href="/pid-advisor"><span class="nmm-item-icon">🩺</span><span class="nmm-item-label">PID Advisor</span></a>
+        <a class="nmm-item" href="/quick-tune"><span class="nmm-item-icon">⚡</span><span class="nmm-item-label">Quick Tune Pad</span><span class="nmm-item-badge ddb-new">NEW</span></a>
+        <a class="nmm-item" href="/rates-visualizer"><span class="nmm-item-icon">📈</span><span class="nmm-item-label">Rates Visualizer</span></a>
+        <a class="nmm-item" href="/rpm-filter"><span class="nmm-item-icon">🔔</span><span class="nmm-item-label">RPM Filter</span></a>
+        <a class="nmm-item" href="/bf-wizard"><span class="nmm-item-icon">🧙</span><span class="nmm-item-label">BF Config Wizard</span></a>
+      </div>
+    </div>
+
+    <!-- ⚙️ HARDWARE -->
+    <div class="nmm-group" data-nmm-group>
+      <button class="nmm-group-btn" aria-expanded="false">
+        <span>⚙️</span><span>HARDWARE — Motor · ESC · Battery</span><span class="nmm-arr">›</span>
+      </button>
+      <div class="nmm-items">
+        <a class="nmm-item" href="/motor-prop"><span class="nmm-item-icon">🧭</span><span class="nmm-item-label">Motor × Prop</span></a>
+        <a class="nmm-item" href="/esc-checker"><span class="nmm-item-icon">⚡</span><span class="nmm-item-label">ESC Checker</span></a>
+        <a class="nmm-item" href="/motor-thermal"><span class="nmm-item-icon">🌡️</span><span class="nmm-item-label">Motor Thermal</span></a>
+        <a class="nmm-item" href="/battery-health"><span class="nmm-item-icon">🔋</span><span class="nmm-item-label">Battery Health</span></a>
+        <a class="nmm-item" href="/loop-analyzer"><span class="nmm-item-icon">🔁</span><span class="nmm-item-label">Loop Analyzer</span></a>
+      </div>
+    </div>
+
+    <!-- 📊 ANALYSIS -->
+    <div class="nmm-group" data-nmm-group>
+      <button class="nmm-group-btn" aria-expanded="false">
+        <span>📊</span><span>ANALYSIS — Blackbox · CLI</span><span class="nmm-arr">›</span>
+      </button>
+      <div class="nmm-items">
+        <a class="nmm-item" href="/blackbox"><span class="nmm-item-icon">📊</span><span class="nmm-item-label">Blackbox Analyzer</span><span class="nmm-item-badge ddb-hot">HOT</span></a>
+        <a class="nmm-item" href="/cli_surgeon"><span class="nmm-item-icon">🩻</span><span class="nmm-item-label">CLI Surgeon</span></a>
+        <a class="nmm-item" href="/cli-comparator"><span class="nmm-item-icon">⚖️</span><span class="nmm-item-label">CLI Comparator</span></a>
+        <a class="nmm-item" href="/build-card"><span class="nmm-item-icon">🃏</span><span class="nmm-item-label">Build Card</span></a>
+        <a class="nmm-item" href="/tuning-log"><span class="nmm-item-icon">📋</span><span class="nmm-item-label">Tuning Log</span></a>
+      </div>
+    </div>
+
+    <!-- 📡 VIDEO -->
+    <div class="nmm-group" data-nmm-group>
+      <button class="nmm-group-btn" aria-expanded="false">
+        <span>📡</span><span>VIDEO — VTX · OSD · RF</span><span class="nmm-arr">›</span>
+      </button>
+      <div class="nmm-items">
+        <a class="nmm-item" href="/vtx"><span class="nmm-item-icon">📡</span><span class="nmm-item-label">VTX Bands</span></a>
+        <a class="nmm-item" href="/vtx-range"><span class="nmm-item-icon">🏞️</span><span class="nmm-item-label">VTX Range</span></a>
+        <a class="nmm-item" href="/vtx-smartaudio"><span class="nmm-item-icon">🎙️</span><span class="nmm-item-label">SmartAudio</span></a>
+        <a class="nmm-item" href="/osd"><span class="nmm-item-icon">🖥️</span><span class="nmm-item-label">OSD Designer</span></a>
+      </div>
+    </div>
+
+    <!-- 🎮 EXPLORE -->
+    <div class="nmm-group" data-nmm-group>
+      <button class="nmm-group-btn" aria-expanded="false">
+        <span>🎮</span><span>EXPLORE — Sim · Community</span><span class="nmm-arr">›</span>
+      </button>
+      <div class="nmm-items">
+        <a class="nmm-item" href="/fpv-trainer"><span class="nmm-item-icon">🎮</span><span class="nmm-item-label">FPV Simulator NEO</span><span class="nmm-item-badge ddb-game">GAME</span></a>
+        <a class="nmm-item" href="/flight-quiz"><span class="nmm-item-icon">🎯</span><span class="nmm-item-label">Flight Style Quiz</span></a>
+        <a class="nmm-item" href="/leaderboard"><span class="nmm-item-icon">🏆</span><span class="nmm-item-label">Config Leaderboard</span></a>
+        <a class="nmm-item" href="{{ url_for('about') }}"><span class="nmm-item-icon">ℹ️</span><span class="nmm-item-label">About</span></a>
+      </div>
+    </div>
+
+    <div class="nmm-divider"></div>
+
+    <div class="nmm-direct-row">
+      <a class="nmm-direct-link highlight" href="/blackbox">📊 Blackbox</a>
+      <a class="nmm-direct-link" href="/leaderboard">🏆 Rank</a>
+      <button class="lang-toggle" onclick="toggleLang(); closeMobileMenu()" id="langBtnMobile" style="font-size:.68rem">
+        <span id="langIconMobile">🇹🇭</span><span id="langLabelMobile">TH</span>
+      </button>
+    </div>
+
+    <div class="nmm-cta-row">
+      <a class="nmm-cta" href="/app">
+        <span class="i18n-th">🚀 เริ่มวิเคราะห์โดรน</span>
+        <span class="i18n-en">🚀 Start Analyzing</span>
+      </a>
+    </div>
+
+  </div>
+</div>
+<!-- /mobile menu -->
 
 <!-- ═══════════════════════════════════════
      HERO
@@ -2815,28 +3315,101 @@ if (window.matchMedia('(prefers-reduced-motion:reduce)').matches) {
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   NAV SCROLL SHRINK — premium SaaS feel
-   FIX: makes nav slightly more compact when page is scrolled
+   NAV SCROLL SHRINK + MEGA MENU + MOBILE MENU
    ───────────────────────────────────────────────────────────────── */
 (function(){
-  const nav = document.querySelector('.nav');
-  if (!nav) return;
-  let ticking = false;
-  window.addEventListener('scroll', () => {
-    if (!ticking) {
-      requestAnimationFrame(() => {
-        if (window.scrollY > 60) {
-          nav.style.height = '52px';
-          nav.style.background = 'rgba(1,6,8,.97)';
-        } else {
-          nav.style.height = '';
-          nav.style.background = '';
-        }
-        ticking = false;
-      });
-      ticking = true;
-    }
-  }, { passive: true });
+  'use strict';
+
+  const nav      = document.getElementById('mainNav');
+  const hamburger = document.getElementById('navHamburger');
+  const mobileMenu = document.getElementById('navMobileMenu');
+
+  /* ── SCROLL SHRINK ── */
+  if (nav) {
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          nav.classList.toggle('scrolled', window.scrollY > 60);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+  }
+
+  /* ── HAMBURGER TOGGLE ── */
+  window.closeMobileMenu = function() {
+    if (!hamburger || !mobileMenu) return;
+    hamburger.classList.remove('open');
+    hamburger.setAttribute('aria-expanded', 'false');
+    mobileMenu.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  if (hamburger && mobileMenu) {
+    hamburger.addEventListener('click', () => {
+      const isOpen = hamburger.classList.toggle('open');
+      hamburger.setAttribute('aria-expanded', String(isOpen));
+      mobileMenu.classList.toggle('open', isOpen);
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+    });
+
+    /* Close on outside click */
+    document.addEventListener('click', e => {
+      if (!nav.contains(e.target) && !mobileMenu.contains(e.target)) {
+        closeMobileMenu();
+      }
+    });
+
+    /* Close on ESC */
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeMobileMenu();
+    });
+  }
+
+  /* ── MOBILE MENU ACCORDION ── */
+  document.querySelectorAll('[data-nmm-group]').forEach(group => {
+    const btn   = group.querySelector('.nmm-group-btn');
+    const items = group.querySelector('.nmm-items');
+    if (!btn || !items) return;
+    btn.addEventListener('click', () => {
+      const isOpen = group.classList.toggle('open');
+      btn.setAttribute('aria-expanded', String(isOpen));
+    });
+  });
+
+  /* ── DESKTOP DROPDOWN — keyboard a11y ── */
+  document.querySelectorAll('.nav-group-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      /* on small screens with no hover, toggle on click */
+      if (window.innerWidth <= 960) return;
+      const group = btn.closest('.nav-group');
+      const isOpen = group.classList.toggle('kb-open');
+      btn.setAttribute('aria-expanded', String(isOpen));
+      e.stopPropagation();
+    });
+    btn.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        btn.click();
+      }
+      if (e.key === 'Escape') {
+        btn.closest('.nav-group').classList.remove('kb-open');
+        btn.setAttribute('aria-expanded', 'false');
+        btn.focus();
+      }
+    });
+  });
+
+  /* Close dropdown on outside click */
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.nav-group.kb-open').forEach(g => {
+      g.classList.remove('kb-open');
+      g.querySelector('.nav-group-btn')?.setAttribute('aria-expanded','false');
+    });
+  });
+
 })();
 
 /* ────── STATS COUNTER ────── */
