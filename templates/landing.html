@@ -1759,6 +1759,520 @@ footer {
   transform: translateY(20px);
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   EPIC BUTTON UPGRADE v5.3 — 4 Hero Buttons
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Shared: animated border via pseudo conic gradient ── */
+@property --btn-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+/* ══════════════════════════════════════
+   1. เริ่มวิเคราะห์โดรน — btn-primary
+   CONCEPT: Neon green power core with
+   rotating plasma ring + text shimmer
+══════════════════════════════════════ */
+.btn-primary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 17px 38px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #00ff9d 0%, #00e68a 45%, #00cc78 100%);
+  color: #011a0e;
+  font-family: var(--font-d);
+  font-size: .74rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-decoration: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  overflow: visible;
+  isolation: isolate;
+  transition: transform .25s var(--ease, cubic-bezier(.16,1,.3,1)),
+              box-shadow .25s ease,
+              filter .25s ease;
+  /* Pulsing aura */
+  box-shadow:
+    0 0 0 0 rgba(0,255,157,0),
+    0 8px 28px rgba(0,255,157,.35),
+    inset 0 1px 0 rgba(255,255,255,.3),
+    inset 0 -1px 0 rgba(0,0,0,.12);
+  animation: btnPrimaryFloat 4s ease-in-out infinite, btnPrimaryAura 2.8s ease-in-out infinite;
+  text-shadow: 0 1px 0 rgba(255,255,255,.3);
+  z-index: 0;
+}
+
+/* Rotating border ring */
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 18px;
+  background: conic-gradient(
+    from var(--btn-angle),
+    transparent 0deg,
+    #00ff9d 60deg,
+    #00e5ff 120deg,
+    transparent 180deg,
+    #00ff9d 240deg,
+    #00e5ff 300deg,
+    transparent 360deg
+  );
+  z-index: -1;
+  animation: btnSpin 3s linear infinite;
+  opacity: .7;
+}
+/* Inner fill to mask the ring center */
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #00ff9d 0%, #00cc78 100%);
+  z-index: -1;
+}
+
+@keyframes btnPrimaryFloat {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-3px); }
+}
+@keyframes btnPrimaryAura {
+  0%,100% {
+    box-shadow:
+      0 0 0 0 rgba(0,255,157,0),
+      0 8px 28px rgba(0,255,157,.35),
+      inset 0 1px 0 rgba(255,255,255,.3);
+  }
+  50% {
+    box-shadow:
+      0 0 0 6px rgba(0,255,157,.08),
+      0 12px 40px rgba(0,255,157,.55),
+      inset 0 1px 0 rgba(255,255,255,.3);
+  }
+}
+@keyframes btnSpin {
+  to { --btn-angle: 360deg; transform: rotate(360deg); }
+}
+
+/* Shine sweep on hover */
+.btn-primary .btn-shine {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255,255,255,.35) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  transition: transform .55s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+.btn-primary:hover .btn-shine { transform: translateX(100%); }
+.btn-primary:hover {
+  transform: translateY(-5px) scale(1.03);
+  filter: brightness(1.08);
+  box-shadow:
+    0 0 0 4px rgba(0,255,157,.15),
+    0 16px 50px rgba(0,255,157,.5),
+    inset 0 1px 0 rgba(255,255,255,.3);
+}
+.btn-primary:active { transform: translateY(0) scale(.98) !important; animation-play-state: paused; }
+
+/* Text shimmer */
+.btn-primary .btn-text-th,
+.btn-primary .btn-text-en,
+.btn-primary .i18n-th,
+.btn-primary .i18n-en {
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(90deg, #011a0e 0%, #013020 40%, #011a0e 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textShimmer 3s linear infinite;
+}
+@keyframes textShimmer {
+  0%   { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+/* ══════════════════════════════════════
+   2. Blackbox — btn-secondary
+   CONCEPT: Electric blue circuit pulse
+   with scan line + glitch on hover
+══════════════════════════════════════ */
+.btn-secondary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 17px 32px;
+  border-radius: 16px;
+  background: linear-gradient(135deg,
+    rgba(0,168,255,.12) 0%,
+    rgba(0,229,255,.06) 100%
+  );
+  color: #7de3ff;
+  font-family: var(--font-d);
+  font-size: .74rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-decoration: none;
+  border: 1px solid rgba(0,200,255,.28);
+  cursor: pointer;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s, background .25s;
+  box-shadow:
+    0 0 16px rgba(0,168,255,.12),
+    inset 0 1px 0 rgba(255,255,255,.07),
+    inset 0 0 20px rgba(0,168,255,.04);
+}
+
+/* Animated scan line */
+.btn-secondary::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,229,255,.6), transparent);
+  top: -1px;
+  animation: scanSweep 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes scanSweep {
+  0%   { top: -1px; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: calc(100% + 1px); opacity: 0; }
+}
+
+/* Circuit node dots */
+.btn-secondary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 15% 50%, rgba(0,229,255,.12) 1px, transparent 1px),
+    radial-gradient(circle at 85% 50%, rgba(0,229,255,.12) 1px, transparent 1px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Data stream lines */
+.btn-secondary .btn-data {
+  position: absolute;
+  top: 50%; left: 0;
+  width: 0; height: 1px;
+  background: linear-gradient(90deg, rgba(0,229,255,0), rgba(0,229,255,.4), rgba(0,229,255,0));
+  animation: dataStream 2s ease-in-out infinite;
+  pointer-events: none;
+}
+.btn-secondary .btn-data:nth-child(2) { animation-delay: .7s; top: 30%; }
+.btn-secondary .btn-data:nth-child(3) { animation-delay: 1.4s; top: 70%; }
+@keyframes dataStream {
+  0%   { width: 0; left: 0; opacity: 0; }
+  50%  { width: 100%; left: 0; opacity: 1; }
+  100% { width: 0; left: 100%; opacity: 0; }
+}
+
+.btn-secondary span { position: relative; z-index: 1; }
+
+.btn-secondary:hover {
+  transform: translateY(-5px);
+  border-color: rgba(0,229,255,.6);
+  background: linear-gradient(135deg,
+    rgba(0,168,255,.2) 0%,
+    rgba(0,229,255,.12) 100%
+  );
+  box-shadow:
+    0 0 0 1px rgba(0,229,255,.3),
+    0 14px 40px rgba(0,168,255,.28),
+    0 0 30px rgba(0,229,255,.15),
+    inset 0 1px 0 rgba(255,255,255,.1);
+  color: #b8f3ff;
+  text-shadow: 0 0 12px rgba(0,229,255,.6);
+}
+.btn-secondary:hover::before {
+  animation-duration: .8s;
+}
+.btn-secondary:active { transform: translateY(0) scale(.98) !important; }
+
+/* ══════════════════════════════════════
+   3. OBIXCONFIGLAB — lnd-fb-btn
+   CONCEPT: Facebook blue energy field
+   + orbit ring + brand glow
+══════════════════════════════════════ */
+.lnd-fb-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 13px;
+  padding: 14px 24px !important;
+  border-radius: 16px !important;
+  background: linear-gradient(135deg,
+    rgba(24,119,242,.14) 0%,
+    rgba(66,153,255,.08) 100%
+  ) !important;
+  border: 1px solid rgba(66,133,244,.3) !important;
+  color: #93c5fd !important;
+  font-family: var(--font-d);
+  cursor: pointer;
+  overflow: hidden;
+  text-decoration: none;
+  isolation: isolate;
+  transition: transform .25s ease, box-shadow .25s ease,
+              border-color .25s, background .25s !important;
+  box-shadow:
+    0 0 20px rgba(24,119,242,.1),
+    inset 0 1px 0 rgba(255,255,255,.06) !important;
+  min-width: 200px;
+}
+
+/* Orbit ring around FB icon */
+.lnd-fb-btn::before {
+  content: '';
+  position: absolute;
+  left: 14px; top: 50%;
+  transform: translateY(-50%);
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  border-top-color: rgba(66,153,255,.5);
+  border-right-color: rgba(66,153,255,.2);
+  animation: orbitSpin 2.5s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes orbitSpin { to { transform: translateY(-50%) rotate(360deg); } }
+
+/* Particle dots float up */
+.lnd-fb-btn::after {
+  content: '· · ·';
+  position: absolute;
+  bottom: 4px; right: 10px;
+  font-size: 8px;
+  letter-spacing: 3px;
+  color: rgba(66,153,255,.3);
+  animation: dotFloat 3s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes dotFloat {
+  0%,100% { transform: translateY(0); opacity: .3; }
+  50%     { transform: translateY(-4px); opacity: .8; }
+}
+
+.lnd-fb-btn .lnd-team-btn-icon {
+  position: relative;
+  z-index: 1;
+  width: 38px; height: 38px;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #1877f2, #4267b2) !important;
+  color: #fff !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 14px rgba(24,119,242,.45);
+  transition: transform .3s ease, box-shadow .3s ease;
+  flex-shrink: 0;
+}
+.lnd-fb-btn:hover .lnd-team-btn-icon {
+  transform: rotate(10deg) scale(1.12);
+  box-shadow: 0 0 24px rgba(24,119,242,.7);
+}
+.lnd-fb-btn .lnd-team-btn-label {
+  position: relative;
+  z-index: 1;
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+  color: #93c5fd !important;
+  background: linear-gradient(90deg, #93c5fd, #bfdbfe, #93c5fd);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textShimmer 2.5s linear infinite;
+}
+.lnd-fb-btn:hover {
+  transform: translateY(-5px) !important;
+  border-color: rgba(66,153,255,.6) !important;
+  background: linear-gradient(135deg,
+    rgba(24,119,242,.22) 0%,
+    rgba(66,153,255,.14) 100%
+  ) !important;
+  box-shadow:
+    0 0 0 2px rgba(24,119,242,.15),
+    0 14px 40px rgba(24,119,242,.25),
+    0 0 30px rgba(66,153,255,.12),
+    inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+.lnd-fb-btn:active { transform: translateY(0) scale(.98) !important; }
+
+/* ══════════════════════════════════════
+   4. ทีมพัฒนา — lnd-team-btn (non-fb)
+   CONCEPT: Gold constellation / stars
+   with shimmer + team icon orbit
+══════════════════════════════════════ */
+.lnd-team-btn:not(.lnd-fb-btn) {
+  position: relative;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 13px;
+  padding: 14px 24px !important;
+  border-radius: 16px !important;
+  background: linear-gradient(135deg,
+    rgba(255,204,0,.1) 0%,
+    rgba(255,170,0,.06) 100%
+  ) !important;
+  border: 1px solid rgba(255,204,0,.25) !important;
+  color: #fcd34d !important;
+  cursor: pointer;
+  overflow: hidden;
+  text-decoration: none;
+  isolation: isolate;
+  transition: transform .25s ease, box-shadow .25s ease,
+              border-color .25s, background .25s !important;
+  box-shadow:
+    0 0 20px rgba(255,204,0,.08),
+    inset 0 1px 0 rgba(255,255,255,.05) !important;
+  min-width: 200px;
+}
+
+/* Star field background */
+.lnd-team-btn:not(.lnd-fb-btn)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(255,204,0,.18) 1px, transparent 1px),
+    radial-gradient(circle at 75% 60%, rgba(255,204,0,.12) 1px, transparent 1px),
+    radial-gradient(circle at 50% 80%, rgba(255,204,0,.15) 1px, transparent 1px),
+    radial-gradient(circle at 88% 25%, rgba(255,220,0,.1) 1px, transparent 1px),
+    radial-gradient(circle at 10% 70%, rgba(255,180,0,.12) 1px, transparent 1px);
+  animation: starTwinkle 3s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes starTwinkle {
+  0%   { opacity: .5; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1.02); }
+}
+
+/* Gold sweep line */
+.lnd-team-btn:not(.lnd-fb-btn)::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(255,204,0,.5) 30%,
+    rgba(255,220,120,.7) 50%,
+    rgba(255,204,0,.5) 70%,
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: goldSweep 3s ease-in-out infinite;
+}
+@keyframes goldSweep {
+  0%   { background-position: -100% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.lnd-team-btn:not(.lnd-fb-btn) .lnd-team-btn-icon {
+  position: relative;
+  z-index: 1;
+  width: 38px; height: 38px;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, rgba(255,204,0,.2), rgba(255,170,0,.15)) !important;
+  border: 1px solid rgba(255,204,0,.3) !important;
+  color: #fbbf24 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  box-shadow: 0 0 12px rgba(255,204,0,.25);
+  transition: transform .4s ease, box-shadow .3s ease;
+  flex-shrink: 0;
+  animation: iconBob 3.5s ease-in-out infinite;
+}
+@keyframes iconBob {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  33%     { transform: translateY(-2px) rotate(-5deg); }
+  66%     { transform: translateY(1px) rotate(4deg); }
+}
+.lnd-team-btn:not(.lnd-fb-btn):hover .lnd-team-btn-icon {
+  animation: none;
+  transform: scale(1.15) rotate(10deg);
+  box-shadow: 0 0 22px rgba(255,204,0,.5);
+}
+
+.lnd-team-btn:not(.lnd-fb-btn) .lnd-team-btn-label {
+  position: relative;
+  z-index: 1;
+  font-size: .72rem !important;
+  font-weight: 900 !important;
+  letter-spacing: .1em;
+  background: linear-gradient(90deg, #fde68a, #fbbf24, #fcd34d, #fbbf24, #fde68a);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: goldShimmer 2.8s linear infinite;
+}
+@keyframes goldShimmer {
+  0%   { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+.lnd-team-btn:not(.lnd-fb-btn) .lnd-team-btn-sub {
+  position: relative;
+  z-index: 1;
+  color: rgba(253,211,138,.6) !important;
+}
+
+.lnd-team-btn:not(.lnd-fb-btn):hover {
+  transform: translateY(-5px) !important;
+  border-color: rgba(255,204,0,.55) !important;
+  background: linear-gradient(135deg,
+    rgba(255,204,0,.16) 0%,
+    rgba(255,170,0,.1) 100%
+  ) !important;
+  box-shadow:
+    0 0 0 2px rgba(255,204,0,.12),
+    0 14px 40px rgba(255,204,0,.2),
+    0 0 30px rgba(255,180,0,.1),
+    inset 0 1px 0 rgba(255,255,255,.07) !important;
+}
+.lnd-team-btn:not(.lnd-fb-btn):active { transform: translateY(0) scale(.98) !important; }
+
+/* ── Shared: Reset animation on hover for float ── */
+.btn-primary:hover { animation: none; }
+
+/* ── Mobile override ── */
+@media (max-width: 720px) {
+  .btn-primary, .btn-secondary,
+  .lnd-fb-btn, .lnd-team-btn:not(.lnd-fb-btn) {
+    width: 100% !important;
+    justify-content: center !important;
+    min-width: unset !important;
+  }
+  .btn-primary { animation: btnPrimaryAura 2.8s ease-in-out infinite; }
+}
+
 </style>
 </head>
 <body>
@@ -2156,11 +2670,11 @@ footer {
       </p>
 
       <div class="hero-actions">
-        <a href="{{ url_for('motor_prop') }}" class="btn-primary">
+        <a href="{{ url_for('motor_prop') }}" class="btn-primary"><span class="btn-shine" aria-hidden="true"></span>
           <span class="i18n-th">📋 เริ่มวิเคราะห์โดรน</span>
           <span class="i18n-en">📋 Analyze My Drone</span>
         </a>
-        <a href="/blackbox" class="btn-secondary">
+        <a href="/blackbox" class="btn-secondary"><span class="btn-data" aria-hidden="true"></span><span class="btn-data" aria-hidden="true"></span><span class="btn-data" aria-hidden="true"></span>
           <span>📊 Blackbox</span>
         </a>
         <a href="https://www.facebook.com/banmysanti"
@@ -2699,7 +3213,7 @@ footer {
             <div class="mode-hero-title">วิเคราะห์โดรน<br>ระดับ Pro</div>
             <p class="mode-hero-desc">ตั้งแต่มือใหม่ที่เพิ่งซื้อโดรนตัวแรก ไปจนถึงนักแข่ง freestyle ระดับ advanced — ConfigDoctor วิเคราะห์สเปคโดรนของคุณและให้ค่า PID · Filter · Motor ที่พร้อม paste ใน Betaflight ทันที พร้อม <strong style="color:var(--green);">Pro Tuning Trix</strong> และ <strong style="color:var(--green);">Tuning Roadmap</strong> ที่ personalized ตาม build จริง</p>
             <div class="mode-cta-row">
-              <a href="/app" class="mode-btn-primary mode-btn-civ">🚀 เริ่มวิเคราะห์โดรน</a>
+              <a href="/app" class="mode-btn-primary mode-btn-civ"><span class="btn-shine" aria-hidden="true"></span>🚀 เริ่มวิเคราะห์โดรน</a>
               <a href="/quick-tune" class="mode-btn-ghost mode-btn-ghost-civ">⚡ Quick Tune Pad</a>
               <a href="/pid-advisor" class="mode-btn-ghost mode-btn-ghost-civ">🩺 PID Advisor</a>
             </div>
@@ -2767,7 +3281,7 @@ footer {
             <div class="mode-hero-title">ระบบวิเคราะห์ UAS<br>ระดับปฏิบัติการ</div>
             <p class="mode-hero-desc">ครอบคลุมทุกมิติของการปฏิบัติการโดรนทางทหาร — ตั้งแต่ <strong style="color:var(--gold);">Mission Planning</strong>, การวิเคราะห์สมรรถนะ UAS, การฝึก Operator ตาม curriculum จริง, Pre-Mission Checklist, Sortie Planning, C-UAS Threat Recognition ไปจนถึง EW และ CBRN operations</p>
             <div class="mode-cta-row">
-              <a href="/app" class="mode-btn-primary mode-btn-mil">📊 UAS Performance Analyzer</a>
+              <a href="/app" class="mode-btn-primary mode-btn-mil"><span class="btn-shine" aria-hidden="true"></span>📊 UAS Performance Analyzer</a>
               <a href="/fpv-trainer" class="mode-btn-ghost mode-btn-ghost-mil">🎮 Operator Simulator</a>
               <a href="/blackbox" class="mode-btn-ghost mode-btn-ghost-mil">📈 Flight Data Analysis</a>
             </div>
