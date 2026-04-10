@@ -1433,6 +1433,332 @@ footer {
   .orb,.hero-hex,.hero-radar { display:none !important; }
   [data-reveal] { opacity:1 !important; transform:none !important; transition:none !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   OBIX TOOL HUB SECTION — Epic Grid v5.3
+   ═══════════════════════════════════════════════════════════════ */
+.toolhub-section {
+  padding: 100px 24px 110px;
+  position: relative;
+  z-index: var(--z-content);
+  overflow: hidden;
+}
+
+/* Ambient background glow */
+.toolhub-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 0%,   rgba(0,255,157,.04),  transparent 65%),
+    radial-gradient(ellipse 40% 30% at 0%   50%,  rgba(0,168,255,.025), transparent 60%),
+    radial-gradient(ellipse 40% 30% at 100% 50%,  rgba(157,78,221,.025),transparent 60%);
+  pointer-events: none;
+}
+
+/* Hex-grid bg texture */
+.toolhub-section::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,255,157,.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,157,.012) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  opacity: .7;
+}
+
+.toolhub-inner { max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+
+/* ── HEADER ── */
+.toolhub-header {
+  text-align: center;
+  margin-bottom: 56px;
+  data-reveal: '';
+}
+.toolhub-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-m);
+  font-size: .6rem;
+  letter-spacing: .22em;
+  color: rgba(0,255,157,.55);
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+.toolhub-eyebrow::before,
+.toolhub-eyebrow::after {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,255,157,.4));
+}
+.toolhub-eyebrow::after { transform: scaleX(-1); }
+
+.toolhub-title {
+  font-family: var(--font-d);
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -.01em;
+  line-height: 1.1;
+  margin-bottom: 12px;
+  text-shadow: 0 0 60px rgba(0,255,157,.15);
+}
+.toolhub-title .hl { color: var(--green); }
+.toolhub-title .hl2 { color: var(--cyan); }
+
+.toolhub-sub {
+  font-size: .95rem;
+  color: var(--muted2);
+  line-height: 1.7;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* ── CATEGORY GROUPS ── */
+.toolhub-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.toolhub-group {}
+.toolhub-group-hd {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  position: relative;
+}
+.toolhub-group-hd::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 60px;
+  height: 1px;
+  border-radius: 1px;
+}
+.tg-tune    .toolhub-group-hd::after { background: var(--green); box-shadow: 0 0 8px var(--green); }
+.tg-hw      .toolhub-group-hd::after { background: var(--cyan);  box-shadow: 0 0 8px var(--cyan); }
+.tg-analysis .toolhub-group-hd::after { background: var(--gold);  box-shadow: 0 0 8px var(--gold); }
+.tg-video   .toolhub-group-hd::after { background: var(--blue);  box-shadow: 0 0 8px var(--blue); }
+.tg-explore .toolhub-group-hd::after { background: var(--purple);box-shadow: 0 0 8px var(--purple); }
+
+.toolhub-group-ico {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 6px currentColor);
+}
+.tg-tune     .toolhub-group-ico { color: var(--green); }
+.tg-hw       .toolhub-group-ico { color: var(--cyan); }
+.tg-analysis .toolhub-group-ico { color: var(--gold); }
+.tg-video    .toolhub-group-ico { color: var(--blue); }
+.tg-explore  .toolhub-group-ico { color: var(--purple); }
+
+.toolhub-group-label {
+  font-family: var(--font-d);
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.tg-tune     .toolhub-group-label { color: rgba(0,255,157,.75); }
+.tg-hw       .toolhub-group-label { color: rgba(0,229,255,.75); }
+.tg-analysis .toolhub-group-label { color: rgba(255,204,0,.75); }
+.tg-video    .toolhub-group-label { color: rgba(0,168,255,.75); }
+.tg-explore  .toolhub-group-label { color: rgba(157,78,221,.75); }
+
+.toolhub-group-count {
+  margin-left: auto;
+  font-family: var(--font-m);
+  font-size: .58rem;
+  color: var(--muted);
+  letter-spacing: .08em;
+}
+
+/* ── TOOL CARDS GRID ── */
+.toolhub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 8px;
+}
+
+/* Card */
+.th-card {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.055);
+  background: rgba(255,255,255,.022);
+  text-decoration: none;
+  color: var(--muted2);
+  position: relative;
+  overflow: hidden;
+  transition: background .2s, border-color .2s, color .2s, transform .2s, box-shadow .2s;
+  will-change: transform;
+}
+/* Shine sweep on hover */
+.th-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -120%;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.04), transparent);
+  transform: skewX(-18deg);
+  transition: left .5s ease;
+  pointer-events: none;
+}
+.th-card:hover::before { left: 160%; }
+
+/* Left accent bar */
+.th-card::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 6px; bottom: 6px;
+  width: 2px;
+  border-radius: 0 2px 2px 0;
+  transform: scaleY(0);
+  transition: transform .2s ease;
+}
+.th-card:hover::after { transform: scaleY(1); }
+
+/* group-specific hover */
+.tg-tune .th-card:hover {
+  border-color: rgba(0,255,157,.25); background: rgba(0,255,157,.035);
+  color: var(--text); transform: translateX(3px);
+  box-shadow: 0 4px 20px rgba(0,255,157,.08);
+}
+.tg-tune .th-card::after { background: var(--green); }
+
+.tg-hw .th-card:hover {
+  border-color: rgba(0,229,255,.25); background: rgba(0,229,255,.035);
+  color: var(--text); transform: translateX(3px);
+  box-shadow: 0 4px 20px rgba(0,229,255,.08);
+}
+.tg-hw .th-card::after { background: var(--cyan); }
+
+.tg-analysis .th-card:hover {
+  border-color: rgba(255,204,0,.25); background: rgba(255,204,0,.035);
+  color: var(--text); transform: translateX(3px);
+  box-shadow: 0 4px 20px rgba(255,204,0,.08);
+}
+.tg-analysis .th-card::after { background: var(--gold); }
+
+.tg-video .th-card:hover {
+  border-color: rgba(0,168,255,.25); background: rgba(0,168,255,.035);
+  color: var(--text); transform: translateX(3px);
+  box-shadow: 0 4px 20px rgba(0,168,255,.08);
+}
+.tg-video .th-card::after { background: var(--blue); }
+
+.tg-explore .th-card:hover {
+  border-color: rgba(157,78,221,.25); background: rgba(157,78,221,.035);
+  color: var(--text); transform: translateX(3px);
+  box-shadow: 0 4px 20px rgba(157,78,221,.08);
+}
+.tg-explore .th-card::after { background: var(--purple); }
+
+/* Icon bubble */
+.th-ico-wrap {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+  transition: transform .2s, box-shadow .2s;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.07);
+}
+.th-card:hover .th-ico-wrap { transform: scale(1.08) rotate(-3deg); }
+
+.tg-tune     .th-ico-wrap { background: rgba(0,255,157,.07);  border-color: rgba(0,255,157,.15); }
+.tg-hw       .th-ico-wrap { background: rgba(0,229,255,.07);  border-color: rgba(0,229,255,.15); }
+.tg-analysis .th-ico-wrap { background: rgba(255,204,0,.07);  border-color: rgba(255,204,0,.15); }
+.tg-video    .th-ico-wrap { background: rgba(0,168,255,.07);  border-color: rgba(0,168,255,.15); }
+.tg-explore  .th-ico-wrap { background: rgba(157,78,221,.07); border-color: rgba(157,78,221,.15); }
+
+.th-info { min-width: 0; }
+.th-name {
+  font-family: var(--font-d);
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: inherit;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.th-desc {
+  font-family: var(--font-t);
+  font-size: .7rem;
+  color: var(--muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color .2s;
+}
+.th-card:hover .th-desc { color: var(--muted2); }
+
+/* NEW badge */
+.th-new {
+  position: absolute;
+  top: 6px; right: 8px;
+  font-family: var(--font-m);
+  font-size: .5rem;
+  letter-spacing: .1em;
+  color: var(--gold);
+  background: rgba(255,204,0,.1);
+  border: 1px solid rgba(255,204,0,.25);
+  border-radius: 4px;
+  padding: 1px 5px;
+  line-height: 1.5;
+}
+
+/* ── FLOATING ORBS (decorative) ── */
+.toolhub-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(80px);
+  opacity: .06;
+}
+.toolhub-orb-1 { width:400px;height:400px; top:-80px; left:-100px; background:var(--green); animation: orbDrift 18s ease-in-out infinite alternate; }
+.toolhub-orb-2 { width:300px;height:300px; bottom:-60px;right:-80px; background:var(--purple); animation: orbDrift 22s ease-in-out 3s infinite alternate-reverse; }
+.toolhub-orb-3 { width:250px;height:250px; top:40%;left:55%; background:var(--cyan); animation: orbDrift 26s ease-in-out 6s infinite alternate; }
+@keyframes orbDrift { from { transform: translate(0,0) scale(1); } to { transform: translate(30px,20px) scale(1.12); } }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .toolhub-section { padding: 72px 16px 80px; }
+  .toolhub-grid { grid-template-columns: repeat(auto-fill, minmax(145px,1fr)); gap: 6px; }
+  .toolhub-title { font-size: 1.7rem; }
+  .toolhub-groups { gap: 30px; }
+}
+@media (max-width: 480px) {
+  .toolhub-grid { grid-template-columns: 1fr 1fr; }
+  .th-card { padding: 10px 11px; gap: 9px; }
+  .th-ico-wrap { width:30px;height:30px;font-size:1rem; }
+  .th-name { font-size: .58rem; }
+}
+
+/* reveal animation integration */
+[data-reveal] .toolhub-header,
+[data-reveal].toolhub-section .toolhub-group {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
 </style>
 </head>
 <body>
@@ -2057,6 +2383,284 @@ footer {
     <div class="stat-lbl"><span class="i18n-th">ชุมชน FPV ไทย</span><span class="i18n-en">Thai FPV Community</span></div>
   </div>
 </div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TOOL HUB — รวมเครื่องมือทั้งหมด
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="toolhub-section" id="tool-hub" data-reveal>
+
+  <!-- decorative orbs -->
+  <div class="toolhub-orb toolhub-orb-1" aria-hidden="true"></div>
+  <div class="toolhub-orb toolhub-orb-2" aria-hidden="true"></div>
+  <div class="toolhub-orb toolhub-orb-3" aria-hidden="true"></div>
+
+  <div class="toolhub-inner">
+
+    <!-- Header -->
+    <div class="toolhub-header">
+      <div class="toolhub-eyebrow">ALL TOOLS · 22 MODULES · FREE FOREVER</div>
+      <h2 class="toolhub-title">
+        <span class="i18n-th">⚡ <span class="hl">TOOL</span> <span class="hl2">HUB</span><br><small style="font-size:.55em;letter-spacing:.04em;opacity:.7">เลือกเครื่องมือที่ต้องการ</small></span>
+        <span class="i18n-en">⚡ <span class="hl">TOOL</span> <span class="hl2">HUB</span><br><small style="font-size:.55em;letter-spacing:.04em;opacity:.7">Choose your module</small></span>
+      </h2>
+      <p class="toolhub-sub">
+        <span class="i18n-th">ครบทุกเครื่องมือสำหรับโดรน FPV — วิเคราะห์ ปรับแต่ง บินได้</span>
+        <span class="i18n-en">Every tool you need for FPV — analyze, tune, fly</span>
+      </p>
+    </div>
+
+    <div class="toolhub-groups">
+
+      <!-- ─── TUNING & PID ─── -->
+      <div class="toolhub-group tg-tune" data-reveal>
+        <div class="toolhub-group-hd">
+          <span class="toolhub-group-ico">🎯</span>
+          <span class="toolhub-group-label">
+            <span class="i18n-th">Tuning &amp; PID</span>
+            <span class="i18n-en">Tuning &amp; PID</span>
+          </span>
+          <span class="toolhub-group-count">6 modules</span>
+        </div>
+        <div class="toolhub-grid">
+          <a href="/app" class="th-card">
+            <div class="th-ico-wrap">🔬</div>
+            <div class="th-info">
+              <div class="th-name">CLI ANALYZER</div>
+              <div class="th-desc"><span class="i18n-th">วิเคราะห์ config หลัก</span><span class="i18n-en">Main config analysis</span></div>
+            </div>
+          </a>
+          <a href="/pid-advisor" class="th-card">
+            <div class="th-ico-wrap">🎛️</div>
+            <div class="th-info">
+              <div class="th-name">PID ADVISOR</div>
+              <div class="th-desc"><span class="i18n-th">แนะนำค่า PID</span><span class="i18n-en">PID recommendations</span></div>
+            </div>
+          </a>
+          <a href="/quick-tune" class="th-card">
+            <div class="th-ico-wrap">⚡</div>
+            <div class="th-info">
+              <div class="th-name">QUICK TUNE</div>
+              <div class="th-desc"><span class="i18n-th">ปรับแต่งด่วน</span><span class="i18n-en">Fast tuning wizard</span></div>
+            </div>
+          </a>
+          <a href="/rpm-filter" class="th-card">
+            <div class="th-ico-wrap">🌀</div>
+            <div class="th-info">
+              <div class="th-name">RPM FILTER</div>
+              <div class="th-desc"><span class="i18n-th">คำนวณ RPM filter</span><span class="i18n-en">RPM filter calc</span></div>
+            </div>
+          </a>
+          <a href="/rates-visualizer" class="th-card">
+            <div class="th-ico-wrap">📊</div>
+            <div class="th-info">
+              <div class="th-name">RATES VIZ</div>
+              <div class="th-desc"><span class="i18n-th">แสดงผล rates</span><span class="i18n-en">Rates visualizer</span></div>
+            </div>
+          </a>
+          <a href="/bf-wizard" class="th-card">
+            <div class="th-ico-wrap">🧙</div>
+            <div class="th-info">
+              <div class="th-name">BF WIZARD</div>
+              <div class="th-desc"><span class="i18n-th">ตัวช่วย Betaflight</span><span class="i18n-en">Betaflight wizard</span></div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- ─── HARDWARE ─── -->
+      <div class="toolhub-group tg-hw" data-reveal>
+        <div class="toolhub-group-hd">
+          <span class="toolhub-group-ico">⚙️</span>
+          <span class="toolhub-group-label">
+            <span class="i18n-th">Hardware</span>
+            <span class="i18n-en">Hardware</span>
+          </span>
+          <span class="toolhub-group-count">4 modules</span>
+        </div>
+        <div class="toolhub-grid">
+          <a href="/motor-prop" class="th-card">
+            <div class="th-ico-wrap">🔧</div>
+            <div class="th-info">
+              <div class="th-name">MOTOR × PROP</div>
+              <div class="th-desc"><span class="i18n-th">จับคู่ motor+ใบพัด</span><span class="i18n-en">Motor & prop matcher</span></div>
+            </div>
+          </a>
+          <a href="/esc-checker" class="th-card">
+            <div class="th-ico-wrap">💡</div>
+            <div class="th-info">
+              <div class="th-name">ESC CHECKER</div>
+              <div class="th-desc"><span class="i18n-th">ตรวจสอบ ESC</span><span class="i18n-en">ESC diagnostics</span></div>
+            </div>
+          </a>
+          <a href="/battery-health" class="th-card">
+            <div class="th-ico-wrap">🔋</div>
+            <div class="th-info">
+              <div class="th-name">BATTERY HEALTH</div>
+              <div class="th-desc"><span class="i18n-th">วิเคราะห์แบตเตอรี่</span><span class="i18n-en">Battery analytics</span></div>
+            </div>
+          </a>
+          <a href="/motor-thermal" class="th-card">
+            <div class="th-ico-wrap">🌡️</div>
+            <div class="th-info">
+              <div class="th-name">MOTOR THERMAL</div>
+              <div class="th-desc"><span class="i18n-th">ความร้อนมอเตอร์</span><span class="i18n-en">Motor heat analysis</span></div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- ─── ANALYSIS & TOOLS ─── -->
+      <div class="toolhub-group tg-analysis" data-reveal>
+        <div class="toolhub-group-hd">
+          <span class="toolhub-group-ico">🔍</span>
+          <span class="toolhub-group-label">
+            <span class="i18n-th">Analysis &amp; Tools</span>
+            <span class="i18n-en">Analysis &amp; Tools</span>
+          </span>
+          <span class="toolhub-group-count">6 modules</span>
+        </div>
+        <div class="toolhub-grid">
+          <a href="/blackbox" class="th-card">
+            <div class="th-ico-wrap">📦</div>
+            <div class="th-info">
+              <div class="th-name">BLACKBOX</div>
+              <div class="th-desc"><span class="i18n-th">วิเคราะห์ blackbox</span><span class="i18n-en">Blackbox analyzer</span></div>
+            </div>
+          </a>
+          <a href="/cli_surgeon" class="th-card">
+            <div class="th-ico-wrap">🔪</div>
+            <div class="th-info">
+              <div class="th-name">CLI SURGEON</div>
+              <div class="th-desc"><span class="i18n-th">ผ่าตัด CLI dump</span><span class="i18n-en">CLI dump editor</span></div>
+            </div>
+          </a>
+          <a href="/cli-comparator" class="th-card">
+            <div class="th-ico-wrap">⚖️</div>
+            <div class="th-info">
+              <div class="th-name">CLI COMPARE</div>
+              <div class="th-desc"><span class="i18n-th">เปรียบเทียบ config</span><span class="i18n-en">Config diff tool</span></div>
+            </div>
+          </a>
+          <a href="/build-card" class="th-card">
+            <span class="th-new">NEW</span>
+            <div class="th-ico-wrap">🃏</div>
+            <div class="th-info">
+              <div class="th-name">BUILD CARD</div>
+              <div class="th-desc"><span class="i18n-th">สร้าง build card</span><span class="i18n-en">Build card generator</span></div>
+            </div>
+          </a>
+          <a href="/tuning-log" class="th-card">
+            <div class="th-ico-wrap">📋</div>
+            <div class="th-info">
+              <div class="th-name">TUNING LOG</div>
+              <div class="th-desc"><span class="i18n-th">บันทึกการปรับแต่ง</span><span class="i18n-en">Tuning journal</span></div>
+            </div>
+          </a>
+          <a href="/osd" class="th-card">
+            <div class="th-ico-wrap">📺</div>
+            <div class="th-info">
+              <div class="th-name">OSD DESIGNER</div>
+              <div class="th-desc"><span class="i18n-th">ออกแบบ OSD</span><span class="i18n-en">OSD layout designer</span></div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- ─── VIDEO TX ─── -->
+      <div class="toolhub-group tg-video" data-reveal>
+        <div class="toolhub-group-hd">
+          <span class="toolhub-group-ico">📡</span>
+          <span class="toolhub-group-label">
+            <span class="i18n-th">Video TX</span>
+            <span class="i18n-en">Video TX</span>
+          </span>
+          <span class="toolhub-group-count">3 modules</span>
+        </div>
+        <div class="toolhub-grid">
+          <a href="/vtx" class="th-card">
+            <div class="th-ico-wrap">📡</div>
+            <div class="th-info">
+              <div class="th-name">VTX BANDS</div>
+              <div class="th-desc"><span class="i18n-th">ตารางความถี่ VTX</span><span class="i18n-en">VTX frequency chart</span></div>
+            </div>
+          </a>
+          <a href="/vtx-range" class="th-card">
+            <div class="th-ico-wrap">📶</div>
+            <div class="th-info">
+              <div class="th-name">VTX RANGE</div>
+              <div class="th-desc"><span class="i18n-th">คำนวณระยะส่ง</span><span class="i18n-en">Range calculator</span></div>
+            </div>
+          </a>
+          <a href="/vtx-smartaudio" class="th-card">
+            <div class="th-ico-wrap">🔊</div>
+            <div class="th-info">
+              <div class="th-name">SMARTAUDIO</div>
+              <div class="th-desc"><span class="i18n-th">ควบคุม SmartAudio</span><span class="i18n-en">SmartAudio control</span></div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- ─── EXPLORE & FUN ─── -->
+      <div class="toolhub-group tg-explore" data-reveal>
+        <div class="toolhub-group-hd">
+          <span class="toolhub-group-ico">🚀</span>
+          <span class="toolhub-group-label">
+            <span class="i18n-th">Explore &amp; Community</span>
+            <span class="i18n-en">Explore &amp; Community</span>
+          </span>
+          <span class="toolhub-group-count">6 modules</span>
+        </div>
+        <div class="toolhub-grid">
+          <a href="/fpv-trainer" class="th-card">
+            <div class="th-ico-wrap">🎮</div>
+            <div class="th-info">
+              <div class="th-name">FPV TRAINER</div>
+              <div class="th-desc"><span class="i18n-th">ฝึก FPV sim</span><span class="i18n-en">Flight simulator</span></div>
+            </div>
+          </a>
+          <a href="/flight-quiz" class="th-card">
+            <div class="th-ico-wrap">❓</div>
+            <div class="th-info">
+              <div class="th-name">FLIGHT QUIZ</div>
+              <div class="th-desc"><span class="i18n-th">ทดสอบความรู้</span><span class="i18n-en">Knowledge test</span></div>
+            </div>
+          </a>
+          <a href="/leaderboard" class="th-card">
+            <div class="th-ico-wrap">🏆</div>
+            <div class="th-info">
+              <div class="th-name">LEADERBOARD</div>
+              <div class="th-desc"><span class="i18n-th">อันดับนักบิน</span><span class="i18n-en">Pilot rankings</span></div>
+            </div>
+          </a>
+          <a href="/downloads" class="th-card">
+            <div class="th-ico-wrap">💾</div>
+            <div class="th-info">
+              <div class="th-name">DOWNLOADS</div>
+              <div class="th-desc"><span class="i18n-th">ไฟล์ config สำเร็จรูป</span><span class="i18n-en">Ready-made configs</span></div>
+            </div>
+          </a>
+          <a href="/about" class="th-card">
+            <div class="th-ico-wrap">ℹ️</div>
+            <div class="th-info">
+              <div class="th-name">ABOUT</div>
+              <div class="th-desc"><span class="i18n-th">เกี่ยวกับ</span><span class="i18n-en">About this tool</span></div>
+            </div>
+          </a>
+          <a href="/team" class="th-card">
+            <div class="th-ico-wrap">👥</div>
+            <div class="th-info">
+              <div class="th-name">TEAM</div>
+              <div class="th-desc"><span class="i18n-th">ทีมงาน OBIX</span><span class="i18n-en">The OBIX team</span></div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+    </div><!-- /toolhub-groups -->
+  </div><!-- /toolhub-inner -->
+</section>
 
 <div class="neon-divider"></div>
 
