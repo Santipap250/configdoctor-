@@ -418,7 +418,9 @@ def landing():
 
 @app.route("/")
 def loading():
-    return render_template("loading.html")
+    # PATCH BW-3: redirect ตรงไป /landing เพื่อลด double page load
+    from flask import redirect
+    return redirect("/landing", code=302)
 
 @app.route("/ping")
 def ping():
@@ -1107,13 +1109,8 @@ def set_security_headers(response):
     response.headers["X-XSS-Protection"]       = "1; mode=block"
     response.headers["Referrer-Policy"]        = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"]     = "geolocation=(), microphone=(), camera=()"
-    # CSP: whitelist ครบทุก CDN ที่ใช้จริง
-    # FIX H4: HSTS only on HTTPS — avoid sending over HTTP (browser ignores it anyway,
-    # but some proxies/test runners may behave unexpectedly)
     if request.is_secure or request.headers.get("X-Forwarded-Proto", "") == "https":
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-    # NOTE: 'unsafe-inline' in script-src is kept for compatibility with inline JS in templates.
-    # TODO (follow-up): migrate inline scripts to nonce-based CSP to remove 'unsafe-inline'.
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
         "script-src 'self' 'unsafe-inline' "
@@ -1132,12 +1129,22 @@ def set_security_headers(response):
         "  wss://*.firebaseio.com "
         "  wss://*.firebasedatabase.app "
         "  https://*.supabase.co "
-        "  https://*.supabase.net; "  # FIX M4: Supabase community rating API
+        "  https://*.supabase.net; "
         "frame-ancestors 'self';"
     )
-    # M2: Cache static assets aggressively (1 year, cache-busted by filename)
+    # PATCH BW-1: Static assets 1 year cache
     if request.path.startswith('/static/'):
         response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+    # PATCH BW-2: HTML pages — 5 min cache + ETag (ลด bot re-fetch)
+    elif request.method == 'GET' and response.status_code == 200:
+        if 'text/html' in response.content_type:
+            response.headers['Cache-Control'] = 'public, max-age=300, s-maxage=60'
+            etag_val = hashlib.md5(response.get_data()).hexdigest()[:16]
+            response.headers['ETag'] = f'"{etag_val}"'
+            if_none_match = request.headers.get('If-None-Match', '').strip('"')
+            if if_none_match and if_none_match == etag_val:
+                response.status_code = 304
+                response.set_data(b'')
     return response
 
 # ── /api/analyze — rate-limited JSON API (used by JS fetch, not the HTML form) ──
@@ -1184,69 +1191,91 @@ def healthz():
 def robots_txt():
     content = (
         "User-agent: *\n"
+        "Crawl-delay: 10\n"
         "Allow: /\n"
         "Disallow: /static/downloads/osd/\n"
         "Disallow: /analyze_cli\n"
         "Disallow: /compare_cli\n"
         "Disallow: /blackbox/analyze\n"
+        "Disallow: /api/\n"
+        "\n"
+        "User-agent: GPTBot\nDisallow: /\n\n"
+        "User-agent: CCBot\nDisallow: /\n\n"
+        "User-agent: anthropic-ai\nDisallow: /\n\n"
+        "User-agent: Claude-Web\nDisallow: /\n\n"
+        "User-agent: Bytespider\nDisallow: /\n\n"
+        "User-agent: PetalBot\nDisallow: /\n\n"
+        "User-agent: SemrushBot\nDisallow: /\n\n"
+        "User-agent: AhrefsBot\nDisallow: /\n\n"
+        "User-agent: MJ12bot\nDisallow: /\n\n"
         "\n"
         "Sitemap: https://configdoctor.onrender.com/sitemap.xml\n"
     )
     from flask import Response
-    return Response(content, mimetype="text/plain")
+    resp = Response(content, mimetype="text/plain")
+    resp.headers["Cache-Control"] = "public, max-age=86400"
+    return resp
 
 # ── SEO: sitemap.xml ───────────────────────────────────────────────────────
 @app.route("/sitemap.xml")
 def sitemap_xml():
     from flask import Response
-    pages = [
-        ("/team",             "monthly", "0.7"),
-        ("/flight-quiz",      "weekly",  "0.8"),
-        ("/bf-wizard",        "weekly",  "0.9"),
-        ("/build-card",       "weekly",  "0.8"),
-        ("/tuning-log",       "weekly",  "0.7"),
-        ("/leaderboard",      "weekly",  "0.8"),
-        ("/landing",          "weekly",  "1.0"),
-        ("/blackbox",          "weekly",  "1.0"),
-        ("/app",              "weekly",  "0.9"),
-        ("/cli_surgeon",      "weekly",  "0.9"),
-        ("/pid-advisor",      "weekly",  "0.9"),
-        ("/quick-tune",       "weekly",  "0.9"),
-        ("/rpm-filter",       "weekly",  "0.8"),
-        ("/motor-prop",       "weekly",  "0.8"),
-        ("/rates-visualizer", "weekly",  "0.8"),
-        ("/cli-comparator",   "weekly",  "0.8"),
-        ("/esc-checker",      "weekly",  "0.8"),
-        ("/fpv-trainer",      "weekly",  "0.9"),
-        ("/battery-health",   "weekly",  "0.8"),
-        ("/motor-thermal",    "weekly",  "0.8"),
-        ("/loop-analyzer",    "weekly",  "0.8"),
-        ("/osd",              "weekly",  "0.7"),
-        ("/vtx",              "monthly", "0.6"),
-        ("/vtx-range",        "monthly", "0.6"),
-        ("/vtx-smartaudio",   "monthly", "0.6"),
-        ("/downloads",        "weekly",  "0.7"),
-        ("/fpv",              "monthly", "0.6"),
-        ("/about",            "monthly", "0.5"),
-        ("/changelog",        "weekly",  "0.5"),
-        ("/military-uas",      "weekly",  "0.8"),
-    ]
-    base = "https://configdoctor.onrender.com"
-    today = datetime.now().strftime("%Y-%m-%d")  # FIX L1: utcnow() deprecated
-    urls = "\n".join(
-        f"""  <url>
+    today = datetime.now().strftime("%Y-%m-%d")
+    if _SITEMAP_CACHE.get("date") == today and _SITEMAP_CACHE.get("xml"):
+        xml = _SITEMAP_CACHE["xml"]
+    else:
+        pages = [
+            ("/team",             "monthly", "0.7"),
+            ("/flight-quiz",      "weekly",  "0.8"),
+            ("/bf-wizard",        "weekly",  "0.9"),
+            ("/build-card",       "weekly",  "0.8"),
+            ("/tuning-log",       "weekly",  "0.7"),
+            ("/leaderboard",      "weekly",  "0.8"),
+            ("/landing",          "weekly",  "1.0"),
+            ("/blackbox",         "weekly",  "1.0"),
+            ("/app",              "weekly",  "0.9"),
+            ("/cli_surgeon",      "weekly",  "0.9"),
+            ("/pid-advisor",      "weekly",  "0.9"),
+            ("/quick-tune",       "weekly",  "0.9"),
+            ("/rpm-filter",       "weekly",  "0.8"),
+            ("/motor-prop",       "weekly",  "0.8"),
+            ("/rates-visualizer", "weekly",  "0.8"),
+            ("/cli-comparator",   "weekly",  "0.8"),
+            ("/esc-checker",      "weekly",  "0.8"),
+            ("/fpv-trainer",      "weekly",  "0.9"),
+            ("/battery-health",   "weekly",  "0.8"),
+            ("/motor-thermal",    "weekly",  "0.8"),
+            ("/loop-analyzer",    "weekly",  "0.8"),
+            ("/osd",              "weekly",  "0.7"),
+            ("/vtx",              "monthly", "0.6"),
+            ("/vtx-range",        "monthly", "0.6"),
+            ("/vtx-smartaudio",   "monthly", "0.6"),
+            ("/downloads",        "weekly",  "0.7"),
+            ("/fpv",              "monthly", "0.6"),
+            ("/about",            "monthly", "0.5"),
+            ("/changelog",        "weekly",  "0.5"),
+            ("/military-uas",     "weekly",  "0.8"),
+        ]
+        base = "https://configdoctor.onrender.com"
+        urls = "\n".join(
+            f"""  <url>
     <loc>{base}{loc}</loc>
     <lastmod>{today}</lastmod>
     <changefreq>{freq}</changefreq>
     <priority>{pri}</priority>
   </url>"""
-        for loc, freq, pri in pages
-    )
-    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+            for loc, freq, pri in pages
+        )
+        xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 {urls}
 </urlset>"""
-    return Response(xml, mimetype="application/xml")
+        _SITEMAP_CACHE["xml"] = xml
+        _SITEMAP_CACHE["date"] = today
+    resp = Response(xml, mimetype="application/xml")
+    resp.headers["Cache-Control"] = "public, max-age=86400"
+    return resp
+
 
 # ── v5.1 Additional Routes ──────────────────────────────────
 
