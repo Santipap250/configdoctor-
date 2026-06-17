@@ -1402,19 +1402,19 @@ def api_like_post():
 
 
 if __name__ == "__main__":
-    # ── Startup template validation ─────────────────────────────────────────
+    # 📝 ส่วนการตรวจสอบ Template ปล่อยได้ # ทำงานปกติได้ค่ะ
     try:
         from jinja2 import Environment, FileSystemLoader as _FL
         _env = Environment(loader=_FL("templates"))
         _env.get_template("index.html")
         logger.info("Startup: template validation passed ✓")
     except Exception as _te:
-        logger.error("Startup: template validation FAILED — %s", _te)
-    # FIX L3: threaded=False ป้องกัน race condition กับ SQLite lock ใน dev
-    # production ใช้ gunicorn (Procfile) ซึ่ง single-worker + WAL อยู่แล้ว
-    app.run(
-        host="0.0.0.0",
-        port=int(os.environ.get("PORT", 10000)),
-        debug=app.config.get('DEBUG', False),
-        threaded=False,
-    )
+        logger.error("Startup: template validation FAILED - %s", _te)
+ 
+    # app.run(
+    #     host="0.0.0.0",
+    # port=int(os.environ.get("PORT", 10000)),
+    # debug=app.config.get('DEBUG', False),
+    #     threaded=False,
+    # )
+
