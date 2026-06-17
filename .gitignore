@@ -1,7 +1,7 @@
 # OBIXConfig Doctor — .gitignore
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# ────────────────────────────────────────────────────────────────
 
-# ─── Python ────────────────────────────────────────────────────
+# Python
 __pycache__/
 *.pyc
 *.pyo
@@ -10,95 +10,49 @@ __pycache__/
 dist/
 build/
 .eggs/
-*.egg
 
-# ─── Virtual Environments ──────────────────────────────────────
+# Virtual environments
 .venv/
 venv/
 env/
-ENV/
-.venv_backup/
 
-# ─── Environment & Secrets (NEVER commit) ──────────────────────
+# Environment & secrets (NEVER commit these)
 .env
 .env.*
-!.env.example
 *.secret
-*.pem
-*.key
 
-# ─── Logs ──────────────────────────────────────────────────────
+# Logs
 *.log
-*.log.*
 logs/
 
-# ─── OS Junk ───────────────────────────────────────────────────
+# OS junk
 .DS_Store
 .DS_Store?
 ._*
 Thumbs.db
 Desktop.ini
-.AppleDouble
-.LSOverride
 
-# ─── Editor & IDE ──────────────────────────────────────────────
+# Editor
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-*.sublime-project
-*.sublime-workspace
-.project
-.pydevproject
-.settings/
-.classpath
 
-# ─── Testing & Coverage ────────────────────────────────────────
+# Test / coverage
 .pytest_cache/
 .coverage
-.coverage.*
 htmlcov/
 .tox/
-.nox/
-.hypothesis/
-.benchmarks/
 
-# ─── OSD Exports (user-generated) ──────────────────────────────
+# OSD exports (user-generated, not part of repo)
 static/downloads/osd/
-static/downloads/diff_all/
 
-# ─── Database ──────────────────────────────────────────────────
-*.db
-*.sqlite
-*.sqlite3
-data/
+# SQLite community DB (runtime data, not committed — only data/.gitkeep is tracked)
+data/*.db
+data/*.db-wal
+data/*.db-shm
 
-# ─── Temporary & Upload Files ─────────────────────────────────
+# Upload temp
 uploads/
 tmp/
-temp/
-*.tmp
-.cache/
-
-# ─── Backup Files ─────────────────────────────────────────────
-*.bak
-*.backup
-*.swp
-*~
-
-# ─── Node (if using frontend build tools) ──────────────────────
-node_modules/
-npm-debug.log
-yarn-error.log
-.npm
-
-# ─── Docker ────────────────────────────────────────────────────
-.dockerignore
-Docker*
-
-# ─── System ────────────────────────────────────────────────────
-.env.local
-.env.*.local
-*.pid
-.lock
