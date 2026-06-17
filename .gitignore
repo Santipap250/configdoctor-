@@ -1,7 +1,7 @@
 # OBIXConfig Doctor — .gitignore
-# ────────────────────────────────────────────────────────────────
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-# Python
+# ─── Python ────────────────────────────────────────────────────
 __pycache__/
 *.pyc
 *.pyo
@@ -10,44 +10,95 @@ __pycache__/
 dist/
 build/
 .eggs/
+*.egg
 
-# Virtual environments
+# ─── Virtual Environments ──────────────────────────────────────
 .venv/
 venv/
 env/
+ENV/
+.venv_backup/
 
-# Environment & secrets (NEVER commit these)
+# ─── Environment & Secrets (NEVER commit) ──────────────────────
 .env
 .env.*
+!.env.example
 *.secret
+*.pem
+*.key
 
-# Logs
+# ─── Logs ──────────────────────────────────────────────────────
 *.log
+*.log.*
 logs/
 
-# OS junk
+# ─── OS Junk ───────────────────────────────────────────────────
 .DS_Store
 .DS_Store?
 ._*
 Thumbs.db
 Desktop.ini
+.AppleDouble
+.LSOverride
 
-# Editor
+# ─── Editor & IDE ──────────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+*.sublime-project
+*.sublime-workspace
+.project
+.pydevproject
+.settings/
+.classpath
 
-# Test / coverage
+# ─── Testing & Coverage ────────────────────────────────────────
 .pytest_cache/
 .coverage
+.coverage.*
 htmlcov/
 .tox/
+.nox/
+.hypothesis/
+.benchmarks/
 
-# OSD exports (user-generated, not part of repo)
+# ─── OSD Exports (user-generated) ──────────────────────────────
 static/downloads/osd/
+static/downloads/diff_all/
 
-# Upload temp
+# ─── Database ──────────────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+data/
+
+# ─── Temporary & Upload Files ─────────────────────────────────
 uploads/
 tmp/
+temp/
+*.tmp
+.cache/
+
+# ─── Backup Files ─────────────────────────────────────────────
+*.bak
+*.backup
+*.swp
+*~
+
+# ─── Node (if using frontend build tools) ──────────────────────
+node_modules/
+npm-debug.log
+yarn-error.log
+.npm
+
+# ─── Docker ────────────────────────────────────────────────────
+.dockerignore
+Docker*
+
+# ─── System ────────────────────────────────────────────────────
+.env.local
+.env.*.local
+*.pid
+.lock

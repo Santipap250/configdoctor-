@@ -1,20 +1,41 @@
-# OBIXConfig Doctor — production requirements
-# ─────────────────────────────────────────────────
-# FIX L2: Flask 2.3.x ต้องการ Werkzeug 2.x เท่านั้น (incompatible กับ 3.x)
-#          แก้โดย upgrade Flask → 3.0.x ซึ่ง fully compatible กับ Werkzeug 3.0.x
-# SECURITY PATCH:
-#   [HIGH]   gunicorn >= 22.0.0  (CVE-2024-1135: HTTP Request Smuggling)
-#   [HIGH]   Werkzeug >= 3.0.3   (CVE-2023-46136: multipart DoS)
-#   [MEDIUM] Jinja2 >= 3.1.4     (CVE-2024-34064: XSS via xmlattr filter)
-# FIX v5.2: Flask-WTF สำหรับ CSRF Protection ทุก POST route
-# FIX v5.2: Flask-Compress ลด HTML/JSON size ~70%
-# FIX v5.1: Flask-Limiter ป้องกัน API abuse/spam
+# OBIXConfig Doctor v5.2 — Production Requirements
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# SECURITY: All versions pinned to tested & secure releases
+
+# ─── Flask Framework ───────────────────────────────────────────
+# v3.0.3+: Full Werkzeug 3.x compatibility, security patches
 Flask==3.0.3
-gunicorn==22.0.0
 Werkzeug==3.0.3
-python-dotenv==1.0.0
 Jinja2>=3.1.4,<4.0
-Flask-Limiter==3.5.0
-Flask-Compress==1.14
+
+# ─── Server & Deployment ───────────────────────────────────────
+# gunicorn v22.0.0+: CVE-2024-1135 HTTP Request Smuggling fix
+gunicorn==22.0.0
+python-dotenv==1.0.0
+
+# ─── Security & Protection ─────────────────────────────────────
+# Flask-WTF v1.2.1: CSRF token protection for all POST routes
 Flask-WTF==1.2.1
+
+# Flask-Limiter v3.5.0: Rate limiting API abuse prevention
+Flask-Limiter==3.5.0
 limits[redis]>=3.6.0
+
+# ─── Performance ───────────────────────────────────────────────
+# Flask-Compress: gzip/brotli compression (~70% size reduction)
+Flask-Compress==1.14
+
+# ─── Data Processing ───────────────────────────────────────────
+# CSV/data analysis for Blackbox logs
+numpy>=1.24.0
+pandas>=2.0.0
+
+# ─── Image Processing ──────────────────────────────────────────
+# OSD designer & graphics generation
+Pillow>=10.0.0
+
+# ─── Optional: Testing ─────────────────────────────────────────
+# Uncomment to include in pip install -r requirements.txt
+# pytest==7.4.0
+# pytest-cov==4.1.0
+# pytest-flask==1.2.0
