@@ -195,6 +195,9 @@ app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB global upload limit
 # ── SHA-256 hash cache (avoid recomputing on every /downloads request) ────
 _HASH_CACHE: dict = {}
 
+# ── sitemap.xml daily cache (was referenced but never declared — caused a 500) ──
+_SITEMAP_CACHE: dict = {}
+
 # ── App start timestamp — ใช้ทำ ETag ให้ lightweight (เปลี่ยนทุก redeploy) ──
 _APP_START_TIME: str = str(int(time.time()))
 
@@ -981,6 +984,8 @@ def analyze_cli():
             return jsonify({"error": "Content-Type must be application/json"}), 415
         data = request.get_json(force=True) or {}
         dump = data.get('dump', '')
+        if not isinstance(dump, str):
+            return jsonify({"error": "dump must be a string"}), 400
         if not dump:
             return jsonify({"error": "no dump provided"}), 400
         # Size limit
@@ -1020,6 +1025,8 @@ def compare_cli():
         data  = request.get_json(force=True) or {}
         dump_a = data.get('dump_a', '')
         dump_b = data.get('dump_b', '')
+        if not isinstance(dump_a, str) or not isinstance(dump_b, str):
+            return jsonify({"error": "dump_a และ dump_b ต้องเป็น string"}), 400
         if not dump_a or not dump_b:
             return jsonify({"error": "ต้องการ dump_a และ dump_b"}), 400
         # Size limit: each dump max 512KB
