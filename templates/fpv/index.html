@@ -158,6 +158,8 @@
     </style>
 </head>
 <body>
+{% set nav_page = "fpv" %}
+{% include "partials/page_actions.html" %}
 
     <nav class="navbar">
         <a href="/" class="logo">Config<span>Doctor</span></a>
@@ -219,5 +221,6 @@
         <p>© 2024 Config Doctor. FPV Knowledge Base.</p>
     </footer>
 
+{% include "partials/footer_nav.html" %}
 </body>
 </html>
