@@ -57,11 +57,7 @@ body::before{
 }
 .nav.scrolled{background:rgba(4,8,8,0.96);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,255,68,0.08)}
 .nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none}
-.nav-logo-icon{width:44px;height:44px}
-.nav-logo-text{}
-.nav-logo-name{font-family:var(--font-t);font-size:22px;font-weight:800;color:#fff;line-height:1}
-.nav-logo-name span{color:var(--g)}
-.nav-logo-sub{font-family:var(--font-d);font-size:7px;letter-spacing:.2em;color:var(--g);margin-top:2px}
+.nav-logo-img{height:38px;width:auto;display:block;filter:drop-shadow(0 0 10px rgba(0,255,68,.18))}
 .nav-menu{display:flex;align-items:center;gap:4px}
 .nav-link{font-size:11px;color:rgba(255,255,255,.65);padding:6px 12px;border-radius:6px;text-decoration:none;transition:.15s;white-space:nowrap}
 .nav-link:hover{color:#fff;background:rgba(255,255,255,.06)}
@@ -400,6 +396,7 @@ footer{
   .stats{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:600px){
+  .nav-logo-img{height:30px}
   .features{grid-template-columns:1fr 1fr}
   .tools-grid{grid-template-columns:repeat(2,1fr)}
   .footer-left,.footer-right{width:100%;justify-content:center;text-align:center}
@@ -426,22 +423,7 @@ footer{
 <!-- NAV -->
 <nav class="nav" id="mainNav">
   <a href="/landing" class="nav-logo">
-    <svg class="nav-logo-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="44" height="44" rx="10" fill="rgba(0,255,68,0.08)" stroke="rgba(0,255,68,0.25)" stroke-width="1"/>
-      <g stroke="#00ff44" stroke-width="1.8" stroke-linecap="round">
-        <circle cx="22" cy="22" r="5" stroke="#00ff44" stroke-width="1.5"/>
-        <line x1="10" y1="10" x2="17" y2="17"/><line x1="27" y1="17" x2="34" y2="10"/>
-        <line x1="10" y1="34" x2="17" y2="27"/><line x1="27" y1="27" x2="34" y2="34"/>
-        <circle cx="9" cy="9" r="3" fill="rgba(0,255,68,.15)"/>
-        <circle cx="35" cy="9" r="3" fill="rgba(0,255,68,.15)"/>
-        <circle cx="9" cy="35" r="3" fill="rgba(0,255,68,.15)"/>
-        <circle cx="35" cy="35" r="3" fill="rgba(0,255,68,.15)"/>
-      </g>
-    </svg>
-    <div class="nav-logo-text">
-      <div class="nav-logo-name">คอนฟิก <span>ด็อกเตอร์</span></div>
-      <div class="nav-logo-sub">แพลตฟอร์มวินิจฉัยโดรน FPV</div>
-    </div>
+    <img class="nav-logo-img" src="{{ url_for('static', filename='img/configdoctor-logo.png') }}" alt="ConfigDoctor — FPV Drone Diagnostic Platform">
   </a>
   <div class="nav-menu">
     <a class="nav-link" href="/app">Analyzer</a>
