@@ -180,21 +180,61 @@ body.no-hero-video .hero-bg-video{display:none;}
 .hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--g);animation:blink .8s ease-in-out infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 .hero-h1{
-  font-family:var(--font-t);font-size:clamp(42px,7vw,72px);font-weight:900;
-  line-height:1.06;letter-spacing:-.01em;color:#fff;margin-bottom:18px;
+  font-family:var(--font-t);
+  font-size:clamp(46px,8.4vw,84px);
+  font-weight:900;
+  line-height:.96;
+  letter-spacing:-.03em;
+  color:#fff;
+  margin-bottom:18px;
+  text-wrap:balance;
+  filter:drop-shadow(0 0 12px rgba(0,255,68,.08));
 }
 /* Staggered line entrance */
-.hero-h1 .line1{display:block;opacity:0;animation:fadeSlideUp .55s .35s forwards}
-.hero-h1 .line2{display:block;opacity:0;animation:fadeSlideUp .55s .5s forwards}
-.hero-h1 .line3{display:block;opacity:0;animation:fadeSlideUp .55s .65s forwards}
-.hero-h1 .green{color:var(--g);text-shadow:0 0 30px rgba(0,255,68,.35)}
+.hero-h1 .line1,
+.hero-h1 .line2,
+.hero-h1 .line3{
+  display:block;
+  opacity:0;
+  transform:translate3d(0,12px,0);
+  animation:heroRise .7s cubic-bezier(.2,.8,.2,1) forwards;
+}
+.hero-h1 .line1{animation-delay:.28s}
+.hero-h1 .line2{animation-delay:.42s}
+.hero-h1 .line3{animation-delay:.56s}
+.hero-h1 .green{
+  display:inline-block;
+  background:linear-gradient(90deg,#00ff66,#8cfffb,#7c5cff,#00ff66);
+  background-size:280% 100%;
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  color:transparent;
+  text-shadow:none;
+  animation:gradientFlow 4s linear infinite, glowPulse 2.4s ease-in-out infinite;
+}
+.hero-shine{
+  position:relative;
+}
 .hero-rule{
   width:0;height:3px;background:linear-gradient(90deg,var(--g),var(--g2));
   border-radius:2px;margin-bottom:18px;box-shadow:0 0 10px rgba(0,255,68,.5);
   animation:ruleExpand .6s .8s cubic-bezier(.2,.8,.3,1) forwards;
 }
 @keyframes ruleExpand{0%{width:0}100%{width:48px}}
-.hero-desc{font-size:clamp(14px,2vw,17px);color:rgba(255,255,255,.65);line-height:1.7;margin-bottom:32px;max-width:420px;opacity:0;animation:fadeSlideUp .5s .9s forwards}
+@keyframes heroRise{
+  0%{opacity:0;transform:translate3d(0,18px,0) scale(.985)}
+  100%{opacity:1;transform:translate3d(0,0,0) scale(1)}
+}
+@keyframes gradientFlow{
+  0%{background-position:0% 50%}
+  100%{background-position:280% 50%}
+}
+@keyframes glowPulse{
+  0%,100%{filter:drop-shadow(0 0 0 rgba(0,255,68,0))}
+  50%{filter:drop-shadow(0 0 12px rgba(0,255,68,.34))}
+}
+.hero-desc{font-size:clamp(14px,2vw,17px);color:rgba(255,255,255,.72);line-height:1.7;margin-bottom:32px;max-width:420px;opacity:0;animation:fadeSlideUp .5s .9s forwards}
 
 /* ── HERO BUTTONS ── */
 .hero-btns{display:flex;gap:12px;flex-wrap:wrap;opacity:0;animation:fadeSlideUp .5s 1.05s forwards}
@@ -533,9 +573,9 @@ footer{
       แพลตฟอร์มวินิจฉัย FPV
     </div>
     <h1 class="hero-h1">
-      <span class="line1">ปรับแต่ง</span>
-      <span class="line2">อย่างชาญฉลาด</span>
-      <span class="line3">บินได้<span class="green">ดียิ่งขึ้น</span></span>
+      <span class="line1">ปรับจูน</span>
+      <span class="line2">อย่างแม่นยำ</span>
+      <span class="line3">บิน<span class="green hero-shine">นิ่งลื่น</span>กว่าเดิม</span>
     </h1>
     <div class="hero-rule"></div>
     <p class="hero-desc">ConfigDoctor ช่วยคุณวิเคราะห์ ปรับแต่ง และปลดล็อกศักยภาพสูงสุดของโดรน FPV ของคุณ</p>
