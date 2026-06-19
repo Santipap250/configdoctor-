@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
 <meta charset="UTF-8">
 <title>ConfigDoctor — FPV Drone Diagnostic Platform</title>
@@ -14,7 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Sarabun:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════
-   CONFIGDOCTOR — LANDING v8.0
+   CONFIGDOCTOR — LANDING v9.0 (Motion Upgrade)
    Design: Mobile-first · Dark · FPV Neon Green
 ═══════════════════════════════════════════════ */
 :root{
@@ -29,6 +29,23 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:var(--font-t);background:var(--bg);color:var(--t);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ════ GLOBAL SCAN-LINE OVERLAY ════ */
+body::before{
+  content:'';pointer-events:none;position:fixed;inset:0;z-index:9999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.05) 2px,rgba(0,0,0,.05) 4px);
+  animation:scanDown 8s linear infinite;opacity:.25;
+}
+@keyframes scanDown{0%{background-position:0 0}100%{background-position:0 100%}}
+
+/* Moving HUD scan beam */
+.hero-scan-beam{
+  position:absolute;top:0;left:0;right:0;z-index:1;pointer-events:none;
+  height:2px;background:linear-gradient(90deg,transparent,rgba(0,255,68,.5),rgba(0,255,68,.9),rgba(0,255,68,.5),transparent);
+  animation:scanBeam 3.5s ease-in-out infinite;
+  box-shadow:0 0 18px rgba(0,255,68,.4),0 0 40px rgba(0,255,68,.15);
+}
+@keyframes scanBeam{0%{top:-2px;opacity:0}5%{opacity:1}95%{opacity:.7}100%{top:100%;opacity:0}}
 
 /* ── NAV ── */
 .nav{
@@ -69,23 +86,13 @@ body{font-family:var(--font-t);background:var(--bg);color:var(--t);overflow-x:hi
 }
 .hero-bg{
   position:absolute;inset:0;z-index:0;
-  background:#040808;
-  overflow:hidden;
-}
-.hero-video{
-  position:absolute;inset:0;width:100%;height:100%;
-  object-fit:cover;object-position:center 30%;
+  background-image:url("{{ url_for('static', filename='img/landing-bg-desktop.jpg') }}");
+  background-size:cover;background-position:center 30%;
   filter:brightness(.55) saturate(1.1);
-  pointer-events:none;
+  transform-origin:center;
+  animation:heroZoom 18s ease-in-out infinite alternate;
 }
-@media(prefers-reduced-motion:reduce){
-  .hero-video{display:none}
-  .hero-bg{
-    background-image:url("{{ url_for('static', filename='img/hero-video-poster.jpg') }}");
-    background-size:cover;background-position:center 30%;
-    filter:brightness(.55) saturate(1.1);
-  }
-}
+@keyframes heroZoom{0%{transform:scale(1)}100%{transform:scale(1.06)}}
 .hero-bg::after{
   content:'';position:absolute;inset:0;
   background:linear-gradient(180deg,
@@ -100,6 +107,28 @@ body{font-family:var(--font-t);background:var(--bg);color:var(--t);overflow-x:hi
   background:radial-gradient(ellipse 80% 60% at 55% 40%, rgba(0,255,68,0.08) 0%, transparent 60%);
 }
 
+/* Radar grid overlay */
+.hero-radar{
+  position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden;
+}
+.hero-radar::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(0,255,68,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,255,68,.04) 1px,transparent 1px);
+  background-size:60px 60px;
+  animation:gridShift 12s linear infinite;
+}
+@keyframes gridShift{0%{background-position:0 0}100%{background-position:60px 60px}}
+
+/* Glowing corner accents */
+.hero-corner{position:absolute;z-index:3;width:40px;height:40px;pointer-events:none}
+.hero-corner.tl{top:80px;left:20px;border-top:2px solid var(--g);border-left:2px solid var(--g);opacity:.5;animation:cornerPulse 2s ease-in-out infinite}
+.hero-corner.tr{top:80px;right:20px;border-top:2px solid var(--g);border-right:2px solid var(--g);opacity:.5;animation:cornerPulse 2s ease-in-out infinite .5s}
+.hero-corner.bl{bottom:20%;left:20px;border-bottom:2px solid var(--g);border-left:2px solid var(--g);opacity:.5;animation:cornerPulse 2s ease-in-out infinite 1s}
+.hero-corner.br{bottom:20%;right:20px;border-bottom:2px solid var(--g);border-right:2px solid var(--g);opacity:.5;animation:cornerPulse 2s ease-in-out infinite 1.5s}
+@keyframes cornerPulse{0%,100%{opacity:.3}50%{opacity:.7}}
+
 /* Floating metric cards */
 .hero-cards{position:absolute;right:clamp(20px,6vw,80px);top:50%;transform:translateY(-50%);z-index:2;display:flex;flex-direction:column;gap:10px;pointer-events:none}
 .hcard{
@@ -107,12 +136,15 @@ body{font-family:var(--font-t);background:var(--bg);color:var(--t);overflow-x:hi
   border:1px solid rgba(0,255,68,.18);border-radius:12px;
   padding:10px 16px;min-width:140px;
   animation:floatCard 4s ease-in-out infinite;
+  opacity:0;
+  animation:heroCardIn .6s cubic-bezier(.2,.8,.3,1) forwards, floatCard 4s ease-in-out infinite;
 }
-.hcard:nth-child(1){animation-delay:0s}
-.hcard:nth-child(2){animation-delay:.6s;min-width:160px}
-.hcard:nth-child(3){animation-delay:1.2s}
-.hcard:nth-child(4){animation-delay:1.8s;min-width:160px}
-.hcard:nth-child(5){animation-delay:2.4s}
+.hcard:nth-child(1){animation-delay:.3s, .3s}
+.hcard:nth-child(2){animation-delay:.5s, .5s;min-width:160px}
+.hcard:nth-child(3){animation-delay:.7s, .7s}
+.hcard:nth-child(4){animation-delay:.9s, .9s;min-width:160px}
+.hcard:nth-child(5){animation-delay:1.1s, 1.1s}
+@keyframes heroCardIn{0%{opacity:0;transform:translateX(30px)}100%{opacity:1;transform:translateX(0)}}
 @keyframes floatCard{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 .hcard-label{font-family:var(--font-d);font-size:8px;letter-spacing:.15em;color:rgba(255,255,255,.5);margin-bottom:4px}
 .hcard-val{font-family:var(--font-d);font-size:20px;font-weight:900;line-height:1}
@@ -120,25 +152,102 @@ body{font-family:var(--font-t);background:var(--bg);color:var(--t);overflow-x:hi
 .hcard.blue  .hcard-val{color:var(--b);text-shadow:0 0 12px rgba(0,168,255,.4)}
 .hcard.amber .hcard-val{color:var(--a);text-shadow:0 0 12px rgba(255,136,0,.4)}
 .hcard.red   .hcard-val{color:var(--r);text-shadow:0 0 12px rgba(255,51,85,.4)}
-/* Mini sparkline */
 .hcard-spark{height:28px;margin-top:4px;opacity:.7}
 .hcard-spark svg{width:100%;height:100%}
 
 /* Hero inner */
-.hero-inner{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;justify-content:center;padding:100px clamp(20px,6vw,80px) 60px;max-width:560px}
-.hero-badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-d);font-size:8px;letter-spacing:.18em;color:var(--g);background:rgba(0,255,68,.08);border:1px solid rgba(0,255,68,.2);border-radius:20px;padding:5px 14px;margin-bottom:20px}
+.hero-inner{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;justify-content:center;padding:100px clamp(20px,6vw,80px) 60px;max-width:580px}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:6px;font-family:var(--font-d);font-size:8px;
+  letter-spacing:.18em;color:var(--g);background:rgba(0,255,68,.08);
+  border:1px solid rgba(0,255,68,.2);border-radius:20px;padding:5px 14px;margin-bottom:20px;
+  opacity:0;animation:fadeSlideUp .5s .2s forwards;
+}
 .hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--g);animation:blink .8s ease-in-out infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.hero-h1{font-family:var(--font-t);font-size:clamp(42px,7vw,72px);font-weight:900;line-height:1.06;letter-spacing:-.01em;color:#fff;margin-bottom:18px}
+.hero-h1{
+  font-family:var(--font-t);font-size:clamp(42px,7vw,72px);font-weight:900;
+  line-height:1.06;letter-spacing:-.01em;color:#fff;margin-bottom:18px;
+}
+/* Staggered line entrance */
+.hero-h1 .line1{display:block;opacity:0;animation:fadeSlideUp .55s .35s forwards}
+.hero-h1 .line2{display:block;opacity:0;animation:fadeSlideUp .55s .5s forwards}
+.hero-h1 .line3{display:block;opacity:0;animation:fadeSlideUp .55s .65s forwards}
 .hero-h1 .green{color:var(--g);text-shadow:0 0 30px rgba(0,255,68,.35)}
-.hero-rule{width:48px;height:3px;background:var(--g);border-radius:2px;margin-bottom:18px;box-shadow:0 0 10px rgba(0,255,68,.5)}
-.hero-desc{font-size:clamp(14px,2vw,17px);color:rgba(255,255,255,.65);line-height:1.7;margin-bottom:32px;max-width:420px}
-.hero-btns{display:flex;gap:12px;flex-wrap:wrap}
-.btn-primary{display:inline-flex;align-items:center;gap:9px;background:var(--g);color:#000;font-family:var(--font-t);font-size:15px;font-weight:800;padding:14px 28px;border-radius:12px;text-decoration:none;transition:all .2s;box-shadow:0 0 24px rgba(0,255,68,.25)}
-.btn-primary:hover{background:var(--g2);transform:translateY(-2px);box-shadow:0 6px 28px rgba(0,255,68,.35)}
+.hero-rule{
+  width:0;height:3px;background:linear-gradient(90deg,var(--g),var(--g2));
+  border-radius:2px;margin-bottom:18px;box-shadow:0 0 10px rgba(0,255,68,.5);
+  animation:ruleExpand .6s .8s cubic-bezier(.2,.8,.3,1) forwards;
+}
+@keyframes ruleExpand{0%{width:0}100%{width:48px}}
+.hero-desc{font-size:clamp(14px,2vw,17px);color:rgba(255,255,255,.65);line-height:1.7;margin-bottom:32px;max-width:420px;opacity:0;animation:fadeSlideUp .5s .9s forwards}
+
+/* ── HERO BUTTONS ── */
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;opacity:0;animation:fadeSlideUp .5s 1.05s forwards}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:9px;background:var(--g);color:#000;
+  font-family:var(--font-t);font-size:15px;font-weight:800;padding:14px 28px;
+  border-radius:12px;text-decoration:none;transition:all .2s;
+  box-shadow:0 0 24px rgba(0,255,68,.25);position:relative;overflow:hidden;
+}
+.btn-primary::after{
+  content:'';position:absolute;top:-50%;left:-60%;width:40%;height:200%;
+  background:linear-gradient(105deg,transparent,rgba(255,255,255,.25),transparent);
+  transform:skewX(-20deg);transition:left .5s;
+}
+.btn-primary:hover::after{left:120%}
+.btn-primary:hover{background:var(--g2);transform:translateY(-2px);box-shadow:0 6px 28px rgba(0,255,68,.45)}
 .btn-primary svg{flex-shrink:0}
-.btn-outline{display:inline-flex;align-items:center;gap:9px;background:transparent;color:#fff;font-family:var(--font-t);font-size:15px;font-weight:600;padding:13px 28px;border-radius:12px;text-decoration:none;transition:all .2s;border:1.5px solid rgba(255,255,255,.25)}
+.btn-outline{
+  display:inline-flex;align-items:center;gap:9px;background:transparent;color:#fff;
+  font-family:var(--font-t);font-size:15px;font-weight:600;padding:13px 28px;
+  border-radius:12px;text-decoration:none;transition:all .2s;
+  border:1.5px solid rgba(255,255,255,.25);position:relative;overflow:hidden;
+}
 .btn-outline:hover{border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.06);transform:translateY(-2px)}
+
+/* ── NEW SOCIAL BUTTONS ── */
+.hero-social-btns{
+  display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;
+  opacity:0;animation:fadeSlideUp .5s 1.2s forwards;
+}
+.btn-dev{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(0,255,68,.07);border:1.5px solid rgba(0,255,68,.28);
+  color:var(--g);font-family:var(--font-t);font-size:13px;font-weight:700;
+  padding:11px 22px;border-radius:12px;text-decoration:none;transition:all .2s;
+  position:relative;overflow:hidden;
+}
+.btn-dev::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,255,68,.08),transparent);
+  opacity:0;transition:.2s;
+}
+.btn-dev:hover::before{opacity:1}
+.btn-dev:hover{
+  background:rgba(0,255,68,.12);border-color:rgba(0,255,68,.5);
+  transform:translateY(-2px);box-shadow:0 4px 18px rgba(0,255,68,.18);
+  color:#fff;
+}
+.btn-dev-ico{width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.btn-fb{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(24,119,242,.1);border:1.5px solid rgba(24,119,242,.3);
+  color:#60a5fa;font-family:var(--font-t);font-size:13px;font-weight:700;
+  padding:11px 22px;border-radius:12px;text-decoration:none;transition:all .2s;
+  position:relative;overflow:hidden;
+}
+.btn-fb::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(24,119,242,.1),transparent);
+  opacity:0;transition:.2s;
+}
+.btn-fb:hover::before{opacity:1}
+.btn-fb:hover{
+  background:rgba(24,119,242,.18);border-color:rgba(24,119,242,.55);
+  transform:translateY(-2px);box-shadow:0 4px 18px rgba(24,119,242,.22);
+  color:#93c5fd;
+}
 
 /* ── FEATURE STRIP ── */
 .features{
@@ -154,7 +263,13 @@ body{font-family:var(--font-t);background:var(--bg);color:var(--t);overflow-x:hi
   background:rgba(4,10,8,.92);backdrop-filter:blur(10px);
   text-decoration:none;color:var(--t);transition:.2s;
   position:relative;overflow:hidden;
+  opacity:0;transform:translateY(16px);
 }
+.feat.show{opacity:1;transform:translateY(0)}
+.feat:nth-child(1){transition:opacity .4s .1s ease, transform .4s .1s ease, background .2s}
+.feat:nth-child(2){transition:opacity .4s .2s ease, transform .4s .2s ease, background .2s}
+.feat:nth-child(3){transition:opacity .4s .3s ease, transform .4s .3s ease, background .2s}
+.feat:nth-child(4){transition:opacity .4s .4s ease, transform .4s .4s ease, background .2s}
 .feat::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,255,68,.04),transparent);opacity:0;transition:.2s}
 .feat:hover::before{opacity:1}
 .feat:hover{background:rgba(8,18,12,.95)}
@@ -163,8 +278,9 @@ body{font-family:var(--font-t);background:var(--bg);color:var(--t);overflow-x:hi
 .feat-name{font-weight:700;font-size:14px;color:#fff}
 .feat-desc{font-size:12px;color:rgba(255,255,255,.5);line-height:1.5}
 .feat-dot{display:flex;gap:3px;margin-top:2px}
-.feat-dot span{width:5px;height:5px;border-radius:50%;background:rgba(0,255,68,.3)}
+.feat-dot span{width:5px;height:5px;border-radius:50%;background:rgba(0,255,68,.3);transition:transform .3s}
 .feat-dot span:first-child{background:var(--g)}
+.feat:hover .feat-dot span{transform:scale(1.3)}
 
 /* ── TOOLS SECTION ── */
 .section{padding:60px clamp(16px,5vw,60px);background:var(--bg)}
@@ -178,7 +294,7 @@ body{font-family:var(--font-t);background:var(--bg);color:var(--t);overflow-x:hi
   display:flex;flex-direction:column;gap:6px;
   padding:16px 14px;border-radius:10px;text-decoration:none;
   background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
-  transition:all .15s;position:relative;overflow:hidden;color:var(--t);
+  transition:all .2s;position:relative;overflow:hidden;color:var(--t);
 }
 .tool-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--g),transparent);opacity:0;transition:.2s}
 .tool-card:hover{border-color:rgba(0,255,68,.22);background:rgba(0,255,68,.04);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
@@ -189,13 +305,17 @@ body{font-family:var(--font-t);background:var(--bg);color:var(--t);overflow-x:hi
 .tool-badge{position:absolute;top:8px;right:8px;font-family:var(--font-d);font-size:7px;letter-spacing:.08em;padding:2px 6px;border-radius:3px}
 .tb-gold{background:rgba(255,204,0,.12);color:#ffcc00;border:1px solid rgba(255,204,0,.22)}
 .tb-new{background:rgba(0,255,68,.1);color:var(--g);border:1px solid rgba(0,255,68,.22)}
-.i18n-en{display:block}
-.i18n-th{display:none}
 
 /* ── STATS BAR ── */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(0,255,68,.07);border-top:1px solid rgba(0,255,68,.07);border-bottom:1px solid rgba(0,255,68,.07)}
 .stat{padding:24px 16px;text-align:center;background:rgba(4,10,8,.8)}
-.stat-num{font-family:var(--font-d);font-size:clamp(24px,3.5vw,36px);font-weight:900;color:var(--g);line-height:1;margin-bottom:4px}
+.stat-num{
+  font-family:var(--font-d);font-size:clamp(24px,3.5vw,36px);font-weight:900;
+  color:var(--g);line-height:1;margin-bottom:4px;
+  opacity:0;transform:scale(.85);
+  transition:opacity .5s ease, transform .5s ease;
+}
+.stat-num.shown{opacity:1;transform:scale(1)}
 .stat-lbl{font-size:11px;color:rgba(255,255,255,.45);letter-spacing:.05em}
 
 /* ── FOOTER ── */
@@ -222,20 +342,26 @@ footer{
   .tools-grid{grid-template-columns:repeat(2,1fr)}
   .footer-left,.footer-right{width:100%;justify-content:center;text-align:center}
   .hero-btns{flex-direction:column;align-items:flex-start}
-  .btn-primary,.btn-outline{width:100%;justify-content:center}
+  .btn-primary,.btn-outline,.btn-dev,.btn-fb{width:100%;justify-content:center}
+  .hero-social-btns{flex-direction:column;align-items:flex-start}
 }
 
-/* scroll reveal */
-.reveal{opacity:0;transform:translateY(24px);transition:opacity .5s ease,transform .5s ease}
+/* ── SCROLL REVEAL UTILITY ── */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .55s ease,transform .55s ease}
 .reveal.show{opacity:1;transform:none}
+
+/* ── FADE SLIDE UP KEYFRAME ── */
+@keyframes fadeSlideUp{0%{opacity:0;transform:translateY(18px)}100%{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 
+<!-- GLOBAL ELEMENTS -->
+<div class="hero-scan-beam"></div>
+
 <!-- NAV -->
 <nav class="nav" id="mainNav">
   <a href="/landing" class="nav-logo">
-    <!-- Drone X logo SVG -->
     <svg class="nav-logo-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width="44" height="44" rx="10" fill="rgba(0,255,68,0.08)" stroke="rgba(0,255,68,0.25)" stroke-width="1"/>
       <g stroke="#00ff44" stroke-width="1.8" stroke-linecap="round">
@@ -249,8 +375,8 @@ footer{
       </g>
     </svg>
     <div class="nav-logo-text">
-      <div class="nav-logo-name">Config<span>Doctor</span></div>
-      <div class="nav-logo-sub">FPV DRONE DIAGNOSTIC PLATFORM</div>
+      <div class="nav-logo-name">คอนฟิก <span>ด็อกเตอร์</span></div>
+      <div class="nav-logo-sub">แพลตฟอร์มวินิจฉัยโดรน FPV</div>
     </div>
   </a>
   <div class="nav-menu">
@@ -260,7 +386,7 @@ footer{
     <a class="nav-link" href="/cli_surgeon">CLI Surgeon</a>
     <a class="nav-link" href="/bf-wizard">BF Wizard</a>
     <a class="nav-link" href="/about">About</a>
-    <a class="nav-cta" href="/app">Start Analyzing</a>
+    <a class="nav-cta" href="/app">เริ่มวิเคราะห์</a>
   </div>
   <div class="nav-ham" id="navHam" onclick="openMob()" aria-label="menu">
     <span></span><span></span><span></span>
@@ -278,22 +404,22 @@ footer{
   <a class="mn-link" href="/rpm-filter" onclick="closeMob()">🔔 RPM Filter</a>
   <a class="mn-link" href="/motor-prop" onclick="closeMob()">🧭 Motor×Prop</a>
   <a class="mn-link" href="/about" onclick="closeMob()">ℹ️ About</a>
-  <a class="mn-link mn-cta" href="/app" onclick="closeMob()">🚀 Start Analyzing</a>
+  <a class="mn-link mn-cta" href="/app" onclick="closeMob()">🚀 เริ่มวิเคราะห์</a>
 </div>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-bg">
-    <video class="hero-video" autoplay muted loop playsinline preload="auto"
-      poster="{{ url_for('static', filename='img/hero-video-poster.jpg') }}">
-      <source src="{{ url_for('static', filename='video/hero-drone.webm') }}" type="video/webm">
-      <source src="{{ url_for('static', filename='video/hero-drone.mp4') }}" type="video/mp4">
-    </video>
-  </div>
+  <div class="hero-bg"></div>
+  <div class="hero-radar"></div>
+
+  <!-- HUD corner accents -->
+  <div class="hero-corner tl"></div>
+  <div class="hero-corner tr"></div>
+  <div class="hero-corner bl"></div>
+  <div class="hero-corner br"></div>
 
   <!-- Floating metric cards -->
   <div class="hero-cards">
-    <!-- PID chart card -->
     <div class="hcard green">
       <div class="hcard-label">PID</div>
       <div class="hcard-spark">
@@ -305,22 +431,18 @@ footer{
         </svg>
       </div>
     </div>
-    <!-- Battery card -->
     <div class="hcard blue">
       <div class="hcard-label">BATTERY</div>
       <div class="hcard-val">23.7<span style="font-size:14px">V</span></div>
     </div>
-    <!-- Amp card -->
     <div class="hcard green">
       <div class="hcard-label">AMP</div>
       <div class="hcard-val">18.5<span style="font-size:14px">A</span></div>
     </div>
-    <!-- Temp card -->
     <div class="hcard amber">
       <div class="hcard-label">TEMP</div>
       <div class="hcard-val">42<span style="font-size:14px">°C</span></div>
     </div>
-    <!-- RPM chart card -->
     <div class="hcard red">
       <div class="hcard-label">RPM</div>
       <div class="hcard-spark">
@@ -338,18 +460,46 @@ footer{
   <div class="hero-inner">
     <div class="hero-badge">
       <span class="hero-badge-dot"></span>
-      FPV DIAGNOSTIC PLATFORM
+      แพลตฟอร์มวินิจฉัย FPV
     </div>
-    <h1 class="hero-h1">TUNE<br>SMARTER.<br>FLY <span class="green">BETTER.</span></h1>
+    <h1 class="hero-h1">
+      <span class="line1">ปรับแต่ง</span>
+      <span class="line2">อย่างชาญฉลาด</span>
+      <span class="line3">บินได้<span class="green">ดียิ่งขึ้น</span></span>
+    </h1>
     <div class="hero-rule"></div>
-    <p class="hero-desc">ConfigDoctor helps you analyze, optimize and unlock the full potential of your FPV drone.</p>
+    <p class="hero-desc">ConfigDoctor ช่วยคุณวิเคราะห์ ปรับแต่ง และปลดล็อกศักยภาพสูงสุดของโดรน FPV ของคุณ</p>
+
+    <!-- Primary action buttons -->
     <div class="hero-btns">
       <a class="btn-primary" href="/app">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2L11.5 7H16L12.5 10.5L14 16L9 13L4 16L5.5 10.5L2 7H6.5L9 2Z" fill="#000"/></svg>
-        Start Analyzing
+        ★ &nbsp;เริ่มการวิเคราะห์
       </a>
       <a class="btn-outline" href="#tools">
-        Explore Features &nbsp;›
+        สำรวจคุณสมบัติ &nbsp;›
+      </a>
+    </div>
+
+    <!-- Secondary social / info buttons -->
+    <div class="hero-social-btns">
+      <a class="btn-dev" href="/team">
+        <div class="btn-dev-ico">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="6.5" r="3" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M2 16c0-3.3 3.1-6 7-6s7 2.7 7 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        ผู้พัฒนาโปรเจค
+      </a>
+      <a class="btn-fb" href="https://www.facebook.com/banmysanti" target="_blank" rel="noopener noreferrer">
+        <div class="btn-dev-ico">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <rect width="24" height="24" rx="5" fill="#1877f2" opacity=".25"/>
+            <path d="M16 8h-2a1 1 0 0 0-1 1v2h3l-.5 3H13v7h-3v-7H8v-3h2V9a4 4 0 0 1 4-4h2v3z" fill="#60a5fa"/>
+          </svg>
+        </div>
+        OBIX CONFIG LAB ↗
       </a>
     </div>
   </div>
@@ -363,7 +513,9 @@ footer{
       <div class="feat-dot"><span></span><span></span><span></span></div>
     </a>
     <a class="feat" href="/pid-advisor">
-      <div class="feat-ic">⚙️</div>
+      <div class="feat-ic">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="rgba(0,255,68,.6)" stroke-width="1.5"/><path d="M9 12h6M12 9v6" stroke="#00ff44" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
       <div class="feat-name">Auto Optimization</div>
       <div class="feat-desc">Tune PID, Rates, Filters & more</div>
       <div class="feat-dot"><span></span><span></span><span></span></div>
@@ -386,11 +538,11 @@ footer{
 </section>
 
 <!-- STATS -->
-<div class="stats">
-  <div class="stat"><div class="stat-num">22+</div><div class="stat-lbl">DIAGNOSTIC TOOLS</div></div>
-  <div class="stat"><div class="stat-num">50k+</div><div class="stat-lbl">ANALYSES RUN</div></div>
-  <div class="stat"><div class="stat-num">4.9★</div><div class="stat-lbl">COMMUNITY RATING</div></div>
-  <div class="stat"><div class="stat-num">100%</div><div class="stat-lbl">FREE TO USE</div></div>
+<div class="stats" id="statsRow">
+  <div class="stat"><div class="stat-num" data-target="22+">22+</div><div class="stat-lbl">DIAGNOSTIC TOOLS</div></div>
+  <div class="stat"><div class="stat-num" data-target="50k+">50k+</div><div class="stat-lbl">ANALYSES RUN</div></div>
+  <div class="stat"><div class="stat-num" data-target="4.9★">4.9★</div><div class="stat-lbl">COMMUNITY RATING</div></div>
+  <div class="stat"><div class="stat-num" data-target="100%">100%</div><div class="stat-lbl">FREE TO USE</div></div>
 </div>
 
 <!-- TOOLS GRID -->
@@ -400,7 +552,6 @@ footer{
     <h2 class="section-h2">Everything for FPV Tuning</h2>
     <p class="section-sub">22 specialized tools — from PID analysis to motor thermal, all in one platform</p>
   </div>
-
   <div class="tools-grid reveal">
     <a class="tool-card" href="/app"><div class="tool-icon">🚀</div><div class="tool-name">Drone Analyzer</div><div class="tool-hint">Main PID/Filter analyzer</div></a>
     <a class="tool-card" href="/blackbox"><div class="tool-icon">📊</div><div class="tool-name">Blackbox Analyzer</div><div class="tool-hint">Flight log CSV → PID score</div><span class="tool-badge tb-gold">HOT</span></a>
@@ -442,49 +593,131 @@ footer{
 </footer>
 
 <script>
-/* Nav scroll */
-window.addEventListener('scroll',function(){
-  document.getElementById('mainNav').classList.toggle('scrolled',window.scrollY>40);
-},{passive:true});
+/* ── Nav scroll ── */
+window.addEventListener('scroll', function(){
+  document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 40);
+}, {passive:true});
 
-/* Mobile nav */
-window.openMob=function(){document.getElementById('mobNav').classList.add('open');document.body.style.overflow='hidden'};
-window.closeMob=function(){document.getElementById('mobNav').classList.remove('open');document.body.style.overflow=''};
+/* ── Mobile nav ── */
+window.openMob  = function(){ document.getElementById('mobNav').classList.add('open'); document.body.style.overflow='hidden'; };
+window.closeMob = function(){ document.getElementById('mobNav').classList.remove('open'); document.body.style.overflow=''; };
 
-/* Scroll reveal */
-var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('show')})},{threshold:.1});
-document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el)});
-
-/* Card number flicker animation */
+/* ── Scroll reveal (all .reveal + feature strip + stats) ── */
 (function(){
-  var cards=[
-    {id:null,el:null,vals:['23.1','23.4','23.7','23.5','23.8'],i:0,label:'BATTERY'},
-    {id:null,el:null,vals:['17.2','18.5','19.1','18.5','17.8'],i:1,label:'AMP'},
-    {id:null,el:null,vals:['41°C','42°C','43°C','42°C','41°C'],i:2,label:'TEMP'},
-  ];
-  var allCards=document.querySelectorAll('.hcard');
-  cards.forEach(function(c,idx){
-    var found=null;
-    allCards.forEach(function(el){
-      var lbl=el.querySelector('.hcard-label');
-      if(lbl&&lbl.textContent===c.label)found=el;
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      // Generic reveal
+      e.target.classList.add('show');
+      // Feature strip cards
+      e.target.querySelectorAll('.feat').forEach(function(f){ f.classList.add('show'); });
+      // Stat numbers pop-in
+      e.target.querySelectorAll('.stat-num').forEach(function(n){ n.classList.add('shown'); });
+      obs.unobserve(e.target);
     });
-    if(!found)return;
-    var valEl=found.querySelector('.hcard-val');
-    if(!valEl)return;
-    setInterval(function(){
-      c.i=(c.i+1)%c.vals.length;
-      var v=c.vals[c.i];
-      valEl.style.opacity='.3';
-      setTimeout(function(){
-        valEl.innerHTML=v.replace(/([A-Z°]+|[0-9.]+)/g,function(m,p){
-          return isNaN(p[0])?'<span style="font-size:14px">'+p+'</span>':p;
-        });
-        valEl.style.opacity='1';
-      },150);
-    },2000+idx*700);
+  }, {threshold:.08});
+
+  document.querySelectorAll('.reveal').forEach(function(el){ obs.observe(el); });
+
+  // Feature strip reveal (it's inside hero which loads immediately)
+  var featObs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      e.target.querySelectorAll('.feat').forEach(function(f){ f.classList.add('show'); });
+      featObs.unobserve(e.target);
+    });
+  }, {threshold:.05});
+  var features = document.querySelector('.features');
+  if(features) featObs.observe(features);
+
+  // Stat numbers
+  var statObs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      e.target.querySelectorAll('.stat-num').forEach(function(n){
+        setTimeout(function(){ n.classList.add('shown'); }, 100);
+      });
+      statObs.unobserve(e.target);
+    });
+  }, {threshold:.15});
+  var statsRow = document.getElementById('statsRow');
+  if(statsRow) statObs.observe(statsRow);
+})();
+
+/* ── Parallax hero bg on scroll ── */
+(function(){
+  var bg = document.querySelector('.hero-bg');
+  if(!bg) return;
+  window.addEventListener('scroll', function(){
+    var y = window.scrollY;
+    bg.style.transform = 'translateY(' + (y * 0.22) + 'px) scale(1.06)';
+  }, {passive:true});
+})();
+
+/* ── Tool card stagger entrance ── */
+(function(){
+  var cards = document.querySelectorAll('.tool-card');
+  var tObs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var idx = Array.from(cards).indexOf(e.target);
+      e.target.style.transitionDelay = (idx % 6 * 0.045) + 's';
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0)';
+      tObs.unobserve(e.target);
+    });
+  }, {threshold:.1});
+  cards.forEach(function(c){
+    c.style.opacity = '0';
+    c.style.transform = 'translateY(14px)';
+    c.style.transition = 'opacity .35s ease, transform .35s ease, border-color .15s, background .15s, box-shadow .15s';
+    tObs.observe(c);
   });
 })();
+
+/* ── Floating card number flicker ── */
+(function(){
+  var cards=[
+    {label:'BATTERY', vals:['23.1<span style="font-size:14px">V</span>','23.4<span style="font-size:14px">V</span>','23.7<span style="font-size:14px">V</span>','23.5<span style="font-size:14px">V</span>','23.8<span style="font-size:14px">V</span>'], i:0},
+    {label:'AMP',     vals:['17.2<span style="font-size:14px">A</span>','18.5<span style="font-size:14px">A</span>','19.1<span style="font-size:14px">A</span>','18.5<span style="font-size:14px">A</span>','17.8<span style="font-size:14px">A</span>'], i:0},
+    {label:'TEMP',    vals:['41<span style="font-size:14px">°C</span>','42<span style="font-size:14px">°C</span>','43<span style="font-size:14px">°C</span>','42<span style="font-size:14px">°C</span>','41<span style="font-size:14px">°C</span>'], i:0},
+  ];
+  var allCards = document.querySelectorAll('.hcard');
+  cards.forEach(function(c, idx){
+    var found = null;
+    allCards.forEach(function(el){
+      var lbl = el.querySelector('.hcard-label');
+      if(lbl && lbl.textContent === c.label) found = el;
+    });
+    if(!found) return;
+    var valEl = found.querySelector('.hcard-val');
+    if(!valEl) return;
+    setInterval(function(){
+      c.i = (c.i + 1) % c.vals.length;
+      valEl.style.opacity = '.2';
+      valEl.style.transform = 'scale(.9)';
+      valEl.style.transition = 'opacity .15s, transform .15s';
+      setTimeout(function(){
+        valEl.innerHTML = c.vals[c.i];
+        valEl.style.opacity = '1';
+        valEl.style.transform = 'scale(1)';
+      }, 160);
+    }, 2000 + idx * 650);
+  });
+})();
+
+/* ── HUD corner flicker ── */
+(function(){
+  var corners = document.querySelectorAll('.hero-corner');
+  setInterval(function(){
+    var r = Math.floor(Math.random() * corners.length);
+    corners[r].style.opacity = '0';
+    setTimeout(function(){ corners[r].style.opacity = '.5'; }, 120);
+  }, 1800);
+})();
+
+/* ── Escape closes mobile nav ── */
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeMob(); });
 </script>
 </body>
 </html>
