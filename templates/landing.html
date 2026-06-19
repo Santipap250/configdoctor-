@@ -745,6 +745,94 @@ body.no-hero-video .hero-bg-video{display:none;}
 }
 @keyframes soonPulse{0%,100%{opacity:.7}50%{opacity:1}}
 
+
+/* ── ABOUT / INFO BLOCK ── */
+.hero-about{
+  position:relative;
+  z-index:2;
+  width:min(100%, 720px);
+  margin:14px auto 0;
+  padding:16px 16px 14px;
+  border-radius:18px;
+  border:1px solid rgba(0,255,68,.16);
+  background:
+    linear-gradient(180deg, rgba(7,12,10,.88), rgba(4,8,10,.78));
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.22),
+    inset 0 0 0 1px rgba(255,255,255,.03);
+  backdrop-filter:blur(14px);
+  text-align:center;
+  opacity:0;
+  animation:fadeSlideUp .5s 1.5s forwards;
+}
+.hero-about-head{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-family:var(--font-d);
+  font-size:10px;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--g);
+  margin-bottom:10px;
+}
+.hero-about-head::before,
+.hero-about-head::after{
+  content:'';
+  width:18px;
+  height:1px;
+  background:linear-gradient(90deg, transparent, rgba(0,255,68,.8));
+}
+.hero-about-head::after{
+  background:linear-gradient(90deg, rgba(0,255,68,.8), transparent);
+}
+.hero-about-copy{
+  font-size:13px;
+  line-height:1.75;
+  color:rgba(255,255,255,.68);
+  max-width:640px;
+  margin:0 auto 12px;
+}
+.hero-about-grid{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+.hero-about-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid rgba(0,255,68,.14);
+  background:rgba(0,255,68,.06);
+  color:#dafbe3;
+  font-size:11px;
+  font-weight:700;
+  line-height:1;
+}
+
+/* tighter spacing for mobile */
+@media(max-width:600px){
+  .hero-about{
+    width:calc(100% - 32px);
+    padding:14px 14px 12px;
+    margin-top:10px;
+  }
+  .hero-about-copy{
+    font-size:12px;
+    line-height:1.7;
+  }
+  .hero-about-grid{
+    gap:6px;
+  }
+  .hero-about-chip{
+    font-size:10px;
+    padding:7px 10px;
+  }
+}
+
 /* ── FEATURE STRIP ── */
 .features{
   position:relative;z-index:2;
@@ -1233,24 +1321,22 @@ footer{
       </span>
 
     </div>
-  </div>   
- <section class="about-config-doctor">
-  <div class="section-badge">
-    <span>⚡ ABOUT CONFIG DOCTOR</span>
   </div>
 
-  <h2>
-    AI Drone Doctor สำหรับนักบิน FPV
-  </h2>
 
-  <p>
-    Config Doctor คือแพลตฟอร์มวิเคราะห์และปรับแต่งโดรน FPV
-    ที่ช่วยตรวจสอบการตั้งค่า Betaflight, PID, Filter,
-    RPM Filter, ESC และระบบต่าง ๆ ของโดรน
-    เพื่อค้นหาปัญหา แนะนำการปรับแต่ง และสร้าง CLI
-    พร้อมใช้งานได้ในไม่กี่วินาที
-  </p>
-</section>
+  <section class="hero-about reveal" aria-labelledby="aboutConfigDoctor">
+    <div class="hero-about-head" id="aboutConfigDoctor">เกี่ยวกับ Config Doctor</div>
+    <p class="hero-about-copy">
+      Config Doctor คือแพลตฟอร์มวิเคราะห์โดรน FPV ที่ช่วยอ่านอาการจาก diff all, Blackbox และสเปคของลำบิน
+      เพื่อสรุปผลให้เข้าใจง่าย พร้อมแนวทางจูนที่ปลอดภัยและนำไปใช้ได้จริง
+    </p>
+    <div class="hero-about-grid" role="list" aria-label="คุณสมบัติของเว็บไซต์">
+      <span class="hero-about-chip" role="listitem">วิเคราะห์ PID · Filter · RPM</span>
+      <span class="hero-about-chip" role="listitem">เช็ค Motor · ESC · Battery</span>
+      <span class="hero-about-chip" role="listitem">ใช้งานง่ายบนมือถือ</span>
+    </div>
+  </section>
+
   <!-- Feature strip -->
   <div class="features">
     <a class="feat" href="/app">
