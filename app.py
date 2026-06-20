@@ -20,6 +20,7 @@ from logic.presets import (PRESETS, detect_class_from_size,
                             get_baseline_for_class, get_pid_for_class_style,
                             get_filter_for_class)
 from analyzer.prop_logic import analyze_propeller
+from analyzer.units import cells_from_battery_string, is_valid_battery_string
 from analyzer.thrust_logic import (calculate_thrust_weight,
                                     estimate_battery_runtime,
                                     estimate_battery_runtime_detail)
@@ -158,20 +159,27 @@ def _normalize_style(s: str) -> str:
     return _STYLE_MAP.get(str(s).lower().strip(), "freestyle")
 
 def _cells_from_str(s):
-    # FIX M2: ใช้ regex แทน replace เพื่อรองรับ "4S+", "4s2p", "4S 1500mAh" ฯลฯ
-    try:
-        m = re.search(r'(\d+)\s*[Ss]', str(s))
-        if m:
-            c = int(m.group(1))
-            return max(1, min(c, 8))
-        # fallback: ถ้าเป็นตัวเลขล้วน
-        c = int(str(s).strip())
-        return max(1, min(c, 8))
-    except Exception:
+    """Thin wrapper around the shared parser, kept for validate_input():
+    returns None (not a default) when the string has no parseable cell
+    count at all, so validate_input can warn the user instead of silently
+    guessing. Everywhere else that needs a *usable* cell count should
+    import cells_from_battery_string directly from analyzer.units."""
+    if not is_valid_battery_string(s):
         return None
+    return cells_from_battery_string(s, default=4, lo=1, hi=8)
 
 # ── Flask app ─────────────────────────────────────────────────────────────
 app = Flask(__name__)
+
+# FIX (critical): templates/index.html uses a |md5 filter to build a
+# cosmetic "build fingerprint" hash for display. It was never registered,
+# so every POST to /app — i.e. every actual use of the Drone Analyzer —
+# was crashing with "jinja2.exceptions.TemplateRuntimeError: No filter
+# named 'md5' found." This is unrelated to the calculation-logic fixes
+# in this pass; found while re-running the test suite end-to-end.
+@app.template_filter('md5')
+def _jinja_md5_filter(s):
+    return hashlib.md5(str(s).encode('utf-8')).hexdigest()
 
 # RENDER FIX: trust one hop of X-Forwarded-For/Proto from Render's proxy
 # Without this, remote_addr is always 127.0.0.1 → ALL users share one rate-limit bucket
@@ -273,7 +281,9 @@ def _file_sha256(path: str) -> str:
 # ═════════════════════════════════════════════════════════════════════════
 # Validation
 # ═════════════════════════════════════════════════════════════════════════
-def validate_input(size, weight, prop_size, pitch, blades, battery):
+def validate_input(size, weight, prop_size, pitch, blades, battery,
+                    motor_kv=None, motor_count=None, battery_mAh=None,
+                    payload_g=None, esc_current_limit_a=None):
     warnings = []
     try:
         size = float(size)
@@ -311,6 +321,47 @@ def validate_input(size, weight, prop_size, pitch, blades, battery):
             warnings.append("แบตควรอยู่ในช่วง 1S ถึง 8S")
     except Exception:
         warnings.append("แบตรูปแบบผิด (เช่น 3S, 4S, 6S, 8S)")
+
+    # FIX: these five fields used to have ZERO validation — a negative or
+    # absurd motor_kv/motor_count/battery_mAh/payload_g/esc_current_limit_a
+    # would flow straight into RPM, thrust, and ESC-sizing math with no
+    # warning at all (e.g. motor_kv=-500 silently produces negative RPM).
+    if motor_kv is not None:
+        try:
+            mk = float(motor_kv)
+            if mk <= 0 or mk > 30000:
+                warnings.append("Motor KV ควรอยู่ระหว่าง 1–30000")
+        except Exception:
+            warnings.append("Motor KV ต้องเป็นตัวเลข")
+    if motor_count is not None:
+        try:
+            mc = int(motor_count)
+            if mc not in (1, 2, 3, 4, 6, 8):
+                warnings.append("จำนวนมอเตอร์ควรเป็น 1, 2, 3, 4, 6 หรือ 8")
+        except Exception:
+            warnings.append("จำนวนมอเตอร์ต้องเป็นจำนวนเต็ม")
+    if battery_mAh is not None:
+        try:
+            mah = float(battery_mAh)
+            if mah <= 0 or mah > 50000:
+                warnings.append("ความจุแบต (mAh) ควรอยู่ระหว่าง 1–50000")
+        except Exception:
+            warnings.append("ความจุแบต (mAh) ต้องเป็นตัวเลข")
+    if payload_g is not None:
+        try:
+            pg = float(payload_g)
+            if pg < 0 or pg > 5000:
+                warnings.append("น้ำหนักบรรทุกเพิ่ม (payload) ควรอยู่ระหว่าง 0–5000 กรัม")
+        except Exception:
+            warnings.append("น้ำหนักบรรทุกเพิ่ม (payload) ต้องเป็นตัวเลข")
+    if esc_current_limit_a is not None:
+        try:
+            esc_a = float(esc_current_limit_a)
+            if esc_a <= 0 or esc_a > 300:
+                warnings.append("ESC current limit ควรอยู่ระหว่าง 1–300A")
+        except Exception:
+            warnings.append("ESC current limit ต้องเป็นตัวเลข")
+
     return warnings
 
 
@@ -396,10 +447,16 @@ def analyze_drone(size, battery, style, prop_result, weight, detected_class=None
     else:
         analysis["extra_tips"] = ["Long Range — P/D ต่ำ นิ่ง I สูงเพื่อ wind rejection"]
 
-    # ── TWR (rough fallback) ───────────────────────────────────────────
+    # ── TWR (fallback — make_advanced_report overrides this with the
+    # accurate value in the normal path; see thrust_logic.py for why this
+    # fallback itself now uses real thrust data instead of a load score) ──
     try:
-        motor_load = prop_result.get("effect", {}).get("motor_load", 0) if isinstance(prop_result, dict) else 0
-        analysis["thrust_ratio"] = calculate_thrust_weight(motor_load, float(weight))
+        effect = prop_result.get("effect", {}) if isinstance(prop_result, dict) else {}
+        motor_load = effect.get("motor_load", 0)
+        max_thrust_per_motor_g = effect.get("max_thrust_per_motor_g")
+        analysis["thrust_ratio"] = calculate_thrust_weight(
+            motor_load, float(weight),
+            max_thrust_per_motor_g=max_thrust_per_motor_g, motor_count=4)
     except Exception:
         analysis["thrust_ratio"] = 0
 
@@ -499,7 +556,9 @@ def _handle_analysis_post():
     esc_current_limit_a  = p["esc_current_limit_a"]
     preset_key           = p["preset_key"]
 
-    warnings = validate_input(size, weight, prop_size, prop_pitch, blade_count, battery)
+    warnings = validate_input(size, weight, prop_size, prop_pitch, blade_count, battery,
+                               motor_kv=motor_kv, motor_count=motor_count, battery_mAh=battery_mAh,
+                               payload_g=payload_g, esc_current_limit_a=esc_current_limit_a)
 
     try:
         cls_det = detect_class_from_size(size)
@@ -508,10 +567,22 @@ def _handle_analysis_post():
         detected_class, class_meta = "freestyle", {}
 
     try:
-        _cells_int = int(str(battery).upper().replace("S","").strip()) if battery else 4
+        # FIX (critical): this used to do
+        #   int(str(battery).upper().replace("S","").strip())
+        # which raises ValueError on anything except a bare "<N>S" string —
+        # e.g. "4s2p", "6S+", "4S 1500mAh" (all real things people type).
+        # That exception was caught by the `except` below, which discarded
+        # the ENTIRE propeller analysis silently (no warning to the user —
+        # they'd just get a degraded "prop analysis not available" result
+        # while everything else looked like it worked fine). Using the
+        # shared parser here means a weird battery string only affects the
+        # cell-count guess, never blows up the whole propeller calculation.
+        _cells_int = cells_from_battery_string(battery, default=4, lo=1, hi=12)
         prop_result = analyze_propeller(prop_size, prop_pitch, blade_count, style,
                                         motor_kv=motor_kv, cells=_cells_int)
     except Exception:
+        logger.exception("analyze_propeller failed for size=%s pitch=%s blades=%s style=%s",
+                          prop_size, prop_pitch, blade_count, style)
         prop_result = {
             "summary": "prop analysis not available",
             "effect": {"motor_load": 0, "noise": 0, "grip": "unknown",
@@ -523,10 +594,18 @@ def _handle_analysis_post():
     try:
         analysis = analyze_drone(size, battery, style, prop_result, weight, detected_class)
     except Exception:
+        logger.exception("analyze_drone failed for class=%s size=%s weight=%s", detected_class, size, weight)
+        _fallback_pid = {"roll": {"p": 48, "i": 90, "d": 38},
+                          "pitch": {"p": 52, "i": 90, "d": 40},
+                          "yaw": {"p": 40, "i": 90, "d": 0}}
+        _fallback_filter = {"gyro_lpf1": 100, "gyro_lpf2": 200, "dterm_lpf1": 75,
+                             "dyn_notch": 2, "rpm_filter": True, "anti_gravity": 5,
+                             "dyn_notch_min": 80, "dyn_notch_max": 400}
         analysis = {
             "style": style, "weight_class": "unknown", "thrust_ratio": 0,
             "flight_time": 0, "battery_est": 0, "est_flight_time_min": 0,
             "summary": "analysis fallback", "basic_tips": [],
+            "pid": _fallback_pid, "filter": _fallback_filter, "extra_tips": [],
         }
 
     baseline_ctrl  = get_baseline_for_class(detected_class) or {}
@@ -562,29 +641,19 @@ def _handle_analysis_post():
     analysis["class_meta"]       = class_meta
     analysis["baseline_control"] = baseline_ctrl
 
-    adv_block = analysis.get("advanced", {})
-    analysis["esc_recommended_a"]  = adv_block.get("esc_recommended_a")
-    analysis["hover_throttle_pct"] = adv_block.get("hover_throttle_pct")
-    analysis["tip_speed_mps"]      = (adv_block.get("tip_speed_mps") or
-                                       prop_result.get("effect", {}).get("tip_speed_mps"))
-    analysis["rpm_estimated"]      = adv_block.get("rpm_estimated")
-    analysis["c_burst"]            = adv_block.get("c_burst")
-    analysis["c_continuous"]       = adv_block.get("c_continuous")
-    analysis["c_recommended"]      = adv_block.get("c_recommended")
-    analysis["peak_per_motor_a"]   = adv_block.get("peak_per_motor_a")
-    analysis["max_power_total_w"]  = adv_block.get("max_power_total_w")
     analysis.setdefault("style",   style)
     analysis.setdefault("summary", analysis.get("overview", ""))
 
-    if evaluate_rules:
-        try:
-            analysis["rules"] = evaluate_rules(analysis)
-        except Exception:
-            logger.exception("Rule engine error")
-            analysis["rules"] = []
-    else:
-        analysis["rules"] = []
-
+    # ── Advanced analysis runs BEFORE the rule engine now. (FIX — real bug:
+    # evaluate_rules() below reads analysis["advanced"].c_burst /
+    # .esc_recommended_a / .tip_speed_mps / .peak_per_motor_a for its safety
+    # warnings (overloaded battery, undersized ESC, dangerous tip speed).
+    # Those all depend on analysis["advanced"] existing. It used to be
+    # populated AFTER evaluate_rules() already ran, so every one of those
+    # warning checks was silently looking at an empty dict and could never
+    # fire — the safety warnings were effectively dead code in production.) ─
+    _adv_inner: dict = {}
+    _adv_power: dict = {}
     if ADV_ANALYSIS_AVAILABLE:
         try:
             adv = make_advanced_report(
@@ -599,15 +668,37 @@ def _handle_analysis_post():
             )
             if isinstance(adv, dict):
                 analysis.update(adv)
-                _adv_inner = adv.get("advanced", {})
-                adv_power  = _adv_inner.get("power", {})
-                analysis["thrust_ratio"]          = _adv_inner.get("thrust_ratio", analysis.get("thrust_ratio", 0))
-                analysis["est_flight_time_min"]   = adv_power.get("est_flight_time_min", analysis.get("battery_est"))
-                analysis["est_flight_time_min_aggr"] = adv_power.get("est_flight_time_min_aggressive")
-                analysis["esc_recommended_a"]     = _adv_inner.get("esc_recommended_a") or adv_power.get("esc_recommended_a")
-                analysis["peak_per_motor_a"]      = _adv_inner.get("peak_per_motor_a")
+                _adv_inner = adv.get("advanced", {}) or {}
+                _adv_power = _adv_inner.get("power", {}) or {}
         except Exception:
             logger.exception("Advanced analysis error")
+
+    # ── Single flattening step — one source of truth (_adv_inner / _adv_power,
+    # empty dicts if advanced analysis was unavailable or failed, in which
+    # case these correctly fall back to whatever analyze_drone() set). ─────
+    analysis["thrust_ratio"]             = _adv_inner.get("thrust_ratio", analysis.get("thrust_ratio", 0))
+    analysis["est_flight_time_min"]      = _adv_power.get("est_flight_time_min", analysis.get("battery_est"))
+    analysis["est_flight_time_min_aggr"] = _adv_power.get("est_flight_time_min_aggressive")
+    analysis["esc_recommended_a"]        = _adv_inner.get("esc_recommended_a") or _adv_power.get("esc_recommended_a")
+    analysis["hover_throttle_pct"]       = _adv_inner.get("hover_throttle_pct") or _adv_power.get("hover_throttle_pct")
+    analysis["tip_speed_mps"]            = (_adv_inner.get("tip_speed_mps") or
+                                             prop_result.get("effect", {}).get("tip_speed_mps"))
+    analysis["rpm_estimated"]            = _adv_inner.get("rpm_estimated")
+    analysis["c_burst"]                  = _adv_inner.get("c_burst") or _adv_power.get("c_burst")
+    analysis["c_continuous"]             = _adv_inner.get("c_continuous") or _adv_power.get("c_continuous")
+    analysis["c_recommended"]            = _adv_inner.get("c_recommended") or _adv_power.get("c_recommended")
+    analysis["peak_per_motor_a"]         = _adv_inner.get("peak_per_motor_a")
+    analysis["max_power_total_w"]        = _adv_inner.get("max_power_total_w") or _adv_power.get("est_max_power_w")
+
+    # ── Rule engine — now runs AFTER analysis["advanced"] is populated ─────
+    if evaluate_rules:
+        try:
+            analysis["rules"] = evaluate_rules(analysis)
+        except Exception:
+            logger.exception("Rule engine error")
+            analysis["rules"] = []
+    else:
+        analysis["rules"] = []
 
     try:
         ft_detail = estimate_battery_runtime_detail(weight, battery, battery_mAh, style, float(size or 5.0))
