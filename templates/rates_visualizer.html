@@ -251,12 +251,74 @@ canvas#rv{width:100%;display:block;cursor:crosshair;}
 {% include "partials/nav.html" %}
 {% include "partials/page_actions.html" %}
 
+<div class="rv-menu-overlay" id="rvMenu" aria-hidden="true">
+  <div class="rv-menu-panel">
+    <div class="rv-menu-head">
+      <div>
+        <div class="rv-menu-title">MENU</div>
+        <div class="rv-menu-sub">Quick access to the FPV tools used most often in ConfigDoctor.</div>
+      </div>
+      <button class="rv-menu-close" type="button" onclick="toggleMenu(false)" aria-label="Close menu">✕</button>
+    </div>
+    <div class="rv-menu-grid">
+      <div class="rv-menu-group">
+        <div class="rv-menu-sec">Analyze</div>
+        <a class="rv-menu-link" href="/app"><span class="rv-menu-ico">🚀</span><span class="rv-menu-copy"><span class="rv-menu-name">Drone Analyzer</span><span class="rv-menu-meta">Analyze PID · Filter · Motor · Flight time</span></span><span class="rv-menu-badge">core</span></a>
+        <a class="rv-menu-link" href="/blackbox"><span class="rv-menu-ico">📊</span><span class="rv-menu-copy"><span class="rv-menu-name">Blackbox CSV Analyzer</span><span class="rv-menu-meta">Decode logs, oscillation and battery sag</span></span><span class="rv-menu-badge">hot</span></a>
+      </div>
+      <div class="rv-menu-group">
+        <div class="rv-menu-sec">Tuning</div>
+        <a class="rv-menu-link" href="/cli_surgeon"><span class="rv-menu-ico">🩻</span><span class="rv-menu-copy"><span class="rv-menu-name">CLI Surgeon</span><span class="rv-menu-meta">Validate diff all / dump and generate safe CLI</span></span></a>
+        <a class="rv-menu-link" href="/pid-advisor"><span class="rv-menu-ico">🩺</span><span class="rv-menu-copy"><span class="rv-menu-name">PID Advisor</span><span class="rv-menu-meta">Symptom-based PID tuning guidance</span></span></a>
+        <a class="rv-menu-link" href="/rates-visualizer"><span class="rv-menu-ico">📈</span><span class="rv-menu-copy"><span class="rv-menu-name">Rates Visualizer</span><span class="rv-menu-meta">Stick response curves, presets and compare modes</span></span><span class="rv-menu-badge">open</span></a>
+      </div>
+      <div class="rv-menu-group">
+        <div class="rv-menu-sec">Optimize</div>
+        <a class="rv-menu-link" href="/rpm-filter"><span class="rv-menu-ico">⚙️</span><span class="rv-menu-copy"><span class="rv-menu-name">RPM Filter Calculator</span><span class="rv-menu-meta">Harmonics and filter recommendations</span></span></a>
+        <a class="rv-menu-link" href="/motor-prop"><span class="rv-menu-ico">🧭</span><span class="rv-menu-copy"><span class="rv-menu-name">Motor × Prop Recommender</span><span class="rv-menu-meta">Match motors and props to the build</span></span></a>
+        <a class="rv-menu-link" href="/battery-health"><span class="rv-menu-ico">🔋</span><span class="rv-menu-copy"><span class="rv-menu-name">Battery Health</span><span class="rv-menu-meta">Efficiency, sag and safe cell range</span></span></a>
+        <a class="rv-menu-link" href="/motor-thermal"><span class="rv-menu-ico">🌡️</span><span class="rv-menu-copy"><span class="rv-menu-name">Motor Thermal</span><span class="rv-menu-meta">Estimate heat risk under load</span></span></a>
+      </div>
+      <div class="rv-menu-group">
+        <div class="rv-menu-sec">Community</div>
+        <a class="rv-menu-link" href="/landing"><span class="rv-menu-ico">🏠</span><span class="rv-menu-copy"><span class="rv-menu-name">Landing</span><span class="rv-menu-meta">Back to the main platform</span></span></a>
+        <a class="rv-menu-link" href="/about"><span class="rv-menu-ico">ℹ️</span><span class="rv-menu-copy"><span class="rv-menu-name">About</span><span class="rv-menu-meta">Project story and current status</span></span></a>
+        <a class="rv-menu-link" href="/changelog"><span class="rv-menu-ico">🧾</span><span class="rv-menu-copy"><span class="rv-menu-name">Changelog</span><span class="rv-menu-meta">Version history and release notes</span></span></a>
+        <a class="rv-menu-link" href="/team"><span class="rv-menu-ico">👥</span><span class="rv-menu-copy"><span class="rv-menu-name">Team</span><span class="rv-menu-meta">Creators and AI partners</span></span></a>
+      </div>
+    </div>
+    <div class="rv-menu-footer">
+      <a class="rv-chip" href="/app">🚀 Start Analysis</a>
+      <a class="rv-chip" href="/blackbox">📊 Blackbox</a>
+      <a class="rv-chip" href="/cli_surgeon">🩻 CLI</a>
+    </div>
+  </div>
+</div>
+
 <div class="wrap" style="padding-top:76px;">
+  <div class="rv-topbar">
+    <div class="rv-topbar-left">
+      <a class="rv-topbar-btn" href="/landing" aria-label="Back to landing">BACK</a>
+      <div class="rv-topbar-brand">
+        <div class="rv-topbar-eyebrow">ConfigDoctor · Flight Computer</div>
+        <div class="rv-topbar-title">Rates <em>Visualizer</em></div>
+        <div class="rv-topbar-sub">Precision curve lab for ACTUAL, BF legacy and KISS tuning</div>
+      </div>
+    </div>
+    <div class="rv-topbar-right">
+      <div class="rv-topbar-chip">v5.4 Smart Curve</div>
+      <button class="rv-topbar-btn menu" type="button" onclick="toggleMenu(true)" aria-label="Open menu">
+        <span class="rv-dot"></span>
+        MENU
+      </button>
+    </div>
+  </div>
+
 
   <div class="hero">
     <div class="hero-ey"><span class="hdot"></span> FPV FLIGHT COMPUTER</div>
     <h1>Stick Response <em>Visualizer</em></h1>
-    <p class="hero-sub">ปรับ slider เห็น curve ทันที · แยก Roll / Pitch / Yaw · Import จาก CLI Paste · Copy CLI ออกได้เลย</p>
+    <p class="hero-sub">ปรับสไลด์แล้วเห็น curve แบบเรียลไทม์ · แยก Roll / Pitch / Yaw · รองรับ CLI Paste, Ghost compare และ preset อัตโนมัติ</p>
     <div class="htags">
       <span class="htag r">ACTUAL</span>
       <span class="htag p">BETAFLIGHT</span>
@@ -379,6 +441,32 @@ canvas#rv{width:100%;display:block;cursor:crosshair;}
           <div class="pbar">
             <div class="ptrack"><div class="pneedle" id="pneedle" style="left:50%"></div></div>
             <div class="plabel" id="plabel">Balanced</div>
+          </div>
+
+          <div class="intel-card">
+            <div class="intel-head">
+              <div class="intel-title">Rate Intelligence</div>
+              <div class="intel-score" id="intelScore">0%</div>
+            </div>
+            <div class="intel-main">
+              <div class="intel-pill">
+                <div class="intel-pill-lbl">Detected Style</div>
+                <div class="intel-pill-val" id="intelStyle">Balanced</div>
+              </div>
+              <div class="intel-pill">
+                <div class="intel-pill-lbl">Curve Shape</div>
+                <div class="intel-pill-val" id="intelShape">Comfort</div>
+              </div>
+              <div class="intel-pill">
+                <div class="intel-pill-lbl">Center Rate</div>
+                <div class="intel-pill-val" id="intelCenter">—</div>
+              </div>
+              <div class="intel-pill">
+                <div class="intel-pill-lbl">Top Rate</div>
+                <div class="intel-pill-val" id="intelMax">—</div>
+              </div>
+            </div>
+            <div class="intel-desc" id="intelDesc">Adjust sliders to see a smart recommendation for your current axis.</div>
           </div>
         </div>
 
@@ -581,27 +669,112 @@ const profiles = {
 const COL = {roll:'#00e87a',pitch:'#4a9eff',yaw:'#ff9718'};
 const GLW = {roll:'rgba(0,232,122,',pitch:'rgba(74,158,255,',yaw:'rgba(255,151,24,'};
 
+
 /* ── Rate Math ── */
-function actRate(s,rr,sr,er){
-  const e=er>0?s*(1-er)+er*Math.pow(s,3):s;
-  return Math.min(rr*200*e/Math.max(1e-5,1-sr*e),1998);
+const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+
+function expoBlend(x, expo){
+  const t = clamp(x, 0, 1);
+  const e = clamp(expo, 0, 1);
+  const smooth = t * t * (3 - 2 * t);
+  return e * smooth + (1 - e) * t;
 }
-function bfRate(s,rr,sr,er){
-  const e=er>0?s*(1-er)+er*Math.pow(s,3):s;
-  const b=rr>1?(rr-1)+rr*rr:rr;
-  return Math.min(b*e*500/Math.max(1e-5,1-sr*e),1998);
+
+function getAxisConfig(ax){
+  return profiles[ax] || profiles.roll;
 }
-function ksRate(s,r,a){return r*s+a*Math.pow(s,3)*1998;}
+
+function actualCenterDeg(cfg){ return cfg.rr * 100; }
+function actualMaxDeg(cfg){ return clamp(actualCenterDeg(cfg) * (1 + cfg.sr * 7.0), actualCenterDeg(cfg), 1998); }
+
+function legacyCenterDeg(cfg){ return cfg.br * 100; }
+function legacyMaxDeg(cfg){
+  // Legacy BF is a touch more aggressive than ACTUAL at the same slider values.
+  return clamp(legacyCenterDeg(cfg) * (1 + cfg.bs * 7.6 + cfg.br * 0.15), legacyCenterDeg(cfg), 1998);
+}
+
+function kissCenterDeg(cfg){ return cfg.kr; }
+function kissMaxDeg(cfg){
+  return clamp(cfg.kr + cfg.ka * 2200, cfg.kr, 1998);
+}
+
+function actualRateAt(s, cfg){
+  const x = clamp(Math.abs(s), 0, 1);
+  const center = actualCenterDeg(cfg);
+  const max = actualMaxDeg(cfg);
+  const shaped = expoBlend(x, cfg.er);
+  const rate = center * x + (max - center) * Math.pow(shaped, 1.65);
+  return Math.min(max, rate) * Math.sign(s || 1);
+}
+
+function legacyRateAt(s, cfg){
+  const x = clamp(Math.abs(s), 0, 1);
+  const center = legacyCenterDeg(cfg);
+  const max = legacyMaxDeg(cfg);
+  const shaped = expoBlend(x, cfg.be);
+  const rate = center * x + (max - center) * Math.pow(shaped, 1.55);
+  return Math.min(max, rate) * Math.sign(s || 1);
+}
+
+function kissRateAt(s, cfg){
+  const x = clamp(Math.abs(s), 0, 1);
+  const center = kissCenterDeg(cfg);
+  const max = kissMaxDeg(cfg);
+  const shaped = expoBlend(x, clamp(cfg.ka * 2.4, 0, 1));
+  const rate = center * x + (max - center) * Math.pow(shaped, 1.45);
+  return Math.min(max, rate) * Math.sign(s || 1);
+}
 
 function getAxisRate(ax,s){
-  const p=profiles[ax];
-  if(rt==='actual') return actRate(s,p.rr,p.sr,p.er);
-  if(rt==='bf')     return bfRate(s,p.br,p.bs,p.be);
-  return ksRate(s,p.kr,p.ka);
+  const cfg = getAxisConfig(ax);
+  if(rt==='actual') return actualRateAt(s,cfg);
+  if(rt==='bf')     return legacyRateAt(s,cfg);
+  return kissRateAt(s,cfg);
 }
 function getRate(s){return getAxisRate(curAx,s);}
 
+function getAxisSnapshot(ax){
+  const cfg = getAxisConfig(ax);
+  const mode = rt;
+  const centerDeg = mode==='actual' ? actualCenterDeg(cfg) : mode==='bf' ? legacyCenterDeg(cfg) : kissCenterDeg(cfg);
+  const maxDeg = mode==='actual' ? actualMaxDeg(cfg) : mode==='bf' ? legacyMaxDeg(cfg) : kissMaxDeg(cfg);
+  const mid = getAxisRate(ax, 0.5);
+  const q1 = getAxisRate(ax, 0.25);
+  const q3 = getAxisRate(ax, 0.75);
+  const centerSlope = getAxisRate(ax, 0.08) / 0.08;
+  const shape = clamp((maxDeg - mid) / Math.max(maxDeg, 1) * 100, 0, 100);
+  const expoVal = mode==='kiss' ? cfg.ka : mode==='actual' ? cfg.er : cfg.be;
+  return {cfg, centerDeg, maxDeg, mid, q1, q3, centerSlope, shape, expoVal};
+}
+
+function classifyRate(snapshot){
+  const { maxDeg, expoVal, centerSlope } = snapshot;
+  let style = 'Balanced';
+  if(maxDeg < 330) style = 'Cinematic';
+  else if(maxDeg < 480) style = 'Smooth';
+  else if(maxDeg < 720) style = 'Balanced';
+  else if(maxDeg < 980) style = 'Freestyle';
+  else style = 'Race';
+
+  let curve = 'Comfort';
+  if(expoVal <= 0.08) curve = 'Direct';
+  else if(expoVal <= 0.22) curve = 'Comfort';
+  else if(expoVal <= 0.38) curve = 'Soft center';
+  else curve = 'Very soft';
+
+  const target = style==='Cinematic' ? 280 : style==='Smooth' ? 420 : style==='Balanced' ? 600 : style==='Freestyle' ? 840 : 1100;
+  const expoTarget = style==='Cinematic' ? 0.34 : style==='Smooth' ? 0.24 : style==='Balanced' ? 0.18 : style==='Freestyle' ? 0.12 : 0.06;
+  const shapeScore = clamp(100 - Math.abs(maxDeg - target) / 12 - Math.abs(expoVal - expoTarget) * 70, 58, 99);
+  let advice = 'ค่าโดยรวมสมดุล';
+  if(maxDeg < target - 90) advice = 'เพิ่ม Super Rate ทีละ 0.05 เพื่อให้ปลาย stick มาไวขึ้น';
+  else if(maxDeg > target + 120) advice = 'ลด Super Rate ทีละ 0.05 ถ้ารู้สึกว่าปลาย stick แรงเกินไป';
+  else if(expoVal > 0.32) advice = 'Expo ค่อนข้างสูง ลองลดทีละ 0.05 ถ้าอยากได้คมขึ้น';
+  else if(expoVal < 0.08) advice = 'Curve ค่อนข้างตรง เหมาะ race หรือผู้บินที่คุมละเอียด';
+  return {style, curve, target, advice, score:Math.round(shapeScore)};
+}
+
 /* ── setAxis ── */
+
 function setAxis(ax){
   saveSl(); curAx=ax; loadSl(ax);
   document.querySelectorAll('.atab').forEach(t=>t.classList.toggle('on',t.dataset.a===ax));
@@ -642,12 +815,16 @@ function update(){
     const r=profiles.roll;
     Object.assign(profiles.pitch,{rr:r.rr,sr:r.sr,er:r.er,br:r.br,bs:r.bs,be:r.be,kr:r.kr,ka:r.ka});
   }
-  updateLabels(); updateStats(); updatePersonality(); updateCLI(); draw();
+  updateLabels();
+  updateStats();
+  updateIntelligence();
+  updateCLI();
+  draw();
 }
 
 function updateLabels(){
   const p=profiles[curAx];
-  const f=(id,v,dp=2)=>{const el=document.getElementById(id);if(el)el.textContent=parseFloat(v).toFixed(dp);};
+  const f=(id,v,dp=2)=>{const el=document.getElementById(id);if(el)el.textContent=Number(v).toFixed(dp);};
   f('vr',p.rr);f('vs',p.sr);f('ve',p.er);
   f('vbr',p.br);f('vbs',p.bs);f('vbe',p.be);
   f('vkr',p.kr,0);f('vka',p.ka);
@@ -657,50 +834,62 @@ function updateStats(){
   const s=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
   s('smax',Math.round(getRate(1.0)));
   s('shalf',Math.round(getRate(0.5)));
-  s('sctr',Math.round(getRate(0.04)));
+  s('sctr',Math.round(getRate(0.08)));
 }
 
-function updatePersonality(){
-  const mx=getRate(1.0);
-  const lbls=['Cinematic','Smooth','Beginner','Balanced','Freestyle','Aggressive','Race'];
-  const thr=[200,320,420,540,680,860];
-  const idx=Math.min(thr.filter(t=>mx>t).length,lbls.length-1);
-  document.getElementById('pneedle').style.left=Math.min((mx/1200)*100,100)+'%';
-  document.getElementById('plabel').textContent=lbls[idx];
+function updateIntelligence(){
+  const snap = getAxisSnapshot(curAx);
+  const info = classifyRate(snap);
+  const center = Math.round(snap.centerDeg);
+  const max = Math.round(snap.maxDeg);
+  const mid = Math.round(snap.mid);
+  const q1 = Math.round(snap.q1);
+  const q3 = Math.round(snap.q3);
+  const needlePct = clamp((snap.maxDeg / 1200) * 100, 0, 100);
+  document.getElementById('pneedle').style.left = needlePct + '%';
+  document.getElementById('plabel').textContent = info.style;
+  document.getElementById('intelScore').textContent = info.score + '%';
+  document.getElementById('intelStyle').innerHTML = `<span>${info.style}</span>`;
+  document.getElementById('intelShape').textContent = info.curve;
+  document.getElementById('intelCenter').textContent = center + ' deg/s';
+  document.getElementById('intelMax').textContent = max + ' deg/s';
+  document.getElementById('intelDesc').innerHTML = `<strong>${curAx.toUpperCase()}</strong> · 25% ${q1} · 50% ${mid} · 75% ${q3}<br><span class="intel-pick">${info.advice}</span>`;
 }
 
 function updateCLI(){
   saveSl();
-  const f=v=>String(Math.round(parseFloat(v)*100));
-  const fk=v=>String(Math.round(parseFloat(v)));
+  const uiToCliCenter = v => String(Math.round(parseFloat(v) * 10));
+  const uiToCliPercent = v => String(Math.round(parseFloat(v) * 100));
+  const uiToCliInt = v => String(Math.round(parseFloat(v)));
   let lines=[];
-  if(rt==='actual'){
-    lines=['# OBIXConfig — ACTUAL Rates','set rates_type = ACTUAL',''];
+  const snap = getAxisSnapshot(curAx);
+  lines.push(`# OBIXConfig — ${rt.toUpperCase()} Rates`);
+  lines.push(`# ${curAx.toUpperCase()} · center ${Math.round(snap.centerDeg)} deg/s · max ${Math.round(snap.maxDeg)} deg/s`);
+  lines.push('');
+
+  if(rt==='actual' || rt==='bf'){
+    lines.push(`set rates_type = ${rt==='actual' ? 'ACTUAL' : 'BETAFLIGHT'}`);
+    lines.push('');
     for(const ax of ['roll','pitch','yaw']){
       const p=profiles[ax];
       lines.push(`# ${ax.toUpperCase()}`);
-      lines.push(`set ${ax}_rc_rate    = ${f(p.rr)}`);
-      lines.push(`set ${ax}_super_rate = ${f(p.sr)}`);
-      lines.push(`set ${ax}_expo       = ${f(p.er)}`);
-    }
-  }else if(rt==='bf'){
-    lines=['# OBIXConfig — BETAFLIGHT Rates','set rates_type = BETAFLIGHT',''];
-    for(const ax of ['roll','pitch','yaw']){
-      const p=profiles[ax];
-      lines.push(`# ${ax.toUpperCase()}`);
-      lines.push(`set ${ax}_rc_rate    = ${f(p.br)}`);
-      lines.push(`set ${ax}_super_rate = ${f(p.bs)}`);
-      lines.push(`set ${ax}_expo       = ${f(p.be)}`);
+      lines.push(`set ${ax}_rc_rate    = ${uiToCliCenter(rt==='actual' ? p.rr : p.br)}`);
+      lines.push(`set ${ax}_super_rate = ${uiToCliPercent(rt==='actual' ? p.sr : p.bs)}`);
+      lines.push(`set ${ax}_expo       = ${uiToCliPercent(rt==='actual' ? p.er : p.be)}`);
+      lines.push('');
     }
   }else{
-    lines=['# OBIXConfig — KISS Rates','set rates_type = KISS',''];
+    lines.push('set rates_type = KISS');
+    lines.push('');
     for(const ax of ['roll','pitch','yaw']){
       const p=profiles[ax];
-      lines.push(`set ${ax}_rc_rate    = ${fk(p.kr)}`);
-      lines.push(`set ${ax}_super_rate = ${f(p.ka)}`);
+      lines.push(`# ${ax.toUpperCase()}`);
+      lines.push(`set ${ax}_rc_rate    = ${uiToCliInt(p.kr)}`);
+      lines.push(`set ${ax}_super_rate = ${uiToCliPercent(p.ka)}`);
+      lines.push('');
     }
   }
-  lines.push('','save');
+  lines.push('save');
   document.getElementById('cliout').textContent=lines.join('\n');
 }
 
@@ -713,19 +902,33 @@ function copyCLI(){
 function parseCLI(){
   const raw=document.getElementById('impta').value;
   if(!raw.trim()){toast('⚠️ ยังไม่ได้วาง CLI');return;}
-  const g=k=>{const m=raw.match(new RegExp('set\\s+'+k+'\\s*=\\s*([\\d.]+)','i'));return m?parseFloat(m[1]):null;};
+  const g=k=>{
+    const m=raw.match(new RegExp('set\\s+'+k+'\\s*=\\s*([\\d.]+)','i'));
+    return m?parseFloat(m[1]):null;
+  };
   const tm=raw.match(/set\s+rates_type\s*=\s*(\w+)/i);
-  if(tm)setRT(tm[1].toLowerCase().replace('betaflight','bf'));
+  if(tm){
+    const t=tm[1].toLowerCase();
+    if(t.includes('act')) setRT('actual');
+    else if(t.includes('kiss')) setRT('kiss');
+    else setRT('bf');
+  }
+
   for(const ax of['roll','pitch','yaw']){
     const p=profiles[ax];
-    const rc=g(`${ax}_rc_rate`),sr=g(`${ax}_super_rate`),ex=g(`${ax}_expo`);
+    const rc=g(`${ax}_rc_rate`), sr=g(`${ax}_super_rate`) ?? g(`${ax}_srate`), ex=g(`${ax}_expo`);
     if(rc!==null){
-      if(rt==='actual'){p.rr=rc/100;p.sr=(sr||0)/100;p.er=(ex||0)/100;}
-      else if(rt==='bf'){p.br=rc/100;p.bs=(sr||0)/100;p.be=(ex||0)/100;}
-      else{p.kr=rc;p.ka=(sr||0)/100;}
+      if(rt==='actual'){
+        p.rr=rc/10; p.sr=(sr||0)/100; p.er=(ex||0)/100;
+      }else if(rt==='bf'){
+        p.br=rc/10; p.bs=(sr||0)/100; p.be=(ex||0)/100;
+      }else{
+        p.kr=rc; p.ka=(sr||0)/100;
+      }
     }
   }
-  loadSl(curAx);update();
+  loadSl(curAx);
+  update();
   document.getElementById('impta').value='';
   toast('✅ โหลด Rates สำเร็จ');
 }
@@ -773,7 +976,8 @@ function draw(){
   const cv=document.getElementById('rv');if(!cv)return;
   const rc=cv.getBoundingClientRect();
   const W=Math.max(Math.round(rc.width),300);
-  const H=Math.round(W*0.60);
+  const precision = true;
+  const H=Math.round(W*(precision ? 0.64 : 0.60));
   cv.width=W;cv.height=H;
   const ctx=cv.getContext('2d');
   const PL=50,PR=16,PT=16,PB=42;
@@ -798,7 +1002,7 @@ function draw(){
   // Grid
   ctx.strokeStyle='rgba(255,255,255,0.032)';ctx.lineWidth=1;
   for(let i=1;i<=10;i++){ctx.beginPath();ctx.moveTo(tx(i/10),PT);ctx.lineTo(tx(i/10),H-PB);ctx.stroke();}
-  for(let i=1;i<=8;i++){ctx.beginPath();ctx.moveTo(PL,ty(maxR*i/8));ctx.lineTo(W-PR,ty(maxR*i/8));ctx.stroke();}
+  for(let i=1;i<=10;i++){ctx.beginPath();ctx.moveTo(PL,ty(maxR*i/10));ctx.lineTo(W-PR,ty(maxR*i/10));ctx.stroke();}
 
   // Axes
   ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=1.5;
@@ -895,16 +1099,32 @@ CV.addEventListener('mousemove',e=>{
   const W=CV.width,PL=50;
   const raw=(e.clientX-rc.left)*(W/rc.width);
   const s=Math.max(0,Math.min(1,(raw-PL)/(W-PL-16)));
-  document.getElementById('tts').textContent=`Stick: ${Math.round(s*100)}%`;
+  const snap=getAxisSnapshot(curAx);
+  document.getElementById('tts').textContent=`Stick: ${Math.round(s*100)}% · ${curAx.toUpperCase()}`;
   document.getElementById('ttv').textContent=`${Math.round(getRate(s))} deg/s`;
   document.getElementById('ttv').style.color=COL[curAx];
   TIP.style.display='block';
   let lx=e.clientX-rc.left+14,ly=e.clientY-rc.top-44;
-  if(lx+150>rc.width)lx-=165;
+  if(lx+170>rc.width)lx-=185;
   TIP.style.left=lx+'px';TIP.style.top=ly+'px';
 });
 CV.addEventListener('mouseleave',()=>{TIP.style.display='none';});
 
+
+function toggleMenu(open){
+  const el=document.getElementById('rvMenu');
+  if(!el) return;
+  const shouldOpen = typeof open === 'boolean' ? open : !el.classList.contains('open');
+  el.classList.toggle('open', shouldOpen);
+  el.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
+  document.body.style.overflow = shouldOpen ? 'hidden' : '';
+}
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape') toggleMenu(false);
+});
+document.getElementById('rvMenu')?.addEventListener('click', e=>{
+  if(e.target.id === 'rvMenu') toggleMenu(false);
+});
 /* ── Guide accordion ── */
 function tog(id){document.getElementById('g-'+id).classList.toggle('open');}
 
@@ -919,7 +1139,12 @@ function toast(msg){
 let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(draw,80);});
 
 /* ── Init ── */
-window.addEventListener('load',()=>setTimeout(()=>{loadSl('roll');update();},60));
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    loadSl('roll');
+    update();
+  },60);
+});
 </script>
 {% include "partials/footer_nav.html" %}
 </body>
