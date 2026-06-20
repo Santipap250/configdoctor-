@@ -45,6 +45,217 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opac
 
 .page-wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 16px 90px}
 
+/* ── TOP COMMAND DECK ── */
+.bb-topdeck{
+  position:relative;
+  z-index:1;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  flex-wrap:wrap;
+  margin:12px 0 18px;
+  padding:14px 16px;
+  background:
+    linear-gradient(180deg, rgba(8,13,22,.82), rgba(5,8,14,.90));
+  border:1px solid rgba(0,229,255,.12);
+  border-radius:22px;
+  box-shadow:
+    0 18px 46px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.03);
+  backdrop-filter:blur(18px) saturate(1.15);
+  overflow:hidden;
+}
+.bb-topdeck::before{
+  content:'';
+  position:absolute;
+  inset:-2px;
+  background:
+    radial-gradient(circle at 14% 18%, rgba(0,229,255,.12), transparent 24%),
+    radial-gradient(circle at 86% 12%, rgba(255,176,32,.10), transparent 22%),
+    linear-gradient(90deg, transparent 0%, rgba(0,229,255,.06) 50%, transparent 100%);
+  opacity:.9;
+  pointer-events:none;
+}
+.bb-topdeck::after{
+  content:'';
+  position:absolute;
+  left:-18%;
+  top:-30%;
+  width:48%;
+  height:180%;
+  background:linear-gradient(110deg, transparent 35%, rgba(255,255,255,.08) 50%, transparent 65%);
+  transform:skewX(-18deg);
+  animation:deckSweep 8s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes deckSweep{
+  0%, 70% { transform:translateX(-12%) skewX(-18deg); opacity:0; }
+  78% { opacity:.7; }
+  100% { transform:translateX(250%) skewX(-18deg); opacity:0; }
+}
+.bb-topdeck-copy{
+  position:relative;
+  z-index:1;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width:0;
+}
+.bb-topdeck-kicker{
+  font-family:var(--fd);
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--am);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  white-space:nowrap;
+}
+.bb-topdeck-kicker::before{
+  content:'';
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--am);
+  box-shadow:0 0 10px rgba(255,176,32,.55);
+}
+.bb-topdeck-title{
+  font-family:var(--ft);
+  font-size:clamp(18px,3vw,24px);
+  font-weight:900;
+  line-height:1.05;
+  color:#f1f8ff;
+  letter-spacing:-.01em;
+}
+.bb-topdeck-sub{
+  font-size:12px;
+  color:var(--t2);
+  line-height:1.55;
+  max-width:560px;
+}
+.bb-topdeck-actions{
+  position:relative;
+  z-index:1;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-left:auto;
+}
+.bb-top-btn{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  min-height:46px;
+  padding:10px 15px;
+  border-radius:15px;
+  text-decoration:none;
+  border:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(180deg, rgba(10,15,24,.88), rgba(7,10,16,.76));
+  color:#e7f2ff;
+  font-family:var(--fd);
+  font-size:9.5px;
+  font-weight:700;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  transition:transform .2s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
+  overflow:hidden;
+}
+.bb-top-btn::before{
+  content:'';
+  position:absolute;
+  inset:-26% -14%;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(0,229,255,.16) 0 10%, transparent 11% 100%),
+    radial-gradient(circle at 74% 34%, rgba(255,176,32,.12) 0 9%, transparent 10% 100%);
+  filter:blur(8px);
+  opacity:.7;
+  animation:btnMist 6s ease-in-out infinite alternate;
+  pointer-events:none;
+}
+.bb-top-btn::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(110deg, transparent 18%, rgba(255,255,255,.14) 40%, transparent 62%);
+  transform:translateX(-120%);
+  transition:transform .55s ease;
+  pointer-events:none;
+}
+.bb-top-btn:hover::after{transform:translateX(140%)}
+.bb-top-btn:hover{
+  transform:translateY(-2px);
+  border-color:rgba(0,229,255,.26);
+  box-shadow:0 12px 28px rgba(0,0,0,.22), 0 0 18px rgba(0,229,255,.08);
+  background:linear-gradient(180deg, rgba(11,18,28,.96), rgba(6,10,16,.84));
+}
+.bb-top-btn:active{transform:translateY(1px) scale(.985)}
+.bb-top-btn--accent{
+  border-color:rgba(0,229,255,.24);
+  background:linear-gradient(135deg, rgba(0,229,255,.16), rgba(255,176,32,.12));
+  color:#f6fbff;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.03) inset,
+    0 10px 24px rgba(0,229,255,.10),
+    0 0 26px rgba(255,176,32,.08);
+}
+.bb-top-btn--accent:hover{
+  border-color:rgba(0,229,255,.40);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.04) inset,
+    0 14px 32px rgba(0,229,255,.12),
+    0 0 30px rgba(255,176,32,.10);
+}
+.bb-top-btn-ic{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:18px;
+  height:18px;
+  flex-shrink:0;
+  font-size:14px;
+  line-height:1;
+  position:relative;
+  z-index:1;
+}
+.bb-top-btn-label{position:relative;z-index:1}
+
+@media(max-width:760px){
+  .bb-topdeck{
+    align-items:flex-start;
+    padding:14px;
+    border-radius:20px;
+  }
+  .bb-topdeck-actions{
+    width:100%;
+    justify-content:flex-start;
+  }
+  .bb-top-btn{
+    flex:1 1 calc(50% - 5px);
+    justify-content:center;
+    min-height:44px;
+    padding:10px 12px;
+    font-size:9px;
+  }
+  .bb-topdeck-title{font-size:18px}
+  .bb-topdeck-sub{font-size:11px}
+}
+@media(max-width:480px){
+  .bb-topdeck-actions{
+    gap:8px;
+  }
+  .bb-top-btn{
+    flex:1 1 100%;
+  }
+  .bb-topdeck-copy{gap:4px}
+}
+
+
 /* ── HERO ── */
 .hero{padding:46px 0 36px;display:flex;flex-direction:column;align-items:flex-start;gap:14px}
 .hero-eyebrow{font-family:var(--fd);font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
@@ -275,7 +486,30 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opac
 <div class="bb-grid" aria-hidden="true"></div>
 
 {% include "partials/nav.html" %}
-{% include "partials/page_actions.html" %}
+
+<div class="bb-topdeck" id="bbTopDeck">
+  <div class="bb-topdeck-copy">
+    <div class="bb-topdeck-kicker">BLACKBOX RECOVERY CONSOLE</div>
+    <div class="bb-topdeck-title">Flight Data Forensics</div>
+    <div class="bb-topdeck-sub">ศูนย์ควบคุมสำหรับกู้ข้อมูลบิน, วิเคราะห์อาการสั่น, motor balance, battery sag และสร้างคำแนะนำแบบล้ำสมัยในมุมมองเดียว</div>
+  </div>
+
+  <div class="bb-topdeck-actions">
+    <a class="bb-top-btn" href="/landing" aria-label="กลับหน้า landing">
+      <span class="bb-top-btn-ic">↩</span><span class="bb-top-btn-label">Back</span>
+    </a>
+    <a class="bb-top-btn" href="/" aria-label="ไปหน้าแรก">
+      <span class="bb-top-btn-ic">⌂</span><span class="bb-top-btn-label">Home</span>
+    </a>
+    <a class="bb-top-btn" href="/app" aria-label="เปิด Drone Analyzer">
+      <span class="bb-top-btn-ic">🚁</span><span class="bb-top-btn-label">Drone Analyzer</span>
+    </a>
+    <a class="bb-top-btn bb-top-btn--accent" href="#uploadZone" aria-label="ไปส่วนอัปโหลด CSV">
+      <span class="bb-top-btn-ic">⤓</span><span class="bb-top-btn-label">Upload CSV</span>
+    </a>
+  </div>
+</div>
+
 
 <div class="page-wrap">
 
