@@ -379,10 +379,14 @@ def classify_weight(size, weight):
 # ═════════════════════════════════════════════════════════════════════════
 # Core analysis — now class+style aware
 # ═════════════════════════════════════════════════════════════════════════
-def analyze_drone(size, battery, style, prop_result, weight, detected_class=None):
+def analyze_drone(size, battery, style, prop_result, weight, detected_class=None, motor_kv=None):
     """
     Generate analysis dict. Uses detected_class + style for accurate PID/filter.
     If detected_class is None, falls back to style-only.
+
+    motor_kv (optional): when the user provides it, dyn_notch_min/max are
+    refined from the user's actual motor speed (see rpm_filter_calc.py)
+    instead of a generic per-class static default — see note below.
     """
     analysis = {}
     try:
@@ -437,6 +441,34 @@ def analyze_drone(size, battery, style, prop_result, weight, detected_class=None
     _flt["dterm_lpf1_hz"] = _flt["dterm_lpf1"]
     _flt["dterm_lpf2_hz"] = _flt["dterm_lpf2"]
     _flt["dyn_notch"]     = _flt["dyn_notch_count"]  # short alias
+
+    # ── FIX: personalize dyn_notch range from real motor speed ──────────
+    # Without motor_kv, dyn_notch_min/max above are a flat per-class
+    # default (e.g. every "freestyle" build gets 80-400Hz) regardless of
+    # the user's actual motor/battery — even though calculate_rpm_filter()
+    # already exists in this codebase and computes the real notch range
+    # from KV+cells+prop (previously wired up only for the standalone
+    # /rpm-filter tool, never for the main Drone Analyzer). A 2306KV/4S
+    # build's real 1x fundamental at full throttle is ~473Hz, which the
+    # static 400Hz max would clip — so when motor_kv is available, use
+    # the personalized values instead.
+    if motor_kv:
+        try:
+            mkv = float(motor_kv)
+            if mkv > 0:
+                _rpmf = calculate_rpm_filter(mkv, battery, float(size or 5.0))
+                _rec = _rpmf.get("recommended", {}) if isinstance(_rpmf, dict) else {}
+                if _rec.get("dyn_notch_min"):
+                    _flt["dyn_notch_min"] = _rec["dyn_notch_min"]
+                if _rec.get("dyn_notch_max"):
+                    _flt["dyn_notch_max"] = _rec["dyn_notch_max"]
+                if _rec.get("dyn_notch_count"):
+                    _flt["dyn_notch_count"] = _rec["dyn_notch_count"]
+                    _flt["dyn_notch"] = _rec["dyn_notch_count"]
+                _flt["dyn_notch_source"] = "motor_kv"  # for UI: "personalized" vs "class default"
+        except Exception:
+            logger.exception("rpm-aware dyn_notch refinement failed for kv=%s", motor_kv)
+
     analysis["filter"] = _flt
 
     # ── Style tips ─────────────────────────────────────────────────────
@@ -592,7 +624,7 @@ def _handle_analysis_post():
         }
 
     try:
-        analysis = analyze_drone(size, battery, style, prop_result, weight, detected_class)
+        analysis = analyze_drone(size, battery, style, prop_result, weight, detected_class, motor_kv=motor_kv)
     except Exception:
         logger.exception("analyze_drone failed for class=%s size=%s weight=%s", detected_class, size, weight)
         _fallback_pid = {"roll": {"p": 48, "i": 90, "d": 38},
