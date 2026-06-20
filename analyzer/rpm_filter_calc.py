@@ -38,12 +38,7 @@ _THROTTLE_LEVELS = {
 _HARMONICS = [1, 2, 3, 4]
 
 
-def _cells_from_str(s) -> int:
-    try:
-        c = int(str(s).upper().replace("S", "").strip())
-        return max(2, min(c, 12))
-    except Exception:
-        return 4
+from analyzer.units import cells_from_battery_string
 
 
 def calculate_rpm_filter(kv: int, battery: str, prop_size: float = 5.0) -> Dict[str, Any]:
@@ -62,7 +57,7 @@ def calculate_rpm_filter(kv: int, battery: str, prop_size: float = 5.0) -> Dict[
         warnings:       list of warning strings
         notes:          contextual notes
     """
-    cells = _cells_from_str(battery)
+    cells = cells_from_battery_string(battery, default=4, lo=1, hi=12)
     v_max = cells * _FLIGHT_VOLTAGE_PER_CELL  # FIX v5.1: ใช้ avg flight voltage
 
     # Max unloaded RPM and loaded RPM

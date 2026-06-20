@@ -58,16 +58,7 @@ _STYLE_FACTORS = {
 }
 
 
-def _cells_from_str(s):
-    # FIX: regex handles "4S+", "4s2p", "4S 1500mAh", plain "4", etc.
-    import re as _re
-    try:
-        m = _re.search(r'(\d+)\s*[Ss]', str(s))
-        if m:
-            return max(1, min(int(m.group(1)), 8))
-        return max(1, min(int(str(s).strip()), 8))
-    except Exception:
-        return 4
+from analyzer.units import cells_from_battery_string as _cells_from_str
 
 def _guess_batt_mAh(size_inch, cells):
     keys = sorted(_DEFAULT_BATT_MAH_BY_SIZE.keys())

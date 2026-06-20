@@ -1,5 +1,10 @@
-# analyzer/thrust_logic.py — OBIXConfig Doctor v5.3
+# analyzer/thrust_logic.py — OBIXConfig Doctor v5.4
 # ============================================================
+# v5.4 — use shared analyzer.units cell parser (was a local
+# duplicate that disagreed with 4 other copies elsewhere in the
+# codebase on valid range and supported string formats — see
+# analyzer/units.py for why this was consolidated).
+#
 # v5.3 — SINGLE SOURCE OF TRUTH for W/g hover table
 # Consolidates with advanced_analysis.py — both now use same
 # validated W/g values from Betaflight telemetry + bench data.
@@ -13,6 +18,8 @@
 #   7"/1100g  6S 2200mAh longrange → 16-18 min ✓
 #   10"/1800g 6S 4000mAh longrange → 20+ min   ✓
 # ============================================================
+
+from analyzer.units import cells_from_battery_string
 
 # ─────────────────────────────────────────────────────────────
 # HOVER POWER CONSTANT W/g — unified table (v5.3)
@@ -56,14 +63,6 @@ _STYLE_POWER_FACTOR = {
 }
 
 
-def _cells_from_str(s) -> int:
-    try:
-        c = int(str(s).upper().replace("S", "").strip())
-        return max(1, min(c, 12))
-    except Exception:
-        return 4
-
-
 def _hover_w_per_g(size_inch: float) -> float:
     """Return hover power constant W/g for given prop/frame size."""
     sizes = sorted(_HOVER_W_PER_G.keys())
@@ -91,17 +90,41 @@ def _default_mah_for_size(size_inch: float) -> int:
     return 1500
 
 
-def calculate_thrust_weight(motor_load, weight):
+def calculate_thrust_weight(motor_load, weight, max_thrust_per_motor_g=None, motor_count=4):
     """
-    Rough TWR estimate from motor_load score (0–6).
-    Returns 0.0 if data insufficient.
-    advanced_analysis.py overrides this with accurate data.
+    TWR (thrust-to-weight ratio) fallback estimate.
+
+    FIX (was a real bug): this used to compute TWR as
+    `(motor_load_score / 6.0) * 3.0` — i.e. it rescaled a 0-6 *noise/load
+    score* from prop_logic into a number that LOOKS like a thrust ratio
+    but has no physical relationship to actual thrust or weight at all.
+    A 2-bladed low-pitch prop and a 4-bladed high-pitch prop with
+    identical real thrust could get different "TWR" purely because the
+    load *score* differs — that's a load/noise rating, not a force ratio.
+
+    This path is normally never seen by users: analyzer/advanced_analysis.py
+    computes the real, accurate TWR from actual thrust data and overwrites
+    this value (see app.py _handle_analysis_post). This function only runs
+    as the safety-net fallback if that module fails to import. It should
+    still return a physically meaningful number when it does run, so:
+      - if real thrust data is available (max_thrust_per_motor_g, from
+        analyzer.prop_logic.analyze_propeller), use actual
+        TWR = (max_thrust_per_motor_g * motor_count) / weight_g
+      - otherwise fall back to a coarse estimate from the load score,
+        clearly only as a rough order-of-magnitude placeholder.
     """
     try:
-        w  = float(weight)
-        ml = float(motor_load)
-        if w <= 0 or ml <= 0:
+        w = float(weight)
+        if w <= 0:
             return 0.0
+        if max_thrust_per_motor_g is not None:
+            total_thrust_g = float(max_thrust_per_motor_g) * max(1, int(motor_count or 4))
+            return round(total_thrust_g / w, 2)
+        ml = float(motor_load)
+        if ml <= 0:
+            return 0.0
+        # Coarse placeholder only — see docstring. ~3:1 TWR is a typical
+        # ceiling for a well-built freestyle quad at full motor_load=6.
         return round((ml / 6.0) * 3.0, 2)
     except (TypeError, ValueError, ZeroDivisionError):
         return 0.0
@@ -127,7 +150,7 @@ def estimate_battery_runtime_detail(weight, battery, battery_mAh=None,
     """
     try:
         w     = float(weight)
-        cells = _cells_from_str(battery)
+        cells = cells_from_battery_string(battery, default=4, lo=1, hi=12)
         mAh   = float(battery_mAh) if battery_mAh else _default_mah_for_size(float(size_inch or 5.0))
         size  = float(size_inch or 5.0)
 
