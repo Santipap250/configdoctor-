@@ -56,8 +56,9 @@ body::before{
   transition:background .3s;
 }
 .nav.scrolled{background:rgba(4,8,8,0.96);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,255,68,0.08)}
-.nav-logo{display:flex;align-items:center;text-decoration:none;line-height:0}
-.nav-logo-icon{height:44px;width:auto;max-width:min(320px, 44vw);display:block;object-fit:contain}
+.nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none}
+.nav-logo-icon{width:44px;height:44px}
+.nav-logo-text{}
 .nav-logo-name{font-family:var(--font-t);font-size:22px;font-weight:800;color:#fff;line-height:1}
 .nav-logo-name span{color:var(--g)}
 .nav-logo-sub{font-family:var(--font-d);font-size:7px;letter-spacing:.2em;color:var(--g);margin-top:2px}
@@ -66,11 +67,6 @@ body::before{
 .nav-link:hover{color:#fff;background:rgba(255,255,255,.06)}
 .nav-cta{background:var(--g);color:#000;font-weight:700;font-size:11px;padding:8px 18px;border-radius:8px;text-decoration:none;transition:.15s;margin-left:6px}
 .nav-cta:hover{background:var(--g2);transform:translateY(-1px)}
-
-
-@media(max-width:600px){
-  .nav-logo-icon{height:34px;max-width:min(220px, 48vw)}
-}
 
 .nav-menu-btn{
   display:none; align-items:center; gap:10px; justify-content:center;
@@ -457,9 +453,9 @@ body.no-hero-video .hero-bg-video{display:none;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 .hero-h1{
   font-family:var(--font-t);
-  font-size:clamp(46px,8.4vw,84px);
+  font-size:clamp(38px,6.8vw,72px);
   font-weight:900;
-  line-height:.96;
+  line-height:.98;
   letter-spacing:-.03em;
   color:#fff;
   margin-bottom:18px;
@@ -749,94 +745,6 @@ body.no-hero-video .hero-bg-video{display:none;}
 }
 @keyframes soonPulse{0%,100%{opacity:.7}50%{opacity:1}}
 
-
-/* ── ABOUT / INFO BLOCK ── */
-.hero-about{
-  position:relative;
-  z-index:2;
-  width:min(100%, 720px);
-  margin:14px auto 0;
-  padding:16px 16px 14px;
-  border-radius:18px;
-  border:1px solid rgba(0,255,68,.16);
-  background:
-    linear-gradient(180deg, rgba(7,12,10,.88), rgba(4,8,10,.78));
-  box-shadow:
-    0 18px 40px rgba(0,0,0,.22),
-    inset 0 0 0 1px rgba(255,255,255,.03);
-  backdrop-filter:blur(14px);
-  text-align:center;
-  opacity:0;
-  animation:fadeSlideUp .5s 1.5s forwards;
-}
-.hero-about-head{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  font-family:var(--font-d);
-  font-size:10px;
-  letter-spacing:.22em;
-  text-transform:uppercase;
-  color:var(--g);
-  margin-bottom:10px;
-}
-.hero-about-head::before,
-.hero-about-head::after{
-  content:'';
-  width:18px;
-  height:1px;
-  background:linear-gradient(90deg, transparent, rgba(0,255,68,.8));
-}
-.hero-about-head::after{
-  background:linear-gradient(90deg, rgba(0,255,68,.8), transparent);
-}
-.hero-about-copy{
-  font-size:13px;
-  line-height:1.75;
-  color:rgba(255,255,255,.68);
-  max-width:640px;
-  margin:0 auto 12px;
-}
-.hero-about-grid{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  justify-content:center;
-}
-.hero-about-chip{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  padding:8px 12px;
-  border-radius:999px;
-  border:1px solid rgba(0,255,68,.14);
-  background:rgba(0,255,68,.06);
-  color:#dafbe3;
-  font-size:11px;
-  font-weight:700;
-  line-height:1;
-}
-
-/* tighter spacing for mobile */
-@media(max-width:600px){
-  .hero-about{
-    width:calc(100% - 32px);
-    padding:14px 14px 12px;
-    margin-top:10px;
-  }
-  .hero-about-copy{
-    font-size:12px;
-    line-height:1.7;
-  }
-  .hero-about-grid{
-    gap:6px;
-  }
-  .hero-about-chip{
-    font-size:10px;
-    padding:7px 10px;
-  }
-}
-
 /* ── FEATURE STRIP ── */
 .features{
   position:relative;z-index:2;
@@ -934,6 +842,7 @@ footer{
   .hero-social-btns{flex-direction:column;align-items:flex-start}
   .hero-store-btns{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
   .btn-store{width:100%;pointer-events:none}
+  .hero-h1{font-size:clamp(34px,7.5vw,62px);}
 }
 
 /* ── SCROLL REVEAL UTILITY ── */
@@ -951,11 +860,24 @@ footer{
 
 <!-- NAV -->
 <nav class="nav" id="mainNav">
-  
-  <a href="/landing" class="nav-logo" aria-label="ConfigDoctor Home">
-    <img src="{{ url_for('static', filename='img/configdoctor-landing-logo.png') }}" alt="ConfigDoctor" class="nav-logo-icon">
+  <a href="/landing" class="nav-logo">
+    <svg class="nav-logo-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="44" height="44" rx="10" fill="rgba(0,255,68,0.08)" stroke="rgba(0,255,68,0.25)" stroke-width="1"/>
+      <g stroke="#00ff44" stroke-width="1.8" stroke-linecap="round">
+        <circle cx="22" cy="22" r="5" stroke="#00ff44" stroke-width="1.5"/>
+        <line x1="10" y1="10" x2="17" y2="17"/><line x1="27" y1="17" x2="34" y2="10"/>
+        <line x1="10" y1="34" x2="17" y2="27"/><line x1="27" y1="27" x2="34" y2="34"/>
+        <circle cx="9" cy="9" r="3" fill="rgba(0,255,68,.15)"/>
+        <circle cx="35" cy="9" r="3" fill="rgba(0,255,68,.15)"/>
+        <circle cx="9" cy="35" r="3" fill="rgba(0,255,68,.15)"/>
+        <circle cx="35" cy="35" r="3" fill="rgba(0,255,68,.15)"/>
+      </g>
+    </svg>
+    <div class="nav-logo-text">
+      <div class="nav-logo-name">คอนฟิก <span>ด็อกเตอร์</span></div>
+      <div class="nav-logo-sub">แพลตฟอร์มวินิจฉัยโดรน FPV</div>
+    </div>
   </a>
-
   <div class="nav-menu">
     <a class="nav-link" href="/app">Analyzer</a>
     <a class="nav-link" href="/blackbox">Blackbox</a>
@@ -1313,20 +1235,6 @@ footer{
 
     </div>
   </div>
-
-
-  <section class="hero-about reveal" aria-labelledby="aboutConfigDoctor">
-    <div class="hero-about-head" id="aboutConfigDoctor">เกี่ยวกับ Config Doctor</div>
-    <p class="hero-about-copy">
-      Config Doctor คือแพลตฟอร์มวิเคราะห์โดรน FPV ที่ช่วยอ่านอาการจาก diff all, Blackbox และสเปคของลำบิน
-      เพื่อสรุปผลให้เข้าใจง่าย พร้อมแนวทางจูนที่ปลอดภัยและนำไปใช้ได้จริง
-    </p>
-    <div class="hero-about-grid" role="list" aria-label="คุณสมบัติของเว็บไซต์">
-      <span class="hero-about-chip" role="listitem">วิเคราะห์ PID · Filter · RPM</span>
-      <span class="hero-about-chip" role="listitem">เช็ค Motor · ESC · Battery</span>
-      <span class="hero-about-chip" role="listitem">ใช้งานง่ายบนมือถือ</span>
-    </div>
-  </section>
 
   <!-- Feature strip -->
   <div class="features">
