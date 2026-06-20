@@ -301,7 +301,7 @@ pre::-webkit-scrollbar-thumb{background:rgba(0,255,68,.2);border-radius:2px}
     <div class="ph-sub">กรอกสเปค 5 อย่าง รับค่า CLI ที่แม่นยำ พร้อมคำอธิบาย</div>
   </div>
 
-  <form method="POST" id="aForm">
+  <form method="POST" id="aForm" onsubmit="return onAnalyzeSubmit(this)">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="size"        id="fSz"  value="{{ request.form.get('size','5.0') }}">
     <input type="hidden" name="prop_size"   id="fPr"  value="{{ request.form.get('prop_size','5.0') }}">
@@ -435,8 +435,7 @@ pre::-webkit-scrollbar-thumb{background:rgba(0,255,68,.2);border-radius:2px}
     </details>
 
     <!-- ANALYZE -->
-    <button type="submit" class="bta" id="btnA"
-      onclick="this.disabled=true;this.querySelector('.bta-m').textContent='กำลังวิเคราะห์...';this.querySelector('.bta-s').textContent='คำนวณ Physics + PID + Filter'">
+    <button type="submit" class="bta" id="btnA">
       <span class="bta-ic">🚀</span>
       <div>
         <div class="bta-m">วิเคราะห์ + สร้าง CLI</div>
@@ -825,6 +824,22 @@ window.toast=function(msg){
 };
 
 window.onPreset=window.onPreset||function(){};
+
+/* PATCH: button disable must happen AFTER the browser commits to
+   submitting the form, not inside the button's own click handler —
+   disabling synchronously on click can cancel the submission itself
+   on some mobile browsers (notably Android Chrome/WebView). */
+window.onAnalyzeSubmit=function(form){
+  var btn=g('btnA');
+  if(btn&&!btn.disabled){
+    setTimeout(function(){
+      btn.disabled=true;
+      var m=btn.querySelector('.bta-m');if(m)m.textContent='กำลังวิเคราะห์...';
+      var s=btn.querySelector('.bta-s');if(s)s.textContent='คำนวณ Physics + PID + Filter';
+    },0);
+  }
+  return true;
+};
 
 document.addEventListener('DOMContentLoaded',function(){
   var bs=g('battSel');if(bs)window.syncBp(bs.value||'4S');
