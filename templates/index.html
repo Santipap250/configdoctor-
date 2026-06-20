@@ -315,6 +315,37 @@ pre::-webkit-scrollbar-thumb{background:rgba(0,255,68,.2);border-radius:2px}
 .exp-row-l{color:var(--t2)}
 .exp-row-v{font-family:var(--fm);font-weight:600}
 
+/* ── Support card (shown after a completed analysis) ───────────────── */
+.support-card2{
+  margin-top:14px;padding:18px 18px 16px;border-radius:14px;
+  border:1px solid rgba(255,187,0,.18);
+  background:linear-gradient(165deg,rgba(20,16,4,.55),rgba(8,9,6,.7));
+  box-shadow:0 14px 30px rgba(0,0,0,.22), inset 0 0 0 1px rgba(255,255,255,.02);
+}
+.sc2-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}
+.sc2-emoji{font-size:26px;line-height:1;flex-shrink:0}
+.sc2-title{font-family:var(--fd);font-size:12px;font-weight:800;color:var(--a);letter-spacing:.01em;line-height:1.5}
+.sc2-sub{font-size:11px;color:var(--t2);margin-top:3px;line-height:1.6}
+.sc2-body{font-size:12px;color:var(--t);line-height:1.8;margin-bottom:14px}
+.sc2-grid{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.sc2-qr-col{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0}
+.sc2-qr{width:100px;height:100px;border-radius:10px;border:1px solid var(--bd);object-fit:cover}
+.sc2-qr-label{font-size:9.5px;color:var(--t2);letter-spacing:.04em}
+.sc2-actions{display:flex;flex-direction:column;gap:8px;flex:1;min-width:200px}
+.sc2-btn{display:flex;align-items:center;justify-content:center;gap:6px;
+  min-height:40px;padding:0 14px;border-radius:10px;
+  border:1px solid var(--bd);background:var(--surf);color:var(--t);
+  text-decoration:none;font-family:var(--fd);font-size:10px;font-weight:700;
+  letter-spacing:.04em;text-align:center;transition:.15s}
+.sc2-btn:hover{border-color:rgba(0,255,68,.3);background:rgba(0,255,68,.06)}
+.sc2-btn-primary{border-color:rgba(0,255,68,.25);background:rgba(0,255,68,.08);color:var(--g)}
+.sc2-foot{font-size:10px;color:var(--t3);margin-top:12px;text-align:center;line-height:1.6}
+@media(max-width:480px){
+  .sc2-grid{flex-direction:column}
+  .sc2-qr-col{order:2}
+  .sc2-actions{order:1;width:100%}
+}
+
 /* PID/Filter mini visual (compact, supportive — not the focus) */
 .compact-card{background:var(--surf);border:1px solid var(--bd);border-radius:10px;padding:13px 15px;margin-bottom:16px}
 .cc-head{display:flex;align-items:center;gap:8px;margin-bottom:11px}
@@ -798,6 +829,35 @@ save</pre>
       4. บันทึก Blackbox เพื่อ fine-tune ต่อ
     </div>
   </div>
+</div>
+
+<!-- ── Support card — shown right after a completed analysis, the moment
+     the user has just gotten real value out of the tool. ───────────────── -->
+<div class="support-card2">
+  <div class="sc2-head">
+    <div class="sc2-emoji">☕</div>
+    <div>
+      <div class="sc2-title">ค่าตั้งนี้ช่วยได้จริง? เลี้ยงกาแฟทีมพัฒนาได้นะ</div>
+      <div class="sc2-sub">ConfigDoctor ฟรี 100% ไม่มีโฆษณา ไม่เก็บค่าสมาชิก — ค่าเซิร์ฟเวอร์/โดเมนจ่ายเองทุกเดือน</div>
+    </div>
+  </div>
+  <div class="sc2-body">
+    เครื่องคำนวณ PID + Filter ที่ใช้แล้วนี้ ก็เป็นผลจากเวลาที่ทุ่มลงไปพัฒนาและทดสอบจริงกับโดรนหลายขนาด
+    ถ้าค่าที่ได้ช่วยให้บินดีขึ้นจริง การสนับสนุนเล็กๆน้อยๆ ช่วยให้โปรเจกต์อยู่ต่อและพัฒนาฟีเจอร์ใหม่ๆต่อไปได้
+  </div>
+  <div class="sc2-grid">
+    <div class="sc2-qr-col">
+      <img src="{{ url_for('static', filename='img/support-qr.png') }}" alt="PromptPay QR" class="sc2-qr" onerror="this.parentElement.style.display='none'">
+      <div class="sc2-qr-label">สแกนผ่าน PromptPay</div>
+    </div>
+    <div class="sc2-actions">
+      <a href="https://www.facebook.com/banmysanti/" target="_blank" rel="noopener" class="sc2-btn sc2-btn-primary">
+        💚 OBIX CONFIG LAB — ติดตาม/สนับสนุน
+      </a>
+      <a href="/about#support" class="sc2-btn">ดูช่องทางสนับสนุนอื่นๆ</a>
+    </div>
+  </div>
+  <div class="sc2-foot">ไม่สนับสนุนก็ใช้งานได้เต็มรูปแบบเหมือนเดิม — ใส่ไว้ให้เผื่อใครอยากช่วยจริงๆเท่านั้น 🙏</div>
 </div>
 
 {% endif %}{# /if analysis #}
