@@ -1,10 +1,5 @@
-# analyzer/thrust_logic.py — OBIXConfig Doctor v5.4
+# analyzer/thrust_logic.py — OBIXConfig Doctor v5.3
 # ============================================================
-# v5.4 — use shared analyzer.units cell parser (was a local
-# duplicate that disagreed with 4 other copies elsewhere in the
-# codebase on valid range and supported string formats — see
-# analyzer/units.py for why this was consolidated).
-#
 # v5.3 — SINGLE SOURCE OF TRUTH for W/g hover table
 # Consolidates with advanced_analysis.py — both now use same
 # validated W/g values from Betaflight telemetry + bench data.
@@ -19,26 +14,33 @@
 #   10"/1800g 6S 4000mAh longrange → 20+ min   ✓
 # ============================================================
 
-from analyzer.units import cells_from_battery_string
-
 # ─────────────────────────────────────────────────────────────
-# HOVER POWER CONSTANT W/g — unified table (v5.3)
-# Same values used in advanced_analysis.py (single source)
+# HOVER POWER CONSTANT W/g — unified table (v5.4)
+# SINGLE SOURCE OF TRUTH — advanced_analysis.py imports this table
+# directly (no more duplicate copy) so the two can't drift apart.
+#
+# v5.4 ACCURACY FIX: re-derived against this file's own validation
+# anchors (comments above). Previous table was non-monotonic
+# (5.5"→6.0"→7.0" spiked up then crashed -46%, which has no physical
+# basis — hover induced power should fall smoothly as disk loading
+# improves with size) and under-shot its own stated targets at the
+# extremes (2.5", 7", 10" all predicted longer flight than the
+# validated range). Mid-range (3"-5") already matched and is unchanged.
 # ─────────────────────────────────────────────────────────────
 _HOVER_W_PER_G = {
     # size_inch: W/g at hover throttle
     # (hover = level flight, ~30-50% throttle for typical FPV)
-    2.5:  0.38,   # Tiny whoop — ducted, high RPM, poor disk loading
+    2.5:  0.50,   # Tiny whoop — ducted, high RPM, poor disk loading (was 0.38 — under target)
     3.0:  0.35,   # 3" whoop/toothpick (bench: 550mAh 3S -> 4.5-5 min) — still inefficient
     3.5:  0.24,   # Cinewhoop 3.5"
     4.0:  0.19,   # Mini 4" — improving rapidly
     4.5:  0.17,   # Light 5"
     5.0:  0.155,  # 5" Freestyle sweet spot (bench: ~115W / 750g = 0.153 W/g)
-    5.5:  0.165,  # Heavy 5" (more mass, higher drag)
-    6.0:  0.20,   # 6" Freestyle — larger but aggressive style
-    7.0:  0.108,  # 7" Mid LR — large disk, cruise RPM, very efficient
-    8.0:  0.095,  # 8" LR
-    10.0: 0.085,  # 10" LR — best disk loading
+    5.5:  0.17,   # Heavy 5" (more mass, higher drag) — smoothed vs 6.0 (was 0.165)
+    6.0:  0.20,   # 6" Freestyle — validated against 5-6min bench target
+    7.0:  0.13,   # 7" Mid LR (was 0.108 — undershot its own 16-18min target)
+    8.0:  0.115,  # 8" LR — smooth interpolation point (was 0.095)
+    10.0: 0.105,  # 10" LR — best disk loading (was 0.085 — undershot 20+min target)
 }
 
 _NOMINAL_CELL_V = 3.7     # V/cell for energy calculations
@@ -61,6 +63,14 @@ _STYLE_POWER_FACTOR = {
     "micro":     1.45,
     "whoop":     1.45,
 }
+
+
+def _cells_from_str(s) -> int:
+    try:
+        c = int(str(s).upper().replace("S", "").strip())
+        return max(1, min(c, 12))
+    except Exception:
+        return 4
 
 
 def _hover_w_per_g(size_inch: float) -> float:
@@ -90,41 +100,17 @@ def _default_mah_for_size(size_inch: float) -> int:
     return 1500
 
 
-def calculate_thrust_weight(motor_load, weight, max_thrust_per_motor_g=None, motor_count=4):
+def calculate_thrust_weight(motor_load, weight):
     """
-    TWR (thrust-to-weight ratio) fallback estimate.
-
-    FIX (was a real bug): this used to compute TWR as
-    `(motor_load_score / 6.0) * 3.0` — i.e. it rescaled a 0-6 *noise/load
-    score* from prop_logic into a number that LOOKS like a thrust ratio
-    but has no physical relationship to actual thrust or weight at all.
-    A 2-bladed low-pitch prop and a 4-bladed high-pitch prop with
-    identical real thrust could get different "TWR" purely because the
-    load *score* differs — that's a load/noise rating, not a force ratio.
-
-    This path is normally never seen by users: analyzer/advanced_analysis.py
-    computes the real, accurate TWR from actual thrust data and overwrites
-    this value (see app.py _handle_analysis_post). This function only runs
-    as the safety-net fallback if that module fails to import. It should
-    still return a physically meaningful number when it does run, so:
-      - if real thrust data is available (max_thrust_per_motor_g, from
-        analyzer.prop_logic.analyze_propeller), use actual
-        TWR = (max_thrust_per_motor_g * motor_count) / weight_g
-      - otherwise fall back to a coarse estimate from the load score,
-        clearly only as a rough order-of-magnitude placeholder.
+    Rough TWR estimate from motor_load score (0–6).
+    Returns 0.0 if data insufficient.
+    advanced_analysis.py overrides this with accurate data.
     """
     try:
-        w = float(weight)
-        if w <= 0:
-            return 0.0
-        if max_thrust_per_motor_g is not None:
-            total_thrust_g = float(max_thrust_per_motor_g) * max(1, int(motor_count or 4))
-            return round(total_thrust_g / w, 2)
+        w  = float(weight)
         ml = float(motor_load)
-        if ml <= 0:
+        if w <= 0 or ml <= 0:
             return 0.0
-        # Coarse placeholder only — see docstring. ~3:1 TWR is a typical
-        # ceiling for a well-built freestyle quad at full motor_load=6.
         return round((ml / 6.0) * 3.0, 2)
     except (TypeError, ValueError, ZeroDivisionError):
         return 0.0
@@ -150,7 +136,7 @@ def estimate_battery_runtime_detail(weight, battery, battery_mAh=None,
     """
     try:
         w     = float(weight)
-        cells = cells_from_battery_string(battery, default=4, lo=1, hi=12)
+        cells = _cells_from_str(battery)
         mAh   = float(battery_mAh) if battery_mAh else _default_mah_for_size(float(size_inch or 5.0))
         size  = float(size_inch or 5.0)
 

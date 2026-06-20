@@ -45,23 +45,28 @@ _TIP_SPEED_DANGER = 290.0   # m/s — compressibility loss severe
 # ─────────────────────────────────────────────────────────────
 # EMPIRICAL MAX POWER per motor at 4S reference (W)
 # Source: RCBenchmark burst data + manufacturer specs
+# v5.4 FIX: was non-monotonic (460→330→390→460 across 6"→7"→8"→10")
+# — a 7"+ build typically runs an equal-or-larger stator motor than
+# a 6" build (e.g. 2807/3110), not a smaller one, so max electrical/
+# mechanical power ceiling should not fall as size increases. The
+# old dip conflated "LR pilots cruise at lower throttle" (already
+# captured separately by _EFF_AT_MAX_THROTTLE / style factors) with
+# the motor's actual max power capability. Now monotonically rising.
 # ─────────────────────────────────────────────────────────────
 _MAX_PWR_BY_SIZE = {
     2.5: 65,  3.0: 80,  3.5: 115, 4.0: 195,  4.5: 270,
     5.0: 385,             # FIX: was 350 — bench 2306/2450 4S = 380-420W
     5.5: 430, 6.0: 460,
-    7.0: 330, 8.0: 390, 10.0: 460,
+    7.0: 480, 8.0: 520, 10.0: 600,
 }
 
 # Efficiency at max throttle vs hover g/W
-# FIX v5.3: calibrated from RCBenchmark burst data
-# Bench: Gemfan 51466 3B @ full throttle = ~1000-1100g, ~385W → ~2.6 g/W
-# ratio to base g/W(4.7): 2.6/4.7 = 0.55 — wait, that means
-# max_thrust = base_gW × SIZE × volt × EFF_MAX × MAX_PWR
-# = 4.7 × 1.0 × 1.0 × eff_max × 385 = 1000g
-# → eff_max = 1000/(4.7 × 385) = 0.552 ≈ 0.55 still
-# BUT we also need to account for voltage efficiency gain at higher S
-# CORRECTED with size-appropriate multiplier:
+# Calibrated from RCBenchmark burst data:
+# Gemfan 51466 3B @ full throttle ≈ 1000-1100g, ~385W → ~2.6 g/W
+# eff_max = (g/W at max) / (base hover g/W 4.7) = 2.6/4.7 ≈ 0.55
+# → 0.55 is the value that reproduces the ~1000g/motor bench target
+# (4.7 × 0.55 × 385 ≈ 996g). Kept as-is; do not raise toward 0.66,
+# that would overshoot the validated bench figure.
 _EFF_AT_MAX_THROTTLE = {
     2.5: 0.64, 3.0: 0.62, 4.0: 0.60, 5.0: 0.55,
     6.0: 0.52, 7.0: 0.48, 8.0: 0.44, 10.0: 0.40,
@@ -114,11 +119,16 @@ def _calc_rpm(motor_kv, cells, prop_size):
         v_pack = cells * _FLIGHT_V_PER_CELL
         return motor_kv * v_pack * _LOADED_RPM_FACTOR
     # Fallback: empirical table by prop size (no KV given)
+    # NOTE: these values already represent realistic LOADED RPM
+    # (e.g. 5.0":28000 lines up with the KV-based calc's own
+    # validated 2306KV/4S → 28,410 RPM result above) — do NOT
+    # multiply by _LOADED_RPM_FACTOR again, that double-discounts
+    # and under-estimates RPM/tip-speed by ~20% whenever no KV is given.
     _rpm_fallback = {
         2.5: 32000, 3.0: 26000, 3.5: 22000, 4.0: 18000, 4.5: 15500,
         5.0: 28000, 5.5: 26000, 6.0: 22000, 7.0: 18000, 8.0: 15000, 10.0: 12000,
     }
-    return _interp(prop_size, _rpm_fallback) * _LOADED_RPM_FACTOR
+    return _interp(prop_size, _rpm_fallback)
 
 
 def analyze_propeller(prop_size, prop_pitch, blade_count, style,
