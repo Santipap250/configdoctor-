@@ -1292,130 +1292,121 @@ footer{
 }
    
 /* ==========================
-   PREMIUM HERO TITLE
+   PREMIUM HERO TITLE — v2 "WOW" UPGRADE
+   Real 3D entrance + embossed depth + holographic glitch on the accent
+   word + ambient glow. Applied per LINE/WORD only — never splits
+   individual Thai characters into separate spans, which would visually
+   detach vowel/tone marks (ั ่ ้ ื ๊ ๋ etc.) from their base consonant.
 ========================== */
 
 .hero-title-premium{
     display:flex;
     flex-direction:column;
     gap:-10px;
-
     font-weight:900;
     line-height:.92;
-
     font-size:clamp(3.4rem,9vw,6.5rem);
-
     color:#ffffff;
-
+    perspective:900px;
+    transform-style:preserve-3d;
     text-shadow:
-        0 0 15px rgba(255,255,255,.08),
-        0 0 40px rgba(0,255,150,.12);
-
-    animation:
-        heroFadeUp 1.2s ease forwards;
+        0 1px 0 rgba(255,255,255,.25),
+        0 2px 0 rgba(200,255,230,.12),
+        0 8px 18px rgba(0,0,0,.45),
+        0 0 40px rgba(0,255,150,.14);
 }
 
 .hero-title-premium .line{
     display:block;
+    opacity:0;
+    transform-origin:50% 100%;
+    transform:perspective(900px) rotateX(55deg) translateY(34px) translateZ(-40px);
+    animation:heroRise3D .9s cubic-bezier(.16,.84,.24,1) forwards;
+    will-change:transform,opacity;
 }
+.hero-title-premium .line:nth-child(1){animation-delay:.12s}
+.hero-title-premium .line:nth-child(2){animation-delay:.26s}
+.hero-title-premium .line:nth-child(3){animation-delay:.40s}
+
+@keyframes heroRise3D{
+  0%{   opacity:0;   transform:perspective(900px) rotateX(55deg) translateY(34px) translateZ(-40px); filter:blur(6px);}
+  60%{  opacity:1;   transform:perspective(900px) rotateX(-4deg) translateY(-3px)  translateZ(6px);   filter:blur(0);}
+  100%{ opacity:1;   transform:perspective(900px) rotateX(0deg)  translateY(0)     translateZ(0);}
+}
+
+/* Ambient depth glow orbs drifting slowly behind the headline */
+.hero-glow-orb{
+  position:absolute;border-radius:50%;filter:blur(50px);pointer-events:none;z-index:0;
+  opacity:.55;mix-blend-mode:screen;
+}
+.hero-glow-orb.o1{width:260px;height:260px;left:-60px;top:0;background:radial-gradient(circle,rgba(0,255,150,.35),transparent 70%);animation:orbDrift1 9s ease-in-out infinite;}
+.hero-glow-orb.o2{width:200px;height:200px;left:30%;top:60%;background:radial-gradient(circle,rgba(0,200,255,.28),transparent 70%);animation:orbDrift2 11s ease-in-out infinite;}
+@keyframes orbDrift1{0%,100%{transform:translate(0,0)}50%{transform:translate(24px,18px)}}
+@keyframes orbDrift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-20px,-14px)}}
 
 .hero-gradient{
-
-    background:
-    linear-gradient(
-        90deg,
-        #00ff88,
-        #00ffd5,
-        #00aaff,
-        #8b5cf6,
-        #00ff88
-    );
-
+    position:relative;
+    display:inline-block;
+    background:linear-gradient(90deg,#00ff88,#00ffd5,#00aaff,#8b5cf6,#00ff88);
     background-size:400% 400%;
-
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
-
-    animation:
-      gradientFlow 6s linear infinite,
-      glowPulse 2.5s ease-in-out infinite;
-
-    position:relative;
+    background-clip:text;
+    animation:gradientFlow 6s linear infinite, glowPulse 2.5s ease-in-out infinite;
+    text-shadow:none;
 }
-
+/* Soft blurred glow duplicate sitting behind the gradient word — gives it
+   a "holographic projection" pop instead of sitting flat on the page */
 .hero-gradient::after{
-    content:"";
-    position:absolute;
-    inset:0;
-
-    background:inherit;
-
-    filter:blur(18px);
-
-    opacity:.45;
-
-    z-index:-1;
+    content:attr(data-text);
+    position:absolute;inset:0;
+    background:inherit;background-size:inherit;
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    filter:blur(18px);opacity:.55;z-index:-1;
+}
+/* Brief chromatic/glitch flicker on first paint — a quick RGB-split
+   "powering on" stutter, then it settles into the calm gradient glow.
+   Runs once (8s, only the first ~1.1s actually does anything visible). */
+.hero-gradient::before{
+    content:attr(data-text);
+    position:absolute;inset:0;left:0;
+    color:#00ffe1;mix-blend-mode:screen;opacity:0;
+    -webkit-text-fill-color:#00ffe1;
+    animation:glitchFlicker 2.6s ease-out 1;
+    pointer-events:none;
+}
+@keyframes glitchFlicker{
+  0%{   opacity:0; transform:translate(0,0); clip-path:inset(0 0 0 0);}
+  4%{   opacity:.8; transform:translate(-3px,1px); clip-path:inset(10% 0 60% 0);}
+  8%{   opacity:.6; transform:translate(3px,-1px); clip-path:inset(50% 0 10% 0);}
+  12%{  opacity:.7; transform:translate(-2px,0);   clip-path:inset(20% 0 40% 0);}
+  16%{  opacity:0; transform:translate(0,0);       clip-path:inset(0 0 0 0);}
+  100%{ opacity:0;}
 }
 
-@keyframes gradientFlow{
-    0%{
-        background-position:0% 50%;
-    }
-    100%{
-        background-position:100% 50%;
-    }
-}
+@keyframes gradientFlow{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+@keyframes glowPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.3)}}
+@keyframes heroFadeUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
 
-@keyframes glowPulse{
-    0%,100%{
-        filter:brightness(1);
-    }
-
-    50%{
-        filter:brightness(1.3);
-    }
-}
-
-@keyframes heroFadeUp{
-    from{
-        opacity:0;
-        transform:
-            translateY(40px);
-    }
-
-    to{
-        opacity:1;
-        transform:
-            translateY(0);
-    }
-}
-   
-.hero-title-premium{
-    position:relative;
-    overflow:hidden;
-}
-
+.hero-title-premium{position:relative;overflow:visible}
 .hero-title-premium::before{
-    content:"";
+    content:"";position:absolute;top:0;left:-100%;width:50%;height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);
+    animation:scanHero 5s infinite;
+}
 
-    position:absolute;
-
-    top:0;
-    left:-100%;
-
-    width:50%;
-    height:100%;
-
-    background:
-    linear-gradient(
-        90deg,
-        transparent,
-        rgba(255,255,255,.25),
-        transparent
-    );
-
-    animation:
-        scanHero 5s infinite;
+/* Subtle mouse-parallax tilt wrapper (JS toggles this class + sets
+   --tiltX/--tiltY custom properties; no-op on touch / reduced-motion) */
+.hero-tilt{
+  transform:rotateX(var(--tiltY,0deg)) rotateY(var(--tiltX,0deg));
+  transition:transform .25s ease-out;
+  transform-style:preserve-3d;
+}
+@media(prefers-reduced-motion:reduce){
+  .hero-title-premium .line{animation:none!important;opacity:1!important;transform:none!important;filter:none!important}
+  .hero-gradient::before{animation:none!important;display:none}
+  .hero-glow-orb{animation:none!important}
+  .hero-tilt{transform:none!important}
 }
 
 @keyframes scanHero{
@@ -1745,11 +1736,13 @@ footer{
       <span class="hero-badge-dot"></span>
       แพลตฟอร์มวินิจฉัย FPV
     </div>
-    <h1 class="hero-title hero-title-premium">
+    <h1 class="hero-title hero-title-premium hero-tilt" id="heroTitleTilt" style="position:relative">
+  <span class="hero-glow-orb o1" aria-hidden="true"></span>
+  <span class="hero-glow-orb o2" aria-hidden="true"></span>
   <span class="line">ปรับจูน</span>
   <span class="line">อย่างแม่นยำ</span>
   <span class="line">
-    บิน<span class="hero-gradient">นิ่งลื่น</span>กว่าเดิม
+    บิน<span class="hero-gradient" data-text="นิ่งลื่น">นิ่งลื่น</span>กว่าเดิม
   </span>
 </h1>
     <div class="hero-rule"></div>
@@ -1967,6 +1960,23 @@ footer{
 window.addEventListener('scroll', function(){
   document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 40);
 }, {passive:true});
+
+/* ── Hero headline mouse-parallax tilt — subtle 3D depth on desktop only ── */
+(function(){
+  var el = document.getElementById('heroTitleTilt');
+  if(!el) return;
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hasFinePointer = window.matchMedia('(pointer: fine)').matches;
+  if(reduceMotion || !hasFinePointer) return;
+  var maxTilt = 4; // degrees — kept subtle, this is a depth hint, not a gimmick
+  document.addEventListener('mousemove', function(e){
+    var w = window.innerWidth, h = window.innerHeight;
+    var x = (e.clientX / w - 0.5) * 2;  // -1..1
+    var y = (e.clientY / h - 0.5) * 2;  // -1..1
+    el.style.setProperty('--tiltX', (x * maxTilt).toFixed(2) + 'deg');
+    el.style.setProperty('--tiltY', (-y * maxTilt).toFixed(2) + 'deg');
+  }, {passive:true});
+})();
 
 /* ── Mobile nav ── */
 window.openMob  = function(){
