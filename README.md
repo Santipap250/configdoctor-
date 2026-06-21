@@ -183,6 +183,15 @@ https://github.com/Santipap250
 Project
 OBIX Config Lab
 
+ConfigDoctor AI
+
+Copyright © 2026 Santipap.
+
+All rights reserved.
+
+This software, source code, design, graphics, documentation, and related materials are the intellectual property of Santipap.
+
+Unauthorized copying, modification, distribution, resale, reverse engineering, or commercial use of this project without written permission is prohibited.
 ---
 
 ⭐ Support
