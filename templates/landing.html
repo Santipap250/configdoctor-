@@ -57,7 +57,7 @@ body::before{
 }
 .nav.scrolled{background:rgba(4,8,8,0.96);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,255,68,0.08)}
 .nav-logo{display:flex;align-items:center;text-decoration:none;line-height:0}
-.nav-logo-icon{height:48px;width:auto;max-width:min(360px, 52vw);display:block;object-fit:contain;filter:drop-shadow(0 0 10px rgba(0,255,255,.08))}
+.nav-logo-icon{height:56px;width:auto;max-width:min(420px, 56vw);display:block;object-fit:contain;filter:drop-shadow(0 0 12px rgba(0,255,255,.12))}
 .nav-logo-name{font-family:var(--font-t);font-size:22px;font-weight:800;color:#fff;line-height:1}
 .nav-logo-name span{color:var(--g)}
 .nav-logo-sub{font-family:var(--font-d);font-size:7px;letter-spacing:.2em;color:var(--g);margin-top:2px}
@@ -69,7 +69,7 @@ body::before{
 
 
 @media(max-width:600px){
-  .nav-logo-icon{height:36px;max-width:min(240px, 54vw)}
+  .nav-logo-icon{height:42px;max-width:min(290px, 60vw)}
 }
 
 .nav-menu-btn{
@@ -749,40 +749,6 @@ body.no-hero-video .hero-bg-video{display:none;}
 }
 .hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--g);animation:blink .8s ease-in-out infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.hero-h1{
-  font-family:var(--font-t);
-  font-size:clamp(46px,8.4vw,84px);
-  font-weight:900;
-  line-height:.96;
-  letter-spacing:-.03em;
-  color:#fff;
-  margin-bottom:18px;
-  text-wrap:balance;
-  filter:drop-shadow(0 0 12px rgba(0,255,68,.08));
-}
-/* Staggered line entrance */
-.hero-h1 .line1,
-.hero-h1 .line2,
-.hero-h1 .line3{
-  display:block;
-  opacity:0;
-  transform:translate3d(0,12px,0);
-  animation:heroRise .7s cubic-bezier(.2,.8,.2,1) forwards;
-}
-.hero-h1 .line1{animation-delay:.28s}
-.hero-h1 .line2{animation-delay:.42s}
-.hero-h1 .line3{animation-delay:.56s}
-.hero-h1 .green{
-  display:inline-block;
-  background:linear-gradient(90deg,#00ff66,#8cfffb,#7c5cff,#00ff66);
-  background-size:280% 100%;
-  -webkit-background-clip:text;
-  background-clip:text;
-  -webkit-text-fill-color:transparent;
-  color:transparent;
-  text-shadow:none;
-  animation:gradientFlow 4s linear infinite, glowPulse 2.4s ease-in-out infinite;
-}
 .hero-shine{
   position:relative;
 }
@@ -1018,31 +984,15 @@ body.no-hero-video .hero-bg-video{display:none;}
   border:1.5px solid rgba(200,200,200,.18);
   color:#d0d0d0;
 }
-/* shimmer sweep on store buttons */
-.btn-store::after{
-  content:'';position:absolute;top:0;left:-70%;width:50%;height:100%;
-  background:linear-gradient(105deg,transparent,rgba(255,255,255,.07),transparent);
-  transform:skewX(-18deg);
-  animation:storeShimmer 3.5s ease-in-out infinite;
-}
-.btn-store-android::after{animation-delay:0s}
-.btn-store-ios::after{animation-delay:1.6s}
-@keyframes storeShimmer{0%,100%{left:-70%}60%{left:120%}}
+/* shimmer sweep removed for cleaner store buttons */
+.btn-store::after{content:none;}
+
 .btn-store-ico{flex-shrink:0;display:flex;align-items:center;justify-content:center;width:26px;height:26px}
 .btn-store-text{display:flex;flex-direction:column;line-height:1}
-.btn-store-sup{font-size:8px;font-family:var(--font-d);letter-spacing:.12em;opacity:.65;margin-bottom:2px}
 .btn-store-name{font-size:12px;font-weight:800;font-family:var(--font-t);letter-spacing:-.01em}
 .btn-store-android .btn-store-name{color:#3ddc84}
 .btn-store-ios .btn-store-name{color:#f0f0f0}
-.soon-badge{
-  position:absolute;top:7px;right:8px;
-  font-family:var(--font-d);font-size:7px;letter-spacing:.1em;
-  padding:2px 7px;border-radius:4px;
-  background:rgba(255,185,0,.13);color:#ffb900;
-  border:1px solid rgba(255,185,0,.28);
-  animation:soonPulse 2.2s ease-in-out infinite;
-}
-@keyframes soonPulse{0%,100%{opacity:.7}50%{opacity:1}}
+
 
 
 /* ── ABOUT / INFO BLOCK ── */
@@ -1274,6 +1224,27 @@ footer{
   .hero-social-btns{flex-direction:column;align-items:flex-start}
   .hero-store-btns{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
   .btn-store{width:100%;pointer-events:none}
+  .hero-inner{padding-top:92px}
+  .hero-title-premium{
+    font-size:clamp(2.75rem,13vw,4.55rem);
+    gap:0;
+    line-height:1;
+  }
+  .hero-title-premium .line{
+    line-height:1.08;
+    padding:.02em 0;
+  }
+  .nav-logo-icon{height:34px;max-width:min(230px, 52vw)}
+  .btn-store{
+    min-height:56px;
+    padding:12px 12px 10px 12px;
+  }
+  .btn-store .soon-badge{
+    top:8px;
+    right:8px;
+    font-size:7px;
+    letter-spacing:.08em;
+  }
 }
 
 /* ── SCROLL REVEAL UTILITY ── */
@@ -1290,6 +1261,28 @@ footer{
     transition: none !important;
   }
 }
+
+@media(max-width:768px){
+  body::before{opacity:.08;animation:none}
+  .hero-bg{animation:none;transform:none}
+  .hero-bg-video{opacity:.96}
+  .hero-scan-beam,.hero-cards,.hero-glow-orb{display:none}
+  .hero-title-premium{
+    font-size:clamp(2.9rem,12vw,4.5rem);
+    gap:0;
+    line-height:1;
+    animation:none;
+  }
+  .hero-title-premium .line{
+    opacity:1;
+    transform:none;
+    animation:none;
+  }
+  .hero-gradient::before,
+  .hero-gradient::after{
+    animation:none;
+  }
+}
    
 /* ==========================
    PREMIUM HERO TITLE — v2 "WOW" UPGRADE
@@ -1300,12 +1293,13 @@ footer{
 ========================== */
 
 .hero-title-premium{
+    font-family:var(--font-t);
     display:flex;
     flex-direction:column;
-    gap:-10px;
+    gap:2px;
     font-weight:900;
-    line-height:.92;
-    font-size:clamp(3.4rem,9vw,6.5rem);
+    line-height:1;
+    font-size:clamp(3.25rem,8.6vw,6.1rem);
     color:#ffffff;
     perspective:900px;
     transform-style:preserve-3d;
@@ -1323,6 +1317,8 @@ footer{
     transform:perspective(900px) rotateX(55deg) translateY(34px) translateZ(-40px);
     animation:heroRise3D .9s cubic-bezier(.16,.84,.24,1) forwards;
     will-change:transform,opacity;
+    line-height:1.08;
+    padding:0.02em 0;
 }
 .hero-title-premium .line:nth-child(1){animation-delay:.12s}
 .hero-title-premium .line:nth-child(2){animation-delay:.26s}
@@ -1388,7 +1384,7 @@ footer{
 @keyframes glowPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.3)}}
 @keyframes heroFadeUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
 
-.hero-title-premium{position:relative;overflow:visible}
+.hero-title-premium{position:relative;overflow:visible;line-height:1}
 .hero-title-premium::before{
     content:"";position:absolute;top:0;left:-100%;width:50%;height:100%;
     background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);
@@ -1678,10 +1674,10 @@ footer{
 <!-- HERO -->
 <section class="hero">
   <div class="hero-bg">
-    <video class="hero-bg-video" id="heroBgVideo" autoplay muted loop playsinline preload="auto"
+    <video class="hero-bg-video" id="heroBgVideo" autoplay muted loop playsinline preload="none"
       poster="{{ url_for('static', filename='img/hero-bg-poster.jpg') }}" aria-hidden="true">
-      <source src="{{ url_for('static', filename='video/hero-bg.webm') }}" type="video/webm">
-      <source src="{{ url_for('static', filename='video/hero-bg.mp4') }}" type="video/mp4">
+      <source data-src="{{ url_for('static', filename='video/hero-bg.webm') }}" type="video/webm">
+      <source data-src="{{ url_for('static', filename='video/hero-bg.mp4') }}" type="video/mp4">
     </video>
   </div>
   <div class="hero-radar"></div>
@@ -1734,28 +1730,28 @@ footer{
   <div class="hero-inner">
     <div class="hero-badge">
       <span class="hero-badge-dot"></span>
-      แพลตฟอร์มวินิจฉัย FPV
+      แพลตฟอร์มวิเคราะห์ FPV
     </div>
     <h1 class="hero-title hero-title-premium hero-tilt" id="heroTitleTilt" style="position:relative">
   <span class="hero-glow-orb o1" aria-hidden="true"></span>
   <span class="hero-glow-orb o2" aria-hidden="true"></span>
-  <span class="line">วินิจฉัยโดรน</span>
-  <span class="line">แม่นยำทุกอาการ</span>
+  <span class="line">ปรับจูน</span>
+  <span class="line">อย่างแม่นยำ</span>
   <span class="line">
-    ก่อนอาการ<span class="hero-gradient" data-text="กำเริบ">กำเริบ</span>กลางอากาศ
+    บิน<span class="hero-gradient" data-text="ดีกว่าเดิม">ดีกว่าเดิม</span>
   </span>
 </h1>
     <div class="hero-rule"></div>
-    <p class="hero-desc">ConfigDoctor อ่านอาการโดรนให้ขาด แปลงข้อมูลดิบเป็นคำวินิจฉัยที่แม่นยำ ก่อนปัญหาจะเกิดกลางอากาศ</p>
+    <p class="hero-desc">ConfigDoctor อ่านอาการโดรนให้ขาด แปลงข้อมูลดิบเป็นคำวินิจฉัยที่แม่นยำ ก่อนปัญหาจะลุกลามกลางอากาศ</p>
 
     <!-- Primary action buttons -->
     <div class="hero-btns">
       <a class="btn-primary" href="/app">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2L11.5 7H16L12.5 10.5L14 16L9 13L4 16L5.5 10.5L2 7H6.5L9 2Z" fill="#000"/></svg>
-        ★ &nbsp;เริ่มการวิเคราะห์
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M6.2 4.6a1 1 0 0 1 1.55-.83l6.1 3.9a1 1 0 0 1 0 1.66l-6.1 3.9A1 1 0 0 1 6.2 12.4V4.6Z" fill="#04130c"/></svg>
+        เริ่มการวิเคราะห์
       </a>
       <a class="btn-outline" href="#tools">
-        สำรวจคุณสมบัติ &nbsp;›
+        ดูคุณสมบัติทั้งหมด &nbsp;›
       </a>
     </div>
 
@@ -1768,7 +1764,7 @@ footer{
             <path d="M2 16c0-3.3 3.1-6 7-6s7 2.7 7 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
         </div>
-        ผู้พัฒนาโปรเจค
+        ทีมพัฒนาโปรเจกต์
       </a>
       <a class="btn-fb" href="https://www.facebook.com/banmysanti" target="_blank" rel="noopener noreferrer">
         <div class="btn-dev-ico">
@@ -1781,11 +1777,11 @@ footer{
       </a>
     </div>
 
-    <!-- App Store Coming Soon buttons -->
+    <!-- Store availability cards -->
     <div class="hero-store-btns">
 
       <!-- Google Play / APK -->
-      <span class="btn-store btn-store-android">
+      <span class="btn-store btn-store-android" aria-label="Google Play coming soon" aria-disabled="true">
         <div class="btn-store-ico">
           <!-- Android robot logo -->
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1812,14 +1808,13 @@ footer{
           </svg>
         </div>
         <div class="btn-store-text">
-          <span class="btn-store-sup">COMING SOON ON</span>
-          <span class="btn-store-name">Play Store Android</span>
+          <span class="soon-badge">เร็ว ๆ นี้</span>
+          <span class="btn-store-name">Google Play</span>
         </div>
-        <div class="soon-badge">เร็วๆนี้</div>
       </span>
 
       <!-- Apple App Store -->
-      <span class="btn-store btn-store-ios">
+      <span class="btn-store btn-store-ios" aria-label="App Store coming soon" aria-disabled="true">
         <div class="btn-store-ico">
           <!-- Apple logo -->
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1830,10 +1825,9 @@ footer{
           </svg>
         </div>
         <div class="btn-store-text">
-          <span class="btn-store-sup">COMING SOON ON</span>
-          <span class="btn-store-name">App Store iOS</span>
+          <span class="soon-badge">เร็ว ๆ นี้</span>
+          <span class="btn-store-name">App Store</span>
         </div>
-        <div class="soon-badge">เร็วๆนี้</div>
       </span>
 
     </div>
@@ -1841,15 +1835,15 @@ footer{
 
 
   <section class="hero-about reveal" aria-labelledby="aboutConfigDoctor">
-    <div class="hero-about-head" id="aboutConfigDoctor">เกี่ยวกับ Config Doctor</div>
+    <div class="hero-about-head" id="aboutConfigDoctor">เกี่ยวกับ ConfigDoctor</div>
     <p class="hero-about-copy">
-      Config Doctor คือแพลตฟอร์มวิเคราะห์โดรน FPV ที่ช่วยอ่านอาการจาก diff all, Blackbox และสเปคของลำบิน
-      เพื่อสรุปผลให้เข้าใจง่าย พร้อมแนวทางจูนที่ปลอดภัย ใช้ได้จริง และดูเป็นมืออาชีพ
+      ConfigDoctor คือแพลตฟอร์มวิเคราะห์โดรน FPV ที่อ่านอาการจาก diff all, Blackbox และสเปคของลำบิน
+      เพื่อสรุปแนวทางจูนที่เข้าใจง่าย ปลอดภัย ใช้ได้จริง และแม่นยำ
     </p>
     <div class="hero-about-grid" role="list" aria-label="คุณสมบัติของเว็บไซต์">
       <span class="hero-about-chip" role="listitem">วิเคราะห์ PID · Filter · RPM</span>
       <span class="hero-about-chip" role="listitem">เช็ค Motor · ESC · Battery</span>
-      <span class="hero-about-chip" role="listitem">ใช้งานง่ายบนมือถือ</span>
+      <span class="hero-about-chip" role="listitem">ใช้งานลื่นทุกหน้าจอ</span>
     </div>
   </section>
 
@@ -1857,30 +1851,30 @@ footer{
   <div class="features">
     <a class="feat" href="/app">
       <div class="feat-ic">📈</div>
-      <div class="feat-name">Smart Analysis</div>
-      <div class="feat-desc">Deep drone data insights</div>
+      <div class="feat-name">วิเคราะห์อัจฉริยะ</div>
+      <div class="feat-desc">ข้อมูลโดรนเชิงลึก</div>
       <div class="feat-dot"><span></span><span></span><span></span></div>
     </a>
     <a class="feat" href="/pid-advisor">
       <div class="feat-ic">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="rgba(0,255,68,.6)" stroke-width="1.5"/><path d="M9 12h6M12 9v6" stroke="#00ff44" stroke-width="2" stroke-linecap="round"/></svg>
       </div>
-      <div class="feat-name">Auto Optimization</div>
-      <div class="feat-desc">Tune PID, Rates, Filters & more</div>
+      <div class="feat-name">จูนอัตโนมัติ</div>
+      <div class="feat-desc">ปรับ PID, Rates, Filter และอื่น ๆ</div>
       <div class="feat-dot"><span></span><span></span><span></span></div>
     </a>
     <a class="feat" href="/cli_surgeon">
       <div class="feat-ic" style="font-size:18px">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="rgba(0,255,68,.6)" stroke-width="1.5"/><path d="M7 8l3 4-3 4M13 16h4" stroke="#00ff44" stroke-width="1.5" stroke-linecap="round"/></svg>
       </div>
-      <div class="feat-name">CLI Commands</div>
-      <div class="feat-desc">Ready-to-use CLI commands</div>
+      <div class="feat-name">คำสั่ง CLI</div>
+      <div class="feat-desc">CLI พร้อมใช้งาน</div>
       <div class="feat-dot"><span></span><span></span><span></span></div>
     </a>
     <a class="feat" href="/build-card">
       <div class="feat-ic">☁️</div>
-      <div class="feat-name">Cloud Sync</div>
-      <div class="feat-desc">Backup, sync and share your setup</div>
+      <div class="feat-name">สำรองและซิงก์</div>
+      <div class="feat-desc">สำรอง ซิงก์ และแชร์ค่าตั้ง</div>
       <div class="feat-dot"><span></span><span></span><span></span></div>
     </a>
   </div>
@@ -1888,73 +1882,89 @@ footer{
 
 <!-- STATS -->
 <div class="stats" id="statsRow">
-  <div class="stat"><div class="stat-num" data-target="22+">22+</div><div class="stat-lbl">DIAGNOSTIC TOOLS</div></div>
-  <div class="stat"><div class="stat-num" data-target="50k+">50k+</div><div class="stat-lbl">ANALYSES RUN</div></div>
-  <div class="stat"><div class="stat-num" data-target="4.9★">4.9★</div><div class="stat-lbl">COMMUNITY RATING</div></div>
-  <div class="stat"><div class="stat-num" data-target="100%">100%</div><div class="stat-lbl">FREE TO USE</div></div>
+  <div class="stat"><div class="stat-num" data-target="22+">22+</div><div class="stat-lbl">เครื่องมือวิเคราะห์</div></div>
+  <div class="stat"><div class="stat-num" data-target="50k+">50k+</div><div class="stat-lbl">การวิเคราะห์</div></div>
+  <div class="stat"><div class="stat-num" data-target="4.9★">4.9★</div><div class="stat-lbl">คะแนนจากชุมชน</div></div>
+  <div class="stat"><div class="stat-num" data-target="100%">100%</div><div class="stat-lbl">ใช้งานฟรี 100%</div></div>
 </div>
 
 <!-- TOOLS GRID -->
 <section class="section" id="tools">
   <div class="section-head reveal">
-    <span class="section-label">ALL TOOLS</span>
-    <h2 class="section-h2">Everything for FPV Tuning</h2>
-    <p class="section-sub">22 specialized tools — from PID analysis to motor thermal, all in one platform</p>
+    <span class="section-label">เครื่องมือทั้งหมด</span>
+    <h2 class="section-h2">ครบทุกเครื่องมือสำหรับการจูน FPV</h2>
+    <p class="section-sub">22 เครื่องมือเฉพาะทาง ตั้งแต่ PID ถึง motor thermal ในที่เดียว</p>
   </div>
   <div class="tools-grid reveal">
-    <a class="tool-card" href="/app"><div class="tool-icon">🚀</div><div class="tool-name">Drone Analyzer</div><div class="tool-hint">Main PID/Filter analyzer</div></a>
-    <a class="tool-card" href="/blackbox"><div class="tool-icon">📊</div><div class="tool-name">Blackbox Analyzer</div><div class="tool-hint">Flight log CSV → PID score</div><span class="tool-badge tb-gold">HOT</span></a>
-    <a class="tool-card" href="/pid-advisor"><div class="tool-icon">🩺</div><div class="tool-name">PID Advisor</div><div class="tool-hint">Symptom → fix instantly</div></a>
-    <a class="tool-card" href="/cli_surgeon"><div class="tool-icon">🩻</div><div class="tool-name">CLI Surgeon</div><div class="tool-hint">Analyze diff all / dump</div></a>
-    <a class="tool-card" href="/motor-prop"><div class="tool-icon">🧭</div><div class="tool-name">Motor × Prop</div><div class="tool-hint">Recommend KV + stator</div></a>
-    <a class="tool-card" href="/rpm-filter"><div class="tool-icon">🔔</div><div class="tool-name">RPM Filter</div><div class="tool-hint">Calculate harmonic Hz</div></a>
-    <a class="tool-card" href="/rates-visualizer"><div class="tool-icon">📈</div><div class="tool-name">Rates Visualizer</div><div class="tool-hint">Live curve + CLI</div></a>
-    <a class="tool-card" href="/cli-comparator"><div class="tool-icon">⚖️</div><div class="tool-name">CLI Comparator</div><div class="tool-hint">Compare 2 configs</div></a>
-    <a class="tool-card" href="/esc-checker"><div class="tool-icon">⚡</div><div class="tool-name">ESC Checker</div><div class="tool-hint">Check ESC + protocol</div></a>
-    <a class="tool-card" href="/osd"><div class="tool-icon">🖥️</div><div class="tool-name">OSD Designer</div><div class="tool-hint">Design OSD layout</div></a>
-    <a class="tool-card" href="/vtx"><div class="tool-icon">📡</div><div class="tool-name">VTX Bands</div><div class="tool-hint">Band/Channel table</div></a>
-    <a class="tool-card" href="/vtx-range"><div class="tool-icon">🏞️</div><div class="tool-name">VTX Range</div><div class="tool-hint">Signal range estimator</div></a>
-    <a class="tool-card" href="/vtx-smartaudio"><div class="tool-icon">🎙️</div><div class="tool-name">SmartAudio</div><div class="tool-hint">SmartAudio commands</div></a>
-    <a class="tool-card" href="{{ url_for('downloads_index') }}"><div class="tool-icon">📁</div><div class="tool-name">DIFF Library</div><div class="tool-hint">Download sample files</div><span class="tool-badge tb-gold">F4/F7</span></a>
-    <a class="tool-card" href="/flight-quiz"><div class="tool-icon">🎯</div><div class="tool-name">Flight Style Quiz</div><div class="tool-hint">5 questions → rates</div><span class="tool-badge tb-new">NEW</span></a>
-    <a class="tool-card" href="/bf-wizard"><div class="tool-icon">🧙</div><div class="tool-name">BF Config Wizard</div><div class="tool-hint">7 steps → CLI ready</div><span class="tool-badge tb-new">NEW</span></a>
-    <a class="tool-card" href="/build-card"><div class="tool-icon">🃏</div><div class="tool-name">Build Card</div><div class="tool-hint">Build card for Social</div><span class="tool-badge tb-new">NEW</span></a>
-    <a class="tool-card" href="/tuning-log"><div class="tool-icon">📋</div><div class="tool-name">Tuning Log</div><div class="tool-hint">Log PID sessions</div><span class="tool-badge tb-new">NEW</span></a>
-    <a class="tool-card" href="/leaderboard"><div class="tool-icon">🏆</div><div class="tool-name">Config Leaderboard</div><div class="tool-hint">vote · rank · copy config</div><span class="tool-badge tb-new">NEW</span></a>
+    <a class="tool-card" href="/app"><div class="tool-icon">🚀</div><div class="tool-name">Drone Analyzer</div><div class="tool-hint">วิเคราะห์หลัก PID / Filter</div></a>
+    <a class="tool-card" href="/blackbox"><div class="tool-icon">📊</div><div class="tool-name">Blackbox Analyzer</div><div class="tool-hint">ไฟล์ CSV → คะแนน PID</div><span class="tool-badge tb-gold">HOT</span></a>
+    <a class="tool-card" href="/pid-advisor"><div class="tool-icon">🩺</div><div class="tool-name">PID Advisor</div><div class="tool-hint">บอกอาการ → แก้ได้ทันที</div></a>
+    <a class="tool-card" href="/cli_surgeon"><div class="tool-icon">🩻</div><div class="tool-name">CLI Surgeon</div><div class="tool-hint">วิเคราะห์ diff all / dump</div></a>
+    <a class="tool-card" href="/motor-prop"><div class="tool-icon">🧭</div><div class="tool-name">Motor × Prop</div><div class="tool-hint">แนะนำ KV + stator</div></a>
+    <a class="tool-card" href="/rpm-filter"><div class="tool-icon">🔔</div><div class="tool-name">RPM Filter</div><div class="tool-hint">คำนวณ harmonic Hz</div></a>
+    <a class="tool-card" href="/rates-visualizer"><div class="tool-icon">📈</div><div class="tool-name">Rates Visualizer</div><div class="tool-hint">กราฟสด + CLI</div></a>
+    <a class="tool-card" href="/cli-comparator"><div class="tool-icon">⚖️</div><div class="tool-name">CLI Comparator</div><div class="tool-hint">เปรียบเทียบ 2 ค่าปรับ</div></a>
+    <a class="tool-card" href="/esc-checker"><div class="tool-icon">⚡</div><div class="tool-name">ESC Checker</div><div class="tool-hint">เช็ค ESC + protocol</div></a>
+    <a class="tool-card" href="/osd"><div class="tool-icon">🖥️</div><div class="tool-name">OSD Designer</div><div class="tool-hint">ออกแบบ OSD</div></a>
+    <a class="tool-card" href="/vtx"><div class="tool-icon">📡</div><div class="tool-name">VTX Bands</div><div class="tool-hint">ตาราง Band / Channel</div></a>
+    <a class="tool-card" href="/vtx-range"><div class="tool-icon">🏞️</div><div class="tool-name">VTX Range</div><div class="tool-hint">ประมาณระยะสัญญาณ</div></a>
+    <a class="tool-card" href="/vtx-smartaudio"><div class="tool-icon">🎙️</div><div class="tool-name">SmartAudio</div><div class="tool-hint">คำสั่ง SmartAudio</div></a>
+    <a class="tool-card" href="{{ url_for('downloads_index') }}"><div class="tool-icon">📁</div><div class="tool-name">DIFF Library</div><div class="tool-hint">ดาวน์โหลดไฟล์ตัวอย่าง</div><span class="tool-badge tb-gold">F4/F7</span></a>
+    <a class="tool-card" href="/flight-quiz"><div class="tool-icon">🎯</div><div class="tool-name">Flight Style Quiz</div><div class="tool-hint">ตอบ 5 ข้อ → ได้ rates</div><span class="tool-badge tb-new">NEW</span></a>
+    <a class="tool-card" href="/bf-wizard"><div class="tool-icon">🧙</div><div class="tool-name">BF Config Wizard</div><div class="tool-hint">7 ขั้นตอน → CLI พร้อมใช้</div><span class="tool-badge tb-new">NEW</span></a>
+    <a class="tool-card" href="/build-card"><div class="tool-icon">🃏</div><div class="tool-name">Build Card</div><div class="tool-hint">การ์ดบิลด์สำหรับแชร์</div><span class="tool-badge tb-new">NEW</span></a>
+    <a class="tool-card" href="/tuning-log"><div class="tool-icon">📋</div><div class="tool-name">Tuning Log</div><div class="tool-hint">บันทึกการจูน</div><span class="tool-badge tb-new">NEW</span></a>
+    <a class="tool-card" href="/leaderboard"><div class="tool-icon">🏆</div><div class="tool-name">Config Leaderboard</div><div class="tool-hint">โหวต · จัดอันดับ · คัดลอกคอนฟิก</div><span class="tool-badge tb-new">NEW</span></a>
     <a class="tool-card" href="/battery-health"><div class="tool-icon">🔋</div><div class="tool-name">Battery Health</div><div class="tool-hint">IR · Sag · Health Score</div></a>
-    <a class="tool-card" href="/motor-thermal"><div class="tool-icon">🌡️</div><div class="tool-name">Motor Thermal</div><div class="tool-hint">Winding temp estimator</div></a>
-    <a class="tool-card" href="/loop-analyzer"><div class="tool-icon">🔁</div><div class="tool-name">Loop Analyzer</div><div class="tool-hint">Stick→Prop latency</div></a>
-    <a class="tool-card" href="/fpv-trainer"><div class="tool-icon">🎮</div><div class="tool-name">FPV Simulator NEO</div><div class="tool-hint">3D drone sim · Race</div><span class="tool-badge tb-gold">GAME</span></a>
-    <a class="tool-card" href="/quick-tune"><div class="tool-icon">⚡</div><div class="tool-name">Quick Tune Pad</div><div class="tool-hint">Symptom → PID delta + CLI</div><span class="tool-badge tb-gold">NEW</span></a>
+    <a class="tool-card" href="/motor-thermal"><div class="tool-icon">🌡️</div><div class="tool-name">Motor Thermal</div><div class="tool-hint">ประเมินอุณหภูมิขดลวด</div></a>
+    <a class="tool-card" href="/loop-analyzer"><div class="tool-icon">🔁</div><div class="tool-name">Loop Analyzer</div><div class="tool-hint">หน่วงจาก Stick → Prop</div></a>
+    <a class="tool-card" href="/fpv-trainer"><div class="tool-icon">🎮</div><div class="tool-name">FPV Simulator NEO</div><div class="tool-hint">ซิม 3D · Race mode</div><span class="tool-badge tb-gold">GAME</span></a>
+    <a class="tool-card" href="/quick-tune"><div class="tool-icon">⚡</div><div class="tool-name">Quick Tune Pad</div><div class="tool-hint">อาการ → PID delta + CLI</div><span class="tool-badge tb-gold">NEW</span></a>
   </div>
 </section>
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-left">CONFIGDOCTOR &nbsp;•&nbsp; FPV COMMUNITY 🇹🇭</div>
+  <div class="footer-left">CONFIGDOCTOR &nbsp;•&nbsp; ชุมชน FPV 🇹🇭</div>
   <div class="footer-right">
     <a class="footer-link" href="/app">Analyzer</a>
     <a class="footer-link" href="/team">Team</a>
     <a class="footer-link" href="/about">About</a>
     <a class="footer-link" href="{{ url_for('downloads_index') }}">Downloads</a>
-    <a class="footer-link" href="https://www.facebook.com/OBIXConfigLab" target="_blank" rel="noopener noreferrer" style="color:#60a5fa">OBIXConfigLab ↗</a>
-  </div>
-</footer>
-
+    <a class="footer-link" href="https://www.facebook.com/OBIXConfigLab" target="_blank" rel="noopener noreferrer" style="color:#60a5fa">OBIXConfigLab ↗</a></div> 
+  <div class="footer-left">Copyright © 2026 Santipap. All Rights Reserved.</div>
+</footer>   
+   
 <script>
-/* ── Hero background video: skip only on data-saver/slow connection/reduced-motion ── */
+/* ── Hero background video: lazy-load only when the device/network can handle it ── */
 (function(){
   var v = document.getElementById('heroBgVideo');
   if(!v) return;
+
   var conn = navigator.connection || navigator.webkitConnection || navigator.mozConnection;
-  var saveData = conn && conn.saveData;
-  var slow = conn && /2g/.test(conn.effectiveType || '');
+  var saveData = !!(conn && conn.saveData);
+  var slow = !!(conn && /(^|[^0-9])2g/i.test(conn.effectiveType || ''));
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Keep the poster only for reduced-motion, save-data, or very slow networks.
   if(saveData || slow || reduceMotion){
     document.body.classList.add('no-hero-video');
-    return; // keep static poster/image, never fetch the video
+    return;
   }
-  v.play().catch(function(){ /* autoplay blocked by browser — poster image stays visible */ });
+
+  // Load the video only when it's allowed to run.
+  var sources = v.querySelectorAll('source[data-src]');
+  sources.forEach(function(s){
+    if(!s.getAttribute('src')) s.setAttribute('src', s.getAttribute('data-src'));
+  });
+
+  try { v.load(); } catch(e) {}
+  var playPromise = v.play();
+  if(playPromise && typeof playPromise.catch === 'function'){
+    playPromise.catch(function(){
+      // If autoplay is blocked, the poster remains visible.
+    });
+  }
 })();
 
 window.addEventListener('scroll', function(){
@@ -1967,7 +1977,8 @@ window.addEventListener('scroll', function(){
   if(!el) return;
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var hasFinePointer = window.matchMedia('(pointer: fine)').matches;
-  if(reduceMotion || !hasFinePointer) return;
+  var smallScreen = window.matchMedia('(max-width: 768px)').matches;
+  if(reduceMotion || !hasFinePointer || smallScreen) return;
   var maxTilt = 4; // degrees — kept subtle, this is a depth hint, not a gimmick
   document.addEventListener('mousemove', function(e){
     var w = window.innerWidth, h = window.innerHeight;
@@ -2056,6 +2067,10 @@ document.addEventListener('keydown', function(e){
 (function(){
   var bg = document.querySelector('.hero-bg');
   if(!bg) return;
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var smallScreen = window.matchMedia('(max-width: 768px)').matches;
+  var hasFinePointer = window.matchMedia('(pointer: fine)').matches;
+  if(reduceMotion || smallScreen || !hasFinePointer) return;
   window.addEventListener('scroll', function(){
     var y = window.scrollY;
     bg.style.transform = 'translateY(' + (y * 0.22) + 'px) scale(1.06)';
@@ -2085,6 +2100,11 @@ document.addEventListener('keydown', function(e){
 
 /* ── Floating card number flicker ── */
 (function(){
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var smallScreen = window.matchMedia('(max-width: 768px)').matches;
+  var coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+  if(reduceMotion || smallScreen || coarsePointer) return;
+
   var cards=[
     {label:'BATTERY', vals:['23.1<span style="font-size:14px">V</span>','23.4<span style="font-size:14px">V</span>','23.7<span style="font-size:14px">V</span>','23.5<span style="font-size:14px">V</span>','23.8<span style="font-size:14px">V</span>'], i:0},
     {label:'AMP',     vals:['17.2<span style="font-size:14px">A</span>','18.5<span style="font-size:14px">A</span>','19.1<span style="font-size:14px">A</span>','18.5<span style="font-size:14px">A</span>','17.8<span style="font-size:14px">A</span>'], i:0},
@@ -2116,6 +2136,11 @@ document.addEventListener('keydown', function(e){
 
 /* ── HUD corner flicker ── */
 (function(){
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var smallScreen = window.matchMedia('(max-width: 768px)').matches;
+  var coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+  if(reduceMotion || smallScreen || coarsePointer) return;
+
   var corners = document.querySelectorAll('.hero-corner');
   setInterval(function(){
     var r = Math.floor(Math.random() * corners.length);
