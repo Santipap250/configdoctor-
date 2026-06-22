@@ -45,216 +45,215 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opac
 
 .page-wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 16px 90px}
 
-/* ── TOP COMMAND DECK ── */
-.bb-topdeck{
-  position:relative;
-  z-index:1;
-  display:flex;
+
+/* ── ChatGPT-style top bar ── */
+.bb-topbar{
+  position:sticky;
+  top:0;
+  z-index:250;
+  backdrop-filter:blur(18px) saturate(1.12);
+  background:rgba(3,5,10,.78);
+  border-bottom:1px solid rgba(0,229,255,.10);
+  box-shadow:0 8px 28px rgba(0,0,0,.22);
+}
+.bb-topbar-inner{
+  max-width:1160px;
+  margin:0 auto;
+  padding:12px 14px;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
   align-items:center;
-  justify-content:space-between;
-  gap:14px;
-  flex-wrap:wrap;
-  margin:12px 0 18px;
-  padding:14px 16px;
-  background:
-    linear-gradient(180deg, rgba(8,13,22,.82), rgba(5,8,14,.90));
-  border:1px solid rgba(0,229,255,.12);
-  border-radius:22px;
-  box-shadow:
-    0 18px 46px rgba(0,0,0,.24),
-    inset 0 1px 0 rgba(255,255,255,.03);
-  backdrop-filter:blur(18px) saturate(1.15);
-  overflow:hidden;
+  gap:12px;
 }
-.bb-topdeck::before{
-  content:'';
-  position:absolute;
-  inset:-2px;
-  background:
-    radial-gradient(circle at 14% 18%, rgba(0,229,255,.12), transparent 24%),
-    radial-gradient(circle at 86% 12%, rgba(255,176,32,.10), transparent 22%),
-    linear-gradient(90deg, transparent 0%, rgba(0,229,255,.06) 50%, transparent 100%);
-  opacity:.9;
-  pointer-events:none;
-}
-.bb-topdeck::after{
-  content:'';
-  position:absolute;
-  left:-18%;
-  top:-30%;
-  width:48%;
-  height:180%;
-  background:linear-gradient(110deg, transparent 35%, rgba(255,255,255,.08) 50%, transparent 65%);
-  transform:skewX(-18deg);
-  animation:deckSweep 8s ease-in-out infinite;
-  pointer-events:none;
-}
-@keyframes deckSweep{
-  0%, 70% { transform:translateX(-12%) skewX(-18deg); opacity:0; }
-  78% { opacity:.7; }
-  100% { transform:translateX(250%) skewX(-18deg); opacity:0; }
-}
-.bb-topdeck-copy{
-  position:relative;
-  z-index:1;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  min-width:0;
-}
-.bb-topdeck-kicker{
-  font-family:var(--fd);
-  font-size:9px;
-  font-weight:700;
-  letter-spacing:.22em;
-  text-transform:uppercase;
-  color:var(--am);
-  display:flex;
-  align-items:center;
-  gap:8px;
-  white-space:nowrap;
-}
-.bb-topdeck-kicker::before{
-  content:'';
-  width:7px;
-  height:7px;
-  border-radius:50%;
-  background:var(--am);
-  box-shadow:0 0 10px rgba(255,176,32,.55);
-}
-.bb-topdeck-title{
-  font-family:var(--ft);
-  font-size:clamp(18px,3vw,24px);
-  font-weight:900;
-  line-height:1.05;
-  color:#f1f8ff;
-  letter-spacing:-.01em;
-}
-.bb-topdeck-sub{
-  font-size:12px;
-  color:var(--t2);
-  line-height:1.55;
-  max-width:560px;
-}
-.bb-topdeck-actions{
-  position:relative;
-  z-index:1;
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-left:auto;
-}
-.bb-top-btn{
-  position:relative;
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  min-height:46px;
-  padding:10px 15px;
-  border-radius:15px;
-  text-decoration:none;
-  border:1px solid rgba(255,255,255,.08);
-  background:linear-gradient(180deg, rgba(10,15,24,.88), rgba(7,10,16,.76));
-  color:#e7f2ff;
-  font-family:var(--fd);
-  font-size:9.5px;
-  font-weight:700;
-  letter-spacing:.14em;
-  text-transform:uppercase;
-  transition:transform .2s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
-  overflow:hidden;
-}
-.bb-top-btn::before{
-  content:'';
-  position:absolute;
-  inset:-26% -14%;
-  background:
-    radial-gradient(circle at 20% 50%, rgba(0,229,255,.16) 0 10%, transparent 11% 100%),
-    radial-gradient(circle at 74% 34%, rgba(255,176,32,.12) 0 9%, transparent 10% 100%);
-  filter:blur(8px);
-  opacity:.7;
-  animation:btnMist 6s ease-in-out infinite alternate;
-  pointer-events:none;
-}
-.bb-top-btn::after{
-  content:'';
-  position:absolute;
-  inset:0;
-  background:linear-gradient(110deg, transparent 18%, rgba(255,255,255,.14) 40%, transparent 62%);
-  transform:translateX(-120%);
-  transition:transform .55s ease;
-  pointer-events:none;
-}
-.bb-top-btn:hover::after{transform:translateX(140%)}
-.bb-top-btn:hover{
-  transform:translateY(-2px);
-  border-color:rgba(0,229,255,.26);
-  box-shadow:0 12px 28px rgba(0,0,0,.22), 0 0 18px rgba(0,229,255,.08);
-  background:linear-gradient(180deg, rgba(11,18,28,.96), rgba(6,10,16,.84));
-}
-.bb-top-btn:active{transform:translateY(1px) scale(.985)}
-.bb-top-btn--accent{
-  border-color:rgba(0,229,255,.24);
-  background:linear-gradient(135deg, rgba(0,229,255,.16), rgba(255,176,32,.12));
-  color:#f6fbff;
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.03) inset,
-    0 10px 24px rgba(0,229,255,.10),
-    0 0 26px rgba(255,176,32,.08);
-}
-.bb-top-btn--accent:hover{
-  border-color:rgba(0,229,255,.40);
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.04) inset,
-    0 14px 32px rgba(0,229,255,.12),
-    0 0 30px rgba(255,176,32,.10);
-}
-.bb-top-btn-ic{
+.bb-menu-btn,
+.bb-icon-btn{
+  width:44px;
+  height:44px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.09);
+  background:rgba(255,255,255,.04);
+  color:var(--t);
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:18px;
-  height:18px;
+  cursor:pointer;
+  transition:transform .16s ease, border-color .16s ease, background .16s ease, box-shadow .16s ease, color .16s ease;
   flex-shrink:0;
-  font-size:14px;
+}
+.bb-menu-btn:hover,
+.bb-icon-btn:hover{
+  border-color:rgba(0,229,255,.18);
+  background:rgba(0,229,255,.06);
+  color:#fff;
+  transform:translateY(-1px);
+  box-shadow:0 0 18px rgba(0,229,255,.08);
+}
+.bb-menu-btn svg,
+.bb-icon-btn svg{
+  width:20px;
+  height:20px;
+  stroke:currentColor;
+}
+.bb-brand{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-width:0;
+  text-align:center;
+  justify-self:center;
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  padding:0;
+  color:inherit;
+  appearance:none;
+}
+.bb-brand-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-family:var(--fd);
+  font-size:clamp(18px,4.2vw,28px);
+  font-weight:900;
+  letter-spacing:.04em;
+  color:#f6fbff;
   line-height:1;
-  position:relative;
-  z-index:1;
+  text-shadow:0 0 14px rgba(255,255,255,.04);
 }
-.bb-top-btn-label{position:relative;z-index:1}
-
-@media(max-width:760px){
-  .bb-topdeck{
-    align-items:flex-start;
-    padding:14px;
-    border-radius:20px;
-  }
-  .bb-topdeck-actions{
-    width:100%;
-    justify-content:flex-start;
-  }
-  .bb-top-btn{
-    flex:1 1 calc(50% - 5px);
-    justify-content:center;
-    min-height:44px;
-    padding:10px 12px;
-    font-size:9px;
-  }
-  .bb-topdeck-title{font-size:18px}
-  .bb-topdeck-sub{font-size:11px}
+.bb-brand-title span{ color:var(--cy); }
+.bb-brand-chevron{
+  color:rgba(255,255,255,.62);
+  font-size:.82em;
+  transform:translateY(1px);
 }
-@media(max-width:480px){
-  .bb-topdeck-actions{
-    gap:8px;
-  }
-  .bb-top-btn{
-    flex:1 1 100%;
-  }
-  .bb-topdeck-copy{gap:4px}
+.bb-brand-sub{
+  margin-top:4px;
+  font-family:var(--fd);
+  font-size:8px;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:rgba(0,229,255,.84);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:100%;
 }
-
+.bb-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  justify-self:end;
+}
+.bb-menu-drawer{
+  position:fixed;
+  inset:0;
+  z-index:400;
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-start;
+  padding:12px;
+  background:rgba(0,0,0,.42);
+  backdrop-filter:blur(12px);
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .18s ease, visibility .18s ease;
+}
+.bb-menu-drawer.open{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+}
+.bb-menu-panel{
+  width:min(100%, 360px);
+  border-radius:22px;
+  border:1px solid rgba(0,229,255,.14);
+  background:linear-gradient(180deg, rgba(8,13,22,.96), rgba(3,5,10,.96));
+  box-shadow:0 20px 60px rgba(0,0,0,.48), inset 0 0 0 1px rgba(255,255,255,.03);
+  overflow:hidden;
+  transform:translateY(-8px) scale(.98);
+  opacity:0;
+  transition:transform .22s ease, opacity .22s ease;
+}
+.bb-menu-drawer.open .bb-menu-panel{
+  transform:translateY(0) scale(1);
+  opacity:1;
+}
+.bb-menu-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 16px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.bb-menu-head-title{
+  font-family:var(--fd);
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.18em;
+  color:#f6fbff;
+  text-transform:uppercase;
+}
+.bb-menu-links{
+  display:grid;
+  gap:8px;
+  padding:14px;
+}
+.bb-menu-link{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 13px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.07);
+  background:rgba(255,255,255,.03);
+  color:var(--t);
+  text-decoration:none;
+  transition:transform .16s ease, border-color .16s ease, background .16s ease;
+}
+.bb-menu-link:hover{
+  transform:translateY(-1px);
+  border-color:rgba(0,229,255,.18);
+  background:rgba(0,229,255,.06);
+}
+.bb-menu-link-ico{
+  width:34px;
+  height:34px;
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+  background:rgba(0,229,255,.08);
+  border:1px solid rgba(0,229,255,.14);
+  flex-shrink:0;
+}
+.bb-menu-link-body{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+}
+.bb-menu-link-title{
+  font-size:13px;
+  font-weight:700;
+  color:#fff;
+  line-height:1.2;
+}
+.bb-menu-link-sub{
+  font-size:11px;
+  color:var(--t2);
+  margin-top:2px;
+  line-height:1.4;
+}
+@media(max-width:600px){
+  .bb-topbar-inner{
+    padding:10px 10px;
+    grid-template-columns:auto 1fr auto;
+  }
+  .bb-menu-btn,
+  .bb-icon-btn{ width:40px; height:40px; border-radius:13px; }
+  .bb-brand{ max-width:calc(100vw - 170px); }
+  .bb-brand-title{ font-size:clamp(16px,6vw,22px); }
+  .bb-brand-sub{ font-size:7px; letter-spacing:.18em; }
+}
 
 /* ── HERO ── */
 .hero{padding:46px 0 36px;display:flex;flex-direction:column;align-items:flex-start;gap:14px}
@@ -485,31 +484,76 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opac
 <body>
 <div class="bb-grid" aria-hidden="true"></div>
 
-{% include "partials/nav.html" %}
+<header class="bb-topbar">
+  <div class="bb-topbar-inner">
+    <button class="bb-menu-btn" type="button" id="bbMenuBtn" onclick="toggleBBMenu()" aria-label="Open menu" aria-controls="bbMenuDrawer" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke="currentColor" stroke-linecap="round">
+        <path d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
 
-<div class="bb-topdeck" id="bbTopDeck">
-  <div class="bb-topdeck-copy">
-    <div class="bb-topdeck-kicker">BLACKBOX RECOVERY CONSOLE</div>
-    <div class="bb-topdeck-title">Flight Data Forensics</div>
-    <div class="bb-topdeck-sub">ศูนย์ควบคุมสำหรับกู้ข้อมูลบิน, วิเคราะห์อาการสั่น, motor balance, battery sag และสร้างคำแนะนำแบบล้ำสมัยในมุมมองเดียว</div>
+    <button class="bb-brand" type="button" onclick="window.location.href='/landing'" aria-label="ConfigDoctor home">
+      <div class="bb-brand-title">Config<span>Doctor</span> <span class="bb-brand-chevron">⌄</span></div>
+      <div class="bb-brand-sub">Blackbox Analyzer</div>
+    </button>
+
+    <div class="bb-actions">
+      <button class="bb-icon-btn" type="button" onclick="resetUpload()" aria-label="New analysis">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 1 1-3.1-6.8"></path>
+          <path d="M21 3v6h-6"></path>
+        </svg>
+      </button>
+      <button class="bb-icon-btn" type="button" onclick="toggleBBMenu()" aria-label="More menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h.01"></path>
+          <path d="M12 12h.01"></path>
+          <path d="M19 12h.01"></path>
+        </svg>
+      </button>
+    </div>
   </div>
+</header>
 
-  <div class="bb-topdeck-actions">
-    <a class="bb-top-btn" href="/landing" aria-label="กลับหน้า landing">
-      <span class="bb-top-btn-ic">↩</span><span class="bb-top-btn-label">Back</span>
-    </a>
-    <a class="bb-top-btn" href="/" aria-label="ไปหน้าแรก">
-      <span class="bb-top-btn-ic">⌂</span><span class="bb-top-btn-label">Home</span>
-    </a>
-    <a class="bb-top-btn" href="/app" aria-label="เปิด Drone Analyzer">
-      <span class="bb-top-btn-ic">🚁</span><span class="bb-top-btn-label">Drone Analyzer</span>
-    </a>
-    <a class="bb-top-btn bb-top-btn--accent" href="#uploadZone" aria-label="ไปส่วนอัปโหลด CSV">
-      <span class="bb-top-btn-ic">⤓</span><span class="bb-top-btn-label">Upload CSV</span>
-    </a>
+<div class="bb-menu-drawer" id="bbMenuDrawer" aria-hidden="true">
+  <div class="bb-menu-panel" role="dialog" aria-modal="true" aria-label="ConfigDoctor menu">
+    <div class="bb-menu-head">
+      <div class="bb-menu-head-title">Menu</div>
+      <button class="bb-icon-btn" type="button" onclick="toggleBBMenu(false)" aria-label="Close menu" style="width:36px;height:36px;border-radius:12px">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round">
+          <path d="M6 6l12 12"></path>
+          <path d="M18 6L6 18"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="bb-menu-links">
+      <a class="bb-menu-link" href="/landing">
+        <div class="bb-menu-link-ico">🏠</div>
+        <div class="bb-menu-link-body"><div class="bb-menu-link-title">Landing</div><div class="bb-menu-link-sub">หน้าแรกของ ConfigDoctor</div></div>
+      </a>
+      <a class="bb-menu-link" href="/app">
+        <div class="bb-menu-link-ico">🚁</div>
+        <div class="bb-menu-link-body"><div class="bb-menu-link-title">Drone Analyzer</div><div class="bb-menu-link-sub">วิเคราะห์ build และสเปคโดรน</div></div>
+      </a>
+      <a class="bb-menu-link" href="/pid-advisor">
+        <div class="bb-menu-link-ico">💊</div>
+        <div class="bb-menu-link-body"><div class="bb-menu-link-title">PID Advisor</div><div class="bb-menu-link-sub">วินิจฉัยอาการและจูน PID</div></div>
+      </a>
+      <a class="bb-menu-link" href="/rates-visualizer">
+        <div class="bb-menu-link-ico">📈</div>
+        <div class="bb-menu-link-body"><div class="bb-menu-link-title">Rates Visualizer</div><div class="bb-menu-link-sub">ดู response curve แบบเรียลไทม์</div></div>
+      </a>
+      <a class="bb-menu-link" href="/about">
+        <div class="bb-menu-link-ico">ℹ️</div>
+        <div class="bb-menu-link-body"><div class="bb-menu-link-title">About</div><div class="bb-menu-link-sub">ข้อมูลโปรเจกต์และทีม</div></div>
+      </a>
+      <a class="bb-menu-link" href="/changelog">
+        <div class="bb-menu-link-ico">🧾</div>
+        <div class="bb-menu-link-body"><div class="bb-menu-link-title">Changelog</div><div class="bb-menu-link-sub">ดูการอัปเดตล่าสุด</div></div>
+      </a>
+    </div>
   </div>
 </div>
-
 
 <div class="page-wrap">
 
