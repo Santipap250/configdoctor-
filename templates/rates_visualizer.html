@@ -6,7 +6,7 @@
 <title>Rates Visualizer — OBIXConfig Doctor</title>
 {% set og_title       = "Rates Visualizer — OBIXConfig Doctor" %}
 {% set og_description = "ปรับและดู stick response curve แบบ real-time รองรับ ACTUAL / BF / KISS — แยก Roll Pitch Yaw ครบ" %}
-{% set og_url         = "https://configdoctor.onrender.com/rates-visualizer" %}
+{% set og_url         = url_for("rates_visualizer", _external=True) %}
 {% include "partials/og_tags.html" %}
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -169,6 +169,16 @@ input[type=range].yr::-webkit-slider-thumb{background:var(--yaw);box-shadow:0 0 
   font-size:10px;font-weight:600;letter-spacing:.04em;border:1px solid var(--border);
   color:var(--muted2);background:transparent;transition:all .18s;}
 .ghost-btn:hover{border-color:rgba(255,255,255,.2);color:#fff;}
+
+[role="button"]:focus-visible,
+.rv-topbar-btn:focus-visible,
+.rv-chip:focus-visible,
+.cli-copy:focus-visible,
+.ghost-btn:focus-visible,
+.import-btn:focus-visible {
+  outline: 2px solid rgba(0,232,122,0.65);
+  outline-offset: 2px;
+}
 .canvas-wrap{position:relative;}
 canvas#rv{width:100%;display:block;cursor:crosshair;}
 .tooltip{position:absolute;pointer-events:none;display:none;
@@ -251,7 +261,7 @@ canvas#rv{width:100%;display:block;cursor:crosshair;}
 {% include "partials/nav.html" %}
 {% include "partials/page_actions.html" %}
 
-<div class="rv-menu-overlay" id="rvMenu" aria-hidden="true">
+<div class="rv-menu-overlay" id="rvMenu" aria-hidden="true" aria-label="Rates visualizer menu">
   <div class="rv-menu-panel">
     <div class="rv-menu-head">
       <div>
@@ -263,34 +273,34 @@ canvas#rv{width:100%;display:block;cursor:crosshair;}
     <div class="rv-menu-grid">
       <div class="rv-menu-group">
         <div class="rv-menu-sec">Analyze</div>
-        <a class="rv-menu-link" href="/app"><span class="rv-menu-ico">🚀</span><span class="rv-menu-copy"><span class="rv-menu-name">Drone Analyzer</span><span class="rv-menu-meta">Analyze PID · Filter · Motor · Flight time</span></span><span class="rv-menu-badge">core</span></a>
-        <a class="rv-menu-link" href="/blackbox"><span class="rv-menu-ico">📊</span><span class="rv-menu-copy"><span class="rv-menu-name">Blackbox CSV Analyzer</span><span class="rv-menu-meta">Decode logs, oscillation and battery sag</span></span><span class="rv-menu-badge">hot</span></a>
+        <a class="rv-menu-link" href="{{ url_for('index') }}"><span class="rv-menu-ico">🚀</span><span class="rv-menu-copy"><span class="rv-menu-name">Drone Analyzer</span><span class="rv-menu-meta">Analyze PID · Filter · Motor · Flight time</span></span><span class="rv-menu-badge">core</span></a>
+        <a class="rv-menu-link" href="{{ url_for('blackbox_page') }}"><span class="rv-menu-ico">📊</span><span class="rv-menu-copy"><span class="rv-menu-name">Blackbox CSV Analyzer</span><span class="rv-menu-meta">Decode logs, oscillation and battery sag</span></span><span class="rv-menu-badge">hot</span></a>
       </div>
       <div class="rv-menu-group">
         <div class="rv-menu-sec">Tuning</div>
-        <a class="rv-menu-link" href="/cli_surgeon"><span class="rv-menu-ico">🩻</span><span class="rv-menu-copy"><span class="rv-menu-name">CLI Surgeon</span><span class="rv-menu-meta">Validate diff all / dump and generate safe CLI</span></span></a>
-        <a class="rv-menu-link" href="/pid-advisor"><span class="rv-menu-ico">🩺</span><span class="rv-menu-copy"><span class="rv-menu-name">PID Advisor</span><span class="rv-menu-meta">Symptom-based PID tuning guidance</span></span></a>
-        <a class="rv-menu-link" href="/rates-visualizer"><span class="rv-menu-ico">📈</span><span class="rv-menu-copy"><span class="rv-menu-name">Rates Visualizer</span><span class="rv-menu-meta">Stick response curves, presets and compare modes</span></span><span class="rv-menu-badge">open</span></a>
+        <a class="rv-menu-link" href="{{ url_for('cli_surgeon') }}"><span class="rv-menu-ico">🩻</span><span class="rv-menu-copy"><span class="rv-menu-name">CLI Surgeon</span><span class="rv-menu-meta">Validate diff all / dump and generate safe CLI</span></span></a>
+        <a class="rv-menu-link" href="{{ url_for('pid_advisor') }}"><span class="rv-menu-ico">🩺</span><span class="rv-menu-copy"><span class="rv-menu-name">PID Advisor</span><span class="rv-menu-meta">Symptom-based PID tuning guidance</span></span></a>
+        <a class="rv-menu-link" href="{{ url_for('rates_visualizer') }}"><span class="rv-menu-ico">📈</span><span class="rv-menu-copy"><span class="rv-menu-name">Rates Visualizer</span><span class="rv-menu-meta">Stick response curves, presets and compare modes</span></span><span class="rv-menu-badge">open</span></a>
       </div>
       <div class="rv-menu-group">
         <div class="rv-menu-sec">Optimize</div>
-        <a class="rv-menu-link" href="/rpm-filter"><span class="rv-menu-ico">⚙️</span><span class="rv-menu-copy"><span class="rv-menu-name">RPM Filter Calculator</span><span class="rv-menu-meta">Harmonics and filter recommendations</span></span></a>
-        <a class="rv-menu-link" href="/motor-prop"><span class="rv-menu-ico">🧭</span><span class="rv-menu-copy"><span class="rv-menu-name">Motor × Prop Recommender</span><span class="rv-menu-meta">Match motors and props to the build</span></span></a>
-        <a class="rv-menu-link" href="/battery-health"><span class="rv-menu-ico">🔋</span><span class="rv-menu-copy"><span class="rv-menu-name">Battery Health</span><span class="rv-menu-meta">Efficiency, sag and safe cell range</span></span></a>
-        <a class="rv-menu-link" href="/motor-thermal"><span class="rv-menu-ico">🌡️</span><span class="rv-menu-copy"><span class="rv-menu-name">Motor Thermal</span><span class="rv-menu-meta">Estimate heat risk under load</span></span></a>
+        <a class="rv-menu-link" href="{{ url_for('rpm_filter') }}"><span class="rv-menu-ico">⚙️</span><span class="rv-menu-copy"><span class="rv-menu-name">RPM Filter Calculator</span><span class="rv-menu-meta">Harmonics and filter recommendations</span></span></a>
+        <a class="rv-menu-link" href="{{ url_for('motor_prop') }}"><span class="rv-menu-ico">🧭</span><span class="rv-menu-copy"><span class="rv-menu-name">Motor × Prop Recommender</span><span class="rv-menu-meta">Match motors and props to the build</span></span></a>
+        <a class="rv-menu-link" href="{{ url_for('battery_health') }}"><span class="rv-menu-ico">🔋</span><span class="rv-menu-copy"><span class="rv-menu-name">Battery Health</span><span class="rv-menu-meta">Efficiency, sag and safe cell range</span></span></a>
+        <a class="rv-menu-link" href="{{ url_for('motor_thermal') }}"><span class="rv-menu-ico">🌡️</span><span class="rv-menu-copy"><span class="rv-menu-name">Motor Thermal</span><span class="rv-menu-meta">Estimate heat risk under load</span></span></a>
       </div>
       <div class="rv-menu-group">
         <div class="rv-menu-sec">Community</div>
-        <a class="rv-menu-link" href="/landing"><span class="rv-menu-ico">🏠</span><span class="rv-menu-copy"><span class="rv-menu-name">Landing</span><span class="rv-menu-meta">Back to the main platform</span></span></a>
-        <a class="rv-menu-link" href="/about"><span class="rv-menu-ico">ℹ️</span><span class="rv-menu-copy"><span class="rv-menu-name">About</span><span class="rv-menu-meta">Project story and current status</span></span></a>
-        <a class="rv-menu-link" href="/changelog"><span class="rv-menu-ico">🧾</span><span class="rv-menu-copy"><span class="rv-menu-name">Changelog</span><span class="rv-menu-meta">Version history and release notes</span></span></a>
-        <a class="rv-menu-link" href="/team"><span class="rv-menu-ico">👥</span><span class="rv-menu-copy"><span class="rv-menu-name">Team</span><span class="rv-menu-meta">Creators and AI partners</span></span></a>
+        <a class="rv-menu-link" href="{{ url_for('landing') }}"><span class="rv-menu-ico">🏠</span><span class="rv-menu-copy"><span class="rv-menu-name">Landing</span><span class="rv-menu-meta">Back to the main platform</span></span></a>
+        <a class="rv-menu-link" href="{{ url_for('about') }}"><span class="rv-menu-ico">ℹ️</span><span class="rv-menu-copy"><span class="rv-menu-name">About</span><span class="rv-menu-meta">Project story and current status</span></span></a>
+        <a class="rv-menu-link" href="{{ url_for('changelog') }}"><span class="rv-menu-ico">🧾</span><span class="rv-menu-copy"><span class="rv-menu-name">Changelog</span><span class="rv-menu-meta">Version history and release notes</span></span></a>
+        <a class="rv-menu-link" href="{{ url_for('team') }}"><span class="rv-menu-ico">👥</span><span class="rv-menu-copy"><span class="rv-menu-name">Team</span><span class="rv-menu-meta">Creators and AI partners</span></span></a>
       </div>
     </div>
     <div class="rv-menu-footer">
-      <a class="rv-chip" href="/app">🚀 Start Analysis</a>
-      <a class="rv-chip" href="/blackbox">📊 Blackbox</a>
-      <a class="rv-chip" href="/cli_surgeon">🩻 CLI</a>
+      <a class="rv-chip" href="{{ url_for('index') }}">🚀 Start Analysis</a>
+      <a class="rv-chip" href="{{ url_for('blackbox_page') }}">📊 Blackbox</a>
+      <a class="rv-chip" href="{{ url_for('cli_surgeon') }}">🩻 CLI</a>
     </div>
   </div>
 </div>
@@ -298,7 +308,7 @@ canvas#rv{width:100%;display:block;cursor:crosshair;}
 <div class="wrap" style="padding-top:76px;">
   <div class="rv-topbar">
     <div class="rv-topbar-left">
-      <a class="rv-topbar-btn" href="/landing" aria-label="Back to landing">BACK</a>
+      <a class="rv-topbar-btn" href="{{ url_for('landing') }}" aria-label="Back to landing">BACK</a>
       <div class="rv-topbar-brand">
         <div class="rv-topbar-eyebrow">ConfigDoctor · Flight Computer</div>
         <div class="rv-topbar-title">Rates <em>Visualizer</em></div>
@@ -339,9 +349,9 @@ canvas#rv{width:100%;display:block;cursor:crosshair;}
         <div class="psec">
           <div class="sec-title">Axis — เลือกแกน</div>
           <div class="axis-tabs">
-            <div class="atab on" data-a="roll"  onclick="setAxis('roll')"><span class="dot"></span>ROLL</div>
-            <div class="atab"    data-a="pitch" onclick="setAxis('pitch')"><span class="dot"></span>PITCH</div>
-            <div class="atab"    data-a="yaw"   onclick="setAxis('yaw')"><span class="dot"></span>YAW</div>
+            <div class="atab on" data-a="roll" onclick="setAxis('roll')" role="button" tabindex="0" aria-pressed="true"><span class="dot"></span>ROLL</div>
+            <div class="atab"    data-a="pitch" onclick="setAxis('pitch')" role="button" tabindex="0" aria-pressed="false"><span class="dot"></span>PITCH</div>
+            <div class="atab"    data-a="yaw"   onclick="setAxis('yaw')" role="button" tabindex="0" aria-pressed="false"><span class="dot"></span>YAW</div>
           </div>
           <label class="link-row">
             <input type="checkbox" id="lnk" onchange="update()">
@@ -353,9 +363,9 @@ canvas#rv{width:100%;display:block;cursor:crosshair;}
         <div class="psec">
           <div class="sec-title">Rate Type</div>
           <div class="rtabs">
-            <div class="rtab on" onclick="setRT('actual')">ACTUAL</div>
-            <div class="rtab"    onclick="setRT('bf')">BF Legacy</div>
-            <div class="rtab"    onclick="setRT('kiss')">KISS</div>
+            <div class="rtab on" onclick="setRT('actual')" role="button" tabindex="0" aria-pressed="true">ACTUAL</div>
+            <div class="rtab"    onclick="setRT('bf')" role="button" tabindex="0" aria-pressed="false">BF Legacy</div>
+            <div class="rtab"    onclick="setRT('kiss')" role="button" tabindex="0" aria-pressed="false">KISS</div>
           </div>
         </div>
 
@@ -474,12 +484,12 @@ canvas#rv{width:100%;display:block;cursor:crosshair;}
         <div class="psec">
           <div class="sec-title">Presets</div>
           <div class="prow">
-            <div class="pbtn" onclick="applyPreset('beginner')">🟢 Beginner</div>
-            <div class="pbtn" onclick="applyPreset('freestyle')">🔵 Freestyle</div>
-            <div class="pbtn" onclick="applyPreset('race')">🔴 Race</div>
-            <div class="pbtn" onclick="applyPreset('smooth')">🎬 Cinematic</div>
-            <div class="pbtn" onclick="applyPreset('longrange')">🟡 Long Range</div>
-            <div class="pbtn" onclick="applyPreset('locked')">🎯 Locked-in</div>
+            <div class="pbtn" onclick="applyPreset('beginner')" role="button" tabindex="0">🟢 Beginner</div>
+            <div class="pbtn" onclick="applyPreset('freestyle')" role="button" tabindex="0">🔵 Freestyle</div>
+            <div class="pbtn" onclick="applyPreset('race')" role="button" tabindex="0">🔴 Race</div>
+            <div class="pbtn" onclick="applyPreset('smooth')" role="button" tabindex="0">🎬 Cinematic</div>
+            <div class="pbtn" onclick="applyPreset('longrange')" role="button" tabindex="0">🟡 Long Range</div>
+            <div class="pbtn" onclick="applyPreset('locked')" role="button" tabindex="0">🎯 Locked-in</div>
           </div>
         </div>
       </div>
@@ -511,9 +521,9 @@ set roll_expo = 15 ..."></textarea>
         <div class="chead-l">
           <span class="ctitle">Response Curve</span>
           <div class="ovr-btns">
-            <div class="obtn roll  on" data-a="roll"  onclick="togOvr('roll')">● R</div>
-            <div class="obtn pitch on" data-a="pitch" onclick="togOvr('pitch')">● P</div>
-            <div class="obtn yaw  on" data-a="yaw"   onclick="togOvr('yaw')">● Y</div>
+            <div class="obtn roll  on" data-a="roll"  onclick="togOvr('roll')" role="button" tabindex="0" aria-pressed="true">● R</div>
+            <div class="obtn pitch on" data-a="pitch" onclick="togOvr('pitch')" role="button" tabindex="0" aria-pressed="true">● P</div>
+            <div class="obtn yaw  on" data-a="yaw"   onclick="togOvr('yaw')" role="button" tabindex="0" aria-pressed="true">● Y</div>
           </div>
         </div>
         <button class="ghost-btn" onclick="saveGhost()">👻 Save Ghost</button>
@@ -542,7 +552,7 @@ set roll_expo = 15 ..."></textarea>
     <div class="ggrid">
 
       <div class="gc" id="g-rc">
-        <div class="gch" onclick="tog('rc')">
+        <div class="gch" onclick="tog('rc')" role="button" tabindex="0" aria-expanded="false">
           <div class="gi r">🎮</div>
           <div><div class="gcname">RC Rate — ความไวตรงกลาง</div><div class="gcsub">Center sensitivity</div></div>
           <span class="gchev">▾</span>
@@ -561,7 +571,7 @@ set roll_expo = 15 ..."></textarea>
       </div>
 
       <div class="gc" id="g-sr">
-        <div class="gch" onclick="tog('sr')">
+        <div class="gch" onclick="tog('sr')" role="button" tabindex="0" aria-expanded="false">
           <div class="gi r">📈</div>
           <div><div class="gcname">Super Rate — ความไวขอบ stick</div><div class="gcsub">Edge sensitivity · curve shape</div></div>
           <span class="gchev">▾</span>
@@ -580,7 +590,7 @@ set roll_expo = 15 ..."></textarea>
       </div>
 
       <div class="gc" id="g-ex">
-        <div class="gch" onclick="tog('ex')">
+        <div class="gch" onclick="tog('ex')" role="button" tabindex="0" aria-expanded="false">
           <div class="gi p">🪄</div>
           <div><div class="gcname">Expo — ความนุ่มตรงกลาง</div><div class="gcsub">Dead zone feel · center softness</div></div>
           <span class="gchev">▾</span>
@@ -599,7 +609,7 @@ set roll_expo = 15 ..."></textarea>
       </div>
 
       <div class="gc" id="g-ax">
-        <div class="gch" onclick="tog('ax')">
+        <div class="gch" onclick="tog('ax')" role="button" tabindex="0" aria-expanded="false">
           <div class="gi w">🔄</div>
           <div><div class="gcname">Roll / Pitch / Yaw</div><div class="gcsub">ทำไมต้องปรับแยกแต่ละแกน</div></div>
           <span class="gchev">▾</span>
@@ -613,7 +623,7 @@ set roll_expo = 15 ..."></textarea>
       </div>
 
       <div class="gc" id="g-cmp">
-        <div class="gch" onclick="tog('cmp')">
+        <div class="gch" onclick="tog('cmp')" role="button" tabindex="0" aria-expanded="false">
           <div class="gi y">⚡</div>
           <div><div class="gcname">ตารางเปรียบเทียบ Presets</div><div class="gcsub">แต่ละสไตล์ต่างกันยังไง</div></div>
           <span class="gchev">▾</span>
@@ -632,7 +642,7 @@ set roll_expo = 15 ..."></textarea>
       </div>
 
       <div class="gc" id="g-steps">
-        <div class="gch" onclick="tog('steps')">
+        <div class="gch" onclick="tog('steps')" role="button" tabindex="0" aria-expanded="false">
           <div class="gi w">🛠️</div>
           <div><div class="gcname">ขั้นตอน tune Rates</div><div class="gcsub">เริ่มต้นยังไงไม่ให้งง</div></div>
           <span class="gchev">▾</span>
@@ -777,7 +787,11 @@ function classifyRate(snapshot){
 
 function setAxis(ax){
   saveSl(); curAx=ax; loadSl(ax);
-  document.querySelectorAll('.atab').forEach(t=>t.classList.toggle('on',t.dataset.a===ax));
+  document.querySelectorAll('.atab').forEach(t=>{
+    const active=t.dataset.a===ax;
+    t.classList.toggle('on',active);
+    t.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
   const c=ax==='roll'?'rr':ax==='pitch'?'pr':'yr';
   document.querySelectorAll('input[type=range]').forEach(i=>{i.className=i.className.replace(/\b(rr|pr|yr)\b/,c);});
   document.querySelectorAll('.cval').forEach(v=>{v.className=v.className.replace(/\b(roll|pitch|yaw)\b/,ax);});
@@ -787,7 +801,11 @@ function setAxis(ax){
 
 function setRT(t){
   rt=t;
-  document.querySelectorAll('.rtab').forEach((el,i)=>el.classList.toggle('on',['actual','bf','kiss'][i]===t));
+  document.querySelectorAll('.rtab').forEach((el,i)=>{
+    const active=['actual','bf','kiss'][i]===t;
+    el.classList.toggle('on',active);
+    el.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
   document.getElementById('ca').style.display=t==='actual'?'':'none';
   document.getElementById('cb').style.display=t==='bf'?'':'none';
   document.getElementById('ck').style.display=t==='kiss'?'':'none';
@@ -967,7 +985,10 @@ function saveGhost(){
 function togOvr(ax){
   ovr[ax]=!ovr[ax];
   const b=document.querySelector(`.obtn[data-a="${ax}"]`);
-  if(b)b.classList.toggle('on',ovr[ax]);
+  if(b){
+    b.classList.toggle('on',ovr[ax]);
+    b.setAttribute('aria-pressed', ovr[ax] ? 'true' : 'false');
+  }
   draw();
 }
 
@@ -1121,12 +1142,23 @@ function toggleMenu(open){
 }
 document.addEventListener('keydown', e=>{
   if(e.key==='Escape') toggleMenu(false);
+  if((e.key==='Enter' || e.key===' ') && e.target && e.target.matches('[role="button"]')){
+    e.preventDefault();
+    e.target.click();
+  }
 });
 document.getElementById('rvMenu')?.addEventListener('click', e=>{
   if(e.target.id === 'rvMenu') toggleMenu(false);
 });
 /* ── Guide accordion ── */
-function tog(id){document.getElementById('g-'+id).classList.toggle('open');}
+function tog(id){
+  const el=document.getElementById('g-'+id);
+  if(!el) return;
+  el.classList.toggle('open');
+  const expanded=el.classList.contains('open');
+  const head=el.querySelector('.gch');
+  if(head) head.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+}
 
 /* ── Toast ── */
 function toast(msg){
