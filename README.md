@@ -110,32 +110,7 @@ configdoctor
     │   └── military.css
     └── js
         └── military.js
-
-⚙️ Installation
-1) Clone repository
-Bash
-git clone https://github.com/Santipap250/configdoctor.git
-2) เข้าไปในโฟลเดอร์โปรเจกต์
-Bash
-cd configdoctor
-3) ติดตั้ง dependencies
-Bash
-pip install -r requirements.txt
-4) รันโปรเจกต์
-Bash
-python app.py
-5) เปิดเว็บ
-calhst
-calhostalhost:5000
-
-🌍 Deployment
-โปรเจกต์นี้ deploy ผ่าน Render
-ขั้นตอนการ deploy
-Fork repository
-เชื่อมกับ Render
-สร้าง Web Service
-Deploy โปรเจกต์
-
+``````
 🔮 Future Features
 แผนพัฒนาในอนาคตของ ConfigDoctor
 AI PID Tuning
@@ -144,6 +119,7 @@ Motor & Propeller Calculator
 Blackbox Log Analyzer
 FPV Setup Guide
 Drone Build Assistant
+``````
 👨‍💻 Developer
 Developed by
 SanTiPapHacker
@@ -156,6 +132,4 @@ ConfigDoctor AI
 Copyright © 2026 Santipap.
 All rights reserved.
 This software, source code, design, graphics, documentation, and related materials are the intellectual property of Santipap.
-Unauthorized copying, modification, distribution, resale, reverse engineering, or commercial use of this project without written permission is prohiSupport
-⭐reverseกด ⭐ Star บน GitHub เพื่อสนับสนุนโปรเจกต์
-ขอบคุณที่ใช้งาน ConfigDoctor 🚀
+Unauthorized copying, modification, distribution, resale, reverse engineering, or commercial use of this project without written permission is prohibited.์
