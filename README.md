@@ -1,20 +1,23 @@
-🚀 ConfigDoctor
+# 🚀 ConfigDoctor
+## FPV Drone Configuration Analyzer
 
-FPV Drone Configuration Analyzer
+**ConfigDoctor** คือเว็บเครื่องมือสำหรับช่วยวิเคราะห์และตรวจสอบการตั้งค่า (Configuration) ของโดรน FPV และระบบที่เกี่ยวข้อง  
+เพื่อช่วยให้ผู้ใช้สามารถปรับแต่ง แก้ไข และเข้าใจค่าต่าง ๆ ได้ง่ายขึ้น
 
-ConfigDoctor คือเว็บเครื่องมือสำหรับช่วยวิเคราะห์การตั้งค่า (Configuration) ของโดรน FPV และระบบต่าง ๆ เพื่อให้ผู้ใช้สามารถตรวจสอบ ปรับแต่ง และแก้ไขค่าต่าง ๆ ได้ง่ายขึ้น
-
-โปรเจกต์นี้ถูกพัฒนาเพื่อช่วยทั้ง มือใหม่และนักบิน FPV ระดับมืออาชีพ ให้เข้าใจการตั้งค่าโดรนได้ง่ายขึ้น และลดปัญหาจากการตั้งค่าที่ผิดพลาด
-
-🌐 Live Website
-https://configdoctor.onrender.com
+โปรเจกต์นี้ถูกออกแบบมาเพื่อรองรับทั้ง **มือใหม่** และ **นักบิน FPV ระดับโปร**  
+โดยมุ่งเน้นให้การตั้งค่าโดรนเป็นเรื่องที่เข้าใจง่ายขึ้น ลดความผิดพลาด และช่วยให้การจูนโดรนมีประสิทธิภาพมากขึ้น
 
 ---
 
-✨ Features
+## 🌐 Live Website
 
-🔧 Drone Configuration Analysis
+[https://configdoctor.onrender.com](https://configdoctor.onrender.com)
 
+---
+
+## ✨ Features
+
+### 🔧 Drone Configuration Analysis
 ตรวจสอบค่าการตั้งค่าโดรน เช่น
 
 - Motor KV
@@ -23,12 +26,11 @@ https://configdoctor.onrender.com
 - PID Configuration
 - Flight Controller Settings
 
-ระบบจะช่วยวิเคราะห์และแนะนำค่าที่เหมาะสม
+ระบบจะช่วยวิเคราะห์และแนะนำค่าที่เหมาะสมกับการใช้งาน
 
 ---
 
-📊 Drone Performance Calculation
-
+### 📊 Drone Performance Calculation
 คำนวณข้อมูลสำคัญของโดรน เช่น
 
 - Thrust Ratio
@@ -38,35 +40,32 @@ https://configdoctor.onrender.com
 
 ---
 
-🧠 Smart Suggestion System
+### 🧠 Smart Suggestion System
+ระบบแนะนำค่าที่เหมาะสมตามสถานการณ์ใช้งาน เช่น
 
-ระบบจะช่วยแนะนำการตั้งค่าที่เหมาะสม เช่น
-
-- PID tuning
-- Motor compatibility
-- Battery configuration
-- Frame recommendation
+- PID Tuning
+- Motor Compatibility
+- Battery Configuration
+- Frame Recommendation
 
 ---
 
-🪖 Military Mode (Experimental)
-
+### 🪖 Military Mode (Experimental)
 โหมดพิเศษสำหรับการวิเคราะห์ระบบโดรนขั้นสูง
 
-คุณสมบัติ
+คุณสมบัติหลัก:
 
-- Drone system analysis
-- Flight assessment
-- Pre-flight checklist
-- Simulation tools
+- Drone System Analysis
+- Flight Assessment
+- Pre-flight Checklist
+- Simulation Tools
 
-⚠️ โหมดนี้อยู่ในขั้นทดลอง
+> ⚠️ โหมดนี้อยู่ในขั้นทดลอง
 
 ---
 
-📱 Mobile Friendly
-
-เว็บไซต์ถูกออกแบบให้ใช้งานได้ดีบน
+### 📱 Mobile Friendly
+เว็บไซต์ถูกออกแบบให้ใช้งานได้ดีบนทุกอุปกรณ์ เช่น
 
 - โทรศัพท์มือถือ
 - แท็บเล็ต
@@ -74,130 +73,89 @@ https://configdoctor.onrender.com
 
 ---
 
-🖥️ Technology Stack
+## 🖥️ Technology Stack
 
-โปรเจกต์นี้ใช้เทคโนโลยีดังนี้
-
-Frontend
-
+### Frontend
 - HTML5
 - CSS3
 - JavaScript
 
-Backend
-
+### Backend
 - Python
 - Flask
 
-Hosting
-
+### Hosting
 - Render
 
-Version Control
-
+### Version Control
 - GitHub
 
 ---
 
-📂 Project Structure
+## 📂 Project Structure
 
+```text
 configdoctor
 │
 ├── app.py
+├── requirements.txt
+├── README.md
 │
 ├── templates
 │   ├── index.html
 │   └── military_mode.html
 │
-├── static
-│   ├── css
-│   │   └── military.css
-│   │
-│   └── js
-│       └── military.js
-│
-└── README.md
-
----
+└── static
+    ├── css
+    │   └── military.css
+    └── js
+        └── military.js
 
 ⚙️ Installation
-
-Clone repository
-
-git clone https://github.com/Santipap250/configdoctor-.git
-
-เข้าไปในโฟลเดอร์
-
-cd configdoctor-
-
-ติดตั้ง dependencies
-
+1) Clone repository
+Bash
+git clone https://github.com/Santipap250/configdoctor.git
+2) เข้าไปในโฟลเดอร์โปรเจกต์
+Bash
+cd configdoctor
+3) ติดตั้ง dependencies
+Bash
 pip install -r requirements.txt
-
-รันโปรเจกต์
-
+4) รันโปรเจกต์
+Bash
 python app.py
-
-เปิดเว็บ
-
-http://localhost:5000
-
----
+5) เปิดเว็บ
+calhst
+calhostalhost:5000
 
 🌍 Deployment
-
-เว็บไซต์นี้ deploy โดยใช้
-
-Render
-
-หากต้องการ deploy เอง
-
-1. Fork repository
-2. เชื่อมกับ Render
-3. Deploy เป็น Web Service
-
----
+โปรเจกต์นี้ deploy ผ่าน Render
+ขั้นตอนการ deploy
+Fork repository
+เชื่อมกับ Render
+สร้าง Web Service
+Deploy โปรเจกต์
 
 🔮 Future Features
-
-แผนพัฒนาในอนาคต
-
-- AI PID Tuning
-- FPV Drone Database
-- Motor & Propeller Calculator
-- Blackbox Log Analyzer
-- FPV Setup Guide
-- Drone Build Assistant
-
----
-
+แผนพัฒนาในอนาคตของ ConfigDoctor
+AI PID Tuning
+FPV Drone Database
+Motor & Propeller Calculator
+Blackbox Log Analyzer
+FPV Setup Guide
+Drone Build Assistant
 👨‍💻 Developer
-
 Developed by
-
 SanTiPapHacker
-
 GitHub
-https://github.com/Santipap250
-
+https://github.com/Santipap250⁠�
 Project
 OBIX Config Lab
-
 ConfigDoctor AI
-
+© Copyright
 Copyright © 2026 Santipap.
-
 All rights reserved.
-
 This software, source code, design, graphics, documentation, and related materials are the intellectual property of Santipap.
-
-Unauthorized copying, modification, distribution, resale, reverse engineering, or commercial use of this project without written permission is prohibited.
----
-
-⭐ Support
-
-หากโปรเจกต์นี้มีประโยชน์
-
-ช่วยกด ⭐ Star บน GitHub เพื่อสนับสนุนโปรเจกต์
-
+Unauthorized copying, modification, distribution, resale, reverse engineering, or commercial use of this project without written permission is prohiSupport
+⭐reverseกด ⭐ Star บน GitHub เพื่อสนับสนุนโปรเจกต์
 ขอบคุณที่ใช้งาน ConfigDoctor 🚀
