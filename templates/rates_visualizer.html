@@ -278,7 +278,7 @@ canvas#rv{width:100%;display:block;cursor:crosshair;}
       </div>
       <div class="rv-menu-group">
         <div class="rv-menu-sec">Tuning</div>
-        <a class="rv-menu-link" href="{{ url_for('cli_surgeon') }}"><span class="rv-menu-ico">🩻</span><span class="rv-menu-copy"><span class="rv-menu-name">CLI Surgeon</span><span class="rv-menu-meta">Validate diff all / dump and generate safe CLI</span></span></a>
+        <a class="rv-menu-link" href="{{ url_for('cli_surgeon_page') }}"><span class="rv-menu-ico">🩻</span><span class="rv-menu-copy"><span class="rv-menu-name">CLI Surgeon</span><span class="rv-menu-meta">Validate diff all / dump and generate safe CLI</span></span></a>
         <a class="rv-menu-link" href="{{ url_for('pid_advisor') }}"><span class="rv-menu-ico">🩺</span><span class="rv-menu-copy"><span class="rv-menu-name">PID Advisor</span><span class="rv-menu-meta">Symptom-based PID tuning guidance</span></span></a>
         <a class="rv-menu-link" href="{{ url_for('rates_visualizer') }}"><span class="rv-menu-ico">📈</span><span class="rv-menu-copy"><span class="rv-menu-name">Rates Visualizer</span><span class="rv-menu-meta">Stick response curves, presets and compare modes</span></span><span class="rv-menu-badge">open</span></a>
       </div>
@@ -300,7 +300,7 @@ canvas#rv{width:100%;display:block;cursor:crosshair;}
     <div class="rv-menu-footer">
       <a class="rv-chip" href="{{ url_for('index') }}">🚀 Start Analysis</a>
       <a class="rv-chip" href="{{ url_for('blackbox_page') }}">📊 Blackbox</a>
-      <a class="rv-chip" href="{{ url_for('cli_surgeon') }}">🩻 CLI</a>
+      <a class="rv-chip" href="{{ url_for('cli_surgeon_page') }}">🩻 CLI</a>
     </div>
   </div>
 </div>
