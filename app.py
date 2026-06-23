@@ -226,6 +226,15 @@ if CSRF_AVAILABLE:
 
 # SECURITY PATCH: SESSION_COOKIE_SECURE=True by default; set FORCE_INSECURE=1 only for local HTTP dev
 FORCE_INSECURE = os.environ.get("FORCE_INSECURE", "0") in ("1", "true", "True")
+
+# ── BASE_URL: single source of truth for all absolute URL generation ──
+_BASE_URL = os.environ.get("BASE_URL", "https://configdoctor.onrender.com").rstrip("/")
+
+
+@app.context_processor
+def inject_base_url():
+    """Inject BASE_URL into every Jinja2 template context."""
+    return {"BASE_URL": _BASE_URL}
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',
@@ -1071,7 +1080,8 @@ def blackbox_page():
 @_rate("10 per minute;100 per day")
 def blackbox_analyze():
     try:
-        if not request.is_json and not request.content_type.startswith('application/json'):
+        content_type = request.content_type or ""
+        if not request.is_json and not content_type.startswith("application/json"):
             return jsonify({"error": "Content-Type must be application/json"}), 415
         data     = request.get_json(force=True) or {}
         csv_text = data.get('csv', '')
@@ -1103,7 +1113,8 @@ def fpv_trainer():
 @_rate("20 per minute;200 per day")
 def analyze_cli():
     try:
-        if not request.is_json and not request.content_type.startswith('application/json'):
+        content_type = request.content_type or ""
+        if not request.is_json and not content_type.startswith("application/json"):
             return jsonify({"error": "Content-Type must be application/json"}), 415
         data = request.get_json(force=True) or {}
         dump = data.get('dump', '')
@@ -1143,7 +1154,8 @@ def analyze_cli():
 def compare_cli():
     """Compare two CLI dumps and return diff."""
     try:
-        if not request.is_json and not request.content_type.startswith('application/json'):
+        content_type = request.content_type or ""
+        if not request.is_json and not content_type.startswith("application/json"):
             return jsonify({"error": "Content-Type must be application/json"}), 415
         data  = request.get_json(force=True) or {}
         dump_a = data.get('dump_a', '')
@@ -1349,7 +1361,7 @@ def robots_txt():
         "User-agent: AhrefsBot\nDisallow: /\n\n"
         "User-agent: MJ12bot\nDisallow: /\n\n"
         "\n"
-        "Sitemap: https://configdoctor.onrender.com/sitemap.xml\n"
+        f"Sitemap: {_BASE_URL}/sitemap.xml\n"
     )
     from flask import Response
     resp = Response(content, mimetype="text/plain")
@@ -1361,7 +1373,7 @@ def robots_txt():
 def sitemap_xml():
     from flask import Response
     today = datetime.now().strftime("%Y-%m-%d")
-    if _SITEMAP_CACHE.get("date") == today and _SITEMAP_CACHE.get("xml"):
+    if _SITEMAP_CACHE.get("date") == today and _SITEMAP_CACHE.get("base") == _BASE_URL and _SITEMAP_CACHE.get("xml"):
         xml = _SITEMAP_CACHE["xml"]
     else:
         pages = [
@@ -1396,7 +1408,7 @@ def sitemap_xml():
             ("/changelog",        "weekly",  "0.5"),
             ("/military-uas",     "weekly",  "0.8"),
         ]
-        base = "https://configdoctor.onrender.com"
+        base = _BASE_URL
         urls = "\n".join(
             f"""  <url>
     <loc>{base}{loc}</loc>
@@ -1412,6 +1424,7 @@ def sitemap_xml():
 </urlset>"""
         _SITEMAP_CACHE["xml"] = xml
         _SITEMAP_CACHE["date"] = today
+        _SITEMAP_CACHE["base"] = _BASE_URL
     resp = Response(xml, mimetype="application/xml")
     resp.headers["Cache-Control"] = "public, max-age=86400"
     return resp
