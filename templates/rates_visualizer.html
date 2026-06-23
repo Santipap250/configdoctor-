@@ -4,11 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rates Visualizer — OBIXConfig Doctor</title>
-{% set og_title       = "Rates Visualizer — OBIXConfig Doctor" %}
-{% set og_description = "ปรับและดู stick response curve แบบ real-time รองรับ ACTUAL / BF / KISS — แยก Roll Pitch Yaw ครบ" %}
-{% set og_url         = "https://configdoctor.onrender.com/rates-visualizer" %}
-{% include "partials/og_tags.html" %}
-<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
 
@@ -31,10 +26,107 @@ body{
 }
 
 /* ── Top Bar ── */
+.rv-topbar {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px 18px;
+  background:rgba(3,5,10,0.92);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
+  position:sticky;
+  top:0;
+  z-index:100;
+  flex-wrap:wrap;
+}
+.rv-topbar-left{display:flex;align-items:center;gap:14px;min-width:0;}
+.rv-topbar-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.rv-topbar-brand{min-width:0;}
+.rv-topbar-eyebrow{font-family:var(--font-d);font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
+.rv-topbar-title{font-family:var(--font-d);font-size:18px;font-weight:700;letter-spacing:.04em;color:#f0f6ff;line-height:1.1;}
+.rv-topbar-title em{font-style:normal;color:var(--roll);}
+.rv-topbar-sub{font-size:.78rem;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rv-topbar-chip{
+  display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;
+  font-family:var(--font-d);font-size:10px;font-weight:700;letter-spacing:.08em;
+  color:var(--roll);background:rgba(0,232,122,0.08);border:1px solid rgba(0,232,122,0.2);
+}
 
+.rv-chip,
+.rv-topbar-btn,
+.rv-menu-close,
+.rv-menu-link,
+.rv-menu-footer .rv-chip {
+  -webkit-tap-highlight-color: transparent;
+}
 
-
-
+.rv-menu-overlay{
+  position:fixed;inset:0;z-index:1200;display:none;
+  align-items:flex-start;justify-content:center;
+  padding:18px 14px;
+  background:rgba(3,5,10,.72);
+  backdrop-filter:blur(16px) saturate(120%);
+}
+.rv-menu-overlay.open{display:flex;}
+.rv-menu-panel{
+  width:min(1120px,100%);margin-top:10px;border-radius:20px;
+  border:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(180deg,rgba(8,13,24,.98),rgba(5,8,15,.98));
+  box-shadow:0 24px 80px rgba(0,0,0,.45), 0 0 0 1px rgba(0,232,122,.06) inset;
+  overflow:hidden;
+}
+.rv-menu-head{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:16px;padding:16px 18px 12px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.rv-menu-title{font-family:var(--font-d);font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--roll);}
+.rv-menu-sub{margin-top:6px;color:var(--muted2);font-size:.9rem;max-width:720px;}
+.rv-menu-close{
+  border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#e8eef9;
+  width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
+  cursor:pointer;font-size:18px;line-height:1;
+  transition:transform .18s ease, border-color .18s ease, background .18s ease;
+}
+.rv-menu-close:hover{transform:translateY(-1px);border-color:rgba(0,232,122,.35);background:rgba(0,232,122,.06);}
+.rv-menu-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:14px 18px 18px;}
+@media (max-width: 980px){.rv-menu-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media (max-width: 620px){.rv-menu-grid{grid-template-columns:1fr;}}
+.rv-menu-group{min-width:0;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:12px;}
+.rv-menu-sec{font-family:var(--font-d);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.rv-menu-link{
+  display:flex;align-items:flex-start;gap:10px;text-decoration:none;
+  padding:10px 11px;border-radius:14px;border:1px solid transparent;color:var(--text);
+  transition:transform .16s ease, border-color .16s ease, background .16s ease;
+}
+.rv-menu-link + .rv-menu-link{margin-top:6px;}
+.rv-menu-link:hover{transform:translateY(-1px);background:rgba(255,255,255,.03);border-color:rgba(0,232,122,.14);}
+.rv-menu-ico{width:28px;height:28px;border-radius:10px;display:grid;place-items:center;flex-shrink:0;background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.12);font-size:14px;}
+.rv-menu-copy{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;}
+.rv-menu-name{font-family:var(--font-d);font-size:13px;font-weight:700;letter-spacing:.02em;line-height:1.2;}
+.rv-menu-meta{color:var(--muted2);font-size:11px;line-height:1.35;}
+.rv-menu-badge{align-self:flex-start;font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:4px 7px;border-radius:999px;color:var(--roll);background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.18);}
+.rv-menu-footer{display:flex;flex-wrap:wrap;gap:8px;padding:0 18px 18px;}
+.rv-chip{
+  display:inline-flex;align-items:center;gap:8px;text-decoration:none;
+  padding:10px 14px;border-radius:999px;border:1px solid rgba(0,232,122,.18);
+  background:rgba(0,232,122,.06);color:var(--roll);font-family:var(--font-d);
+  font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  transition:transform .16s ease, background .16s ease, border-color .16s ease;
+}
+.rv-chip:hover{transform:translateY(-1px);background:rgba(0,232,122,.1);border-color:rgba(0,232,122,.3);}
+.rv-topbar-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:none;border:1px solid rgba(255,255,255,0.1);color:var(--muted2);padding:6px 12px;border-radius:8px;cursor:pointer;font-family:var(--font-d);font-size:11px;font-weight:600;letter-spacing:.06em;transition:all .18s;}
+.rv-topbar-btn:hover{border-color:rgba(0,232,122,.3);color:var(--roll);}
+.rv-topbar-btn.menu{min-width:88px;justify-content:flex-start;}
+.rv-dot{width:8px;height:8px;border-radius:50%;background:var(--roll);box-shadow:0 0 10px rgba(0,232,122,.8);}
+@media (max-width: 720px){
+  .rv-menu-overlay{padding:10px;}
+  .rv-menu-head{padding:14px;}
+  .rv-menu-grid{padding:12px 14px 14px;}
+  .rv-menu-footer{padding:0 14px 14px;}
+  .rv-topbar-sub{display:none;}
+}
 
 @keyframes pulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 16px rgba(0,232,122,0.25)}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
@@ -125,6 +217,42 @@ input[type=range].yr::-webkit-slider-thumb{background:var(--yaw);box-shadow:0 0 
   box-shadow:0 0 8px rgba(255,255,255,.4);}
 .plabel{font-family:var(--font-d);font-size:12px;font-weight:700;letter-spacing:.04em;min-width:86px;text-align:right;color:#fff;}
 
+/* ── Intel Card ── */
+.intel-card{
+  margin-top:10px;background:var(--bg2);border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;
+}
+.intel-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 12px;border-bottom:1px solid var(--border);
+}
+.intel-title{
+  font-family:var(--font-d);font-size:10px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+}
+.intel-score{
+  font-family:var(--font-m);font-size:13px;font-weight:700;color:var(--roll);
+}
+.intel-main{
+  display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 12px;
+}
+.intel-pill{
+  background:rgba(255,255,255,0.03);border:1px solid var(--border);
+  border-radius:8px;padding:7px 10px;
+}
+.intel-pill-lbl{
+  font-family:var(--font-d);font-size:9px;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;
+}
+.intel-pill-val{
+  font-family:var(--font-d);font-size:13px;font-weight:700;color:var(--text);
+}
+.intel-desc{
+  padding:8px 12px 10px;font-size:.8rem;color:var(--muted2);line-height:1.55;
+  border-top:1px solid var(--border);
+}
+.intel-pick{color:var(--roll);font-size:.78rem;}
+
 /* ── Presets ── */
 .prow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;}
 .pbtn{padding:6px 4px;text-align:center;background:var(--bg2);border:1px solid var(--border);
@@ -154,7 +282,7 @@ input[type=range].yr::-webkit-slider-thumb{background:var(--yaw);box-shadow:0 0 
 .import-btn:hover{background:rgba(74,158,255,.18);}
 
 /* ── Canvas card ── */
-.ccard{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;position:sticky;top:60px;}
+.ccard{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;position:sticky;top:72px;}
 .chead{display:flex;align-items:center;justify-content:space-between;padding:11px 15px;border-bottom:1px solid var(--border);}
 .chead-l{display:flex;align-items:center;gap:10px;}
 .ctitle{font-family:var(--font-d);font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;}
@@ -169,6 +297,16 @@ input[type=range].yr::-webkit-slider-thumb{background:var(--yaw);box-shadow:0 0 
   font-size:10px;font-weight:600;letter-spacing:.04em;border:1px solid var(--border);
   color:var(--muted2);background:transparent;transition:all .18s;}
 .ghost-btn:hover{border-color:rgba(255,255,255,.2);color:#fff;}
+
+[role="button"]:focus-visible,
+.rv-topbar-btn:focus-visible,
+.rv-chip:focus-visible,
+.cli-copy:focus-visible,
+.ghost-btn:focus-visible,
+.import-btn:focus-visible {
+  outline: 2px solid rgba(0,232,122,0.65);
+  outline-offset: 2px;
+}
 .canvas-wrap{position:relative;}
 canvas#rv{width:100%;display:block;cursor:crosshair;}
 .tooltip{position:absolute;pointer-events:none;display:none;
@@ -229,98 +367,6 @@ canvas#rv{width:100%;display:block;cursor:crosshair;}
 .ptbl tr:last-child td{border-bottom:none;}
 .ptbl .mv{font-family:var(--font-m);font-size:11px;color:var(--pitch);}
 
-/* ── RV Topbar ── */
-.rv-topbar{display:flex;align-items:center;justify-content:space-between;
-  padding:10px 0 18px;gap:12px;flex-wrap:wrap;}
-.rv-topbar-left{display:flex;align-items:center;gap:14px;}
-.rv-topbar-right{display:flex;align-items:center;gap:8px;}
-.rv-topbar-brand{}
-.rv-topbar-eyebrow{font-family:var(--font-d);font-size:9px;font-weight:600;
-  letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
-.rv-topbar-title{font-family:var(--font-d);font-size:20px;font-weight:700;
-  letter-spacing:.04em;color:#f0f6ff;line-height:1.1;}
-.rv-topbar-title em{font-style:normal;color:var(--roll);}
-.rv-topbar-sub{font-size:.75rem;color:var(--muted);margin-top:2px;}
-.rv-topbar-chip{font-family:var(--font-d);font-size:10px;font-weight:700;
-  letter-spacing:.08em;padding:4px 10px;border-radius:100px;
-  background:rgba(0,232,122,.1);border:1px solid rgba(0,232,122,.25);
-  color:var(--roll);}
-.rv-topbar-btn{display:flex;align-items:center;gap:5px;
-  padding:6px 13px;border-radius:6px;font-family:var(--font-d);font-size:11px;
-  font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;
-  background:var(--bg2);border:1px solid var(--border);color:var(--muted2);
-  text-decoration:none;transition:all .18s;}
-.rv-topbar-btn:hover{border-color:rgba(0,232,122,.35);color:var(--roll);}
-.rv-topbar-btn.menu{border-color:rgba(0,232,122,.25);color:var(--roll);}
-.rv-dot{width:7px;height:7px;border-radius:50%;background:var(--roll);
-  animation:blink 2s ease-in-out infinite;flex-shrink:0;}
-
-/* ── RV Menu Overlay ── */
-.rv-menu-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);
-  backdrop-filter:blur(6px);z-index:1000;display:flex;align-items:flex-start;
-  justify-content:flex-end;opacity:0;pointer-events:none;transition:opacity .25s;}
-.rv-menu-overlay.open{opacity:1;pointer-events:auto;}
-.rv-menu-panel{width:min(420px,95vw);height:100vh;overflow-y:auto;
-  background:var(--card2);border-left:1px solid var(--border);
-  padding:20px 18px 32px;transform:translateX(100%);
-  transition:transform .28s cubic-bezier(.4,0,.2,1);}
-.rv-menu-overlay.open .rv-menu-panel{transform:translateX(0);}
-.rv-menu-head{display:flex;align-items:flex-start;justify-content:space-between;
-  margin-bottom:22px;gap:10px;}
-.rv-menu-title{font-family:var(--font-d);font-size:16px;font-weight:700;
-  letter-spacing:.12em;text-transform:uppercase;color:var(--roll);}
-.rv-menu-sub{font-size:.78rem;color:var(--muted);margin-top:3px;}
-.rv-menu-close{background:transparent;border:1px solid var(--border);border-radius:5px;
-  color:var(--muted2);width:30px;height:30px;display:grid;place-items:center;
-  cursor:pointer;font-size:13px;transition:all .18s;flex-shrink:0;}
-.rv-menu-close:hover{border-color:rgba(255,100,100,.4);color:#ff6b6b;}
-.rv-menu-grid{display:flex;flex-direction:column;gap:18px;}
-.rv-menu-group{display:flex;flex-direction:column;gap:2px;}
-.rv-menu-sec{font-family:var(--font-d);font-size:9px;font-weight:700;
-  letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
-  padding:0 6px 6px;border-bottom:1px solid var(--border);margin-bottom:4px;}
-.rv-menu-link{display:flex;align-items:center;gap:11px;padding:9px 10px;
-  border-radius:8px;text-decoration:none;color:var(--text);transition:background .15s;}
-.rv-menu-link:hover{background:rgba(255,255,255,.04);}
-.rv-menu-ico{font-size:18px;width:28px;text-align:center;flex-shrink:0;}
-.rv-menu-copy{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;}
-.rv-menu-name{font-family:var(--font-d);font-size:13px;font-weight:600;
-  letter-spacing:.02em;color:var(--text);}
-.rv-menu-meta{font-size:.75rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.rv-menu-badge{font-family:var(--font-d);font-size:9px;font-weight:700;
-  letter-spacing:.08em;padding:2px 7px;border-radius:100px;
-  background:rgba(0,232,122,.12);border:1px solid rgba(0,232,122,.25);
-  color:var(--roll);text-transform:uppercase;flex-shrink:0;}
-.rv-menu-footer{display:flex;gap:7px;flex-wrap:wrap;margin-top:24px;
-  padding-top:16px;border-top:1px solid var(--border);}
-.rv-chip{font-family:var(--font-d);font-size:11px;font-weight:700;
-  letter-spacing:.06em;padding:6px 13px;border-radius:6px;
-  background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.2);
-  color:var(--roll);text-decoration:none;transition:all .18s;}
-.rv-chip:hover{background:rgba(0,232,122,.16);}
-
-/* ── Rate Intelligence Card ── */
-.intel-card{margin-top:10px;background:var(--bg2);border:1px solid var(--border);
-  border-radius:10px;overflow:hidden;}
-.intel-head{display:flex;align-items:center;justify-content:space-between;
-  padding:9px 12px;border-bottom:1px solid var(--border);}
-.intel-title{font-family:var(--font-d);font-size:10px;font-weight:700;
-  letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);}
-.intel-score{font-family:var(--font-m);font-size:13px;font-weight:700;color:var(--roll);}
-.intel-main{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);}
-.intel-pill{background:var(--card);padding:8px 10px;}
-.intel-pill-lbl{font-family:var(--font-d);font-size:9px;font-weight:600;
-  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
-.intel-pill-val{font-family:var(--font-d);font-size:13px;font-weight:700;color:var(--text);}
-.intel-desc{padding:9px 12px;font-size:.8rem;color:var(--muted2);line-height:1.6;}
-.intel-pick{color:var(--roll);font-size:.78rem;}
-
-/* ── Share / URL btn ── */
-.share-btn{padding:4px 10px;border-radius:5px;cursor:pointer;font-family:var(--font-d);
-  font-size:10px;font-weight:600;letter-spacing:.04em;border:1px solid var(--border);
-  color:var(--muted2);background:transparent;transition:all .18s;}
-.share-btn:hover{border-color:rgba(74,158,255,.4);color:var(--pitch);}
-
 /* ── Toast ── */
 #toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(8px);
   background:var(--roll);color:#001a08;padding:8px 20px;border-radius:20px;
@@ -337,12 +383,29 @@ canvas#rv{width:100%;display:block;cursor:crosshair;}
   .main-grid{grid-template-columns:1fr;}
 }
 </style>
-{% set nav_page = "rates" %}
 </head>
 <body>
-{% include "partials/nav.html" %}
-{% include "partials/page_actions.html" %}
 
+<!-- ── TOP BAR ── -->
+<div class="rv-topbar">
+  <div class="rv-topbar-left">
+    <a class="rv-topbar-btn" href="#" aria-label="Back to landing">← BACK</a>
+    <div class="rv-topbar-brand">
+      <div class="rv-topbar-eyebrow">ConfigDoctor · Flight Computer</div>
+      <div class="rv-topbar-title">Rates <em>Visualizer</em></div>
+      <div class="rv-topbar-sub">Precision curve lab for ACTUAL, BF legacy, and KISS tuning</div>
+    </div>
+  </div>
+  <div class="rv-topbar-right">
+    <div class="rv-topbar-chip">v5.4 Smart Curve</div>
+    <button class="rv-topbar-btn menu" type="button" onclick="toggleMenu(true)" aria-label="Open menu">
+      <span class="rv-dot"></span>
+      MENU
+    </button>
+  </div>
+</div>
+
+<!-- ── NAV MENU ── -->
 <div class="rv-menu-overlay" id="rvMenu" aria-hidden="true">
   <div class="rv-menu-panel">
     <div class="rv-menu-head">
@@ -355,58 +418,36 @@ canvas#rv{width:100%;display:block;cursor:crosshair;}
     <div class="rv-menu-grid">
       <div class="rv-menu-group">
         <div class="rv-menu-sec">Analyze</div>
-        <a class="rv-menu-link" href="/app"><span class="rv-menu-ico">🚀</span><span class="rv-menu-copy"><span class="rv-menu-name">Drone Analyzer</span><span class="rv-menu-meta">Analyze PID · Filter · Motor · Flight time</span></span><span class="rv-menu-badge">core</span></a>
-        <a class="rv-menu-link" href="/blackbox"><span class="rv-menu-ico">📊</span><span class="rv-menu-copy"><span class="rv-menu-name">Blackbox CSV Analyzer</span><span class="rv-menu-meta">Decode logs, oscillation and battery sag</span></span><span class="rv-menu-badge">hot</span></a>
+        <a class="rv-menu-link" href="#"><span class="rv-menu-ico">🚀</span><span class="rv-menu-copy"><span class="rv-menu-name">Drone Analyzer</span><span class="rv-menu-meta">Analyze PID · Filter · Motor · Flight time</span></span><span class="rv-menu-badge">core</span></a>
+        <a class="rv-menu-link" href="#"><span class="rv-menu-ico">📊</span><span class="rv-menu-copy"><span class="rv-menu-name">Blackbox CSV Analyzer</span><span class="rv-menu-meta">Decode logs, oscillation and battery sag</span></span><span class="rv-menu-badge">hot</span></a>
       </div>
       <div class="rv-menu-group">
         <div class="rv-menu-sec">Tuning</div>
-        <a class="rv-menu-link" href="/cli_surgeon"><span class="rv-menu-ico">🩻</span><span class="rv-menu-copy"><span class="rv-menu-name">CLI Surgeon</span><span class="rv-menu-meta">Validate diff all / dump and generate safe CLI</span></span></a>
-        <a class="rv-menu-link" href="/pid-advisor"><span class="rv-menu-ico">🩺</span><span class="rv-menu-copy"><span class="rv-menu-name">PID Advisor</span><span class="rv-menu-meta">Symptom-based PID tuning guidance</span></span></a>
-        <a class="rv-menu-link" href="/rates-visualizer"><span class="rv-menu-ico">📈</span><span class="rv-menu-copy"><span class="rv-menu-name">Rates Visualizer</span><span class="rv-menu-meta">Stick response curves, presets and compare modes</span></span><span class="rv-menu-badge">open</span></a>
+        <a class="rv-menu-link" href="#"><span class="rv-menu-ico">🩻</span><span class="rv-menu-copy"><span class="rv-menu-name">CLI Surgeon</span><span class="rv-menu-meta">Validate diff all / dump and generate safe CLI</span></span></a>
+        <a class="rv-menu-link" href="#"><span class="rv-menu-ico">🩺</span><span class="rv-menu-copy"><span class="rv-menu-name">PID Advisor</span><span class="rv-menu-meta">Symptom-based PID tuning guidance</span></span></a>
+        <a class="rv-menu-link" href="#"><span class="rv-menu-ico">📈</span><span class="rv-menu-copy"><span class="rv-menu-name">Rates Visualizer</span><span class="rv-menu-meta">Stick response curves, presets and compare modes</span></span><span class="rv-menu-badge">open</span></a>
       </div>
       <div class="rv-menu-group">
         <div class="rv-menu-sec">Optimize</div>
-        <a class="rv-menu-link" href="/rpm-filter"><span class="rv-menu-ico">⚙️</span><span class="rv-menu-copy"><span class="rv-menu-name">RPM Filter Calculator</span><span class="rv-menu-meta">Harmonics and filter recommendations</span></span></a>
-        <a class="rv-menu-link" href="/motor-prop"><span class="rv-menu-ico">🧭</span><span class="rv-menu-copy"><span class="rv-menu-name">Motor × Prop Recommender</span><span class="rv-menu-meta">Match motors and props to the build</span></span></a>
-        <a class="rv-menu-link" href="/battery-health"><span class="rv-menu-ico">🔋</span><span class="rv-menu-copy"><span class="rv-menu-name">Battery Health</span><span class="rv-menu-meta">Efficiency, sag and safe cell range</span></span></a>
-        <a class="rv-menu-link" href="/motor-thermal"><span class="rv-menu-ico">🌡️</span><span class="rv-menu-copy"><span class="rv-menu-name">Motor Thermal</span><span class="rv-menu-meta">Estimate heat risk under load</span></span></a>
+        <a class="rv-menu-link" href="#"><span class="rv-menu-ico">⚙️</span><span class="rv-menu-copy"><span class="rv-menu-name">RPM Filter Calculator</span><span class="rv-menu-meta">Harmonics and filter recommendations</span></span></a>
+        <a class="rv-menu-link" href="#"><span class="rv-menu-ico">🧭</span><span class="rv-menu-copy"><span class="rv-menu-name">Motor × Prop Recommender</span><span class="rv-menu-meta">Match motors and props to the build</span></span></a>
+        <a class="rv-menu-link" href="#"><span class="rv-menu-ico">🔋</span><span class="rv-menu-copy"><span class="rv-menu-name">Battery Health</span><span class="rv-menu-meta">Efficiency, sag and safe cell range</span></span></a>
       </div>
       <div class="rv-menu-group">
         <div class="rv-menu-sec">Community</div>
-        <a class="rv-menu-link" href="/landing"><span class="rv-menu-ico">🏠</span><span class="rv-menu-copy"><span class="rv-menu-name">Landing</span><span class="rv-menu-meta">Back to the main platform</span></span></a>
-        <a class="rv-menu-link" href="/about"><span class="rv-menu-ico">ℹ️</span><span class="rv-menu-copy"><span class="rv-menu-name">About</span><span class="rv-menu-meta">Project story and current status</span></span></a>
-        <a class="rv-menu-link" href="/changelog"><span class="rv-menu-ico">🧾</span><span class="rv-menu-copy"><span class="rv-menu-name">Changelog</span><span class="rv-menu-meta">Version history and release notes</span></span></a>
-        <a class="rv-menu-link" href="/team"><span class="rv-menu-ico">👥</span><span class="rv-menu-copy"><span class="rv-menu-name">Team</span><span class="rv-menu-meta">Creators and AI partners</span></span></a>
+        <a class="rv-menu-link" href="#"><span class="rv-menu-ico">🏠</span><span class="rv-menu-copy"><span class="rv-menu-name">Landing</span><span class="rv-menu-meta">Back to the main platform</span></span></a>
+        <a class="rv-menu-link" href="#"><span class="rv-menu-ico">ℹ️</span><span class="rv-menu-copy"><span class="rv-menu-name">About</span><span class="rv-menu-meta">Project story and current status</span></span></a>
       </div>
     </div>
     <div class="rv-menu-footer">
-      <a class="rv-chip" href="/app">🚀 Start Analysis</a>
-      <a class="rv-chip" href="/blackbox">📊 Blackbox</a>
-      <a class="rv-chip" href="/cli_surgeon">🩻 CLI</a>
+      <a class="rv-chip" href="#">🚀 Start Analysis</a>
+      <a class="rv-chip" href="#">📊 Blackbox</a>
+      <a class="rv-chip" href="#">🩻 CLI</a>
     </div>
   </div>
 </div>
 
-<div class="wrap" style="padding-top:76px;">
-  <div class="rv-topbar">
-    <div class="rv-topbar-left">
-      <a class="rv-topbar-btn" href="/landing" aria-label="Back to landing">BACK</a>
-      <div class="rv-topbar-brand">
-        <div class="rv-topbar-eyebrow">ConfigDoctor · Flight Computer</div>
-        <div class="rv-topbar-title">Rates <em>Visualizer</em></div>
-        <div class="rv-topbar-sub">Precision curve lab for ACTUAL, BF legacy and KISS tuning</div>
-      </div>
-    </div>
-    <div class="rv-topbar-right">
-      <div class="rv-topbar-chip">v5.4 Smart Curve</div>
-      <button class="rv-topbar-btn menu" type="button" onclick="toggleMenu(true)" aria-label="Open menu">
-        <span class="rv-dot"></span>
-        MENU
-      </button>
-    </div>
-  </div>
-
-
+<div class="wrap">
   <div class="hero">
     <div class="hero-ey"><span class="hdot"></span> FPV FLIGHT COMPUTER</div>
     <h1>Stick Response <em>Visualizer</em></h1>
@@ -431,9 +472,9 @@ canvas#rv{width:100%;display:block;cursor:crosshair;}
         <div class="psec">
           <div class="sec-title">Axis — เลือกแกน</div>
           <div class="axis-tabs">
-            <div class="atab on" data-a="roll"  onclick="setAxis('roll')"><span class="dot"></span>ROLL</div>
-            <div class="atab"    data-a="pitch" onclick="setAxis('pitch')"><span class="dot"></span>PITCH</div>
-            <div class="atab"    data-a="yaw"   onclick="setAxis('yaw')"><span class="dot"></span>YAW</div>
+            <div class="atab on" data-a="roll" onclick="setAxis('roll')" role="button" tabindex="0" aria-pressed="true"><span class="dot"></span>ROLL</div>
+            <div class="atab"    data-a="pitch" onclick="setAxis('pitch')" role="button" tabindex="0" aria-pressed="false"><span class="dot"></span>PITCH</div>
+            <div class="atab"    data-a="yaw"   onclick="setAxis('yaw')" role="button" tabindex="0" aria-pressed="false"><span class="dot"></span>YAW</div>
           </div>
           <label class="link-row">
             <input type="checkbox" id="lnk" onchange="update()">
@@ -445,9 +486,9 @@ canvas#rv{width:100%;display:block;cursor:crosshair;}
         <div class="psec">
           <div class="sec-title">Rate Type</div>
           <div class="rtabs">
-            <div class="rtab on" onclick="setRT('actual')">ACTUAL</div>
-            <div class="rtab"    onclick="setRT('bf')">BF Legacy</div>
-            <div class="rtab"    onclick="setRT('kiss')">KISS</div>
+            <div class="rtab on" onclick="setRT('actual')" role="button" tabindex="0" aria-pressed="true">ACTUAL</div>
+            <div class="rtab"    onclick="setRT('bf')" role="button" tabindex="0" aria-pressed="false">BF Legacy</div>
+            <div class="rtab"    onclick="setRT('kiss')" role="button" tabindex="0" aria-pressed="false">KISS</div>
           </div>
         </div>
 
@@ -566,12 +607,12 @@ canvas#rv{width:100%;display:block;cursor:crosshair;}
         <div class="psec">
           <div class="sec-title">Presets</div>
           <div class="prow">
-            <div class="pbtn" onclick="applyPreset('beginner')">🟢 Beginner</div>
-            <div class="pbtn" onclick="applyPreset('freestyle')">🔵 Freestyle</div>
-            <div class="pbtn" onclick="applyPreset('race')">🔴 Race</div>
-            <div class="pbtn" onclick="applyPreset('smooth')">🎬 Cinematic</div>
-            <div class="pbtn" onclick="applyPreset('longrange')">🟡 Long Range</div>
-            <div class="pbtn" onclick="applyPreset('locked')">🎯 Locked-in</div>
+            <div class="pbtn" onclick="applyPreset('beginner')" role="button" tabindex="0">🟢 Beginner</div>
+            <div class="pbtn" onclick="applyPreset('freestyle')" role="button" tabindex="0">🔵 Freestyle</div>
+            <div class="pbtn" onclick="applyPreset('race')" role="button" tabindex="0">🔴 Race</div>
+            <div class="pbtn" onclick="applyPreset('smooth')" role="button" tabindex="0">🎬 Cinematic</div>
+            <div class="pbtn" onclick="applyPreset('longrange')" role="button" tabindex="0">🟡 Long Range</div>
+            <div class="pbtn" onclick="applyPreset('locked')" role="button" tabindex="0">🎯 Locked-in</div>
           </div>
         </div>
       </div>
@@ -587,10 +628,7 @@ canvas#rv{width:100%;display:block;cursor:crosshair;}
         </div>
         <div class="psec">
           <div class="sec-title">📥 Import จาก CLI Paste</div>
-          <textarea class="import-ta" id="impta" placeholder="วาง diff all หรือ CLI dump ที่นี่
-set roll_rc_rate = 120
-set roll_super_rate = 70
-set roll_expo = 15 ..."></textarea>
+          <textarea class="import-ta" id="impta" placeholder="วาง diff all หรือ CLI dump ที่นี่&#10;set roll_rc_rate = 120&#10;set roll_super_rate = 70&#10;set roll_expo = 15 ..."></textarea>
           <button class="import-btn" onclick="parseCLI()">⚡ Parse &amp; Load</button>
         </div>
       </div>
@@ -603,13 +641,12 @@ set roll_expo = 15 ..."></textarea>
         <div class="chead-l">
           <span class="ctitle">Response Curve</span>
           <div class="ovr-btns">
-            <div class="obtn roll  on" data-a="roll"  onclick="togOvr('roll')">● R</div>
-            <div class="obtn pitch on" data-a="pitch" onclick="togOvr('pitch')">● P</div>
-            <div class="obtn yaw  on" data-a="yaw"   onclick="togOvr('yaw')">● Y</div>
+            <div class="obtn roll  on" data-a="roll"  onclick="togOvr('roll')" role="button" tabindex="0" aria-pressed="true">● R</div>
+            <div class="obtn pitch on" data-a="pitch" onclick="togOvr('pitch')" role="button" tabindex="0" aria-pressed="true">● P</div>
+            <div class="obtn yaw  on" data-a="yaw"   onclick="togOvr('yaw')" role="button" tabindex="0" aria-pressed="true">● Y</div>
           </div>
         </div>
-        <button class="ghost-btn" onclick="saveGhost()">👻 Ghost</button>
-        <button class="share-btn" onclick="shareURL()">🔗 Share</button>
+        <button class="ghost-btn" onclick="saveGhost()">👻 Save Ghost</button>
       </div>
       <div class="canvas-wrap">
         <canvas id="rv"></canvas>
@@ -635,7 +672,7 @@ set roll_expo = 15 ..."></textarea>
     <div class="ggrid">
 
       <div class="gc" id="g-rc">
-        <div class="gch" onclick="tog('rc')">
+        <div class="gch" onclick="tog('rc')" role="button" tabindex="0" aria-expanded="false">
           <div class="gi r">🎮</div>
           <div><div class="gcname">RC Rate — ความไวตรงกลาง</div><div class="gcsub">Center sensitivity</div></div>
           <span class="gchev">▾</span>
@@ -654,7 +691,7 @@ set roll_expo = 15 ..."></textarea>
       </div>
 
       <div class="gc" id="g-sr">
-        <div class="gch" onclick="tog('sr')">
+        <div class="gch" onclick="tog('sr')" role="button" tabindex="0" aria-expanded="false">
           <div class="gi r">📈</div>
           <div><div class="gcname">Super Rate — ความไวขอบ stick</div><div class="gcsub">Edge sensitivity · curve shape</div></div>
           <span class="gchev">▾</span>
@@ -673,7 +710,7 @@ set roll_expo = 15 ..."></textarea>
       </div>
 
       <div class="gc" id="g-ex">
-        <div class="gch" onclick="tog('ex')">
+        <div class="gch" onclick="tog('ex')" role="button" tabindex="0" aria-expanded="false">
           <div class="gi p">🪄</div>
           <div><div class="gcname">Expo — ความนุ่มตรงกลาง</div><div class="gcsub">Dead zone feel · center softness</div></div>
           <span class="gchev">▾</span>
@@ -692,7 +729,7 @@ set roll_expo = 15 ..."></textarea>
       </div>
 
       <div class="gc" id="g-ax">
-        <div class="gch" onclick="tog('ax')">
+        <div class="gch" onclick="tog('ax')" role="button" tabindex="0" aria-expanded="false">
           <div class="gi w">🔄</div>
           <div><div class="gcname">Roll / Pitch / Yaw</div><div class="gcsub">ทำไมต้องปรับแยกแต่ละแกน</div></div>
           <span class="gchev">▾</span>
@@ -706,7 +743,7 @@ set roll_expo = 15 ..."></textarea>
       </div>
 
       <div class="gc" id="g-cmp">
-        <div class="gch" onclick="tog('cmp')">
+        <div class="gch" onclick="tog('cmp')" role="button" tabindex="0" aria-expanded="false">
           <div class="gi y">⚡</div>
           <div><div class="gcname">ตารางเปรียบเทียบ Presets</div><div class="gcsub">แต่ละสไตล์ต่างกันยังไง</div></div>
           <span class="gchev">▾</span>
@@ -725,7 +762,7 @@ set roll_expo = 15 ..."></textarea>
       </div>
 
       <div class="gc" id="g-steps">
-        <div class="gch" onclick="tog('steps')">
+        <div class="gch" onclick="tog('steps')" role="button" tabindex="0" aria-expanded="false">
           <div class="gi w">🛠️</div>
           <div><div class="gcname">ขั้นตอน tune Rates</div><div class="gcsub">เริ่มต้นยังไงไม่ให้งง</div></div>
           <span class="gchev">▾</span>
@@ -762,7 +799,6 @@ const profiles = {
 const COL = {roll:'#00e87a',pitch:'#4a9eff',yaw:'#ff9718'};
 const GLW = {roll:'rgba(0,232,122,',pitch:'rgba(74,158,255,',yaw:'rgba(255,151,24,'};
 
-
 /* ── Rate Math ── */
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 
@@ -773,23 +809,18 @@ function expoBlend(x, expo){
   return e * smooth + (1 - e) * t;
 }
 
-function getAxisConfig(ax){
-  return profiles[ax] || profiles.roll;
-}
+function getAxisConfig(ax){ return profiles[ax] || profiles.roll; }
 
 function actualCenterDeg(cfg){ return cfg.rr * 100; }
 function actualMaxDeg(cfg){ return clamp(actualCenterDeg(cfg) * (1 + cfg.sr * 7.0), actualCenterDeg(cfg), 1998); }
 
 function legacyCenterDeg(cfg){ return cfg.br * 100; }
 function legacyMaxDeg(cfg){
-  // Legacy BF is a touch more aggressive than ACTUAL at the same slider values.
   return clamp(legacyCenterDeg(cfg) * (1 + cfg.bs * 7.6 + cfg.br * 0.15), legacyCenterDeg(cfg), 1998);
 }
 
 function kissCenterDeg(cfg){ return cfg.kr; }
-function kissMaxDeg(cfg){
-  return clamp(cfg.kr + cfg.ka * 2200, cfg.kr, 1998);
-}
+function kissMaxDeg(cfg){ return clamp(cfg.kr + cfg.ka * 2200, cfg.kr, 1998); }
 
 function actualRateAt(s, cfg){
   const x = clamp(Math.abs(s), 0, 1);
@@ -818,6 +849,10 @@ function kissRateAt(s, cfg){
   return Math.min(max, rate) * Math.sign(s || 1);
 }
 
+function actRate(s, rr, sr, er){ return actualRateAt(s, { rr, sr, er }); }
+function bfRate(s, br, bs, be){ return legacyRateAt(s, { br, bs, be }); }
+function ksRate(s, kr, ka){ return kissRateAt(s, { kr, ka }); }
+
 function getAxisRate(ax,s){
   const cfg = getAxisConfig(ax);
   if(rt==='actual') return actualRateAt(s,cfg);
@@ -834,14 +869,12 @@ function getAxisSnapshot(ax){
   const mid = getAxisRate(ax, 0.5);
   const q1 = getAxisRate(ax, 0.25);
   const q3 = getAxisRate(ax, 0.75);
-  const centerSlope = getAxisRate(ax, 0.08) / 0.08;
-  const shape = clamp((maxDeg - mid) / Math.max(maxDeg, 1) * 100, 0, 100);
   const expoVal = mode==='kiss' ? cfg.ka : mode==='actual' ? cfg.er : cfg.be;
-  return {cfg, centerDeg, maxDeg, mid, q1, q3, centerSlope, shape, expoVal};
+  return {cfg, centerDeg, maxDeg, mid, q1, q3, expoVal};
 }
 
 function classifyRate(snapshot){
-  const { maxDeg, expoVal, centerSlope } = snapshot;
+  const { maxDeg, expoVal } = snapshot;
   let style = 'Balanced';
   if(maxDeg < 330) style = 'Cinematic';
   else if(maxDeg < 480) style = 'Smooth';
@@ -863,14 +896,17 @@ function classifyRate(snapshot){
   else if(maxDeg > target + 120) advice = 'ลด Super Rate ทีละ 0.05 ถ้ารู้สึกว่าปลาย stick แรงเกินไป';
   else if(expoVal > 0.32) advice = 'Expo ค่อนข้างสูง ลองลดทีละ 0.05 ถ้าอยากได้คมขึ้น';
   else if(expoVal < 0.08) advice = 'Curve ค่อนข้างตรง เหมาะ race หรือผู้บินที่คุมละเอียด';
-  return {style, curve, target, advice, score:Math.round(shapeScore)};
+  return {style, curve, advice, score:Math.round(shapeScore)};
 }
 
 /* ── setAxis ── */
-
 function setAxis(ax){
   saveSl(); curAx=ax; loadSl(ax);
-  document.querySelectorAll('.atab').forEach(t=>t.classList.toggle('on',t.dataset.a===ax));
+  document.querySelectorAll('.atab').forEach(t=>{
+    const active=t.dataset.a===ax;
+    t.classList.toggle('on',active);
+    t.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
   const c=ax==='roll'?'rr':ax==='pitch'?'pr':'yr';
   document.querySelectorAll('input[type=range]').forEach(i=>{i.className=i.className.replace(/\b(rr|pr|yr)\b/,c);});
   document.querySelectorAll('.cval').forEach(v=>{v.className=v.className.replace(/\b(roll|pitch|yaw)\b/,ax);});
@@ -880,7 +916,11 @@ function setAxis(ax){
 
 function setRT(t){
   rt=t;
-  document.querySelectorAll('.rtab').forEach((el,i)=>el.classList.toggle('on',['actual','bf','kiss'][i]===t));
+  document.querySelectorAll('.rtab').forEach((el,i)=>{
+    const active=['actual','bf','kiss'][i]===t;
+    el.classList.toggle('on',active);
+    el.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
   document.getElementById('ca').style.display=t==='actual'?'':'none';
   document.getElementById('cb').style.display=t==='bf'?'':'none';
   document.getElementById('ck').style.display=t==='kiss'?'':'none';
@@ -927,7 +967,7 @@ function updateStats(){
   const s=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
   s('smax',Math.round(getRate(1.0)));
   s('shalf',Math.round(getRate(0.5)));
-  s('sctr',Math.round(getRate(0.05)));
+  s('sctr',Math.round(getRate(0.08)));
 }
 
 function updateIntelligence(){
@@ -942,7 +982,7 @@ function updateIntelligence(){
   document.getElementById('pneedle').style.left = needlePct + '%';
   document.getElementById('plabel').textContent = info.style;
   document.getElementById('intelScore').textContent = info.score + '%';
-  document.getElementById('intelStyle').innerHTML = `<span>${info.style}</span>`;
+  document.getElementById('intelStyle').textContent = info.style;
   document.getElementById('intelShape').textContent = info.curve;
   document.getElementById('intelCenter').textContent = center + ' deg/s';
   document.getElementById('intelMax').textContent = max + ' deg/s';
@@ -961,8 +1001,7 @@ function updateCLI(){
   lines.push('');
 
   if(rt==='actual' || rt==='bf'){
-    const rateTypeName = rt==='actual' ? 'ACTUAL' : 'BETAFLIGHT';
-    lines.push(`set rates_type = ${rateTypeName}`);
+    lines.push(`set rates_type = ${rt==='actual' ? 'ACTUAL' : 'BETAFLIGHT'}`);
     lines.push('');
     for(const ax of ['roll','pitch','yaw']){
       const p=profiles[ax];
@@ -1007,7 +1046,6 @@ function parseCLI(){
     else if(t.includes('kiss')) setRT('kiss');
     else setRT('bf');
   }
-
   for(const ax of['roll','pitch','yaw']){
     const p=profiles[ax];
     const rc=g(`${ax}_rc_rate`), sr=g(`${ax}_super_rate`) ?? g(`${ax}_srate`), ex=g(`${ax}_expo`);
@@ -1061,7 +1099,10 @@ function saveGhost(){
 function togOvr(ax){
   ovr[ax]=!ovr[ax];
   const b=document.querySelector(`.obtn[data-a="${ax}"]`);
-  if(b)b.classList.toggle('on',ovr[ax]);
+  if(b){
+    b.classList.toggle('on',ovr[ax]);
+    b.setAttribute('aria-pressed', ovr[ax] ? 'true' : 'false');
+  }
   draw();
 }
 
@@ -1070,8 +1111,7 @@ function draw(){
   const cv=document.getElementById('rv');if(!cv)return;
   const rc=cv.getBoundingClientRect();
   const W=Math.max(Math.round(rc.width),300);
-  const precision = true;
-  const H=Math.round(W*(precision ? 0.64 : 0.60));
+  const H=Math.round(W*0.64);
   cv.width=W;cv.height=H;
   const ctx=cv.getContext('2d');
   const PL=50,PR=16,PT=16,PB=42;
@@ -1083,9 +1123,9 @@ function draw(){
   for(const ax of['roll','pitch','yaw'])if(ovr[ax])maxR=Math.max(maxR,getAxisRate(ax,1));
   if(ghost)for(const ax of['roll','pitch','yaw']){
     const p=ghost[ax];let r;
-    if(rt==='actual')r=actualRateAt(1,p);
-    else if(rt==='bf')r=legacyRateAt(1,p);
-    else r=kissRateAt(1,p);
+    if(rt==='actual')r=actRate(1,p.rr,p.sr,p.er);
+    else if(rt==='bf')r=bfRate(1,p.br,p.bs,p.be);
+    else r=ksRate(1,p.kr,p.ka);
     maxR=Math.max(maxR,r);
   }
   maxR=Math.ceil(maxR/100)*100;
@@ -1121,9 +1161,9 @@ function draw(){
       ctx.beginPath();
       for(let i=0;i<=200;i++){
         const s=i/200;let r;
-        if(rt==='actual')r=actualRateAt(s,p);
-        else if(rt==='bf')r=legacyRateAt(s,p);
-        else r=kissRateAt(s,p);
+        if(rt==='actual')r=actRate(s,p.rr,p.sr,p.er);
+        else if(rt==='bf')r=bfRate(s,p.br,p.bs,p.be);
+        else r=ksRate(s,p.kr,p.ka);
         i===0?ctx.moveTo(tx(s),ty(r)):ctx.lineTo(tx(s),ty(r));
       }
       ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;
@@ -1145,7 +1185,6 @@ function draw(){
     const pts=[];
     for(let i=0;i<=280;i++){const s=i/280;pts.push({x:tx(s),y:ty(getAxisRate(ax,s))});}
 
-    // Fill
     if(isCur){
       const grad=ctx.createLinearGradient(0,PT,0,H-PB);
       grad.addColorStop(0,gl+'0.22)');grad.addColorStop(1,gl+'0.0)');
@@ -1155,18 +1194,15 @@ function draw(){
       ctx.lineTo(tx(1),H-PB);ctx.closePath();ctx.fill();
     }
 
-    // Glow
     ctx.save();ctx.globalAlpha=alpha*0.35;ctx.shadowColor=col;ctx.shadowBlur=14;
     ctx.strokeStyle=col;ctx.lineWidth=lw+3;
     ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.stroke();
     ctx.restore();
 
-    // Main
     ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.shadowColor=col;ctx.shadowBlur=5;
     ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.stroke();
     ctx.restore();
 
-    // Markers (current axis only)
     if(isCur){
       for(const pct of[0.25,0.5,0.75]){
         const r=getAxisRate(ax,pct);
@@ -1183,47 +1219,25 @@ function draw(){
       }
     }
   }
-
-  // Hover crosshair
-  if(typeof hoverS !== 'undefined' && hoverS >= 0){
-    const hx = tx(hoverS);
-    const hr = getAxisRate(curAx, hoverS);
-    const hy = ty(hr);
-    ctx.save();
-    ctx.strokeStyle = COL[curAx];ctx.lineWidth=1;ctx.globalAlpha=0.35;ctx.setLineDash([3,4]);
-    ctx.beginPath();ctx.moveTo(hx,PT);ctx.lineTo(hx,H-PB);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(PL,hy);ctx.lineTo(W-PR,hy);ctx.stroke();
-    ctx.setLineDash([]);ctx.globalAlpha=1;
-    ctx.fillStyle=COL[curAx];ctx.shadowColor=COL[curAx];ctx.shadowBlur=10;
-    ctx.beginPath();ctx.arc(hx,hy,5,0,Math.PI*2);ctx.fill();
-    ctx.restore();
-  }
 }
 
-/* ── Hover tooltip + crosshair ── */
+/* ── Hover tooltip ── */
 const CV=document.getElementById('rv');
 const TIP=document.getElementById('tip');
-let hoverS = -1;
-
 CV.addEventListener('mousemove',e=>{
   const rc=CV.getBoundingClientRect();
-  const W=CV.width,PL=50,PR=16;
+  const W=CV.width,PL=50;
   const raw=(e.clientX-rc.left)*(W/rc.width);
-  const s=Math.max(0,Math.min(1,(raw-PL)/(W-PL-PR)));
-  hoverS = s;
+  const s=Math.max(0,Math.min(1,(raw-PL)/(W-PL-16)));
   document.getElementById('tts').textContent=`Stick: ${Math.round(s*100)}% · ${curAx.toUpperCase()}`;
-  const rval = Math.round(getRate(s));
-  document.getElementById('ttv').textContent=`${rval} deg/s`;
+  document.getElementById('ttv').textContent=`${Math.round(getRate(s))} deg/s`;
   document.getElementById('ttv').style.color=COL[curAx];
   TIP.style.display='block';
   let lx=e.clientX-rc.left+14,ly=e.clientY-rc.top-44;
-  if(lx+180>rc.width)lx-=195;
-  if(ly<0)ly=4;
+  if(lx+170>rc.width)lx-=185;
   TIP.style.left=lx+'px';TIP.style.top=ly+'px';
-  draw();
 });
-CV.addEventListener('mouseleave',()=>{TIP.style.display='none';hoverS=-1;draw();});
-
+CV.addEventListener('mouseleave',()=>{TIP.style.display='none';});
 
 function toggleMenu(open){
   const el=document.getElementById('rvMenu');
@@ -1233,14 +1247,30 @@ function toggleMenu(open){
   el.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
   document.body.style.overflow = shouldOpen ? 'hidden' : '';
 }
+
 document.addEventListener('keydown', e=>{
   if(e.key==='Escape') toggleMenu(false);
+  if((e.key==='Enter' || e.key===' ') && e.target && e.target.matches('[role="button"]')){
+    e.preventDefault();
+    e.target.click();
+  }
 });
 document.getElementById('rvMenu')?.addEventListener('click', e=>{
   if(e.target.id === 'rvMenu') toggleMenu(false);
 });
+document.querySelectorAll('.rv-menu-link, .rv-chip').forEach(el => {
+  el.addEventListener('click', () => toggleMenu(false));
+});
+
 /* ── Guide accordion ── */
-function tog(id){document.getElementById('g-'+id).classList.toggle('open');}
+function tog(id){
+  const el=document.getElementById('g-'+id);
+  if(!el) return;
+  el.classList.toggle('open');
+  const expanded=el.classList.contains('open');
+  const head=el.querySelector('.gch');
+  if(head) head.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+}
 
 /* ── Toast ── */
 function toast(msg){
@@ -1249,51 +1279,13 @@ function toast(msg){
   clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2000);
 }
 
-/* ── Share URL ── */
-function shareURL(){
-  const p=profiles[curAx];
-  const params=new URLSearchParams({
-    rt,ax:curAx,
-    rr:p.rr,sr:p.sr,er:p.er,
-    br:p.br,bs:p.bs,be:p.be,
-    kr:p.kr,ka:p.ka,
-  });
-  const url=location.origin+location.pathname+'?'+params.toString();
-  navigator.clipboard.writeText(url).then(()=>toast('🔗 URL คัดลอกแล้ว'));
-}
-
-function loadFromURL(){
-  const p=new URLSearchParams(location.search);
-  if(!p.has('rt')) return;
-  const rtVal=p.get('rt')||'actual';
-  const axVal=p.get('ax')||'roll';
-  const upd=(k,def)=>parseFloat(p.get(k)||def);
-  ['roll','pitch','yaw'].forEach(ax=>{
-    profiles[ax].rr=upd('rr',profiles[ax].rr);
-    profiles[ax].sr=upd('sr',profiles[ax].sr);
-    profiles[ax].er=upd('er',profiles[ax].er);
-    profiles[ax].br=upd('br',profiles[ax].br);
-    profiles[ax].bs=upd('bs',profiles[ax].bs);
-    profiles[ax].be=upd('be',profiles[ax].be);
-    profiles[ax].kr=upd('kr',profiles[ax].kr);
-    profiles[ax].ka=upd('ka',profiles[ax].ka);
-  });
-  setRT(rtVal);
-  setAxis(axVal);
-}
-
 /* ── Resize ── */
 let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(draw,80);});
 
 /* ── Init ── */
 window.addEventListener('load',()=>{
-  setTimeout(()=>{
-    loadFromURL();
-    loadSl('roll');
-    update();
-  },60);
+  setTimeout(()=>{ loadSl('roll'); update(); },60);
 });
 </script>
-{% include "partials/footer_nav.html" %}
 </body>
 </html>
