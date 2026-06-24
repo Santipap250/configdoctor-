@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 {% set og_title       = "About — ConfigDoctor" %}
 {% set og_description = "ConfigDoctor — FPV Drone Diagnostic Platform สำหรับวิเคราะห์ PID, Filter, Blackbox, CLI และ Battery ของโดรน FPV" %}
-{% set og_url         = "https://configdoctor.onrender.com/about" %}
+{% set og_url = BASE_URL ~ '/about' %}
 {% include "partials/og_tags.html" %}
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>About — ConfigDoctor</title>
@@ -510,6 +510,7 @@ body::after{
 </head>
 <body>
 {% include "partials/nav.html" %}
+{% include "partials/page_actions.html" %}
 <div class="about-topbar" role="navigation" aria-label="Page actions">
   <div class="left">
     <a href="/landing" class="mini-badge back" aria-label="กลับหน้าแรก">

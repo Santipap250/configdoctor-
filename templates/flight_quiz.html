@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 {% set og_title       = "Flight Style Quiz — OBIXConfig Doctor" %}
 {% set og_description = "ตอบ 5 คำถาม รับ rates + preset ที่เหมาะกับสไตล์การบินของคุณโดยเฉพาะ — ฟรี ไม่ต้อง login" %}
-{% set og_url         = "https://configdoctor.onrender.com/flight-quiz" %}
+{% set og_url = BASE_URL ~ '/flight-quiz' %}
 {% include "partials/og_tags.html" %}
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -14,8 +14,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@400;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 {% set nav_page = "flight_quiz" %}
-{% include "partials/nav.html" %}
-{% include "partials/page_actions.html" %}
 
 <style>
 /* ══════════════════════════════════════════════
@@ -645,6 +643,8 @@ body::after {
 </style>
 </head>
 <body>
+{% include "partials/nav.html" %}
+{% include "partials/page_actions.html" %}
 
 <div class="scan-line"></div>
 

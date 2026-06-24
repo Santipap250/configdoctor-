@@ -6,7 +6,7 @@
 <title>BF Config Wizard — OBIXConfig Doctor</title>
 {% set og_title="BF Config Wizard — OBIXConfig Doctor" %}
 {% set og_description="8 ขั้นตอน กรอกสเปคโดรน → CLI Betaflight ครบสมบูรณ์ PID · Rates · Filter · Safety · OSD" %}
-{% set og_url="https://configdoctor.onrender.com/bf-wizard" %}
+{% set og_url = BASE_URL ~ '/bf-wizard' %}
 {% include "partials/og_tags.html" %}
 <link rel="icon" href="{{ url_for('static',filename='favicon.ico') }}" type="image/x-icon">
 <link rel="stylesheet" href="{{ url_for('static',filename='css/style.css') }}">
@@ -412,10 +412,10 @@ pre#cliOut .cs{color:var(--green);font-weight:700;text-shadow:0 0 10px rgba(0,25
   .wiz-outer{padding-bottom:80px}
 }
 </style>
-{% include "partials/nav.html" %}
-{% include "partials/page_actions.html" %}
 </head>
 <body>
+{% include "partials/nav.html" %}
+{% include "partials/page_actions.html" %}
 <div class="scan-line"></div>
 <div class="dot-grid"></div>
 

@@ -6,7 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 {% set og_title       = "FPV Drone Analyzer — ConfigDoctor" %}
 {% set og_description = "กรอกสเปคโดรน FPV รับค่า PID + Filter CLI ที่แม่นยำ พร้อมคำอธิบาย" %}
-{% set og_url         = "https://configdoctor.onrender.com/app" %}
+{% set og_url = BASE_URL ~ '/app' %}
+{% set nav_page = "home" %}
 {% include "partials/og_tags.html" %}
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,78 +50,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 }
 
 /* NAV */
-.nav{position:sticky;top:0;z-index:200;height:var(--nh);display:flex;align-items:center;
-  padding:0 18px;gap:10px;background:rgba(4,8,8,.97);backdrop-filter:blur(20px);
-  border-bottom:1px solid rgba(0,255,68,.08)}
-.nav-logo-img{height:32px;width:auto;filter:drop-shadow(0 0 8px rgba(0,255,68,.18))}
-.nav-r{margin-left:auto;display:flex;align-items:center;gap:8px}
-.nav-back-btn{
-  display:inline-flex; align-items:center; gap:10px; justify-content:center;
-  min-width:96px; height:44px; padding:0 16px;
-  border-radius:16px; border:1px solid rgba(0,255,136,.18);
-  background:
-    linear-gradient(180deg, rgba(10,16,14,.96), rgba(5,9,12,.86));
-  color:#effff4; font-family:var(--fd); font-size:11px; font-weight:900;
-  letter-spacing:.22em; text-transform:uppercase; text-decoration:none;
-  box-shadow:
-    0 10px 30px rgba(0,0,0,.30),
-    inset 0 0 0 1px rgba(255,255,255,.03),
-    inset 0 0 22px rgba(0,255,136,.05);
-  position:relative; overflow:hidden; isolation:isolate;
-  transition:transform .2s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
-}
-.nav-back-btn::before{
-  content:''; position:absolute; inset:-35% -12%;
-  background:
-    radial-gradient(circle at 20% 40%, rgba(0,255,136,.18) 0 12%, transparent 13% 100%),
-    radial-gradient(circle at 40% 70%, rgba(0,255,255,.14) 0 10%, transparent 11% 100%),
-    radial-gradient(circle at 70% 30%, rgba(255,255,255,.14) 0 8%, transparent 9% 100%),
-    radial-gradient(circle at 85% 65%, rgba(0,255,136,.12) 0 10%, transparent 11% 100%);
-  filter: blur(12px);
-  opacity:.72;
-  transform: translate3d(0,0,0);
-  animation:menuSmoke 5.8s ease-in-out infinite alternate;
-  pointer-events:none;
-}
-.nav-back-btn::after{
-  content:''; position:absolute; inset:0;
-  background:linear-gradient(110deg, transparent 18%, rgba(255,255,255,.18) 38%, transparent 58%);
-  transform:translateX(-120%);
-  animation:menuSweep 4.8s ease-in-out infinite;
-  pointer-events:none;
-}
-.nav-back-btn:hover{
-  color:#ffffff;
-  border-color:rgba(0,255,136,.34);
-  box-shadow:
-    0 14px 34px rgba(0,0,0,.34),
-    0 0 26px rgba(0,255,136,.14),
-    inset 0 0 0 1px rgba(255,255,255,.05);
-  transform: translateY(-1px);
-  background: linear-gradient(180deg, rgba(8,22,18,.98), rgba(4,8,12,.92));
-}
-.nav-back-btn:active{transform: translateY(1px) scale(.986)}
-.nav-back-btn .menu-label{
-  position:relative; z-index:1;
-  text-shadow:0 0 12px rgba(0,255,136,.18);
-}
-.nav-back-btn .menu-smoke{
-  position:absolute; inset:auto auto -10px -6px;
-  width:72px; height:28px;
-  background:
-    radial-gradient(circle at 18% 75%, rgba(0,255,136,.24) 0 7px, transparent 8px),
-    radial-gradient(circle at 38% 45%, rgba(255,255,255,.12) 0 8px, transparent 9px),
-    radial-gradient(circle at 60% 60%, rgba(0,255,255,.15) 0 8px, transparent 9px),
-    radial-gradient(circle at 82% 35%, rgba(0,255,136,.18) 0 7px, transparent 8px);
-  filter: blur(10px);
-  opacity:.65;
-  animation:menuSmoke 6s ease-in-out infinite alternate-reverse;
-  pointer-events:none;
-}
-.nav-ver{font-family:var(--fd);font-size:7px;letter-spacing:.18em;color:var(--g);
-  padding:4px 10px;border-radius:5px;border:1px solid rgba(0,255,68,.2);background:rgba(0,255,68,.05)}
-
-/* SHELL — 2 column on desktop, stack on mobile */
 .shell{position:relative;z-index:1;max-width:1180px;margin:0 auto;
   display:grid;grid-template-columns:380px 1fr;gap:0;align-items:start;
   min-height:calc(100vh - var(--nh))}
@@ -402,17 +331,8 @@ pre::-webkit-scrollbar-thumb{background:rgba(0,255,68,.2);border-radius:2px}
 </style>
 </head>
 <body>
-
-<nav class="nav">
-  <a href="/landing"><img class="nav-logo-img" src="{{ url_for('static', filename='img/configdoctor-logo.png') }}" alt="ConfigDoctor"></a>
-  <div class="nav-r">
-    <span class="nav-ver">v9.0</span>
-    <a class="nav-menu-btn nav-back-btn" href="/landing" aria-label="กลับหน้าแรก">
-      <span class="menu-smoke" aria-hidden="true"></span>
-      <span class="menu-label">BACK</span>
-    </a>
-  </div>
-</nav>
+{% include "partials/nav.html" %}
+{% include "partials/page_actions.html" %}
 
 <div class="shell">
 
@@ -1006,5 +926,6 @@ document.addEventListener('DOMContentLoaded',function(){
 },false);
 })();
 </script>
+{% include "partials/footer_nav.html" %}
 </body>
 </html>

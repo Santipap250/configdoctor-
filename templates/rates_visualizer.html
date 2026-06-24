@@ -2,6 +2,11 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
+{% set nav_page = "rates" %}
+{% set og_title = "Rates Visualizer — OBIXConfig Doctor" %}
+{% set og_description = "วิเคราะห์ stick response curve แบบ real-time รองรับ ACTUAL, BF Legacy, KISS · per-axis · CLI export" %}
+{% set og_url = BASE_URL ~ '/rates-visualizer' %}
+{% include "partials/og_tags.html" %}
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rates Visualizer — OBIXConfig Doctor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,113 +30,6 @@ body{
   background-image:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(0,232,122,0.04) 0%,transparent 60%);
 }
 
-/* ── Top Bar ── */
-.rv-topbar {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  padding:14px 18px;
-  background:rgba(3,5,10,0.92);
-  border-bottom:1px solid var(--border);
-  backdrop-filter:blur(12px);
-  position:sticky;
-  top:0;
-  z-index:100;
-  flex-wrap:wrap;
-}
-.rv-topbar-left{display:flex;align-items:center;gap:14px;min-width:0;}
-.rv-topbar-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.rv-topbar-brand{min-width:0;}
-.rv-topbar-eyebrow{font-family:var(--font-d);font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
-.rv-topbar-title{font-family:var(--font-d);font-size:18px;font-weight:700;letter-spacing:.04em;color:#f0f6ff;line-height:1.1;}
-.rv-topbar-title em{font-style:normal;color:var(--roll);}
-.rv-topbar-sub{font-size:.78rem;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.rv-topbar-chip{
-  display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;
-  font-family:var(--font-d);font-size:10px;font-weight:700;letter-spacing:.08em;
-  color:var(--roll);background:rgba(0,232,122,0.08);border:1px solid rgba(0,232,122,0.2);
-}
-
-.rv-chip,
-.rv-topbar-btn,
-.rv-menu-close,
-.rv-menu-link,
-.rv-menu-footer .rv-chip {
-  -webkit-tap-highlight-color: transparent;
-}
-
-.rv-menu-overlay{
-  position:fixed;inset:0;z-index:1200;display:none;
-  align-items:flex-start;justify-content:center;
-  padding:18px 14px;
-  background:rgba(3,5,10,.72);
-  backdrop-filter:blur(16px) saturate(120%);
-}
-.rv-menu-overlay.open{display:flex;}
-.rv-menu-panel{
-  width:min(1120px,100%);margin-top:10px;border-radius:20px;
-  border:1px solid rgba(255,255,255,.08);
-  background:linear-gradient(180deg,rgba(8,13,24,.98),rgba(5,8,15,.98));
-  box-shadow:0 24px 80px rgba(0,0,0,.45), 0 0 0 1px rgba(0,232,122,.06) inset;
-  overflow:hidden;
-}
-.rv-menu-head{
-  display:flex;align-items:flex-start;justify-content:space-between;
-  gap:16px;padding:16px 18px 12px;
-  border-bottom:1px solid rgba(255,255,255,.06);
-}
-.rv-menu-title{font-family:var(--font-d);font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--roll);}
-.rv-menu-sub{margin-top:6px;color:var(--muted2);font-size:.9rem;max-width:720px;}
-.rv-menu-close{
-  border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#e8eef9;
-  width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
-  cursor:pointer;font-size:18px;line-height:1;
-  transition:transform .18s ease, border-color .18s ease, background .18s ease;
-}
-.rv-menu-close:hover{transform:translateY(-1px);border-color:rgba(0,232,122,.35);background:rgba(0,232,122,.06);}
-.rv-menu-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:14px 18px 18px;}
-@media (max-width: 980px){.rv-menu-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
-@media (max-width: 620px){.rv-menu-grid{grid-template-columns:1fr;}}
-.rv-menu-group{min-width:0;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:12px;}
-.rv-menu-sec{font-family:var(--font-d);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
-.rv-menu-link{
-  display:flex;align-items:flex-start;gap:10px;text-decoration:none;
-  padding:10px 11px;border-radius:14px;border:1px solid transparent;color:var(--text);
-  transition:transform .16s ease, border-color .16s ease, background .16s ease;
-}
-.rv-menu-link + .rv-menu-link{margin-top:6px;}
-.rv-menu-link:hover{transform:translateY(-1px);background:rgba(255,255,255,.03);border-color:rgba(0,232,122,.14);}
-.rv-menu-ico{width:28px;height:28px;border-radius:10px;display:grid;place-items:center;flex-shrink:0;background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.12);font-size:14px;}
-.rv-menu-copy{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;}
-.rv-menu-name{font-family:var(--font-d);font-size:13px;font-weight:700;letter-spacing:.02em;line-height:1.2;}
-.rv-menu-meta{color:var(--muted2);font-size:11px;line-height:1.35;}
-.rv-menu-badge{align-self:flex-start;font-family:var(--font-d);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:4px 7px;border-radius:999px;color:var(--roll);background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.18);}
-.rv-menu-footer{display:flex;flex-wrap:wrap;gap:8px;padding:0 18px 18px;}
-.rv-chip{
-  display:inline-flex;align-items:center;gap:8px;text-decoration:none;
-  padding:10px 14px;border-radius:999px;border:1px solid rgba(0,232,122,.18);
-  background:rgba(0,232,122,.06);color:var(--roll);font-family:var(--font-d);
-  font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-  transition:transform .16s ease, background .16s ease, border-color .16s ease;
-}
-.rv-chip:hover{transform:translateY(-1px);background:rgba(0,232,122,.1);border-color:rgba(0,232,122,.3);}
-.rv-topbar-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:none;border:1px solid rgba(255,255,255,0.1);color:var(--muted2);padding:6px 12px;border-radius:8px;cursor:pointer;font-family:var(--font-d);font-size:11px;font-weight:600;letter-spacing:.06em;transition:all .18s;}
-.rv-topbar-btn:hover{border-color:rgba(0,232,122,.3);color:var(--roll);}
-.rv-topbar-btn.menu{min-width:88px;justify-content:flex-start;}
-.rv-dot{width:8px;height:8px;border-radius:50%;background:var(--roll);box-shadow:0 0 10px rgba(0,232,122,.8);}
-@media (max-width: 720px){
-  .rv-menu-overlay{padding:10px;}
-  .rv-menu-head{padding:14px;}
-  .rv-menu-grid{padding:12px 14px 14px;}
-  .rv-menu-footer{padding:0 14px 14px;}
-  .rv-topbar-sub{display:none;}
-}
-
-@keyframes pulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 16px rgba(0,232,122,0.25)}}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-
-/* ── Wrap ── */
 .wrap{max-width:1160px;margin:0 auto;padding:24px 18px 80px;}
 
 /* ── Hero ── */
@@ -299,14 +197,7 @@ input[type=range].yr::-webkit-slider-thumb{background:var(--yaw);box-shadow:0 0 
 .ghost-btn:hover{border-color:rgba(255,255,255,.2);color:#fff;}
 
 [role="button"]:focus-visible,
-.rv-topbar-btn:focus-visible,
-.rv-chip:focus-visible,
-.cli-copy:focus-visible,
-.ghost-btn:focus-visible,
-.import-btn:focus-visible {
-  outline: 2px solid rgba(0,232,122,0.65);
-  outline-offset: 2px;
-}
+
 .canvas-wrap{position:relative;}
 canvas#rv{width:100%;display:block;cursor:crosshair;}
 .tooltip{position:absolute;pointer-events:none;display:none;
@@ -386,66 +277,9 @@ canvas#rv{width:100%;display:block;cursor:crosshair;}
 </head>
 <body>
 
-<!-- ── TOP BAR ── -->
-<div class="rv-topbar">
-  <div class="rv-topbar-left">
-    <a class="rv-topbar-btn" href="#" aria-label="Back to landing">← BACK</a>
-    <div class="rv-topbar-brand">
-      <div class="rv-topbar-eyebrow">ConfigDoctor · Flight Computer</div>
-      <div class="rv-topbar-title">Rates <em>Visualizer</em></div>
-      <div class="rv-topbar-sub">Precision curve lab for ACTUAL, BF legacy, and KISS tuning</div>
-    </div>
-  </div>
-  <div class="rv-topbar-right">
-    <div class="rv-topbar-chip">v5.4 Smart Curve</div>
-    <button class="rv-topbar-btn menu" type="button" onclick="toggleMenu(true)" aria-label="Open menu">
-      <span class="rv-dot"></span>
-      MENU
-    </button>
-  </div>
-</div>
+{% include "partials/nav.html" %}
+{% include "partials/page_actions.html" %}
 
-<!-- ── NAV MENU ── -->
-<div class="rv-menu-overlay" id="rvMenu" aria-hidden="true">
-  <div class="rv-menu-panel">
-    <div class="rv-menu-head">
-      <div>
-        <div class="rv-menu-title">MENU</div>
-        <div class="rv-menu-sub">Quick access to the FPV tools used most often in ConfigDoctor.</div>
-      </div>
-      <button class="rv-menu-close" type="button" onclick="toggleMenu(false)" aria-label="Close menu">✕</button>
-    </div>
-    <div class="rv-menu-grid">
-      <div class="rv-menu-group">
-        <div class="rv-menu-sec">Analyze</div>
-        <a class="rv-menu-link" href="#"><span class="rv-menu-ico">🚀</span><span class="rv-menu-copy"><span class="rv-menu-name">Drone Analyzer</span><span class="rv-menu-meta">Analyze PID · Filter · Motor · Flight time</span></span><span class="rv-menu-badge">core</span></a>
-        <a class="rv-menu-link" href="#"><span class="rv-menu-ico">📊</span><span class="rv-menu-copy"><span class="rv-menu-name">Blackbox CSV Analyzer</span><span class="rv-menu-meta">Decode logs, oscillation and battery sag</span></span><span class="rv-menu-badge">hot</span></a>
-      </div>
-      <div class="rv-menu-group">
-        <div class="rv-menu-sec">Tuning</div>
-        <a class="rv-menu-link" href="#"><span class="rv-menu-ico">🩻</span><span class="rv-menu-copy"><span class="rv-menu-name">CLI Surgeon</span><span class="rv-menu-meta">Validate diff all / dump and generate safe CLI</span></span></a>
-        <a class="rv-menu-link" href="#"><span class="rv-menu-ico">🩺</span><span class="rv-menu-copy"><span class="rv-menu-name">PID Advisor</span><span class="rv-menu-meta">Symptom-based PID tuning guidance</span></span></a>
-        <a class="rv-menu-link" href="#"><span class="rv-menu-ico">📈</span><span class="rv-menu-copy"><span class="rv-menu-name">Rates Visualizer</span><span class="rv-menu-meta">Stick response curves, presets and compare modes</span></span><span class="rv-menu-badge">open</span></a>
-      </div>
-      <div class="rv-menu-group">
-        <div class="rv-menu-sec">Optimize</div>
-        <a class="rv-menu-link" href="#"><span class="rv-menu-ico">⚙️</span><span class="rv-menu-copy"><span class="rv-menu-name">RPM Filter Calculator</span><span class="rv-menu-meta">Harmonics and filter recommendations</span></span></a>
-        <a class="rv-menu-link" href="#"><span class="rv-menu-ico">🧭</span><span class="rv-menu-copy"><span class="rv-menu-name">Motor × Prop Recommender</span><span class="rv-menu-meta">Match motors and props to the build</span></span></a>
-        <a class="rv-menu-link" href="#"><span class="rv-menu-ico">🔋</span><span class="rv-menu-copy"><span class="rv-menu-name">Battery Health</span><span class="rv-menu-meta">Efficiency, sag and safe cell range</span></span></a>
-      </div>
-      <div class="rv-menu-group">
-        <div class="rv-menu-sec">Community</div>
-        <a class="rv-menu-link" href="#"><span class="rv-menu-ico">🏠</span><span class="rv-menu-copy"><span class="rv-menu-name">Landing</span><span class="rv-menu-meta">Back to the main platform</span></span></a>
-        <a class="rv-menu-link" href="#"><span class="rv-menu-ico">ℹ️</span><span class="rv-menu-copy"><span class="rv-menu-name">About</span><span class="rv-menu-meta">Project story and current status</span></span></a>
-      </div>
-    </div>
-    <div class="rv-menu-footer">
-      <a class="rv-chip" href="#">🚀 Start Analysis</a>
-      <a class="rv-chip" href="#">📊 Blackbox</a>
-      <a class="rv-chip" href="#">🩻 CLI</a>
-    </div>
-  </div>
-</div>
 
 <div class="wrap">
   <div class="hero">
@@ -1239,29 +1073,6 @@ CV.addEventListener('mousemove',e=>{
 });
 CV.addEventListener('mouseleave',()=>{TIP.style.display='none';});
 
-function toggleMenu(open){
-  const el=document.getElementById('rvMenu');
-  if(!el) return;
-  const shouldOpen = typeof open === 'boolean' ? open : !el.classList.contains('open');
-  el.classList.toggle('open', shouldOpen);
-  el.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
-  document.body.style.overflow = shouldOpen ? 'hidden' : '';
-}
-
-document.addEventListener('keydown', e=>{
-  if(e.key==='Escape') toggleMenu(false);
-  if((e.key==='Enter' || e.key===' ') && e.target && e.target.matches('[role="button"]')){
-    e.preventDefault();
-    e.target.click();
-  }
-});
-document.getElementById('rvMenu')?.addEventListener('click', e=>{
-  if(e.target.id === 'rvMenu') toggleMenu(false);
-});
-document.querySelectorAll('.rv-menu-link, .rv-chip').forEach(el => {
-  el.addEventListener('click', () => toggleMenu(false));
-});
-
 /* ── Guide accordion ── */
 function tog(id){
   const el=document.getElementById('g-'+id);
@@ -1287,5 +1098,6 @@ window.addEventListener('load',()=>{
   setTimeout(()=>{ loadSl('roll'); update(); },60);
 });
 </script>
+{% include "partials/footer_nav.html" %}
 </body>
 </html>

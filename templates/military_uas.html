@@ -9,7 +9,7 @@
 <meta name="robots" content="noindex,nofollow">
 {% set og_title = 'Military UAS Analyzer — ConfigDoctor v5.1' %}
 {% set og_description = 'ระบบวิเคราะห์สมรรถนะ UAS ทางทหาร — Armed Drone Physics Engine (Educational)' %}
-{% set og_url = 'https://configdoctor.onrender.com/military-uas' %}
+{% set og_url = BASE_URL ~ '/military-uas' %}
 {% set nav_page = 'military_uas' %}
 {% include 'partials/og_tags.html' %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -65,37 +65,6 @@ body::after{
 }
 
 /* ── TOP BAR ── */
-.topbar{
-  position:sticky;top:0;z-index:500;
-  background:rgba(4,6,13,.97);
-  border-bottom:1px solid rgba(245,158,11,.15);
-  padding:0 24px;height:52px;
-  display:flex;align-items:center;justify-content:space-between;
-  backdrop-filter:blur(12px);
-}
-.topbar-brand{
-  display:flex;align-items:center;gap:14px;
-  font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:.14em;
-}
-.topbar-emblem{
-  width:34px;height:34px;border:2px solid var(--amber);border-radius:4px;
-  display:flex;align-items:center;justify-content:center;font-size:16px;
-  background:rgba(245,158,11,.08);
-}
-.topbar-title{color:var(--amber);}
-.topbar-sub{font-size:7px;color:var(--muted);letter-spacing:.2em;margin-top:2px;}
-.topbar-right{display:flex;align-items:center;gap:12px;}
-.status-dot{
-  width:7px;height:7px;border-radius:50%;background:var(--green);
-  box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;
-}
-.status-txt{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--green);letter-spacing:.1em;}
-.nav-back{
-  font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:.12em;padding:6px 14px;
-  background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:4px;
-  color:var(--muted);text-decoration:none;transition:all .2s;
-}
-.nav-back:hover{border-color:var(--amber);color:var(--amber);}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
 /* ── PAGE WRAPPER ── */
@@ -372,26 +341,9 @@ body::after{
 </style>
 </head>
 <body>
-{% set nav_page = "military_uas" %}
+{% include "partials/nav.html" %}
 {% include "partials/page_actions.html" %}
 <div class="hex-bg"></div>
-
-<!-- TOP BAR -->
-<nav class="topbar">
-  <div class="topbar-brand">
-    <div class="topbar-emblem">🎯</div>
-    <div>
-      <div class="topbar-title">MILITARY UAS ANALYZER</div>
-      <div class="topbar-sub">ARMED DRONE PERFORMANCE SYSTEM · v5.1</div>
-    </div>
-  </div>
-  <div class="topbar-right">
-    <div class="status-dot"></div>
-    <span class="status-txt">SYSTEM ONLINE</span>
-    <a href="/landing" class="nav-back">← MAIN</a>
-    <a href="/app" class="nav-back">FPV ANALYZER</a>
-  </div>
-</nav>
 
 <!-- PAGE -->
 <div class="page">
