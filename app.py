@@ -145,6 +145,30 @@ except Exception as e:
     def make_advanced_report(*args, **kwargs): return {"advanced": {}}
     ADV_ANALYSIS_AVAILABLE = False
 
+# ── FPV Affiliate Gear module — extension/UI layer, fully isolated from
+#    analyzer/ and logic/ (see affiliate/gear_recommender.py docstring).
+#    It never touches PID/motor-prop/blackbox math; it only reads the
+#    already-computed drone_class/style/size strings to pick catalog
+#    entries. Deleting affiliate/ + this try/except + the /fpv-gear route
+#    below removes the whole feature with zero impact on analysis. ──────
+try:
+    from affiliate.gear_recommender import (
+        recommend as _gear_recommend,
+        get_starter_kits as _gear_starter_kits,
+        get_categories as _gear_categories,
+        get_disclaimer as _gear_disclaimer,
+        CATEGORY_ORDER as _GEAR_CATEGORY_ORDER,
+    )
+    GEAR_MODULE_AVAILABLE = True
+except Exception as e:
+    GEAR_MODULE_AVAILABLE = False
+    _GEAR_CATEGORY_ORDER = []
+    def _gear_recommend(*args, **kwargs): return None
+    def _gear_starter_kits(): return []
+    def _gear_categories(): return {}
+    def _gear_disclaimer(): return {"th": "", "en": ""}
+    logging.warning("affiliate.gear_recommender import failed: %s", e)
+
 # ── Style normalizer ──────────────────────────────────────────────────────
 _STYLE_MAP = {
     "micro": "freestyle", "whoop": "freestyle", "cine": "longrange",
@@ -515,6 +539,43 @@ def analyze_drone(size, battery, style, prop_result, weight, detected_class=None
 @app.route('/fpv')
 def fpv_hub():
     return render_template('fpv/index.html')
+
+# ── FPV Affiliate Gear Guide — extension/UI layer only. ───────────────────
+# Reads optional ?class=&style=&size= query params (set by links from the
+# analysis result page / FPV hub) and maps them onto a small affiliate
+# catalog (data/fpv_affiliate_products.json) via affiliate/gear_recommender.
+# Does NOT read analyzer/PID/motor-prop/blackbox internals — only plain
+# strings already computed elsewhere are passed in. No context → falls
+# back to generic starter kits.
+@app.route('/fpv-gear')
+def fpv_gear():
+    drone_class = (request.args.get('class') or '').strip() or None
+    style       = (request.args.get('style') or '').strip() or None
+    size_inch   = (request.args.get('size') or '').strip() or None
+
+    gear_by_category = None
+    starter_kits = []
+    if GEAR_MODULE_AVAILABLE:
+        try:
+            gear_by_category = _gear_recommend(drone_class=drone_class, style=style, size_inch=size_inch)
+        except Exception:
+            logger.exception("gear_recommender.recommend failed")
+            gear_by_category = None
+        if not gear_by_category:
+            try:
+                starter_kits = _gear_starter_kits()
+            except Exception:
+                logger.exception("gear_recommender.get_starter_kits failed")
+
+    return render_template(
+        'fpv_gear.html',
+        gear_by_category=gear_by_category,
+        starter_kits=starter_kits,
+        drone_class=drone_class, style=style, size_inch=size_inch,
+        categories=(_gear_categories() if GEAR_MODULE_AVAILABLE else {}),
+        category_order=_GEAR_CATEGORY_ORDER,
+        gear_disclaimer=(_gear_disclaimer() if GEAR_MODULE_AVAILABLE else {"th": "", "en": ""}),
+    )
 
 @app.route("/landing")
 def landing():
