@@ -1,1 +1,66 @@
+{#
+  templates/components/affiliate_card.html — OBIXConfig Doctor
+  ══════════════════════════════════════════════════════════════════════
+  Reusable "FPV Gear" recommendation card — extension/UI layer only.
+  Self-contained: ships its own CSS with hard-coded colors (not the host
+  page's CSS variables) so it renders identically wherever it's dropped in
+  — /fpv-gear (style.css family) or the analysis result page (index.html,
+  its own bespoke theme). This keeps the component truly portable.
 
+  USAGE:
+    {% from "components/affiliate_card.html" import render_affiliate_card, affiliate_card_styles %}
+    {{ affiliate_card_styles() }}          {# include ONCE per page #}
+    <div class="gear-grid">
+      {% for product in products %}
+        {{ render_affiliate_card(product, category_label="มอเตอร์") }}
+      {% endfor %}
+    </div>
+  ══════════════════════════════════════════════════════════════════════
+#}
+
+{% macro affiliate_card_styles() %}
+<style>
+.gear-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.ag-card{background:#0c1116;border:1px solid rgba(255,255,255,.08);border-radius:14px;
+  padding:16px 17px;display:flex;flex-direction:column;gap:8px;transition:border-color .15s,transform .15s}
+.ag-card:hover{border-color:rgba(88,166,255,.32);transform:translateY(-2px)}
+.ag-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ag-cat-pill{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:#58a6ff;background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.25);
+  border-radius:20px;padding:3px 10px;white-space:nowrap}
+.ag-price{font-family:'JetBrains Mono',monospace;font-size:11px;color:#f1b65a;font-weight:600;white-space:nowrap}
+.ag-name{font-family:'Sarabun',sans-serif;font-size:14px;font-weight:700;color:#e7eef5;line-height:1.35}
+.ag-desc{font-size:12px;color:#8fa3b3;line-height:1.6}
+.ag-tags{display:flex;flex-wrap:wrap;gap:5px}
+.ag-tag{font-size:9.5px;color:#7a8fa0;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);
+  border-radius:20px;padding:2px 8px}
+.ag-why{display:flex;align-items:flex-start;gap:6px;font-size:11px;color:#6fcf97;background:rgba(16,196,122,.07);
+  border-left:2px solid #10c47a;border-radius:6px;padding:6px 9px;line-height:1.5}
+.ag-why-ic{flex-shrink:0}
+.ag-buy{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin-top:auto;
+  padding:9px 14px;background:linear-gradient(135deg,#0ea368,#12c87e);color:#021a0e;
+  border-radius:9px;text-decoration:none;font-family:'Sarabun',sans-serif;font-size:12.5px;font-weight:700;
+  transition:filter .15s,transform .15s}
+.ag-buy:hover{filter:brightness(1.08);transform:translateY(-1px)}
+</style>
+{% endmacro %}
+
+{% macro render_affiliate_card(product, category_label=None) %}
+<div class="ag-card" data-category="{{ product.category }}" data-product-id="{{ product.id }}">
+  <div class="ag-card-head">
+    <span class="ag-cat-pill">{{ category_label or product.category }}</span>
+    {% if product.price_range %}<span class="ag-price">{{ product.price_range }}</span>{% endif %}
+  </div>
+  <div class="ag-name">{{ product.name }}</div>
+  {% if product.short_description %}<p class="ag-desc">{{ product.short_description }}</p>{% endif %}
+  {% if product.compatibility_tags %}
+  <div class="ag-tags">
+    {% for t in product.compatibility_tags %}<span class="ag-tag">{{ t }}</span>{% endfor %}
+  </div>
+  {% endif %}
+  <div class="ag-why"><span class="ag-why-ic">🛠️</span><span>{{ product.why or 'อุปกรณ์มาตรฐานที่นิยมใช้ในหมวดนี้' }}</span></div>
+  <a class="ag-buy" href="{{ product.affiliate_url }}" target="_blank" rel="nofollow sponsored noopener">
+    ดูสินค้า <span aria-hidden="true">→</span>
+  </a>
+</div>
+{% endmacro %}
