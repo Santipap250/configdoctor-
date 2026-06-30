@@ -1190,6 +1190,42 @@ body.no-hero-video .hero-bg-video{display:none;}
 .tb-gold{background:rgba(255,204,0,.12);color:#ffcc00;border:1px solid rgba(255,204,0,.22)}
 .tb-new{background:rgba(0,255,68,.1);color:var(--g);border:1px solid rgba(0,255,68,.22)}
 
+/* ── FPV GEAR GUIDE PROMO (extension/UI layer — links to /fpv-gear) ── */
+.gear-promo-section{padding:8px clamp(16px,5vw,60px) 54px;background:var(--bg)}
+.gear-promo-shell{
+  max-width:1100px;margin:0 auto;position:relative;overflow:hidden;
+  padding:30px clamp(20px,4.5vw,42px);border-radius:28px;
+  border:1px solid rgba(0,168,255,.16);
+  background:linear-gradient(180deg, rgba(7,13,18,.94), rgba(4,8,10,.9));
+  box-shadow:0 18px 44px rgba(0,0,0,.24), inset 0 0 0 1px rgba(255,255,255,.03);
+}
+.gear-promo-shell::before{
+  content:'';position:absolute;inset:-1px;pointer-events:none;opacity:.9;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(0,168,255,.14), transparent 30%),
+    radial-gradient(circle at 92% 100%, rgba(0,255,68,.06), transparent 26%);
+}
+.gear-promo-head{position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+.gear-promo-kicker{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-d);font-size:10px;font-weight:900;letter-spacing:.18em;color:var(--b);text-transform:uppercase;margin-bottom:10px}
+.gear-promo-kicker::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--b);box-shadow:0 0 12px rgba(0,168,255,.5)}
+.gear-promo-title{font-family:var(--font-t);font-size:clamp(24px,4vw,32px);font-weight:900;color:#fff;line-height:1.12;margin:0}
+.gear-promo-sub{margin-top:10px;max-width:640px;font-size:14px;line-height:1.75;color:rgba(255,255,255,.62)}
+.gear-promo-badge{flex-shrink:0;padding:8px 16px;border-radius:999px;border:1px solid rgba(0,168,255,.25);background:rgba(0,168,255,.08);color:#bfe6ff;font-family:var(--font-d);font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
+.gear-promo-cats{position:relative;z-index:1;display:flex;gap:8px;flex-wrap:wrap;margin-bottom:26px}
+.gp-cat{font-size:12px;color:rgba(255,255,255,.7);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:7px 14px;display:inline-flex;align-items:center;gap:6px;transition:.15s}
+.gp-cat:hover{border-color:rgba(0,168,255,.3);background:rgba(0,168,255,.06);color:#fff}
+.gear-promo-foot{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.gear-promo-cta{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:11px;
+  background:linear-gradient(135deg,var(--b),#0079c2);color:#021726;
+  font-family:var(--font-t);font-size:14px;font-weight:800;text-decoration:none;
+  box-shadow:0 8px 26px rgba(0,168,255,.22);transition:all .2s}
+.gear-promo-cta:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(0,168,255,.32)}
+.gear-promo-note{font-size:11.5px;color:rgba(255,255,255,.4);line-height:1.5;max-width:360px}
+@media(max-width:640px){
+  .gear-promo-shell{padding:24px 18px}
+  .gear-promo-foot{flex-direction:column;align-items:flex-start}
+}
+
 /* ── STATS BAR ── */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(0,255,68,.07);border-top:1px solid rgba(0,255,68,.07);border-bottom:1px solid rgba(0,255,68,.07)}
 .stat{padding:24px 16px;text-align:center;background:rgba(4,10,8,.8)}
@@ -1923,6 +1959,14 @@ footer{
           </span>
         </a>
 
+        <a class="mn-link" href="/fpv-gear" onclick="closeMob()">
+          <span class="mn-ico">🛒</span>
+          <span class="mn-copy">
+            <span class="mn-title">FPV Gear Guide</span>
+            <span class="mn-meta">แนะนำอุปกรณ์ตาม class และสไตล์โดรน</span>
+          </span>
+        </a>
+
         <a class="mn-link" href="/downloads" onclick="closeMob()">
           <span class="mn-ico">⬇️</span>
           <span class="mn-copy">
@@ -2215,6 +2259,39 @@ footer{
     <a class="tool-card" href="/loop-analyzer"><div class="tool-icon">🔁</div><div class="tool-name">Loop Analyzer</div><div class="tool-hint">หน่วงจาก Stick → Prop</div></a>
     <a class="tool-card" href="/fpv-trainer"><div class="tool-icon">🎮</div><div class="tool-name">FPV Simulator NEO</div><div class="tool-hint">ซิม 3D · Race mode</div><span class="tool-badge tb-gold">GAME</span></a>
     <a class="tool-card" href="/quick-tune"><div class="tool-icon">⚡</div><div class="tool-name">Quick Tune Pad</div><div class="tool-hint">อาการ → PID delta + CLI</div><span class="tool-badge tb-gold">NEW</span></a>
+    <a class="tool-card" href="/fpv-gear"><div class="tool-icon">🛒</div><div class="tool-name">FPV Gear Guide</div><div class="tool-hint">แนะนำอุปกรณ์ตาม class/style</div><span class="tool-badge tb-new">NEW</span></a>
+  </div>
+</section>
+
+<!-- ── FPV GEAR GUIDE PROMO ── extension/UI layer → /fpv-gear ────────── -->
+<section class="gear-promo-section">
+  <div class="gear-promo-shell reveal">
+
+    <div class="gear-promo-head">
+      <div>
+        <div class="gear-promo-kicker">Engineering Recommendation</div>
+        <h2 class="gear-promo-title">อุปกรณ์ FPV ที่<br>เหมาะกับโดรนของคุณ</h2>
+        <p class="gear-promo-sub">ConfigDoctor คัดเลือกมอเตอร์ · เฟรม · ใบพัด · ESC · แบต · goggles จากความเข้ากันได้ทางวิศวกรรมกับ class และสไตล์การบินของคุณ ไม่ใช่โฆษณาหรือสปอนเซอร์</p>
+      </div>
+      <span class="gear-promo-badge">🛒 Gear Guide</span>
+    </div>
+
+    <div class="gear-promo-cats">
+      <span class="gp-cat">⚙️ มอเตอร์</span>
+      <span class="gp-cat">🛠️ เฟรม</span>
+      <span class="gp-cat">🌀 ใบพัด</span>
+      <span class="gp-cat">⚡ ESC</span>
+      <span class="gp-cat">🔋 แบตเตอรี่</span>
+      <span class="gp-cat">🔌 เครื่องชาร์จ</span>
+      <span class="gp-cat">🥽 FPV Goggles</span>
+      <span class="gp-cat">📡 เสาอากาศ</span>
+    </div>
+
+    <div class="gear-promo-foot">
+      <a class="gear-promo-cta" href="/fpv-gear">ดูคำแนะนำอุปกรณ์ →</a>
+      <p class="gear-promo-note">⚠️ บางลิงก์อาจเป็น affiliate link — ConfigDoctor อาจได้รับค่าคอมมิชชั่นเล็กน้อยโดยไม่มีค่าใช้จ่ายเพิ่มจากคุณ</p>
+    </div>
+
   </div>
 </section>
 
@@ -2250,7 +2327,7 @@ footer{
           <div class="support-label">วิธีสนับสนุน</div>
           <p>
             เปิดแอปธนาคาร แล้วสแกน QR ด้านซ้ายเพื่อโอนเข้าบัญชี
-            ชื่อผู้รับ: <strong>นาย สันติภาพ สงฆรักษ์</strong>
+            ชื่อผู้รับ: <strong>นาย สันติภาพ สงมัรักษ์</strong>
           </p>
         </div>
 
